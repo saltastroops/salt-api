@@ -1220,7 +1220,7 @@
     node-gyp "^7.1.0"
     read-package-json-fast "^2.0.1"
 
-"@schematics/angular@11.2.12":
+"@schematics/angular@11.2.12", "@schematics/angular@^11.2.12":
   version "11.2.12"
   resolved "https://registry.yarnpkg.com/@schematics/angular/-/angular-11.2.12.tgz#1a9db7fc3ac6b520dd6607ec5096842d1e9e8d09"
   integrity sha512-QCFdJhJtHrytl2L9VAdKYzSS1+R5LpjQ+pw3f/10YeEEoUHk7QyuYXmMnreCYBWSKrloO+3Q+vhdnVWUQZSRng==

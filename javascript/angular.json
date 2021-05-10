@@ -3,9 +3,12 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "javascript": {
+    "web-manger": {
       "projectType": "application",
       "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        },
         "@schematics/angular:application": {
           "strict": true
         }
@@ -17,7 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/javascript",
+            "outputPath": "dist/web-manger",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -28,7 +31,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           },
@@ -65,18 +68,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "javascript:build"
+            "browserTarget": "web-manger:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "javascript:build:production"
+              "browserTarget": "web-manger:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "javascript:build"
+            "browserTarget": "web-manger:build"
           }
         },
         "test": {
@@ -91,7 +94,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           }
@@ -113,16 +116,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "javascript:serve"
+            "devServerTarget": "web-manger:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "javascript:serve:production"
+              "devServerTarget": "web-manger:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "javascript"
+  "defaultProject": "Web manager"
 }

@@ -20,11 +20,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-
-  it('should render heading', () => {
+  it(`should have as title 'Web Manager'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.heading').textContent).toContain('Welcome to the web manager 2021.');
+    const app = fixture.componentInstance;
+    expect(app.title).toEqual('Web Manager');
   });
 });

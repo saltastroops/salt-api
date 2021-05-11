@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "web-manger": {
+    "web-manager": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -68,18 +68,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "web-manger:build"
+            "browserTarget": "web-manager:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "web-manger:build:production"
+              "browserTarget": "web-manager:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "web-manger:build"
+            "browserTarget": "web-manager:build"
           }
         },
         "test": {
@@ -116,11 +116,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "web-manger:serve"
+            "devServerTarget": "web-manager:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "web-manger:serve:production"
+              "devServerTarget": "web-manager:serve:production"
             }
           }
         }

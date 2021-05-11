@@ -63,7 +63,7 @@ mypy: ## check types with mypy
 	cd python; mypy --config-file mypy.ini .
 
 prettier: ## format JavaScript code
-	cd e2e; npx prettier --write cypress
+	cd e2e; npx prettier --write cypress; cd ../frontend; npx prettier --write .
 
 prettier-staged: ## format staged JavaScript files
 	cd e2e; npm run pretty-quick:staged

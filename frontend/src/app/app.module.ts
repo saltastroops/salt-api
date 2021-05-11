@@ -12,13 +12,10 @@ import { InvestigatorsComponent } from './proposal/investigators/investigators.c
     AppComponent,
     HomeComponent,
     ProposalComponent,
-    InvestigatorsComponent
+    InvestigatorsComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule
-  ],
+  imports: [BrowserModule, AppRoutingModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

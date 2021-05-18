@@ -1,1 +1,33 @@
-<p>investigators works!</p>
+<div>
+  <h2>Investigators</h2>
+</div>
+
+<div class="table">
+  <div class="investigator-row headers">
+    <div>PC</div>
+    <div>PI</div>
+    <div>Name</div>
+    <div>Partner</div>
+    <div>Institution</div>
+    <div>Department</div>
+    <div>Accept</div>
+  </div>
+  <div *ngFor="let investigator of investigators">
+    <div class="investigator-row row">
+      <div><mat-icon *ngIf="investigator.is_pc">done</mat-icon></div>
+      <div><mat-icon *ngIf="investigator.is_pi">done</mat-icon></div>
+      <div>{{ investigator.name }}</div>
+      <div>{{ investigator.partner.name }}</div>
+      <div>{{ investigator.partner.institute }}</div>
+      <div>{{ investigator.partner.department }}</div>
+
+      <!-- TODO: Replace with correct code -->
+      <ng-template [ngIf]="investigator.is_pi">
+        <div><button mat-raised-button color="accent">Reject</button></div>
+      </ng-template>
+      <ng-template [ngIf]="!investigator.is_pi">
+        <div><button mat-raised-button color="primary">Accept</button></div>
+      </ng-template>
+    </div>
+  </div>
+</div>

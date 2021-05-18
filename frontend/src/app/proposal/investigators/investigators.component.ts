@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Investigator } from '../../types';
 
 @Component({
   selector: 'wm-investigators',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./investigators.component.scss'],
 })
 export class InvestigatorsComponent implements OnInit {
+  @Input() investigators!: Investigator[];
+
   constructor() {}
 
   ngOnInit(): void {}

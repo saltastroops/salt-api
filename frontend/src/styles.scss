@@ -1,1 +1,37 @@
 /* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0.5% 5%;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.row > div {
+  text-align: left;
+  padding: 0.5em;
+}
+
+.table > div:nth-child(odd) {
+  background: #ddd;
+}
+
+.table {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-row-gap: 0.07em;
+}
+.table > div {
+  background: #eee;
+}
+.headers > div {
+  background: cornflowerblue;
+  color: white;
+  text-align: left;
+  font-weight: bolder;
+  font-size: 18px;
+  padding: 0.2em;
+  height: 100%;
+}

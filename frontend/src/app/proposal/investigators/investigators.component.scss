@@ -1,0 +1,5 @@
+.investigator-row {
+  display: grid;
+  grid-template-columns: 3% 3% repeat(4, 21%) 10%;
+  align-items: center;
+}

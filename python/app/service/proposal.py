@@ -1,11 +1,18 @@
 from typing import Any, Dict, List
 
+import astropy.units as u
 from aiomysql import connect
 from astropy.coordinates import Angle
-import astropy.units as u
 
-from app.models.proposal_model import TextContent, Investigator, Affiliation, \
-    BlockVisit, Partner, Target, RequestedTime
+from app.models.proposal_model import (
+    Affiliation,
+    BlockVisit,
+    Investigator,
+    Partner,
+    RequestedTime,
+    Target,
+    TextContent,
+)
 from app.models.pydantic import Semester
 
 
@@ -40,9 +47,7 @@ WHERE Proposal_Code = %(proposal_code)s
     raise ValueError(f"Proposal content of {proposal_code} could not be found.")
 
 
-async def get_investigators(
-    proposal_code: str, db: connect
-) -> List[Investigator]:
+async def get_investigators(proposal_code: str, db: connect) -> List[Investigator]:
     sql = """\
 SELECT pi.Investigator_Id, FirstName, Surname, Partner_Name, InstituteName_Name,
         Department, Url, Leader_Id, Contact_Id, Partner_Code 
@@ -70,8 +75,8 @@ WHERE Proposal_Code = %(proposal_code)s
                             partner_name=r[3],
                             institute=r[4],
                             department=r[5],
-                            home_page=r[6]
-                        )
+                            home_page=r[6],
+                        ),
                     )
                     for r in rs
                 ]
@@ -108,10 +113,7 @@ WHERE Proposal_Code = %(proposal_code)s
                 for r in rs:
                     if not (r[0] in _alloc):
                         _alloc[r[0]] = {
-                            "partner": Partner(
-                                name=r[1],
-                                code=r[0]
-                            ),
+                            "partner": Partner(name=r[1], code=r[0]),
                             "tac_comment": r[4],
                         }
                     _alloc[r[0]][f"priority_{r[2]}"] = r[3]
@@ -164,18 +166,16 @@ WHERE Proposal_Code = %(proposal_code)s
                         seeing_probability=r[21],
                         identifier=r[22],
                         output_interval=r[23],
-                        ra_dot=Angle(r[24]) * u.arcsec/u.year,
-                        dec_dot=Angle(r[25]) * u.arcsec/u.year,
-                        epoch=r[26]
+                        ra_dot=Angle(r[24]) * u.arcsec / u.year,
+                        dec_dot=Angle(r[25]) * u.arcsec / u.year,
+                        epoch=r[26],
                     )
                     for r in rs
                 ]
     raise ValueError(f"Targets for proposal {proposal_code} couldn't be found")
 
 
-async def get_block_visits(
-    proposal_code: str, db: connect
-) -> List[BlockVisit]:
+async def get_block_visits(proposal_code: str, db: connect) -> List[BlockVisit]:
 
     sql = """ 
 SELECT bv.Block_Id, Block_Name, p.ObsTime, Priority, MaxLunarPhase, Target_Name,
@@ -216,9 +216,7 @@ GROUP BY bv.Block_Id
     raise ValueError(f"Targets for proposal {proposal_code} couldn't be found")
 
 
-async def get_total_requested_time(
-    proposal_code: str, db: connect
-) -> List[BlockVisit]:
+async def get_total_requested_time(proposal_code: str, db: connect) -> List[BlockVisit]:
 
     sql = """
 SELECT SUM(p1rt.P1RequestedTime) AS total_requested_time

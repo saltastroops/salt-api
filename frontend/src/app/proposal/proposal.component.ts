@@ -24,6 +24,5 @@ export class ProposalComponent implements OnInit {
     const routeParams = this.route.snapshot.paramMap;
     this.proposalCode = routeParams.get('proposal-code') || '';
     this.proposal = this.proposalService.getProposal(this.proposalCode);
-    console.log(this.proposal);
   }
 }

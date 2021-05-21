@@ -1,0 +1,59 @@
+<div>
+  <h2>General</h2>
+</div>
+
+<div class="table">
+  <div class="headers row">
+    <div>Title</div>
+  </div>
+  <div class="row">
+    <div>{{ general_proposal_info.title }}</div>
+  </div>
+  <div class="proposal_info-row headers row">
+    <div>PID</div>
+    <div>Code</div>
+    <div>Phase</div>
+    <div>Semester</div>
+    <div>First Submission</div>
+    <div>Current Submission</div>
+  </div>
+
+  <div class="proposal_info-row row">
+    <div>{{ general_proposal_info.id }}</div>
+    <div>{{ general_proposal_info.code }}</div>
+    <div>{{ general_proposal_info.phase }}</div>
+    <div>
+      <mat-select
+        class="mat-focus-indicator mat-raised-button mat-button-base mat-primary"
+        [formControl]="semesterControl"
+      >
+        <mat-option
+          *ngFor="let s of general_proposal_info.semesters"
+          [value]="s"
+        >
+          {{ s.year }}-{{ s.semester }}
+        </mat-option>
+      </mat-select>
+    </div>
+    <div>
+      {{ general_proposal_info.first_submission.toISOString().split("T")[0] }}
+    </div>
+    <div>
+      {{ general_proposal_info.current_submission.toISOString().split("T")[0] }}
+      (#{{ general_proposal_info.submission_number }})
+    </div>
+  </div>
+
+  <div class="headers row">
+    <div>Abstract</div>
+  </div>
+  <div class="row">
+    <div>{{ general_proposal_info.abstract }}</div>
+  </div>
+  <div class="headers row">
+    <div>Status</div>
+  </div>
+  <div class="row">
+    <div>{{ general_proposal_info.status.message }}</div>
+  </div>
+</div>

@@ -1,16 +1,15 @@
 from datetime import date, datetime
-from astropy.coordinates import Angle
-from typing import Optional, List
+from typing import List, Optional
 
+from astropy.coordinates import Angle
 from pydantic import BaseModel, validator
 
 from app.models.pydantic import Semester
 
 
 class TextContent(BaseModel):
-    """
+    """"""
 
-    """
     title: str
     abstract: str
     read_me: str
@@ -18,9 +17,8 @@ class TextContent(BaseModel):
 
 
 class Affiliation(BaseModel):
-    """
+    """"""
 
-    """
     partner_code: str
     partner_name: str
     institute: str
@@ -29,9 +27,8 @@ class Affiliation(BaseModel):
 
 
 class Investigator(BaseModel):
-    """
+    """"""
 
-    """
     is_pc: bool
     is_pi: bool
     name: str
@@ -39,9 +36,8 @@ class Investigator(BaseModel):
 
 
 class TimeAllocations(BaseModel):
-    """
+    """"""
 
-    """
     partner_code: str
     partner_name: str
     tac_comment: Optional[str]
@@ -53,9 +49,8 @@ class TimeAllocations(BaseModel):
 
 
 class BlockVisit(BaseModel):
-    """
+    """"""
 
-    """
     block_id: int
     block_name: str
     observed_time: str

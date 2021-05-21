@@ -1,0 +1,10 @@
+.proposal_info-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+}
+.mat-select {
+  width: 95px;
+  height: 2.5em;
+  background: lightgray;
+}

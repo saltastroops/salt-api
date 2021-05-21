@@ -1,7 +1,15 @@
-<div>
-  <h1>This is proposal {{ proposalCode }}.</h1>
-</div>
-
 <div *ngIf="proposal | async as p">
-  <wm-investigators [investigators]="p.investigators"></wm-investigators>
+  <div>
+    <h1>This is proposal {{ proposalCode }}.</h1>
+  </div>
+  <div>
+    <wm-investigators [investigators]="p.investigators"></wm-investigators>
+  </div>
+  <br />
+  <div>
+    <wm-general-proposal-info
+      [general_proposal_info]="p.general_info"
+      [currentSemester]="p.general_info.current_semester"
+    ></wm-general-proposal-info>
+  </div>
 </div>

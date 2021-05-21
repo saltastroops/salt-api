@@ -11,8 +11,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClientModule } from '@angular/common/http';
+import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { ProposalService } from './service/proposal.service';
 import { RealProposalService } from './service/real/real-proposal.service';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/general-proposal-info.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +24,7 @@ import { RealProposalService } from './service/real/real-proposal.service';
     HomeComponent,
     ProposalComponent,
     InvestigatorsComponent,
+    GeneralProposalInfoComponent,
   ],
   imports: [
     BrowserModule,
@@ -29,6 +34,10 @@ import { RealProposalService } from './service/real/real-proposal.service';
     MatSliderModule,
     MatButtonModule,
     MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [{ provide: ProposalService, useClass: RealProposalService }],
   bootstrap: [AppComponent],

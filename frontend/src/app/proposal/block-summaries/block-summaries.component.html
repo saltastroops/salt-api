@@ -1,0 +1,57 @@
+<div>
+  <h2>Block Summary</h2>
+</div>
+
+<div class="table alternate-background">
+  <div class="block-row headers">
+    <div>Block</div>
+    <div>ObsTime</div>
+    <div>Priority</div>
+    <div>Done Visits</div>
+    <div>Tonight?</div>
+    <div>Remaining</div>
+    <div>Max Seeing</div>
+    <div>Transparency</div>
+    <div>Max Lunar Phase</div>
+    <div>Instrument</div>
+    <div>Config Mode</div>
+  </div>
+  <div *ngFor="let b of blocks">
+    <div class="block-row row">
+      <div>
+        <a href="proposal/{{ proposalCode }}/#block{{ b.id }}">{{ b.name }}</a>
+      </div>
+      <div>{{ b.obs_time }}</div>
+      <div>{{ b.priority }}</div>
+      <div>{{ b.done_visits }}/{{ b.requested_block_visits }}</div>
+      <div *ngIf="b.observable_tonight">
+        <mat-icon class="icon-green">done</mat-icon>
+      </div>
+      <div *ngIf="!b.observable_tonight">
+        <mat-icon class="icon-red">clear</mat-icon>
+      </div>
+      <div>{{ b.remaining_nights }}</div>
+      <div>{{ b.maximum_seeing }}</div>
+      <div class="transparency">
+        <span>{{ b.transparency }}</span>
+        <span>
+          <mat-icon *ngIf="b.transparency === 'Any'">cloud_circle</mat-icon>
+          <mat-icon *ngIf="b.transparency === 'Clear'">cloud_off</mat-icon>
+          <mat-icon *ngIf="b.transparency === 'Thin cloud'"
+            >cloud_queue</mat-icon
+          >
+          <mat-icon *ngIf="b.transparency === 'Thick cloud'">cloud</mat-icon>
+        </span>
+      </div>
+      <div>{{ b.maximum_lunar_phase }}</div>
+      <div class="instrument-container">
+        <div *ngFor="let i of b.instruments">
+          <div>
+            <a href="proposal/{{ proposalCode }}/#">{{ i.name }}</a>
+          </div>
+          <div>{{ i.config_mode }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

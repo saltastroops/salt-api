@@ -2,7 +2,7 @@
   <h2>Investigators</h2>
 </div>
 
-<div class="table">
+<div class="table alternate-background">
   <div class="investigator-row headers">
     <div>PC</div>
     <div>PI</div>
@@ -20,7 +20,6 @@
       <div>{{ investigator.partner.name }}</div>
       <div>{{ investigator.partner.institute }}</div>
       <div>{{ investigator.partner.department }}</div>
-
       <!-- TODO: Replace with correct code -->
       <ng-template [ngIf]="investigator.is_pi">
         <div><button mat-raised-button color="accent">Reject</button></div>

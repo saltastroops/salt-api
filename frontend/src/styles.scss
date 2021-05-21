@@ -1,5 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 
+$light-strip: #eee;
+$dark-strip: #ddd;
+$secondy-headerr: #666;
+$primary-header: cornflowerblue;
+
 html,
 body {
   height: 100%;
@@ -14,8 +19,8 @@ body {
   padding: 0.5em;
 }
 
-.table > div:nth-child(odd) {
-  background: #ddd;
+.alternate-background > div:nth-child(odd) {
+  background: $dark-strip;
 }
 
 .table {
@@ -24,14 +29,14 @@ body {
   grid-row-gap: 0.07em;
 }
 .table > div {
-  background: #eee;
+  background: $light-strip;
 }
 .headers > div {
-  background: cornflowerblue;
+  background: $primary-header;
   color: white;
   text-align: left;
   font-weight: bolder;
-  font-size: 18px;
+  font-size: 1.1rem;
   padding: 0.2em;
   height: 100%;
 }

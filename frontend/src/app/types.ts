@@ -27,6 +27,22 @@ export interface GeneralProposalInfo {
   status: ProposalStatus;
 }
 
+export interface BlockSummary {
+  // TODO rename all as follows the rename
+  id: number;
+  name: string;
+  obs_time: number;
+  priority: number;
+  requested_block_visits: number;
+  done_visits: number;
+  observable_tonight: boolean;
+  remaining_nights: number;
+  maximum_seeing: number;
+  transparency: string;
+  maximum_lunar_phase: number;
+  instruments: Array<{ name: string; config_mode: string }>;
+}
+
 export interface Semester {
   year: number;
   semester: number;
@@ -40,4 +56,5 @@ interface ProposalStatus {
 export interface Proposal {
   investigators: Investigator[];
   general_info: GeneralProposalInfo;
+  blocks: BlockSummary[];
 }

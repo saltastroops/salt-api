@@ -17,6 +17,7 @@ import { ProposalService } from './service/proposal.service';
 import { RealProposalService } from './service/real/real-proposal.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/general-proposal-info.component';
+import { BlockSummariesComponent } from './proposal/block-summaries/block-summaries.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/g
     ProposalComponent,
     InvestigatorsComponent,
     GeneralProposalInfoComponent,
+    BlockSummariesComponent,
   ],
   imports: [
     BrowserModule,

@@ -9,14 +9,14 @@ import { BlockIdentifier } from '../../../types';
 export class BlockSelectionComponent implements OnInit {
   @Input() blocks!: Array<BlockIdentifier>;
 
-  @Input() selectedBlock!: BlockIdentifier;
+  @Input() selectedBlock!: BlockIdentifier | null;
 
   @Output() select = new EventEmitter<BlockIdentifier>();
 
   constructor() {}
 
   get selectedIndex() {
-    return this.blocks.indexOf(this.selectedBlock);
+    return this.selectedBlock ? this.blocks.indexOf(this.selectedBlock) : -1;
   }
 
   ngOnInit(): void {}

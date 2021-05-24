@@ -51,11 +51,13 @@ describe('BlockViewNavigationComponent', () => {
     expect(previousButton().disabled).toBeTrue();
   });
 
-  it('should enable the previous button', () => {
-    component.blocks = defaultBlocks;
-    component.selectedBlock = defaultBlocks[1];
-    fixture.detectChanges();
-    expect(previousButton().disabled).toBeFalse();
+  [1, 2].forEach((selectedIndex) => {
+    it('should enable the previous button', () => {
+      component.blocks = defaultBlocks;
+      component.selectedBlock = defaultBlocks[selectedIndex];
+      fixture.detectChanges();
+      expect(previousButton().disabled).toBeFalse();
+    });
   });
 
   it('should disable the next button', () => {
@@ -72,11 +74,13 @@ describe('BlockViewNavigationComponent', () => {
     expect(nextButton().disabled).toBeTrue();
   });
 
-  it('should enable the next button', () => {
-    component.blocks = defaultBlocks;
-    component.selectedBlock = defaultBlocks[1];
-    fixture.detectChanges();
-    expect(nextButton().disabled).toBeFalse();
+  [0, 1].forEach((selectedIndex) => {
+    it('should enable the next button', () => {
+      component.blocks = defaultBlocks;
+      component.selectedBlock = defaultBlocks[selectedIndex];
+      fixture.detectChanges();
+      expect(nextButton().disabled).toBeFalse();
+    });
   });
 
   it('should select the previous block when the previous button is clicked', () => {

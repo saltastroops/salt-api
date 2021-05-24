@@ -12,7 +12,7 @@ from app.dependencies import (
     get_semester,
     get_settings,
 )
-from app.models.pydantic import AccessToken, Semester, User
+from app.models.general import AccessToken, Semester, User
 from app.service import block
 from app.settings import Settings
 from app.util import auth

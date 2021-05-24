@@ -8,7 +8,7 @@ import aiofiles
 import xmltodict
 from aiomysql import Pool
 
-from app.models.pydantic import Semester
+from app.models.general import Semester
 
 
 async def get_block(

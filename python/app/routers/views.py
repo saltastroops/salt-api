@@ -16,7 +16,7 @@ from app.dependencies import (
     get_settings,
 )
 from app.jinja2.filters import autoversion
-from app.models.pydantic import Semester, User
+from app.models.general import Semester, User
 from app.service import block as block_service
 from app.settings import Settings
 from app.util import auth

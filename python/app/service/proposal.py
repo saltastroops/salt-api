@@ -1,56 +1,65 @@
-from typing import Any, Dict, List
+import asyncio
+from typing import Any, Awaitable, Dict, Iterable, List, Optional, Union, cast
 
-import astropy.units as u
-from aiomysql import connect
+from aiomysql import DictCursor, connect
 from astropy.coordinates import Angle
 
-from app.models.proposal_model import (
-    Affiliation,
+from app.models.general import Semester
+from app.models.proposal import (
     BlockVisit,
+    Institute,
     Investigator,
+    ObservedTime,
     Partner,
+    PartnerPercentage,
+    PersonalDetails,
+    Phase1Proposal,
+    Phase1Target,
+    Phase2Proposal,
     RequestedTime,
-    Target,
     TextContent,
+    TimeAllocation,
 )
-from app.models.pydantic import Semester
 
 
-async def get_text_content(
-    proposal_code: str, semester: Semester, db: connect
-) -> TextContent:
+async def get_text_content(proposal_code: str, db: connect) -> List[TextContent]:
+    """
+    Get the text content for a proposal.
+    """
     sql = """
-SELECT Title, Abstract, ReadMe, NightLogSummary FROM ProposalText as pt
+SELECT Title, Abstract, ReadMe, NightLogSummary, Year, Semester FROM ProposalText as pt
 JOIN ProposalCode AS pc ON pt.ProposalCode_Id = pc.ProposalCode_Id
 JOIN Semester AS s ON s.Semester_Id = pt.Semester_Id
 WHERE Proposal_Code = %(proposal_code)s
-    AND s.Year = %(year)s AND s.Semester = %(semester)s
     """
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(DictCursor) as cur:
             await cur.execute(
                 sql,
                 {
                     "proposal_code": proposal_code,
-                    "year": semester.year,
-                    "semester": semester.semester,
                 },
             )
-            rs = await cur.fetchone()
-            if rs:
-                return TextContent(
-                    title=rs[0],
-                    abstract=rs[1],
-                    read_me=rs[2],
-                    nightlog_summary=rs[3],
+            rs = await cur.fetchall()
+            return [
+                TextContent(
+                    semester=Semester(year=r["Year"], semester=r["Semester"]),
+                    title=r["Title"],
+                    abstract=r["Abstract"],
+                    read_me=r["ReadMe"],
+                    nightlog_summary=r["NightLogSummary"],
                 )
-    raise ValueError(f"Proposal content of {proposal_code} could not be found.")
+                for r in rs
+            ]
 
 
 async def get_investigators(proposal_code: str, db: connect) -> List[Investigator]:
-    sql = """\
-SELECT pi.Investigator_Id, FirstName, Surname, Partner_Name, InstituteName_Name,
-        Department, Url, Leader_Id, Contact_Id, Partner_Code 
+    """
+    Get the investigators on a proposal.
+    """
+    sql = """
+SELECT pi.Investigator_Id AS Investigator_Id, FirstName, Surname, Partner_Name,
+       InstituteName_Name, Department, Url, Leader_Id, Contact_Id, Partner_Code, Email
 FROM ProposalInvestigator AS pi
     JOIN ProposalCode AS pc ON pi.ProposalCode_Id = pc.ProposalCode_Id
     JOIN Investigator AS inv ON inv.Investigator_Id = pi.Investigator_Id
@@ -61,21 +70,26 @@ FROM ProposalInvestigator AS pi
 WHERE Proposal_Code = %(proposal_code)s
     """
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(DictCursor) as cur:
             await cur.execute(sql, {"proposal_code": proposal_code})
             rs = await cur.fetchall()
             if rs:
                 return [
                     Investigator(
-                        is_pc=r[0] == r[8],
-                        is_pi=r[0] == r[7],
-                        name=f"{r[2]} {r[1]}",
-                        affiliation=Affiliation(
-                            partner_code=r[9],
-                            partner_name=r[3],
-                            institute=r[4],
-                            department=r[5],
-                            home_page=r[6],
+                        is_pc=r["Investigator_Id"] == r["Contact_Id"],
+                        is_pi=r["Investigator_Id"] == r["Leader_Id"],
+                        personal_details=PersonalDetails(
+                            given_name=r["FirstName"],
+                            family_name=r["Surname"],
+                            email=r["Email"],
+                        ),
+                        affiliation=Institute(
+                            partner=Partner(
+                                code=r["Partner_Code"], name=r["Partner_Name"]
+                            ),
+                            name=r["InstituteName_Name"],
+                            department=r["Department"],
+                            home_page=r["Url"],
                         ),
                     )
                     for r in rs
@@ -83,11 +97,12 @@ WHERE Proposal_Code = %(proposal_code)s
     raise ValueError(f"Investigator for {proposal_code} couldn't be found.")
 
 
-async def get_time_allocations(
-    proposal_code: str, semester: Semester, db: connect
-) -> List[Dict[str, Any]]:
+async def get_time_allocations(proposal_code: str, db: connect) -> List[TimeAllocation]:
+    """
+    Get the time allocations for a proposal.
+    """
     sql = """
-SELECT Partner_Code, Partner_Name, Priority ,TimeAlloc, TacComment
+SELECT Partner_Code, Partner_Name, Priority ,TimeAlloc, TacComment, Year, Semester
 FROM MultiPartner AS mp
     JOIN ProposalCode AS pc ON mp.ProposalCode_Id = pc.ProposalCode_Id
     JOIN Semester AS s ON s.Semester_Id = mp.Semester_Id
@@ -95,38 +110,48 @@ FROM MultiPartner AS mp
     JOIN PriorityAlloc AS pa ON pa.MultiPartner_Id = mp.MultiPartner_Id
     JOIN TacProposalComment AS tc ON tc.MultiPartner_Id = mp.MultiPartner_Id
 WHERE Proposal_Code = %(proposal_code)s
-    AND s.Year = %(year)s AND s.Semester = %(semester)s
     """
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(DictCursor) as cur:
             await cur.execute(
                 sql,
                 {
                     "proposal_code": proposal_code,
-                    "year": semester.year,
-                    "semester": semester.semester,
                 },
             )
             rs = await cur.fetchall()
-            if rs:
-                _alloc = {}
-                for r in rs:
-                    if not (r[0] in _alloc):
-                        _alloc[r[0]] = {
-                            "partner": Partner(name=r[1], code=r[0]),
-                            "tac_comment": r[4],
-                        }
-                    _alloc[r[0]][f"priority_{r[2]}"] = r[3]
-                return [_alloc[r] for r in _alloc]
-    raise ValueError(f"Targets for proposal {proposal_code} couldn't be found")
+            alloc: Dict[str, Dict[str, TimeAllocation]] = {}
+            for r in rs:
+                semester = f"{r['Year']}-{r['Semester']}"
+                partner_code = r["Partner_Code"]
+                if semester not in alloc:
+                    alloc[semester] = {}
+                sem_alloc = alloc[semester]
+                if partner_code not in sem_alloc:
+                    sem_alloc[partner_code] = TimeAllocation(
+                        semester=Semester(year=r["Year"], semester=r["Semester"]),
+                        partner=Partner(name=r["Partner_Name"], code=partner_code),
+                        tac_comment=r["TacComment"],
+                        priority_0=0,
+                        priority_1=0,
+                        priority_2=0,
+                        priority_3=0,
+                        priority_4=0,
+                    )
+                    priority = f"priority_{r['Priority']}"
+                    setattr(sem_alloc[partner_code], priority, r["TimeAlloc"])
+            return [t for v in alloc.values() for t in v.values()]
 
 
-async def get_phase_1_targets(proposal_code: str, db: connect) -> List[Target]:
+async def get_phase_1_targets(proposal_code: str, db: connect) -> List[Phase1Target]:
+    """
+    Get the targets defined in phase 1 of a proposal.
+    """
     sql = """
 SELECT Target_Name, RaH, RaM, RaS, DecSign, DecD, DecM, DecS, Equinox, MinMag, MaxMag,
     TargetType, TargetSubType, Optional, NVisits, MaxLunarPhase, Ranking, NightCount,
     MoonProbability, CompetitionProbability, ObservabilityProbability,
-    SeeingProbability, Identifier, OutputInterval, RaDot, DecDot, Epoch
+    SeeingProbability, Identifier
 FROM P1ProposalTarget AS pt
     JOIN ProposalCode AS pc ON pt.ProposalCode_Id = pc.ProposalCode_Id
     JOIN Target AS ta ON ta.Target_Id = pt.Target_Id
@@ -141,47 +166,49 @@ FROM P1ProposalTarget AS pt
 WHERE Proposal_Code = %(proposal_code)s
     """
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(DictCursor) as cur:
             await cur.execute(sql, {"proposal_code": proposal_code})
             rs = await cur.fetchall()
-            if rs:
-                return [
-                    Target(
-                        name=r[0],
-                        ra=Angle(f"{r[1]}:{r[2]}:{r[3]} hours").degree * u.deg,
-                        dec=Angle(f"{r[4]}{r[5]}:{r[6]}:{r[7]} degrees").degree * u.deg,
-                        equinox=r[8],
-                        minimun_magnitude=r[9],
-                        maximun_magnitude=r[10],
-                        target_type=r[11],
-                        sub_type=r[12],
-                        is_optional=r[13] == 1,
-                        n_visits=r[14],
-                        max_luner_phase=r[15],
-                        ranking=r[16],
-                        night_count=r[17],
-                        moon_probability=r[18],
-                        competition_probability=r[19],
-                        observability_probability=r[20],
-                        seeing_probability=r[21],
-                        identifier=r[22],
-                        output_interval=r[23],
-                        ra_dot=Angle(r[24]) * u.arcsec / u.year,
-                        dec_dot=Angle(r[25]) * u.arcsec / u.year,
-                        epoch=r[26],
-                    )
-                    for r in rs
-                ]
-    raise ValueError(f"Targets for proposal {proposal_code} couldn't be found")
+            return [
+                Phase1Target(
+                    name=r["Target_Name"],
+                    right_ascension=Angle(
+                        f"{r['RaH']}:{r['RaM']}:{r['RaS']} hours"
+                    ).degree,
+                    declination=Angle(
+                        f"{r['DecSign']}{r['DecD']}:{r['DecM']}:{r['DecS']} degrees"
+                    ).degree,
+                    equinox=r["Equinox"],
+                    minimum_magnitude=r["MinMag"],
+                    maximum_magnitude=r["MaxMag"],
+                    target_type=r["TargetType"],
+                    target_subtype=r["TargetSubType"],
+                    is_optional=r["Optional"] == 1,
+                    n_visits=r["NVisits"],
+                    max_lunar_phase=r["MaxLunarPhase"],
+                    ranking=r["Ranking"],
+                    night_count=r["NightCount"],
+                    moon_probability=r["MoonProbability"],
+                    competition_probability=r["CompetitionProbability"],
+                    observability_probability=r["ObservabilityProbability"],
+                    seeing_probability=r["SeeingProbability"],
+                    horizons_identifier=r["Identifier"],
+                )
+                for r in rs
+            ]
 
 
 async def get_block_visits(proposal_code: str, db: connect) -> List[BlockVisit]:
-
-    sql = """ 
-SELECT bv.Block_Id, Block_Name, p.ObsTime, Priority, MaxLunarPhase, Target_Name,
-    `Date`, BlockVisitStatus, RejectedReason
-RejectedReason FROM BlockVisit AS bv
+    """
+    Get the accepted and rejected block visits of a proposal.
+    """
+    sql = """
+SELECT BlockVisit_Id, b.Block_Id AS Block_Id, Block_Name, p.ObsTime, Priority,
+       MaxLunarPhase, Target_Name, `Date`, BlockVisitStatus, RejectedReason
+    FROM BlockVisit AS bv
     JOIN `Block` AS b ON b.Block_Id = bv.Block_Id
+    JOIN Proposal pr ON b.Proposal_Id = pr.Proposal_Id
+    JOIN Semester s ON pr.Semester_Id = s.Semester_Id
     JOIN ProposalCode AS pc ON pc.ProposalCode_Id = b.ProposalCode_Id
     JOIN NightInfo AS ni ON ni.NightInfo_Id = bv.NightInfo_Id
     JOIN Pointing AS p ON p.Block_Id = bv.Block_Id
@@ -191,124 +218,119 @@ RejectedReason FROM BlockVisit AS bv
         ON bvs.BlockVisitStatus_Id = bv.BlockVisitStatus_Id
     LEFT JOIN BlockRejectedReason AS brr
         ON brr.BlockRejectedReason_Id = bv.BlockRejectedReason_Id
-WHERE Proposal_Code = %(proposal_code)s
-GROUP BY bv.Block_Id 
-    """  # TODO: can have more than one pointing and observation per block visit
+WHERE Proposal_Code = %(proposal_code)s AND BlockVisitStatus IN ('Accepted', 'Rejected')
+    """
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(DictCursor) as cur:
             await cur.execute(sql, {"proposal_code": proposal_code})
             rs = await cur.fetchall()
-            if rs:
-                return [
-                    BlockVisit(
-                        block_id=r[0],
-                        block_name=r[1],
-                        observed_time=r[2],
-                        priority=r[3],
-                        max_luner_phase=r[4],
-                        target_name=r[5],
-                        observation_date=r[6],
-                        status=r[7],
-                        rejection_reason=r[8],
-                    )
-                    for r in rs
-                ]
-    raise ValueError(f"Targets for proposal {proposal_code} couldn't be found")
+            bv: Dict[int, BlockVisit] = {}
+            for r in rs:
+                # If a block had multiple observations (which is technically possible
+                # and happens for a few rather old proposals), there will be more one
+                # result for a corresponding block visit. The only difference between
+                # these is the target name. To keep things simple, we only use the
+                # first result. The target name thus can be any of the target names for
+                # the block visit.
+                block_visit_id_ = r["BlockVisit_Id"]
+                bv[block_visit_id_] = BlockVisit(
+                    block_visit_id=block_visit_id_,
+                    block_id=r["Block_Id"],
+                    block_name=r["Block_Name"],
+                    observed_time=r["ObsTime"],
+                    priority=r["Priority"],
+                    max_lunar_phase=r["MaxLunarPhase"],
+                    target_name=r["Target_Name"],
+                    observation_night=r["Date"],
+                    semester=Semester(year=2042, semester=2),
+                    status=r["BlockVisitStatus"],
+                    rejection_reason=r["RejectedReason"],
+                )
+            return list(bv.values())
 
 
-async def get_total_requested_time(proposal_code: str, db: connect) -> List[BlockVisit]:
-
+async def _time_distribution(
+    proposal_code: str, db: connect
+) -> Iterable[Dict[str, Any]]:
     sql = """
-SELECT SUM(p1rt.P1RequestedTime) AS total_requested_time
-FROM P1RequestedTime AS p1rt
-WHERE p1rt.Proposal_Id IN %(proposal_id)s
-GROUP BY p1rt.Proposal_Id, p1rt.Semester_Id
-    """
-    async with db.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(sql, {"proposal_code": proposal_code})
-            rs = await cur.fetchall()
-            if rs:
-                return [
-                    BlockVisit(
-                        block_id=r[0],
-                        block_name=r[1],
-                        observed_time=r[2],
-                        priority=r[3],
-                        max_luner_phase=r[4],
-                        target_name=r[5],
-                        observation_date=r[6],
-                        status=r[7],
-                        rejection_reason=r[8],
-                    )
-                    for r in rs
-                ]
-    raise ValueError(f"Targets for proposal {proposal_code} couldn't be found")
-
-
-async def get_requested_time(
-    proposal_code: str, proposal_id: int, db: connect
-) -> List[RequestedTime]:
-    requested_time_sql = """
-SELECT P1MinimumUsefulTime, P1TimeComment, Year, Semester
-FROM P1MinTime AS pmt
-    JOIN ProposalCode AS pc ON pmt.ProposalCode_Id = pc.ProposalCode_Id
-    JOIN Semester AS s ON s.Semester_Id = pmt.Semester_Id
-WHERE Proposal_Code = %(proposal_code)s 
-    """
-    distribution_time_sql = """
-SELECT Year, Semester, Partner_Code, Partner_Name, ReqTimePercent
+SELECT Partner_Code, Partner_Name, ReqTimePercent, ReqTimeAmount, Year, Semester
 FROM MultiPartner AS mp
     JOIN ProposalCode AS pc ON mp.ProposalCode_Id = pc.ProposalCode_Id
     JOIN Semester AS s ON s.Semester_Id = mp.Semester_Id
     JOIN Partner AS p ON p.Partner_Id = mp.Partner_Id
 WHERE Proposal_Code = %(proposal_code)s
     """
-    total_requested_time_sql = """
-SELECT `Year`, Semester, SUM(p1rt.P1RequestedTime) AS total_requested_time
-FROM P1RequestedTime AS p1rt
-    JOIN Semester AS s ON s.Semester_Id = p1rt.Semester_Id
-WHERE p1rt.Proposal_Id = %(proposal_id)s
-GROUP BY p1rt.Proposal_Id, p1rt.Semester_Id
-    """
-    requested_time = dict()
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(requested_time_sql, {"proposal_code": proposal_code})
-            rrs = await cur.fetchall()
-            for r in rrs:
-                _sem = f"{r[2]}-{r[3]}"
-                if not (_sem in requested_time):
-                    requested_time[_sem] = RequestedTime(
-                        total_requested_time=0,
-                        minimum_useful_time=r[0],
-                        time_comment=r[1],
-                        semester=Semester(year=r[2], semester=r[3]),
-                        distribution=[],
-                    )
-            await cur.execute(total_requested_time_sql, {"proposal_id": proposal_id})
-            trt = await cur.fetchall()
-            for r in trt:
-                _sem = f"{r[0]}-{r[1]}"
-                requested_time[_sem].total_requested_time = r[2]
-            await cur.execute(distribution_time_sql, {"proposal_code": proposal_code})
-            drs = await cur.fetchall()
-            for r in drs:
-                if not (r[2] == "OTH"):  # TODO: raise error if oth allocated time
-                    _sem = f"{r[0]}-{r[1]}"
-                    requested_time[_sem].distribution.append(
-                        dict(
-                            partner=Partner(code=r[2], name=r[3]), share_percentage=r[4]
-                        )
-                    )
+        async with conn.cursor(DictCursor) as cur:
+            await cur.execute(sql, {"proposal_code": proposal_code})
+            results = await cur.fetchall()
+            return cast(Iterable[Dict[str, Any]], results)
+
+
+async def _minimum_useful_time(
+    proposal_code: str, db: connect
+) -> Iterable[Dict[str, Any]]:
+    sql = """
+SELECT P1MinimumUsefulTime, P1TimeComment, Year, Semester
+FROM P1MinTime AS pmt
+    JOIN ProposalCode AS pc ON pmt.ProposalCode_Id = pc.ProposalCode_Id
+    JOIN Semester AS s ON s.Semester_Id = pmt.Semester_Id
+WHERE Proposal_Code = %(proposal_code)s
+    """
+    async with db.acquire() as conn:
+        async with conn.cursor(DictCursor) as cur:
+            await cur.execute(sql, {"proposal_code": proposal_code})
+            results = await cur.fetchall()
+            return cast(Iterable[Dict[str, Any]], results)
+
+
+async def get_requested_time(proposal_code: str, db: connect) -> List[RequestedTime]:
+    """
+    Get the time requested for a proposal.
+    """
+    distribution_rs, min_useful_rs = await asyncio.gather(
+        asyncio.create_task(_time_distribution(proposal_code, db)),
+        asyncio.create_task(_minimum_useful_time(proposal_code, db)),
+    )
+
+    requested_time: Dict[str, RequestedTime] = {}
+
+    # The order matters: For every entry in the MultiPartner table, there should be an
+    # entry in the P1MinTime table, but there may be MultiPartner table entries without
+    # a corresponding P1MinTime table entry. Hence we should create the requested_time
+    # dictionary from the results of the MultiPartner table query.
+
+    for r in distribution_rs:
+        _sem = f"{r['Year']}-{r['Semester']}"
+        if _sem not in requested_time:
+            requested_time[_sem] = RequestedTime(
+                total_requested_time=r["ReqTimeAmount"],
+                minimum_useful_time=None,
+                comment=None,
+                semester=Semester(year=r["Year"], semester=r["Semester"]),
+                distribution=[],
+            )
+        if r["Partner_Code"] == "OTH" and r["ReqTimePercent"] > 0:
+            raise ValueError("The partner 'Other' should not have a time share.")
+        if r["Partner_Code"] != "OTH":
+            requested_time[_sem].distribution.append(
+                PartnerPercentage(
+                    partner=Partner(code=r["Partner_Code"], name=r["Partner_Name"]),
+                    percentage=r["ReqTimePercent"],
+                )
+            )
+
+    for r in min_useful_rs:
+        _sem = f"{r['Year']}-{r['Semester']}"
+        requested_time[_sem].minimum_useful_time = r["P1MinimumUsefulTime"]
+        requested_time[_sem].comment = r["P1TimeComment"]
+
     return [requested_time[r] for r in requested_time]
 
 
-async def get_observed_time(
-    proposal_code: str, semester: Semester, db: connect
-) -> Dict[str, Any]:
+async def get_observed_time(proposal_code: str, db: connect) -> List[ObservedTime]:
     sql = """
-SELECT SUM(ObsTime), Priority 
+SELECT SUM(ObsTime) AS ObsTime, Priority, Year, Semester
 FROM BlockVisit AS bv
     JOIN `Block` AS b ON bv.Block_Id = b.Block_Id
     JOIN ProposalCode AS pc ON pc.ProposalCode_Id = b.ProposalCode_Id
@@ -317,27 +339,107 @@ FROM BlockVisit AS bv
     JOIN BlockVisitStatus AS bvs ON bvs.BlockVisitStatus_Id = bv.BlockVisitStatus_Id
 WHERE Proposal_Code = %(proposal_code)s
     AND BlockVisitStatus = 'Accepted'
-    AND `Year` = %(year)s AND Semester = %(semester)s
-GROUP BY Priority
+GROUP BY Priority, s.Semester_Id
     """
     async with db.acquire() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(DictCursor) as cur:
             await cur.execute(
                 sql,
                 {
                     "proposal_code": proposal_code,
-                    "year": semester.year,
-                    "semester": semester.semester,
                 },
             )
             rs = await cur.fetchall()
-            observed_time = dict(
-                priority_0=0,
-                priority_1=0,
-                priority_2=0,
-                priority_3=0,
-                priority_4=0,
-            )
+            ot: Dict[str, ObservedTime] = {}
             for r in rs:
-                observed_time[f"priority_{r[1]}"] = r[0]
-            return observed_time
+                semester = f"{r['Year']-r['Semester']}"
+                if semester not in ot:
+                    ot[semester] = ObservedTime(
+                        semester=Semester(year=r["Year"], semester=r["Semester"]),
+                        priority_0=0,
+                        priority_1=0,
+                        priority_2=0,
+                        priority_3=0,
+                        priority_4=0,
+                    )
+                priority = f"priority_{r['Priority']}"
+                setattr(ot[semester], priority, r["ObsTime"])
+            return list(ot.values())
+
+
+async def get_phase(proposal_code: str, db: connect) -> int:
+    """
+    Get the proposal phase of a proposal's latest submission.
+    """
+    sql = """
+SELECT Phase
+FROM Proposal p
+JOIN ProposalCode pc ON p.ProposalCode_Id = pc.ProposalCode_Id
+WHERE Proposal_Code=%(proposal_code)s AND Current=1
+ORDER BY Proposal_Id DESC
+LIMIT 1
+    """
+    async with db.acquire() as conn:
+        async with conn.cursor(DictCursor) as cur:
+            await cur.execute(sql, {"proposal_code": proposal_code})
+            r = await cur.fetchone()
+            return cast(int, r["Phase"])
+
+
+async def _phase_1_proposal(proposal_code: str, db: connect) -> Phase1Proposal:
+    queries = [
+        get_text_content(proposal_code, db),
+        get_investigators(proposal_code, db),
+        get_phase_1_targets(proposal_code, db),
+        get_requested_time(proposal_code, db),
+    ]
+    content = await asyncio.gather(
+        *[asyncio.create_task(cast(Awaitable[Any], q)) for q in queries]
+    )
+    return Phase1Proposal(
+        phase=1,
+        text_content=content[0],
+        investigators=content[1],
+        targets=content[2],
+        requested_time=content[3],
+    )
+
+
+async def _phase_2_proposal(proposal_code: str, db: connect) -> Phase2Proposal:
+    queries = [
+        get_text_content(proposal_code, db),
+        get_investigators(proposal_code, db),
+        get_block_visits(proposal_code, db),
+        get_observed_time(proposal_code, db),
+        get_time_allocations(proposal_code, db),
+    ]
+    content = await asyncio.gather(
+        *[asyncio.create_task(cast(Awaitable[Any], q)) for q in queries]
+    )
+    return Phase2Proposal(
+        phase=2,
+        text_content=content[0],
+        investigators=content[1],
+        block_visits=content[2],
+        observed_time=content[3],
+        time_allocations=content[4],
+    )
+
+
+async def get_proposal(
+    proposal_code: str, db: connect, phase: Optional[int] = None
+) -> Union[Phase1Proposal, Phase2Proposal]:
+    """
+    Return the proposal content for a phase 1 or 2 proposal.
+
+    If a phase is given, the content for that phase is returned. Otherwise the content
+    is returned for the phase of the proposal's latest submission.
+    """
+    if phase is None:
+        phase = await get_phase(proposal_code, db)
+    if phase == 1:
+        return await _phase_1_proposal(proposal_code, db)
+    elif phase == 2:
+        return await _phase_2_proposal(proposal_code, db)
+    else:
+        raise ValueError(f"Unsupported proposal phase: {phase}")

@@ -1,19 +1,18 @@
 <div *ngIf="proposal | async as p">
-  <div>
-    <h1>This is proposal {{ proposalCode }}.</h1>
-  </div>
-  <div>
+  <h1 class="title is-3">This is proposal {{ proposalCode }}.</h1>
+  <div class="block">
     <wm-investigators [investigators]="p.investigators"></wm-investigators>
   </div>
-  <br />
-  <div>
+  <div class="block">
     <wm-general-proposal-info
       [general_proposal_info]="p.general_info"
       [currentSemester]="p.general_info.current_semester"
     ></wm-general-proposal-info>
   </div>
-  <wm-block-summaries
-    [blocks]="p.blocks"
-    [proposalCode]="p.general_info.code"
-  ></wm-block-summaries>
+  <div class="block">
+    <wm-block-summaries
+      [blocks]="p.blocks"
+      [proposalCode]="p.general_info.code"
+    ></wm-block-summaries>
+  </div>
 </div>

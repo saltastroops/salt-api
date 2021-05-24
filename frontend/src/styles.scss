@@ -1,17 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import "./node_modules/bulma/bulma.sass";
+
 $light-strip: #eee;
 $dark-strip: #ddd;
 $secondy-headerr: #666;
 $primary-header: cornflowerblue;
 
-html,
 body {
-  height: 100%;
-}
-body {
-  margin: 0.5% 5%;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: "Helvetica Neue", sans-serif;
 }
 
 .row > div {

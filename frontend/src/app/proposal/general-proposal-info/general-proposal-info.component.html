@@ -1,6 +1,4 @@
-<div>
-  <h2>General</h2>
-</div>
+<h2 class="title is-4">General</h2>
 
 <div class="table">
   <div class="headers row">
@@ -23,17 +21,11 @@
     <div>{{ general_proposal_info.code }}</div>
     <div>{{ general_proposal_info.phase }}</div>
     <div>
-      <mat-select
-        class="mat-focus-indicator mat-raised-button mat-button-base mat-primary"
-        [formControl]="semesterControl"
-      >
-        <mat-option
-          *ngFor="let s of general_proposal_info.semesters"
-          [value]="s"
-        >
+      <select class="" [formControl]="semesterControl">
+        <option *ngFor="let s of general_proposal_info.semesters" [value]="s">
           {{ s.year }}-{{ s.semester }}
-        </mat-option>
-      </mat-select>
+        </option>
+      </select>
     </div>
     <div>
       {{ general_proposal_info.first_submission.toISOString().split("T")[0] }}

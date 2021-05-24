@@ -1,6 +1,4 @@
-<div>
-  <h2>Block Summary</h2>
-</div>
+<h2 class="title is-4">Block Summary</h2>
 
 <div class="table alternate-background">
   <div class="block-row headers">
@@ -24,23 +22,17 @@
       <div>{{ b.obs_time }}</div>
       <div>{{ b.priority }}</div>
       <div>{{ b.done_visits }}/{{ b.requested_block_visits }}</div>
-      <div *ngIf="b.observable_tonight">
-        <mat-icon class="icon-green">done</mat-icon>
-      </div>
-      <div *ngIf="!b.observable_tonight">
-        <mat-icon class="icon-red">clear</mat-icon>
-      </div>
+      <div *ngIf="b.observable_tonight">green-done</div>
+      <div *ngIf="!b.observable_tonight">clear</div>
       <div>{{ b.remaining_nights }}</div>
       <div>{{ b.maximum_seeing }}</div>
       <div class="transparency">
         <span>{{ b.transparency }}</span>
         <span>
-          <mat-icon *ngIf="b.transparency === 'Any'">cloud_circle</mat-icon>
-          <mat-icon *ngIf="b.transparency === 'Clear'">cloud_off</mat-icon>
-          <mat-icon *ngIf="b.transparency === 'Thin cloud'"
-            >cloud_queue</mat-icon
-          >
-          <mat-icon *ngIf="b.transparency === 'Thick cloud'">cloud</mat-icon>
+          <span *ngIf="b.transparency === 'Any'">cloud_circle</span>
+          <span *ngIf="b.transparency === 'Clear'">cloud_off</span>
+          <span *ngIf="b.transparency === 'Thin cloud'">cloud_queue</span>
+          <span *ngIf="b.transparency === 'Thick cloud'">cloud</span>
         </span>
       </div>
       <div>{{ b.maximum_lunar_phase }}</div>

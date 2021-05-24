@@ -1,6 +1,4 @@
-<div>
-  <h2>Investigators</h2>
-</div>
+<h2 class="title is-4">Investigators</h2>
 
 <div class="table alternate-background">
   <div class="investigator-row headers">
@@ -14,18 +12,18 @@
   </div>
   <div *ngFor="let investigator of investigators">
     <div class="investigator-row row">
-      <div><mat-icon *ngIf="investigator.is_pc">done</mat-icon></div>
-      <div><mat-icon *ngIf="investigator.is_pi">done</mat-icon></div>
+      <div>done</div>
+      <div>done</div>
       <div>{{ investigator.name }}</div>
       <div>{{ investigator.partner.name }}</div>
       <div>{{ investigator.partner.institute }}</div>
       <div>{{ investigator.partner.department }}</div>
       <!-- TODO: Replace with correct code -->
       <ng-template [ngIf]="investigator.is_pi">
-        <div><button mat-raised-button color="accent">Reject</button></div>
+        <div><button>Reject</button></div>
       </ng-template>
       <ng-template [ngIf]="!investigator.is_pi">
-        <div><button mat-raised-button color="primary">Accept</button></div>
+        <div><button>Accept</button></div>
       </ng-template>
     </div>
   </div>

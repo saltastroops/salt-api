@@ -58,3 +58,15 @@ export interface Proposal {
   general_info: GeneralProposalInfo;
   blocks: BlockSummary[];
 }
+
+export interface BlockIdentifier {
+  // the block id in the database
+  id: number;
+  // the block name
+  name: string;
+}
+
+export interface Block {
+  id: number;
+  name: string;
+}

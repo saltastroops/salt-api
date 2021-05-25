@@ -14,6 +14,8 @@ import { RealProposalService } from './service/real/real-proposal.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/general-proposal-info.component';
 import { BlockSummariesComponent } from './proposal/block-summaries/block-summaries.component';
+import { BlockViewComponent } from './proposal/block-view/block-view.component';
+import { BlockSelectionComponent } from './proposal/block-view/block-selection/block-selection.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,8 @@ import { BlockSummariesComponent } from './proposal/block-summaries/block-summar
     InvestigatorsComponent,
     GeneralProposalInfoComponent,
     BlockSummariesComponent,
+    BlockViewComponent,
+    BlockSelectionComponent,
   ],
   imports: [
     BrowserModule,

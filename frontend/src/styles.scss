@@ -2,10 +2,10 @@
 
 @import "./node_modules/bulma/bulma.sass";
 
-$light-strip: #eee;
-$dark-strip: #ddd;
-$secondy-headerr: #666;
-$primary-header: cornflowerblue;
+$light-strip: #eeeeee;
+$dark-strip: #dddddd;
+$secondary-header: #666;
+$primary-header: #209cee;
 
 body {
   font-family: "Helvetica Neue", sans-serif;
@@ -36,4 +36,8 @@ body {
   font-size: 1.1rem;
   padding: 0.2em;
   height: 100%;
+}
+
+svg-icon.icon {
+  display: block;
 }

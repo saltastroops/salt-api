@@ -21,11 +21,14 @@
     <div>{{ general_proposal_info.code }}</div>
     <div>{{ general_proposal_info.phase }}</div>
     <div>
-      <select class="" [formControl]="semesterControl">
+      <div class="select" >
+        <select [formControl]="semesterControl">
         <option *ngFor="let s of general_proposal_info.semesters" [value]="s">
           {{ s.year }}-{{ s.semester }}
         </option>
-      </select>
+        </select>
+      </div>
+
     </div>
     <div>
       {{ general_proposal_info.first_submission.toISOString().split("T")[0] }}

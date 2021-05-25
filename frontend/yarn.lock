@@ -148,7 +148,7 @@
     "universal-analytics" "0.4.23"
     "uuid" "8.3.2"
 
-"@angular/common@~11.2.13", "@angular/common@11.2.13":
+"@angular/common@>=11.0.0", "@angular/common@~11.2.13", "@angular/common@11.2.13":
   "version" "11.2.13"
   dependencies:
     "tslib" "^2.0.0"
@@ -177,7 +177,7 @@
   dependencies:
     "tslib" "^2.0.0"
 
-"@angular/core@>=2.3.1 <13.0.0 || ^12.0.0-next || ^12.1.0-next || ^12.2.0-next", "@angular/core@~11.2.13", "@angular/core@11.2.13":
+"@angular/core@>=11.0.0", "@angular/core@>=2.3.1 <13.0.0 || ^12.0.0-next || ^12.1.0-next || ^12.2.0-next", "@angular/core@~11.2.13", "@angular/core@11.2.13":
   "version" "11.2.13"
   dependencies:
     "tslib" "^2.0.0"
@@ -1441,6 +1441,13 @@
   "integrity" "sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM="
   "resolved" "https://registry.npmjs.org/alphanum-sort/-/alphanum-sort-1.0.2.tgz"
   "version" "1.0.2"
+
+"angular-svg-icon@^11.2.0":
+  "integrity" "sha512-5SWvZyRPRV88n6/b+5AqI580Aq3xmQ1dd1ucYCMDrj4afQzQwJv2V7pBFcF3qNYzVZyF5TLDF006tGxMHYAb2g=="
+  "resolved" "https://registry.npmjs.org/angular-svg-icon/-/angular-svg-icon-11.2.0.tgz"
+  "version" "11.2.0"
+  dependencies:
+    "tslib" "^2.0.0"
 
 "ansi-colors@^3.0.0":
   "integrity" "sha512-hHUXGagefjN2iRrID63xckIvotOXOojhQKWIPUZ4mNUZ9nLZW+7FMNoE1lOkEhNWYsx/7ysGIuJYCiMAA9FnrA=="
@@ -4194,8 +4201,6 @@
     "safer-buffer" ">= 2.1.2 < 3"
 
 "iconv-lite@^0.6.2":
-  "integrity" "sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ=="
-  "resolved" "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.2.tgz"
   "version" "0.6.2"
   dependencies:
     "safer-buffer" ">= 2.1.2 < 3.0.0"
@@ -6119,8 +6124,6 @@
   "version" "2.1.0"
 
 "picomatch@^2.0.4", "picomatch@^2.2.1", "picomatch@^2.2.3":
-  "integrity" "sha512-KpELjfwcCDUb9PeigTs2mBJzXUPzAuP2oPcA989He8Rte0+YUAjw1JVedDhuTKPkHjSYzMN3npC9luThGYEKdg=="
-  "resolved" "https://registry.npmjs.org/picomatch/-/picomatch-2.2.3.tgz"
   "version" "2.2.3"
 
 "pify@^2.0.0", "pify@^2.3.0":
@@ -7093,7 +7096,7 @@
   dependencies:
     "aproba" "^1.1.1"
 
-"rxjs@^6.5.3", "rxjs@^6.6.0", "rxjs@~6.6.0":
+"rxjs@^6.5.3", "rxjs@^6.6.0", "rxjs@>=6.6.0", "rxjs@~6.6.0":
   "integrity" "sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ=="
   "resolved" "https://registry.npmjs.org/rxjs/-/rxjs-6.6.7.tgz"
   "version" "6.6.7"

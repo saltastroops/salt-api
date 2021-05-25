@@ -10,20 +10,26 @@
     <div>Department</div>
     <div>Accept</div>
   </div>
-  <div *ngFor="let investigator of investigators">
+  <div *ngFor="let i of investigators">
     <div class="investigator-row row">
-      <div>done</div>
-      <div>done</div>
-      <div>{{ investigator.name }}</div>
-      <div>{{ investigator.partner.name }}</div>
-      <div>{{ investigator.partner.institute }}</div>
-      <div>{{ investigator.partner.department }}</div>
+      <div *ngIf="i.is_pc">
+        <svg-icon class="icon" src="/assets/icons/noun_check.svg"></svg-icon>
+      </div>
+      <div *ngIf="!i.is_pc"></div>
+      <div *ngIf="i.is_pi">
+        <svg-icon class="icon" src="/assets/icons/noun_check.svg"></svg-icon>
+      </div>
+      <div *ngIf="!i.is_pi"></div>
+      <div>{{ i.name }}</div>
+      <div>{{ i.partner.name }}</div>
+      <div>{{ i.partner.institute }}</div>
+      <div>{{ i.partner.department }}</div>
       <!-- TODO: Replace with correct code -->
-      <ng-template [ngIf]="investigator.is_pi">
-        <div><button>Reject</button></div>
+      <ng-template [ngIf]="i.is_pi">
+        <div><button class="button is-danger is-small">Reject</button></div>
       </ng-template>
-      <ng-template [ngIf]="!investigator.is_pi">
-        <div><button>Accept</button></div>
+      <ng-template [ngIf]="!i.is_pi">
+        <div><button class="button is-primary is-small">Accept</button></div>
       </ng-template>
     </div>
   </div>

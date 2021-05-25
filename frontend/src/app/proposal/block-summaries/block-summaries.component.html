@@ -1,7 +1,7 @@
 <h2 class="title is-4">Block Summary</h2>
 
-<div class="table alternate-background">
-  <div class="block-row headers">
+<div class="table is-table alternate-background">
+  <div class="block-row headers is-info">
     <div>Block</div>
     <div>ObsTime</div>
     <div>Priority</div>
@@ -22,18 +22,34 @@
       <div>{{ b.obs_time }}</div>
       <div>{{ b.priority }}</div>
       <div>{{ b.done_visits }}/{{ b.requested_block_visits }}</div>
-      <div *ngIf="b.observable_tonight">green-done</div>
-      <div *ngIf="!b.observable_tonight">clear</div>
+      <div *ngIf="b.observable_tonight" class="is-green">
+        <svg-icon class="icon" src="/assets/icons/noun_check.svg"></svg-icon>
+      </div>
+      <div *ngIf="!b.observable_tonight">
+        <svg-icon class="icon" src="/assets/icons/noun_cross.svg"></svg-icon>
+      </div>
       <div>{{ b.remaining_nights }}</div>
       <div>{{ b.maximum_seeing }}</div>
       <div class="transparency">
-        <span>{{ b.transparency }}</span>
-        <span>
-          <span *ngIf="b.transparency === 'Any'">cloud_circle</span>
-          <span *ngIf="b.transparency === 'Clear'">cloud_off</span>
-          <span *ngIf="b.transparency === 'Thin cloud'">cloud_queue</span>
-          <span *ngIf="b.transparency === 'Thick cloud'">cloud</span>
-        </span>
+        <div>{{ b.transparency }}</div>
+        <div *ngIf="b.transparency === 'Any'">
+          <svg-icon class="icon" src="/assets/icons/noun_any.svg"></svg-icon>
+        </div>
+        <div *ngIf="b.transparency === 'Clear'">
+          <svg-icon class="icon" src="/assets/icons/noun_clear.svg"></svg-icon>
+        </div>
+        <div *ngIf="b.transparency === 'Thin cloud'">
+          <svg-icon
+            class="icon"
+            src="/assets/icons/noun_thin_clouds.svg"
+          ></svg-icon>
+        </div>
+        <div *ngIf="b.transparency === 'Thick cloud'">
+          <svg-icon
+            class="icon"
+            src="/assets/icons/noun_thick_clouds.svg"
+          ></svg-icon>
+        </div>
       </div>
       <div>{{ b.maximum_lunar_phase }}</div>
       <div class="instrument-container">

@@ -7,12 +7,12 @@
 
 .block-row {
   display: grid;
-  grid-template-columns: 15% repeat(6, 1fr) 8% repeat(1, 1fr) 18%;
+  grid-template-columns: 15% repeat(6, 1fr) 10% repeat(1, 1fr) 18%;
   align-items: center;
 }
 
 .block-row.headers {
-  grid-template-columns: 15% repeat(6, 1fr) 8% repeat(1, 1fr) 7% 11%;
+  grid-template-columns: 15% repeat(6, 1fr) 10% repeat(1, 1fr) 7% 11%;
 }
 
 .block-row > div {
@@ -28,6 +28,7 @@
 .transparency {
   display: grid;
   grid-template-columns: 70% 30%;
+  align-items: center;
 }
 
 .instrument-container {
@@ -41,7 +42,8 @@
     border-top: 0.01em solid white;
     padding-top: 0.5em;
   }
+
   > :last-child {
-    padding-bottom: 0.5em;
+    padding-bottom: 0;
   }
 }

@@ -1,9 +1,28 @@
 <wm-block-selection
   [blocks]="blocks"
   [selectedBlock]="selectedBlock"
+  (select)="selectBlock($event)"
 ></wm-block-selection>
-<div>Block Content!</div>
+<div class="block-content" style="position: relative">
+  <ng-container *ngIf="isLoading">
+    <div class="is-overlay" data-testid="block-view-loading">
+      <wm-loading-spinner></wm-loading-spinner>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="error">
+    <div class="message is-danger">
+      <div class="message-header">Error</div>
+      <div class="message-body">{{ error }}</div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="displayedBlock">
+    <div [class.is-blurred]="isLoading">
+      <h1>{{ displayedBlock.name }}</h1>
+    </div>
+  </ng-container>
+</div>
 <wm-block-selection
   [blocks]="blocks"
   [selectedBlock]="selectedBlock"
+  (select)="selectBlock($event)"
 ></wm-block-selection>

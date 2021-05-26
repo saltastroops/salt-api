@@ -1,3 +1,11 @@
+import { Observable } from 'rxjs';
+
+export interface LoadingStreams<T> {
+  content$: Observable<T>;
+  error$: Observable<string | null>;
+  isLoading$: Observable<boolean>;
+}
+
 export interface Partner {
   name: string;
   code: string;

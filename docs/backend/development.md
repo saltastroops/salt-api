@@ -1,6 +1,6 @@
-# Developing the Web Manager
+# Developing the Web Manager Backend
 
-This page outlines how to develop the Web Manager.
+This page outlines how to develop the Web Manager backend.
 
 ## Requirements
 

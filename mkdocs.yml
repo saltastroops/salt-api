@@ -8,10 +8,10 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - API: api.md
-  - Development: development.md
-  - Implementation: implementation.md
-  - Web Components: web-components.md
+  - Backend API: backend/api.md
+  - Backend Development: backend/development.md
+  - Backend Implementation: backend/implementation.md
+  - Frontend Develoment: frontend/development.md
 
 plugins:
   - macros

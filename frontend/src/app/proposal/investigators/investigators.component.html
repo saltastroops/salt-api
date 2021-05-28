@@ -13,11 +13,19 @@
   <div *ngFor="let i of investigators">
     <div class="investigator-row row">
       <div *ngIf="i.is_pc">
-        <svg-icon class="icon" src="/assets/icons/noun_check.svg"></svg-icon>
+        <img
+          alt="Is a PI"
+          class="icon is-small"
+          src="/assets/icons/noun_tick_2836262.svg"
+        />
       </div>
       <div *ngIf="!i.is_pc"></div>
       <div *ngIf="i.is_pi">
-        <svg-icon class="icon" src="/assets/icons/noun_check.svg"></svg-icon>
+        <img
+          alt="Is a PC"
+          class="icon is-small"
+          src="/assets/icons/noun_tick_2836262.svg"
+        />
       </div>
       <div *ngIf="!i.is_pi"></div>
       <div>{{ i.name }}</div>

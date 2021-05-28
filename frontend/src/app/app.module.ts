@@ -8,7 +8,6 @@ import { ProposalComponent } from './proposal/proposal.component';
 import { InvestigatorsComponent } from './proposal/investigators/investigators.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
-import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ProposalService } from './service/proposal.service';
 import { RealProposalService } from './service/real/real-proposal.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -35,7 +34,6 @@ import { BlockSelectionComponent } from './proposal/block-view/block-selection/b
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    AngularSvgIconModule.forRoot()
   ],
   providers: [{ provide: ProposalService, useClass: RealProposalService }],
   bootstrap: [AppComponent],

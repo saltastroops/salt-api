@@ -15,6 +15,9 @@ import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/g
 import { BlockSummariesComponent } from './proposal/block-summaries/block-summaries.component';
 import { BlockViewComponent } from './proposal/block-view/block-view.component';
 import { BlockSelectionComponent } from './proposal/block-view/block-selection/block-selection.component';
+import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
+import { BlockService } from './service/block.service';
+import { MockBlockService } from './mock/service/mock-block.service';
 
 @NgModule({
   declarations: [
@@ -26,6 +29,7 @@ import { BlockSelectionComponent } from './proposal/block-view/block-selection/b
     BlockSummariesComponent,
     BlockViewComponent,
     BlockSelectionComponent,
+    LoadingSpinnerComponent,
   ],
   imports: [
     BrowserModule,
@@ -35,7 +39,10 @@ import { BlockSelectionComponent } from './proposal/block-view/block-selection/b
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [{ provide: ProposalService, useClass: RealProposalService }],
+  providers: [
+    { provide: ProposalService, useClass: RealProposalService },
+    { provide: BlockService, useClass: MockBlockService },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

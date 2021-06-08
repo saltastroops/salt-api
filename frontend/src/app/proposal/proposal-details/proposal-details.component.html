@@ -1,0 +1,86 @@
+<div class="table">
+  <div class="headers row">
+    <div>Summary for SALT Astronomer</div>
+  </div>
+  <div class="row">
+    <div>
+      <p
+        [innerHTML]="general_proposal_info.summary_for_salt_astronomer | nl2br"
+      ></p>
+    </div>
+  </div>
+  <div class="headers row">
+    <div>Summary for the nightlog</div>
+  </div>
+  <div class="row">
+    <div>
+      <p>{{ general_proposal_info.summary_for_night_log }}</p>
+    </div>
+  </div>
+</div>
+<h2 class="title is-4">Details</h2>
+<div class="table">
+  <div class="proposal-details-row headers row">
+    <div>Status</div>
+    <div>Type</div>
+    <div>Target of Opportunity</div>
+    <div>Total time</div>
+    <div>Proprietary period</div>
+  </div>
+
+  <div class="proposal-details-row row">
+    <div>{{ general_proposal_info.status.status }}</div>
+    <div>{{ general_proposal_info.type }}</div>
+    <div *ngIf="general_proposal_info.target_of_opportunity">
+      <div>
+        <img
+          class="icon is-small"
+          src="/assets/icons/noun_tick_2836262-green.svg"
+          alt="Is target of opportunity"
+        />
+      </div>
+    </div>
+    <div *ngIf="!general_proposal_info.target_of_opportunity">
+      <div>
+        <img
+          class="icon is-small"
+          src="/assets/icons/noun_Cross_2120375.svg"
+          alt="Is not target of opportunity"
+        />
+      </div>
+    </div>
+    <div>{{ general_proposal_info.total_requested_time }}</div>
+    <div class="proprietary-period">
+      <div>{{ general_proposal_info.proprietary_period }} months</div>
+      <div><button class="button is-small">change</button></div>
+    </div>
+  </div>
+</div>
+<div class="table">
+  <div class="headers row">
+    <div>Download</div>
+  </div>
+  <div class="row">
+    <div><a>Download zip file</a></div>
+  </div>
+  <div class="row">
+    <div><a>Download summary</a></div>
+  </div>
+  <div class="row headers">
+    <div>Responsible SALT Astronomer:</div>
+  </div>
+  <div class="row">
+    <div>
+      <a>
+        <!--      TODO Send email.-->
+        {{ general_proposal_info.responsible_salt_astronomer.family_name }}
+        {{ " " + general_proposal_info.responsible_salt_astronomer.given_name }}
+      </a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="is-pulled-right">
+      <button class="button is-small">Edit</button>
+    </div>
+  </div>
+</div>

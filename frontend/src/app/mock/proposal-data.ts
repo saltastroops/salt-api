@@ -1,4 +1,4 @@
-import { Proposal } from '../types';
+import {Partner, Proposal} from '../types';
 
 export const proposal: Proposal = {
   investigators: [
@@ -87,6 +87,51 @@ export const proposal: Proposal = {
       status: 'active',
       message: 'The proposal has been added to the queue.',
     },
+    type: 'Science - Long Term',
+    target_of_opportunity: false,
+    total_requested_time: 9999,
+    proprietary_period: 36,
+    responsible_salt_astronomer: {
+      given_name: 'John',
+      family_name: 'Doe',
+      email: 'johndoe.@host.com'
+    },
+    summary_for_salt_astronomer: `
+----------------------------------
+Lorem ipsum dolor.
+----------------------------------
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur, facere.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+
+----------------------------------
+Lorem ipsum dolor sit amet.
+----------------------------------
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque error eveniet illo iure sapiente sunt vero. Ad
+architecto, beatae blanditiis debitis deleniti doloremque incidunt itaque natus nisi, nostrum quidem sint!
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequuntur doloremque error inventore nemo quae rerum!
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Blanditiis error et, nulla optio soluta voluptas.
+
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime, totam!
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+- Lorem ipsum dolor sit amet, consectetur.
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium laboriosam libero nemo nesciunt temporibus. Aliquid!
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi, ullam!
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Impedit libero maxime similique unde voluptatem.
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum?
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse eum expedita neque provident quas recusandae sapiente, veritatis voluptates! Animi, obcaecati.
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque cupiditate fugit, molestiae quasi quos reprehenderit vel voluptatum! Autem debitis dolorem ducimus esse ex exercitationem expedita ipsa iusto modi optio pariatur perferendis, placeat quasi quia quibusdam temporibus tenetur unde ut voluptatem.
+- Lorem ipsum dolor sit amet, consectetur adipisicing elit. At debitis est eum libero repellendus ullam!
+
+----------------------------------
+Lorem ipsum dolor.
+----------------------------------
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam, omnis.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae cumque, dicta dolores dolorum eius et expedita explicabo hic id omnis porro quas repellendus ullam veniam, veritatis vero. Culpa.
+`,
+    summary_for_night_log: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti ducimus est, et incidunt labore nam nisi officia quos reiciendis repudiandae sit sunt tempora voluptas, voluptatem?\n'
   },
   blocks: [
     {

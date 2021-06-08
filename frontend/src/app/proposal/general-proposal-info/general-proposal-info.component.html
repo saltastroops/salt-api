@@ -42,7 +42,7 @@
     <div>Abstract</div>
   </div>
   <div class="row">
-    <div>{{ general_proposal_info.abstract }}</div>
+    <div [innerHTML]="general_proposal_info.abstract | nl2br"></div>
   </div>
   <div class="headers row">
     <div>Status</div>

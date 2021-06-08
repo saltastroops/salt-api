@@ -1,0 +1,15 @@
+.proposal-details-row {
+  display: grid;
+  grid-template-columns: 1fr 30% repeat(2, 1fr) 30%;
+  align-items: center;
+}
+
+.formatted {
+  white-space: pre-wrap;
+}
+
+.proprietary-period {
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  align-items: center;
+}

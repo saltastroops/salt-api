@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, Pipe, PipeTransform } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -15,6 +15,8 @@ import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/g
 import { BlockSummariesComponent } from './proposal/block-summaries/block-summaries.component';
 import { BlockViewComponent } from './proposal/block-view/block-view.component';
 import { BlockSelectionComponent } from './proposal/block-view/block-selection/block-selection.component';
+import { ProposalDetailsComponent } from './proposal/proposal-details/proposal-details.component';
+import { nl2brPipe } from './nl2br.pipe';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
 import { BlockService } from './service/block.service';
 import { MockBlockService } from './mock/service/mock-block.service';
@@ -29,6 +31,8 @@ import { MockBlockService } from './mock/service/mock-block.service';
     BlockSummariesComponent,
     BlockViewComponent,
     BlockSelectionComponent,
+    ProposalDetailsComponent,
+    nl2brPipe,
     LoadingSpinnerComponent,
   ],
   imports: [

@@ -1,5 +1,11 @@
 import { Observable } from 'rxjs';
 
+export interface SaltAstronomer {
+  given_name: string;
+  family_name: string;
+  email: string;
+}
+
 export interface LoadingStreams<T> {
   content$: Observable<T>;
   error$: Observable<string | null>;
@@ -33,6 +39,13 @@ export interface GeneralProposalInfo {
   semesters: Semester[]; // TODO semester need to be handled correctly
   current_semester: Semester;
   status: ProposalStatus;
+  type: string;
+  target_of_opportunity: boolean;
+  total_requested_time: number;
+  proprietary_period: number;
+  responsible_salt_astronomer: SaltAstronomer;
+  summary_for_salt_astronomer: string;
+  summary_for_night_log: string;
 }
 
 export interface BlockSummary {

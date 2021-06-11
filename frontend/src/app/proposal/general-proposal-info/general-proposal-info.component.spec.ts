@@ -1,23 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GeneralProposalInfoComponent } from './general-proposal-info.component';
+import { GeneralProposalInfo, Semester } from '../../types';
+import {proposal} from "../../mock/proposal-data";
+import {render} from "@testing-library/angular";
 
 describe('GeneralComponent', () => {
   let component: GeneralProposalInfoComponent;
-  let fixture: ComponentFixture<GeneralProposalInfoComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [GeneralProposalInfoComponent],
-    }).compileComponents();
-  });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(GeneralProposalInfoComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
+  it('should create', async () => {
+    await render(GeneralProposalInfoComponent, {
+      componentProperties: {
+        general_proposal_info: proposal.general_info,
+        current_semester: { year: 2020, semester: 1 }
+      }
+    });
     expect(component).toBeTruthy();
   });
 });

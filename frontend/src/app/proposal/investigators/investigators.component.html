@@ -1,7 +1,7 @@
 <h2 class="title is-4">Investigators</h2>
 
 <div class="table alternate-background">
-  <div class="investigator-row headers">
+  <div class="investigator-row headers row">
     <div>PC</div>
     <div>PI</div>
     <div>Name</div>
@@ -14,17 +14,17 @@
     <div class="investigator-row row">
       <div *ngIf="i.is_pc">
         <img
-          alt="Is a PI"
-          class="icon is-small"
+          class="icon"
           src="/assets/icons/noun_tick_2836262.svg"
+          alt="is proposal contact."
         />
       </div>
       <div *ngIf="!i.is_pc"></div>
       <div *ngIf="i.is_pi">
         <img
-          alt="Is a PC"
-          class="icon is-small"
+          class="icon"
           src="/assets/icons/noun_tick_2836262.svg"
+          alt="is principal investigator."
         />
       </div>
       <div *ngIf="!i.is_pi"></div>

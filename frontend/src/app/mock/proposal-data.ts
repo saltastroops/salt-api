@@ -1,4 +1,4 @@
-import {Partner, Proposal} from '../types';
+import { Partner, Proposal } from '../types';
 
 export const proposal: Proposal = {
   investigators: [
@@ -94,7 +94,7 @@ export const proposal: Proposal = {
     responsible_salt_astronomer: {
       given_name: 'John',
       family_name: 'Doe',
-      email: 'johndoe.@host.com'
+      email: 'johndoe.@host.com',
     },
     summary_for_salt_astronomer: `
 ----------------------------------
@@ -131,7 +131,8 @@ Lorem ipsum dolor.
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam, omnis.
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae cumque, dicta dolores dolorum eius et expedita explicabo hic id omnis porro quas repellendus ullam veniam, veritatis vero. Culpa.
 `,
-    summary_for_night_log: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti ducimus est, et incidunt labore nam nisi officia quos reiciendis repudiandae sit sunt tempora voluptas, voluptatem?\n'
+    summary_for_night_log:
+      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti ducimus est, et incidunt labore nam nisi officia quos reiciendis repudiandae sit sunt tempora voluptas, voluptatem?\n',
   },
   blocks: [
     {
@@ -304,6 +305,51 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
 
       maximum_lunar_phase: 14.6,
       instruments: [{ name: 'RSS', config_mode: 'Spectroscopy' }],
+    },
+  ],
+  executed_observations: [
+    {
+      observation_id: 6677,
+      block_identifier: {
+        id: 12341,
+        name: 'Block name 1',
+      },
+      observation_time: 100,
+      priority: 1,
+      maximum_lunar_phase: 14.5,
+      targets: ['Target name 1', 'target name 2'],
+      observation_date: new Date(2019, 11, 30),
+      accepted: true,
+      rejection_reason: null,
+    },
+    {
+      observation_id: 7814,
+      block_identifier: {
+        id: 12342,
+        name: 'Block name 2',
+      },
+      observation_time: 100,
+      priority: 1,
+      maximum_lunar_phase: 14.5,
+      targets: ['Target name 3'],
+      observation_date: new Date(2019, 11, 30),
+      accepted: false,
+      rejection_reason:
+        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolores laborum veritatis.',
+    },
+    {
+      observation_id: 8134,
+      block_identifier: {
+        id: 12343,
+        name: 'Block name 3',
+      },
+      observation_time: 100,
+      priority: 1,
+      maximum_lunar_phase: 14.5,
+      targets: ['Target name 5'],
+      observation_date: new Date(2019, 11, 30),
+      accepted: true,
+      rejection_reason: null,
     },
   ],
 };

@@ -23,22 +23,18 @@
       <div>{{ b.priority }}</div>
       <div>{{ b.done_visits }}/{{ b.requested_block_visits }}</div>
       <div *ngIf="b.observable_tonight" class="is-green">
-        <div>
-          <img
-            class="icon is-small"
-            src="/assets/icons/noun_tick_2836262-green.svg"
-            alt="Is observable tonight"
-          />
-        </div>
+        <img
+          class="icon"
+          src="/assets/icons/noun_tick_2836262-green.svg"
+          alt="block is visible tonight"
+        />
       </div>
       <div *ngIf="!b.observable_tonight">
-        <div>
-          <img
-            class="icon is-small"
-            src="/assets/icons/noun_Cross_2120375.svg"
-            alt="Is not observable tonight"
-          />
-        </div>
+        <img
+          class="icon"
+          src="/assets/icons/noun_Cross_2120375.svg"
+          alt="block is not visible tonight"
+        />
       </div>
       <div>{{ b.remaining_nights }}</div>
       <div>{{ b.maximum_seeing }}</div>
@@ -48,17 +44,29 @@
           <img
             class="icon"
             src="/assets/icons/noun_Cloud_moon_2462941.svg"
-            alt=""
+            alt="any weather conditions"
           />
         </div>
         <div *ngIf="b.transparency === 'Clear'">
-          <img class="icon" src="/assets/icons/noun_Night_2325384.svg" alt="" />
+          <img
+            class="icon"
+            src="/assets/icons/noun_Night_2325384.svg"
+            alt="clear sky"
+          />
         </div>
         <div *ngIf="b.transparency === 'Thin cloud'">
-          <img class="icon" src="/assets/icons/noun_Cloud_1188472.svg" alt="" />
+          <img
+            class="icon"
+            src="/assets/icons/noun_Cloud_1188472.svg"
+            alt="thin clouds"
+          />
         </div>
         <div *ngIf="b.transparency === 'Thick cloud'">
-          <img class="icon" src="/assets/icons/noun_Cloud_2891552.svg" alt="" />
+          <img
+            class="icon"
+            src="/assets/icons/noun_Cloud_2891552.svg"
+            alt="thick clouds"
+          />
         </div>
       </div>
       <div>{{ b.maximum_lunar_phase }}</div>

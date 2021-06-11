@@ -78,6 +78,7 @@ export interface Proposal {
   investigators: Investigator[];
   general_info: GeneralProposalInfo;
   blocks: BlockSummary[];
+  executed_observations: ExecutedObservation[];
 }
 
 export interface BlockIdentifier {
@@ -90,4 +91,16 @@ export interface BlockIdentifier {
 export interface Block {
   id: number;
   name: string;
+}
+
+export interface ExecutedObservation {
+  observation_id: number;
+  block_identifier: BlockIdentifier;
+  observation_time: number;
+  priority: number;
+  maximum_lunar_phase: number;
+  targets: string[];
+  observation_date: Date;
+  accepted: boolean;
+  rejection_reason: string | null;
 }

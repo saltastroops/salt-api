@@ -15,6 +15,7 @@ import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/g
 import { BlockSummariesComponent } from './proposal/block-summaries/block-summaries.component';
 import { BlockViewComponent } from './proposal/block-view/block-view.component';
 import { BlockSelectionComponent } from './proposal/block-view/block-selection/block-selection.component';
+import { SummaryOfExecutedObservationsComponent } from './proposal/summary-of-executed-observations/summary-of-executed-observations.component';
 import { ProposalDetailsComponent } from './proposal/proposal-details/proposal-details.component';
 import { nl2brPipe } from './nl2br.pipe';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
@@ -34,6 +35,7 @@ import { MockBlockService } from './mock/service/mock-block.service';
     ProposalDetailsComponent,
     nl2brPipe,
     LoadingSpinnerComponent,
+    SummaryOfExecutedObservationsComponent,
   ],
   imports: [
     BrowserModule,
@@ -41,7 +43,7 @@ import { MockBlockService } from './mock/service/mock-block.service';
     BrowserAnimationsModule,
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule,
+    ReactiveFormsModule
   ],
   providers: [
     { provide: ProposalService, useClass: RealProposalService },

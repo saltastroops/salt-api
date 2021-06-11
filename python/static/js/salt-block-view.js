@@ -36,7 +36,7 @@ class SaltBlockView extends HTMLElement {
    * Initialise the component and fetch the initial block.
    */
   connectedCallback() {
-    this.proposalCode = this.getAttribute("proposal-code");
+    this.proposal_code = this.getAttribute("proposal-code");
     this.blockCodes = this.getAttribute("block-codes").split(/\s*,\s*/);
     this.blockContent = null;
     this.loading = false;

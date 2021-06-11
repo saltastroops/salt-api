@@ -18,13 +18,7 @@
 .block-row > div {
   font-size: 0.9rem;
 }
-.icon-red {
-  color: red;
-}
 
-.icon-green {
-  color: green;
-}
 .transparency {
   display: grid;
   grid-template-columns: 70% 30%;
@@ -46,8 +40,4 @@
   > :last-child {
     padding-bottom: 0;
   }
-}
-
-img.icon {
-  display: block;
 }

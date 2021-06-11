@@ -6,7 +6,7 @@
   <div class="block">
     <wm-general-proposal-info
       [general_proposal_info]="p.general_info"
-      [currentSemester]="p.general_info.current_semester"
+      [current_semester]="p.general_info.current_semester"
     ></wm-general-proposal-info>
   </div>
   <div class="block">
@@ -14,6 +14,11 @@
       [blocks]="p.blocks"
       [proposalCode]="p.general_info.code"
     ></wm-block-summaries>
+  </div>
+  <div class="block">
+    <wm-summary-of-executed-observations
+      [executed_observations]="p.executed_observations"
+    ></wm-summary-of-executed-observations>
   </div>
   <div class="block">
     <wm-details [general_proposal_info]="p.general_info"></wm-details>

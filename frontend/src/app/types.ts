@@ -74,11 +74,31 @@ interface ProposalStatus {
   message: string;
 }
 
+export interface TimeAllocation {
+  partner: Partner;
+  priority_0: number;
+  priority_1: number;
+  priority_2: number;
+  priority_3: number;
+  priority_4: number;
+  tac_comment: string | null;
+}
+
 export interface Proposal {
   investigators: Investigator[];
   general_info: GeneralProposalInfo;
   blocks: BlockSummary[];
   executed_observations: ExecutedObservation[];
+  time_allocations: TimeAllocation[];
+  charged_time: ChargedTime;
+}
+
+export interface ChargedTime {
+  priority_0: number;
+  priority_1: number;
+  priority_2: number;
+  priority_3: number;
+  priority_4: number;
 }
 
 export interface BlockIdentifier {

@@ -10,6 +10,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { ProposalService } from './service/proposal.service';
 import { RealProposalService } from './service/real/real-proposal.service';
+import { TimeAllocationTableComponent } from './proposal/time-allocation-table/time-allocation-table.component';
+import { ChargedTimeTableComponent } from './proposal/charged-time-table/charged-time-table.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GeneralProposalInfoComponent } from './proposal/general-proposal-info/general-proposal-info.component';
 import { BlockSummariesComponent } from './proposal/block-summaries/block-summaries.component';
@@ -21,6 +23,7 @@ import { nl2brPipe } from './nl2br.pipe';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
 import { BlockService } from './service/block.service';
 import { MockBlockService } from './mock/service/mock-block.service';
+import {TooltipModule} from 'ng2-tooltip-directive';
 
 @NgModule({
   declarations: [
@@ -36,6 +39,8 @@ import { MockBlockService } from './mock/service/mock-block.service';
     nl2brPipe,
     LoadingSpinnerComponent,
     SummaryOfExecutedObservationsComponent,
+    TimeAllocationTableComponent,
+    ChargedTimeTableComponent,
   ],
   imports: [
     BrowserModule,
@@ -43,7 +48,8 @@ import { MockBlockService } from './mock/service/mock-block.service';
     BrowserAnimationsModule,
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TooltipModule
   ],
   providers: [
     { provide: ProposalService, useClass: RealProposalService },

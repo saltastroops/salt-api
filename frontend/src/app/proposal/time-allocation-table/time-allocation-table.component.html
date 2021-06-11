@@ -1,0 +1,32 @@
+<h2 class="title is-4">Time Allocation (seconds)</h2>
+
+<div class="table alternate-background ">
+  <div class="allocation-row headers">
+    <div>Partner</div>
+    <div>Priority 0</div>
+    <div>Priority 1</div>
+    <div>Priority 2</div>
+    <div>Priority 3</div>
+    <div>Priority 4</div>
+    <div>TAC comment</div>
+  </div>
+  <div *ngFor="let a of time_allocations">
+    <div class="allocation-row row">
+      <div>{{ a.partner.name }}</div>
+      <div>{{ a.priority_0 }}</div>
+      <div>{{ a.priority_1 }}</div>
+      <div>{{ a.priority_2 }}</div>
+      <div>{{ a.priority_3 }}</div>
+      <div>{{ a.priority_4 }}</div>
+      <div *ngIf="!!a.tac_comment">
+        <span
+          class="has-text-link"
+          tooltip="{{a.tac_comment}}"
+        > Show comment</span>
+      </div>
+      <div *ngIf="!a.tac_comment">
+        <span>No comment</span>
+      </div>
+    </div>
+  </div>
+</div>

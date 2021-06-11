@@ -1,0 +1,6 @@
+.allocation-row {
+  display: grid;
+  grid-template-columns: 20% repeat(5, 1fr) 10%;
+  align-items: center;
+}
+

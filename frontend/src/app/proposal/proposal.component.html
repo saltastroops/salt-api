@@ -21,6 +21,14 @@
     ></wm-summary-of-executed-observations>
   </div>
   <div class="block">
+    <wm-time-allocation-table [time_allocations]="p.time_allocations"></wm-time-allocation-table>
+  </div>
+  <div class="block">
+<!--    TODO Please note that time allocations are semester dependent this needs to be fixed to selected semester. -->
+    <wm-charged-time-table [charged_time]="p.charged_time" [time_allocation]="p.time_allocations[0]"></wm-charged-time-table>
+   </div>
+<!--  TODO: Allocation is semester dependent will fix it -->
+  <div class="block">
     <wm-details [general_proposal_info]="p.general_info"></wm-details>
   </div>
   <div class="block">

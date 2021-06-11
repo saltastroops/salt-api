@@ -352,4 +352,52 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
       rejection_reason: null,
     },
   ],
+  time_allocations: [
+    {
+      partner: {name: 'outh Africa', code: 'RSA', institute: '', department: ''},
+      priority_0 : 2700,
+      priority_1 : 66700,
+      priority_2 : 7100,
+      priority_3: 6700,
+      priority_4 : 112700,
+      tac_comment: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
+        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.'
+
+    },
+    {
+      partner: {name: 'University of Wisconsin-Madison', code: 'UW', institute: '', department: ''},
+      priority_0 : 2700,
+      priority_1 : 0,
+      priority_2 : 0,
+      priority_3: 0,
+      priority_4 : 112700,
+      tac_comment: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
+        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.'
+    },
+    {
+      partner: {name: 'UK SALT Consortium', code: 'UK', institute: '', department: ''},
+      priority_0 : 0,
+      priority_1 : 66700,
+      priority_2 : 700,
+      priority_3: 0,
+      priority_4 : 22700,
+      tac_comment: null
+    },
+    {
+      partner: {name: 'Poland', code: 'POL', institute: '', department: ''},
+      priority_0 : 2700,
+      priority_1 : 0,
+      priority_2 : 700,
+      priority_3: 3362,
+      priority_4 : 12700,
+      tac_comment: null
+    },
+  ],
+  charged_time : {
+    priority_0: 659,
+    priority_1: 0,
+    priority_2: 0,
+    priority_3: 34999,
+    priority_4: 27966
+  }
 };

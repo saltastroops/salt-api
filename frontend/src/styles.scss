@@ -4,7 +4,7 @@
 
 $light-strip: #eeeeee;
 $dark-strip: #dddddd;
-$secondary-header: #666;
+$secondary-header: #666666;
 $primary-header: #209cee;
 
 body {
@@ -44,4 +44,13 @@ body {
 
 .is-blurred {
   filter: blur(2px);
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
 }

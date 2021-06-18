@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BlockService } from '../block.service';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Block, Proposal } from '../../types';
+import { HttpClient } from '@angular/common/http';
+import { Block } from '../../types';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { catchError } from 'rxjs/operators';
@@ -22,7 +22,7 @@ export class RealBlockService implements BlockService {
   getBlock(id: number): Observable<Block> {
     const uri = environment.apiUrl + '/block/' + id;
     return this.http.get<Block>(uri).pipe(
-      catchError((error: HttpErrorResponse) => {
+      catchError(() => {
         return throwError('The request has failed.');
       })
     );

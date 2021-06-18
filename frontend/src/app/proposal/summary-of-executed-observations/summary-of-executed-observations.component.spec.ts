@@ -53,7 +53,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it("should toggle an observation when the observation's checkbox is clicked", async () => {
+  it('should toggle an observation when the observation\'s checkbox is clicked', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
         executed_observations,

@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { ProposalComponent } from './proposal.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute } from '@angular/router';
+import {render} from '@testing-library/angular';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 
 describe('ProposalComponent', () => {
-  let component: ProposalComponent;
-  let fixture: ComponentFixture<ProposalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,13 +21,13 @@ describe('ProposalComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ProposalComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
 
-  it('should create', () => {
+  it('should create', async () => {
+    const component = await render(ProposalComponent, {
+      imports: [
+        HttpClientTestingModule
+      ]
+    });
     expect(component).toBeTruthy();
   });
 });

@@ -1,5 +1,6 @@
+import re
 from datetime import date
-from typing import List, Optional
+from typing import Any, Callable, Dict, Generator, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -375,3 +376,51 @@ class Phase2Proposal(BaseProposal):
     block_visits: List[BlockVisit]
     observed_time: List[ObservedTime]
     time_allocations: List[TimeAllocation]
+
+
+# -------------------------
+
+
+class Message(BaseModel):
+    message: str = Field(..., title="Message", description="Message")
+
+    class Config:
+        schema_extra = {"example": {"message": "This is a message."}}
+
+
+class SemesterString(str):
+    """
+    A string denoting a semester, such as "2021-2" or "2022-1".
+
+    The string must consist of a four-digit year (between 2000 and 2099) followed by a
+    dash and "1" or "2".
+    """
+
+    # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
+    semester_regex = r"20\d{2}-[12]"
+
+    @classmethod
+    def __get_validators__(cls) -> Generator[Callable[[str], str], None, None]:
+        yield cls.validate
+
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[Any, Any]) -> None:
+        field_schema.update(
+            pattern=SemesterString.semester_regex, examples=["2021-2", "2022-1"]
+        )
+
+    @classmethod
+    def validate(cls, v: str) -> str:
+        if not isinstance(v, str):
+            raise TypeError("string required")
+        m = re.match(SemesterString.semester_regex, v)
+        if not m:
+            raise ValueError("incorrect semester format")
+        return v
+
+
+class ProposalListItem(BaseModel):
+    proposal_code: str = Field(..., title="Proposal code", description="Proposal code")
+
+    class Config:
+        schema_extra = {"example": {"proposal_code": "2021-1-SCI-074"}}

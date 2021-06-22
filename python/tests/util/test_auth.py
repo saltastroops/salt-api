@@ -13,8 +13,8 @@ from starlette.requests import Request
 
 from app.models.general import UserInDB
 from app.service import user as user_service
-from app.util import auth
-from app.util.auth import OAuth2TokenOrCookiePasswordBearer
+from app.util import authentication
+from app.util.authentication import OAuth2TokenOrCookiePasswordBearer
 
 
 class RequestMock(BaseModel):
@@ -97,19 +97,19 @@ def test_verify_password() -> None:
     """verify_password verifies a password against a password hash."""
     password = "secret"
     incorrect_password = "secrat"
-    hashed_password = auth.get_password_hash(password)
+    hashed_password = authentication.get_password_hash(password)
 
     # correct password
-    assert auth.verify_password(password, hashed_password)
+    assert authentication.verify_password(password, hashed_password)
 
     # incorrect password
-    assert not auth.verify_password(incorrect_password, hashed_password)
+    assert not authentication.verify_password(incorrect_password, hashed_password)
 
 
 def test_get_password_hash() -> None:
     """test_get_password_hash does not return the original password."""
     password = "secret"
-    assert auth.get_password_hash(password) != password
+    assert authentication.get_password_hash(password) != password
 
 
 @pytest.mark.parametrize(
@@ -137,12 +137,15 @@ async def test_authenticate_user_with_incorrect_credentials(
             email="john@example,com",
             family_name="Doe",
             given_name="Doe",
-            hashed_password=auth.get_password_hash(username),
+            hashed_password=authentication.get_password_hash(username),
             username=username,
         )
 
     monkeypatch.setattr(user_service, "get_user", mock_get_user)
-    assert await auth.authenticate_user(username, password, cast(Pool, {})) is None
+    assert (
+        await authentication.authenticate_user(username, password, cast(Pool, {}))
+        is None
+    )
 
 
 @pytest.mark.parametrize(
@@ -160,12 +163,15 @@ async def test_authenticate_user_with_correct_credentials(
             email="john@example,com",
             family_name="Doe",
             given_name="Doe",
-            hashed_password=auth.get_password_hash(username),
+            hashed_password=authentication.get_password_hash(username),
             username=username,
         )
 
     monkeypatch.setattr(user_service, "get_user", mock_get_user)
-    assert await auth.authenticate_user(username, password, cast(Pool, {})) is not None
+    assert (
+        await authentication.authenticate_user(username, password, cast(Pool, {}))
+        is not None
+    )
 
 
 @pytest.mark.parametrize("payload", [{"a": "b"}, {"c": 123, "d": True}])
@@ -173,7 +179,7 @@ def test_create_jwt_token(payload: Dict[str, Any]) -> None:
     """create_jwt_token creates a JWT token."""
     # create_jwt_token can be called with an expiry time
     secret_key = "top_secret"
-    token = auth.create_jwt_token(
+    token = authentication.create_jwt_token(
         secret_key=secret_key, payload=payload, expires_delta=timedelta(hours=48)
     )
     decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
@@ -187,7 +193,7 @@ def test_create_jwt_token(payload: Dict[str, Any]) -> None:
     assert abs(int(decoded_token["exp"]) - 48 * 3600 - time()) < 5
 
     # ... or it can be called without an expiry time
-    token = auth.create_jwt_token(secret_key=secret_key, payload=payload)
+    token = authentication.create_jwt_token(secret_key=secret_key, payload=payload)
     decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
 
     # the token expires in a week (= 7 * 24 * 60 * 60 seconds)

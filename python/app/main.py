@@ -1,25 +1,17 @@
-import base64
-
 from fastapi import FastAPI
-from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
-from starlette.responses import (
-    HTMLResponse,
-    JSONResponse,
-    RedirectResponse,
-    Response,
-)
+from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
 
 from app.dependencies import get_db, get_settings
-from app.routers.api import router as api_router
-from app.routers.views import router as views_router
+from app.routers.auth import router as auth_router
+from app.routers.proposals import router as proposals_router
 
 app = FastAPI()
 
-app.include_router(api_router)
-app.include_router(views_router)
+app.include_router(auth_router)
+app.include_router(proposals_router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -45,7 +37,7 @@ def _is_api_request(request: Request) -> bool:
 
 
 @app.exception_handler(HTTPException)
-def http_exception_handler(request: Request, exc: HTTPException) -> Response:
+def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """
     Error handler for HTTP exceptions.
 
@@ -54,13 +46,4 @@ def http_exception_handler(request: Request, exc: HTTPException) -> Response:
     For web page requests a redirection response (for Authorization exceptions, i.e.
     for exceptions with a status code of 401)
     """
-    if _is_api_request(request):
-        return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
-
-    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
-        redirect = base64.b64encode(str(request.url).encode("utf-8")).decode("utf-8")
-        return RedirectResponse(
-            url=f"/login?redirect={redirect}", status_code=status.HTTP_303_SEE_OTHER
-        )
-
-    return HTMLResponse("<h1>Error</h1>", status_code=exc.status_code)
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)

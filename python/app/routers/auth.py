@@ -1,27 +1,17 @@
-import json
-from typing import Dict
-
 from aiomysql import Pool
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from starlette import status
 
-from app.dependencies import (
-    get_current_user,
-    get_db,
-    get_semester,
-    get_settings,
-)
-from app.models.general import AccessToken, Semester, User
-from app.service import block
+from app.dependencies import get_db, get_settings
+from app.models.general import AccessToken
 from app.settings import Settings
-from app.util import auth
+from app.util import authentication
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post(
-    "/api/token",
+    "/token",
     summary="Request an authentication token",
     response_description="An authentication token",
     response_model=AccessToken,
@@ -45,7 +35,9 @@ async def login_for_access_token(
 
     Note that the token expires 24 hours after being issued.
     """
-    user = await auth.authenticate_user(form_data.username, form_data.password, db)
+    user = await authentication.authenticate_user(
+        form_data.username, form_data.password, db
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,18 +45,4 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return auth.create_access_token(settings.secret_key, user)
-
-
-@router.get("/api/proposals/{proposal_code}/blocks/{block_code}")
-async def get_block_html(
-    proposal_code: str,
-    block_code: str,
-    semester: Semester = Depends(get_semester),
-    settings: Settings = Depends(get_settings),
-    user: User = Depends(get_current_user),
-) -> Dict[str, str]:
-    block_content = await block.get_block(
-        proposal_code, block_code, semester, settings.proposals_dir
-    )
-    return {"html": f"<pre>{json.dumps(block_content, indent=2)}</pre>"}
+    return authentication.create_access_token(settings.secret_key, user)

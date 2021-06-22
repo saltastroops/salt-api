@@ -10,7 +10,10 @@ from starlette import status
 from app.models.general import Semester, User
 from app.service import user as user_service
 from app.settings import Settings
-from app.util.auth import ALGORITHM, OAuth2TokenOrCookiePasswordBearer
+from app.util.authentication import (
+    ALGORITHM,
+    OAuth2TokenOrCookiePasswordBearer,
+)
 from app.util.database import DatabasePool
 
 
@@ -23,7 +26,7 @@ def get_settings() -> Settings:
 get_db = DatabasePool()
 
 
-oauth2_scheme = OAuth2TokenOrCookiePasswordBearer("api/token")
+oauth2_scheme = OAuth2TokenOrCookiePasswordBearer("auth/token")
 
 
 async def get_current_user(

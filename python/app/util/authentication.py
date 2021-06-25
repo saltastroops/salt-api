@@ -20,9 +20,13 @@ from starlette.status import HTTP_401_UNAUTHORIZED
 from app.models.general import AccessToken, User
 from app.service import user as user_service
 
+from passlib.context import CryptContext
+
 ALGORITHM = "HS256"
 
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
+
+pwd_context = CryptContext(schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto")
 
 
 class OAuth2TokenOrCookiePasswordBearer(OAuth2PasswordBearer):
@@ -64,12 +68,16 @@ class OAuth2TokenOrCookiePasswordBearer(OAuth2PasswordBearer):
 
 def verify_password(password: str, hashed_password: str) -> bool:
     """Check a plain text password against a hash."""
-    return get_password_hash(password) == hashed_password
+    return pwd_context.verify(password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Hash a plain text password."""
     return hashlib.md5(password.encode("utf-8")).hexdigest()  # nosec
+
+def get_new_password_hash(password: str) -> str:
+    """Hash a plain text password."""
+    return pwd_context.hash(password)
 
 
 async def authenticate_user(username: str, password: str, db: Pool) -> Optional[User]:
@@ -84,6 +92,9 @@ async def authenticate_user(username: str, password: str, db: Pool) -> Optional[
         return None
     if not verify_password(password, user.hashed_password):
         return None
+
+    await user_service.update_password_hash(username, password, db)
+
     return User(**user.dict())  # turn UserInDB into User
 
 

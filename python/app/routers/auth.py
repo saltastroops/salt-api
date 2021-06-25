@@ -6,6 +6,7 @@ from app.dependencies import get_db, get_settings
 from app.models.general import AccessToken
 from app.settings import Settings
 from app.util import authentication
+from app.service import user as user_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -30,7 +31,6 @@ async def login_for_access_token(
     ```shell
     curl -H "Authorization: Bearer abcd1234" /api/some/secret/resource
     ```
-
     The token is effectively a password; so keep it safe and don't share it.
 
     Note that the token expires 24 hours after being issued.

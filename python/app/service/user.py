@@ -2,6 +2,7 @@
 from aiomysql import Pool
 
 from app.models.general import User, UserInDB
+from app.util import authentication
 
 
 async def get_user(username: str, db: Pool) -> UserInDB:
@@ -30,6 +31,21 @@ WHERE Username=%(username)s
                 hashed_password=r[3],
                 username=r[4],
             )
+
+async def update_password_hash(username: str, password: str, db: Pool) -> None:
+
+    new_password_hash = authentication.get_new_password_hash(password)
+    sql = """
+INSERT INTO Password(Username, Password)
+VALUES (%(username)s,%(password)s)
+ON DUPLICATE KEY UPDATE Username=%(username)s
+"""
+    async with db.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(sql, {"username": username, "password": new_password_hash})
+
+            await conn.commit()
+
 
 
 async def is_administrator(user: User, db: Pool) -> bool:

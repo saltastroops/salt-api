@@ -33,11 +33,14 @@
   }
 
   > :nth-child(n + 2) {
-    border-top: 0.01em solid white;
+    border-top: 0.01em solid $table-border-color;
     padding-top: 0.5em;
   }
 
   > :last-child {
     padding-bottom: 0;
   }
+}
+.header-icon {
+  margin-top: -0.47em;
 }

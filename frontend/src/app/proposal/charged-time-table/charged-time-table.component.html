@@ -1,29 +1,41 @@
-<h2 class="title is-4">Charged Time to date (seconds)</h2>
 
-<div class="table">
-  <div class="charged-row headers">
-    <div>Priority 0</div>
-    <div>Priority 1</div>
-    <div>Priority 2</div>
-    <div>Priority 3</div>
-    <div>Priority 4</div>
-    <div>P1-P3 Total/Allocated</div>
-    <div>P1-P3 Completion (%)</div>
+<div class="table alternate-background">
+  <div class="secondary-header row">
+    <div class="has-text-centered">Charged Time to date (seconds)</div>
   </div>
-    <div class="charged-row row">
-      <div>{{ charged_time.priority_0 }}</div>
-      <div>{{ charged_time.priority_1 }}</div>
-      <div>{{ charged_time.priority_2 }}</div>
-      <div>{{ charged_time.priority_3 }}</div>
-      <div>{{ charged_time.priority_4 }}</div>
-      <div data-testid = "absolute-completion">
-        {{ charged_time_p0_to_p3}}/{{allocated_p0_to_p3_time}}
-      </div>
-      <div data-testid = "relative-completion">
-        {{(
-        (charged_time_p0_to_p3)/
-        allocated_p0_to_p3_time)*100 | number : '1.0-1'
-        }}%
-      </div>
+  <div class="charged-row row">
+    <div>Priority 0</div>
+    <div>{{ charged_time.priority_0 }}</div>
+  </div>
+  <div class="charged-row row">
+    <div>Priority 1</div>
+    <div>{{ charged_time.priority_1 }}</div>
+  </div>
+  <div class="charged-row row">
+    <div>Priority 2</div>
+    <div>{{ charged_time.priority_2 }}</div>
+  </div>
+  <div class="charged-row row">
+    <div>Priority 3</div>
+    <div>{{ charged_time.priority_3 }}</div>
+  </div>
+  <div class="charged-row row">
+    <div>Priority 4</div>
+    <div>{{ charged_time.priority_4 }}</div>
+  </div>
+  <div class="charged-row row">
+    <div>P1-P3 Total/Allocated</div>
+    <div data-testid = "absolute-completion">
+      {{ charged_time_p0_to_p3}}/{{allocated_p0_to_p3_time}}
     </div>
+  </div>
+  <div class="charged-row row">
+    <div>P1-P3 Completion (%)</div>
+    <div data-testid = "relative-completion">
+      {{(
+      (charged_time_p0_to_p3)/
+      allocated_p0_to_p3_time)*100 | number : '1.0-1'
+      }}%
+    </div>
+  </div>
 </div>

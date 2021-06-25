@@ -1,5 +1,6 @@
-import { NgModule, Pipe, PipeTransform } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { DateFnsModule } from 'ngx-date-fns';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -23,7 +24,9 @@ import { nl2brPipe } from './nl2br.pipe';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
 import { BlockService } from './service/block.service';
 import { MockBlockService } from './mock/service/mock-block.service';
-import {TooltipModule} from 'ng2-tooltip-directive';
+import { TooltipModule } from 'ng2-tooltip-directive';
+import { ProposalCommentsComponent } from './proposal/proposal-comments/proposal-comments.component';
+import { ProposalProgressTableComponent } from './proposal/proposal-progress-table/proposal-progress-table.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +44,8 @@ import {TooltipModule} from 'ng2-tooltip-directive';
     SummaryOfExecutedObservationsComponent,
     TimeAllocationTableComponent,
     ChargedTimeTableComponent,
+    ProposalCommentsComponent,
+    ProposalProgressTableComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,7 +54,8 @@ import {TooltipModule} from 'ng2-tooltip-directive';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    TooltipModule
+    TooltipModule,
+    DateFnsModule.forRoot(),
   ],
   providers: [
     { provide: ProposalService, useClass: RealProposalService },

@@ -1,5 +1,12 @@
 .investigator-row {
   display: grid;
-  grid-template-columns: 3% 3% repeat(4, 1fr) 10%;
+  grid-template-columns: 4% 4% repeat(4, 1fr) 15%;
   align-items: center;
+}
+
+.accept-reject {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  column-gap: 0.5em;
 }

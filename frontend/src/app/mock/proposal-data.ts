@@ -3,7 +3,8 @@ import { Partner, Proposal } from '../types';
 export const proposal: Proposal = {
   investigators: [
     {
-      name: 'John Doe Leader',
+      id: 1,
+      name: 'Drake Blane',
       partner: {
         name: 'South Africa',
         code: 'RSA',
@@ -11,10 +12,10 @@ export const proposal: Proposal = {
         department: '',
       },
       is_pc: true,
-      is_pi: true,
-      accept: true,
+      is_pi: true
     },
     {
+      id: 2,
       name: 'John Doe Second',
       partner: {
         name: 'South Africa',
@@ -23,10 +24,10 @@ export const proposal: Proposal = {
         department: 'Department of Astronomy',
       },
       is_pc: false,
-      is_pi: false,
-      accept: false,
+      is_pi: false
     },
     {
+      id: 3,
       name: 'Mary Jane',
       partner: {
         name: 'Other',
@@ -35,10 +36,10 @@ export const proposal: Proposal = {
         department: '',
       },
       is_pc: false,
-      is_pi: false,
-      accept: false,
+      is_pi: false
     },
     {
+      id: 4,
       name: 'Thomas DaFirst',
       partner: {
         name: 'UK SALT Consortium',
@@ -47,10 +48,10 @@ export const proposal: Proposal = {
         department: 'Physics and Astronomy',
       },
       is_pc: false,
-      is_pi: false,
-      accept: false,
+      is_pi: false
     },
     {
+      id: 5,
       name: 'John Doe Member',
       partner: {
         name: 'South Africa',
@@ -59,8 +60,19 @@ export const proposal: Proposal = {
         department: 'Department of Astronomy',
       },
       is_pc: false,
-      is_pi: false,
-      accept: false,
+      is_pi: false
+    },
+    {
+      id: 6,
+      name: 'Jane Foster',
+      partner: {
+        name: 'South Africa',
+        code: 'RSA',
+        institute: 'SAAO',
+        department: '',
+      },
+      is_pc: false,
+      is_pi: false
     },
   ],
   general_info: {
@@ -354,7 +366,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
   ],
   time_allocations: [
     {
-      partner: {name: 'outh Africa', code: 'RSA', institute: '', department: ''},
+      partner: {name: 'South Africa', code: 'RSA', institute: '', department: ''},
       priority_0 : 2700,
       priority_1 : 66700,
       priority_2 : 7100,
@@ -399,5 +411,65 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
     priority_2: 0,
     priority_3: 34999,
     priority_4: 27966
-  }
+  },
+  comments: [
+    {
+      author: 'Robbert Smith',
+      comment: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus debitis doloremque harum in libero neque quidem saepe sunt? Adipisci aliquid asperiores eaque enim, est harum id iure minus obcaecati officia similique, suscipit tempore voluptates voluptatum?
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias consectetur est ex harum illum inventore libero quibusdam quisquam sapiente soluta?
+`,
+      madeAt: new Date(2020, 0, 15, 9, 4, 6, 6)
+    },
+    {
+      author: 'John Doe',
+      comment: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus debitis doloremque harum in libero neque quidem saepe sunt? Adipisci aliquid asperiores eaque enim, est harum id iure minus obcaecati officia similique, suscipit tempore voluptates voluptatum?
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias consectetur est ex harum illum inventore libero quibusdam quisquam sapiente soluta?
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet consequatur deleniti facilis quaerat reprehenderit. Accusantium asperiores beatae debitis delectus distinctio eaque expedita itaque laborum maiores maxime mollitia perspiciatis quibusdam, voluptas. Asperiores atque expedita perspiciatis quisquam. Cupiditate ex, impedit incidunt laborum laudantium omnis porro, quas quia quo quos repellat sapiente sunt?
+  `,
+      madeAt: new Date(2020, 1, 6, 10, 34, 36, 6)
+    },
+    {
+      author: 'Robbert Smith',
+      comment: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus debitis doloremque harum in libero neque quidem saepe sunt? Adipisci aliquid asperiores eaque enim, est harum id iure minus obcaecati officia similique, suscipit tempore voluptates voluptatum?
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias consectetur est ex harum illum inventore libero quibusdam quisquam sapiente soluta?
+`,
+      madeAt: new Date(2020, 2, 15, 9, 4, 6, 6)
+    },
+    {
+      author: 'Jacob May',
+      comment: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus debitis doloremque harum in libero neque quidem saepe sunt? Adipisci aliquid asperiores eaque enim, est harum id iure minus obcaecati officia similique, suscipit tempore voluptates voluptatum?`,
+      madeAt: new Date(2020, 4, 23, 13, 34, 6, 6)
+    }
+  ],
+  progress: null,
+  proposalAcceptance: [
+    {
+      investigatorId: 1,
+      accepted: true
+    },
+    {
+      investigatorId: 2,
+      accepted: true
+    },
+    {
+      investigatorId: 3,
+      accepted: false
+    },
+    {
+      investigatorId: 4,
+      accepted: null
+    },
+    {
+      investigatorId: 5,
+      accepted: false
+    },
+    {
+      investigatorId: 6,
+      accepted: true
+    },
+  ]
 };

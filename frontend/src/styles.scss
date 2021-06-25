@@ -1,14 +1,33 @@
 /* You can add global styles to this file, and also import other style files */
 
+$primary: #27e8a7;
+$danger: #df4576;
+$warning: #ccaa00;
+$link: #0e0eee;
+$white: #f2f6fa;
+$size-6: 0.8rem;
+
 @import "./node_modules/bulma/bulma.sass";
 
-$light-strip: #eeeeee;
-$dark-strip: #dddddd;
-$secondary-header: #666666;
-$primary-header: #209cee;
+$light-strip: #efefef;
+$dark-strip: #dedede;
+$secondary-header: #7390aa;
+$tertiary-header: #91b4d5;
+$primary-header: #506477;
+$proposal-color: #5aeafa;
+$block-color: #fa5a5a;
+$blocks-color: #4f45a8;
+$pool-color: #fa5afa;
+$investigators-color: #e7fa5a;
+$proposal-comment-color: #5afa87;
+$proposal-summary-color: #f5b642;
+$error-background-color: #ffb0b0;
+$success-background-color: #b0ffb0;
+$table-border-color: #aaaaaa;
 
 body {
   font-family: "Helvetica Neue", sans-serif;
+  font-size: 0.8rem;
 }
 
 .row > div {
@@ -24,6 +43,9 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   grid-row-gap: 0.07em;
+  border: 1px solid $table-border-color;
+  background-color: $table-border-color; /* This serves as a border color, as the
+                                             background is visible in the row gaps. */
 }
 .table > div {
   background: $light-strip;
@@ -33,7 +55,15 @@ body {
   color: white;
   text-align: left;
   font-weight: bolder;
-  font-size: 1.1rem;
+  font-size: 0.85rem;
+  height: 100%;
+}
+.secondary-header > div {
+  background: $secondary-header;
+  color: white;
+  text-align: left;
+  font-weight: bolder;
+  font-size: 0.85rem;
   height: 100%;
 }
 
@@ -51,6 +81,58 @@ body {
   height: 100%;
 }
 body {
-  margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.2;
+}
+html {
+  background-image: url("assets/background.png");
+}
+
+.proposal-header {
+  background-color: $proposal-color;
+}
+.block-header {
+  background-color: $block-color;
+}
+.blocks-header {
+  background-color: $blocks-color;
+}
+.pool-header {
+  background-color: $pool-color;
+}
+
+.summary-header {
+  background-color: $proposal-comment-color;
+}
+
+.comment-header {
+  background-color: $proposal-summary-color;
+}
+.investigators-header {
+  background-color: $investigators-color;
+}
+.heading-line {
+  height: 1rem;
+  margin-top: -1.5rem;
+  opacity: 0.8;
+  filter: blur(2px);
+  border-radius: 0.5rem;
+  width: 105%;
+  margin-left: -1.5%;
+  margin-right: 3.5%;
+}
+.header-icon {
+  margin-top: -0.39em;
+  height: 4rem;
+  width: 4rem;
+  position: absolute;
+}
+.title {
+  margin-top: 2.5rem;
+}
+.is-green-background {
+  background: $success-background-color;
+}
+.is-red-background {
+  background-color: $error-background-color;
 }

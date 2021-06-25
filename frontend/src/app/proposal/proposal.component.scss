@@ -1,0 +1,5 @@
+.charged-and-progress {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 4em;
+}

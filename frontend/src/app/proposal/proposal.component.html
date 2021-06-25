@@ -1,36 +1,60 @@
 <div *ngIf="proposal | async as p">
-  <h1 class="title is-3">This is proposal {{ proposalCode }}.</h1>
-  <div class="block">
-    <wm-investigators [investigators]="p.investigators"></wm-investigators>
-  </div>
+  <h1 class="title is-1">{{ proposalCode }}</h1>
+  <hr class="heading-line proposal-header">
+
   <div class="block">
     <wm-general-proposal-info
-      [general_proposal_info]="p.general_info"
-      [current_semester]="p.general_info.current_semester"
+      [generalProposalInfo]="p.general_info"
+      [currentSemester]="p.general_info.current_semester"
     ></wm-general-proposal-info>
   </div>
+
+  <div class="block">
+    <wm-details [general_proposal_info]="p.general_info"></wm-details>
+  </div>
+
+  <div class="block">
+    <wm-time-allocation-table [time_allocations]="p.time_allocations"></wm-time-allocation-table>
+  </div>
+
+  <div class="block charged-and-progress">
+    <!--    TODO Please note that time allocations are semester dependent this needs to be fixed to selected semester. -->
+    <wm-charged-time-table [charged_time]="p.charged_time" [time_allocation]="p.time_allocations[0]"></wm-charged-time-table>
+
+    <wm-proposal-progress-table
+      [proposalProgress]="p.progress"
+    ></wm-proposal-progress-table>
+  </div>
+
+  <div class="block">
+    <wm-investigators
+      [investigators]="p.investigators"
+      [proposalAcceptance]="p.proposalAcceptance"
+    ></wm-investigators>
+  </div>
+
+  <div class="block">
+    <wm-proposal-comments [proposalComments]="p.comments"></wm-proposal-comments>
+  </div>
+
   <div class="block">
     <wm-block-summaries
       [blocks]="p.blocks"
       [proposalCode]="p.general_info.code"
     ></wm-block-summaries>
   </div>
+
   <div class="block">
     <wm-summary-of-executed-observations
       [executed_observations]="p.executed_observations"
     ></wm-summary-of-executed-observations>
   </div>
-  <div class="block">
-    <wm-time-allocation-table [time_allocations]="p.time_allocations"></wm-time-allocation-table>
-  </div>
-  <div class="block">
-<!--    TODO Please note that time allocations are semester dependent this needs to be fixed to selected semester. -->
-    <wm-charged-time-table [charged_time]="p.charged_time" [time_allocation]="p.time_allocations[0]"></wm-charged-time-table>
-   </div>
+
+
+
+
 <!--  TODO: Allocation is semester dependent will fix it -->
-  <div class="block">
-    <wm-details [general_proposal_info]="p.general_info"></wm-details>
-  </div>
+
   <div class="block">
     <wm-block-view [blocks]="p.blocks"></wm-block-view>
   </div>

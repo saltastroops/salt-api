@@ -1,4 +1,5 @@
-<h2 class="title is-4">Investigators</h2>
+<h2 class="title is-2">Investigators</h2>
+<hr class="heading-line investigators-header">
 
 <div class="table alternate-background">
   <div class="investigator-row headers row">
@@ -8,10 +9,14 @@
     <div>Partner</div>
     <div>Institution</div>
     <div>Department</div>
-    <div>Accept</div>
+    <div></div>
   </div>
   <div *ngFor="let i of investigators">
-    <div class="investigator-row row">
+    <div
+      class="investigator-row row"
+      [class.is-green-background]="accepted(i) === true"
+      [class.is-red-background]="accepted(i) === false"
+    >
       <div *ngIf="i.is_pc">
         <img
           class="icon"
@@ -33,11 +38,17 @@
       <div>{{ i.partner.institute }}</div>
       <div>{{ i.partner.department }}</div>
       <!-- TODO: Replace with correct code -->
-      <ng-template [ngIf]="i.is_pi">
+      <ng-template [ngIf]="accepted(i) === true">
         <div><button class="button is-danger is-small">Reject</button></div>
       </ng-template>
-      <ng-template [ngIf]="!i.is_pi">
-        <div><button class="button is-primary is-small">Accept</button></div>
+      <ng-template [ngIf]="accepted(i) === false">
+        <div><button class="button is-success is-small">Accept</button></div>
+      </ng-template>
+      <ng-template [ngIf]="accepted(i) === null">
+        <div class="accept-reject">
+          <div><button class="button is-success is-small">Accept</button></div>
+          <div><button class="button is-danger is-small">Reject</button></div>
+        </div>
       </ng-template>
     </div>
   </div>

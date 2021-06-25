@@ -1,6 +1,6 @@
 .proposal-details-row {
   display: grid;
-  grid-template-columns: 1fr 30% repeat(2, 1fr) 30%;
+  grid-template-columns: repeat(2, 1fr);
   align-items: center;
 }
 
@@ -12,4 +12,14 @@
   display: grid;
   grid-template-columns: 6em 1fr;
   align-items: center;
+}
+.main-details {
+  column-gap: 4em;
+  align-items: initial;
+}
+.download-and-astronomer {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  row-gap: 2.7em;
+  background-color: transparent;
 }

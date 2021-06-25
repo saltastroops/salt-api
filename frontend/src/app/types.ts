@@ -20,11 +20,11 @@ export interface Partner {
 }
 
 export interface Investigator {
+  id: number;
   name: string;
   partner: Partner;
   is_pc: boolean;
   is_pi: boolean;
-  accept: boolean;
 }
 
 export interface GeneralProposalInfo {
@@ -91,6 +91,9 @@ export interface Proposal {
   executed_observations: ExecutedObservation[];
   time_allocations: TimeAllocation[];
   charged_time: ChargedTime;
+  comments: ProposalComment[];
+  proposalAcceptance: ProposalAcceptance[];
+  progress: string | null;
 }
 
 export interface ChargedTime {
@@ -123,4 +126,16 @@ export interface ExecutedObservation {
   observation_date: Date;
   accepted: boolean;
   rejection_reason: string | null;
+}
+
+export interface ProposalComment {
+  author: string;
+  madeAt: Date;
+  comment: string;
+}
+
+
+export interface ProposalAcceptance {
+  accepted: boolean | null;
+  investigatorId: number;
 }

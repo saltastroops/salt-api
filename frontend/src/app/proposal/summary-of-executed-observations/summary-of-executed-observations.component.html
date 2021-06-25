@@ -1,7 +1,7 @@
-<h2 class="title is-4">Summary of executed observations</h2>
-
-<div class="table is-table alternate-background">
-  <div class="summary-row headers is-info row">
+<h2 class="title is-2">Summary of executed observations</h2>
+<hr class="heading-line summary-header">
+<div class="table alternate-background">
+  <div class="summary-row headers row">
     <div>Block</div>
     <div>Observation time</div>
     <div>Priority</div>
@@ -60,12 +60,8 @@
         />
       </div>
       <div>{{ e.rejection_reason }}</div>
-      <ng-template [ngIf]="e.accepted">
-        <div><button class="button is-danger is-small">Reject</button></div>
-      </ng-template>
-      <ng-template [ngIf]="!e.accepted">
-        <div><button class="button is-primary is-small">Accept</button></div>
-      </ng-template>
+        <div *ngIf="e.accepted"><button class="button is-danger is-small">Reject</button></div>
+        <div *ngIf="!e.accepted"><button class="button is-success is-small">Accept</button></div>
       <div>
         <label class="checkbox">
           <input

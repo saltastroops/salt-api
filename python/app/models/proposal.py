@@ -1,6 +1,7 @@
 import re
 from datetime import date
-from typing import Any, Callable, Dict, Generator, List, Optional
+from enum import Enum
+from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -388,6 +389,39 @@ class Message(BaseModel):
         schema_extra = {"example": {"message": "This is a message."}}
 
 
+class ProposalCode(str):
+    """
+    A string denoting a semester, such as "2021-2-SCI-017".
+
+    The string must consist of a four-digit year (between 2000 and 2099) followed by a
+    dash, the semester ("1" or "2"), another dash, a combination of uppercase letters
+    and underscores (which must start and end with a letter), another dash and three
+    digits.
+    """
+
+    # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
+    proposal_code_regex = r"20\d{2}-[12]-[A-Z][A-Z_]*[A-Z]-\d{3}"
+
+    @classmethod
+    def __get_validators__(cls) -> Generator[Callable[[str], str], None, None]:
+        yield cls.validate
+
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[Any, Any]) -> None:
+        field_schema.update(
+            pattern=ProposalCode.proposal_code_regex, examples=["2021-2-SCI-017"]
+        )
+
+    @classmethod
+    def validate(cls, v: str) -> str:
+        if not isinstance(v, str):
+            raise TypeError("string required")
+        m = re.match(SemesterString.semester_regex, v)
+        if not m:
+            raise ValueError("incorrect proposal code format")
+        return v
+
+
 class SemesterString(str):
     """
     A string denoting a semester, such as "2021-2" or "2022-1".
@@ -420,7 +454,68 @@ class SemesterString(str):
 
 
 class ProposalListItem(BaseModel):
+    """
+    Item in a list of proposals.
+    """
+
     proposal_code: str = Field(..., title="Proposal code", description="Proposal code")
 
     class Config:
         schema_extra = {"example": {"proposal_code": "2021-1-SCI-074"}}
+
+
+class SubmissionAcknowledgment(BaseModel):
+    """
+    Acknowledgment that a proposal submission has been received.
+    """
+
+    submission_id: int = Field(
+        ...,
+        title="Submission id",
+        description="Unique identifier for a proposal submission",
+    )
+
+    class Config:
+        schema_extra = {"example": {"submission_id": 41318}}
+
+
+class ProposalContentType(str, Enum):
+    JSON = ("application/json",)
+    PDF = ("application/pdf",)
+    ZIP = "application/zip"
+
+
+class ProposalStatus(str, Enum):
+    ACCEPTED = "Accepted"
+    ACTIVE = "Active"
+    COMPLETED = "Completed"
+    DELETED = "Deleted"
+    EXPIRED = "Expired"
+    IN_PREPARATION = "In preparation"
+    INACTIVE = "Inactive"
+    REJECTED = "Rejected"
+    SUPERSEDED = "Superseded"
+    UNDER_SCIENTIFIC_REVIEW = "Under scientific review"
+    UNDER_TECHNICAL_REVIEW = "Under technical review"
+
+
+class ProposalStatusContent(BaseModel):
+    """
+    Content including a proposal status.
+    """
+
+    status: ProposalStatus = Field(
+        ..., title="Proposal status", description="Proposal status"
+    )
+
+
+class ProposalContent(BaseModel):
+    """
+    Helper class.
+
+    mypy does not like if a Union is used as the value of FastAPI's response_model in a
+    path operation's decorator, so Union[Phase1Proposal, Phase2Proposal] cannot be used.
+    This class can used instead.
+    """
+
+    __root__: Union[Phase1Proposal, Phase2Proposal]

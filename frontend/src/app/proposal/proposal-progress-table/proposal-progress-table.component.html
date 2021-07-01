@@ -1,11 +1,15 @@
 <div class="table">
-  <div class="secondary-header row ">
+  <div class="secondary-header row">
     <div class="has-text-centered">Proposal progress</div>
   </div>
   <div class="row">
-    <div> <p *ngIf="proposalProgress">{{proposalProgress}}</p></div>
     <div>
-      <p *ngIf="!proposalProgress"> No progress report has been submitted yet.</p>
+      <p *ngIf="proposalProgress">{{ proposalProgress }}</p>
+    </div>
+    <div>
+      <p *ngIf="!proposalProgress">
+        No progress report has been submitted yet.
+      </p>
     </div>
     <div><button class="button">Edit</button></div>
     <div>

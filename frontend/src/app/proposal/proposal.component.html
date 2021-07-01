@@ -1,6 +1,6 @@
 <div *ngIf="proposal | async as p">
   <h1 class="title is-1">{{ proposalCode }}</h1>
-  <hr class="heading-line proposal-header">
+  <hr class="heading-line proposal-header" />
 
   <div class="block">
     <wm-general-proposal-info
@@ -14,12 +14,17 @@
   </div>
 
   <div class="block">
-    <wm-time-allocation-table [time_allocations]="p.time_allocations"></wm-time-allocation-table>
+    <wm-time-allocation-table
+      [time_allocations]="p.time_allocations"
+    ></wm-time-allocation-table>
   </div>
 
   <div class="block charged-and-progress">
     <!--    TODO Please note that time allocations are semester dependent this needs to be fixed to selected semester. -->
-    <wm-charged-time-table [charged_time]="p.charged_time" [time_allocation]="p.time_allocations[0]"></wm-charged-time-table>
+    <wm-charged-time-table
+      [charged_time]="p.charged_time"
+      [time_allocation]="p.time_allocations[0]"
+    ></wm-charged-time-table>
 
     <wm-proposal-progress-table
       [proposalProgress]="p.progress"
@@ -34,7 +39,9 @@
   </div>
 
   <div class="block">
-    <wm-proposal-comments [proposalComments]="p.comments"></wm-proposal-comments>
+    <wm-proposal-comments
+      [proposalComments]="p.comments"
+    ></wm-proposal-comments>
   </div>
 
   <div class="block">
@@ -50,10 +57,7 @@
     ></wm-summary-of-executed-observations>
   </div>
 
-
-
-
-<!--  TODO: Allocation is semester dependent will fix it -->
+  <!--  TODO: Allocation is semester dependent will fix it -->
 
   <div class="block">
     <wm-block-view [blocks]="p.blocks"></wm-block-view>

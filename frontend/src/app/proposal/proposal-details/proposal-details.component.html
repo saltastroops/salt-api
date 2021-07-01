@@ -14,14 +14,14 @@
     <div class="row proposal-details-row">
       <div>Target of Opportunity</div>
       <div *ngIf="general_proposal_info.target_of_opportunity">
-      <div>
-        <img
-          class="icon is-small"
-          src="/assets/icons/noun_tick_2836262-green.svg"
-          alt="Is target of opportunity"
-        />
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="Is target of opportunity"
+          />
+        </div>
       </div>
-    </div>
       <div *ngIf="!general_proposal_info.target_of_opportunity">
         <div>
           <img
@@ -39,11 +39,10 @@
     <div class="row proposal-details-row">
       <div>Proprietary period</div>
       <div class="proprietary-period">
-      <div>{{ general_proposal_info.proprietary_period }} months</div>
-      <div><button class="button is-small">change</button></div>
+        <div>{{ general_proposal_info.proprietary_period }} months</div>
+        <div><button class="button is-small">change</button></div>
+      </div>
     </div>
-    </div>
-
   </div>
   <div>
     <div class="table download-and-astronomer">
@@ -66,8 +65,13 @@
           <div>
             <a>
               <!--      TODO Send email.-->
-              {{ general_proposal_info.responsible_salt_astronomer.family_name }}
-              {{ " " + general_proposal_info.responsible_salt_astronomer.given_name }}
+              {{
+                general_proposal_info.responsible_salt_astronomer.family_name
+              }}
+              {{
+                " " +
+                  general_proposal_info.responsible_salt_astronomer.given_name
+              }}
             </a>
           </div>
           <div class="">
@@ -77,7 +81,6 @@
       </div>
     </div>
   </div>
-
 </div>
 <div class="table">
   <div class="secondary-header row">

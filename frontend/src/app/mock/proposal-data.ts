@@ -12,7 +12,7 @@ export const proposal: Proposal = {
         department: '',
       },
       is_pc: true,
-      is_pi: true
+      is_pi: true,
     },
     {
       id: 2,
@@ -24,7 +24,7 @@ export const proposal: Proposal = {
         department: 'Department of Astronomy',
       },
       is_pc: false,
-      is_pi: false
+      is_pi: false,
     },
     {
       id: 3,
@@ -36,7 +36,7 @@ export const proposal: Proposal = {
         department: '',
       },
       is_pc: false,
-      is_pi: false
+      is_pi: false,
     },
     {
       id: 4,
@@ -48,7 +48,7 @@ export const proposal: Proposal = {
         department: 'Physics and Astronomy',
       },
       is_pc: false,
-      is_pi: false
+      is_pi: false,
     },
     {
       id: 5,
@@ -60,7 +60,7 @@ export const proposal: Proposal = {
         department: 'Department of Astronomy',
       },
       is_pc: false,
-      is_pi: false
+      is_pi: false,
     },
     {
       id: 6,
@@ -72,7 +72,7 @@ export const proposal: Proposal = {
         department: '',
       },
       is_pc: false,
-      is_pi: false
+      is_pi: false,
     },
   ],
   general_info: {
@@ -366,51 +366,67 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
   ],
   time_allocations: [
     {
-      partner: {name: 'South Africa', code: 'RSA', institute: '', department: ''},
-      priority_0 : 2700,
-      priority_1 : 66700,
-      priority_2 : 7100,
+      partner: {
+        name: 'South Africa',
+        code: 'RSA',
+        institute: '',
+        department: '',
+      },
+      priority_0: 2700,
+      priority_1: 66700,
+      priority_2: 7100,
       priority_3: 6700,
-      priority_4 : 112700,
-      tac_comment: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
-        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.'
-
+      priority_4: 112700,
+      tac_comment:
+        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
+        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
     },
     {
-      partner: {name: 'University of Wisconsin-Madison', code: 'UW', institute: '', department: ''},
-      priority_0 : 2700,
-      priority_1 : 0,
-      priority_2 : 0,
+      partner: {
+        name: 'University of Wisconsin-Madison',
+        code: 'UW',
+        institute: '',
+        department: '',
+      },
+      priority_0: 2700,
+      priority_1: 0,
+      priority_2: 0,
       priority_3: 0,
-      priority_4 : 112700,
-      tac_comment: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
-        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.'
+      priority_4: 112700,
+      tac_comment:
+        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
+        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
     },
     {
-      partner: {name: 'UK SALT Consortium', code: 'UK', institute: '', department: ''},
-      priority_0 : 0,
-      priority_1 : 66700,
-      priority_2 : 700,
+      partner: {
+        name: 'UK SALT Consortium',
+        code: 'UK',
+        institute: '',
+        department: '',
+      },
+      priority_0: 0,
+      priority_1: 66700,
+      priority_2: 700,
       priority_3: 0,
-      priority_4 : 22700,
-      tac_comment: null
+      priority_4: 22700,
+      tac_comment: null,
     },
     {
-      partner: {name: 'Poland', code: 'POL', institute: '', department: ''},
-      priority_0 : 2700,
-      priority_1 : 0,
-      priority_2 : 700,
+      partner: { name: 'Poland', code: 'POL', institute: '', department: '' },
+      priority_0: 2700,
+      priority_1: 0,
+      priority_2: 700,
       priority_3: 3362,
-      priority_4 : 12700,
-      tac_comment: null
+      priority_4: 12700,
+      tac_comment: null,
     },
   ],
-  charged_time : {
+  charged_time: {
     priority_0: 659,
     priority_1: 0,
     priority_2: 0,
     priority_3: 34999,
-    priority_4: 27966
+    priority_4: 27966,
   },
   comments: [
     {
@@ -419,7 +435,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
 
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias consectetur est ex harum illum inventore libero quibusdam quisquam sapiente soluta?
 `,
-      madeAt: new Date(2020, 0, 15, 9, 4, 6, 6)
+      madeAt: new Date(2020, 0, 15, 9, 4, 6, 6),
     },
     {
       author: 'John Doe',
@@ -429,7 +445,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias consectetur est 
 
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet consequatur deleniti facilis quaerat reprehenderit. Accusantium asperiores beatae debitis delectus distinctio eaque expedita itaque laborum maiores maxime mollitia perspiciatis quibusdam, voluptas. Asperiores atque expedita perspiciatis quisquam. Cupiditate ex, impedit incidunt laborum laudantium omnis porro, quas quia quo quos repellat sapiente sunt?
   `,
-      madeAt: new Date(2020, 1, 6, 10, 34, 36, 6)
+      madeAt: new Date(2020, 1, 6, 10, 34, 36, 6),
     },
     {
       author: 'Robbert Smith',
@@ -437,39 +453,39 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet consequatur delen
 
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias consectetur est ex harum illum inventore libero quibusdam quisquam sapiente soluta?
 `,
-      madeAt: new Date(2020, 2, 15, 9, 4, 6, 6)
+      madeAt: new Date(2020, 2, 15, 9, 4, 6, 6),
     },
     {
       author: 'Jacob May',
       comment: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus debitis doloremque harum in libero neque quidem saepe sunt? Adipisci aliquid asperiores eaque enim, est harum id iure minus obcaecati officia similique, suscipit tempore voluptates voluptatum?`,
-      madeAt: new Date(2020, 4, 23, 13, 34, 6, 6)
-    }
+      madeAt: new Date(2020, 4, 23, 13, 34, 6, 6),
+    },
   ],
   progress: null,
   proposalAcceptance: [
     {
       investigatorId: 1,
-      accepted: true
+      accepted: true,
     },
     {
       investigatorId: 2,
-      accepted: true
+      accepted: true,
     },
     {
       investigatorId: 3,
-      accepted: false
+      accepted: false,
     },
     {
       investigatorId: 4,
-      accepted: null
+      accepted: null,
     },
     {
       investigatorId: 5,
-      accepted: false
+      accepted: false,
     },
     {
       investigatorId: 6,
-      accepted: true
+      accepted: true,
     },
-  ]
+  ],
 };

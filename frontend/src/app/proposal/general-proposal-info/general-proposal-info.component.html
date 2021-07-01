@@ -1,8 +1,6 @@
 <div class="table">
   <div class="headers row">
-    <div class="has-text-centered">
-      General
-    </div>
+    <div class="has-text-centered">General</div>
   </div>
   <div class="secondary-header row">
     <div class="has-text-centered">Title</div>
@@ -19,38 +17,38 @@
     <div>Current Submission</div>
   </div>
 
-<div class="proposal_info-row row">
-  <div>{{ generalProposalInfo.id }}</div>
-  <div>{{ generalProposalInfo.code }}</div>
-  <div>{{ generalProposalInfo.phase }}</div>
-  <div>
-    <div class="select">
-      <select [formControl]="semesterControl">
-        <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
-          {{ s.year }}-{{ s.semester }}
-        </option>
-      </select>
+  <div class="proposal_info-row row">
+    <div>{{ generalProposalInfo.id }}</div>
+    <div>{{ generalProposalInfo.code }}</div>
+    <div>{{ generalProposalInfo.phase }}</div>
+    <div>
+      <div class="select">
+        <select [formControl]="semesterControl">
+          <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
+            {{ s.year }}-{{ s.semester }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div>
+      {{ generalProposalInfo.first_submission.toISOString().split("T")[0] }}
+    </div>
+    <div>
+      {{ generalProposalInfo.current_submission.toISOString().split("T")[0] }}
+      (#{{ generalProposalInfo.submission_number }})
     </div>
   </div>
-  <div>
-    {{ generalProposalInfo.first_submission.toISOString().split("T")[0] }}
-  </div>
-  <div>
-    {{ generalProposalInfo.current_submission.toISOString().split("T")[0] }}
-    (#{{ generalProposalInfo.submission_number }})
-  </div>
-</div>
 
-<div class="secondary-header row has-text-centered">
-  <div class="has-text-centered">Abstract</div>
+  <div class="secondary-header row has-text-centered">
+    <div class="has-text-centered">Abstract</div>
+  </div>
+  <div class="row">
+    <div [innerHTML]="generalProposalInfo.abstract | nl2br"></div>
+  </div>
+  <div class="secondary-header row">
+    <div class="has-text-centered">Status</div>
+  </div>
+  <div class="row">
+    <div>{{ generalProposalInfo.status.message }}</div>
+  </div>
 </div>
-<div class="row">
-  <div [innerHTML]="generalProposalInfo.abstract | nl2br"></div>
-</div>
-<div class="secondary-header row">
-  <div class="has-text-centered">Status</div>
-</div>
-<div class="row">
-  <div>{{ generalProposalInfo.status.message }}</div>
-</div>
-

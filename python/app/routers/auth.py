@@ -4,9 +4,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.dependencies import get_db, get_settings
 from app.models.general import AccessToken
+from app.service import user as user_service
 from app.settings import Settings
 from app.util import authentication
-from app.service import user as user_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

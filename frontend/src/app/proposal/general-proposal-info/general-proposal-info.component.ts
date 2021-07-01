@@ -15,10 +15,10 @@ export class GeneralProposalInfoComponent implements OnInit {
 
   ngOnInit(): void {
     this.semesterControl.setValue(
-    // Select the current semester.
-    // It is not possible to just pass this.currentSemester, as (while it may share the
-    // year and semester with an item) it is not equal to any of the items in the
-    // semesters array.
+      // Select the current semester.
+      // It is not possible to just pass this.currentSemester, as (while it may share the
+      // year and semester with an item) it is not equal to any of the items in the
+      // semesters array.
       this.generalProposalInfo.semesters.find(
         (s) =>
           this.currentSemester.year === s.year &&

@@ -1,6 +1,6 @@
 import re
-from datetime import date
-from enum import Enum
+from datetime import date, datetime
+from enum import Enum, IntEnum
 from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 from pydantic import BaseModel, Field
@@ -519,3 +519,118 @@ class ProposalContent(BaseModel):
     """
 
     __root__: Union[Phase1Proposal, Phase2Proposal]
+
+
+class ObservationComment(BaseModel):
+    """
+    Comment related to an observation of a proposal.
+    """
+
+    author: str = Field(..., title="Author", description="Author of the comment")
+    comment: str = Field(..., title="Comment", description="Text of the comment")
+    madeAt: datetime = Field(
+        ...,
+        title="Time of creation",
+        description="Date amd time when the comment was made",
+    )
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "author": "Sipho Mangana",
+                "comment": "Please check the position angle.",
+                "madeAt": "2019-08-24T14:15:22Z",
+            }
+        }
+
+
+class ProgressReport(BaseModel):
+    """
+    Progress report for a proposal and semester. The semester is the semester for which
+    the progress is reported. For example, if the semester is 2021-1, the report covers
+    the observations up to and including the 2021-1 semester and it requests time for
+    the 2021-2 semester.
+    """
+
+    dummy: str
+
+
+class Priority(IntEnum):
+    P0 = 0
+    P1 = 1
+    P2 = 2
+    P3 = 3
+    P4 = 4
+
+
+class ObservedTarget(BaseModel):
+    id: int = Field(
+        ..., title="Target id", description="Unique identifier of the target"
+    )
+    name: str = Field(..., title="Target name", description="Target name")
+
+
+class ObservationStatus(str, Enum):
+    ACCEPTED = "Accepted"
+    REJECTED = "Rejected"
+
+
+class Observation(BaseModel):
+    id: int = Field(
+        ..., title="Observation id", description="Unique identifier of the observation"
+    )
+    observation_time: int = Field(
+        ...,
+        title="observation time",
+        description="Time charged for the observation, in seconds",
+    )
+    block_id: int = Field(
+        ..., title="Block id", description="Unique identifier of the observed block"
+    )
+    priority: Priority = Field(
+        ..., title="Priority", description="Priority of the observed block"
+    )
+    max_lunar_phase: float = Field(
+        ...,
+        title="Maximum lunar phase",
+        description="Maximum lunar phase which was allowed for the observation, as the percentage of lunar illumination",
+    )
+    targets: List[ObservedTarget] = Field(
+        ..., title="Observed targets", description="Observed targets"
+    )
+    observation_night: date = Field(
+        ...,
+        title="Observation night",
+        description="Start date of the night when the observation was made",
+    )
+    status: ObservationStatus = Field(
+        ...,
+        title="Observation status",
+        description="Status of the observation, i.e. whether it has been accepted or rejected",
+    )
+    rejection_reason: Optional[str] = Field(
+        None,
+        title="Rejection reason",
+        description="Reason why the observation has been rejected",
+    )
+
+
+class DataReleaseDate(BaseModel):
+    release_date: date = Field(
+        ...,
+        title="Data release date",
+        description="Date when the proposal data is scheduled to become public",
+    )
+
+
+class DataReleaseDateUpdate(BaseModel):
+    release_date: date = Field(
+        ...,
+        title="Data release date",
+        description="Requested date when the proposal data should become public",
+    )
+    motivation: date = Field(
+        ...,
+        title="Motivation",
+        description="Motivation why the request should be granted",
+    )

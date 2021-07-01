@@ -14,19 +14,20 @@ from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
+from passlib.context import CryptContext
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from app.models.general import AccessToken, User
 from app.service import user as user_service
 
-from passlib.context import CryptContext
-
 ALGORITHM = "HS256"
 
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 
-pwd_context = CryptContext(schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
+)
 
 
 class OAuth2TokenOrCookiePasswordBearer(OAuth2PasswordBearer):
@@ -74,6 +75,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     """Hash a plain text password."""
     return hashlib.md5(password.encode("utf-8")).hexdigest()  # nosec
+
 
 def get_new_password_hash(password: str) -> str:
     """Hash a plain text password."""

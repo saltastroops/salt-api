@@ -32,6 +32,7 @@ WHERE Username=%(username)s
                 username=r[4],
             )
 
+
 async def update_password_hash(username: str, password: str, db: Pool) -> None:
 
     new_password_hash = authentication.get_new_password_hash(password)
@@ -42,10 +43,11 @@ ON DUPLICATE KEY UPDATE Username=%(username)s
 """
     async with db.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute(sql, {"username": username, "password": new_password_hash})
+            await cur.execute(
+                sql, {"username": username, "password": new_password_hash}
+            )
 
             await conn.commit()
-
 
 
 async def is_administrator(user: User, db: Pool) -> bool:

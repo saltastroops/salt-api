@@ -1,5 +1,5 @@
 <h2 class="title is-2">Summary of executed observations</h2>
-<hr class="heading-line summary-header">
+<hr class="heading-line summary-header" />
 <div class="table alternate-background">
   <div class="summary-row headers row">
     <div>Block</div>
@@ -60,8 +60,12 @@
         />
       </div>
       <div>{{ e.rejection_reason }}</div>
-        <div *ngIf="e.accepted"><button class="button is-danger is-small">Reject</button></div>
-        <div *ngIf="!e.accepted"><button class="button is-success is-small">Accept</button></div>
+      <div *ngIf="e.accepted">
+        <button class="button is-danger is-small">Reject</button>
+      </div>
+      <div *ngIf="!e.accepted">
+        <button class="button is-success is-small">Accept</button>
+      </div>
       <div>
         <label class="checkbox">
           <input

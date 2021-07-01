@@ -1,5 +1,4 @@
-
-<div class="table alternate-background ">
+<div class="table alternate-background">
   <div class="secondary-header row">
     <div class="has-text-centered">Time Allocation (seconds)</div>
   </div>
@@ -21,10 +20,9 @@
       <div>{{ a.priority_3 }}</div>
       <div>{{ a.priority_4 }}</div>
       <div *ngIf="!!a.tac_comment">
-        <span
-          class="has-text-link"
-          tooltip="{{a.tac_comment}}"
-        > Show comment</span>
+        <span class="has-text-link" tooltip="{{ a.tac_comment }}">
+          Show comment
+        </span>
       </div>
       <div *ngIf="!a.tac_comment">
         <span>No comment</span>

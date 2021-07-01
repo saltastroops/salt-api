@@ -1,7 +1,7 @@
-version: '3.5'
+version: "3.5"
 services:
   web-manager-frontend:
-    container_name: web-manager-container  # Container name
+    container_name: web-manager-container # Container name
     build: . # Location of our Dockerfile
     ports:
       - 4200:80 # Port mapping

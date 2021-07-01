@@ -134,7 +134,6 @@ export interface ProposalComment {
   comment: string;
 }
 
-
 export interface ProposalAcceptance {
   accepted: boolean | null;
   investigatorId: number;

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import {Investigator, ProposalAcceptance} from '../../types';
+import { Investigator, ProposalAcceptance } from '../../types';
 
 @Component({
   selector: 'wm-investigators',
@@ -15,7 +15,9 @@ export class InvestigatorsComponent implements OnInit {
   ngOnInit(): void {}
 
   accepted(investigator: Investigator): boolean | null {
-    const inv =  this.proposalAcceptance.find(pa => investigator.id === pa.investigatorId);
+    const inv = this.proposalAcceptance.find(
+      (pa) => investigator.id === pa.investigatorId
+    );
     if (inv) {
       return inv.accepted;
     }

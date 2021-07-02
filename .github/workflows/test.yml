@@ -21,6 +21,8 @@ jobs:
       - name: Install packages
         working-directory: ./python
         env:
+          SDB_DSN: ""
+          PROPOSALS_DIR: "."
           SKIP_E2E: "true"
         run: |
           poetry install

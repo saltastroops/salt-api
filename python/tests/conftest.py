@@ -1,16 +1,8 @@
 import os
-
-import dotenv
-
-# Make sure that the test database etc. are used.
-# IMPORTANT: These lines must be executed before any server-related package is imported.
-
-os.environ["DOTENV_FILE"] = ".env.test"
-dotenv.load_dotenv(os.environ["DOTENV_FILE"])
-
 from typing import Generator, cast  # noqa: E402
 
 import aiomysql  # noqa: E402
+import dotenv
 import dsnparse  # noqa: E402
 import pytest  # noqa: E402
 from aiomysql import Pool  # noqa: E402
@@ -21,8 +13,15 @@ from app.dependencies import get_db, get_settings  # noqa: E402
 from app.main import app  # noqa: E402
 from app.settings import Settings  # noqa: E402
 
+# Make sure that the test database etc. are used.
+# IMPORTANT: These lines must be executed before any server-related package is imported.
+
+os.environ["DOTENV_FILE"] = ".env.test"
+dotenv.load_dotenv(os.environ["DOTENV_FILE"])
+
 
 def mock_get_settings() -> Settings:
+
     return Settings(secret_key="top-secret")
 
 

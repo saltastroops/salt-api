@@ -31,6 +31,7 @@ async def test_database_pool_can_be_connected_called_and_closed() -> None:
         await database_pool.close()
 
 
+@nodatabase
 def test_database_pool_connect_must_be_called_first() -> None:
     """
     For a DatabasePool instance the connect method must be called before the instance

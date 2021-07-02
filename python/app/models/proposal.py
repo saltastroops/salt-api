@@ -593,7 +593,8 @@ class Observation(BaseModel):
     max_lunar_phase: float = Field(
         ...,
         title="Maximum lunar phase",
-        description="Maximum lunar phase which was allowed for the observation, as the percentage of lunar illumination",
+        description="Maximum lunar phase which was allowed for the observation, "
+        "as the percentage of lunar illumination",
     )
     targets: List[ObservedTarget] = Field(
         ..., title="Observed targets", description="Observed targets"
@@ -606,7 +607,8 @@ class Observation(BaseModel):
     status: ObservationStatus = Field(
         ...,
         title="Observation status",
-        description="Status of the observation, i.e. whether it has been accepted or rejected",
+        description="Status of the observation, "
+        "i.e. whether it has been accepted or rejected",
     )
     rejection_reason: Optional[str] = Field(
         None,

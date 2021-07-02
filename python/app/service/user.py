@@ -41,6 +41,7 @@ INSERT INTO Password(Username, Password)
 VALUES (%(username)s,%(password)s)
 ON DUPLICATE KEY UPDATE Username=%(username)s
 """
+
     async with db.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(

@@ -127,7 +127,7 @@ def test_get_password_hash() -> None:
 async def test_authenticate_user_with_incorrect_credentials(
     username: str, password: str, monkeypatch: MonkeyPatch
 ) -> None:
-    "authenticate_user returns None for incorrect credentials."
+    """authenticate_user returns None for incorrect credentials."""
 
     async def mock_get_user(username: str, db: Pool) -> Optional[UserInDB]:
         """Returns a user whose password is equal to the username."""
@@ -141,7 +141,12 @@ async def test_authenticate_user_with_incorrect_credentials(
             username=username,
         )
 
+    async def mock_update_password_hash(username: str, password: str, db: Pool) -> None:
+
+        return None
+
     monkeypatch.setattr(user_service, "get_user", mock_get_user)
+    monkeypatch.setattr(user_service, "update_password_hash", mock_update_password_hash)
     assert (
         await authentication.authenticate_user(username, password, cast(Pool, {}))
         is None
@@ -167,7 +172,12 @@ async def test_authenticate_user_with_correct_credentials(
             username=username,
         )
 
+    async def mock_update_password_hash(username: str, password: str, db: Pool) -> None:
+
+        return None
+
     monkeypatch.setattr(user_service, "get_user", mock_get_user)
+    monkeypatch.setattr(user_service, "update_password_hash", mock_update_password_hash)
     assert (
         await authentication.authenticate_user(username, password, cast(Pool, {}))
         is not None

@@ -5,6 +5,7 @@ The code in this module has in wide oparts been taken from the FastAPI tutorial,
 https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/.
 """
 import hashlib
+import secrets
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, cast
 from urllib.parse import unquote
@@ -69,7 +70,8 @@ class OAuth2TokenOrCookiePasswordBearer(OAuth2PasswordBearer):
 
 def verify_password(password: str, hashed_password: str) -> bool:
     """Check a plain text password against a hash."""
-    return pwd_context.verify(password, hashed_password)
+    password_hash = get_password_hash(password)
+    return secrets.compare_digest(password_hash, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
@@ -79,7 +81,10 @@ def get_password_hash(password: str) -> str:
 
 def get_new_password_hash(password: str) -> str:
     """Hash a plain text password."""
-    return pwd_context.hash(password)
+
+    # Note that the type hint for the return value of the hash method is Any,
+    # but the method is guaranteed to return a str.
+    return cast(str, pwd_context.hash(password))
 
 
 async def authenticate_user(username: str, password: str, db: Pool) -> Optional[User]:

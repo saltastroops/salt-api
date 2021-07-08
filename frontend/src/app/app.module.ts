@@ -27,7 +27,15 @@ import { MockBlockService } from './mock/service/mock-block.service';
 import { TooltipModule } from 'ng2-tooltip-directive';
 import { ProposalCommentsComponent } from './proposal/proposal-comments/proposal-comments.component';
 import { ProposalProgressTableComponent } from './proposal/proposal-progress-table/proposal-progress-table.component';
+import { ObservingConditionsComponent } from './proposal/block/observing-conditions/observing-conditions.component';
+import { IterationsComponent } from './proposal/block/iterations/iterations.component';
+import { BlockComponent } from './proposal/block/block.component';
+import { TotalObservationTimeComponent } from './proposal/block/total-obs-time/total-observation-time.component';
+import { ObservingWindowsComponent } from './proposal/block/observing-windows/observing-windows.component';
+import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
+import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
 
+// @ts-ignore
 @NgModule({
   declarations: [
     AppComponent,
@@ -46,6 +54,13 @@ import { ProposalProgressTableComponent } from './proposal/proposal-progress-tab
     ChargedTimeTableComponent,
     ProposalCommentsComponent,
     ProposalProgressTableComponent,
+    ObservingConditionsComponent,
+    IterationsComponent,
+    BlockComponent,
+    TotalObservationTimeComponent,
+    ObservingWindowsComponent,
+    ProbabilityTableComponent,
+    PriorityCommentComponent,
   ],
   imports: [
     BrowserModule,

@@ -251,7 +251,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
       maximum_lunar_phase: 14.6,
       instruments: [
         { name: 'RSS', config_mode: 'Spectroscopy' },
-        { name: 'SCAM', config_mode: 'imaging' },
+        { name: 'SCAM', config_mode: 'Imaging' },
       ],
     },
     {
@@ -300,7 +300,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
       instruments: [
         { name: 'RSS', config_mode: 'Spectroscopy' },
         { name: 'HRS', config_mode: 'LR' },
-        { name: 'SCAM', config_mode: 'imaging' },
+        { name: 'SCAM', config_mode: 'Imaging' },
       ],
     },
     {

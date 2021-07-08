@@ -1,0 +1,103 @@
+<div class="observing-windows-container">
+  <div class="table">
+    <div class="row headers">
+      <div>Observing Windows</div>
+    </div>
+    <div class="row">
+      <div>
+        <p *ngIf="blocksObservableTonight.length === 0">
+          This block is <b>NOT</b> observable tonight.
+        </p>
+        <p *ngIf="blocksObservableTonight.length === 1">
+          This block can be observed tonight from
+          {{ blocksObservableTonight[0].start | dfnsFormat: "H:mm:ss" }} to
+          {{ blocksObservableTonight[0].end | dfnsFormat: "H:mm:ss" }}.
+        </p>
+        <p *ngIf="blocksObservableTonight.length === 2">
+          This block can be observed tonight from
+          {{ blocksObservableTonight[0].start | dfnsFormat: "H:mm:ss" }} to
+          {{ blocksObservableTonight[0].end | dfnsFormat: "H:mm:ss" }} and from
+          {{ blocksObservableTonight[1].start | dfnsFormat: "H:mm:ss" }} to
+          {{ blocksObservableTonight[1].end | dfnsFormat: "H:mm:ss" }}.
+        </p>
+        <p *ngIf="remainingNights > 1">
+          It will be observable for {{ remainingNights }} more nights this
+          semester.
+        </p>
+        <p></p>
+        <p *ngIf="remainingNights === 1">
+          It will be observable for 1 more night this semester.
+        </p>
+        <p></p>
+        <p *ngIf="remainingNights === 0">
+          It will not be observable again this semester.
+        </p>
+        <p>
+          <a
+            *ngIf="!showObservingWindow"
+            class="has-text-link"
+            (click)="toggleObservingWindows()"
+            >Show observing windows.</a
+          >
+          <a
+            *ngIf="showObservingWindow"
+            class="has-text-link"
+            (click)="toggleObservingWindows()"
+            >Hide observing windows.</a
+          >
+        </p>
+      </div>
+    </div>
+    <div *ngIf="showObservingWindow" class="alternate-background">
+      <div class="headers observing-windows row">
+        <div>Night starting on</div>
+        <div>Observing Window (Your Time)</div>
+        <div>Duration (seconds)</div>
+        <div>Type</div>
+      </div>
+      <div
+        *ngFor="let o of sortedObservingWindows()"
+        class="row observing-windows"
+      >
+        <div>{{ nightStart(o.start) | dfnsFormat: "d MMMM yyyy" }}</div>
+        <div>
+          {{ o.start | dfnsFormat: "HH:mm:ss" }} -
+          {{ o.end | dfnsFormat: "HH:mm:ss" }}
+        </div>
+        <div>{{ differenceInSeconds(o.end, o.start) }}</div>
+        <div>{{ o.type }}</div>
+      </div>
+      <div class="row">
+        <div>
+          <p>Strict: The Moon condition is met during the window.</p>
+          <p>
+            Extended: The Moon condition is brighter than requested during the
+            window.
+          </p>
+          <p>
+            Strict / Extended: The Moon condition is met in part of the window,
+            but a brighter than requested condition applies in the other part.
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <p>
+            <a
+              *ngIf="!showObservingWindow"
+              class="has-text-link"
+              (click)="toggleObservingWindows()"
+              >Show observing windows.</a
+            >
+            <a
+              *ngIf="showObservingWindow"
+              class="has-text-link"
+              (click)="toggleObservingWindows()"
+              >Hide observing windows.</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

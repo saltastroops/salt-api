@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProposalService } from '../service/proposal.service';
 import { Observable } from 'rxjs';
-import { Proposal } from '../types';
+import {Proposal} from '../types';
 import { MockProposalService } from '../mock/service/mock-proposal.service';
 
 @Component({
@@ -12,7 +12,7 @@ import { MockProposalService } from '../mock/service/mock-proposal.service';
   providers: [{ provide: ProposalService, useClass: MockProposalService }],
 })
 export class ProposalComponent implements OnInit {
-  proposalCode: string = '';
+  proposalCode = '';
   proposal!: Observable<Proposal>;
 
   constructor(

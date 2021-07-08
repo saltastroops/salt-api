@@ -20,7 +20,9 @@
   </ng-container>
   <ng-container *ngIf="displayedBlock">
     <div [class.is-blurred]="isLoading">
-      <h1>{{ displayedBlock.name }}</h1>
+      <div class="block">
+        <wm-block [block]="displayedBlock"></wm-block>
+      </div>
     </div>
   </ng-container>
 </div>

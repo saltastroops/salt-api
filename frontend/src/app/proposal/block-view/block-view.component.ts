@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Block, BlockIdentifier, LoadingStreams } from '../../types';
+import {Block, BlockIdentifier, LoadingStreams} from '../../types';
 import { merge, of, Subject, Subscription } from 'rxjs';
 import {
   catchError,
@@ -45,10 +45,7 @@ export class BlockViewComponent implements OnInit, OnDestroy {
     );
 
     const requestResult$ = trigger$.pipe(
-      tap((v) => {
-        console.log(v);
-      }),
-      switchMap(({ id }) => {
+         switchMap(({ id }) => {
         return this.blockService.getBlock(id).pipe(
           map((b) => ({ success: true, payload: b })),
           catchError((error) => of({ success: false, payload: error }))
@@ -90,13 +87,13 @@ export class BlockViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.contentSubscription.unsubscribe();
     this.errorSubscription.unsubscribe();
     this.isLoadingSubscription.unsubscribe();
   }
 
-  selectBlock(block: BlockIdentifier) {
+  selectBlock(block: BlockIdentifier): void {
     this.selectedBlock = block;
     this.selectedBlocks$.next(block);
   }

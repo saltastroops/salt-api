@@ -136,3 +136,9 @@ html {
 .is-red-background {
   background-color: $error-background-color;
 }
+
+.has-two-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 2em;
+}

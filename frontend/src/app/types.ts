@@ -27,6 +27,7 @@ export interface Investigator {
   is_pi: boolean;
 }
 
+
 export interface GeneralProposalInfo {
   id: number;
   code: string;
@@ -114,6 +115,19 @@ export interface BlockIdentifier {
 export interface Block {
   id: number;
   name: string;
+  observingConditions: ObservingConditions;
+  overheads: number;
+  observationTime: number;
+  priority: number;
+  comment: string;
+  observingWindows: ObservingWindow[];
+  observationProbabilities: ObservationProbabilities;
+  lastModified: Date;
+  wait: number;
+  visits: number;  // TODO you should consider adding a block visits
+  attempted: number;
+  done: number;
+  shutterOpenTime: number;
 }
 
 export interface ExecutedObservation {
@@ -137,4 +151,31 @@ export interface ProposalComment {
 export interface ProposalAcceptance {
   accepted: boolean | null;
   investigatorId: number;
+}
+
+export interface ObservingConditions {
+  transparency: string;
+  minimumLunarPhase: number;
+  maximumLunarPhase: number;
+  minimumLunarDistance: number;
+  minimumSeeing: number;
+  maximumSeeing: number;
+  observationTime: number;
+}
+
+export interface ObservationProbabilities {
+  moon: number;
+  competition: number;
+  observability: number;
+  seeing: number;
+  averageRanking: number;
+  total: number;
+}
+
+export type ObservingWindowType = 'Strict' | 'Extended' | 'Strict / Extended';
+
+export interface ObservingWindow {
+  start: Date;
+  end: Date;
+  type: ObservingWindowType;
 }

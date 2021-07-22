@@ -1,0 +1,24 @@
+
+<h2 class="title is-4">{{instrumentConfiguration.instrument}} {{instrumentConfiguration.configurationType}} - Configuration #{{runningNumber}}</h2>
+<hr class="heading-line {{headerLine}}">
+<div class="used-in-container">
+  <div><p><b>Guided method:</b> {{instrumentConfiguration.guideMethod || 'None'}}</p></div>
+  <div class="table">
+    <div class="row secondary-header"><div class="has-text-centered">Used in</div></div>
+    <div class="row headers used-in-row">
+      <div>Block</div>
+      <div>Observation</div>
+      <div>PA</div>
+      <div>Iterations</div>
+      <div>Dither</div>
+    </div>
+    <div class="row used-in-row">
+      <div>{{instrumentConfiguration.usedIn.block.name}}</div>
+      <div>{{instrumentConfiguration.usedIn.observation.name}}</div>
+      <div>{{instrumentConfiguration.usedIn.pa}}</div>
+      <div>{{instrumentConfiguration.usedIn.iterations}}</div>
+      <div>{{ditherPattern}}</div>
+    </div>
+  </div>
+</div>
+

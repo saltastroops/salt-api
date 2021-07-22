@@ -1,0 +1,29 @@
+<div class="table alternate-background">
+  <div class="secondary-header row">
+    <div class="has-text-centered">Detector</div>
+  </div>
+  <div class="row headers detector-section">
+    <div>Iterations</div>
+    <div>RoSpeed</div>
+    <div>Gain</div>
+    <div>Mode</div>
+    <div>Binning (spatial × spectral)</div>
+  </div>
+  <div class="row detector-section">
+    <div>{{detector.iterations}}</div>
+    <div>{{detector.readoutSpeed}}</div>
+    <div>{{detector.gain}}</div>
+    <div>{{detector.mode}}</div>
+    <div>{{detector.binning}}</div>
+    </div>
+  <div class="row headers exposure-section">
+    <div>Exp. type</div>
+    <div>Exp. time</div>
+    <div>Window height</div>
+  </div>
+  <div class="row exposure-section">
+    <div>{{detector.exposureType}}</div>
+    <div>{{detector.exposureTime}} sec</div>
+    <div>{{detector.windowHeight || 'No Window'}}}</div>
+  </div>
+</div>

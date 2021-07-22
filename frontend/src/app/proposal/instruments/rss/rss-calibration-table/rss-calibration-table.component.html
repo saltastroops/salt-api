@@ -1,0 +1,8 @@
+<div class="table">
+  <div class="row secondary-header"><div class="has-text-centered">Calibration</div></div>
+  <div class="headers row has-two-columns"><div>Lamp</div><div>Filter Setup</div></div>
+  <div *ngFor="let c of calibrationSetup" class="row has-two-columns">
+    <div>{{c.lamp}}</div><div>{{c.filterSetup || 'None'}}</div>
+  </div>
+
+</div>

@@ -27,7 +27,6 @@ export interface Investigator {
   is_pi: boolean;
 }
 
-
 export interface GeneralProposalInfo {
   id: number;
   code: string;
@@ -152,6 +151,8 @@ export interface ProposalAcceptance {
   accepted: boolean | null;
   investigatorId: number;
 }
+
+export type Instrument = 'RSS' | 'Salticam' | 'HRS' | 'BVIT';
 
 export interface ObservingConditions {
   transparency: string;

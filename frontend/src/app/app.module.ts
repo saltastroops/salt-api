@@ -27,6 +27,15 @@ import { MockBlockService } from './mock/service/mock-block.service';
 import { TooltipModule } from 'ng2-tooltip-directive';
 import { ProposalCommentsComponent } from './proposal/proposal-comments/proposal-comments.component';
 import { ProposalProgressTableComponent } from './proposal/proposal-progress-table/proposal-progress-table.component';
+import { SpectroscopyTableComponent } from './proposal/instruments/rss/spectroscopy-table/spectroscopy-table.component';
+import { SlitMaskTableComponent } from './proposal/instruments/rss/slit-mask/slit-mask-table.component';
+import { DetectorTableComponent } from './proposal/instruments/detector-table/detector-table.component';
+import { ArcBibleTableComponent } from './proposal/instruments/rss/arc-bible-table/arc-bible-table.component';
+import { UsedInTableComponent } from './proposal/instruments/used-in-table/used-in-table.component';
+import { RssConfigurationViewComponent } from './proposal/instruments/rss/rss-cofiguration-view/rss-configuration-view.component';
+import { RssGeneralTableComponent } from './proposal/instruments/rss/rss-general-table/rss-general-table.component';
+import { RssCalibrationTableComponent } from './proposal/instruments/rss/rss-calibration-table/rss-calibration-table.component';
+import { RssViewComponent } from './proposal/instruments/rss/rss-view/rss-view.component';
 import { ObservingConditionsComponent } from './proposal/block/observing-conditions/observing-conditions.component';
 import { IterationsComponent } from './proposal/block/iterations/iterations.component';
 import { BlockComponent } from './proposal/block/block.component';
@@ -35,7 +44,6 @@ import { ObservingWindowsComponent } from './proposal/block/observing-windows/ob
 import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
 import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
 
-// @ts-ignore
 @NgModule({
   declarations: [
     AppComponent,
@@ -54,6 +62,15 @@ import { PriorityCommentComponent } from './proposal/block/priority-comment/prio
     ChargedTimeTableComponent,
     ProposalCommentsComponent,
     ProposalProgressTableComponent,
+    SpectroscopyTableComponent,
+    SlitMaskTableComponent,
+    DetectorTableComponent,
+    ArcBibleTableComponent,
+    UsedInTableComponent,
+    RssConfigurationViewComponent,
+    RssGeneralTableComponent,
+    RssCalibrationTableComponent,
+    RssViewComponent,
     ObservingConditionsComponent,
     IterationsComponent,
     BlockComponent,

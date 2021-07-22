@@ -28,7 +28,7 @@ const MockBlockService = {
    * milliseconds.
    */
   getBlock(id: number): Observable<Block> {
-    if (id === 42 || id == 43) {
+    if (id === 42 || id === 43) {
       return of(block(id)).pipe(
         delay(id),
         switchMap(() => throwError(`Error for id ${id}.`))
@@ -44,7 +44,7 @@ function blockIdentifier(id: number): BlockIdentifier {
 }
 
 function block(id: number): Block {
-  return { id, name: `Loaded Block ${id}` };
+  return { id, name: `Loaded Block ${id}` } as Block;
 }
 
 describe('BlockViewComponent', () => {
@@ -102,7 +102,7 @@ describe('BlockViewComponent', () => {
     const component = await defaultComponent();
 
     // The first block is shown
-    let selectElements = component.getAllByDisplayValue('Block A');
+    const selectElements = component.getAllByDisplayValue('Block A');
     const selectElement = selectElements[0] as HTMLSelectElement;
     expect(selectElement.selectedIndex).toBe(0);
 

@@ -1,4 +1,4 @@
-import { Partner, Proposal } from '../types';
+import { Proposal } from '../types';
 
 export const proposal: Proposal = {
   investigators: [

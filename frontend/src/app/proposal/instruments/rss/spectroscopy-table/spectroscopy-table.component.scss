@@ -1,0 +1,4 @@
+@import "src/styles";
+.double-boarder > div {
+  border-right: 1px solid $table-border-color;
+}

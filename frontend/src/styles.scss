@@ -140,5 +140,57 @@ html {
 .has-two-columns {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  column-gap: 2em;
+}
+.has-three-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+$rss-header-config-color: #ff0000;
+$rss-science-config-color: #ff9696;
+$rss-calibration-config-color: #660000;
+$rss-acquisition-config-color: #a35f7e;
+$hrs-header-config-color: #00ff00;
+$hrs-science-config-color: #96ffce;
+$hrs-calibration-config-color: #006600;
+$hrs-acquisition-config-color: #97a35f;
+$scam-header-config-color: #0000ff;
+$scam-science-config-color: #9696ff;
+$scam-calibration-config-color: #000066;
+$scam-acquisition-config-color: #5f8ba3;
+
+.rss-header-config-color{
+  background-color: $rss-header-config-color;
+}
+.rss-science-config-color{
+  background-color: $rss-science-config-color;
+}
+.rss-calibration-config-color{
+  background-color: $rss-calibration-config-color;
+}
+.rss-acquisition-config-color{
+  background-color: $scam-acquisition-config-color;
+}
+.hrs-header-config-color{
+  background-color: $hrs-header-config-color;
+}
+.hrs-science-config-color{
+  background-color: $hrs-science-config-color;
+}
+.hrs-calibration-config-color{
+  background-color: $hrs-calibration-config-color;
+}
+.hrs-acquisition-config-color{
+  background-color: $scam-acquisition-config-color;
+}
+.salticam-header-config-color{
+  background-color: $scam-header-config-color;
+}
+.salticam-science-config-color{
+  background-color: $scam-science-config-color;
+}
+.salticam-calibration-config-color{
+  background-color: $scam-calibration-config-color;
+}
+.salticam-acquisition-config-color{
+  background-color: $scam-acquisition-config-color;
 }

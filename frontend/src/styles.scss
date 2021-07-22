@@ -24,6 +24,7 @@ $proposal-summary-color: #f5b642;
 $error-background-color: #ffb0b0;
 $success-background-color: #b0ffb0;
 $table-border-color: #aaaaaa;
+$salticam-color: #0c5fc4;
 
 body {
   font-family: "Helvetica Neue", sans-serif;
@@ -110,6 +111,9 @@ html {
 }
 .investigators-header {
   background-color: $investigators-color;
+}
+.salticam-header {
+  background-color: $salticam-color;
 }
 .heading-line {
   height: 1rem;

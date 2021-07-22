@@ -43,6 +43,11 @@ import { TotalObservationTimeComponent } from './proposal/block/total-obs-time/t
 import { ObservingWindowsComponent } from './proposal/block/observing-windows/observing-windows.component';
 import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
 import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
+import { SalticamComponent } from './proposal/salticam/salticam.component';
+import { GeneralComponent } from './proposal/salticam/general/general.component';
+import { ObservationTimesComponent } from './proposal/salticam/observation-times/observation-times.component';
+import { DetectorTableComponent } from './proposal/salticam/detector-table/detector-table.component';
+import { FiltersTableComponent } from './proposal/salticam/filters-table/filters-table.component';
 import { PolarimetryTableComponent } from './proposal/instruments/rss/polarimetry-table/polarimetry-table.component';
 import { PolarimetricImagingTableComponent } from './proposal/instruments/rss/polarimetric-imaging-table/polarimetric-imaging-table.component';
 
@@ -80,6 +85,11 @@ import { PolarimetricImagingTableComponent } from './proposal/instruments/rss/po
     ObservingWindowsComponent,
     ProbabilityTableComponent,
     PriorityCommentComponent,
+    SalticamComponent,
+    GeneralComponent,
+    ObservationTimesComponent,
+    DetectorTableComponent,
+    FiltersTableComponent,
     PolarimetryTableComponent,
     PolarimetricImagingTableComponent,
   ],

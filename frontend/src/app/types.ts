@@ -180,3 +180,36 @@ export interface ObservingWindow {
   end: Date;
   type: ObservingWindowType;
 }
+
+export type ReadoutSpeed = 'Slow' | 'None' | 'Fast';
+export type Gain = 'Faint' | 'Bright';
+export type Mode = 'Drift Scan' | 'Frame Transfer' | 'Normal' | 'Shuffle' | 'Slot Mode';
+export type ExposureType= 'Arc' | 'Bias' | 'Dark' | 'Flat Field' | 'Science';
+
+export interface SalticamDetector {
+  preBinRows: number;
+  preBinCols: number;
+  iterations: number;
+  readoutSpeed: ReadoutSpeed;
+  gain: Gain;
+  detMode: Mode;
+  exposureType: ExposureType;
+}
+
+export interface SalticamFilter {
+  name: string;
+  filter: string;
+  exposureTime: number;
+}
+
+export interface Salticam {
+  inCalibration: boolean;
+  salticamDetector: SalticamDetector;
+  minimumSN: number;
+  cycles: number;
+  name: string;
+  salticamProcedure: SalticamFilter[];
+  shutterOpenTime: number;
+  overhead: number;
+  charged: number;
+}

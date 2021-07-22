@@ -194,3 +194,7 @@ $scam-acquisition-config-color: #5f8ba3;
 .salticam-acquisition-config-color{
   background-color: $scam-acquisition-config-color;
 }
+.has-three-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}

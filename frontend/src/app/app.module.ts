@@ -43,6 +43,8 @@ import { TotalObservationTimeComponent } from './proposal/block/total-obs-time/t
 import { ObservingWindowsComponent } from './proposal/block/observing-windows/observing-windows.component';
 import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
 import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
+import { PolarimetryTableComponent } from './proposal/instruments/rss/polarimetry-table/polarimetry-table.component';
+import { PolarimetricImagingTableComponent } from './proposal/instruments/rss/polarimetric-imaging-table/polarimetric-imaging-table.component';
 
 @NgModule({
   declarations: [
@@ -78,6 +80,8 @@ import { PriorityCommentComponent } from './proposal/block/priority-comment/prio
     ObservingWindowsComponent,
     ProbabilityTableComponent,
     PriorityCommentComponent,
+    PolarimetryTableComponent,
+    PolarimetricImagingTableComponent,
   ],
   imports: [
     BrowserModule,

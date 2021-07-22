@@ -1,0 +1,13 @@
+<div class="table alternate-background">
+  <div class="row secondary-header"><div class="has-text-centered">{{polarimetry.pattern}}</div></div>
+  <div class="row headers has-three-columns">
+    <div>#</div>
+    <div>Half-Wave Pattern</div>
+    <div>Quarter-Wave Pattern</div>
+  </div>
+  <div *ngFor="let p of polarimetry.wavePlateAngles let i = index" class="row has-three-columns">
+    <div>{{i}}</div>
+    <div>{{p.halfWavePattern}}</div>
+    <div>{{p.quarterWavePattern}}</div>
+  </div>
+</div>

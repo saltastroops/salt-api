@@ -50,6 +50,8 @@ import { DetectorTableComponent } from './proposal/salticam/detector-table/detec
 import { FiltersTableComponent } from './proposal/salticam/filters-table/filters-table.component';
 import { PolarimetryTableComponent } from './proposal/instruments/rss/polarimetry-table/polarimetry-table.component';
 import { PolarimetricImagingTableComponent } from './proposal/instruments/rss/polarimetric-imaging-table/polarimetric-imaging-table.component';
+import { EtalonConfigurationTableComponent } from './proposal/instruments/rss/etalon-configuration-table/etalon-configuration-table.component';
+import { FabryPerotTableComponent } from './proposal/instruments/rss/fabry-perot-table/fabry-perot-table.component';
 
 @NgModule({
   declarations: [
@@ -92,6 +94,8 @@ import { PolarimetricImagingTableComponent } from './proposal/instruments/rss/po
     FiltersTableComponent,
     PolarimetryTableComponent,
     PolarimetricImagingTableComponent,
+    EtalonConfigurationTableComponent,
+    FabryPerotTableComponent,
   ],
   imports: [
     BrowserModule,

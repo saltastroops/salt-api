@@ -43,6 +43,7 @@ import { TotalObservationTimeComponent } from './proposal/block/total-obs-time/t
 import { ObservingWindowsComponent } from './proposal/block/observing-windows/observing-windows.component';
 import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
 import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
+import { TargetTableComponent } from './proposal/instruments/target-table/target-table.component';
 import { BvitComponent } from './proposal/bvit/bvit.component';
 import { MosSlitMaskTableComponent } from './proposal/instruments/rss/mos-slit-mask-table/mos-slit-mask-table.component';
 import { SalticamComponent } from './proposal/salticam/salticam.component';
@@ -90,6 +91,7 @@ import { FabryPerotTableComponent } from './proposal/instruments/rss/fabry-perot
     ObservingWindowsComponent,
     ProbabilityTableComponent,
     PriorityCommentComponent,
+    TargetTableComponent,
     BvitComponent,
     MosSlitMaskTableComponent,
     SalticamComponent,

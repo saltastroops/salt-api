@@ -24,6 +24,7 @@ $proposal-summary-color: #f5b642;
 $error-background-color: #ffb0b0;
 $success-background-color: #b0ffb0;
 $table-border-color: #aaaaaa;
+$bvit-color: #d44f12;
 $salticam-color: #0c5fc4;
 
 body {
@@ -205,4 +206,8 @@ $scam-acquisition-config-color: #5f8ba3;
 .has-three-columns {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+}
+
+.bvit-header {
+  background-color: $bvit-color;
 }

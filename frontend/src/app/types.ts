@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import {stringify} from "@angular/compiler/src/util";
 
 export interface SaltAstronomer {
   given_name: string;
@@ -179,6 +180,19 @@ export interface ObservingWindow {
   start: Date;
   end: Date;
   type: ObservingWindowType;
+}
+
+export type BvitMode = 'Imaging' | 'Streaming'
+export type BvitFilter =  'Open' | 'B' | 'V' | 'R' | 'H-alpha'
+export type NeutralDensityFilter = 'Open' | '0.3' | '0.5' | '1.0' | '2.0'
+
+export interface Bvit {
+  name: string;
+  mode: BvitMode;
+  filter: BvitFilter;
+  neutralDensityFilter: NeutralDensityFilter;
+  irisSize: number;
+  shutterOpenTime: number;
 }
 
 export type ReadoutSpeed = 'Slow' | 'None' | 'Fast';

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import {Salticam} from "../../../types";
+import {Salticam} from '../../../types';
 
 @Component({
   selector: 'wm-detector-table',

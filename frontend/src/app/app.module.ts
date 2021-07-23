@@ -29,7 +29,7 @@ import { ProposalCommentsComponent } from './proposal/proposal-comments/proposal
 import { ProposalProgressTableComponent } from './proposal/proposal-progress-table/proposal-progress-table.component';
 import { SpectroscopyTableComponent } from './proposal/instruments/rss/spectroscopy-table/spectroscopy-table.component';
 import { SlitMaskTableComponent } from './proposal/instruments/rss/slit-mask/slit-mask-table.component';
-import { DetectorTableComponent } from './proposal/instruments/detector-table/detector-table.component';
+import { RssDetectorTableComponent } from './proposal/instruments/rss-detector-table/rss-detector-table.component';
 import { ArcBibleTableComponent } from './proposal/instruments/rss/arc-bible-table/arc-bible-table.component';
 import { UsedInTableComponent } from './proposal/instruments/used-in-table/used-in-table.component';
 import { RssConfigurationViewComponent } from './proposal/instruments/rss/rss-cofiguration-view/rss-configuration-view.component';
@@ -79,6 +79,7 @@ import { FabryPerotTableComponent } from './proposal/instruments/rss/fabry-perot
     UsedInTableComponent,
     RssConfigurationViewComponent,
     RssGeneralTableComponent,
+    RssDetectorTableComponent,
     RssCalibrationTableComponent,
     RssViewComponent,
     ObservingConditionsComponent,

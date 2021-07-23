@@ -2,7 +2,7 @@
 <hr class="heading-line {{headerLine}}">
 <div class="has-two-columns">
   <wm-rss-general-table [configuration]="instrumentConfiguration.configuration"></wm-rss-general-table>
-  <wm-detector-table [detector]="instrumentConfiguration.configuration.detector"></wm-detector-table>
+  <wm-rss-detector-table [detector]="instrumentConfiguration.configuration.detector"></wm-rss-detector-table>
   <div  *ngIf="instrumentConfiguration.configuration.spectroscopy">
     <wm-spectroscopy-table [spectroscopy]="instrumentConfiguration.configuration.spectroscopy"></wm-spectroscopy-table>
   </div>

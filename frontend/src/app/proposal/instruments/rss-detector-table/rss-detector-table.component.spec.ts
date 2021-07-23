@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DetectorTableComponent } from './detector-table.component';
+import { RssDetectorTableComponent } from './rss-detector-table.component';
 
 describe('DetectorTableComponent', () => {
-  let component: DetectorTableComponent;
-  let fixture: ComponentFixture<DetectorTableComponent>;
+  let component: RssDetectorTableComponent;
+  let fixture: ComponentFixture<RssDetectorTableComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DetectorTableComponent ]
+      declarations: [ RssDetectorTableComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DetectorTableComponent);
+    fixture = TestBed.createComponent(RssDetectorTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -24,6 +24,7 @@ $proposal-summary-color: #f5b642;
 $error-background-color: #ffb0b0;
 $success-background-color: #b0ffb0;
 $table-border-color: #aaaaaa;
+$hrs-color: #9309ce;
 $bvit-color: #d44f12;
 $salticam-color: #0c5fc4;
 
@@ -210,4 +211,8 @@ $scam-acquisition-config-color: #5f8ba3;
 
 .bvit-header {
   background-color: $bvit-color;
+}
+
+.hrs-header {
+  background-color: $hrs-color;
 }

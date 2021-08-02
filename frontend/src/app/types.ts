@@ -182,6 +182,54 @@ export interface ObservingWindow {
   type: ObservingWindowType;
 }
 
+export type ReadoutSpeed = 'Slow' | 'None' | 'Fast';
+export type ExposureType= 'Arc' | 'Bias' | 'Dark' | 'Flat Field' | 'Science';
+export interface ExposureTime {
+  value: number
+}
+
+export interface HrsDetector {
+  readoutSpeed: ReadoutSpeed;
+  numberOfAmplifiers: number;
+  preBinRows: number;
+  preBinCols: number;
+  iterations: number;
+  preShuffle: number;
+  postShuffle: number;
+}
+
+export type IodineCellPosition = 'IN' | 'OUT' | 'ThAr in sky (O) fiber' | 'ThAr in star (P) fiber' | 'CALIBRATION'
+export type TargetLocation = 'STAR' | 'BISECT' | 'SKY'
+export type HrsMode = 'LOW RESOLUTION' | 'MEDIUM RESOLUTION' | 'HIGH RESOLUTION' | 'HIGH STABILITY' | 'INT CAL FIBRE'
+
+export interface NodAndShuffle {
+  nodInterval: number|undefined;
+  nodCount: number|undefined;
+}
+
+export interface HrsConfiguration {
+  mode: HrsMode;
+  exposureType: ExposureType;
+  nodAndShuffle: NodAndShuffle;
+  iodineCellPosition: IodineCellPosition;
+  targetLocation: TargetLocation;
+  fibreSeparation: number;
+  useThArWithIodineCell: boolean;
+}
+
+export interface HrsProcedure {
+  cycles: number;
+  blueExposurePattern: number[];
+  redExposurePattern: number[];
+}
+
+export interface Hrs {
+  name: string;
+  hrsConfig: HrsConfiguration;
+  hrsProcedure: HrsProcedure;
+  hrsBlueDetector: HrsDetector;
+  hrsRedDetector: HrsDetector;
+
 export type BvitMode = 'Imaging' | 'Streaming'
 export type BvitFilter =  'Open' | 'B' | 'V' | 'R' | 'H-alpha'
 export type NeutralDensityFilter = 'Open' | '0.3' | '0.5' | '1.0' | '2.0'

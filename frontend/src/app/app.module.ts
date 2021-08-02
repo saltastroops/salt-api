@@ -43,6 +43,11 @@ import { TotalObservationTimeComponent } from './proposal/block/total-obs-time/t
 import { ObservingWindowsComponent } from './proposal/block/observing-windows/observing-windows.component';
 import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
 import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
+import { HrsComponent } from './proposal/hrs/hrs.component';
+import { HrsGeneralTableComponent } from './proposal/hrs/hrs-general-table/hrs-general-table.component';
+import { HrsObservingTimesTableComponent } from './proposal/hrs/hrs-observing-times-table/hrs-observing-times-table.component';
+import { HrsConfigurationTableComponent } from './proposal/hrs/hrs-configuration-table/hrs-configuration-table.component';
+import { HrsDetectorTableComponent } from './proposal/hrs/hrs-detector-table/hrs-detector-table.component';
 import { TargetTableComponent } from './proposal/instruments/target-table/target-table.component';
 import { BvitComponent } from './proposal/bvit/bvit.component';
 import { MosSlitMaskTableComponent } from './proposal/instruments/rss/mos-slit-mask-table/mos-slit-mask-table.component';
@@ -91,6 +96,11 @@ import { FabryPerotTableComponent } from './proposal/instruments/rss/fabry-perot
     ObservingWindowsComponent,
     ProbabilityTableComponent,
     PriorityCommentComponent,
+    HrsComponent,
+    HrsGeneralTableComponent,
+    HrsObservingTimesTableComponent,
+    HrsConfigurationTableComponent,
+    HrsDetectorTableComponent,
     TargetTableComponent,
     BvitComponent,
     MosSlitMaskTableComponent,

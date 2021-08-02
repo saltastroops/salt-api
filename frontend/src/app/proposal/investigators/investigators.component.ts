@@ -16,7 +16,7 @@ export class InvestigatorsComponent implements OnInit {
 
   accepted(investigator: Investigator): boolean | null {
     const inv = this.proposalAcceptance.find(
-      (pa) => investigator.id === pa.investigatorId
+      (pa) => investigator.userId === pa.investigatorId
     );
     if (inv) {
       return inv.accepted;

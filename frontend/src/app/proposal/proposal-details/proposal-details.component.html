@@ -5,15 +5,15 @@
     </div>
     <div class="row proposal-details-row">
       <div>Status</div>
-      <div>{{ general_proposal_info.status.status }}</div>
+      <div>{{ generalProposalInfo.status }}</div>
     </div>
     <div class="row proposal-details-row">
       <div>Type</div>
-      <div>{{ general_proposal_info.type }}</div>
+      <div>{{ generalProposalInfo.proposalType }}</div>
     </div>
     <div class="row proposal-details-row">
       <div>Target of Opportunity</div>
-      <div *ngIf="general_proposal_info.target_of_opportunity">
+      <div *ngIf="generalProposalInfo.targetOfOpportunity">
         <div>
           <img
             class="icon is-small"
@@ -22,7 +22,7 @@
           />
         </div>
       </div>
-      <div *ngIf="!general_proposal_info.target_of_opportunity">
+      <div *ngIf="!generalProposalInfo.targetOfOpportunity">
         <div>
           <img
             class="icon is-small"
@@ -34,12 +34,12 @@
     </div>
     <div class="row proposal-details-row">
       <div>Total time</div>
-      <div>{{ general_proposal_info.total_requested_time }}</div>
+      <div>{{ generalProposalInfo.totalRequestedTime }}</div>
     </div>
     <div class="row proposal-details-row">
       <div>Proprietary period</div>
       <div class="proprietary-period">
-        <div>{{ general_proposal_info.proprietary_period }} months</div>
+        <div>{{ generalProposalInfo.dataReleaseDate }}</div>
         <div><button class="button is-small">change</button></div>
       </div>
     </div>
@@ -66,11 +66,7 @@
             <a>
               <!--      TODO Send email.-->
               {{
-                general_proposal_info.responsible_salt_astronomer.family_name
-              }}
-              {{
-                " " +
-                  general_proposal_info.responsible_salt_astronomer.given_name
+                generalProposalInfo.liaisonSaltAstronomer
               }}
             </a>
           </div>
@@ -84,21 +80,21 @@
 </div>
 <div class="table">
   <div class="secondary-header row">
-    <div class="has-text-centered">Summary for SALT Astronomer</div>
+    <div class="has-text-centered">Summary For SALT Astronomer</div>
   </div>
   <div class="notification">
     <div>
       <p
-        [innerHTML]="general_proposal_info.summary_for_salt_astronomer | nl2br"
+        [innerHTML]="generalProposalInfo.summaryForSaltAstronomer | nl2br"
       ></p>
     </div>
   </div>
   <div class="secondary-header row">
-    <div class="has-text-centered">Summary for the nightlog</div>
+    <div class="has-text-centered">Summary For The Night Log</div>
   </div>
   <div class="proposal-details-row notification">
     <div class="">
-      <p>{{ general_proposal_info.summary_for_night_log }}</p>
+      <p>{{ generalProposalInfo.summaryForNightLog }}</p>
     </div>
   </div>
 </div>

@@ -7,7 +7,7 @@ import {GeneralProposalInfo} from "../../types";
   styleUrls: ['./proposal-details.component.scss']
 })
 export class ProposalDetailsComponent implements OnInit {
-  @Input() general_proposal_info!: GeneralProposalInfo;
+  @Input() generalProposalInfo!: GeneralProposalInfo;
   constructor() { }
 
   ngOnInit(): void {}

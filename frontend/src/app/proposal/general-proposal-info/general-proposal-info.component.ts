@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { GeneralProposalInfo, Semester } from '../../types';
+import { parseISO } from 'date-fns';
 
 @Component({
   selector: 'wm-general-proposal-info',
@@ -9,21 +10,19 @@ import { GeneralProposalInfo, Semester } from '../../types';
 })
 export class GeneralProposalInfoComponent implements OnInit {
   @Input() generalProposalInfo!: GeneralProposalInfo;
-  @Input() currentSemester!: Semester;
+  @Input() currentSemester!: string;
+  @Input() phase!: number;
+  @Input() proposalCode!: string;
   semesterControl = new FormControl();
+  currentSubmission!: Date;
+  firstSubmission!: Date;
   constructor() {}
 
   ngOnInit(): void {
-    this.semesterControl.setValue(
-      // Select the current semester.
-      // It is not possible to just pass this.currentSemester, as (while it may share the
-      // year and semester with an item) it is not equal to any of the items in the
-      // semesters array.
-      this.generalProposalInfo.semesters.find(
-        (s) =>
-          this.currentSemester.year === s.year &&
-          this.currentSemester.semester === s.semester
-      )
+    this.currentSubmission = parseISO(
+      this.generalProposalInfo.currentSubmission
     );
+    this.firstSubmission = parseISO(this.generalProposalInfo.firstSubmission);
+    this.semesterControl.setValue(this.currentSemester);
   }
 }

@@ -14,37 +14,37 @@
   <div *ngFor="let i of investigators">
     <div
       class="investigator-row row"
-      [class.is-green-background]="accepted(i) === true"
-      [class.is-red-background]="accepted(i) === false"
+      [class.is-green-background]="i.hasApprovedProposal === true"
+      [class.is-red-background]="i.hasApprovedProposal === false"
     >
-      <div *ngIf="i.is_pc">
+      <div *ngIf="i.isPc">
         <img
           class="icon"
           src="/assets/icons/noun_tick_2836262.svg"
           alt="is proposal contact."
         />
       </div>
-      <div *ngIf="!i.is_pc"></div>
-      <div *ngIf="i.is_pi">
+      <div *ngIf="!i.isPc"></div>
+      <div *ngIf="i.isPi">
         <img
           class="icon"
           src="/assets/icons/noun_tick_2836262.svg"
           alt="is principal investigator."
         />
       </div>
-      <div *ngIf="!i.is_pi"></div>
-      <div>{{ i.name }}</div>
-      <div>{{ i.partner.name }}</div>
-      <div>{{ i.partner.institute }}</div>
-      <div>{{ i.partner.department }}</div>
+      <div *ngIf="!i.isPi"></div>
+      <div>{{ i.givenName + ' ' + i.familyName}}</div>
+      <div>{{ i.affiliation.partnerName }}</div>
+      <div>{{ i.affiliation.institute }}</div>
+      <div>{{ i.affiliation.department }}</div>
       <!-- TODO: Replace with correct code -->
-      <ng-template [ngIf]="accepted(i) === true">
+      <ng-template [ngIf]="i.hasApprovedProposal === true">
         <div><button class="button is-danger is-small">Reject</button></div>
       </ng-template>
-      <ng-template [ngIf]="accepted(i) === false">
+      <ng-template [ngIf]="i.hasApprovedProposal === false">
         <div><button class="button is-success is-small">Accept</button></div>
       </ng-template>
-      <ng-template [ngIf]="accepted(i) === null">
+      <ng-template [ngIf]="i.hasApprovedProposal === null || undefined">
         <div class="accept-reject">
           <div><button class="button is-success is-small">Accept</button></div>
           <div><button class="button is-danger is-small">Reject</button></div>

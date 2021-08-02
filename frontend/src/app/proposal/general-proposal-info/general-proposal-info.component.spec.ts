@@ -7,8 +7,8 @@ describe('GeneralComponent', () => {
   it('should create', async () => {
     const component = await render(GeneralProposalInfoComponent, {
       componentProperties: {
-        generalProposalInfo: proposal.general_info,
-        currentSemester: { year: 2020, semester: 1 },
+        generalProposalInfo: proposal.generalInfo,
+        currentSemester: '2021-1',
       },
       declarations: [nl2brPipe],
     });

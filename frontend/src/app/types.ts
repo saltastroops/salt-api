@@ -2,8 +2,8 @@ import { Observable } from 'rxjs';
 import {stringify} from "@angular/compiler/src/util";
 
 export interface SaltAstronomer {
-  given_name: string;
-  family_name: string;
+  givenName: string;
+  familyName: string;
   email: string;
 }
 
@@ -13,19 +13,22 @@ export interface LoadingStreams<T> {
   isLoading$: Observable<boolean>;
 }
 
-export interface Partner {
-  name: string;
-  code: string;
+export interface Affiliation {
+  partnerName: string;
+  partnerCode: string;
   institute: string;
   department: string;
 }
 
 export interface Investigator {
-  id: number;
-  name: string;
-  partner: Partner;
-  is_pc: boolean;
-  is_pi: boolean;
+  userId: number;
+  familyName: string;
+  email: string;
+  givenName: string;
+  affiliation: Affiliation;
+  hasApprovedProposal: boolean;
+  isPc: boolean;
+  isPi: boolean;
 }
 
 export interface GeneralProposalInfo {
@@ -33,36 +36,37 @@ export interface GeneralProposalInfo {
   code: string;
   title: string;
   abstract: string;
-  current_submission: Date;
-  first_submission: Date;
-  submission_number: number;
+  currentSubmission: string;
+  firstSubmission: string;
+  submissionNumber: number;
   phase: number;
-  semesters: Semester[]; // TODO semester need to be handled correctly
-  current_semester: Semester;
-  status: ProposalStatus;
-  type: string;
-  target_of_opportunity: boolean;
-  total_requested_time: number;
-  proprietary_period: number;
-  responsible_salt_astronomer: SaltAstronomer;
-  summary_for_salt_astronomer: string;
-  summary_for_night_log: string;
+  semesters: string[]; // TODO semester need to be handled correctly
+  status: ProposalStatus; // TODO you should remove a ProposalStatus and add display it correctly on General.
+  proposalType: string;
+  targetOfOpportunity: boolean;
+  totalRequestedTime: number;
+  dataReleaseDate: number;
+  liaisonSaltAstronomer: SaltAstronomer;
+  summaryForSaltAstronomer: string;
+  summaryForNightLog: string;
 }
 
 export interface BlockSummary {
   // TODO rename all as follows the rename
   id: number;
   name: string;
-  obs_time: number;
+  observationTime: number;
   priority: number;
-  requested_block_visits: number;
-  done_visits: number;
-  observable_tonight: boolean;
-  remaining_nights: number;
-  maximum_seeing: number;
-  transparency: string;
-  maximum_lunar_phase: number;
-  instruments: Array<{ name: string; config_mode: string }>;
+  requestedObservations: number;
+  acceptedObservations: number;
+  isObservableTonight: boolean;
+  remainingNights: number;
+  instruments: Array<{ name: string; modes: Array<string> }>;
+  observingConditions: {
+    maximumSeeing: number;
+    transparency: string;
+    maximumLunarPhase: number;
+  };
 }
 
 export interface Semester {
@@ -76,33 +80,37 @@ interface ProposalStatus {
 }
 
 export interface TimeAllocation {
-  partner: Partner;
-  priority_0: number;
-  priority_1: number;
-  priority_2: number;
-  priority_3: number;
-  priority_4: number;
-  tac_comment: string | null;
+  partnerCode: string;
+  partnerName: string;
+  priority0: number;
+  priority1: number;
+  priority2: number;
+  priority3: number;
+  priority4: number;
+  tacComment: string | null;
 }
 
 export interface Proposal {
   investigators: Investigator[];
-  general_info: GeneralProposalInfo;
+  generalInfo: GeneralProposalInfo;
   blocks: BlockSummary[];
-  executed_observations: ExecutedObservation[];
-  time_allocations: TimeAllocation[];
-  charged_time: ChargedTime;
+  semester: string;
+  executedObservations: ExecutedObservation[];
+  timeAllocations: TimeAllocation[];
+  chargedTime: ChargedTime;
   comments: ProposalComment[];
   proposalAcceptance: ProposalAcceptance[];
   progress: string | null;
+  phase: number;
+  proposalCode: string;
 }
 
 export interface ChargedTime {
-  priority_0: number;
-  priority_1: number;
-  priority_2: number;
-  priority_3: number;
-  priority_4: number;
+  priority0: number;
+  priority1: number;
+  priority2: number;
+  priority3: number;
+  priority4: number;
 }
 
 export interface BlockIdentifier {
@@ -131,15 +139,15 @@ export interface Block {
 }
 
 export interface ExecutedObservation {
-  observation_id: number;
-  block_identifier: BlockIdentifier;
-  observation_time: number;
+  blockId: number;
+  blockName: string;
+  observationTime: number;
   priority: number;
-  maximum_lunar_phase: number;
+  maximumLunarPhase: number;
   targets: string[];
-  observation_date: Date;
+  night: string;
   accepted: boolean;
-  rejection_reason: string | null;
+  rejectionReason: string | null;
 }
 
 export interface ProposalComment {

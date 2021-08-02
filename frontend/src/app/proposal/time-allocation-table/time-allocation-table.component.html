@@ -9,22 +9,22 @@
     <div>Priority 2</div>
     <div>Priority 3</div>
     <div>Priority 4</div>
-    <div>TAC comment</div>
+    <div>TAC Comment</div>
   </div>
   <div *ngFor="let a of time_allocations">
     <div class="allocation-row row">
-      <div>{{ a.partner.name }}</div>
-      <div>{{ a.priority_0 }}</div>
-      <div>{{ a.priority_1 }}</div>
-      <div>{{ a.priority_2 }}</div>
-      <div>{{ a.priority_3 }}</div>
-      <div>{{ a.priority_4 }}</div>
-      <div *ngIf="!!a.tac_comment">
-        <span class="has-text-link" tooltip="{{ a.tac_comment }}">
+      <div>{{ a.partnerName }}</div>
+      <div>{{ a.priority0 }}</div>
+      <div>{{ a.priority1 }}</div>
+      <div>{{ a.priority2 }}</div>
+      <div>{{ a.priority3 }}</div>
+      <div>{{ a.priority4 }}</div>
+      <div *ngIf="!!a.tacComment">
+        <span class="has-text-link" tooltip="{{ a.tacComment }}">
           Show comment
         </span>
       </div>
-      <div *ngIf="!a.tac_comment">
+      <div *ngIf="!a.tacComment">
         <span>No comment</span>
       </div>
     </div>

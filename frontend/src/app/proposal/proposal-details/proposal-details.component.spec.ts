@@ -4,11 +4,11 @@ import {nl2brPipe} from '../../nl2br.pipe';
 import {proposal} from '../../mock/proposal-data';
 
 describe('ProposalDetailsComponent', () => {
-  const generalProposalInfo = proposal.general_info;
+  const generalProposalInfo = proposal.generalInfo;
   it('should create', async () => {
     const component = await render(ProposalDetailsComponent, {
       componentProperties: {
-        general_proposal_info: generalProposalInfo
+        generalProposalInfo: generalProposalInfo
       },
       declarations: [nl2brPipe]
     });

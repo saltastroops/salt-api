@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BlockIdentifier, ExecutedObservation } from '../../types';
+import {parseISO} from "date-fns";
 
 @Component({
   selector: 'wm-summary-of-executed-observations',
@@ -8,37 +9,41 @@ import { BlockIdentifier, ExecutedObservation } from '../../types';
 })
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;
-  @Input() executed_observations!: ExecutedObservation[];
+  @Input() executedObservations!: ExecutedObservation[];
   observations!: Observation[];
   constructor() {}
 
   ngOnInit(): void {
-    this.observations = this.executed_observations.map((o) => ({
+    this.observations = this.executedObservations.map((o) => ({
       ...o,
-      download_observation: this.selectAll,
+      downloadObservation: this.selectAll,
     }));
   }
 
   selectDeselectAll(selectAll: boolean): void {
     this.selectAll = selectAll;
     this.observations.forEach((e) => {
-      e.download_observation = this.selectAll;
+      e.downloadObservation = this.selectAll;
     });
   }
 
   toggleRequestData(observation_id: number): void {
     this.selectAll = true;
     this.observations.forEach((o) => {
-      if (o.observation_id === observation_id) {
-        o.download_observation = !o.download_observation;
+      if (o.blockId === observation_id) {
+        o.downloadObservation = !o.downloadObservation;
       }
-      if (!o.download_observation) {
+      if (!o.downloadObservation) {
         this.selectAll = false;
       }
     });
   }
+
+  observationDate(dateString: string): Date {
+    return parseISO(dateString)
+  }
 }
 
 interface Observation extends ExecutedObservation {
-  download_observation: boolean;
+  downloadObservation: boolean;
 }

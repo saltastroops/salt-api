@@ -19,23 +19,23 @@
 
   <div class="proposal_info-row row">
     <div>{{ generalProposalInfo.id }}</div>
-    <div>{{ generalProposalInfo.code }}</div>
-    <div>{{ generalProposalInfo.phase }}</div>
+    <div>{{ proposalCode }}</div>
+    <div>{{ phase }}</div>
     <div>
       <div class="select">
         <select [formControl]="semesterControl">
           <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
-            {{ s.year }}-{{ s.semester }}
+            {{s}}
           </option>
         </select>
       </div>
     </div>
     <div>
-      {{ generalProposalInfo.first_submission.toISOString().split("T")[0] }}
+      {{ firstSubmission | dfnsFormat: "d MMMM yyyy" }}
     </div>
     <div>
-      {{ generalProposalInfo.current_submission.toISOString().split("T")[0] }}
-      (#{{ generalProposalInfo.submission_number }})
+      {{ currentSubmission | dfnsFormat: "d MMMM yyyy" }}
+      (#{{ generalProposalInfo.submissionNumber }})
     </div>
   </div>
 
@@ -49,6 +49,6 @@
     <div class="has-text-centered">Status</div>
   </div>
   <div class="row">
-    <div>{{ generalProposalInfo.status.message }}</div>
+    <div>{{ generalProposalInfo.status}}</div>
   </div>
 </div>

@@ -2,14 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProposalService } from '../service/proposal.service';
 import { Observable } from 'rxjs';
-import {Proposal} from '../types';
-import { MockProposalService } from '../mock/service/mock-proposal.service';
+import { Proposal } from '../types';
 
 @Component({
   selector: 'wm-proposal',
   templateUrl: './proposal.component.html',
   styleUrls: ['./proposal.component.scss'],
-  providers: [{ provide: ProposalService, useClass: MockProposalService }],
 })
 export class ProposalComponent implements OnInit {
   proposalCode = '';

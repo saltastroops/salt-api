@@ -7,17 +7,17 @@ import {ChargedTime, TimeAllocation} from "../../types";
   styleUrls: ['./charged-time-table.component.scss']
 })
 export class ChargedTimeTableComponent implements OnInit {
-  @Input() charged_time!: ChargedTime
-  @Input() time_allocation!: TimeAllocation
-  allocated_p0_to_p3_time: number = 0
-  charged_time_p0_to_p3: number = 0
+  @Input() chargedTime!: ChargedTime
+  @Input() timeAllocation!: TimeAllocation
+  allocatedP0ToP3Time: number = 0
+  chargedTimeP0ToP3: number = 0
   constructor() { }
 
   ngOnInit(): void {
-    this.allocated_p0_to_p3_time = this.time_allocation.priority_0 + this.time_allocation.priority_1 +
-      this.time_allocation.priority_2 + this.time_allocation.priority_3
-    this.charged_time_p0_to_p3 = this.charged_time.priority_0 + this.charged_time.priority_1 +
-      this.charged_time.priority_2 + this.charged_time.priority_3
+    this.allocatedP0ToP3Time = this.timeAllocation.priority0 + this.timeAllocation.priority1 +
+      this.timeAllocation.priority2 + this.timeAllocation.priority3
+    this.chargedTimeP0ToP3 = this.chargedTime.priority0 + this.chargedTime.priority1 +
+      this.chargedTime.priority2 + this.chargedTime.priority3
   }
 
 }

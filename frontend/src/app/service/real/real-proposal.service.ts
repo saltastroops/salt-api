@@ -4,7 +4,8 @@ import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ProposalService } from '../proposal.service';
 import { Proposal } from '../../types';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
+import * as camelcaseKeys from 'camelcase-keys';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +22,8 @@ export class RealProposalService implements ProposalService {
    */
   getProposal(proposalCode: string): Observable<Proposal> {
     const uri = environment.apiUrl + '/proposal/' + proposalCode;
-    return this.http.get<Proposal>(uri).pipe(
+    return this.http.get<any>(uri).pipe(
+      map((proposal: any) => camelcaseKeys(proposal, { deep: true })),
       catchError(() => {
         return throwError('The request has failed.');
       })

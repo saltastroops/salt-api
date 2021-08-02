@@ -8,32 +8,32 @@ import { ExecutedObservation } from '../../types';
 describe('SummaryOfExecutedObservationsComponent', () => {
   const executed_observations: ExecutedObservation[] = [
     {
-      observation_id: 6677,
-      block_identifier: {
+      blockId: 6677,
+      blockIdentifier: {
         id: 12341,
         name: 'Block name 1',
       },
-      observation_time: 100,
+      observationTime: 100,
       priority: 1,
-      maximum_lunar_phase: 14.5,
+      maximumLunarPhase: 14.5,
       targets: ['Target name 1', 'target name 2'],
-      observation_date: new Date(2019, 11, 30),
+      night: new Date(2019, 11, 30),
       accepted: true,
-      rejection_reason: null,
+      rejectionReason: null,
     },
     {
-      observation_id: 7814,
-      block_identifier: {
+      blockId: 7814,
+      blockIdentifier: {
         id: 12342,
         name: 'Block name 2',
       },
-      observation_time: 100,
+      observationTime: 100,
       priority: 1,
-      maximum_lunar_phase: 14.5,
+      maximumLunarPhase: 14.5,
       targets: ['Target name 3'],
-      observation_date: new Date(2019, 11, 30),
+      night: new Date(2019, 11, 30),
       accepted: false,
-      rejection_reason:
+      rejectionReason:
         'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolores laborum veritatis.',
     },
   ];
@@ -47,7 +47,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it('should create', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executed_observations,
+        executedObservations: executed_observations,
       },
     });
     expect(component).toBeTruthy();
@@ -56,7 +56,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it('should toggle an observation when the observation\'s checkbox is clicked', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executed_observations,
+        executedObservations: executed_observations,
       },
     });
     const observationCheckbox1 = component.getAllByTestId(
@@ -80,7 +80,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it('should select/deselect all if the "Select/Deselect all" checkbox is clicked', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executed_observations,
+        executedObservations: executed_observations,
       },
     });
     const selectAllSelector = component.getByTestId(
@@ -108,7 +108,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it('should select/deselect the "Select/Deselect all" (only) if all observations are selected', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executed_observations: proposal.executed_observations,
+        executedObservations: proposal.executedObservations,
       },
     });
     const selectAllCheckbox = component.getByTestId(

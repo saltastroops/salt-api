@@ -1,38 +1,38 @@
 <div class="table alternate-background">
   <div class="secondary-header row">
-    <div class="has-text-centered">Charged Time to date (seconds)</div>
+    <div class="has-text-centered">Charged Time To Date (seconds)</div>
   </div>
   <div class="charged-row row">
     <div>Priority 0</div>
-    <div>{{ charged_time.priority_0 }}</div>
+    <div>{{ chargedTime.priority0 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 1</div>
-    <div>{{ charged_time.priority_1 }}</div>
+    <div>{{ chargedTime.priority1 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 2</div>
-    <div>{{ charged_time.priority_2 }}</div>
+    <div>{{ chargedTime.priority2 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 3</div>
-    <div>{{ charged_time.priority_3 }}</div>
+    <div>{{ chargedTime.priority3 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 4</div>
-    <div>{{ charged_time.priority_4 }}</div>
+    <div>{{ chargedTime.priority4 }}</div>
   </div>
   <div class="charged-row row">
     <div>P1-P3 Total/Allocated</div>
     <div data-testid="absolute-completion">
-      {{ charged_time_p0_to_p3 }}/{{ allocated_p0_to_p3_time }}
+      {{ chargedTimeP0ToP3 }}/{{ allocatedP0ToP3Time }}
     </div>
   </div>
   <div class="charged-row row">
     <div>P1-P3 Completion (%)</div>
     <div data-testid="relative-completion">
       {{
-        (charged_time_p0_to_p3 / allocated_p0_to_p3_time) * 100
+        (chargedTimeP0ToP3 / allocatedP0ToP3Time) * 100
           | number: "1.0-1"
       }}%
     </div>

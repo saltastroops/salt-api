@@ -31,12 +31,12 @@
   <div *ngFor="let e of observations">
     <div class="summary-row row">
       <div>
-        {{ e.block_identifier.name }}
+        {{ e.blockName }}
         <span>(view details)</span>
       </div>
-      <div>{{ e.observation_time }}</div>
+      <div>{{ e.observationTime }} s</div>
       <div>{{ e.priority }}</div>
-      <div>{{ e.maximum_lunar_phase }}</div>
+      <div>{{ e.maximumLunarPhase }}</div>
       <div class="targets-container">
         <div *ngFor="let t of e.targets">
           <div>
@@ -44,7 +44,7 @@
           </div>
         </div>
       </div>
-      <div>{{ e.observation_date.toISOString().split("T")[0] }}</div>
+      <div>{{ observationDate(e.night) | dfnsFormat: "d MMMM yyyy" }}</div>
       <div *ngIf="e.accepted" class="is-green">
         <img
           class="icon"
@@ -59,7 +59,7 @@
           alt="block is rejected"
         />
       </div>
-      <div>{{ e.rejection_reason }}</div>
+      <div>{{ e.rejectionReason }}</div>
       <div *ngIf="e.accepted">
         <button class="button is-danger is-small">Reject</button>
       </div>
@@ -70,8 +70,8 @@
         <label class="checkbox">
           <input
             type="checkbox"
-            [checked]="e.download_observation"
-            (change)="toggleRequestData(e.observation_id)"
+            [checked]="e.downloadObservation"
+            (change)="toggleRequestData(e.blockId)"
             data-testid="download-observation-checkbox"
           />
           Request data

@@ -1,6 +1,6 @@
 import { Proposal } from '../types';
 
-export const proposal: Proposal = {
+export const proposal: any = {
   investigators: [
     {
       id: 1,
@@ -75,7 +75,7 @@ export const proposal: Proposal = {
       is_pi: false,
     },
   ],
-  general_info: {
+  generalInfo: {
     id: 23654,
     code: '2020-1-MLT-005',
     title: 'Lorem ipsum dolor sit amet.',
@@ -84,11 +84,11 @@ export const proposal: Proposal = {
       'provident reprehenderit rerum. Ab alias architecto asperiores assumenda atque autem cumque dolorum eius error et ' +
       'eveniet excepturi, expedita illo illum incidunt ipsam minima modi nulla pariatur quasi quidem, quisquam ' +
       'soluta sunt? Eos eum necessitatibus nostrum soluta veniam.',
-    current_submission: new Date(2020, 3, 31),
-    first_submission: new Date(2019, 11, 30),
-    submission_number: 12,
+    currentSubmission: new Date(2020, 3, 31),
+    firstSubmission: new Date(2019, 11, 30),
+    submissionNumber: 12,
     phase: 2,
-    current_semester: { year: 2021, semester: 2 },
+    currentSemester: { year: 2021, semester: 2 },
     semesters: [
       { year: 2020, semester: 1 },
       { year: 2020, semester: 2 },
@@ -100,15 +100,15 @@ export const proposal: Proposal = {
       message: 'The proposal has been added to the queue.',
     },
     type: 'Science - Long Term',
-    target_of_opportunity: false,
-    total_requested_time: 9999,
-    proprietary_period: 36,
-    responsible_salt_astronomer: {
+    targetOfOpportunity: false,
+    totalRequestedTime: 9999,
+    proprietaryPeriod: 36,
+    responsibleSaltAstronomer: {
       given_name: 'John',
       family_name: 'Doe',
       email: 'johndoe.@host.com',
     },
-    summary_for_salt_astronomer: `
+    summaryForSaltAstronomer: `
 ----------------------------------
 Lorem ipsum dolor.
 ----------------------------------
@@ -143,7 +143,7 @@ Lorem ipsum dolor.
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam, omnis.
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae cumque, dicta dolores dolorum eius et expedita explicabo hic id omnis porro quas repellendus ullam veniam, veritatis vero. Culpa.
 `,
-    summary_for_night_log:
+    summaryForNightLog:
       'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti ducimus est, et incidunt labore nam nisi officia quos reiciendis repudiandae sit sunt tempora voluptas, voluptatem?\n',
   },
   blocks: [
@@ -319,7 +319,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
       instruments: [{ name: 'RSS', config_mode: 'Spectroscopy' }],
     },
   ],
-  executed_observations: [
+  executedObservations: [
     {
       observation_id: 6677,
       block_identifier: {
@@ -364,7 +364,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
       rejection_reason: null,
     },
   ],
-  time_allocations: [
+  timeAllocations: [
     {
       partner: {
         name: 'South Africa',
@@ -372,12 +372,12 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
         institute: '',
         department: '',
       },
-      priority_0: 2700,
-      priority_1: 66700,
-      priority_2: 7100,
-      priority_3: 6700,
-      priority_4: 112700,
-      tac_comment:
+      priority0: 2700,
+      priority1: 66700,
+      priority2: 7100,
+      priority3: 6700,
+      priority4: 112700,
+      tacComment:
         'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
         'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
     },
@@ -388,12 +388,12 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
         institute: '',
         department: '',
       },
-      priority_0: 2700,
-      priority_1: 0,
-      priority_2: 0,
-      priority_3: 0,
-      priority_4: 112700,
-      tac_comment:
+      priority0: 2700,
+      priority1: 0,
+      priority2: 0,
+      priority3: 0,
+      priority4: 112700,
+      tacComment:
         'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
         'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
     },
@@ -404,29 +404,29 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto, beatae 
         institute: '',
         department: '',
       },
-      priority_0: 0,
-      priority_1: 66700,
-      priority_2: 700,
-      priority_3: 0,
-      priority_4: 22700,
-      tac_comment: null,
+      priority0: 0,
+      priority1: 66700,
+      priority2: 700,
+      priority3: 0,
+      priority4: 22700,
+      tacComment: null,
     },
     {
       partner: { name: 'Poland', code: 'POL', institute: '', department: '' },
-      priority_0: 2700,
-      priority_1: 0,
-      priority_2: 700,
-      priority_3: 3362,
-      priority_4: 12700,
-      tac_comment: null,
+      priority0: 2700,
+      priority1: 0,
+      priority2: 700,
+      priority3: 3362,
+      priority4: 12700,
+      tacComment: null,
     },
   ],
-  charged_time: {
-    priority_0: 659,
-    priority_1: 0,
-    priority_2: 0,
-    priority_3: 34999,
-    priority_4: 27966,
+  chargedTime: {
+    priority0: 659,
+    priority1: 0,
+    priority2: 0,
+    priority3: 34999,
+    priority4: 27966,
   },
   comments: [
     {

@@ -4,26 +4,28 @@
 
   <div class="block">
     <wm-general-proposal-info
-      [generalProposalInfo]="p.general_info"
-      [currentSemester]="p.general_info.current_semester"
+      [generalProposalInfo]="p.generalInfo"
+      [currentSemester]="p.semester"
+      [phase]="p.phase"
+      [proposalCode]="p.proposalCode"
     ></wm-general-proposal-info>
   </div>
 
   <div class="block">
-    <wm-details [general_proposal_info]="p.general_info"></wm-details>
+    <wm-details [generalProposalInfo]="p.generalInfo"></wm-details>
   </div>
 
   <div class="block">
     <wm-time-allocation-table
-      [time_allocations]="p.time_allocations"
+      [time_allocations]="p.timeAllocations"
     ></wm-time-allocation-table>
   </div>
 
   <div class="block charged-and-progress">
     <!--    TODO Please note that time allocations are semester dependent this needs to be fixed to selected semester. -->
     <wm-charged-time-table
-      [charged_time]="p.charged_time"
-      [time_allocation]="p.time_allocations[0]"
+      [chargedTime]="p.chargedTime"
+      [timeAllocation]="p.timeAllocations[0]"
     ></wm-charged-time-table>
 
     <wm-proposal-progress-table
@@ -34,7 +36,6 @@
   <div class="block">
     <wm-investigators
       [investigators]="p.investigators"
-      [proposalAcceptance]="p.proposalAcceptance"
     ></wm-investigators>
   </div>
 
@@ -47,13 +48,13 @@
   <div class="block">
     <wm-block-summaries
       [blocks]="p.blocks"
-      [proposalCode]="p.general_info.code"
+      [proposalCode]="p.generalInfo.code"
     ></wm-block-summaries>
   </div>
 
   <div class="block">
     <wm-summary-of-executed-observations
-      [executed_observations]="p.executed_observations"
+            [executedObservations]="p.executedObservations"
     ></wm-summary-of-executed-observations>
   </div>
 

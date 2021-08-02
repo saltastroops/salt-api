@@ -1,0 +1,46 @@
+<div class="table alternate-background">
+  <div class="row secondary-header payload-main-headers has-right-border">
+    <div class="has-text-centered">Pointing</div>
+    <div class="has-text-centered">Acquisition</div>
+    <div class="has-text-centered">Configurations</div>
+    <div class="has-text-centered">Pipeline Config</div>
+    <div class="has-text-centered">Observation Times</div>
+  </div>
+  <div class="row headers payload-table-row">
+    <div>Min Useful Time</div>
+    <div>Position Angles</div>
+    <div>Constraints</div>
+    <div>Data Access Method</div>
+    <div>Doc format</div>
+    <div></div>
+    <div>Shutter Open Time</div>
+    <div>Overhead</div>
+    <div>Charged</div>
+  </div>
+  <div class="row payload-table-row">
+    <div>{{payload.minimumUsefulTime}} sec</div>
+    <div>{{payload.positionAngles}}&#176;</div>
+    <div>{{payload.constraints}}</div>
+    <div>{{payload.dataAccessMethod}}</div>
+    <div>{{payload.docFormat}}</div>
+    <div class="has-text-centered"><button class="button is-small">edit</button></div>
+    <div>{{payload.shutterOpenTime}} sec</div>
+    <div>{{payload.overhead}} sec</div>
+    <div>{{payload.charged}} sec</div>
+  </div>
+
+  <div class="row secondary-header">
+    <div class="has-text-centered">Finding charts ({{firstValidFrom | dfnsFormat: "d MMMM yyyy H:mm" }} to
+      {{lastValidUntil | dfnsFormat: "d MMMM yyyy H:mm" }})</div>
+  </div>
+  <div class="row headers payload-chat-row">
+    <div>Chat</div>
+    <div>comment</div>
+  </div>
+  <div *ngFor="let c of payload.chats">
+    <div class="row payload-chat-row">
+      <div><img src="{{c.path}}" alt="Finding chat" class="image is-128x128"></div>
+      <div><p [innerHTML]="c.comment | nl2br"></p></div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+.payload-chat-row {
+  display: grid;
+  grid-template-columns: 15% 1fr;
+}
+.payload-table-row {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.payload-main-headers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) repeat(2, 3fr);
+}

@@ -43,6 +43,7 @@ import { TotalObservationTimeComponent } from './proposal/block/total-obs-time/t
 import { ObservingWindowsComponent } from './proposal/block/observing-windows/observing-windows.component';
 import { ProbabilityTableComponent } from './proposal/block/probability-table/probability-table.component';
 import { PriorityCommentComponent } from './proposal/block/priority-comment/priority-comment.component';
+import { PayloadConfigurationTableComponent } from './proposal/instruments/payload-configuration-table/payload-configuration-table.component';
 import { HrsComponent } from './proposal/hrs/hrs.component';
 import { HrsGeneralTableComponent } from './proposal/hrs/hrs-general-table/hrs-general-table.component';
 import { HrsObservingTimesTableComponent } from './proposal/hrs/hrs-observing-times-table/hrs-observing-times-table.component';
@@ -96,6 +97,7 @@ import { FabryPerotTableComponent } from './proposal/instruments/rss/fabry-perot
     ObservingWindowsComponent,
     ProbabilityTableComponent,
     PriorityCommentComponent,
+    PayloadConfigurationTableComponent,
     HrsComponent,
     HrsGeneralTableComponent,
     HrsObservingTimesTableComponent,

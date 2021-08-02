@@ -204,6 +204,11 @@ $scam-acquisition-config-color: #5f8ba3;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
+
+.has-right-border > div {
+  border-right: 1px solid $table-border-color;
+}
+
 .has-three-columns {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -20,6 +20,13 @@ export interface DitherPattern {
   steps: number;
 }
 
+export interface FinderChart {
+  id: number;
+  comments: string | null;
+  validFrom: string | null;
+  validUntil: string | null;
+}
+
 export type GuideMethod =
   | 'HRS Probe'
   | 'Manual'
@@ -44,6 +51,7 @@ export interface Instruments {
 export interface Observation {
   observationTime: number;
   overheadTime: number;
+  finderCharts: FinderChart[];
   timeRestrictions: TimeInterval[] | null;
   phaseConstraints: PhaseInterval[] | null;
   telescopeConfigurations: TelescopeConfiguration[];

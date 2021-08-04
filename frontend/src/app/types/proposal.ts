@@ -54,7 +54,7 @@ export interface Investigator {
 export interface ObservationComment {
   author: string;
   comment: string;
-  madeAt: string;
+  commentDate: string;
 }
 
 export interface Proposal {

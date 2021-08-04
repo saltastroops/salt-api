@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Phase2Proposal } from '../types/proposal';
+import { Proposal } from '../types/proposal';
 
 export abstract class ProposalService {
   /**
@@ -8,5 +8,5 @@ export abstract class ProposalService {
    *
    * @param proposalCode Proposal code.
    */
-  public abstract getProposal(proposalCode: string): Observable<Phase2Proposal>;
+  public abstract getProposal(proposalCode: string): Observable<Proposal>;
 }

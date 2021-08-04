@@ -9,13 +9,6 @@ export interface Affiliation {
   department: string;
 }
 
-interface BaseProposal {
-  proposalCode: string;
-  semester: string;
-  generalInfo: GeneralProposalInfo;
-  investigators: Investigator[];
-}
-
 export interface ChargedTime {
   priority0: number;
   priority1: number;
@@ -65,21 +58,19 @@ export interface ObservationComment {
   madeAt: string;
 }
 
-export interface Phase1Proposal extends BaseProposal {
+export interface Proposal {
+  proposalCode: string;
   phase: 1;
-  targets: Phase1Target[];
-  requestedTimes: RequestedTime[];
-}
-
-export interface Phase2Proposal extends BaseProposal {
-  phase: 2;
+  semester: string;
+  generalInfo: GeneralProposalInfo;
+  investigators: Investigator[];
+  targets: Phase1Target[] | null;
+  requestedTimes: RequestedTime[] | null;
   blocks: BlockSummary[];
   executedObservations: ExecutedObservation[];
   chargedTime: ChargedTime;
   timeAllocations: TimeAllocation[];
 }
-
-export type Proposal = Phase1Proposal | Phase2Proposal;
 
 export interface ProposalListItem {
   id: number;

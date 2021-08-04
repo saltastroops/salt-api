@@ -1,0 +1,17 @@
+@import "../../../../../styles.scss";
+
+.detector {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  align-items: center;
+}
+
+.detector-row div {
+  line-height: 4px;
+}
+
+.exposure-times {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}

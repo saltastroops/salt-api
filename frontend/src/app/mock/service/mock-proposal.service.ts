@@ -2,8 +2,8 @@ import { Injectable, isDevMode } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ProposalService } from '../../service/proposal.service';
-import { Proposal } from '../../types';
 import { proposal } from '../proposal-data';
+import { Proposal } from '../../types/proposal';
 
 @Injectable({
   providedIn: 'root',

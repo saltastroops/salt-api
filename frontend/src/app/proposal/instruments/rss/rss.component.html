@@ -1,0 +1,27 @@
+<h2 class="title is-4">
+  RSS {{ payloadConfiguration.payloadConfigurationType }} - Configuration #{{
+    runningNumber
+  }}
+</h2>
+<hr class="heading-line {{ headerLine }}" />
+<div class="has-two-columns">
+  <wm-rss-general-info [rss]="rss"></wm-rss-general-info>
+  <wm-rss-detector [detector]="rss.detector"></wm-rss-detector>
+  <div *ngIf="rss.configuration.spectroscopy">
+    <wm-rss-spectroscopy
+      [spectroscopy]="rss.configuration.spectroscopy"
+    ></wm-rss-spectroscopy>
+  </div>
+  <div *ngIf="rss.configuration.mask">
+    <wm-rss-slit-mask [slitMask]="rss.configuration.mask"></wm-rss-slit-mask>
+  </div>
+  <div *ngIf="payloadConfiguration.lamp">
+    <wm-rss-calibration
+      [filter]="payloadConfiguration.calibrationFilter"
+      [lamp]="payloadConfiguration.lamp"
+    ></wm-rss-calibration>
+  </div>
+  <div *ngIf="rss.arcBibleEntries.length > 0">
+    <wm-arc-bible [arcBibleEntries]="rss.arcBibleEntries"></wm-arc-bible>
+  </div>
+</div>

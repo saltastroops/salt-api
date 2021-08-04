@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BlockService } from '../block.service';
 import { HttpClient } from '@angular/common/http';
-import { Block } from '../../types';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { catchError } from 'rxjs/operators';
+import { Block } from '../../types/block';
 
 @Injectable({
   providedIn: 'root',

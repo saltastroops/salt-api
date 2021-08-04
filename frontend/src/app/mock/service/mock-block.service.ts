@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Block } from '../../types';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap } from 'rxjs/operators';
-import {blockGeneralDetails} from '../block-data';
+import { blockGeneralDetails } from '../block-data';
+import { Block } from '../../types/block';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +16,7 @@ export class MockBlockService implements MockBlockService {
       );
     }
     return of({
-      ...blockGeneralDetails
+      ...blockGeneralDetails,
     }).pipe(delay(Math.random() * 1000));
   }
 }

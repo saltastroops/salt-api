@@ -1,24 +1,22 @@
 import { addHours, addMinutes } from 'date-fns';
-import { Block } from '../types';
+import { Block } from '../types/block';
 
+// TODO: value must be fixed abd type cast removed
 export const blockGeneralDetails: Block = {
   id: 33,
   name: 'Block name 33',
   observingConditions: {
     transparency: 'Thin clouds',
-    minimumLunarPhase: 14.5,
     maximumLunarPhase: 14.5,
     minimumLunarDistance: 14.5,
     minimumSeeing: 0.1,
     maximumSeeing: 2,
-    observationTime: 2000,
   },
   wait: 2,
   visits: 3,
   attempted: 3,
   done: 3,
-  shutterOpenTime: 1400,
-  overheads: 900,
+  overheadTime: 900,
   observationTime: 3000,
   priority: 1,
   comment: `
@@ -233,4 +231,4 @@ Dolores eligendi itaque magnam minus, officiis provident quibusdam recusandae? A
     total: 0.3,
   },
   lastModified: new Date(2020, 4, 16),
-};
+} as any;

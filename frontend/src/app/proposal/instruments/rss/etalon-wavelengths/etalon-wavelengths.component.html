@@ -1,0 +1,16 @@
+<div class="table alternate-background">
+  <div class="row secondary-header">
+    <div class="has-text-centered">Etalon config</div>
+  </div>
+  <div class="row headers has-two-columns">
+    <div>#</div>
+    <div>Wavelength</div>
+  </div>
+  <div
+    *ngFor="let e of etalonConfiguration; let i = index"
+    class="row has-two-columns"
+  >
+    <div>{{ i + 1 }}</div>
+    <div>{{ e }} Å</div>
+  </div>
+</div>

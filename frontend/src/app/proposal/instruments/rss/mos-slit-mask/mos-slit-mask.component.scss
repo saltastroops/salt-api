@@ -1,0 +1,12 @@
+.slit-three-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) 70%;
+}
+.slit-four-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 55%;
+}
+.slit-image-section {
+  display: grid;
+  grid-template-columns: 5% 60% repeat(2, 1fr);
+}

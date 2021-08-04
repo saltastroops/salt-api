@@ -12,7 +12,9 @@
   </div>
 
   <div class="block">
-    <wm-details [generalProposalInfo]="p.generalInfo"></wm-details>
+    <wm-proposal-details
+      [generalProposalInfo]="p.generalInfo"
+    ></wm-proposal-details>
   </div>
 
   <div class="block">
@@ -23,47 +25,44 @@
 
   <div class="block charged-and-progress">
     <!--    TODO Please note that time allocations are semester dependent this needs to be fixed to selected semester. -->
-    <wm-charged-time-table
+    <wm-charged-time
       [chargedTime]="p.chargedTime"
       [timeAllocation]="p.timeAllocations[0]"
-    ></wm-charged-time-table>
+    ></wm-charged-time>
 
     <wm-proposal-progress-table
-      [proposalProgress]="p.progress"
+      [proposalProgress]="'TO BE IMPLEMENTED'"
     ></wm-proposal-progress-table>
   </div>
 
   <div class="block">
-    <wm-investigators
-      [investigators]="p.investigators"
-    ></wm-investigators>
+    <wm-investigators [investigators]="p.investigators"></wm-investigators>
   </div>
 
   <div class="block">
     <wm-proposal-comments
-      [proposalComments]="p.comments"
+      [observationComments]="[
+        { comment: 'n/a', author: 'n/a', madeAt: '2021-07-18T06:07:08' }
+      ]"
     ></wm-proposal-comments>
   </div>
 
   <div class="block">
     <wm-block-summaries
       [blocks]="p.blocks"
-      [proposalCode]="p.generalInfo.code"
+      [proposalCode]="p.proposalCode"
     ></wm-block-summaries>
   </div>
 
   <div class="block">
     <wm-summary-of-executed-observations
-            [executedObservations]="p.executedObservations"
+      [executedObservations]="p.executedObservations"
     ></wm-summary-of-executed-observations>
   </div>
 
   <!--  TODO: Allocation is semester dependent will fix it -->
 
-
-    <wm-block-view
-      [blocks]="p.blocks"
-    ></wm-block-view>
+  <wm-block-view [blocks]="p.blocks"></wm-block-view>
 
   <wm-hrs></wm-hrs>
- </div>
+</div>

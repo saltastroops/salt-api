@@ -1,0 +1,15 @@
+@import "src/styles";
+
+.detector-section {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+}
+.exposure-section {
+  display: grid;
+  grid-template-columns: repeat(2, 2fr) 1fr;
+  align-items: center;
+}
+.exposure-section > div {
+  border-right: 1px solid $table-border-color;
+}

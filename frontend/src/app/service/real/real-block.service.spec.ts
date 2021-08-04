@@ -7,6 +7,7 @@ import {
 } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Block } from '../../types/block';
 
 describe('RealBlockService', () => {
   let service: RealBlockService;
@@ -28,7 +29,7 @@ describe('RealBlockService', () => {
 
   it('should return the content returned by the server', () => {
     const url = environment.apiUrl + '/block/4287';
-    const testData = { id: 4287, name: 'Block 4287' };
+    const testData = { id: 4287, name: 'Block 4287' } as Block;
 
     service.getBlock(4287).subscribe((data) => {
       expect(data).toEqual(testData);

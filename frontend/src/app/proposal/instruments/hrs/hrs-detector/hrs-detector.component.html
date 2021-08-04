@@ -1,0 +1,39 @@
+<div class="table alternate-background">
+  <div class="row secondary-header">
+    <div class="has-text-centered">{{ detectorColor }} Detector</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>Iteration</div>
+    <div>{{ hrsDetector.iterations }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>RoSpeed</div>
+    <div>{{ hrsDetector.readoutSpeed }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>Amplifiers</div>
+    <div>{{ hrsDetector.readoutAmplifiers }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>PreBinColumns</div>
+    <div>{{ hrsDetector.preBinnedColumns }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>PreBinRows</div>
+    <div>{{ hrsDetector.preBinnedRows }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>PreShuffle</div>
+    <div>{{ hrsDetector.preShuffledRows }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>PostShuffle</div>
+    <div>{{ hrsDetector.postShuffledRows }}</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>Exposure times</div>
+    <div class="exposure-times" *ngFor="let h of exposureTimes">
+      <p>{{ h }} sec</p>
+    </div>
+  </div>
+</div>

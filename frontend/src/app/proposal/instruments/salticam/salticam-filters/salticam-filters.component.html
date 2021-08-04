@@ -1,0 +1,19 @@
+<div class="table">
+  <div class="row secondary-header">
+    <div class="has-text-centered">Filters</div>
+  </div>
+  <div class="row headers filters">
+    <div>Name</div>
+    <div>Description</div>
+    <div>Exposure time</div>
+  </div>
+  <div class="row filters" *ngFor="let f of salticamExposures">
+    <div>n/a</div>
+    <div>{{ f.filter }}</div>
+    <div>{{ f.exposureTime }} sec</div>
+  </div>
+  <div class="row filters-row">
+    <div>The filter is current unavailable</div>
+  </div>
+  <div class="row">Plot of filter cycle</div>
+</div>

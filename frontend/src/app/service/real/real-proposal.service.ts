@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ProposalService } from '../proposal.service';
-import { Proposal } from '../../types';
 import { catchError, map } from 'rxjs/operators';
 import * as camelcaseKeys from 'camelcase-keys';
+import { Phase2Proposal } from '../../types/proposal';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +20,8 @@ export class RealProposalService implements ProposalService {
    *
    * @param proposalCode Proposal code.
    */
-  getProposal(proposalCode: string): Observable<Proposal> {
-    const uri = environment.apiUrl + '/proposal/' + proposalCode;
+  getProposal(proposalCode: string): Observable<Phase2Proposal> {
+    const uri = environment.apiUrl + '/proposals/' + proposalCode;
     return this.http.get<any>(uri).pipe(
       map((proposal: any) => camelcaseKeys(proposal, { deep: true })),
       catchError(() => {

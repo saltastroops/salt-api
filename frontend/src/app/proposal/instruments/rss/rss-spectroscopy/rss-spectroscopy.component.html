@@ -1,0 +1,29 @@
+<div class="table alternate-background" *ngIf="spectroscopy">
+  <div class="secondary-header row">
+    <div class="has-text-centered">Spectroscopy</div>
+  </div>
+  <div class="row has-two-columns">
+    <div>Filter</div>
+    <div>{{ filter }}</div>
+  </div>
+  <div class="has-two-columns row double-boarder">
+    <div class="has-two-columns">
+      <div>Grating</div>
+      <div class="has-text-centered">{{ spectroscopy.grating }}</div>
+    </div>
+    <div class="has-two-columns">
+      <div>Grating angle</div>
+      <div class="has-text-centered">{{ spectroscopy.gratingAngle }}&#176;</div>
+    </div>
+  </div>
+  <div class="row has-two-columns double-boarder">
+    <div class="has-two-columns">
+      <div>Camera station</div>
+      <div class="has-text-centered">n/a</div>
+    </div>
+    <div class="has-two-columns">
+      <div>Camera angle</div>
+      <div class="has-text-centered">{{ spectroscopy.cameraAngle }}&#176;</div>
+    </div>
+  </div>
+</div>

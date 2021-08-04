@@ -1,0 +1,25 @@
+@import "../../../../../styles.scss";
+
+.conditions-header-main {
+  display: grid;
+  grid-template-columns: 7fr 5fr 2fr;
+  align-items: center;
+}
+
+.conditions {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  align-items: center;
+}
+
+.probability-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 4em;
+  align-items: initial;
+}
+.probability {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}

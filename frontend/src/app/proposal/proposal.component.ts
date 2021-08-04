@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProposalService } from '../service/proposal.service';
 import { Observable } from 'rxjs';
-import { Proposal } from '../types';
+import { Phase2Proposal } from '../types/proposal';
 
 @Component({
   selector: 'wm-proposal',
@@ -11,7 +11,7 @@ import { Proposal } from '../types';
 })
 export class ProposalComponent implements OnInit {
   proposalCode = '';
-  proposal!: Observable<Proposal>;
+  proposal!: Observable<Phase2Proposal>;
 
   constructor(
     private route: ActivatedRoute,

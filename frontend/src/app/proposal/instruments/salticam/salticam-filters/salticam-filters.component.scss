@@ -1,0 +1,11 @@
+@import "../../../../../styles.scss";
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+}
+
+.filters-row div {
+  line-height: 15px;
+}

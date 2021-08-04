@@ -1,0 +1,54 @@
+<div class="table">
+  <div class="headers row">
+    <div class="has-text-centered">General</div>
+  </div>
+  <div class="secondary-header row">
+    <div class="has-text-centered">Title</div>
+  </div>
+  <div class="row">
+    <div>{{ generalProposalInfo.title }}</div>
+  </div>
+  <div class="proposal_info-row headers row">
+    <div>PID</div>
+    <div>Code</div>
+    <div>Phase</div>
+    <div>Semester</div>
+    <div>First Submission</div>
+    <div>Current Submission</div>
+  </div>
+
+  <div class="proposal_info-row row">
+    <div>n/a</div>
+    <div>{{ proposalCode }}</div>
+    <div>{{ phase }}</div>
+    <div>
+      <div class="select">
+        <select [formControl]="semesterControl">
+          <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
+            {{ s }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div>
+      {{ firstSubmission | dfnsFormat: "d MMMM yyyy" }}
+    </div>
+    <div>
+      {{ currentSubmission | dfnsFormat: "d MMMM yyyy" }}
+      (#{{ generalProposalInfo.submissionNumber }})
+    </div>
+  </div>
+
+  <div class="secondary-header row has-text-centered">
+    <div class="has-text-centered">Abstract</div>
+  </div>
+  <div class="row">
+    <div [innerHTML]="generalProposalInfo.abstract | nl2br"></div>
+  </div>
+  <div class="secondary-header row">
+    <div class="has-text-centered">Status</div>
+  </div>
+  <div class="row">
+    <div>{{ generalProposalInfo.status }}</div>
+  </div>
+</div>

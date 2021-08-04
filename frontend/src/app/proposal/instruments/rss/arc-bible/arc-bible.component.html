@@ -1,0 +1,15 @@
+<div class="table alternate-background" *ngIf="arcBibleEntries">
+  <div class="secondary-header row">
+    <div class="has-text-centered">Arc Bible</div>
+  </div>
+  <div class="row has-three-columns headers">
+    <div>Lamp</div>
+    <div>Base exp. time</div>
+    <div>Corrected Exp. time</div>
+  </div>
+  <div *ngFor="let ab of arcBibleEntries" class="row has-three-columns">
+    <div>{{ ab.lamp }}</div>
+    <div>{{ ab.originalExposureTime }} sec</div>
+    <div>{{ ab.preferredExposureTime }} sec</div>
+  </div>
+</div>

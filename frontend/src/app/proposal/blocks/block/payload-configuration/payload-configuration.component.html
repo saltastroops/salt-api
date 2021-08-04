@@ -1,0 +1,31 @@
+<h2 class="title is-4">
+  {{ instrument }} {{ payloadConfiguration.payloadConfigurationType }} -
+  Configuration #{{ payloadConfigurationIndex + 1 }}
+</h2>
+<hr class="heading-line {{ headerLine }}" />
+<div class="used-in-container">
+  <div>
+    <p>
+      <b>Guided method:</b> {{ payloadConfiguration.guideMethod || "None" }}
+    </p>
+  </div>
+  <div class="table">
+    <div class="row secondary-header">
+      <div class="has-text-centered">Used in</div>
+    </div>
+    <div class="row headers used-in-row">
+      <div>Block</div>
+      <div>Observation</div>
+      <div>PA</div>
+      <div>Iterations</div>
+      <div>Dither</div>
+    </div>
+    <div class="row used-in-row">
+      <div>n/a</div>
+      <div>n/a</div>
+      <div>{{ telescopeConfiguration.positionAngle }}</div>
+      <div>{{ telescopeConfiguration.iterations }}</div>
+      <div>{{ ditherPatternDescription }}</div>
+    </div>
+  </div>
+</div>

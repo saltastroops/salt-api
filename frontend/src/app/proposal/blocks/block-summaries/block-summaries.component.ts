@@ -1,0 +1,15 @@
+import { Component, Input, OnInit } from '@angular/core';
+import { BlockSummary } from '../../../types/block';
+
+@Component({
+  selector: 'wm-block-summaries',
+  templateUrl: './block-summaries.component.html',
+  styleUrls: ['./block-summaries.component.scss'],
+})
+export class BlockSummariesComponent implements OnInit {
+  @Input() blocks!: BlockSummary[];
+  @Input() proposalCode!: string;
+  constructor() {}
+
+  ngOnInit(): void {}
+}

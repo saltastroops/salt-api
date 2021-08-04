@@ -1,0 +1,17 @@
+<h2 class="title is-2">Salticam Acquisition</h2>
+<hr class="heading-line salticam-header" />
+<div class="salticam">
+  <div class="has-two-columns">
+    <wm-salticam-general-info [salticam]="salticam"></wm-salticam-general-info>
+    <wm-salticam-observation-times
+      [salticam]="salticam"
+    ></wm-salticam-observation-times>
+  </div>
+
+  <div class="has-two-columns">
+    <wm-salticam-detector [detector]="salticam.detector"></wm-salticam-detector>
+    <salticam-wm-filters
+      [salticamExposures]="salticam.procedure.exposures"
+    ></salticam-wm-filters>
+  </div>
+</div>

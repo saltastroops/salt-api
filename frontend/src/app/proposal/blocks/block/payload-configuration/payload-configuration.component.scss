@@ -1,0 +1,11 @@
+@import "../../../../../styles";
+.used-in-container {
+  display: grid;
+  grid-row-gap: 1em;
+}
+
+.used-in-row {
+  display: grid;
+  grid-template-columns: repeat(2, 3fr) repeat(3, 1fr);
+  align-items: center;
+}

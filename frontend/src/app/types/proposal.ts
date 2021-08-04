@@ -38,7 +38,6 @@ export interface GeneralProposalInfo {
   liaisonSaltAstronomer: string;
   summaryForSaltAstronomer: string;
   summaryForNightLog: string;
-  observationComments: ObservationComment[];
 }
 
 export interface Investigator {
@@ -70,6 +69,7 @@ export interface Proposal {
   executedObservations: ExecutedObservation[];
   chargedTime: ChargedTime;
   timeAllocations: TimeAllocation[];
+  observationComments: ObservationComment[];
 }
 
 export interface ProposalListItem {

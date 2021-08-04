@@ -1,0 +1,8 @@
+.has-two-columns {
+  column-gap: 0;
+}
+
+.target-table {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}

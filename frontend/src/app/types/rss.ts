@@ -2,6 +2,7 @@ import { InstrumentSummary, Lamp } from './common';
 
 export interface ArcBibleEntry {
   lamp: Lamp;
+  isPreferredLamp: boolean;
   originalExposureTime: number;
   preferredExposureTime: number;
 }

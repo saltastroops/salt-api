@@ -15,7 +15,7 @@ export interface PeriodEphemeris {
 
 export interface Phase1Target extends Target {
   isOptional: boolean;
-  nVisits: number;
+  requestedObservations: number;
   maxLunarPhase: number;
   ranking: Ranking;
   nightCount: number;

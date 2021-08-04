@@ -11,7 +11,9 @@
         [totalObservationTime]="block.observationTime"
       ></wm-total-observation-time>
     </div>
-    <wm-observation-probabilities></wm-observation-probabilities>
+    <wm-observation-probabilities
+      [probabilities]="block.observationProbabilities"
+    ></wm-observation-probabilities>
   </div>
   <wm-priority-comment
     [comment]="block.comment"
@@ -20,7 +22,5 @@
   <wm-observing-windows
     [observingWindows]="block.observingWindows"
   ></wm-observing-windows>
-  <!--  TODO this component belong to the payload view will be moved accordingly-->
-  <wm-target></wm-target>
   <wm-observation></wm-observation>
 </div>

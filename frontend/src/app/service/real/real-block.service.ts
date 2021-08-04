@@ -3,8 +3,9 @@ import { BlockService } from '../block.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { Block } from '../../types/block';
+import * as camelcaseKeys from 'camelcase-keys';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +21,9 @@ export class RealBlockService implements BlockService {
    * @param id Block id.
    */
   getBlock(id: number): Observable<Block> {
-    const uri = environment.apiUrl + '/block/' + id;
+    const uri = environment.apiUrl + '/blocks/' + id;
     return this.http.get<Block>(uri).pipe(
+      map((block: Block) => camelcaseKeys(block, { deep: true })),
       catchError(() => {
         return throwError('The request has failed.');
       })

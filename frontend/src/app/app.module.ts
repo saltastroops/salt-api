@@ -15,7 +15,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { nl2brPipe } from './nl2br.pipe';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
 import { BlockService } from './service/block.service';
-import { MockBlockService } from './mock/service/mock-block.service';
 import { TooltipModule } from 'ng2-tooltip-directive';
 import { RssSpectroscopyComponent } from './proposal/instruments/rss/rss-spectroscopy/rss-spectroscopy.component';
 import { RssSlitMaskComponent } from './proposal/instruments/rss/rss-slit-mask/rss-slit-mask.component';
@@ -60,6 +59,7 @@ import { BlockSummariesComponent } from './proposal/blocks/block-summaries/block
 import { ProposalDetailsComponent } from './proposal/general/proposal-details/proposal-details.component';
 import { BlockSelectionComponent } from './proposal/blocks/block-view/block-selection/block-selection.component';
 import { BlockViewComponent } from './proposal/blocks/block-view/block-view.component';
+import { RealBlockService } from './service/real/real-block.service';
 
 @NgModule({
   declarations: [
@@ -128,7 +128,7 @@ import { BlockViewComponent } from './proposal/blocks/block-view/block-view.comp
   ],
   providers: [
     { provide: ProposalService, useClass: RealProposalService },
-    { provide: BlockService, useClass: MockBlockService },
+    { provide: BlockService, useClass: RealBlockService },
   ],
   bootstrap: [AppComponent],
 })

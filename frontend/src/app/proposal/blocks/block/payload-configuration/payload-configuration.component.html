@@ -1,31 +1,56 @@
-<h2 class="title is-4">
+<h2 class="title is-3">
   {{ instrument }} {{ payloadConfiguration.payloadConfigurationType }} -
   Configuration #{{ payloadConfigurationIndex + 1 }}
 </h2>
 <hr class="heading-line {{ headerLine }}" />
-<div class="used-in-container">
-  <div>
-    <p>
-      <b>Guided method:</b> {{ payloadConfiguration.guideMethod || "None" }}
-    </p>
-  </div>
+<div class="payload-configuration-container">
   <div class="table">
     <div class="row secondary-header">
-      <div class="has-text-centered">Used in</div>
+      <div class="has-text-centered">Telescope/Payload configuration</div>
     </div>
-    <div class="row headers used-in-row">
-      <div>Block</div>
-      <div>Observation</div>
+    <div class="row headers payload-configuration-row">
+      <div>Guide method</div>
       <div>PA</div>
       <div>Iterations</div>
       <div>Dither</div>
     </div>
-    <div class="row used-in-row">
-      <div>n/a</div>
-      <div>n/a</div>
+    <div class="row payload-configuration-row">
+      <div>{{ payloadConfiguration.guideMethod || "None" }}</div>
       <div>{{ telescopeConfiguration.positionAngle }}</div>
       <div>{{ telescopeConfiguration.iterations }}</div>
       <div>{{ ditherPatternDescription }}</div>
     </div>
+  </div>
+
+  <div *ngIf="payloadConfiguration.instruments.salticam">
+    <wm-salticam
+      *ngFor="let salticam of payloadConfiguration.instruments.salticam"
+      [salticam]="salticam"
+      [payloadConfiguration]="payloadConfiguration"
+    ></wm-salticam>
+  </div>
+
+  <div *ngIf="payloadConfiguration.instruments.rss">
+    <wm-rss
+      *ngFor="let rss of payloadConfiguration.instruments.rss"
+      [rss]="rss"
+      [payloadConfiguration]="payloadConfiguration"
+    ></wm-rss>
+  </div>
+
+  <div *ngIf="payloadConfiguration.instruments.hrs">
+    <wm-hrs
+      *ngFor="let hrs of payloadConfiguration.instruments.hrs"
+      [hrs]="hrs"
+      [payloadConfiguration]="payloadConfiguration"
+    ></wm-hrs>
+  </div>
+
+  <div *ngIf="payloadConfiguration.instruments.bvit">
+    <wm-bvit
+      *ngFor="let bvit of payloadConfiguration.instruments.bvit"
+      [bvit]="bvit"
+      [payloadConfiguration]="payloadConfiguration"
+    ></wm-bvit>
   </div>
 </div>

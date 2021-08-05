@@ -8,12 +8,11 @@
     <div>Exposure time</div>
   </div>
   <div class="row filters" *ngFor="let f of salticamExposures">
-    <div>n/a</div>
-    <div>{{ f.filter }}</div>
+    <div>{{ f.filter.name }}</div>
+    <div>{{ f.filter.description }}</div>
     <div>{{ f.exposureTime }} sec</div>
   </div>
   <div class="row filters-row">
     <div>The filter is current unavailable</div>
   </div>
-  <div class="row">Plot of filter cycle</div>
 </div>

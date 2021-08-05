@@ -3,6 +3,7 @@ import { Salticam } from './salticam';
 import { Rss } from './rss';
 import { Hrs } from './hrs';
 import { Bvit } from './bvit';
+import { Target } from './target';
 
 export type CalibrationFilter =
   | 'Blue and Red'
@@ -22,7 +23,7 @@ export interface DitherPattern {
 
 export interface FinderChart {
   id: number;
-  comments: string | null;
+  comment: string | null;
   validFrom: string | null;
   validUntil: string | null;
 }
@@ -52,6 +53,7 @@ export interface Observation {
   observationTime: number;
   overheadTime: number;
   finderCharts: FinderChart[];
+  target: Target;
   timeRestrictions: TimeInterval[] | null;
   phaseConstraints: PhaseInterval[] | null;
   telescopeConfigurations: TelescopeConfiguration[];

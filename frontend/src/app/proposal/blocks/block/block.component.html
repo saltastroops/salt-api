@@ -22,5 +22,8 @@
   <wm-observing-windows
     [observingWindows]="block.observingWindows"
   ></wm-observing-windows>
-  <wm-observation></wm-observation>
+  <wm-observation
+    *ngFor="let o of block.observations"
+    [observation]="o"
+  ></wm-observation>
 </div>

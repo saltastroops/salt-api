@@ -35,7 +35,7 @@ export interface GeneralProposalInfo {
   targetOfOpportunity: boolean;
   totalRequestedTime: number;
   dataReleaseDate: string;
-  liaisonSaltAstronomer: string;
+  liaisonSaltAstronomer: ContactDetails;
   summaryForSaltAstronomer: string;
   summaryForNightLog: string;
 }

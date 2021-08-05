@@ -91,6 +91,7 @@ export type RssGrating =
 
 export interface RssMask {
   barcode: string;
+  description: string | null;
   maskType: RssMaskType;
 }
 

@@ -3,8 +3,8 @@
 
 <div class="table alternate-background">
   <div class="investigator-row headers row">
-    <div>PC</div>
     <div>PI</div>
+    <div>PC</div>
     <div>Name</div>
     <div>Partner</div>
     <div>Institution</div>
@@ -17,14 +17,6 @@
       [class.is-green-background]="i.hasApprovedProposal === true"
       [class.is-red-background]="i.hasApprovedProposal === false"
     >
-      <div *ngIf="i.isPc">
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262.svg"
-          alt="is proposal contact."
-        />
-      </div>
-      <div *ngIf="!i.isPc"></div>
       <div *ngIf="i.isPi">
         <img
           class="icon"
@@ -33,7 +25,15 @@
         />
       </div>
       <div *ngIf="!i.isPi"></div>
-      <div>{{ i.givenName + ' ' + i.familyName}}</div>
+      <div *ngIf="i.isPc">
+        <img
+          class="icon"
+          src="/assets/icons/noun_tick_2836262.svg"
+          alt="is proposal contact."
+        />
+      </div>
+      <div *ngIf="!i.isPc"></div>
+      <div>{{ i.givenName + " " + i.familyName }}</div>
       <div>{{ i.affiliation.partnerName }}</div>
       <div>{{ i.affiliation.institute }}</div>
       <div>{{ i.affiliation.department }}</div>

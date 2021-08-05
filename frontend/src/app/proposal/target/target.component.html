@@ -13,10 +13,14 @@
   </div>
   <div class="row target-table">
     <div>{{ target.name }}</div>
-    <div>{{ target.type }}</div>
-    <div>{{ target.equinox }}</div>
-    <div>{{ target.magnitude }}</div>
-    <div>{{ target.declination }}</div>
-    <div>{{ target.rightAscension }}</div>
+    <div>{{ target.targetType }}</div>
+    <div>{{ target.coordinates?.equinox }}</div>
+    <div>
+      {{ target.magnitude?.minimumMagnitude }} -
+      {{ target.magnitude?.maximumMagnitude }}
+      <span *ngIf="target.magnitude">({{ target.magnitude.bandpass }})</span>
+    </div>
+    <div>{{ target.coordinates?.rightAscension }}&deg;</div>
+    <div>{{ target.coordinates?.declination }}&deg;</div>
   </div>
 </div>

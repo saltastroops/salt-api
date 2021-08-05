@@ -8,7 +8,9 @@
     <div>Corrected Exp. time</div>
   </div>
   <div *ngFor="let ab of arcBibleEntries" class="row has-three-columns">
-    <div>{{ ab.lamp }}</div>
+    <div>
+      {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
+    </div>
     <div>{{ ab.originalExposureTime }} sec</div>
     <div>{{ ab.preferredExposureTime }} sec</div>
   </div>

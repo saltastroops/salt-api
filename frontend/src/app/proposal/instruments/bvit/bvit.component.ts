@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Bvit } from '../../../types/bvit';
+import { PayloadConfiguration } from '../../../types/observation';
 
 @Component({
   selector: 'wm-bvit',
@@ -8,6 +9,7 @@ import { Bvit } from '../../../types/bvit';
 })
 export class BvitComponent implements OnInit {
   @Input() bvit!: Bvit;
+  @Input() payloadConfiguration!: PayloadConfiguration;
 
   constructor() {}
 

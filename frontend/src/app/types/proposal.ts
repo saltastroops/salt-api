@@ -100,7 +100,7 @@ export type ProposalStatus =
 
 export type ProposalType =
   | 'Commissioning'
-  | 'Director’s Discretionary Time'
+  | "Director's Discretionary Time"
   | 'Engineering'
   | 'Gravitational Wave Event'
   | 'Key Science Program'

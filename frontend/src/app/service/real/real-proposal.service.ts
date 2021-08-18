@@ -44,7 +44,7 @@ export class RealProposalService implements ProposalService {
         );
       }),
       catchError(() => {
-        return throwError('The request has failed.');
+        return throwError('Oops. Something is wrong.');
       })
     );
   }

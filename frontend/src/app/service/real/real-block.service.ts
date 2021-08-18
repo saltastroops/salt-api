@@ -25,7 +25,7 @@ export class RealBlockService implements BlockService {
     return this.http.get<Block>(uri).pipe(
       map((block: Block) => camelcaseKeys(block, { deep: true })),
       catchError(() => {
-        return throwError('The request has failed.');
+        return throwError('Oops. Something is wrong.');
       })
     );
   }

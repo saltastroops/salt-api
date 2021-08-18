@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import {
   PayloadConfiguration,
   TelescopeConfiguration,
@@ -9,7 +9,7 @@ import {
   templateUrl: './payload-configuration.component.html',
   styleUrls: ['./payload-configuration.component.scss'],
 })
-export class PayloadConfigurationComponent implements OnInit {
+export class PayloadConfigurationComponent implements OnInit, OnChanges {
   @Input() telescopeConfiguration!: TelescopeConfiguration;
   @Input() payloadConfigurationIndex!: number;
 
@@ -20,29 +20,56 @@ export class PayloadConfigurationComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  ngOnChanges() {
     this.payloadConfiguration = this.telescopeConfiguration.payloadConfigurations[
       this.payloadConfigurationIndex
     ];
+
     const instruments = this.payloadConfiguration.instruments;
     if (instruments.salticam) {
       this.instrument = 'Salticam';
-      this.headerLine = 'salticam-header-config-color';
     } else if (instruments.rss) {
       this.instrument = 'RSS';
-      this.headerLine = 'rss-header-config-color';
     } else if (instruments.hrs) {
       this.instrument = 'HRS';
-      this.headerLine = 'hrs-header-config-color';
     } else if (instruments.bvit) {
       this.instrument = 'BVIT';
-      this.headerLine = 'bvit-header-config-color';
     }
+
+    this.headerLine = this.instrument.toLowerCase() + '-';
+    if (
+      this.payloadConfiguration.payloadConfigurationType ===
+      'Instrument Acquisition'
+    ) {
+      this.headerLine += 'acquisition';
+    } else if (this.payloadConfiguration.payloadConfigurationType) {
+      this.headerLine += this.payloadConfiguration.payloadConfigurationType.toLowerCase();
+    } else {
+      this.headerLine += 'unknown';
+    }
+    this.headerLine += '-config-color';
+
     const dp = this.telescopeConfiguration.ditherPattern;
     this.ditherPatternDescription = dp
       ? `${dp.horizontalTiles} h.t. x ${
           dp.verticalTiles
         } v.t., ${dp.offsetSize.toFixed(1)} arcsec, ${dp.steps} dithers`
       : '';
+  }
+
+  headerLineBackgroundColor(payloadConfiguration: PayloadConfiguration) {
+    switch (this.payloadConfiguration.payloadConfigurationType) {
+      case 'Science':
+        this.headerLine = 'rss-config-color';
+        break;
+      case 'Calibration':
+        this.headerLine = 'rss--config-color';
+        break;
+      case 'Acquisition':
+        this.headerLine = 'rss-header-config-color';
+        break;
+    }
   }
 }

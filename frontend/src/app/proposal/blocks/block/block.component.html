@@ -1,3 +1,6 @@
+<h2 class="title is-2">Block {{ block.name }}</h2>
+<hr class="heading-line block-header" />
+
 <div class="block">
   <wm-observing-conditions [block]="block"></wm-observing-conditions>
   <div class="has-two-columns">
@@ -8,7 +11,9 @@
         [totalObservationTime]="block.observationTime"
       ></wm-total-observation-time>
     </div>
-    <wm-observation-probabilities></wm-observation-probabilities>
+    <wm-observation-probabilities
+      [probabilities]="block.observationProbabilities"
+    ></wm-observation-probabilities>
   </div>
   <wm-priority-comment
     [comment]="block.comment"
@@ -17,16 +22,8 @@
   <wm-observing-windows
     [observingWindows]="block.observingWindows"
   ></wm-observing-windows>
-  <!--  TODO this component belong to the payload view will be moved accordingly-->
-  <wm-observation></wm-observation>
-  <wm-target></wm-target>
-  <!--  TODO below configurations should go to the RSS View component it is controlled there-->
-  <div class="row headers">
-    <div class="has-text-centered">Polarimetry</div>
-  </div>
-  <div class="has-two-columns">
-    <wm-polarimetric-imaging></wm-polarimetric-imaging>
-    <wm-polarimetry></wm-polarimetry>
-  </div>
-  <!--  TODO above configurations should go to the RSS View component it is controlled there-->
+  <wm-observation
+    *ngFor="let o of block.observations"
+    [observation]="o"
+  ></wm-observation>
 </div>

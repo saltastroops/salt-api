@@ -2,6 +2,7 @@ import { InstrumentSummary, Lamp } from './common';
 
 export interface ArcBibleEntry {
   lamp: Lamp;
+  isPreferredLamp: boolean;
   originalExposureTime: number;
   preferredExposureTime: number;
 }
@@ -90,6 +91,7 @@ export type RssGrating =
 
 export interface RssMask {
   barcode: string;
+  description: string | null;
   maskType: RssMaskType;
 }
 

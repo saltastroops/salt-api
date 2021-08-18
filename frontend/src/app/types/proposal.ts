@@ -9,13 +9,6 @@ export interface Affiliation {
   department: string;
 }
 
-interface BaseProposal {
-  proposalCode: string;
-  semester: string;
-  generalInfo: GeneralProposalInfo;
-  investigators: Investigator[];
-}
-
 export interface ChargedTime {
   priority0: number;
   priority1: number;
@@ -42,10 +35,9 @@ export interface GeneralProposalInfo {
   targetOfOpportunity: boolean;
   totalRequestedTime: number;
   dataReleaseDate: string;
-  liaisonSaltAstronomer: string;
+  liaisonSaltAstronomer: ContactDetails;
   summaryForSaltAstronomer: string;
   summaryForNightLog: string;
-  observationComments: ObservationComment[];
 }
 
 export interface Investigator {
@@ -62,24 +54,23 @@ export interface Investigator {
 export interface ObservationComment {
   author: string;
   comment: string;
-  madeAt: string;
+  commentDate: string;
 }
 
-export interface Phase1Proposal extends BaseProposal {
+export interface Proposal {
+  proposalCode: string;
   phase: 1;
-  targets: Phase1Target[];
-  requestedTimes: RequestedTime[];
-}
-
-export interface Phase2Proposal extends BaseProposal {
-  phase: 2;
+  semester: string;
+  generalInfo: GeneralProposalInfo;
+  investigators: Investigator[];
+  targets: Phase1Target[] | null;
+  requestedTimes: RequestedTime[] | null;
   blocks: BlockSummary[];
   executedObservations: ExecutedObservation[];
   chargedTime: ChargedTime;
   timeAllocations: TimeAllocation[];
+  observationComments: ObservationComment[];
 }
-
-export type Proposal = Phase1Proposal | Phase2Proposal;
 
 export interface ProposalListItem {
   id: number;
@@ -109,7 +100,7 @@ export type ProposalStatus =
 
 export type ProposalType =
   | 'Commissioning'
-  | 'Director’s Discretionary Time'
+  | "Director's Discretionary Time"
   | 'Engineering'
   | 'Gravitational Wave Event'
   | 'Key Science Program'

@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Phase2Proposal } from '../types/proposal';
+import { Proposal, ProposalListItem } from '../types/proposal';
 
 export abstract class ProposalService {
   /**
@@ -8,5 +8,12 @@ export abstract class ProposalService {
    *
    * @param proposalCode Proposal code.
    */
-  public abstract getProposal(proposalCode: string): Observable<Phase2Proposal>;
+  public abstract getProposal(proposalCode: string): Observable<Proposal>;
+
+  /**
+   * Get a list of proposals from the API server.
+   *
+   * If the request fails the stream terminates with a generic error message as error.
+   */
+  public abstract getProposals(): Observable<ProposalListItem[]>;
 }

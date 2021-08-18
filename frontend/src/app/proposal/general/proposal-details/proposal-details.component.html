@@ -62,12 +62,14 @@
           <div class="has-text-centered">Responsible SALT Astronomer:</div>
         </div>
         <div class="row proposal-details-row">
-          <div>
+          <div *ngIf="generalProposalInfo.liaisonSaltAstronomer">
             <a>
               <!--      TODO Send email.-->
-              {{ generalProposalInfo.liaisonSaltAstronomer }}
+              {{ generalProposalInfo.liaisonSaltAstronomer.givenName }}
+              {{ generalProposalInfo.liaisonSaltAstronomer.familyName }}
             </a>
           </div>
+          <div *ngIf="!generalProposalInfo.liaisonSaltAstronomer">None</div>
           <div class="">
             <button class="is-pulled-right button is-small">Edit</button>
           </div>

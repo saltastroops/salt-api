@@ -6,7 +6,7 @@
       <div class="comment-author">
         <span class="author">{{ c.author + " " }}</span>
         <span class="made-at">
-          {{ parseDate(c.madeAt) | dfnsFormat: "d MMMM yyyy H:mm" }}
+          {{ parseDate(c.commentDate) | dfnsFormat: "d MMMM yyyy" }}
         </span>
       </div>
       <p [innerHTML]="c.comment | nl2br"></p>

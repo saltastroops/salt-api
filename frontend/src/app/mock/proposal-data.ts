@@ -1,4 +1,4 @@
-import { Proposal } from '../types';
+import { Proposal } from '../types/proposal';
 
 export const proposal: any = {
   investigators: [

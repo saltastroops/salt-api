@@ -28,7 +28,13 @@
       <span *ngIf="detector.detectorWindow">{{
         detector.detectorWindow?.height
       }}</span>
-      <span *ngIf="detector.detectorWindow">No Window</span>
+      <span
+        *ngIf="
+          detector.detectorWindow === null ||
+          detector.detectorWindow.height !== null
+        "
+        >No Window</span
+      >
     </div>
   </div>
 </div>

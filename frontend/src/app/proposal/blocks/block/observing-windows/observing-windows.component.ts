@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import {
   addDays,
   subDays,
@@ -15,7 +15,7 @@ type ObservingWindow = { start: Date; end: Date };
   templateUrl: './observing-windows.component.html',
   styleUrls: ['./observing-windows.component.scss'],
 })
-export class ObservingWindowsComponent implements OnInit {
+export class ObservingWindowsComponent implements OnInit, OnChanges {
   @Input('observingWindows') stringObservingWindows!: TimeInterval[];
 
   observingWindows!: ObservingWindow[];
@@ -25,7 +25,9 @@ export class ObservingWindowsComponent implements OnInit {
   differenceInSeconds = differenceInSeconds; // It needs to be an attribute of the class to be used in the template.
   constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit() {}
+
+  ngOnChanges(): void {
     this.observingWindows = this.stringObservingWindows.map(
       ({ start, end }) => ({ start: parseISO(start), end: parseISO(end) })
     );

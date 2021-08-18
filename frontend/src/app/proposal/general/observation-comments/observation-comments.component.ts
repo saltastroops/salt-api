@@ -3,7 +3,7 @@ import { ObservationComment } from '../../../types/proposal';
 import { parseISO } from 'date-fns';
 
 @Component({
-  selector: 'wm-proposal-comments',
+  selector: 'wm-observation-comments',
   templateUrl: './observation-comments.component.html',
   styleUrls: ['./observation-comments.component.scss'],
 })

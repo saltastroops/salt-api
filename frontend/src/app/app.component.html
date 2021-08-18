@@ -1,3 +1,26 @@
-<div class="container">
-  <router-outlet></router-outlet>
+<div class="logo">
+  <div class="salt_logo"></div>
+  <div class="salt_image right"></div>
+</div>
+<div class="header">
+  <div class="left">
+    <a [routerLink]="['/']">Home</a>
+    <!--    <input type="button" id="login" value="Login"/>-->
+    <!--    <input type="button" id="register" value="Register new user"/>-->
+  </div>
+  <!--  <div class="right">-->
+  <!--    <input type="text" id="username" placeholder="Username"/>-->
+  <!--    <input type="text" id="password" placeholder="Password"/>-->
+  <!--    <input type="button" id="login_details" value="Login"/>-->
+  <!--  </div>-->
+</div>
+
+<div class="body">
+  <div class="container">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<div class="footer">
+  <p>© SAAO 2021</p>
 </div>

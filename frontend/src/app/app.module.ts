@@ -1,5 +1,7 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
+import { Router } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
+import * as Sentry from '@sentry/angular';
 import { DateFnsModule } from 'ngx-date-fns';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -133,6 +135,17 @@ import { RealAuthenticationService } from './service/real/real-authentication.se
     DateFnsModule.forRoot(),
   ],
   providers: [
+    { provide: ErrorHandler,
+      useValue: Sentry.createErrorHandler(
+        {showDialog: true,
+        }),
+    },
+    { provide: Sentry.TraceService, deps: [Router] },
+    { provide: APP_INITIALIZER,
+      useFactory: () => () => {},
+      deps: [Sentry.TraceService],
+      multi: true
+    },
     { provide: ProposalService, useClass: RealProposalService },
     { provide: BlockService, useClass: RealBlockService },
     { provide: AuthenticationService, useClass: RealAuthenticationService },

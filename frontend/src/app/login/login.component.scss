@@ -1,0 +1,24 @@
+@import "src/styles";
+.login-page {
+  margin: auto;
+  width: 40%;
+  border: 1px solid $table-border-color;;
+  padding: 10px;
+}
+
+.invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: .25rem;
+  font-size: 80%;
+  color: $danger;
+}
+
+.input-section{
+  margin-bottom: 1em;
+}
+
+.login-form {
+  display: grid;
+  justify-content: center;
+}

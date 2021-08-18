@@ -25,7 +25,9 @@ export class RealProposalService implements ProposalService {
     return this.http.get<Proposal>(uri).pipe(
       map((proposal: Proposal) => camelcaseKeys(proposal, { deep: true })),
       catchError(() => {
-        return throwError('The request has failed.');
+        return throwError(
+          `The request to get proposal "${proposalCode}" has failed.`
+        );
       })
     );
   }

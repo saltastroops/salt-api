@@ -8,7 +8,7 @@ import { HomeComponent } from './home/home.component';
 import { ProposalComponent } from './proposal/proposal.component';
 import { InvestigatorsComponent } from './proposal/investigators/investigators.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ProposalService } from './service/proposal.service';
 import { RealProposalService } from './service/real/real-proposal.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -59,7 +59,12 @@ import { BlockSummariesComponent } from './proposal/blocks/block-summaries/block
 import { ProposalDetailsComponent } from './proposal/general/proposal-details/proposal-details.component';
 import { BlockSelectionComponent } from './proposal/blocks/block-view/block-selection/block-selection.component';
 import { BlockViewComponent } from './proposal/blocks/block-view/block-view.component';
+import { LoginComponent } from './login/login.component';
+import { AuthGuardService } from './service/auth-guard.service';
+import { AuthenticationInterceptor } from './service/authentication.interceptor.service';
 import { RealBlockService } from './service/real/real-block.service';
+import { AuthenticationService } from './service/authentication.service';
+import { RealAuthenticationService } from './service/real/real-authentication.service';
 
 @NgModule({
   declarations: [
@@ -115,6 +120,7 @@ import { RealBlockService } from './service/real/real-block.service';
     PolarimetricImagingComponent,
     EtalonWavelengthsComponent,
     FabryPerotComponent,
+    LoginComponent,
   ],
   imports: [
     BrowserModule,
@@ -129,6 +135,13 @@ import { RealBlockService } from './service/real/real-block.service';
   providers: [
     { provide: ProposalService, useClass: RealProposalService },
     { provide: BlockService, useClass: RealBlockService },
+    { provide: AuthenticationService, useClass: RealAuthenticationService },
+    { provide: AuthGuardService, useClass: AuthGuardService },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthenticationInterceptor,
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })

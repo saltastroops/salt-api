@@ -1,0 +1,48 @@
+<div class="login-form">
+  <h2 class="title is-3">Login</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <div class="form-group input-section">
+      <label class="label">Username</label>
+      <input
+        (ngModelChange)="clearError()"
+        type="text"
+        formControlName="username"
+        class="input"
+        [ngClass]="{ 'is-danger': submitted && f.username.errors }"
+      />
+      <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+        <div *ngIf="f.username.errors.required" class="has-text-danger">
+          Username is required
+        </div>
+      </div>
+    </div>
+    <div class="input-section">
+      <div class="form-group">
+        <label class="label">Password</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="password"
+          formControlName="password"
+          class="input"
+          [ngClass]="{ 'is-danger': submitted && f.password.errors }"
+        />
+        <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+          <div *ngIf="f.password.errors.required" class="has-text-danger">
+            Password is required
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="form-group">
+        <button class="button is-primary {{ loading ? 'is-loading' : '' }}">
+          Login
+        </button>
+        <div *ngIf="error">
+          <p class="has-text-danger">{{ error }}</p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

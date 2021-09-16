@@ -11,7 +11,7 @@ prettier: ## format JavaScript code
 	npx prettier --write .
 
 prettier-staged: ## format staged JavaScript files
-	npm run pretty-quick:staged
+	npx pretty-quick --staged
 
 test: ## run various tests (but no end-to-end tests)
 	npx prettier --check cypress

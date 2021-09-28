@@ -1,4 +1,4 @@
-const LOGIN_URL = '/login';
+export const LOGIN_URL = '/login';
 
 const USERNAME_INPUT = "[data-test='login-username']";
 const PASSWORD_INPUT = "[data-test='login-password']";
@@ -38,5 +38,9 @@ export class LoginPage {
 
   static submit() {
     cy.get("[data-test='login-submit']").click();
+  }
+
+  static hasGenericError() {
+    cy.get("[data-test='error']").should('contain', 'wrong');
   }
 }

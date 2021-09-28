@@ -1,8 +1,15 @@
 import { Given, Then, When } from 'cypress-cucumber-preprocessor/steps';
-import { LoginPage } from '../pages/login-page';
+import { LOGIN_URL, LoginPage } from '../pages/login-page';
+import { getUserPassword, updateUserPassword } from '../utils';
 
-Given(/^I am on the login page$/, () => {
+const USERNAME = 'hettlage';
+
+Given('I am on the login page', () => {
   LoginPage.visit();
+});
+
+Given('I change the user password', () => {
+  updateUserPassword(USERNAME);
 });
 
 When('I enter the username {string}', (username) => {
@@ -29,6 +36,19 @@ When('I get a password error', () => {
   LoginPage.hasPasswordError();
 });
 
+When('I enter the username and password', () => {
+  LoginPage.typeUsername(USERNAME);
+  LoginPage.typePassword(getUserPassword(USERNAME));
+});
+
 When('I submit the form', () => {
   LoginPage.submit();
+});
+
+Then('another page is loaded', () => {
+  cy.url().should('not.contain', LOGIN_URL);
+});
+
+Then('I get a generic error', () => {
+  LoginPage.hasGenericError();
 });

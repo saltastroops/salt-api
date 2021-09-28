@@ -26,3 +26,26 @@ Feature: Logging in
     When I enter the password "secret"
     And I remove the password
     Then I get a password error
+
+  Scenario: Logging in with a server error
+
+    Given I change the user password
+    And there is a server error
+    When I enter the username and password
+    And I submit the form
+    Then I get a generic error
+
+  Scenario: Logging in with a network failure
+
+    Given I change the user password
+    And there is a network error
+    When I enter the username and password
+    And I submit the form
+    Then I get a generic error
+
+  Scenario: I login
+
+    Given I change the user password
+    When I enter the username and password
+    And I submit the form
+    Then another page is loaded

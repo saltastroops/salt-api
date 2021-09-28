@@ -9,9 +9,14 @@
         formControlName="username"
         class="input"
         data-test="login-username"
-        [ngClass]="{ 'is-danger': submitted && f.username.errors }"
+        [ngClass]="{
+          'is-danger': (f.username.dirty || submitted) && f.username.errors
+        }"
       />
-      <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+      <div
+        *ngIf="(f.username.dirty || submitted) && f.username.errors"
+        class="invalid-feedback"
+      >
         <div
           *ngIf="f.username.errors.required"
           class="has-text-danger"
@@ -27,12 +32,17 @@
         <input
           (ngModelChange)="clearError()"
           type="password"
-          formControlName="login-password"
+          formControlName="password"
           class="input"
-          data-test="password"
-          [ngClass]="{ 'is-danger': submitted && f.password.errors }"
+          data-test="login-password"
+          [ngClass]="{
+            'is-danger': (f.password.dirty || submitted) && f.password.errors
+          }"
         />
-        <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+        <div
+          *ngIf="(f.password.dirty || submitted) && f.password.errors"
+          class="invalid-feedback"
+        >
           <div
             *ngIf="f.password.errors.required"
             class="has-text-danger"

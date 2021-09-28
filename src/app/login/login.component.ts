@@ -70,6 +70,9 @@ export class LoginComponent implements OnInit {
           // error response with status code 401.
           if (error.status === 401) {
             this.error = 'Username or password is incorrect.';
+          } else {
+            this.error =
+              'Sorry, something has gone wrong. Please try again later.';
           }
           this.loading = false;
         }

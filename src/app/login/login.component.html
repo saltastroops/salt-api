@@ -8,10 +8,15 @@
         type="text"
         formControlName="username"
         class="input"
+        data-test="login-username"
         [ngClass]="{ 'is-danger': submitted && f.username.errors }"
       />
       <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
-        <div *ngIf="f.username.errors.required" class="has-text-danger">
+        <div
+          *ngIf="f.username.errors.required"
+          class="has-text-danger"
+          data-test="error"
+        >
           Username is required
         </div>
       </div>
@@ -22,12 +27,17 @@
         <input
           (ngModelChange)="clearError()"
           type="password"
-          formControlName="password"
+          formControlName="login-password"
           class="input"
+          data-test="password"
           [ngClass]="{ 'is-danger': submitted && f.password.errors }"
         />
         <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
-          <div *ngIf="f.password.errors.required" class="has-text-danger">
+          <div
+            *ngIf="f.password.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
             Password is required
           </div>
         </div>
@@ -36,11 +46,14 @@
 
     <div class="input-section">
       <div class="form-group">
-        <button class="button is-primary {{ loading ? 'is-loading' : '' }}">
+        <button
+          class="button is-primary {{ loading ? 'is-loading' : '' }}"
+          data-test="login-submit"
+        >
           Login
         </button>
         <div *ngIf="error">
-          <p class="has-text-danger">{{ error }}</p>
+          <p class="has-text-danger" data-test="error">{{ error }}</p>
         </div>
       </div>
     </div>

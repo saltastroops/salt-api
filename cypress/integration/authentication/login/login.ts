@@ -1,6 +1,6 @@
 import { Given, Then, When } from 'cypress-cucumber-preprocessor/steps';
-import { LOGIN_URL, LoginPage } from '../pages/login-page';
-import { getUserPassword, updateUserPassword } from '../utils';
+import { LOGIN_URL, LoginPage } from '../../pages/login-page';
+import { getUserPassword, updateUserPassword } from '../../utils';
 
 const USERNAME = 'hettlage';
 

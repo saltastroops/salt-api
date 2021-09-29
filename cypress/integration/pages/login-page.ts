@@ -2,6 +2,7 @@ export const LOGIN_URL = '/login';
 
 const USERNAME_INPUT = "[data-test='login-username']";
 const PASSWORD_INPUT = "[data-test='login-password']";
+const ERROR = "[data-test='error']";
 
 export class LoginPage {
   static visit() {
@@ -17,7 +18,7 @@ export class LoginPage {
   }
 
   static hasUsernameError() {
-    cy.get("[data-test='error']")
+    cy.get(ERROR)
       .contains(/username/i)
       .should('exist');
   }
@@ -31,7 +32,7 @@ export class LoginPage {
   }
 
   static hasPasswordError() {
-    cy.get("[data-test='error']")
+    cy.get(ERROR)
       .contains(/password/i)
       .should('exist');
   }
@@ -41,6 +42,12 @@ export class LoginPage {
   }
 
   static hasGenericError() {
-    cy.get("[data-test='error']").should('contain', 'wrong');
+    cy.get(ERROR).should('contain', 'wrong');
+  }
+
+  static hasUsernameOrPasswordError() {
+    cy.get(ERROR)
+      .contains(/username or password/i)
+      .should('exist');
   }
 }

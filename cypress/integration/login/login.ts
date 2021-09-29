@@ -41,6 +41,11 @@ When('I enter the username and password', () => {
   LoginPage.typePassword(getUserPassword(USERNAME));
 });
 
+When('I enter the username and a wrong password', () => {
+  LoginPage.typeUsername(USERNAME);
+  LoginPage.typePassword('incorrect');
+});
+
 When('I submit the form', () => {
   LoginPage.submit();
 });
@@ -51,4 +56,8 @@ Then('another page is loaded', () => {
 
 Then('I get a generic error', () => {
   LoginPage.hasGenericError();
+});
+
+Then('I get a username or password error', () => {
+  LoginPage.hasUsernameOrPasswordError();
 });

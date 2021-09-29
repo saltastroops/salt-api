@@ -43,6 +43,12 @@ Feature: Logging in
     And I submit the form
     Then I get a generic error
 
+  Scenario: Trying to login with incoprrect credentials
+
+    When I enter the username and a wrong password
+    And I submit the form
+    Then I get a username or password error
+
   Scenario: I login
 
     Given I change the user password

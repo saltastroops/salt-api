@@ -7,6 +7,7 @@ import { AccessToken } from '../../types/authentication';
 import * as camelcaseKeys from 'camelcase-keys';
 import { AuthenticationService, Redirection } from '../authentication.service';
 import { parseISO } from 'date-fns';
+import { storeAccessToken } from '../../utils';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +26,6 @@ export class RealAuthenticationService implements AuthenticationService {
   login(username: string, password: string): Observable<AccessToken> {
     const uri = environment.apiUrl + '/token';
     const headers = new HttpHeaders({
-      Authorization: 'Bearer x',
       'Content-type': 'application/x-www-form-urlencoded',
     });
 
@@ -50,6 +50,10 @@ export class RealAuthenticationService implements AuthenticationService {
       return false;
     }
     return this.isTokenValid();
+  }
+
+  setAccessToken(tokenData: AccessToken): void {
+    storeAccessToken(tokenData);
   }
 
   getAccessToken(): string | null {

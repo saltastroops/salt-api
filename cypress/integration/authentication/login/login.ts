@@ -1,10 +1,19 @@
 import { Given, Then, When } from 'cypress-cucumber-preprocessor/steps';
 import { LOGIN_URL, LoginPage } from '../../pages/login-page';
-import { getUserPassword, updateUserPassword } from '../../utils';
+import { getUserPassword, login, updateUserPassword } from '../../utils';
 
 const USERNAME = 'hettlage';
 
-Given('I am on the login page', () => {
+Given('I am logged in', () => {
+  login(USERNAME);
+});
+
+Given('I go to the login page', () => {
+  cy.log(localStorage['accessToken']);
+  LoginPage.visit();
+});
+
+When('I go to the login page', () => {
   LoginPage.visit();
 });
 

@@ -1,7 +1,7 @@
 Feature: Logging in
 
   Background:
-    Given I am on the login page
+    Given I go to the login page
 
   Scenario: I try to login with no username
 
@@ -54,4 +54,10 @@ Feature: Logging in
     Given I change the user password
     When I enter the username and password
     And I submit the form
+    Then another page is loaded
+
+  Scenario: I try to login even though I'm logged in already
+
+    Given I am logged in
+    When I go to the login page
     Then another page is loaded

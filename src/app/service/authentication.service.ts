@@ -17,6 +17,8 @@ export abstract class AuthenticationService {
 
   public abstract isAuthenticated(): boolean;
 
+  public abstract setAccessToken(tokenData: AccessToken): void;
+
   public abstract getAccessToken(): string | null;
 
   public abstract getRedirection(): Redirection | null;

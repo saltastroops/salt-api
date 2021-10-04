@@ -51,8 +51,7 @@ export class LoginComponent implements OnInit {
       .login(this.f.username.value, this.f.password.value)
       .subscribe(
         (data: AccessToken) => {
-          localStorage.setItem('accessToken', data.accessToken);
-          localStorage.setItem('expiresAt', data.expiresAt);
+          this.authenticationService.setAccessToken(data);
           const redirection = this.authenticationService.getRedirection();
           const redirectUrlParts =
             redirection && redirection.urlParts.length

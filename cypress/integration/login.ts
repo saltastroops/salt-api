@@ -1,11 +1,12 @@
-import { LOGIN_URL, LoginPage } from '../pages/login-page';
+import { LOGIN_URL, LoginPage } from './pages/login-page';
 import {
   forceNetworkError,
   forceServerError,
   login,
   updateUserPassword,
-} from '../utils';
-import { PROPOSAL_BASE_URL, ProposalPage } from '../pages/proposal-page';
+} from './utils';
+import { PROPOSAL_BASE_URL, ProposalPage } from './pages/proposal-page';
+import { FORGOT_PASSWORD_URL } from './pages/forgot-password-page';
 
 const USERNAME = 'hettlage';
 
@@ -91,5 +92,10 @@ describe('Login page', () => {
     LoginPage.typePassword(password);
     LoginPage.submit();
     cy.url().should('contain', PROPOSAL_BASE_URL);
+  });
+
+  it('should link to the password reset page', () => {
+    LoginPage.forgotPasswordLink().click();
+    cy.url().should('contain', FORGOT_PASSWORD_URL);
   });
 });

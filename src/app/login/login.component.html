@@ -69,7 +69,8 @@
       <div class="form-group">
         <a
           class="has-text-link {{ loading ? 'is-loading' : '' }}"
-          (click)="toForgotPassword()"
+          data-test="forgot-password-link"
+          [routerLink]="['/forgot-password']"
         >
           Forgot password
         </a>

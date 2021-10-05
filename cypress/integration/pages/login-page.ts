@@ -50,4 +50,8 @@ export class LoginPage {
       .contains(/username or password/i)
       .should('exist');
   }
+
+  static forgotPasswordLink() {
+    return cy.get("[data-test='forgot-password-link']");
+  }
 }

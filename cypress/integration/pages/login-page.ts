@@ -1,3 +1,5 @@
+import { GENERIC_ERROR_MESSAGE } from '../../../src/app/utils';
+
 export const LOGIN_URL = '/login';
 
 const USERNAME_INPUT = "[data-test='login-username']";
@@ -42,7 +44,7 @@ export class LoginPage {
   }
 
   static hasGenericError() {
-    cy.get(ERROR).should('contain', 'wrong').and('be.visible');
+    cy.get(ERROR).should('contain', GENERIC_ERROR_MESSAGE).and('be.visible');
   }
 
   static hasUsernameOrPasswordError() {

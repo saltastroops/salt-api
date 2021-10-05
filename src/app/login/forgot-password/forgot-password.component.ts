@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService } from '../../service/authentication.service';
+import { GENERIC_ERROR_MESSAGE } from '../../utils';
 
 @Component({
   selector: 'wm-forgot-password',
@@ -26,8 +27,10 @@ export class ForgotPasswordComponent implements OnInit {
       usernameEmail: ['', Validators.required],
     });
   }
+
   forgotPassword(): void {
     // stop here if form is invalid
+    this.submitted = true;
     if (this.forgotPasswordForm.invalid) {
       return;
     }
@@ -40,10 +43,10 @@ export class ForgotPasswordComponent implements OnInit {
           this.switchForm = true;
         },
         (error: any) => {
-          // The HTTP request for a token is not intercepted, and hence there may be an
-          // error response with status code 401.
-          if (error.status === 401) {
+          if (error.status === 404) {
             this.error = 'Unknown username or email.';
+          } else {
+            this.error = GENERIC_ERROR_MESSAGE;
           }
           this.loading = false;
         }

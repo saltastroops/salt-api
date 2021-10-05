@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { AccessToken } from '../types/authentication';
 import { AuthenticationService } from '../service/authentication.service';
+import { GENERIC_ERROR_MESSAGE } from '../utils';
 
 @Component({ templateUrl: 'login.component.html' })
 export class LoginComponent implements OnInit {
@@ -70,8 +71,7 @@ export class LoginComponent implements OnInit {
           if (error.status === 401) {
             this.error = 'Username or password is incorrect.';
           } else {
-            this.error =
-              'Sorry, something has gone wrong. Please try again later.';
+            this.error = GENERIC_ERROR_MESSAGE;
           }
           this.loading = false;
         }

@@ -1,7 +1,5 @@
 import { storeAccessToken } from '../../src/app/utils';
 
-const userPasswords: Record<string, string> = {};
-
 /**
  * Update the user password in the database.
  *
@@ -16,27 +14,21 @@ const userPasswords: Record<string, string> = {};
  *
  * @param username
  */
-export function updateUserPassword(username: string): any {
-  return cy
-    .task('updateUserPassword', username)
-    .then((password: string) => (userPasswords[username] = password));
+export function updateUserPassword(username: string): string {
+  const { password } = _updateUserPassword(username);
+
+  return password;
 }
 
-/**
- * Return a user's password.
- *
- * The password must have been updated with the updateUserPassword function before it
- * can be retrieved with the getUserPassword function.
- *
- * @param username
- */
-export function getUserPassword(username: string): string {
-  if (!userPasswords.hasOwnProperty(username)) {
-    throw new Error(
-      `updateUserPassword must be called before you can get the password of ${username}.`
-    );
-  }
-  return userPasswords[username];
+function _updateUserPassword(username: string) {
+  // Taken from https://gist.github.com/6174/6062387
+  const password =
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15);
+  return {
+    password,
+    updatePromise: cy.task('updateUserPassword', { username, password }),
+  };
 }
 
 /**
@@ -45,7 +37,8 @@ export function getUserPassword(username: string): string {
  * The user password is updated first.
  */
 export function login(username: string) {
-  updateUserPassword(username).then((password: string) => {
+  const { password, updatePromise } = _updateUserPassword(username);
+  updatePromise.then(() => {
     return cy
       .request({
         url: 'http://localhost:8001/token',
@@ -60,7 +53,27 @@ export function login(username: string) {
           expiresAt: tokenData.expires_at,
           tokenType: tokenData.token_type,
         });
-        cy.log(localStorage['accessToken']);
       });
+  });
+}
+
+/**
+ * Intercept all HTTP queries so that they give a network error.
+ *
+ * This function internally uses Cypress' intercept method.
+ */
+export function forceNetworkError() {
+  cy.intercept('/**', { forceNetworkError: true });
+}
+
+/**
+ * Intercept all HTTP queries so that they give a server error (with status code 500).
+ *
+ * This function internally uses Cypress' intercept method.
+ */
+export function forceServerError() {
+  cy.intercept('/**', {
+    statusCode: 500,
+    body: { detail: 'This is a server error' },
   });
 }

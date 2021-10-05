@@ -20,7 +20,7 @@ export class LoginPage {
   static hasUsernameError() {
     cy.get(ERROR)
       .contains(/username/i)
-      .should('exist');
+      .should('be.visible');
   }
 
   static typePassword(password: string) {
@@ -34,7 +34,7 @@ export class LoginPage {
   static hasPasswordError() {
     cy.get(ERROR)
       .contains(/password/i)
-      .should('exist');
+      .should('be.visible');
   }
 
   static submit() {
@@ -42,13 +42,13 @@ export class LoginPage {
   }
 
   static hasGenericError() {
-    cy.get(ERROR).should('contain', 'wrong');
+    cy.get(ERROR).should('contain', 'wrong').and('be.visible');
   }
 
   static hasUsernameOrPasswordError() {
     cy.get(ERROR)
       .contains(/username or password/i)
-      .should('exist');
+      .should('be.visible');
   }
 
   static forgotPasswordLink() {

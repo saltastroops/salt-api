@@ -4,6 +4,7 @@ import { ProposalComponent } from './proposal/proposal.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { AuthGuardService } from './service/auth-guard.service';
+import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuardService] },
@@ -13,6 +14,7 @@ const routes: Routes = [
     component: ProposalComponent,
     canActivate: [AuthGuardService],
   },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
 ];
 
 @NgModule({

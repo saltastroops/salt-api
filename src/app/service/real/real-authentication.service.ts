@@ -8,6 +8,7 @@ import * as camelcaseKeys from 'camelcase-keys';
 import { AuthenticationService, Redirection } from '../authentication.service';
 import { parseISO } from 'date-fns';
 import { storeAccessToken } from '../../utils';
+import { Message } from '../../types/common';
 
 @Injectable({
   providedIn: 'root',
@@ -68,6 +69,22 @@ export class RealAuthenticationService implements AuthenticationService {
     this.redirection = redirection;
   }
 
+  /**
+   * Request password reset token to be sent.
+   *
+   * @param usernameEmail Username or email
+   */
+  sendResetPassword(usernameEmail: string): Observable<Message> {
+    const uri = environment.apiUrl + '/users/send-password-reset-email';
+    const headers = new HttpHeaders({
+      Authorization: 'Bearer x',
+      'Content-type': 'application/json',
+    });
+
+    return this.http
+      .post<any>(uri, { username_email: usernameEmail }, { headers })
+      .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
+  }
   private isTokenValid(): boolean {
     const expiresAt = RealAuthenticationService.getExpiry();
     const accessToken = this.getAccessToken();

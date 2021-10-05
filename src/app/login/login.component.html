@@ -1,4 +1,4 @@
-<div class="login-form">
+<div class="login-form login-page">
   <h2 class="title is-3">Login</h2>
   <form [formGroup]="loginForm" (ngSubmit)="login()">
     <div class="form-group input-section">
@@ -64,6 +64,17 @@
         </button>
         <div *ngIf="error">
           <p class="has-text-danger" data-test="error">{{ error }}</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <a
+          class="has-text-link {{ loading ? 'is-loading' : '' }}"
+          (click)="toForgotPassword()"
+        >
+          Forgot password
+        </a>
+        <div *ngIf="error">
+          <p class="has-text-danger">{{ error }}</p>
         </div>
       </div>
     </div>

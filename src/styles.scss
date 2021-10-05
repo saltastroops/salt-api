@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
-$primary: #27e8a7;
+$primary: #00667d;
+$success: #27e8a7;
 $danger: #df4576;
 $warning: #ccaa00;
 $link: #0e0eee;
@@ -246,4 +247,16 @@ $bvit-calibration-config-color: #999999;
 
 .hrs-header {
   background-color: $hrs-color;
+}
+
+.invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 80%;
+  color: $danger;
+}
+
+.input {
+  margin-bottom: 0.5em;
 }

@@ -27,7 +27,10 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    if (request.url.split('/').slice(-1)[0] === 'token') {
+    if (
+      request.url.split('/').slice(-1)[0] === 'token' ||
+      request.url.split('/').slice(-1)[0] === 'send-password-reset-email'
+    ) {
       return next.handle(request);
     }
     const token = this.authenticationService.getAccessToken();

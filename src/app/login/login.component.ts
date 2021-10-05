@@ -77,7 +77,12 @@ export class LoginComponent implements OnInit {
         }
       );
   }
+
   clearError() {
     this.error = undefined;
+  }
+
+  toForgotPassword() {
+    this.router.navigate(['forgot-password']);
   }
 }

@@ -88,3 +88,7 @@ export interface TimeInterval {
   start: string;
   end: string;
 }
+
+export interface Message {
+  message: string;
+}

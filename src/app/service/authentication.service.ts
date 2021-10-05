@@ -1,6 +1,7 @@
 import { Params } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AccessToken } from '../types/authentication';
+import { Message } from '../types/common';
 
 export interface Redirection {
   urlParts: string[];
@@ -24,4 +25,6 @@ export abstract class AuthenticationService {
   public abstract getRedirection(): Redirection | null;
 
   public abstract setRedirection(redirection: Redirection | null): void;
+
+  public abstract sendResetPassword(usernameEmail: string): Observable<Message>;
 }

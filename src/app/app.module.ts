@@ -67,6 +67,7 @@ import { AuthenticationInterceptor } from './service/authentication.interceptor.
 import { RealBlockService } from './service/real/real-block.service';
 import { AuthenticationService } from './service/authentication.service';
 import { RealAuthenticationService } from './service/real/real-authentication.service';
+import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [
@@ -123,6 +124,7 @@ import { RealAuthenticationService } from './service/real/real-authentication.se
     EtalonWavelengthsComponent,
     FabryPerotComponent,
     LoginComponent,
+    ForgotPasswordComponent,
   ],
   imports: [
     BrowserModule,

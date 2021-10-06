@@ -11,12 +11,23 @@ export class ForgotPasswordPage {
     cy.get("[data-test='username-email']").type(usernameOrEmail);
   }
 
+  static hasUsernameOrEmail(usernameOrEmail: string) {
+    cy.get("[data-test='username-email']").should(
+      'have.value',
+      usernameOrEmail
+    );
+  }
+
   static clearUsernameOrEmail() {
     cy.get("[data-test='username-email']").clear();
   }
 
   static submit() {
     cy.get("[data-test='submit-request']").click();
+  }
+
+  static requestAgain() {
+    cy.get('[data-test="request-again"]').click();
   }
 
   static hasMissingUsernameOrEmailError() {

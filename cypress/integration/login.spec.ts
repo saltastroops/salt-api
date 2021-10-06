@@ -1,12 +1,15 @@
-import { LOGIN_URL, LoginPage } from './pages/login-page';
+import { LOGIN_URL, LoginPage } from '../support/pages/login-page';
 import {
   forceNetworkError,
   forceServerError,
   login,
   updateUserPassword,
-} from './utils';
-import { PROPOSAL_BASE_URL, ProposalPage } from './pages/proposal-page';
-import { FORGOT_PASSWORD_URL } from './pages/forgot-password-page';
+} from '../support/utils';
+import {
+  PROPOSAL_BASE_URL,
+  ProposalPage,
+} from '../support/pages/proposal-page';
+import { FORGOT_PASSWORD_URL } from '../support/pages/forgot-password-page';
 
 const USERNAME = 'hettlage';
 

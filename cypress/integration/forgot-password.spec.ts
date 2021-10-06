@@ -1,5 +1,5 @@
-import { ForgotPasswordPage } from './pages/forgot-password-page';
-import { forceNetworkError, forceServerError } from './utils';
+import { ForgotPasswordPage } from '../support/pages/forgot-password-page';
+import { forceNetworkError, forceServerError } from '../support/utils';
 
 describe('Forgot password page', () => {
   beforeEach(() => {

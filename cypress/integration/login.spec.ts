@@ -1,10 +1,5 @@
 import { LOGIN_URL, LoginPage } from '../support/pages/login-page';
-import {
-  forceNetworkError,
-  forceServerError,
-  login,
-  updateUserPassword,
-} from '../support/utils';
+import { forceNetworkError, forceServerError, login } from '../support/utils';
 import {
   PROPOSAL_BASE_URL,
   ProposalPage,
@@ -43,21 +38,23 @@ describe('Login page', () => {
   });
 
   it('should give an error if there is a server error', () => {
-    const password = updateUserPassword(USERNAME);
-    forceServerError();
-    LoginPage.typeUsername(USERNAME);
-    LoginPage.typePassword(password);
-    LoginPage.submit();
-    LoginPage.hasGenericError();
+    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+      forceServerError();
+      LoginPage.typeUsername(USERNAME);
+      LoginPage.typePassword(password);
+      LoginPage.submit();
+      LoginPage.hasGenericError();
+    });
   });
 
   it('should give an error if there is a network error', () => {
-    const password = updateUserPassword(USERNAME);
-    forceNetworkError();
-    LoginPage.typeUsername(USERNAME);
-    LoginPage.typePassword(password);
-    LoginPage.submit();
-    LoginPage.hasGenericError();
+    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+      forceNetworkError();
+      LoginPage.typeUsername(USERNAME);
+      LoginPage.typePassword(password);
+      LoginPage.submit();
+      LoginPage.hasGenericError();
+    });
   });
 
   it('should give an error if you login with an incorrect password', () => {
@@ -69,11 +66,12 @@ describe('Login page', () => {
 
   it('should log you in if you use the correct username and password', () => {
     cy.url().should('contain', LOGIN_URL);
-    const password = updateUserPassword(USERNAME);
-    LoginPage.typeUsername(USERNAME);
-    LoginPage.typePassword(password);
-    LoginPage.submit();
-    cy.url().should('not.contain', LOGIN_URL);
+    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+      LoginPage.typeUsername(USERNAME);
+      LoginPage.typePassword(password);
+      LoginPage.submit();
+      cy.url().should('not.contain', LOGIN_URL);
+    });
   });
 
   it('should redirect to another page if you are logged in already', () => {
@@ -87,14 +85,15 @@ describe('Login page', () => {
     // And I go to a proposal page
     // Then I'm redirected to the login page
     // And when I then login
-    // Then I'm redirected to the originaly requested proposal page
+    // Then I'm redirected to the originally requested proposal page
     ProposalPage.visit('2020-2-SCI-043');
     cy.url().should('not.contain', PROPOSAL_BASE_URL);
-    const password = updateUserPassword(USERNAME);
-    LoginPage.typeUsername(USERNAME);
-    LoginPage.typePassword(password);
-    LoginPage.submit();
-    cy.url().should('contain', PROPOSAL_BASE_URL);
+    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+      LoginPage.typeUsername(USERNAME);
+      LoginPage.typePassword(password);
+      LoginPage.submit();
+      cy.url().should('contain', PROPOSAL_BASE_URL);
+    });
   });
 
   it('should link to the password reset page', () => {

@@ -14,7 +14,7 @@ export class ForgotPasswordComponent implements OnInit {
   submitted = false;
   loading = false;
   error: string | undefined = undefined;
-  switchForm = false;
+  showSuccessMessage = false;
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -40,7 +40,7 @@ export class ForgotPasswordComponent implements OnInit {
       .subscribe(
         () => {
           // Switch form
-          this.switchForm = true;
+          this.showSuccessMessage = true;
         },
         (error: any) => {
           if (error.status === 404) {
@@ -64,9 +64,6 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   requestAgain() {
-    this.switchForm = false;
-  }
-  toLogin() {
-    this.router.navigate(['login']);
+    this.showSuccessMessage = false;
   }
 }

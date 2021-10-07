@@ -45,7 +45,7 @@ describe('Forgot password page', () => {
     cy.contains(/has been sent/i).should('exist');
   });
 
-  it('should have the input field prepopulated wheh an email is requested again', () => {
+  it('should have the input field prepopulated when an email is requested again', () => {
     const USERNAME = 'hettlage';
     ForgotPasswordPage.typeUsernameOrEmail(USERNAME);
     ForgotPasswordPage.submit();

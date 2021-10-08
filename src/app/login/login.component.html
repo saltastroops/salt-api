@@ -1,0 +1,80 @@
+<div class="login-form login-page">
+  <h2 class="title is-3">Login</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <div class="form-group input-section">
+      <label class="label">Username</label>
+      <input
+        (ngModelChange)="clearError()"
+        type="text"
+        formControlName="username"
+        class="input"
+        data-test="login-username"
+        [ngClass]="{
+          'is-danger': (f.username.dirty || submitted) && f.username.errors
+        }"
+      />
+      <div
+        *ngIf="(f.username.dirty || submitted) && f.username.errors"
+        class="invalid-feedback"
+      >
+        <div
+          *ngIf="f.username.errors.required"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Username is required
+        </div>
+      </div>
+    </div>
+    <div class="input-section">
+      <div class="form-group">
+        <label class="label">Password</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="password"
+          formControlName="password"
+          class="input"
+          data-test="login-password"
+          [ngClass]="{
+            'is-danger': (f.password.dirty || submitted) && f.password.errors
+          }"
+        />
+        <div
+          *ngIf="(f.password.dirty || submitted) && f.password.errors"
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="f.password.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Password is required
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="form-group">
+        <button
+          class="button is-primary {{ loading ? 'is-loading' : '' }}"
+          data-test="login-submit"
+        >
+          Login
+        </button>
+        <div *ngIf="error">
+          <p class="has-text-danger" data-test="error">{{ error }}</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <a
+          class="has-text-link {{ loading ? 'is-loading' : '' }}"
+          data-test="forgot-password-link"
+          [routerLink]="['/forgot-password']"
+        >
+          Forgot password
+        </a>
+      </div>
+    </div>
+  </form>
+</div>

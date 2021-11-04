@@ -68,6 +68,10 @@ import { RealBlockService } from './service/real/real-block.service';
 import { AuthenticationService } from './service/authentication.service';
 import { RealAuthenticationService } from './service/real/real-authentication.service';
 import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
+import { InlineLoginComponent } from './navigation-bar/inline-login/inline-login.component';
+import { HomeUserComponent } from './home/home-user/home-user.component';
+import { HomeGuestComponent } from './home/home-guest/home-guest.component';
+import { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
 import { ChangePasswordComponent } from './login/change-password/change-password.component';
 
 @NgModule({
@@ -126,6 +130,10 @@ import { ChangePasswordComponent } from './login/change-password/change-password
     FabryPerotComponent,
     LoginComponent,
     ForgotPasswordComponent,
+    InlineLoginComponent,
+    HomeUserComponent,
+    HomeGuestComponent,
+    NavigationBarComponent,
     ChangePasswordComponent,
   ],
   imports: [

@@ -2,6 +2,7 @@ import { Params } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AccessToken } from '../types/authentication';
 import { Message } from '../types/common';
+import { User } from '../types/user';
 
 export interface Redirection {
   urlParts: string[];
@@ -21,6 +22,25 @@ export abstract class AuthenticationService {
   public abstract setAccessToken(tokenData: AccessToken): void;
 
   public abstract getAccessToken(): string | null;
+
+  /**
+   * Update the user.
+   *
+   * If no user is logged in, the current user is set to null; otherwise the
+   * user is loaded by calling the /user API endpoint.
+   */
+  public abstract updateUser(): void;
+
+  /**
+   * An observable emitting the currently logged in user (or null if no user is logged
+   * in).
+   *
+   * The current user (or null) is immediately returned when you subscribe to the
+   * stream. The same stream is returned for every instance of the service.
+   *
+   * Use the updateUser method to update the user.
+   */
+  public abstract user(): Observable<User | null>;
 
   public abstract getRedirection(): Redirection | null;
 

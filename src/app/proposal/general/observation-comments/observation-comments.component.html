@@ -2,7 +2,7 @@
 <hr class="heading-line comment-header" />
 <div class="table">
   <div *ngFor="let c of observationComments">
-    <div class="notification">
+    <div class="notification" data-test="observation-comment">
       <div class="comment-author">
         <span class="author">{{ c.author + " " }}</span>
         <span class="made-at">
@@ -12,7 +12,63 @@
       <p [innerHTML]="c.comment | nl2br"></p>
     </div>
   </div>
+  <div *ngIf="isCommentInputOpen" class="notification">
+    <form
+      [formGroup]="commentForm"
+      (ngSubmit)="submitComment()"
+      data-test="add-observation-comment-form"
+    >
+      <div class="input-comment has-two-columns">
+        <div>
+          <textarea
+            class="textarea"
+            formControlName="comment"
+            data-test="add-observation-comment-text"
+          ></textarea>
+          <div
+            *ngIf="(f.comment.dirty || submitted) && f.comment.errors"
+            class="invalid-feedback has-text-danger"
+            data-test="observation-comment-text-error"
+          >
+            Some comment text is required.
+          </div>
+          <div
+            *ngIf="error"
+            class="invalid-feedback has-text-danger"
+            data-test="observation-comment-submission-error"
+          >
+            {{ error }}
+          </div>
+        </div>
+        <div class="send-cancel">
+          <button
+            type="submit"
+            class="button is-primary"
+            data-test="add-observation-comment-submit"
+          >
+            Submit
+          </button>
+          <button
+            class="button is-danger"
+            (click)="cancel()"
+            data-test="add-observation-comment-cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
   <div class="row">
-    <div><button class="button is-small">Add new comment</button></div>
+    <div>
+      <button
+        class="button is-small"
+        [disabled]="isCommentInputOpen"
+        (click)="openCommentInput()"
+        data-test="add-observation-comment-button"
+      >
+        Add new comment
+      </button>
+    </div>
   </div>
 </div>

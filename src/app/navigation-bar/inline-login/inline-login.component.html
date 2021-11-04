@@ -1,0 +1,33 @@
+<form data-test="inline-login" [formGroup]="loginForm" (ngSubmit)="login()">
+  <div>
+    <input
+      type="text"
+      class="input is-small"
+      id="username"
+      formControlName="username"
+      placeholder="Username"
+      data-test="inline-login-username"
+    />
+    <input
+      type="password"
+      class="input is-small"
+      id="password"
+      formControlName="password"
+      placeholder="Password"
+      data-test="inline-login-password"
+    />
+    <input
+      type="button"
+      class="button is-small"
+      [ngClass]="{ 'is-loading': loading }"
+      [disabled]="loading"
+      id="login_details"
+      value="Login"
+      (click)="login()"
+      data-test="inline-login-submit"
+    />
+  </div>
+  <div *ngIf="error" class="has-text-danger" data-test="inline-login-error">
+    {{ error }}
+  </div>
+</form>

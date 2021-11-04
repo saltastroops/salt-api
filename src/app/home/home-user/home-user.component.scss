@@ -1,0 +1,62 @@
+h1 {
+  color: black;
+  font-weight: bold;
+  font-size: 200%;
+}
+
+p {
+  margin: 0.5rem 0 1rem 0;
+}
+
+.left {
+  margin-top: -0.5rem;
+  float: left;
+}
+
+div label {
+  display: block;
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.checkboxes label {
+  margin-left: 0;
+  margin-top: 0;
+  display: block;
+  float: left;
+  width: 34%;
+}
+
+.table {
+  margin-top: 0.5rem;
+  width: 97%;
+}
+
+.proposals {
+  display: grid;
+  grid-template-columns: 100px 180px 300px 100px 80px 130px 130px 150px auto;
+  align-items: center;
+}
+
+.legend {
+  margin-top: 0.5rem;
+  width: 50%;
+}
+
+.proposal-header {
+  background: red;
+  margin-top: -0.12rem;
+  margin-left: 0.18rem;
+  width: 97%;
+}
+
+.pi {
+  background: blue;
+}
+
+.pc {
+  background: green;
+}
+
+.sa {
+  background: gold;
+}

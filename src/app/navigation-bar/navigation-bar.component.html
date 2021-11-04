@@ -1,0 +1,26 @@
+<div class="navbar">
+  <div class="navbar-menu">
+    <div class="navbar-start">
+      <div class="navbar-item"><a [routerLink]="['/']">Home</a></div>
+      <!--    <input type="button" id="register" value="Register new user"/>-->
+    </div>
+    <div class="navbar-end">
+      <ng-container *ngIf="user$ | async as user; else inlineLoginForm">
+        <div class="navbar-item welcome-message" data-test="welcome-message">
+          Hello {{ user.givenName }} {{ user.familyName }}
+        </div>
+        <div
+          class="navbar-item is-clickable"
+          (click)="logout()"
+          data-test="logout"
+        >
+          Logout
+        </div>
+      </ng-container>
+
+      <ng-template #inlineLoginForm>
+        <wm-inline-login class="navbar-item"></wm-inline-login>
+      </ng-template>
+    </div>
+  </div>
+</div>

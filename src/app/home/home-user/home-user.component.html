@@ -1,0 +1,148 @@
+<h1 class="title is-1">Web Manager</h1>
+<p></p>
+<p></p>
+<div class="proposal_header_left"></div>
+
+<h2 class="title is-2">PIPT</h2>
+<hr class="heading-line proposal-header" />
+
+<p>
+  For preparing and submitting your proposals please use the latest version of
+  the <a href="http://astronomers.salt.ac.za/software/#PIPT">PIPT Manager</a>.
+</p>
+
+<h2 class="title is-2">Proposals</h2>
+<hr class="heading-line proposal-header" />
+
+<div class="radio-buttons">
+  <label>
+    <input type="radio" id="current_semester" value="" />
+    Show proposals for the current semester
+  </label>
+  <label>
+    <input type="radio" id="next_semester" value="" />
+    Show proposals for the next semester
+  </label>
+  <label>
+    <input type="radio" id="semester_range" value="" />
+    Show proposals from Semester
+    <input type="text" id="start_semester" placeholder="yyyy-s" /> to Semester
+    <input type="text" id="end_semester" placeholder="yyyy-s" />
+    <input type="button" id="apply" value="Apply" />
+  </label>
+  <label>
+    <input type="radio" id="single_semester" value="" />
+    Show proposals for the selected Semester
+    <select id="semester" [(ngModel)]="selectedSemester">
+      <option *ngFor="let semester of availableSemesters()">
+        {{ semester }}
+      </option>
+    </select>
+  </label>
+</div>
+<br />
+Show
+<div class="checkboxes">
+  <label for="attention_only"
+    ><input type="checkbox" id="attention_only" value="" /> only proposals
+    requiring your attention
+  </label>
+  <label for="unchecked"
+    ><input type="checkbox" id="unchecked" value="" /> only unchecked proposals
+  </label>
+  <label for="unassigned"
+    ><input type="checkbox" id="unassigned" value="" /> only unassigned
+    proposals
+  </label>
+  <label for="active"
+    ><input type="checkbox" id="active" value="" /> only active proposals
+  </label>
+  <label for="completed"
+    ><input type="checkbox" id="completed" value="" /> only completed proposals
+  </label>
+  <label for="science"
+    ><input type="checkbox" id="science" value="" /> only science proposals
+  </label>
+  <label for="ddt"
+    ><input type="checkbox" id="ddt" value="" /> only director's discretionary
+    time
+  </label>
+  <label for="rejected"
+    ><input type="checkbox" id="rejected" value="" /> only rejected, completed
+    and expired proposals
+  </label>
+  <label for="my_proposals"
+    ><input type="checkbox" id="my_proposals" value="" /> only your proposals
+  </label>
+  <label for="phase1"
+    ><input type="checkbox" id="phase1" value="" /> only phase 1 proposals
+  </label>
+  <label for="phase2"
+    ><input type="checkbox" id="phase2" value="" /> only phase 2 proposals
+  </label>
+  <label for="commissioning"
+    ><input type="checkbox" id="commissioning" value="" /> only commissioning
+    proposals
+  </label>
+  <label for="deleted"
+    ><input type="checkbox" id="deleted" value="" /> show deleted proposals
+  </label>
+</div>
+<br /><br />
+<div class="table alternate-background">
+  <div class="row secondary-header">
+    <div class="has-text-centered">Proposals</div>
+  </div>
+  <div class="row headers proposals">
+    <div>Proposal ID</div>
+    <div>Proposal Code</div>
+    <div>Title</div>
+    <div>Semester</div>
+    <div>Phase</div>
+    <div>Proposal Status</div>
+    <div>Proposal Type</div>
+    <div>PI</div>
+    <div>Astronomer</div>
+  </div>
+  <div *ngIf="proposals">
+    <div class="row proposals" *ngFor="let proposal of proposals">
+      <div>{{ proposal.id }}</div>
+      <div>
+        <a [routerLink]="['/proposal', proposal.proposalCode]">
+          {{ proposal.proposalCode }}
+        </a>
+      </div>
+      <div>{{ proposal.title }}</div>
+      <div>{{ proposal.semester }}</div>
+      <div>{{ proposal.phase }}</div>
+      <div>{{ proposal.status }}</div>
+      <div>{{ proposal.proposalType }}</div>
+      <div>
+        {{ proposal.principalInvestigator.givenName }}
+        {{ proposal.principalInvestigator.familyName }}
+      </div>
+      <div>
+        <span *ngIf="proposal.liaisonAstronomer">{{
+          proposal.liaisonAstronomer.givenName
+        }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="table legend">
+  <div class="row headers">
+    <div class="has-text-centered">Legend</div>
+  </div>
+  <div class="has-two-columns">
+    <div class="pi"></div>
+    <div>You are Principal Investigator</div>
+  </div>
+  <div class="has-two-columns">
+    <div class="pc"></div>
+    <div>You are Principal Contact</div>
+  </div>
+  <div class="has-two-columns">
+    <div class="sa"></div>
+    <div>You are the responsible SALT astronomer</div>
+  </div>
+</div>

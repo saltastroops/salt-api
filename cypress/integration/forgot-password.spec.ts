@@ -1,6 +1,7 @@
 import { recurse } from 'cypress-recurse';
 import { ForgotPasswordPage } from '../support/pages/forgot-password-page';
 import { forceNetworkError, forceServerError } from '../support/utils';
+import { User } from '../support/types';
 
 describe('Forgot password page', () => {
   beforeEach(() => {
@@ -60,7 +61,7 @@ describe('Forgot password page', () => {
     ForgotPasswordPage.typeUsernameOrEmail(USERNAME);
     ForgotPasswordPage.submit();
     recurse(
-      () => cy.task('getEmailInbox', 'hettlage@saao.ac.za'),
+      () => cy.task('getEmailInbox'),
       (emails: Array<any>) => {
         // A boolean (not just a truthy value) must be returned
         return !!emails.length;
@@ -72,9 +73,9 @@ describe('Forgot password page', () => {
     cy.get('@emails').should('have.length', 1);
 
     // And it is sent to the correct email address
-    cy.task('getEmailAddress', USERNAME).then((emailAddress: string) => {
+    cy.task('getUser', USERNAME).then((user: User) => {
       cy.get('@emails').then((emails: any) => {
-        expect(emails[0].to).to.contain(emailAddress);
+        expect(emails[0].to).to.contain(user.email);
       });
     });
 

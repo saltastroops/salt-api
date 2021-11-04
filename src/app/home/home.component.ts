@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ProposalService } from '../service/proposal.service';
-import { ProposalListItem } from '../types/proposal';
+import { AuthenticationService } from '../service/authentication.service';
 import { Observable } from 'rxjs';
+import { User } from '../types/user';
 
 @Component({
   selector: 'wm-home',
@@ -9,11 +9,10 @@ import { Observable } from 'rxjs';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  proposals?: ProposalListItem[];
-
-  constructor(private proposalService: ProposalService) {}
+  user$!: Observable<User | null>;
+  constructor(private authService: AuthenticationService) {}
 
   ngOnInit() {
-    this.proposalService.getProposals().subscribe((p) => (this.proposals = p));
+    this.user$ = this.authService.user();
   }
 }

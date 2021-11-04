@@ -33,14 +33,20 @@ export class LoginPage {
     cy.get(PASSWORD_INPUT).clear();
   }
 
-  static hasPasswordError() {
-    cy.get(ERROR)
-      .contains(/password/i)
-      .should('be.visible');
+  static login(username: string, password: string) {
+    LoginPage.typeUsername(username);
+    LoginPage.typePassword(password);
+    LoginPage.submit();
   }
 
   static submit() {
     cy.get("[data-test='login-submit']").click();
+  }
+
+  static hasPasswordError() {
+    cy.get(ERROR)
+      .contains(/password/i)
+      .should('be.visible');
   }
 
   static hasGenericError() {

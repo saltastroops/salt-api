@@ -1,5 +1,30 @@
+import {
+  HttpResponseInterceptor,
+  RouteMatcher,
+  StaticResponse,
+} from 'cypress/types/net-stubbing';
 import { storeAccessToken } from '../../src/app/utils';
 
+/**
+ * Function for delaying a request until it is explicitly triggered.
+ *
+ * Taken from https://blog.dai.codes/cypress-loading-state-tests/.
+ */
+export function interceptIndefinitely(
+  requestMatcher: RouteMatcher,
+  response?: StaticResponse | HttpResponseInterceptor
+): { sendResponse: () => void } {
+  let sendResponse;
+  const trigger = new Promise((resolve) => {
+    sendResponse = resolve;
+  });
+  cy.intercept(requestMatcher, (request) => {
+    return trigger.then(() => {
+      request.reply(response);
+    });
+  });
+  return { sendResponse };
+}
 /**
  * Log in as a user.
  *
@@ -43,5 +68,17 @@ export function forceServerError() {
   cy.intercept('/**', {
     statusCode: 500,
     body: { detail: 'This is a server error' },
+  });
+}
+
+/**
+ * Intercept all HTTP queries so that they give a not authorized error (with status code 401).
+ *
+ * This function internally uses Cypress' intercept method.
+ */
+export function forceAuthenticationError() {
+  cy.intercept('/**', {
+    statusCode: 401,
+    body: { detail: 'Not Authorized' },
   });
 }

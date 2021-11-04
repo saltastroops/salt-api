@@ -1,3 +1,5 @@
+@import "src/styles";
+
 .header-icon {
   margin-top: -0.17em;
   height: 3rem;
@@ -12,6 +14,25 @@
   font-weight: bold;
   font-size: 0.9rem;
 }
+
 .comment-author {
   margin-bottom: 0.85em;
+}
+
+.textarea-section {
+  background-color: $dark-strip;
+  padding: 1em;
+}
+
+.textarea {
+  margin-bottom: 0.5em;
+}
+
+.input-comment {
+  grid-template-columns: 60% 5%;
+  column-gap: 1em;
+}
+
+.send-cancel {
+  display: grid;
 }

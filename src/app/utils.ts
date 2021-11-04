@@ -5,5 +5,18 @@ export const GENERIC_ERROR_MESSAGE =
 
 export function storeAccessToken(tokenData: AccessToken) {
   localStorage.setItem('accessToken', tokenData.accessToken);
-  localStorage.setItem('expiresAt', tokenData.expiresAt);
+  localStorage.setItem('accessTokenExpiresAt', tokenData.expiresAt);
+}
+
+export function currentSemester() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  if (month < 4) {
+    return `${year - 1}-2`;
+  } else if (month < 10) {
+    return `${year}-1`;
+  } else {
+    return `${year}-2`;
+  }
 }

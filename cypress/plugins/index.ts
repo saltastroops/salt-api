@@ -3,7 +3,11 @@ require('dotenv').config();
 const axios = require('axios');
 const ms = require('smtp-tester');
 
-import { getEmailAddress, updateUserPassword } from './database';
+import {
+  clearObservationComments,
+  getUser,
+  updateUserPassword,
+} from './database';
 
 /**
  * @type {Cypress.PluginConfig}
@@ -56,10 +60,10 @@ export default (on, config) => {
     },
 
     /**
-     * Return a promise with a user's email address.
+     * Return a promise with user details
      */
-    getEmailAddress(username) {
-      return getEmailAddress(username);
+    getUser(username) {
+      return getUser(username);
     },
 
     /**
@@ -67,6 +71,13 @@ export default (on, config) => {
      */
     updateUserPassword(username) {
       return updateUserPassword(username);
+    },
+
+    /**
+     * Delete all observation comments for a proposal.
+     */
+    clearObservationComments(proposalCode: string) {
+      return clearObservationComments(proposalCode);
     },
   });
 };

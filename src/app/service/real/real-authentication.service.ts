@@ -1,14 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { map } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { AccessToken } from '../../types/authentication';
 import * as camelcaseKeys from 'camelcase-keys';
 import { AuthenticationService, Redirection } from '../authentication.service';
 import { parseISO } from 'date-fns';
-import { storeAccessToken } from '../../utils';
 import { Message } from '../../types/common';
+import { User } from '../../types/user';
+import { storeAccessToken } from '../../utils';
+
+const user$ = new BehaviorSubject<User | null>(null);
+
+let whoAmITrigger$: Subject<null> | null;
 
 @Injectable({
   providedIn: 'root',
@@ -33,23 +38,23 @@ export class RealAuthenticationService implements AuthenticationService {
     const body = new HttpParams()
       .set('username', username)
       .set('password', password);
-    return this.http
-      .post<any>(uri, body, { headers })
-      .pipe(
-        map((accessToken: any) => camelcaseKeys(accessToken, { deep: true }))
-      );
+    return this.http.post<any>(uri, body, { headers }).pipe(
+      map((accessToken: any) => camelcaseKeys(accessToken, { deep: true })),
+      tap((tokenData) => {
+        this.setAccessToken(tokenData);
+        this.updateUser();
+      })
+    );
   }
 
   logout(): void {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('expiresAt');
+    localStorage.removeItem('accessTokenExpiresAt');
+    sessionStorage.removeItem('user');
+    this.updateUser();
   }
 
   isAuthenticated(): boolean {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      return false;
-    }
     return this.isTokenValid();
   }
 
@@ -59,6 +64,56 @@ export class RealAuthenticationService implements AuthenticationService {
 
   getAccessToken(): string | null {
     return localStorage.getItem('accessToken');
+  }
+
+  _user(): Observable<User> {
+    const uri = environment.apiUrl + '/user';
+    return this.http
+      .get<User>(uri)
+      .pipe(
+        map((accessToken: any) => camelcaseKeys(accessToken, { deep: true }))
+      );
+  }
+
+  /**
+   * Update the user.
+   *
+   * If no user is logged in, the current user is set to null; otherwise the
+   * user is loaded by calling the /user API endpoint.
+   */
+  updateUser(): void {
+    if (!whoAmITrigger$) {
+      whoAmITrigger$ = new Subject<null>();
+      whoAmITrigger$
+        .pipe(
+          switchMap(() => {
+            return this.isAuthenticated() ? this._user() : of(null);
+          })
+        )
+        .subscribe((user) => {
+          if (user) {
+            sessionStorage.setItem('user', JSON.stringify(user));
+          } else {
+            sessionStorage.removeItem('user');
+          }
+          user$.next(user);
+        });
+    }
+    whoAmITrigger$.next(null);
+  }
+
+  /**
+   * An observable emitting the currently logged in user (or null if no user is logged
+   * in).
+   *
+   * The current user (or null) is immediately returned when you subscribe to the
+   * stream. The same stream is returned for every instance of the service.
+   *
+   * Use the updateUser method to update the user.
+   */
+  user(): Observable<User | null> {
+    // Return a read-only stream
+    return user$.asObservable();
   }
 
   getRedirection(): Redirection | null {
@@ -95,7 +150,6 @@ export class RealAuthenticationService implements AuthenticationService {
   sendResetPassword(usernameEmail: string): Observable<Message> {
     const uri = environment.apiUrl + '/users/send-password-reset-email';
     const headers = new HttpHeaders({
-      Authorization: 'Bearer x',
       'Content-type': 'application/json',
     });
 
@@ -103,6 +157,27 @@ export class RealAuthenticationService implements AuthenticationService {
       .post<any>(uri, { username_email: usernameEmail }, { headers })
       .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
   }
+
+  private isTokenValid(): boolean {
+    const accessToken = this.getAccessToken();
+    const expiresAt = RealAuthenticationService.getExpiry();
+    const now = new Date();
+    if (!accessToken || !expiresAt) {
+      return false;
+    }
+    return expiresAt >= now;
+  }
+
+  private static getExpiry(): Date | null {
+    try {
+      const expiresAt = localStorage.getItem('accessTokenExpiresAt');
+      if (expiresAt) {
+        return parseISO(expiresAt);
+      }
+    } catch (Error) {
+      // do nothing
+    }
+    return null;
 
   /**
    * Change user password.

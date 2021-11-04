@@ -11,6 +11,10 @@
     <div>
       {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
     </div>
+    <div *ngIf="ab.originalExposureTime; else elseBlock">
+      {{ ab.originalExposureTime }} sec
+    </div>
+    <ng-template #elseBlock><div>n/a</div></ng-template>
     <div>{{ ab.originalExposureTime }} sec</div>
     <div>{{ ab.preferredExposureTime }} sec</div>
   </div>

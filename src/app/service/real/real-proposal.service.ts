@@ -5,7 +5,11 @@ import { environment } from '../../../environments/environment';
 import { ProposalService } from '../proposal.service';
 import { catchError, map } from 'rxjs/operators';
 import * as camelcaseKeys from 'camelcase-keys';
-import { Proposal, ProposalListItem } from '../../types/proposal';
+import {
+  ObservationComment,
+  Proposal,
+  ProposalListItem,
+} from '../../types/proposal';
 
 @Injectable({
   providedIn: 'root',
@@ -49,5 +53,46 @@ export class RealProposalService implements ProposalService {
         return throwError('Oops. Something is wrong.');
       })
     );
+  }
+
+  /**
+   * Get the list of observation comments for a proposal from the API server.
+   *
+   * If the request fails the stream terminates with a generic error message as error.
+   */
+  public getObservationComments(
+    proposalCode: string
+  ): Observable<ObservationComment[]> {
+    const uri =
+      environment.apiUrl +
+      '/proposals/' +
+      proposalCode +
+      '/observation-comments';
+    return this.http.get<ObservationComment[]>(uri).pipe(
+      map((observationComments) => {
+        return observationComments.map((observationComment) =>
+          camelcaseKeys(observationComment, { deep: true })
+        );
+      }),
+      catchError(() => {
+        return throwError('Oops. Something is wrong.');
+      })
+    );
+  }
+
+  /**
+   * Submit an observation comment to the API server.
+   *
+   * If the request fails the stream terminates with a generic error message as error.
+   */
+  public submitObservationComment(proposalCode: string, comment: string): any {
+    const uri =
+      environment.apiUrl +
+      '/proposals/' +
+      proposalCode +
+      '/observation-comments';
+    return this.http
+      .post<any>(uri, { comment })
+      .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
   }
 }

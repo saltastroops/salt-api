@@ -8,14 +8,17 @@
   margin-top: -0.5rem;
   float: right;
 }
+
 .logo {
   position: relative;
 }
+
 .salt_logo {
   height: 100px;
   background: url("/assets/salt_logo.jpg") bottom center no-repeat;
   background-size: 100% 100%;
 }
+
 .salt_image {
   background: url("/assets/salt_image.jpg") bottom center no-repeat;
   background-size: 100% 100%;
@@ -24,19 +27,20 @@
   right: 0;
   padding: 6.96rem 7.5rem 0 0;
 }
+
 .body {
   margin-top: 2rem;
   margin-left: 2rem;
 }
-.header {
-  position: relative;
-  padding: 0.5em 2em;
-  background-color: #dddddd;
-}
+
 .footer {
   margin-left: 0;
   margin-bottom: 0;
   width: 100%;
   text-align: center;
   background-color: transparent;
+}
+
+.welcome-message {
+  padding-right: 2em;
 }

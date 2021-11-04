@@ -8,7 +8,7 @@ import { ForgotPasswordComponent } from './login/forgot-password/forgot-password
 import { ChangePasswordComponent } from './login/change-password/change-password.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent, canActivate: [AuthGuardService] },
+  { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   {
     path: 'proposal/:proposal-code',

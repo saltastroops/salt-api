@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ObservationComment } from '../../../types/proposal';
 import { parseISO } from 'date-fns';
+import { ProposalService } from '../../../service/proposal.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'wm-observation-comments',
@@ -9,9 +11,78 @@ import { parseISO } from 'date-fns';
 })
 export class ObservationCommentsComponent implements OnInit {
   @Input() observationComments!: ObservationComment[];
+  @Input() proposalCode!: string;
   parseDate = parseISO;
+  commentForm!: FormGroup;
+  submitted: boolean = false;
+  isCommentInputOpen = false;
+  loading = false;
+  error: string | undefined = undefined;
 
-  constructor() {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private proposalService: ProposalService
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.commentForm = this.formBuilder.group({
+      comment: ['', Validators.required],
+    });
+  }
+
+  // convenience getter for easy access to form fields
+  get f() {
+    return this.commentForm.controls;
+  }
+
+  submitComment(): void {
+    this.submitted = true;
+
+    // stop here if form is invalid
+    if (this.commentForm.invalid) {
+      return;
+    }
+
+    this.loading = true;
+    this.proposalService
+      .submitObservationComment(this.proposalCode, this.f.comment.value)
+      .subscribe(
+        () => {
+          this.error = undefined;
+          this.proposalService
+            .getObservationComments(this.proposalCode)
+            .subscribe(
+              (data) => {
+                this.observationComments = data;
+                this.loading = false;
+                this.isCommentInputOpen = false;
+                this.error = undefined;
+                this.f.comment.reset('');
+              },
+              () => {
+                this.error = 'Failed to fetch your comment.';
+                this.loading = false;
+              }
+            );
+        },
+        (error: any) => {
+          this.error = error.toString();
+          this.loading = false;
+        }
+      );
+  }
+
+  openCommentInput(): void {
+    this.isCommentInputOpen = true;
+  }
+
+  clearError(): void {
+    this.error = undefined;
+  }
+
+  cancel(): void {
+    this.f.comment.reset('');
+    this.isCommentInputOpen = false;
+    this.clearError();
+  }
 }

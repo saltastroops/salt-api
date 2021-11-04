@@ -9,6 +9,7 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthenticationService } from './authentication.service';
+import { GENERIC_ERROR_MESSAGE } from '../utils';
 
 @Injectable()
 export class AuthenticationInterceptor implements HttpInterceptor {
@@ -45,10 +46,18 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     }
     return next.handle(request).pipe(
       catchError((err: HttpErrorResponse) => {
+        let message = GENERIC_ERROR_MESSAGE;
         if (err.status === 401) {
+          message = 'You are not logged in.';
           this.authenticationService.logout();
+        } else if (err.status === 500) {
+          message = GENERIC_ERROR_MESSAGE;
+        } else if (err.error && err.error.detail) {
+          message = err.error.detail;
+        } else if (err.error && err.error.message) {
+          message = err.error.message;
         }
-        return throwError(err.message);
+        return throwError(message);
       })
     );
   }

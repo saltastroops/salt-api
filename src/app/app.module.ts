@@ -68,6 +68,7 @@ import { RealBlockService } from './service/real/real-block.service';
 import { AuthenticationService } from './service/authentication.service';
 import { RealAuthenticationService } from './service/real/real-authentication.service';
 import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
+import { ChangePasswordComponent } from './login/change-password/change-password.component';
 
 @NgModule({
   declarations: [
@@ -125,6 +126,7 @@ import { ForgotPasswordComponent } from './login/forgot-password/forgot-password
     FabryPerotComponent,
     LoginComponent,
     ForgotPasswordComponent,
+    ChangePasswordComponent,
   ],
   imports: [
     BrowserModule,

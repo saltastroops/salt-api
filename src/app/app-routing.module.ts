@@ -5,6 +5,7 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { AuthGuardService } from './service/auth-guard.service';
 import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
+import { ChangePasswordComponent } from './login/change-password/change-password.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuardService] },
@@ -15,6 +16,7 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
   { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'change-password/:token', component: ChangePasswordComponent },
 ];
 
 @NgModule({

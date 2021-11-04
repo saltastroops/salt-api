@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService } from '../../service/authentication.service';
-import { GENERIC_ERROR_MESSAGE } from '../../utils';
 
 @Component({
   selector: 'wm-forgot-password',
@@ -14,7 +13,7 @@ export class ForgotPasswordComponent implements OnInit {
   submitted = false;
   loading = false;
   error: string | undefined = undefined;
-  showSuccessMessage = false;
+  switchForm = false;
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -27,10 +26,8 @@ export class ForgotPasswordComponent implements OnInit {
       usernameEmail: ['', Validators.required],
     });
   }
-
   forgotPassword(): void {
     // stop here if form is invalid
-    this.submitted = true;
     if (this.forgotPasswordForm.invalid) {
       return;
     }
@@ -40,13 +37,13 @@ export class ForgotPasswordComponent implements OnInit {
       .subscribe(
         () => {
           // Switch form
-          this.showSuccessMessage = true;
+          this.switchForm = true;
         },
         (error: any) => {
-          if (error.status === 404) {
+          // The HTTP request for a token is not intercepted, and hence there may be an
+          // error response with status code 401.
+          if (error.status === 401) {
             this.error = 'Unknown username or email.';
-          } else {
-            this.error = GENERIC_ERROR_MESSAGE;
           }
           this.loading = false;
         }
@@ -64,6 +61,9 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   requestAgain() {
-    this.showSuccessMessage = false;
+    this.switchForm = false;
+  }
+  toLogin() {
+    this.router.navigate(['login']);
   }
 }

@@ -27,4 +27,10 @@ export abstract class AuthenticationService {
   public abstract setRedirection(redirection: Redirection | null): void;
 
   public abstract sendResetPassword(usernameEmail: string): Observable<Message>;
+
+  public abstract changePassword(
+    password: string,
+    token: string
+  ): Observable<any>;
+  public abstract getUser(): Observable<any>;
 }

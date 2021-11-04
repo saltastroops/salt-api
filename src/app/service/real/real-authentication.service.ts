@@ -69,22 +69,6 @@ export class RealAuthenticationService implements AuthenticationService {
     this.redirection = redirection;
   }
 
-  /**
-   * Request password reset token to be sent.
-   *
-   * @param usernameEmail Username or email
-   */
-  sendResetPassword(usernameEmail: string): Observable<Message> {
-    const uri = environment.apiUrl + '/users/send-password-reset-email';
-    const headers = new HttpHeaders({
-      Authorization: 'Bearer x',
-      'Content-type': 'application/json',
-    });
-
-    return this.http
-      .post<any>(uri, { username_email: usernameEmail }, { headers })
-      .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
-  }
   private isTokenValid(): boolean {
     const expiresAt = RealAuthenticationService.getExpiry();
     const accessToken = this.getAccessToken();
@@ -102,4 +86,41 @@ export class RealAuthenticationService implements AuthenticationService {
     }
     return null;
   }
+
+  /**
+   * Request password reset token to be sent.
+   *
+   * @param usernameEmail Username or email
+   */
+  sendResetPassword(usernameEmail: string): Observable<Message> {
+    const uri = environment.apiUrl + '/users/send-password-reset-email';
+    const headers = new HttpHeaders({
+      Authorization: 'Bearer x',
+      'Content-type': 'application/json',
+    });
+
+    return this.http
+      .post<any>(uri, { username_email: usernameEmail }, { headers })
+      .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
+  }
+
+  /**
+   * Change user password.
+   *
+   * @param username Username.
+   * @param password Password.
+   */
+  changePassword(password: string, username: string): Observable<any> {
+    const uri = environment.apiUrl + '/users/update-user-details';
+    return this.http.post<any>(uri, { username }, { })
+      .pipe(map((user: any) => camelcaseKeys(user, { deep: true })));
+  }
+
+  getUser(): Observable<any> {
+    const uri = environment.apiUrl + '/user'
+    return this.http.get<any>(uri)
+      .pipe(map((user: any) => camelcaseKeys(user, { deep: true })));
+  }
 }
+
+

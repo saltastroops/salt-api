@@ -1,4 +1,8 @@
-import { forceNetworkError, forceServerError } from '../../support/utils';
+import {
+  forceNetworkError,
+  forceServerError,
+  interceptIndefinitely,
+} from '../../support/utils';
 import { ChangePasswordPage } from '../../support/pages/login/change-password-page';
 
 describe('Change password page', () => {
@@ -71,15 +75,20 @@ describe('Change password page', () => {
   });
 
   it('should show a meaningful error if the password is changed with an invalid token', () => {
-    expect(true).to.be.false;
-    // Also check that there is no loading indicator any longer.
+    ChangePasswordPage.visit('invalid-token');
+    ChangePasswordPage.changePassword('new-password');
+
+    ChangePasswordPage.hasAuthenticationError();
+    ChangePasswordPage.isNotLoading();
   });
 
   it('should show a loading indicator while the password is being changed', () => {
-    expect(true).to.be.false;
+    interceptIndefinitely('user');
+    ChangePasswordPage.visit('invalid-token');
+    ChangePasswordPage.changePassword('new-password');
+    ChangePasswordPage.isLoading();
   });
 
-  it('should redirect to the login page after the pasdsword has been changed successfully', () => {
-    expect(true).to.be.false;
-  });
+  // Testing the case of a successful password change is covered by the integration
+  // tests for the forgot password page.
 });

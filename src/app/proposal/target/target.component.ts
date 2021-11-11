@@ -6,10 +6,8 @@ import { Target } from '../../types/target';
   templateUrl: './target.component.html',
   styleUrls: ['./target.component.scss'],
 })
-export class TargetComponent implements OnInit {
+export class TargetComponent {
   @Input() target!: Target;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

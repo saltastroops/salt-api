@@ -6,9 +6,7 @@ import { HrsProcedure } from '../../../../types/hrs';
   templateUrl: './hrs-general-info.component.html',
   styleUrls: ['./hrs-general-info.component.scss'],
 })
-export class HrsGeneralInfoComponent implements OnInit {
+export class HrsGeneralInfoComponent {
   @Input() hrsProcedure!: HrsProcedure;
   constructor() {}
-
-  ngOnInit(): void {}
 }

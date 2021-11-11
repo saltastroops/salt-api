@@ -6,13 +6,11 @@ import { Block } from '../../../../types/block';
   templateUrl: './observing-conditions.component.html',
   styleUrls: ['./observing-conditions.component.scss'],
 })
-export class ObservingConditionsComponent implements OnInit {
+export class ObservingConditionsComponent {
   @Input() block!: Block;
   @Input() observationTime!: number;
 
   showObservingWindows = false;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

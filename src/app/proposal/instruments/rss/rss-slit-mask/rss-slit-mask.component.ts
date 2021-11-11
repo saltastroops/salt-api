@@ -6,10 +6,8 @@ import { RssMask } from '../../../../types/rss';
   templateUrl: './rss-slit-mask.component.html',
   styleUrls: ['./rss-slit-mask.component.scss'],
 })
-export class RssSlitMaskComponent implements OnInit {
+export class RssSlitMaskComponent {
   @Input() slitMask!: RssMask;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

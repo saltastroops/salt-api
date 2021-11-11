@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ProposalService } from '../proposal.service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import * as camelcaseKeys from 'camelcase-keys';
 import {
   ObservationComment,
@@ -20,26 +20,19 @@ export class RealProposalService implements ProposalService {
   /**
    * Get a proposal from the API server.
    *
-   * If the request fails the stream terminates with a generic error message as error.
-   *
    * @param proposalCode Proposal code.
    */
   getProposal(proposalCode: string): Observable<Proposal> {
     const uri = environment.apiUrl + '/proposals/' + proposalCode;
-    return this.http.get<Proposal>(uri).pipe(
-      map((proposal: Proposal) => camelcaseKeys(proposal, { deep: true })),
-      catchError(() => {
-        return throwError(
-          `The request to get proposal "${proposalCode}" has failed.`
-        );
-      })
-    );
+    return this.http
+      .get<Proposal>(uri)
+      .pipe(
+        map((proposal: Proposal) => camelcaseKeys(proposal, { deep: true }))
+      );
   }
 
   /**
    * Get a list of proposals from the API server.
-   *
-   * If the request fails the stream terminates with a generic error message as error.
    */
   getProposals(): Observable<ProposalListItem[]> {
     const uri = environment.apiUrl + '/proposals/';
@@ -48,17 +41,12 @@ export class RealProposalService implements ProposalService {
         return proposals.map((proposal) =>
           camelcaseKeys(proposal, { deep: true })
         );
-      }),
-      catchError(() => {
-        return throwError('Oops. Something is wrong.');
       })
     );
   }
 
   /**
    * Get the list of observation comments for a proposal from the API server.
-   *
-   * If the request fails the stream terminates with a generic error message as error.
    */
   public getObservationComments(
     proposalCode: string
@@ -73,17 +61,12 @@ export class RealProposalService implements ProposalService {
         return observationComments.map((observationComment) =>
           camelcaseKeys(observationComment, { deep: true })
         );
-      }),
-      catchError(() => {
-        return throwError('Oops. Something is wrong.');
       })
     );
   }
 
   /**
    * Submit an observation comment to the API server.
-   *
-   * If the request fails the stream terminates with a generic error message as error.
    */
   public submitObservationComment(proposalCode: string, comment: string): any {
     const uri =
@@ -91,8 +74,9 @@ export class RealProposalService implements ProposalService {
       '/proposals/' +
       proposalCode +
       '/observation-comments';
-    return this.http
-      .post<any>(uri, { comment })
-      .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
+    return this.http.post<any>(uri, { comment }).pipe(
+      switchMap(() => this.http.get(uri)),
+      map((comments: any) => camelcaseKeys(comments, { deep: true }))
+    );
   }
 }

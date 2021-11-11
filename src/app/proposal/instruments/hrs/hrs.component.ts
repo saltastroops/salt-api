@@ -7,11 +7,9 @@ import { PayloadConfiguration } from '../../../types/observation';
   templateUrl: './hrs.component.html',
   styleUrls: ['./hrs.component.scss'],
 })
-export class HrsComponent implements OnInit {
+export class HrsComponent {
   @Input() hrs!: Hrs;
   @Input() payloadConfiguration!: PayloadConfiguration;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

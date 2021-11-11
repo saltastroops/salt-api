@@ -6,10 +6,8 @@ import { Salticam } from '../../../../types/salticam';
   templateUrl: './salticam-observation-times.component.html',
   styleUrls: ['./salticam-observation-times.component.scss'],
 })
-export class SalticamObservationTimesComponent implements OnInit {
+export class SalticamObservationTimesComponent {
   @Input() salticam!: Salticam;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

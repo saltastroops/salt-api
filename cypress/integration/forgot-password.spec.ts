@@ -1,7 +1,13 @@
 import { recurse } from 'cypress-recurse';
 import { ForgotPasswordPage } from '../support/pages/forgot-password-page';
-import { forceNetworkError, forceServerError } from '../support/utils';
+import {
+  forceNetworkError,
+  forceServerError,
+  randomPassword,
+} from '../support/utils';
 import { User } from '../support/types';
+import { ChangePasswordPage } from '../support/pages/login/change-password-page';
+import { LoginPage } from '../support/pages/login-page';
 
 describe('Forgot password page', () => {
   beforeEach(() => {
@@ -93,8 +99,20 @@ describe('Forgot password page', () => {
       .then((link: string) => {
         // And when I click on the link I get to the password reset page
         cy.visit(link);
-        cy.url().should('contain', 'password-reset');
-        // TODO: Continue with the test on the password reset page
+        cy.url().should('contain', 'change-password');
+
+        // And when I then request a password change
+        const password = randomPassword();
+        ChangePasswordPage.changePassword(password);
+
+        // I get to the login page
+        cy.url().should('contain', 'login');
+
+        // And when I enter my username and new password
+        LoginPage.login(USERNAME, password);
+
+        // I am logged in
+        cy.url().should('not.contain', 'login');
       });
   });
 });

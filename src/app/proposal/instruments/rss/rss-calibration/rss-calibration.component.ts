@@ -7,11 +7,9 @@ import { Lamp } from '../../../../types/common';
   templateUrl: './rss-calibration.component.html',
   styleUrls: ['./rss-calibration.component.scss'],
 })
-export class RssCalibrationComponent implements OnInit {
+export class RssCalibrationComponent {
   @Input() filter!: CalibrationFilter | null;
   @Input() lamp!: Lamp;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

@@ -87,7 +87,7 @@ describe('BlockViewNavigationComponent', () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[1];
     fixture.detectChanges();
-    const emitSpy = spyOn(component.select, 'emit');
+    const emitSpy = spyOn(component.selectEmitter, 'emit');
     previousButton().click();
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[0]);
   });
@@ -96,7 +96,7 @@ describe('BlockViewNavigationComponent', () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[1];
     fixture.detectChanges();
-    const emitSpy = spyOn(component.select, 'emit');
+    const emitSpy = spyOn(component.selectEmitter, 'emit');
     nextButton().click();
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[2]);
   });
@@ -112,7 +112,7 @@ describe('BlockViewNavigationComponent', () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[0];
     fixture.detectChanges();
-    const emitSpy = spyOn(component.select, 'emit');
+    const emitSpy = spyOn(component.selectEmitter, 'emit');
     select().value = select().options[1].value;
     select().dispatchEvent(new Event('change'));
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[1]);

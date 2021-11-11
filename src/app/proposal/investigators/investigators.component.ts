@@ -6,10 +6,8 @@ import { Investigator } from '../../types/proposal';
   templateUrl: './investigators.component.html',
   styleUrls: ['./investigators.component.scss'],
 })
-export class InvestigatorsComponent implements OnInit {
+export class InvestigatorsComponent {
   @Input() investigators!: Investigator[];
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

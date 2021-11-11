@@ -13,7 +13,7 @@ import { GENERIC_ERROR_MESSAGE } from '../../utils';
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;
-  accessToken!: Observable<AccessToken>;
+  token!: string;
   user: any;
   loading = false;
   submitted = false;
@@ -32,7 +32,7 @@ export class ChangePasswordComponent implements OnInit {
       retypedPassword: ['', Validators.required],
     });
     this.route.params.subscribe((params) => {
-      this.authenticationService.setAccessToken(params.token)
+      this.token = params.token;
     });
   }
 
@@ -54,30 +54,15 @@ export class ChangePasswordComponent implements OnInit {
     }
 
     this.loading = true;
-    this.authenticationService.getUser().subscribe(
-      (data: any) => {
-        this.user = data
-      }
-    )
     this.authenticationService
-      .changePassword(this.f.password.value, this.user.username)
+      .changePassword(this.f.password.value, this.token)
       .subscribe(
         () => {
           this.loading = false;
-          this.router.navigate(['/']);
+          this.router.navigate(['/login']);
         },
         (error: any) => {
-          // The HTTP request for a token is not intercepted, and hence there may be an
-          // error response with status code 401.
-          if (error.status === 401) {
-            this.error = 'Unauthorised to change password.';
-          } else {
-            if (error.status === 405) {
-              this.error = 'Allowed to change password.';
-            } else {
-              this.error = GENERIC_ERROR_MESSAGE;
-            }
-          }
+          this.error = error;
           this.loading = false;
         }
       );

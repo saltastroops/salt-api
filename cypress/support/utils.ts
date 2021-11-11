@@ -25,6 +25,7 @@ export function interceptIndefinitely(
   });
   return { sendResponse };
 }
+
 /**
  * Log in as a user.
  *
@@ -48,6 +49,17 @@ export function login(username: string) {
         tokenType: tokenData.token_type,
       });
     });
+}
+
+/**
+ * Generate a random password.
+ */
+export function randomPassword() {
+  // Taken from https://gist.github.com/6174/6062387
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
 
 /**
@@ -80,5 +92,17 @@ export function forceAuthenticationError() {
   cy.intercept('/**', {
     statusCode: 401,
     body: { detail: 'Not Authorized' },
+  });
+}
+
+/**
+ * Intercept all HTTP queries so that they give a forbidden error (with status code 403).
+ *
+ * This function internally uses Cypress' intercept method.
+ */
+export function forceForbiddenError() {
+  cy.intercept('/**', {
+    statusCode: 403,
+    body: { detail: 'Forbidden' },
   });
 }

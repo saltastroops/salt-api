@@ -7,11 +7,9 @@ import { PayloadConfiguration } from '../../../types/observation';
   templateUrl: './bvit.component.html',
   styleUrls: ['./bvit.component.scss'],
 })
-export class BvitComponent implements OnInit {
+export class BvitComponent {
   @Input() bvit!: Bvit;
   @Input() payloadConfiguration!: PayloadConfiguration;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

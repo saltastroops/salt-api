@@ -15,22 +15,21 @@ type ObservingWindow = { start: Date; end: Date };
   templateUrl: './observing-windows.component.html',
   styleUrls: ['./observing-windows.component.scss'],
 })
-export class ObservingWindowsComponent implements OnInit, OnChanges {
-  @Input('observingWindows') stringObservingWindows!: TimeInterval[];
+export class ObservingWindowsComponent implements OnChanges {
+  @Input() observingWindows!: TimeInterval[];
 
-  observingWindows!: ObservingWindow[];
+  observingWindowList!: ObservingWindow[];
   showObservingWindow = false;
   blocksObservableTonight!: ObservingWindow[];
   remainingNights!: number;
   differenceInSeconds = differenceInSeconds; // It needs to be an attribute of the class to be used in the template.
   constructor() {}
 
-  ngOnInit() {}
-
   ngOnChanges(): void {
-    this.observingWindows = this.stringObservingWindows.map(
-      ({ start, end }) => ({ start: parseISO(start), end: parseISO(end) })
-    );
+    this.observingWindowList = this.observingWindows.map(({ start, end }) => ({
+      start: parseISO(start),
+      end: parseISO(end),
+    }));
     this.blocksObservableTonight = this.tonightsObservingWindows();
     this.remainingNights = this.numberOfObservableNightsRemaining();
   }
@@ -56,7 +55,7 @@ export class ObservingWindowsComponent implements OnInit, OnChanges {
 
   tonightsObservingWindows(): ObservingWindow[] {
     const night = this.tonight();
-    const tonightsWindows = this.observingWindows.filter(
+    const tonightsWindows = this.observingWindowList.filter(
       (o) => o.end >= night.start && o.end < night.end
     );
     return tonightsWindows.sort(this._compareObservingWindows);
@@ -68,7 +67,7 @@ export class ObservingWindowsComponent implements OnInit, OnChanges {
 
   numberOfObservableNightsRemaining(): number {
     const tomorrow = addDays(this.tonight().start, 1);
-    const remainingWindows = this.observingWindows.filter(
+    const remainingWindows = this.observingWindowList.filter(
       (o: ObservingWindow) => tomorrow <= o.start
     );
     const remainingNights = new Set(
@@ -78,7 +77,7 @@ export class ObservingWindowsComponent implements OnInit, OnChanges {
   }
 
   sortedObservingWindows(): ObservingWindow[] {
-    return [...this.observingWindows].sort(this._compareObservingWindows);
+    return [...this.observingWindowList].sort(this._compareObservingWindows);
   }
 
   _compareObservingWindows(a: ObservingWindow, b: ObservingWindow): number {

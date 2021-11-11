@@ -6,9 +6,7 @@ import { SalticamDetector } from '../../../../types/salticam';
   templateUrl: './salticam-detector.component.html',
   styleUrls: ['./salticam-detector.component.scss'],
 })
-export class SalticamDetectorComponent implements OnInit {
+export class SalticamDetectorComponent {
   @Input() detector!: SalticamDetector;
   constructor() {}
-
-  ngOnInit(): void {}
 }

@@ -6,12 +6,12 @@ import { BlockSummary } from '../../../../types/block';
   templateUrl: './block-selection.component.html',
   styleUrls: ['./block-selection.component.scss'],
 })
-export class BlockSelectionComponent implements OnInit {
+export class BlockSelectionComponent {
   @Input() blocks!: BlockSummary[];
 
   @Input() selectedBlock!: BlockSummary | null;
 
-  @Output() select = new EventEmitter<BlockSummary>();
+  @Output() selectEmitter = new EventEmitter<BlockSummary>();
 
   constructor() {}
 
@@ -19,14 +19,12 @@ export class BlockSelectionComponent implements OnInit {
     return this.selectedBlock ? this.blocks.indexOf(this.selectedBlock) : -1;
   }
 
-  ngOnInit(): void {}
-
   onSelect(event: Event) {
     const index = parseInt((event.target as HTMLSelectElement).value, 10);
     this.selectBlock(index);
   }
 
   selectBlock(index: number) {
-    this.select.emit(this.blocks[index]);
+    this.selectEmitter.emit(this.blocks[index]);
   }
 }

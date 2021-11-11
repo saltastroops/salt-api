@@ -135,7 +135,7 @@ export class RealAuthenticationService implements AuthenticationService {
   }
 
   private static getExpiry(): Date | null {
-    const expiresAt = localStorage.getItem('expiresAt');
+    const expiresAt = localStorage.getItem('accessTokenExpiresAt');
     if (expiresAt) {
       return parseISO(expiresAt);
     }
@@ -158,44 +158,44 @@ export class RealAuthenticationService implements AuthenticationService {
       .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
   }
 
-  private isTokenValid(): boolean {
-    const accessToken = this.getAccessToken();
-    const expiresAt = RealAuthenticationService.getExpiry();
-    const now = new Date();
-    if (!accessToken || !expiresAt) {
-      return false;
-    }
-    return expiresAt >= now;
-  }
-
-  private static getExpiry(): Date | null {
-    try {
-      const expiresAt = localStorage.getItem('accessTokenExpiresAt');
-      if (expiresAt) {
-        return parseISO(expiresAt);
-      }
-    } catch (Error) {
-      // do nothing
-    }
-    return null;
-
   /**
    * Change user password.
    *
-   * @param username Username.
+   * @param token Authentication token.
    * @param password Password.
    */
-  changePassword(password: string, username: string): Observable<any> {
-    const uri = environment.apiUrl + '/users/update-user-details';
-    return this.http.post<any>(uri, { username }, { })
-      .pipe(map((user: any) => camelcaseKeys(user, { deep: true })));
+  changePassword(password: string, token: string): Observable<any> {
+    // Make sure that we don't use another token for changing the password
+    this.logout();
+
+    const options = {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    return (
+      this.http
+        // get the user for the token...
+        .get<User>(environment.apiUrl + '/user/', options)
+        .pipe(
+          // ... and update their password
+          switchMap((user) => {
+            return this.http.patch(
+              `${environment.apiUrl}/users/${user.username}`,
+              { password },
+              options
+            );
+          })
+        )
+    );
   }
 
   getUser(): Observable<any> {
-    const uri = environment.apiUrl + '/user'
-    return this.http.get<any>(uri)
+    const uri = environment.apiUrl + '/user';
+    return this.http
+      .get<any>(uri)
       .pipe(map((user: any) => camelcaseKeys(user, { deep: true })));
   }
 }
-
-

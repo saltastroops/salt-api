@@ -7,12 +7,10 @@ import { PayloadConfiguration } from '../../../types/observation';
   templateUrl: './rss.component.html',
   styleUrls: ['./rss.component.scss'],
 })
-export class RssComponent implements OnInit {
+export class RssComponent {
   @Input() rss!: Rss;
   @Input() payloadConfiguration!: PayloadConfiguration;
   headerLine: string | null = null;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

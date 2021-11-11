@@ -7,11 +7,9 @@ import { PayloadConfiguration } from '../../../types/observation';
   templateUrl: './salticam.component.html',
   styleUrls: ['./salticam.component.scss'],
 })
-export class SalticamComponent implements OnInit {
+export class SalticamComponent {
   @Input() salticam!: Salticam;
   @Input() payloadConfiguration!: PayloadConfiguration;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

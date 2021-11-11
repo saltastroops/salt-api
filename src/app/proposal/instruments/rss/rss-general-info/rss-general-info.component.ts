@@ -6,9 +6,7 @@ import { Rss } from '../../../../types/rss';
   templateUrl: './rss-general-info.component.html',
   styleUrls: ['./rss-general-info.component.scss'],
 })
-export class RssGeneralInfoComponent implements OnInit {
+export class RssGeneralInfoComponent {
   @Input() rss!: Rss;
   constructor() {}
-
-  ngOnInit(): void {}
 }

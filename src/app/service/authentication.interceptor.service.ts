@@ -9,7 +9,11 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthenticationService } from './authentication.service';
-import { GENERIC_ERROR_MESSAGE } from '../utils';
+import {
+  FORBIDDEN_MESSAGE,
+  GENERIC_ERROR_MESSAGE,
+  NOT_LOGGED_IN_MESSAGE,
+} from '../utils';
 
 @Injectable()
 export class AuthenticationInterceptor implements HttpInterceptor {
@@ -46,19 +50,27 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     }
     return next.handle(request).pipe(
       catchError((err: HttpErrorResponse) => {
-        let message = GENERIC_ERROR_MESSAGE;
         if (err.status === 401) {
-          message = 'You are not logged in.';
           this.authenticationService.logout();
-        } else if (err.status === 500) {
-          message = GENERIC_ERROR_MESSAGE;
-        } else if (err.error && err.error.detail) {
-          message = err.error.detail;
-        } else if (err.error && err.error.message) {
-          message = err.error.message;
         }
-        return throwError(message);
+        return httpErrorObservable(err);
       })
     );
   }
+}
+
+function httpErrorObservable(err: HttpErrorResponse): Observable<never> {
+  let message = GENERIC_ERROR_MESSAGE;
+  if (err.status === 401) {
+    message = NOT_LOGGED_IN_MESSAGE;
+  } else if (err.status === 403) {
+    message = FORBIDDEN_MESSAGE;
+  } else if (err.status === 500) {
+    message = GENERIC_ERROR_MESSAGE;
+  } else if (err.error && err.error.detail) {
+    message = err.error.detail;
+  } else if (err.error && err.error.message) {
+    message = err.error.message;
+  }
+  return throwError(message);
 }

@@ -6,10 +6,8 @@ import { HrsConfiguration } from '../../../../types/hrs';
   templateUrl: './hrs-configuration.component.html',
   styleUrls: ['./hrs-configuration.component.scss'],
 })
-export class HrsConfigurationComponent implements OnInit {
+export class HrsConfigurationComponent {
   @Input() hrsConfig!: HrsConfiguration;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

@@ -6,10 +6,8 @@ import { RssPolarimetryPattern } from '../../../../types/rss';
   templateUrl: './polarimetry.component.html',
   styleUrls: ['./polarimetry.component.scss'],
 })
-export class PolarimetryComponent implements OnInit {
+export class PolarimetryComponent {
   @Input() pattern!: RssPolarimetryPattern;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

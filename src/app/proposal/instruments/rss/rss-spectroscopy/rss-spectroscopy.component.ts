@@ -6,11 +6,9 @@ import { RssSpectroscopy } from '../../../../types/rss';
   templateUrl: './rss-spectroscopy.component.html',
   styleUrls: ['./rss-spectroscopy.component.scss'],
 })
-export class RssSpectroscopyComponent implements OnInit {
+export class RssSpectroscopyComponent {
   @Input() spectroscopy!: RssSpectroscopy;
   @Input() filter!: string;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

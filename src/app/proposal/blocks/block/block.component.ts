@@ -6,9 +6,7 @@ import { Block } from '../../../types/block';
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss'],
 })
-export class BlockComponent implements OnInit {
+export class BlockComponent {
   @Input() block!: Block;
   constructor() {}
-
-  ngOnInit(): void {}
 }

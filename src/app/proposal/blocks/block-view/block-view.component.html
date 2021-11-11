@@ -1,7 +1,7 @@
 <wm-block-selection
   [blocks]="blocks"
   [selectedBlock]="selectedBlock"
-  (select)="selectBlock($event)"
+  (selectEmitter)="selectBlock($event)"
 ></wm-block-selection>
 <div class="block-content" style="position: relative">
   <ng-container *ngIf="isLoading">
@@ -26,5 +26,5 @@
 <wm-block-selection
   [blocks]="blocks"
   [selectedBlock]="selectedBlock"
-  (select)="selectBlock($event)"
+  (selectEmitter)="selectBlock($event)"
 ></wm-block-selection>

@@ -6,10 +6,8 @@ import { ObservationProbabilities } from '../../../../types/common';
   templateUrl: './observation-probabilities.component.html',
   styleUrls: ['./observation-probabilities.component.scss'],
 })
-export class ObservationProbabilitiesComponent implements OnInit {
+export class ObservationProbabilitiesComponent {
   @Input() probabilities!: ObservationProbabilities;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

@@ -5,9 +5,7 @@ import { Component, Input, OnInit } from '@angular/core';
   templateUrl: './proposal-progress-table.component.html',
   styleUrls: ['./proposal-progress-table.component.scss'],
 })
-export class ProposalProgressTableComponent implements OnInit {
+export class ProposalProgressTableComponent {
   @Input() proposalProgress: string | null = null;
   constructor() {}
-
-  ngOnInit(): void {}
 }

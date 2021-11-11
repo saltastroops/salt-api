@@ -9,7 +9,7 @@ import {
   templateUrl: './payload-configuration.component.html',
   styleUrls: ['./payload-configuration.component.scss'],
 })
-export class PayloadConfigurationComponent implements OnInit, OnChanges {
+export class PayloadConfigurationComponent implements OnChanges {
   @Input() telescopeConfiguration!: TelescopeConfiguration;
   @Input() payloadConfigurationIndex!: number;
 
@@ -19,8 +19,6 @@ export class PayloadConfigurationComponent implements OnInit, OnChanges {
   ditherPatternDescription!: string;
 
   constructor() {}
-
-  ngOnInit(): void {}
 
   ngOnChanges() {
     this.payloadConfiguration =

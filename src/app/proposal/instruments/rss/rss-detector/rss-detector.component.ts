@@ -6,10 +6,8 @@ import { RssDetector } from '../../../../types/rss';
   templateUrl: './rss-detector.component.html',
   styleUrls: ['./rss-detector.component.scss'],
 })
-export class RssDetectorComponent implements OnInit {
+export class RssDetectorComponent {
   @Input() detector!: RssDetector;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

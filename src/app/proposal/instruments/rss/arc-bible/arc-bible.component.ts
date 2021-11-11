@@ -6,10 +6,8 @@ import { ArcBibleEntry } from '../../../../types/rss';
   templateUrl: './arc-bible.component.html',
   styleUrls: ['./arc-bible.component.scss'],
 })
-export class ArcBibleComponent implements OnInit {
+export class ArcBibleComponent {
   @Input() arcBibleEntries!: ArcBibleEntry[];
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

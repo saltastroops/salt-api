@@ -43,30 +43,20 @@ export class ObservationCommentsComponent implements OnInit {
       return;
     }
 
+    this.error = undefined;
     this.loading = true;
     this.proposalService
       .submitObservationComment(this.proposalCode, this.f.comment.value)
       .subscribe(
-        () => {
+        (data: ObservationComment[]) => {
+          this.observationComments = data;
+          this.loading = false;
           this.error = undefined;
-          this.proposalService
-            .getObservationComments(this.proposalCode)
-            .subscribe(
-              (data) => {
-                this.observationComments = data;
-                this.loading = false;
-                this.isCommentInputOpen = false;
-                this.error = undefined;
-                this.f.comment.reset('');
-              },
-              () => {
-                this.error = 'Failed to fetch your comment.';
-                this.loading = false;
-              }
-            );
+          this.f.comment.reset('');
+          this.closeCommentInput();
         },
-        (error: any) => {
-          this.error = error.toString();
+        (error: string) => {
+          this.error = error;
           this.loading = false;
         }
       );
@@ -76,13 +66,17 @@ export class ObservationCommentsComponent implements OnInit {
     this.isCommentInputOpen = true;
   }
 
+  closeCommentInput(): void {
+    this.isCommentInputOpen = false;
+  }
+
   clearError(): void {
     this.error = undefined;
   }
 
   cancel(): void {
     this.f.comment.reset('');
-    this.isCommentInputOpen = false;
+    this.closeCommentInput();
     this.clearError();
   }
 }

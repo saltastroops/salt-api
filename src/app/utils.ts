@@ -3,6 +3,10 @@ import { AccessToken } from './types/authentication';
 export const GENERIC_ERROR_MESSAGE =
   'Sorry, something has gone wrong. Please try again later.';
 
+export const NOT_LOGGED_IN_MESSAGE = 'You are not logged in.';
+
+export const FORBIDDEN_MESSAGE = 'You are not allowed to perform this action.';
+
 export function storeAccessToken(tokenData: AccessToken) {
   localStorage.setItem('accessToken', tokenData.accessToken);
   localStorage.setItem('accessTokenExpiresAt', tokenData.expiresAt);

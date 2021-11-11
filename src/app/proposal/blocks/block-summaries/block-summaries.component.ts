@@ -6,10 +6,8 @@ import { BlockSummary } from '../../../types/block';
   templateUrl: './block-summaries.component.html',
   styleUrls: ['./block-summaries.component.scss'],
 })
-export class BlockSummariesComponent implements OnInit {
+export class BlockSummariesComponent {
   @Input() blocks!: BlockSummary[];
   @Input() proposalCode!: string;
   constructor() {}
-
-  ngOnInit(): void {}
 }

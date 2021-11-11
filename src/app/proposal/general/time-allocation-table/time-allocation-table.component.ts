@@ -6,9 +6,7 @@ import { TimeAllocation } from '../../../types/proposal';
   templateUrl: './time-allocation-table.component.html',
   styleUrls: ['./time-allocation-table.component.scss'],
 })
-export class TimeAllocationTableComponent implements OnInit {
+export class TimeAllocationTableComponent {
   @Input() time_allocations!: TimeAllocation[];
   constructor() {}
-
-  ngOnInit(): void {}
 }

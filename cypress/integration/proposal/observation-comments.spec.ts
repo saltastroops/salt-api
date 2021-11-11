@@ -2,11 +2,16 @@ import { ProposalPage } from '../../support/pages/proposal-page';
 import { ObservationComments } from '../../support/components/observation-comments';
 import {
   forceAuthenticationError,
+  forceForbiddenError,
   forceNetworkError,
   forceServerError,
   login,
 } from '../../support/utils';
-import { GENERIC_ERROR_MESSAGE } from '../../../src/app/utils';
+import {
+  FORBIDDEN_MESSAGE,
+  GENERIC_ERROR_MESSAGE,
+  NOT_LOGGED_IN_MESSAGE,
+} from '../../../src/app/utils';
 
 const USERNAME = 'hettlage';
 
@@ -83,7 +88,7 @@ describe('Observation comments', () => {
     forceNetworkError();
 
     // When I add a new comment
-    ObservationComments.addComment('This is test comment.');
+    ObservationComments.addComment('This is a test comment.');
 
     // An error is displayed
     ObservationComments.hasSubmissionError(GENERIC_ERROR_MESSAGE);
@@ -101,7 +106,7 @@ describe('Observation comments', () => {
     forceServerError();
 
     // When I add a new comment
-    ObservationComments.addComment('This is test comment.');
+    ObservationComments.addComment('This is a test comment.');
 
     // An error is displayed
     ObservationComments.hasSubmissionError(GENERIC_ERROR_MESSAGE);
@@ -119,10 +124,28 @@ describe('Observation comments', () => {
     forceAuthenticationError();
 
     // When I add a new comment
-    ObservationComments.addComment('This is test comment.');
+    ObservationComments.addComment('This is a test comment.');
 
     // An error is displayed
-    ObservationComments.hasSubmissionError('logged in');
+    ObservationComments.hasSubmissionError(NOT_LOGGED_IN_MESSAGE);
+
+    // And the button for adding a new comment is still disabled
+    ObservationComments.hasDisabledAddCommentButton(true);
+
+    // And the other buttons are enabled
+    ObservationComments.hasDisabledSubmitButton(false);
+    ObservationComments.hasDisabledCancelButton(false);
+  });
+
+  it('should show an error if the user is not allowed to add a comment', () => {
+    // Given there will be an authorization error
+    forceForbiddenError();
+
+    // When I add a new comment
+    ObservationComments.addComment('This is a test comment.');
+
+    // An error is displayed
+    ObservationComments.hasSubmissionError(FORBIDDEN_MESSAGE);
 
     // And the button for adding a new comment is still disabled
     ObservationComments.hasDisabledAddCommentButton(true);
@@ -161,5 +184,8 @@ describe('Observation comments', () => {
 
     // Then the new comment is displayed
     cy.get('[data-test="observation-comment"]').should('have.length', 1);
+
+    // And there is no input form any longer
+    ObservationComments.hasNoAddCommentForm();
   });
 });

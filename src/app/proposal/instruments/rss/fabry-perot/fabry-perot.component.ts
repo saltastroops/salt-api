@@ -6,11 +6,9 @@ import { RssMode } from '../../../../types/rss';
   templateUrl: './fabry-perot.component.html',
   styleUrls: ['./fabry-perot.component.scss'],
 })
-export class FabryPerotComponent implements OnInit {
+export class FabryPerotComponent {
   @Input() filter!: string;
   @Input() mode!: RssMode;
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

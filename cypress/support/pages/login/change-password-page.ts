@@ -1,4 +1,7 @@
-import { GENERIC_ERROR_MESSAGE } from '../../../../src/app/utils';
+import {
+  GENERIC_ERROR_MESSAGE,
+  NOT_LOGGED_IN_MESSAGE,
+} from '../../../../src/app/utils';
 
 export const CHANGE_PASSWORD_BASE_URL = '/change-password/';
 
@@ -41,6 +44,12 @@ export class ChangePasswordPage {
     cy.get("[data-test='submit-request']").click();
   }
 
+  static changePassword(password: string) {
+    ChangePasswordPage.typeNewPassword(password);
+    ChangePasswordPage.typeRetypedNewPassword(password);
+    ChangePasswordPage.submit();
+  }
+
   static hasMissingNewPasswordError() {
     cy.get("[data-test='password-error']")
       .contains(/cannot be empty/i)
@@ -69,5 +78,24 @@ export class ChangePasswordPage {
     cy.get("[data-test='error']")
       .contains(GENERIC_ERROR_MESSAGE)
       .should('be.visible');
+  }
+
+  static hasAuthenticationError() {
+    cy.get("[data-test='error']")
+      .contains(NOT_LOGGED_IN_MESSAGE)
+      .should('be.visible');
+  }
+
+  static isLoading() {
+    return cy
+      .get('[data-test="submit-request"]')
+      .should('have.class', 'is-loading');
+  }
+
+  static isNotLoading() {
+    cy.get('[data-test="submit-request"]').should(
+      'not.have.class',
+      'is-loading'
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { parseISO } from 'date-fns';
-import { ExecutedObservation } from '../../../types/common';
+import { BlockVisit } from '../../../types/common';
 
 @Component({
   selector: 'wm-summary-of-executed-observations',
@@ -9,12 +9,12 @@ import { ExecutedObservation } from '../../../types/common';
 })
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;
-  @Input() executedObservations!: ExecutedObservation[];
+  @Input() blockVisits!: BlockVisit[];
   observations!: Observation[];
   constructor() {}
 
   ngOnInit(): void {
-    this.observations = this.executedObservations.map((o) => ({
+    this.observations = this.blockVisits.map((o) => ({
       ...o,
       downloadObservation: this.selectAll,
     }));
@@ -44,6 +44,6 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   }
 }
 
-interface Observation extends ExecutedObservation {
+interface Observation extends BlockVisit {
   downloadObservation: boolean;
 }

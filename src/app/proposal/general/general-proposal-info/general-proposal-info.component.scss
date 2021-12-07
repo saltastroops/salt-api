@@ -1,5 +1,17 @@
-.proposal_info-row {
+@import "../../../../styles";
+
+.proposal-info-row {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   align-items: center;
+}
+
+.proposal-status-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: center;
+}
+
+#proposal-comment {
+  font-weight: bold;
 }

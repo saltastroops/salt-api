@@ -3,6 +3,7 @@
 
 <div class="table is-table alternate-background">
   <div class="block-row headers is-info row">
+    <div>Block ID</div>
     <div>Block</div>
     <div>ObsTime</div>
     <div>Priority</div>
@@ -17,6 +18,7 @@
   </div>
   <div *ngFor="let b of blocks">
     <div class="block-row row">
+      <div>{{ b.id }}</div>
       <div>
         <a href="proposal/{{ proposalCode }}/#block{{ b.id }}">{{ b.name }}</a>
       </div>
@@ -39,7 +41,7 @@
       </div>
       <div>{{ b.remainingNights }}</div>
       <div>{{ b.observingConditions.maximumSeeing }}</div>
-      <div class="transparency">
+      <div>
         <div>{{ b.observingConditions.transparency }}</div>
         <div *ngIf="b.observingConditions.transparency === 'Any'">
           <img

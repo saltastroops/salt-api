@@ -4,33 +4,33 @@
   </div>
   <div class="charged-row row">
     <div>Priority 0</div>
-    <div>{{ chargedTime.priority0 }}</div>
+    <div class="has-text-right">{{ chargedTime.priority0 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 1</div>
-    <div>{{ chargedTime.priority1 }}</div>
+    <div class="has-text-right">{{ chargedTime.priority1 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 2</div>
-    <div>{{ chargedTime.priority2 }}</div>
+    <div class="has-text-right">{{ chargedTime.priority2 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 3</div>
-    <div>{{ chargedTime.priority3 }}</div>
+    <div class="has-text-right">{{ chargedTime.priority3 }}</div>
   </div>
   <div class="charged-row row">
     <div>Priority 4</div>
-    <div>{{ chargedTime.priority4 }}</div>
+    <div class="has-text-right">{{ chargedTime.priority4 }}</div>
   </div>
   <div class="charged-row row">
     <div>P1-P3 Total/Allocated</div>
-    <div data-testid="absolute-completion">
+    <div class="rhas-text-right" data-testid="absolute-completion">
       {{ chargedTimeP0ToP3 }}/{{ allocatedP0ToP3Time }}
     </div>
   </div>
   <div class="charged-row row">
     <div>P1-P3 Completion (%)</div>
-    <div data-testid="relative-completion">
+    <div class="has-text-right" data-testid="relative-completion">
       {{ (chargedTimeP0ToP3 / allocatedP0ToP3Time) * 100 | number: "1.0-1" }}%
     </div>
   </div>

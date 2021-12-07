@@ -37,6 +37,7 @@ export interface Target {
   targetType: string | null;
   periodEphemeris: PeriodEphemeris | null;
   horizonsIdentifier: string | null;
+  nonSidereal: boolean;
 }
 
 export type TimeBase =

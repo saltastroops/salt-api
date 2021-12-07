@@ -1,5 +1,5 @@
 import {
-  BaseExecutedObservation,
+  BaseBlockVisit,
   InstrumentSummary,
   ObservationProbabilities,
   Ranking,
@@ -18,7 +18,7 @@ export interface Block {
   comment: string;
   waitPeriod: number;
   requestedObservations: number;
-  executedObservations: BaseExecutedObservation[];
+  blockVisits: BaseBlockVisit[];
   observingConditions: ObservingConditions;
   observationTime: number;
   overheadTime: number;
@@ -27,14 +27,19 @@ export interface Block {
   observations: Observation[];
 }
 
-export type BlockStatus =
+export type BlockStatusValue =
   | 'Active'
   | 'Completed'
   | 'Deleted'
   | 'Expired'
   | 'Not set'
-  | 'On Hold'
+  | 'On hold'
   | 'Superseded';
+
+export interface BlockStatus {
+  value: BlockStatusValue;
+  reason: string | null;
+}
 
 export interface BlockSummary {
   id: number;

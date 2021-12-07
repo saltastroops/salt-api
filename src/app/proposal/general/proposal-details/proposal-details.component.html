@@ -5,7 +5,14 @@
     </div>
     <div class="row proposal-details-row">
       <div>Status</div>
-      <div>{{ generalProposalInfo.status }}</div>
+      <div>{{ generalProposalInfo.status.value }}</div>
+    </div>
+    <div
+      class="row proposal-details-row"
+      *ngIf="generalProposalInfo.status.reason"
+    >
+      <div>Status reason</div>
+      <div>{{ generalProposalInfo.status.reason }}</div>
     </div>
     <div class="row proposal-details-row">
       <div>Type</div>

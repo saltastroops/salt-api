@@ -2,11 +2,11 @@ import { TestBed } from '@angular/core/testing';
 
 import { SummaryOfExecutedObservationsComponent } from './summary-of-executed-observations.component';
 import { fireEvent, render } from '@testing-library/angular';
-import { proposal } from '../../../mock/proposal-data';
-import { ExecutedObservation } from '../../../types/common';
+import { BlockVisit } from '../../../types/common';
+import { DateFnsModule } from 'ngx-date-fns';
 
 describe('SummaryOfExecutedObservationsComponent', () => {
-  const executed_observations: ExecutedObservation[] = [
+  const blockVisits: BlockVisit[] = [
     {
       id: 567,
       blockId: 6677,
@@ -16,7 +16,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
       maximumLunarPhase: 14.5,
       targets: ['Target name 1', 'target name 2'],
       night: '2019-11-30',
-      accepted: true,
+      status: 'Accepted',
       rejectionReason: null,
     },
     {
@@ -28,7 +28,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
       maximumLunarPhase: 14.5,
       targets: ['Target name 3'],
       night: '2019-11-30',
-      accepted: false,
+      status: 'Rejected',
       rejectionReason:
         'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolores laborum veritatis.',
     },
@@ -37,13 +37,14 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [SummaryOfExecutedObservationsComponent],
+      imports: [DateFnsModule.forRoot()],
     }).compileComponents();
   });
 
   it('should create', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executedObservations: executed_observations,
+        blockVisits,
       },
     });
     expect(component).toBeTruthy();
@@ -52,7 +53,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it("should toggle an observation when the observation's checkbox is clicked", async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executedObservations: executed_observations,
+        blockVisits,
       },
     });
     const observationCheckbox1 = component.getAllByTestId(
@@ -76,7 +77,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it('should select/deselect all if the "Select/Deselect all" checkbox is clicked', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executedObservations: executed_observations,
+        blockVisits,
       },
     });
     const selectAllSelector = component.getByTestId(
@@ -104,7 +105,7 @@ describe('SummaryOfExecutedObservationsComponent', () => {
   it('should select/deselect the "Select/Deselect all" (only) if all observations are selected', async () => {
     const component = await render(SummaryOfExecutedObservationsComponent, {
       componentProperties: {
-        executedObservations: proposal.executedObservations,
+        blockVisits,
       },
     });
     const selectAllCheckbox = component.getByTestId(

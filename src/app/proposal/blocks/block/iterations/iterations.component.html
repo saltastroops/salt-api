@@ -4,22 +4,24 @@
   </div>
   <div class="row has-two-columns">
     <div>Wait</div>
-    <div>{{ block.waitPeriod }}</div>
+    <div class="has-text-right">{{ block.waitPeriod }}</div>
   </div>
   <div class="row has-two-columns">
     <div>Visits</div>
-    <div>{{ block.requestedObservations }}</div>
+    <div class="has-text-right">{{ block.requestedObservations }}</div>
   </div>
   <div class="row has-two-columns">
     <div>Attempted</div>
-    <div>{{ rejectedObservations }}</div>
+    <div class="has-text-right">{{ rejectedObservations }}</div>
   </div>
   <div class="row has-two-columns">
     <div>Done</div>
-    <div>{{ acceptedObservations }}</div>
+    <div class="has-text-right">{{ acceptedObservations }}</div>
   </div>
   <div class="row has-two-columns">
     <div>Shutter open time</div>
-    <div>{{ block.observationTime - block.overheadTime }}</div>
+    <div class="has-text-right">
+      {{ block.observationTime - block.overheadTime }}
+    </div>
   </div>
 </div>

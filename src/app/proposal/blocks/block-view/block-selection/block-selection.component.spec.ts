@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BlockSelectionComponent } from './block-selection.component';
+import { BlockSummary } from '../../../../types/block';
 
 describe('BlockViewNavigationComponent', () => {
   const defaultBlocks = [
     { id: 1, name: 'A' },
     { id: 2, name: 'B' },
     { id: 546, name: 'C' },
-  ];
+  ] as BlockSummary[];
 
   let component: BlockSelectionComponent;
   let fixture: ComponentFixture<BlockSelectionComponent>;

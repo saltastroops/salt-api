@@ -12,7 +12,7 @@
   <div class="select">
     <select (change)="onSelect($event)">
       <option
-        *ngFor="let b of blocks; index as i"
+        *ngFor="let b of sortedBlocks; index as i"
         [value]="i"
         [selected]="i === selectedIndex"
       >
@@ -30,4 +30,17 @@
       <img src="/assets/icons/noun_right_1920905.svg" alt="right arrow" />
     </span>
   </button>
+  <input
+    (input)="onInput($event)"
+    type="text"
+    class="block-filter"
+    placeholder="Search for a block"
+    list="blockNames"
+  />
+  <datalist id="blockNames">
+    <option *ngFor="let b of sortedBlocks" [value]="b.name">
+      {{ b.name }}
+    </option>
+  </datalist>
+  <span id="error"></span>
 </div>

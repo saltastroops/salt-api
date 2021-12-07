@@ -1,4 +1,4 @@
-import { ExecutedObservation, PartnerCode, PartnerName } from './common';
+import { BlockVisit, PartnerCode, PartnerName } from './common';
 import { Phase1Target } from './target';
 import { Block, BlockSummary } from './block';
 
@@ -35,9 +35,10 @@ export interface GeneralProposalInfo {
   targetOfOpportunity: boolean;
   totalRequestedTime: number;
   dataReleaseDate: string;
-  liaisonSaltAstronomer: ContactDetails;
+  liaisonSaltAstronomer: ContactDetails | null;
   summaryForSaltAstronomer: string;
   summaryForNightLog: string;
+  isSelfActivatable: boolean;
 }
 
 export interface Investigator {
@@ -66,7 +67,7 @@ export interface Proposal {
   targets: Phase1Target[] | null;
   requestedTimes: RequestedTime[] | null;
   blocks: BlockSummary[];
-  executedObservations: ExecutedObservation[];
+  blockVisits: BlockVisit[];
   chargedTime: ChargedTime;
   timeAllocations: TimeAllocation[];
   observationComments: ObservationComment[];
@@ -82,10 +83,10 @@ export interface ProposalListItem {
   proposalType: ProposalType;
   principalInvestigator: ContactDetails;
   principalContact: ContactDetails;
-  liaisonAstronomer: ContactDetails;
+  liaisonAstronomer: ContactDetails | null;
 }
 
-export type ProposalStatus =
+export type ProposalStatusValue =
   | 'Accepted'
   | 'Active'
   | 'Completed'
@@ -97,6 +98,11 @@ export type ProposalStatus =
   | 'Superseded'
   | 'Under scientific review'
   | 'Under technical review';
+
+export interface ProposalStatus {
+  value: ProposalStatusValue;
+  reason: string | null;
+}
 
 export type ProposalType =
   | 'Commissioning'

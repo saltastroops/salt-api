@@ -71,6 +71,8 @@ function httpErrorObservable(err: HttpErrorResponse): Observable<never> {
     message = err.error.detail;
   } else if (err.error && err.error.message) {
     message = err.error.message;
+  } else if (err.error && typeof err.error === 'string') {
+    message = err.error;
   }
   return throwError(message);
 }

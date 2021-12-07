@@ -1,4 +1,4 @@
-<div class="table">
+<div class="table alternate-background">
   <div class="headers row">
     <div class="has-text-centered">General</div>
   </div>
@@ -8,7 +8,7 @@
   <div class="row">
     <div>{{ generalProposalInfo.title }}</div>
   </div>
-  <div class="proposal_info-row headers row">
+  <div class="proposal-info-row headers row">
     <div>PID</div>
     <div>Code</div>
     <div>Phase</div>
@@ -17,7 +17,7 @@
     <div>Current Submission</div>
   </div>
 
-  <div class="proposal_info-row row">
+  <div class="proposal-info-row row">
     <div>n/a</div>
     <div>{{ proposalCode }}</div>
     <div>{{ phase }}</div>
@@ -49,6 +49,8 @@
     <div class="has-text-centered">Status</div>
   </div>
   <div class="row">
-    <div>{{ generalProposalInfo.status }}</div>
+    <div class="{{ backgroundColor }}" id="proposal-comment">
+      {{ statusDescription }}
+    </div>
   </div>
 </div>

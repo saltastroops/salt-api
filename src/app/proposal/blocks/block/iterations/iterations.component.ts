@@ -16,10 +16,11 @@ export class IterationsComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    this.acceptedObservations = this.block.executedObservations.filter(
-      (o) => o.accepted
+    this.acceptedObservations = this.block.blockVisits.filter(
+      (o) => o.status === 'Accepted'
     ).length;
-    this.rejectedObservations =
-      this.block.executedObservations.length - this.acceptedObservations;
+    this.rejectedObservations = this.block.blockVisits.filter(
+      (o) => o.status === 'Rejected'
+    ).length;
   }
 }

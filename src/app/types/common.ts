@@ -1,11 +1,13 @@
-export interface BaseExecutedObservation {
+export type BlockVisitStatus = 'Accepted' | 'In queue' | 'Rejected';
+
+export interface BaseBlockVisit {
   id: number;
   night: string;
-  accepted: boolean;
+  status: BlockVisitStatus;
   rejectionReason: string | null;
 }
 
-export interface ExecutedObservation extends BaseExecutedObservation {
+export interface BlockVisit extends BaseBlockVisit {
   blockId: number;
   blockName: string;
   observationTime: number;

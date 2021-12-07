@@ -34,9 +34,9 @@
         {{ e.blockName }}
         <span>(view details)</span>
       </div>
-      <div>{{ e.observationTime }} s</div>
-      <div>{{ e.priority }}</div>
-      <div>{{ e.maximumLunarPhase }}</div>
+      <div class="right-align-numbers">{{ e.observationTime }} s</div>
+      <div class="right-align-numbers">{{ e.priority }}</div>
+      <div class="right-align-numbers">{{ e.maximumLunarPhase }}</div>
       <div class="targets-container">
         <div *ngFor="let t of e.targets">
           <div>
@@ -45,25 +45,25 @@
         </div>
       </div>
       <div>{{ observationDate(e.night) | dfnsFormat: "d MMMM yyyy" }}</div>
-      <div *ngIf="e.accepted" class="is-green">
+      <div *ngIf="e.status === 'Accepted'" class="is-green">
         <img
           class="icon"
           src="/assets/icons/noun_tick_2836262-green.svg"
-          alt="block is accepted"
+          alt="block has been accepted"
         />
       </div>
-      <div *ngIf="!e.accepted">
+      <div *ngIf="e.status === 'Rejected'">
         <img
           class="icon"
           src="/assets/icons/noun_Cross_2120375.svg"
-          alt="block is rejected"
+          alt="block has been rejected"
         />
       </div>
       <div>{{ e.rejectionReason }}</div>
-      <div *ngIf="e.accepted">
+      <div *ngIf="e.status === 'Accepted'">
         <button class="button is-danger is-small">Reject</button>
       </div>
-      <div *ngIf="!e.accepted">
+      <div *ngIf="e.status === 'Rejected'">
         <button class="button is-success is-small">Accept</button>
       </div>
       <div>

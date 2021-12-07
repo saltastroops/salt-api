@@ -22,11 +22,8 @@ export class RealBlockService implements BlockService {
    */
   getBlock(id: number): Observable<Block> {
     const uri = environment.apiUrl + '/blocks/' + id;
-    return this.http.get<Block>(uri).pipe(
-      map((block: Block) => camelcaseKeys(block, { deep: true })),
-      catchError(() => {
-        return throwError('Oops. Something is wrong.');
-      })
-    );
+    return this.http
+      .get<Block>(uri)
+      .pipe(map((block: Block) => camelcaseKeys(block, { deep: true })));
   }
 }

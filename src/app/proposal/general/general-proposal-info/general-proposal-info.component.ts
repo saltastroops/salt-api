@@ -18,7 +18,6 @@ export class GeneralProposalInfoComponent implements OnInit {
   firstSubmission!: Date;
   statusDescription = '';
   backgroundColor = '';
-  constructor() {}
 
   ngOnInit(): void {
     this.currentSubmission = parseISO(
@@ -27,7 +26,7 @@ export class GeneralProposalInfoComponent implements OnInit {
     this.firstSubmission = parseISO(this.generalProposalInfo.firstSubmission);
     this.semesterControl.setValue(this.currentSemester);
 
-    let status = this.generalProposalInfo.status.value;
+    const status = this.generalProposalInfo.status.value;
 
     switch (status) {
       case 'Active':

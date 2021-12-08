@@ -1,5 +1,3 @@
-import { AccessToken } from './authentication';
-
 export type UserRole =
   | 'Administrator'
   | 'SALT Astronomer'

@@ -10,11 +10,9 @@ import { parseISO } from 'date-fns';
 export class ObservationComponent implements OnInit {
   @Input() observation!: Observation;
 
-  positionAngles!: Array<any>;
+  positionAngles!: Array<number | null>;
   firstValidFrom: Date | undefined;
   lastValidUntil: Date | undefined;
-
-  constructor() {}
 
   ngOnInit(): void {
     // TODO: Must be fixed

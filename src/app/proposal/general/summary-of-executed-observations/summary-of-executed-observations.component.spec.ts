@@ -89,17 +89,19 @@ describe('SummaryOfExecutedObservationsComponent', () => {
 
     // Click Select/Deselect all
     fireEvent.click(selectAllSelector);
-    expect((selectAllSelector as any).checked).toBeTruthy();
+    expect((selectAllSelector as HTMLInputElement).checked).toBeTruthy();
 
     // All observations have been selected.
-    expect(checkboxes.every((e: any) => e.checked)).toBeTrue();
+    expect(checkboxes.every((e) => (e as HTMLInputElement).checked)).toBeTrue();
 
     // Click Select/Deselect all
     fireEvent.click(selectAllSelector);
-    expect((selectAllSelector as any).checked).toBeFalsy();
+    expect((selectAllSelector as HTMLInputElement).checked).toBeFalsy();
 
     // All observations have been deselected
-    expect(checkboxes.every((e: any) => e.checked)).toBeFalse();
+    expect(
+      checkboxes.every((e) => (e as HTMLInputElement).checked)
+    ).toBeFalse();
   });
 
   it('should select/deselect the "Select/Deselect all" (only) if all observations are selected', async () => {

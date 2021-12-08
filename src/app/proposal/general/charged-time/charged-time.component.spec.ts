@@ -1,7 +1,6 @@
 import { ChargedTimeComponent } from './charged-time.component';
 import { render } from '@testing-library/angular';
 import { ChargedTime, TimeAllocation } from '../../../types/proposal';
-import { PartnerCode, PartnerName } from '../../../types/common';
 
 describe('ChargedTimeTableComponent', () => {
   const charged_time: ChargedTime = {

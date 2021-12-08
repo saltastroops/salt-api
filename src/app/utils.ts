@@ -7,12 +7,12 @@ export const NOT_LOGGED_IN_MESSAGE = 'You are not logged in.';
 
 export const FORBIDDEN_MESSAGE = 'You are not allowed to perform this action.';
 
-export function storeAccessToken(tokenData: AccessToken) {
+export function storeAccessToken(tokenData: AccessToken): void {
   localStorage.setItem('accessToken', tokenData.accessToken);
   localStorage.setItem('accessTokenExpiresAt', tokenData.expiresAt);
 }
 
-export function currentSemester() {
+export function currentSemester(): string {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -39,7 +39,9 @@ export type sortArg<T> =
  *
  * referece: https://stackoverflow.com/a/68279093/8910547
  */
-export function byPropertiesOf<T extends object>(sortBy: Array<sortArg<T>>) {
+export function byPropertiesOf<T>(
+  sortBy: Array<sortArg<T>>
+): (a: T, b: T) => number {
   function compareByProperty(arg: sortArg<T>) {
     let key: keyof T;
     let sortOrder = 1;
@@ -80,7 +82,7 @@ export function byPropertiesOf<T extends object>(sortBy: Array<sortArg<T>>) {
 // @ return {HMS} string hours : minutes : seconds
 //
 // reference https://stackoverflow.com/a/61961361
-export function degreesToHms(deg: number, decimal_places: number = 2): string {
+export function degreesToHms(deg: number, decimal_places = 2): string {
   if (deg < 0) {
     throw new Error('The degrees must be non-negative');
   }
@@ -111,7 +113,7 @@ export function degreesToHms(deg: number, decimal_places: number = 2): string {
 // @ return {DMS} string degrees : minutes : seconds
 //
 // reference https://stackoverflow.com/a/61961361
-export function degreesToDms(deg: number, decimal_places: number = 2): string {
+export function degreesToDms(deg: number, decimal_places = 2): string {
   const sign = deg < 0 ? -1 : 1;
   deg = Math.abs(deg);
 

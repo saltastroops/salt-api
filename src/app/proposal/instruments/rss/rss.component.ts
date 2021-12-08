@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Rss } from '../../../types/rss';
 import { PayloadConfiguration } from '../../../types/observation';
 
@@ -11,6 +11,4 @@ export class RssComponent {
   @Input() rss!: Rss;
   @Input() payloadConfiguration!: PayloadConfiguration;
   headerLine: string | null = null;
-
-  constructor() {}
 }

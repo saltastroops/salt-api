@@ -38,5 +38,5 @@ export abstract class ProposalService {
   public abstract submitObservationComment(
     proposalCode: string,
     comment: string
-  ): any;
+  ): Observable<ObservationComment[]>;
 }

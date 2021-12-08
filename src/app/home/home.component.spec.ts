@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HomeComponent } from './home.component';
-import { AppComponent } from '../app.component';
 import { FormBuilder } from '@angular/forms';
 import { AuthenticationService } from '../service/authentication.service';
 import { RealAuthenticationService } from '../service/real/real-authentication.service';

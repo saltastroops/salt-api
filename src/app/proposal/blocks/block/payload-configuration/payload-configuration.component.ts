@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import {
   PayloadConfiguration,
   TelescopeConfiguration,
@@ -18,9 +18,7 @@ export class PayloadConfigurationComponent implements OnChanges {
   headerLine: string | null = null;
   ditherPatternDescription!: string;
 
-  constructor() {}
-
-  ngOnChanges() {
+  ngOnChanges(): void {
     this.payloadConfiguration =
       this.telescopeConfiguration.payloadConfigurations[
         this.payloadConfigurationIndex
@@ -59,7 +57,7 @@ export class PayloadConfigurationComponent implements OnChanges {
       : '';
   }
 
-  headerLineBackgroundColor(payloadConfiguration: PayloadConfiguration) {
+  headerLineBackgroundColor(): void {
     switch (this.payloadConfiguration.payloadConfigurationType) {
       case 'Science':
         this.headerLine = 'rss-config-color';

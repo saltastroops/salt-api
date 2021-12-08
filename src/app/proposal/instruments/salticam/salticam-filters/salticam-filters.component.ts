@@ -1,5 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { SalticamExposure, SalticamFilter } from '../../../../types/salticam';
+import { Component, Input } from '@angular/core';
+import { SalticamExposure } from '../../../../types/salticam';
 
 @Component({
   selector: 'wm-salticam-filters',
@@ -8,6 +8,4 @@ import { SalticamExposure, SalticamFilter } from '../../../../types/salticam';
 })
 export class SalticamFiltersComponent {
   @Input() salticamExposures!: SalticamExposure[];
-
-  constructor() {}
 }

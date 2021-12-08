@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { AccessToken } from '../../types/authentication';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService } from '../../service/authentication.service';
-import { GENERIC_ERROR_MESSAGE } from '../../utils';
 
 @Component({
   selector: 'wm-change-password',
@@ -14,7 +16,6 @@ import { GENERIC_ERROR_MESSAGE } from '../../utils';
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;
   token!: string;
-  user: any;
   loading = false;
   submitted = false;
   error: string | undefined = undefined;
@@ -26,7 +27,7 @@ export class ChangePasswordComponent implements OnInit {
     private authenticationService: AuthenticationService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.changePasswordForm = this.formBuilder.group({
       password: ['', Validators.required],
       retypedPassword: ['', Validators.required],
@@ -37,11 +38,11 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   // convenience getter for easy access to form fields
-  get f() {
+  get f(): { [key: string]: AbstractControl } {
     return this.changePasswordForm.controls;
   }
 
-  changePassword() {
+  changePassword(): void {
     this.submitted = true;
 
     // stop here if form is invalid
@@ -61,14 +62,14 @@ export class ChangePasswordComponent implements OnInit {
           this.loading = false;
           this.router.navigate(['/login']);
         },
-        (error: any) => {
+        (error: string) => {
           this.error = error;
           this.loading = false;
         }
       );
   }
 
-  clearError() {
+  clearError(): void {
     this.error = undefined;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { GeneralProposalInfo } from '../../../types/proposal';
 
 @Component({
@@ -8,5 +8,4 @@ import { GeneralProposalInfo } from '../../../types/proposal';
 })
 export class ProposalDetailsComponent {
   @Input() generalProposalInfo!: GeneralProposalInfo;
-  constructor() {}
 }

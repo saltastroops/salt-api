@@ -13,15 +13,16 @@ export class TargetComponent implements OnInit {
   rightAscension!: string;
   declination!: string;
 
-  constructor() {}
-
   ngOnInit(): void {
     if (!this.target.nonSidereal) {
       this.rightAscension = degreesToHms(
-        this.target.coordinates!.rightAscension,
+        this.target.coordinates?.rightAscension as number,
         2
       );
-      this.declination = degreesToDms(this.target.coordinates!.declination, 2);
+      this.declination = degreesToDms(
+        this.target.coordinates?.declination as number,
+        2
+      );
     } else if (this.target.horizonsIdentifier) {
       this.rightAscension = 'N/A';
       this.declination = 'N/A (' + this.target.horizonsIdentifier + ')';

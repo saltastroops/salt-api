@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Rss } from '../../../../types/rss';
 
 @Component({
@@ -8,5 +8,4 @@ import { Rss } from '../../../../types/rss';
 })
 export class RssGeneralInfoComponent {
   @Input() rss!: Rss;
-  constructor() {}
 }

@@ -154,7 +154,9 @@ import { ChangePasswordComponent } from './login/change-password/change-password
     { provide: Sentry.TraceService, deps: [Router] },
     {
       provide: APP_INITIALIZER,
-      useFactory: () => () => {},
+      useFactory: () => () => {
+        /* Do nothing */
+      },
       deps: [Sentry.TraceService],
       multi: true,
     },

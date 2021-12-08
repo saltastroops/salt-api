@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Hrs } from '../../../../types/hrs';
 
 @Component({
@@ -8,6 +8,4 @@ import { Hrs } from '../../../../types/hrs';
 })
 export class HrsObservingTimesComponent {
   @Input() hrs!: Hrs;
-
-  constructor() {}
 }

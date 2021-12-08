@@ -2,7 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ObservationComment } from '../../../types/proposal';
 import { parseISO } from 'date-fns';
 import { ProposalService } from '../../../service/proposal.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'wm-observation-comments',
@@ -14,7 +19,7 @@ export class ObservationCommentsComponent implements OnInit {
   @Input() proposalCode!: string;
   parseDate = parseISO;
   commentForm!: FormGroup;
-  submitted: boolean = false;
+  submitted = false;
   isCommentInputOpen = false;
   loading = false;
   error: string | undefined = undefined;
@@ -31,7 +36,7 @@ export class ObservationCommentsComponent implements OnInit {
   }
 
   // convenience getter for easy access to form fields
-  get f() {
+  get f(): { [key: string]: AbstractControl } {
     return this.commentForm.controls;
   }
 

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ObservationProbabilities } from '../../../../types/common';
 
 @Component({
@@ -8,6 +8,4 @@ import { ObservationProbabilities } from '../../../../types/common';
 })
 export class ObservationProbabilitiesComponent {
   @Input() probabilities!: ObservationProbabilities;
-
-  constructor() {}
 }

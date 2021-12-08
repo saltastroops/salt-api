@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Investigator } from '../../types/proposal';
 
 @Component({
@@ -8,6 +8,4 @@ import { Investigator } from '../../types/proposal';
 })
 export class InvestigatorsComponent {
   @Input() investigators!: Investigator[];
-
-  constructor() {}
 }

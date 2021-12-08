@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RssMode } from '../../../../types/rss';
 
 @Component({
@@ -9,6 +9,4 @@ import { RssMode } from '../../../../types/rss';
 export class FabryPerotComponent {
   @Input() filter!: string;
   @Input() mode!: RssMode;
-
-  constructor() {}
 }

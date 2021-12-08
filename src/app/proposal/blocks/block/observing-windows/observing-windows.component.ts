@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import {
   addDays,
   subDays,
@@ -23,7 +23,6 @@ export class ObservingWindowsComponent implements OnChanges {
   blocksObservableTonight!: ObservingWindow[];
   remainingNights!: number;
   differenceInSeconds = differenceInSeconds; // It needs to be an attribute of the class to be used in the template.
-  constructor() {}
 
   ngOnChanges(): void {
     this.observingWindowList = this.observingWindows.map(({ start, end }) => ({
@@ -48,7 +47,7 @@ export class ObservingWindowsComponent implements OnChanges {
   }
 
   tonight(): { start: Date; end: Date } {
-    let start = this.nightStart(new Date());
+    const start = this.nightStart(new Date());
     const end = addDays(start, 1);
     return { start, end };
   }

@@ -29,9 +29,9 @@ export class AuthenticationInterceptor implements HttpInterceptor {
    * user is logged out, as the access token evidently is invalid.
    */
   intercept(
-    request: HttpRequest<any>,
+    request: HttpRequest<unknown>,
     next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  ): Observable<HttpEvent<unknown>> {
     if (
       request.url.split('/').slice(-1)[0] === 'token' ||
       request.url.split('/').slice(-1)[0] === 'send-password-reset-email'

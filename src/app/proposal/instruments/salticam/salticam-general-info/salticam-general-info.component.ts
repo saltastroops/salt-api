@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Salticam } from '../../../../types/salticam';
 
 @Component({
@@ -8,6 +8,4 @@ import { Salticam } from '../../../../types/salticam';
 })
 export class SalticamGeneralInfoComponent {
   @Input() salticam!: Salticam;
-
-  constructor() {}
 }

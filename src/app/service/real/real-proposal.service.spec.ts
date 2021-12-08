@@ -1,24 +1,25 @@
 import { RealProposalService } from './real-proposal.service';
 import { environment } from '../../../environments/environment';
-import { proposal } from '../../mock/proposal-data';
 import * as camelcaseKeys from 'camelcase-keys';
 import { TestBed } from '@angular/core/testing';
 import {
   HttpClientTestingModule,
   HttpTestingController,
 } from '@angular/common/http/testing';
-import { HttpClient } from '@angular/common/http';
+import { Proposal } from '../../types/proposal';
 
 describe('RealProposalService', () => {
   let service: RealProposalService;
-  let httpClient: HttpClient;
   let httpTestingController: HttpTestingController;
+
+  const proposal: Proposal = {
+    proposalCode: '2020-2-SCI-042',
+  } as Proposal;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
     });
-    httpClient = TestBed.inject(HttpClient);
     httpTestingController = TestBed.inject(HttpTestingController);
     service = TestBed.inject(RealProposalService);
   });
@@ -46,7 +47,7 @@ describe('RealProposalService', () => {
 
     service.getProposal('FAIL-CODE-101').subscribe(
       () => fail('Should have failed with an error.'),
-      (error) => {
+      () => {
         //expect(error).toEqual('The request has failed.');
       }
     );

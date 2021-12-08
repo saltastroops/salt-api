@@ -13,8 +13,6 @@ export class IterationsComponent implements OnInit {
 
   rejectedObservations!: number;
 
-  constructor() {}
-
   ngOnInit(): void {
     this.acceptedObservations = this.block.blockVisits.filter(
       (o) => o.status === 'Accepted'

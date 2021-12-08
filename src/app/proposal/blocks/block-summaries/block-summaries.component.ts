@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BlockSummary } from '../../../types/block';
 
 @Component({
@@ -9,5 +9,4 @@ import { BlockSummary } from '../../../types/block';
 export class BlockSummariesComponent {
   @Input() blocks!: BlockSummary[];
   @Input() proposalCode!: string;
-  constructor() {}
 }

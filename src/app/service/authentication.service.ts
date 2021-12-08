@@ -51,6 +51,7 @@ export abstract class AuthenticationService {
   public abstract changePassword(
     password: string,
     token: string
-  ): Observable<any>;
-  public abstract getUser(): Observable<any>;
+  ): Observable<Message>;
+
+  public abstract getUser(): Observable<User>;
 }

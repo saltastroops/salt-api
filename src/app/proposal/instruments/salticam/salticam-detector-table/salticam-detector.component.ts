@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { SalticamDetector } from '../../../../types/salticam';
 
 @Component({
@@ -8,5 +8,4 @@ import { SalticamDetector } from '../../../../types/salticam';
 })
 export class SalticamDetectorComponent {
   @Input() detector!: SalticamDetector;
-  constructor() {}
 }

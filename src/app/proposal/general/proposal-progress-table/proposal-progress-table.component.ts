@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'wm-proposal-progress-table',
@@ -7,5 +7,4 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class ProposalProgressTableComponent {
   @Input() proposalProgress: string | null = null;
-  constructor() {}
 }

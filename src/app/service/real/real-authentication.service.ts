@@ -38,8 +38,9 @@ export class RealAuthenticationService implements AuthenticationService {
     const body = new HttpParams()
       .set('username', username)
       .set('password', password);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.http.post<any>(uri, body, { headers }).pipe(
-      map((accessToken: any) => camelcaseKeys(accessToken, { deep: true })),
+      map((accessToken) => camelcaseKeys(accessToken, { deep: true })),
       tap((tokenData) => {
         this.setAccessToken(tokenData);
         this.updateUser();
@@ -68,11 +69,12 @@ export class RealAuthenticationService implements AuthenticationService {
 
   _user(): Observable<User> {
     const uri = environment.apiUrl + '/user';
-    return this.http
-      .get<User>(uri)
-      .pipe(
-        map((accessToken: any) => camelcaseKeys(accessToken, { deep: true }))
-      );
+    return (
+      this.http
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .get<any>(uri)
+        .pipe(map((user) => camelcaseKeys(user, { deep: true })))
+    );
   }
 
   /**
@@ -154,8 +156,8 @@ export class RealAuthenticationService implements AuthenticationService {
     });
 
     return this.http
-      .post<any>(uri, { username_email: usernameEmail }, { headers })
-      .pipe(map((message: any) => camelcaseKeys(message, { deep: true })));
+      .post<Message>(uri, { username_email: usernameEmail }, { headers })
+      .pipe(map((message: Message) => camelcaseKeys(message, { deep: true })));
   }
 
   /**
@@ -164,7 +166,7 @@ export class RealAuthenticationService implements AuthenticationService {
    * @param token Authentication token.
    * @param password Password.
    */
-  changePassword(password: string, token: string): Observable<any> {
+  changePassword(password: string, token: string): Observable<Message> {
     // Make sure that we don't use another token for changing the password
     this.logout();
 
@@ -182,7 +184,7 @@ export class RealAuthenticationService implements AuthenticationService {
         .pipe(
           // ... and update their password
           switchMap((user) => {
-            return this.http.patch(
+            return this.http.patch<Message>(
               `${environment.apiUrl}/users/${user.username}`,
               { password },
               options
@@ -192,10 +194,10 @@ export class RealAuthenticationService implements AuthenticationService {
     );
   }
 
-  getUser(): Observable<any> {
+  getUser(): Observable<User> {
     const uri = environment.apiUrl + '/user';
     return this.http
-      .get<any>(uri)
-      .pipe(map((user: any) => camelcaseKeys(user, { deep: true })));
+      .get<User>(uri)
+      .pipe(map((user) => camelcaseKeys(user, { deep: true })));
   }
 }

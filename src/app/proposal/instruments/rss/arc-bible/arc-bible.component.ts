@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ArcBibleEntry } from '../../../../types/rss';
 
 @Component({
@@ -8,6 +8,4 @@ import { ArcBibleEntry } from '../../../../types/rss';
 })
 export class ArcBibleComponent {
   @Input() arcBibleEntries!: ArcBibleEntry[];
-
-  constructor() {}
 }

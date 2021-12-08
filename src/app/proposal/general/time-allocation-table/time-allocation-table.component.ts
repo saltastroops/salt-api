@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { TimeAllocation } from '../../../types/proposal';
 
 @Component({
@@ -8,5 +8,4 @@ import { TimeAllocation } from '../../../types/proposal';
 })
 export class TimeAllocationTableComponent {
   @Input() time_allocations!: TimeAllocation[];
-  constructor() {}
 }

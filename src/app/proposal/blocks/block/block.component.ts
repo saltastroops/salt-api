@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Block } from '../../../types/block';
 
 @Component({
@@ -8,5 +8,4 @@ import { Block } from '../../../types/block';
 })
 export class BlockComponent {
   @Input() block!: Block;
-  constructor() {}
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Salticam } from '../../../types/salticam';
 import { PayloadConfiguration } from '../../../types/observation';
 
@@ -10,6 +10,4 @@ import { PayloadConfiguration } from '../../../types/observation';
 export class SalticamComponent {
   @Input() salticam!: Salticam;
   @Input() payloadConfiguration!: PayloadConfiguration;
-
-  constructor() {}
 }

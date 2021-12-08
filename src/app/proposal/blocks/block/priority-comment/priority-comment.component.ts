@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'wm-priority-comment',
@@ -6,7 +6,6 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./priority-comment.component.scss'],
 })
 export class PriorityCommentComponent {
-  @Input() comment: string = '';
+  @Input() comment = '';
   @Input() priority!: number;
-  constructor() {}
 }

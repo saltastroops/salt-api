@@ -1,6 +1,6 @@
 import { BlockVisit, PartnerCode, PartnerName } from './common';
 import { Phase1Target } from './target';
-import { Block, BlockSummary } from './block';
+import { BlockSummary } from './block';
 
 export interface Affiliation {
   partnerName: PartnerName;

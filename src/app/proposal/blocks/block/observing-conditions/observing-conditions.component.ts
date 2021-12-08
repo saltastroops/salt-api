@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Block } from '../../../../types/block';
 
 @Component({
@@ -11,6 +11,4 @@ export class ObservingConditionsComponent {
   @Input() observationTime!: number;
 
   showObservingWindows = false;
-
-  constructor() {}
 }

@@ -9,9 +9,8 @@ import { ChargedTime, TimeAllocation } from '../../../types/proposal';
 export class ChargedTimeComponent implements OnInit {
   @Input() chargedTime!: ChargedTime;
   @Input() timeAllocation!: TimeAllocation;
-  allocatedP0ToP3Time: number = 0;
-  chargedTimeP0ToP3: number = 0;
-  constructor() {}
+  allocatedP0ToP3Time = 0;
+  chargedTimeP0ToP3 = 0;
 
   ngOnInit(): void {
     this.allocatedP0ToP3Time =

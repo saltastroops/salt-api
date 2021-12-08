@@ -1,13 +1,4 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  Output,
-  EventEmitter,
-  OnDestroy,
-} from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { BlockSummary } from '../../../../types/block';
 import { byPropertiesOf } from '../../../../utils';
 
@@ -25,30 +16,28 @@ export class BlockSelectionComponent implements OnInit {
 
   sortedBlocks: BlockSummary[] = [];
 
-  constructor() {}
-
   ngOnInit(): void {
     this.sortedBlocks = this.blocks.sort(
       byPropertiesOf<BlockSummary>(['name'])
     );
   }
 
-  get selectedIndex() {
+  get selectedIndex(): number {
     return this.selectedBlock
       ? this.sortedBlocks.indexOf(this.selectedBlock)
       : -1;
   }
 
-  onSelect(event: Event) {
+  onSelect(event: Event): void {
     const index = parseInt((event.target as HTMLSelectElement).value, 10);
     this.selectBlock(index);
   }
 
-  selectBlock(index: number) {
+  selectBlock(index: number): void {
     this.selectEmitter.emit(this.sortedBlocks[index]);
   }
 
-  onInput(e: Event) {
+  onInput(e: Event): void {
     const selectedBlockName = (e.target as HTMLInputElement).value;
     const selectedIndex = this.sortedBlocks.findIndex(
       (block) => block.name === selectedBlockName

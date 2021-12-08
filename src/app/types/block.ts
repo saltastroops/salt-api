@@ -57,7 +57,7 @@ export interface BlockSummary {
 export interface ObservingConditions {
   minimumSeeing: number;
   maximumSeeing: number;
-  transparency: string;
+  transparency: Transparency;
   maximumLunarPhase: number;
   minimumLunarDistance: number;
 }

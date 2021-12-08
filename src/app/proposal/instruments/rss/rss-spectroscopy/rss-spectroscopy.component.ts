@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RssSpectroscopy } from '../../../../types/rss';
 
 @Component({
@@ -9,6 +9,4 @@ import { RssSpectroscopy } from '../../../../types/rss';
 export class RssSpectroscopyComponent {
   @Input() spectroscopy!: RssSpectroscopy;
   @Input() filter!: string;
-
-  constructor() {}
 }

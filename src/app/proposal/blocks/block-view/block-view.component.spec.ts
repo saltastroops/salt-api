@@ -1,10 +1,4 @@
-import {
-  findByText,
-  fireEvent,
-  getByText,
-  render,
-  waitFor,
-} from '@testing-library/angular';
+import { fireEvent, render, waitFor } from '@testing-library/angular';
 import { BlockViewComponent } from './block-view.component';
 import { BlockSelectionComponent } from './block-selection/block-selection.component';
 import { Observable, of, throwError } from 'rxjs';
@@ -12,11 +6,9 @@ import {
   discardPeriodicTasks,
   fakeAsync,
   flush,
-  TestBed,
   tick,
 } from '@angular/core/testing';
-import { TestScheduler } from 'rxjs/testing';
-import { delay, map, switchMap } from 'rxjs/operators';
+import { delay, switchMap } from 'rxjs/operators';
 import { Block, BlockSummary } from '../../../types/block';
 import { BlockService } from '../../../service/block.service';
 

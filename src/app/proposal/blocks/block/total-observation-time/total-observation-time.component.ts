@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'wm-total-observation-time',
@@ -8,5 +8,4 @@ import { Component, Input, OnInit } from '@angular/core';
 export class TotalObservationTimeComponent {
   @Input() totalObservationTime!: number;
   @Input() overhead!: number;
-  constructor() {}
 }

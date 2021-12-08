@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { AuthenticationService } from '../../service/authentication.service';
-import { AccessToken } from '../../types/authentication';
 import { GENERIC_ERROR_MESSAGE } from '../../utils';
 
 @Component({
@@ -11,7 +15,7 @@ import { GENERIC_ERROR_MESSAGE } from '../../utils';
 })
 export class InlineLoginComponent implements OnInit {
   loginForm!: FormGroup;
-  loading: boolean = false;
+  loading = false;
   error: string | null = null;
 
   constructor(
@@ -27,11 +31,11 @@ export class InlineLoginComponent implements OnInit {
   }
 
   // convenience getter for easy access to form fields
-  get f() {
+  get f(): { [key: string]: AbstractControl } {
     return this.loginForm.controls;
   }
 
-  login() {
+  login(): void {
     if (this.f.username.errors?.required) {
       this.error = 'The username is required.';
       return;
@@ -50,7 +54,7 @@ export class InlineLoginComponent implements OnInit {
         () => {
           this.loading = false;
         },
-        (error: any) => {
+        (error: { status: number; error: string }) => {
           // The HTTP request for a token is not intercepted, and hence there may be an
           // error response with status code 401.
           if (error.status === 401) {

@@ -12,7 +12,7 @@ export class HomeComponent implements OnInit {
   user$!: Observable<User | null>;
   constructor(private authService: AuthenticationService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     console.log(Object.keys(this.authService));
     this.user$ = this.authService.user();
   }

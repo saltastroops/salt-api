@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RssPolarimetryPattern } from '../../../../types/rss';
 
 @Component({
@@ -8,6 +8,4 @@ import { RssPolarimetryPattern } from '../../../../types/rss';
 })
 export class PolarimetryComponent {
   @Input() pattern!: RssPolarimetryPattern;
-
-  constructor() {}
 }

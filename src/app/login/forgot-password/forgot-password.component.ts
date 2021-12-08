@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService } from '../../service/authentication.service';
 import { GENERIC_ERROR_MESSAGE } from '../../utils';
@@ -42,7 +47,7 @@ export class ForgotPasswordComponent implements OnInit {
           // Switch form
           this.showSuccessMessage = true;
         },
-        (error: any) => {
+        (error: { status: number; error: string }) => {
           if (error.status === 404) {
             this.error = 'Unknown username or email.';
           } else {
@@ -55,15 +60,15 @@ export class ForgotPasswordComponent implements OnInit {
     this.loading = false;
   }
 
-  clearError() {
+  clearError(): void {
     this.error = undefined;
   }
 
-  get f() {
+  get f(): { [key: string]: AbstractControl } {
     return this.forgotPasswordForm.controls;
   }
 
-  requestAgain() {
+  requestAgain(): void {
     this.showSuccessMessage = false;
   }
 }

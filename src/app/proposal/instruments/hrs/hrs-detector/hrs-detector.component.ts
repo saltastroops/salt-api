@@ -12,8 +12,6 @@ export class HrsDetectorComponent implements OnInit {
   hrsDetector!: HrsDetector;
   exposureTimes: Array<number | null> = [];
 
-  constructor() {}
-
   ngOnInit(): void {
     this.hrsDetector =
       this.detectorColor === 'Blue'

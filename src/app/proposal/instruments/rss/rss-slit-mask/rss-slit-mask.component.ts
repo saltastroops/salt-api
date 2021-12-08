@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RssMask } from '../../../../types/rss';
 
 @Component({
@@ -8,6 +8,4 @@ import { RssMask } from '../../../../types/rss';
 })
 export class RssSlitMaskComponent {
   @Input() slitMask!: RssMask;
-
-  constructor() {}
 }

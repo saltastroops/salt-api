@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { Observable } from 'rxjs';
 import { AccessToken } from '../types/authentication';
 import { AuthenticationService } from '../service/authentication.service';
@@ -27,7 +32,7 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
@@ -35,11 +40,11 @@ export class LoginComponent implements OnInit {
   }
 
   // convenience getter for easy access to form fields
-  get f() {
+  get f(): { [key: string]: AbstractControl } {
     return this.loginForm.controls;
   }
 
-  login() {
+  login(): void {
     this.submitted = true;
 
     // stop here if form is invalid
@@ -65,7 +70,7 @@ export class LoginComponent implements OnInit {
             queryParams: redirectQueryParams,
           });
         },
-        (error: any) => {
+        (error: { status: number }) => {
           // The HTTP request for a token is not intercepted, and hence there may be an
           // error response with status code 401.
           if (error.status === 401) {
@@ -78,11 +83,11 @@ export class LoginComponent implements OnInit {
       );
   }
 
-  clearError() {
+  clearError(): void {
     this.error = undefined;
   }
 
-  toForgotPassword() {
+  toForgotPassword(): void {
     this.router.navigate(['forgot-password']);
   }
 }

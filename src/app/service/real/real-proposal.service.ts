@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ProposalService } from '../proposal.service';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import * as camelcaseKeys from 'camelcase-keys';
 import {
   ObservationComment,
@@ -68,14 +68,19 @@ export class RealProposalService implements ProposalService {
   /**
    * Submit an observation comment to the API server.
    */
-  public submitObservationComment(proposalCode: string, comment: string): any {
+  public submitObservationComment(
+    proposalCode: string,
+    comment: string
+  ): Observable<ObservationComment[]> {
     const uri =
       environment.apiUrl +
       '/proposals/' +
       proposalCode +
       '/observation-comments';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.http.post<any>(uri, { comment }).pipe(
       switchMap(() => this.http.get(uri)),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((comments: any) => camelcaseKeys(comments, { deep: true }))
     );
   }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CalibrationFilter } from '../../../../types/observation';
 import { Lamp } from '../../../../types/common';
 
@@ -10,6 +10,4 @@ import { Lamp } from '../../../../types/common';
 export class RssCalibrationComponent {
   @Input() filter!: CalibrationFilter | null;
   @Input() lamp!: Lamp;
-
-  constructor() {}
 }

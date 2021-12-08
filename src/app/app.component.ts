@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from './service/authentication.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'wm-root',
@@ -15,7 +15,7 @@ export class AppComponent implements OnInit {
     private authService: AuthenticationService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     // Make sure that invalid tokens are removed
     if (!this.authService.isAuthenticated()) {
       this.authService.logout();

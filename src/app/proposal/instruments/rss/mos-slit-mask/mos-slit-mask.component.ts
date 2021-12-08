@@ -12,8 +12,6 @@ export class MosSlitMaskComponent implements OnInit {
 
   cutDate!: Date | null;
 
-  constructor() {}
-
   ngOnInit(): void {
     this.cutDate = this.mosSlitMask.cutDate
       ? parseISO(this.mosSlitMask.cutDate)

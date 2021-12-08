@@ -11,7 +11,6 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;
   @Input() blockVisits!: BlockVisit[];
   observations!: Observation[];
-  constructor() {}
 
   ngOnInit(): void {
     this.observations = this.blockVisits.map((o) => ({

@@ -13,11 +13,12 @@ export class ChargedTimeComponent implements OnInit {
   chargedTimeP0ToP3 = 0;
 
   ngOnInit(): void {
-    this.allocatedP0ToP3Time =
-      this.timeAllocation.priority0 +
-      this.timeAllocation.priority1 +
-      this.timeAllocation.priority2 +
-      this.timeAllocation.priority3;
+    this.allocatedP0ToP3Time = this.timeAllocation
+      ? this.timeAllocation.priority0 +
+        this.timeAllocation.priority1 +
+        this.timeAllocation.priority2 +
+        this.timeAllocation.priority3
+      : 0;
     this.chargedTimeP0ToP3 =
       this.chargedTime.priority0 +
       this.chargedTime.priority1 +

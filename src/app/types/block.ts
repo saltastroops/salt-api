@@ -43,9 +43,11 @@ export interface BlockStatus {
 
 export interface BlockSummary {
   id: number;
+  semester: string;
   name: string;
+  status: BlockStatus;
   observationTime: number;
-  priority: number;
+  priority: 0 | 1 | 2 | 3 | 4;
   requestedObservations: number;
   acceptedObservations: number;
   isObservableTonight: boolean;

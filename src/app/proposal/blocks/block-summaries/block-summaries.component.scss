@@ -7,12 +7,12 @@
 
 .block-row {
   display: grid;
-  grid-template-columns: 7% 15% repeat(6, 1fr) 10% repeat(1, 1fr) 18%;
+  grid-template-columns: 6% 17% repeat(6, 1fr) 10% repeat(1, 1fr) 18%;
   align-items: center;
 }
 
 .block-row.headers {
-  grid-template-columns: 7% 15% repeat(6, 1fr) 10% repeat(1, 1fr) 7% 11%;
+  grid-template-columns: 6% 17% repeat(6, 1fr) 10% repeat(1, 1fr) 7% 11%;
 }
 
 .block-row > div {
@@ -43,4 +43,21 @@
 }
 .header-icon {
   margin-top: -0.47em;
+}
+
+.select {
+  width: 100px;
+  position: relative;
+}
+
+.checkboxes label {
+  display: block;
+}
+
+.checkboxes label {
+  display: block;
+}
+
+.completed-block {
+  background-color: $completed-background-color;
 }

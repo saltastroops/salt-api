@@ -1,6 +1,29 @@
 <h2 class="title is-2">Block Summary</h2>
 <hr class="heading-line blocks-header" />
 
+<div class="checkboxes">
+  <label for="filter-completed"
+    ><input
+      type="checkbox"
+      id="filter-completed"
+      (change)="filterByCompleted()"
+      [checked]="filteredByCompleted"
+    />
+    Hide completed blocks
+  </label>
+  <label for="filter-unobservable"
+    ><input
+      type="checkbox"
+      id="filter-unobservable"
+      (change)="filterByUnobservable()"
+      [checked]="filteredByUnobservable"
+    />
+    Hide blocks that cannot be observed any longer
+  </label>
+</div>
+
+<br />
+
 <div class="table is-table alternate-background">
   <div class="block-row headers is-info row">
     <div>Block ID</div>
@@ -16,8 +39,12 @@
     <div>Instrument</div>
     <div>Config Mode</div>
   </div>
-  <div *ngFor="let b of blocks">
-    <div class="block-row row">
+  <div *ngFor="let b of filteredBlocks">
+    <div
+      class="block-row row"
+      [ngClass]="blockClass(b)"
+      [attr.data-test]="blockDataTestAttribute(b)"
+    >
       <div>{{ b.id }}</div>
       <div>
         <a href="proposal/{{ proposalCode }}/#block{{ b.id }}">{{ b.name }}</a>
@@ -81,6 +108,10 @@
           <div>
             <div *ngFor="let m of i.modes">
               {{ m }}
+            </div>
+            <div *ngIf="i.gratings || i.filters">
+              <div *ngFor="let g of i.gratings">{{ g }}</div>
+              <div *ngFor="let t of i.filters">{{ t }}</div>
             </div>
           </div>
         </div>

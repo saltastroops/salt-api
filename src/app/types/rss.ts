@@ -162,4 +162,5 @@ export interface RssSpectroscopy {
 export interface RssSummary extends InstrumentSummary {
   name: 'RSS';
   modes: RssMode[];
+  gratings: RssGrating[];
 }

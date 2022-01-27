@@ -19,6 +19,8 @@ export interface BlockVisit extends BaseBlockVisit {
 export interface InstrumentSummary {
   name: string;
   modes: string[];
+  gratings: string[] | null;
+  filters: string[] | null;
 }
 
 export type Lamp =

@@ -34,9 +34,9 @@
         {{ e.blockName }}
         <span>(view details)</span>
       </div>
-      <div class="right-align-numbers">{{ e.observationTime }} s</div>
-      <div class="right-align-numbers">{{ e.priority }}</div>
-      <div class="right-align-numbers">{{ e.maximumLunarPhase }}</div>
+      <div>{{ e.observationTime }} s</div>
+      <div>{{ e.priority }}</div>
+      <div>{{ e.maximumLunarPhase }}</div>
       <div class="targets-container">
         <div *ngFor="let t of e.targets">
           <div>

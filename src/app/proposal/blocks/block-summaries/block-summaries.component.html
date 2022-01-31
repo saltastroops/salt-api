@@ -26,7 +26,12 @@
 
 <div class="table is-table alternate-background">
   <div class="block-row headers is-info row">
-    <div>Block ID</div>
+    <div>
+      <a id="sortable-column" class="sortable-column" href="javascript:return false" (click)="onColumnClick('id', ascending)">
+        Block ID
+        <span class="arrow"></span>
+      </a>
+    </div>
     <div>Block</div>
     <div>ObsTime</div>
     <div>Priority</div>

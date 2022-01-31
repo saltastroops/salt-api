@@ -7,12 +7,12 @@
 
 .block-row {
   display: grid;
-  grid-template-columns: 6% 17% repeat(6, 1fr) 10% repeat(1, 1fr) 18%;
+  grid-template-columns: 8% 17% repeat(6, 1fr) 10% repeat(1, 1fr) 18%;
   align-items: center;
 }
 
 .block-row.headers {
-  grid-template-columns: 6% 17% repeat(6, 1fr) 10% repeat(1, 1fr) 7% 11%;
+  grid-template-columns: 8% 17% repeat(6, 1fr) 10% repeat(1, 1fr) 7% 11%;
 }
 
 .block-row > div {
@@ -60,4 +60,46 @@
 
 .completed-block {
   background-color: $completed-background-color;
+}
+
+.sortable-column {
+  position: relative;
+  display: block;
+  background: inherit;
+  color: white;
+}
+
+.arrow {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.arrow::before,
+.arrow::after {
+  position: relative;
+  content: '';
+  display: block;
+  width: 10px;
+  height: 1px;
+  background: white;
+  transition: 0.3s ease-in-out;
+}
+
+.arrow::before {
+  transform: rotate(45deg);
+}
+
+.arrow::after {
+  left: 6px;
+  top: -1px;
+  transform: rotate(-45deg);
+}
+
+.sortable-column.active .arrow::before {
+  transform: rotate(-45deg);
+}
+
+.sortable-column.active .arrow::after {
+  transform: rotate(45deg);
 }

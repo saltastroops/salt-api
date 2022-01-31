@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BlockSummary } from '../../../types/block';
+import { byPropertiesOf } from '../../../utils';
 
 @Component({
   selector: 'wm-block-summaries',
@@ -9,6 +10,7 @@ import { BlockSummary } from '../../../types/block';
 export class BlockSummariesComponent implements OnInit {
   @Input() blocks!: BlockSummary[];
   @Input() proposalCode!: string;
+  ascending = false;
   filteredByCompleted!: boolean;
   filteredByUnobservable!: boolean;
   filteredBlocks: BlockSummary[] = [];
@@ -92,5 +94,19 @@ export class BlockSummariesComponent implements OnInit {
       return 'unobservable-block';
     }
     return '';
+  }
+
+  onColumnClick(columnName: keyof BlockSummary, ascending: boolean) {
+    const element = document.getElementById("sortable-column") as HTMLDivElement;
+    element.classList.toggle("active");
+    if (ascending) {
+      this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([columnName]));
+      this.ascending = !ascending;
+    } else {
+      const column = '-'+ columnName.toString();
+      // @ts-ignore
+      this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([column]));
+      this.ascending = !ascending;
+    }
   }
 }

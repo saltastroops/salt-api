@@ -26,13 +26,22 @@
 
 <div class="table is-table alternate-background">
   <div class="block-row headers is-info row">
-    <div>
-      <a id="sortable-column" class="sortable-column" href="javascript:return false" (click)="onColumnClick('id', ascending)">
-        Block ID
-        <span class="arrow"></span>
-      </a>
+    <div
+      class="sortable-column"
+      [ngClass]="sortableColumnClass('id')"
+      (click)="onColumnClick($event)"
+      data-testid="block-summary-id"
+    >
+      Block ID
     </div>
-    <div>Block</div>
+    <div
+      class="sortable-column"
+      [ngClass]="sortableColumnClass('name')"
+      (click)="onColumnClick($event)"
+      data-testid="block-summary-name"
+    >
+      Block
+    </div>
     <div>ObsTime</div>
     <div>Priority</div>
     <div>Done Visits</div>
@@ -50,8 +59,8 @@
       [ngClass]="blockClass(b)"
       [attr.data-test]="blockDataTestAttribute(b)"
     >
-      <div>{{ b.id }}</div>
-      <div>
+      <div data-test="block-id">{{ b.id }}</div>
+      <div data-test="block-name">
         <a href="proposal/{{ proposalCode }}/#block{{ b.id }}">{{ b.name }}</a>
       </div>
       <div>{{ b.observationTime }}</div>

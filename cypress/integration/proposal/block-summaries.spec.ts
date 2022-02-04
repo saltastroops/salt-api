@@ -64,4 +64,18 @@ describe('Block summaries', () => {
     BlockSummaries.hasCompletedBlocks(false);
     BlockSummaries.hasUnobservableBlocks(false);
   });
+
+  it('should have the table sorted by IDs when block ID column is clicked', () => {
+    BlockSummaries.clickBlockIdColumn();
+    BlockSummaries.blocksSortedByIdInAscending(true);
+    BlockSummaries.clickBlockIdColumn();
+    BlockSummaries.blocksSortedByIdInAscending(false);
+  });
+
+  it('should have the table sorted by names when block ID column is clicked', () => {
+    BlockSummaries.clickBlockNameColumn();
+    BlockSummaries.blocksSortedByNameInAscending(true);
+    BlockSummaries.clickBlockNameColumn();
+    BlockSummaries.blocksSortedByNameInAscending(false);
+  });
 });

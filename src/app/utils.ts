@@ -57,8 +57,17 @@ export function byPropertiesOf<T>(
       key = arg as keyof T;
     }
     return function (a: T, b: T) {
-      const result = a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
-
+      let result = 0;
+      if (typeof a[key] === 'string' && typeof b[key] === 'string') {
+        result =
+          parseToLowerCase(a[key]) < parseToLowerCase(b[key])
+            ? -1
+            : parseToLowerCase(a[key]) > parseToLowerCase(b[key])
+            ? 1
+            : 0;
+      } else {
+        result = a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+      }
       return result * sortOrder;
     };
   }
@@ -74,6 +83,14 @@ export function byPropertiesOf<T>(
 
     return result;
   };
+}
+
+// Generic type parameters are implicitly constrained to unknown
+// as such methods like `toString` are not available
+// the workaround is to dd an explicit constraint of {} to a type parameter to get the old behavior
+// reference: https://devblogs.microsoft.com/typescript/announcing-typescript-3-5/
+function parseToLowerCase<T extends {}>(x: T): string {
+  return x.toLocaleString().toLocaleLowerCase();
 }
 
 // @ input {deg}     Numeric; degrees number to convert

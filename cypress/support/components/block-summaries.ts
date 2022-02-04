@@ -2,6 +2,10 @@ const FILTER_COMPLETED = '#filter-completed';
 const FILTER_UNOBSERVABLE = '#filter-unobservable';
 const COMPLETED_BLOCK = '[data-test="completed-block"]';
 const UNOBSERVABLE_BLOCK = '[data-test="unobservable-block"]';
+const SORT_BY_ID_COLUMN = '[data-testid=block-summary-id]';
+const SORT_BY_NAME_COLUMN = '[data-testid=block-summary-name]';
+const BLOCK_ID_ROW = '[data-test=block-id]';
+const BLOCK_NAME_ROW = '[data-test=block-name]';
 
 export class BlockSummaries {
   static clickFilterCompleted() {
@@ -41,6 +45,56 @@ export class BlockSummaries {
       cy.get(UNOBSERVABLE_BLOCK);
     } else {
       cy.get(UNOBSERVABLE_BLOCK).should('not.exist');
+    }
+  }
+
+  static clickBlockIdColumn() {
+    cy.get(SORT_BY_ID_COLUMN).click();
+  }
+
+  static clickBlockNameColumn() {
+    cy.get(SORT_BY_ID_COLUMN).click();
+  }
+
+  static blocksSortedByIdInAscending(ascending: boolean) {
+    let sortedBlockIds = [];
+    if (ascending) {
+      cy.get(BLOCK_ID_ROW)
+        .each(($el, index) => {
+          sortedBlockIds[index] = $el.text();
+        })
+        .then(() => {
+          expect(sortedBlockIds).to.deep.equal(sortedBlockIds.sort());
+        });
+    } else {
+      cy.get(BLOCK_ID_ROW)
+        .each(($el, index) => {
+          sortedBlockIds[index] = $el.text();
+        })
+        .then(() => {
+          expect(sortedBlockIds).to.deep.equal(sortedBlockIds.reverse());
+        });
+    }
+  }
+
+  static blocksSortedByNameInAscending(ascending: boolean) {
+    let sortedNames = [];
+    if (ascending) {
+      cy.get(BLOCK_NAME_ROW)
+        .each(($el, index) => {
+          sortedNames[index] = $el.text();
+        })
+        .then(() => {
+          expect(sortedNames).to.deep.equal(sortedNames.sort());
+        });
+    } else {
+      cy.get(BLOCK_NAME_ROW)
+        .each(($el, index) => {
+          sortedNames[index] = $el.text();
+        })
+        .then(() => {
+          expect(sortedNames).to.deep.equal(sortedNames.reverse());
+        });
     }
   }
 }

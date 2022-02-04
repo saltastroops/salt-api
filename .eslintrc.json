@@ -31,6 +31,15 @@
             "style": "camelCase",
             "type": "attribute"
           }
+        ],
+        "@typescript-eslint/ban-types": [
+          "error",
+          {
+            "extendDefaults": true,
+            "types": {
+              "{}": false
+            }
+          }
         ]
       }
     },

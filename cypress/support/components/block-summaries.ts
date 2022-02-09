@@ -4,8 +4,23 @@ const COMPLETED_BLOCK = '[data-test="completed-block"]';
 const UNOBSERVABLE_BLOCK = '[data-test="unobservable-block"]';
 const SORT_BY_ID_COLUMN = '[data-testid=block-summary-id]';
 const SORT_BY_NAME_COLUMN = '[data-testid=block-summary-name]';
-const BLOCK_ID_ROW = '[data-test=block-id]';
-const BLOCK_NAME_ROW = '[data-test=block-name]';
+const SORT_BY_OBSERVATION_TIME_COLUMN =
+  '[data-testid=block-summary-observation-time]';
+const SORT_BY_PRIORITY_COLUMN = '[data-testid=block-summary-priority]';
+const SORT_BY_REMAINING_NIGHTS_COLUMN =
+  '[data-testid=block-summary-remaining-nights]';
+const SORT_BY_MAXIMUM_SEEING_COLUMN =
+  '[data-testid=block-summary-maximum-seeing]';
+const SORT_BY_MAXIMUM_LUNAR_PHASE_COLUMN =
+  '[data-testid=block-summary-maximum-lunar-phase]';
+const BLOCK_ID_ELEMENT = '[data-test=block-id]';
+const BLOCK_NAME_ELEMENT = '[data-test=block-name]';
+const BLOCK_OBSERVATION_TIME_ELEMENT = '[data-test=observation-time]';
+const BLOCK_PRIORITY_ELEMENT = '[data-test=block-priority]';
+const BLOCK_MAXIMUM_SEEING_ELEMENT = '[data-test=block-maximum-sseing]';
+const BLOCK_REMAINING_NIGHTS_ELEMENT = '[data-test=block-remaining-nights]';
+const BLOCK_MAXIMUM_LUNAR_PHASE_ELEMENT =
+  '[data-test=block-maximum-lunar-phase]';
 
 export class BlockSummaries {
   static clickFilterCompleted() {
@@ -56,44 +71,68 @@ export class BlockSummaries {
     cy.get(SORT_BY_ID_COLUMN).click();
   }
 
-  static blocksSortedByIdInAscending(ascending: boolean) {
+  static clickBlockObservationTimeColumn() {
+    cy.get(SORT_BY_OBSERVATION_TIME_COLUMN).click();
+  }
+
+  static clickBlockPriorityColumn() {
+    cy.get(SORT_BY_PRIORITY_COLUMN).click();
+  }
+
+  static clickBlockMaximumSeeingColumn() {
+    cy.get(SORT_BY_MAXIMUM_SEEING_COLUMN).click();
+  }
+
+  static clickBlockRemainingNightsColumn() {
+    cy.get(SORT_BY_REMAINING_NIGHTS_COLUMN).click();
+  }
+
+  static clickBlockMaximumLunarPhaseColumn() {
+    cy.get(SORT_BY_MAXIMUM_LUNAR_PHASE_COLUMN).click();
+  }
+
+  static blocksSortedBy(column: string, order: 'ascending' | 'descending') {
+    let columnElement = '';
+    switch (column) {
+      case 'id':
+        columnElement = BLOCK_ID_ELEMENT;
+        break;
+      case 'name':
+        columnElement = BLOCK_NAME_ELEMENT;
+        break;
+      case 'observation-time':
+        columnElement = BLOCK_OBSERVATION_TIME_ELEMENT;
+        break;
+      case 'priority':
+        columnElement = BLOCK_PRIORITY_ELEMENT;
+        break;
+      case 'remaining-nights':
+        columnElement = BLOCK_REMAINING_NIGHTS_ELEMENT;
+        break;
+      case 'maximum-seeing':
+        columnElement = BLOCK_MAXIMUM_SEEING_ELEMENT;
+        break;
+      case 'maximum-lunar-phase':
+        columnElement = BLOCK_MAXIMUM_LUNAR_PHASE_ELEMENT;
+    }
+
     let sortedBlockIds = [];
-    if (ascending) {
-      cy.get(BLOCK_ID_ROW)
+    if (order==='ascending') {
+      cy.get(BLOCK_ID_ELEMENT)
         .each(($el, index) => {
           sortedBlockIds[index] = $el.text();
         })
         .then(() => {
           expect(sortedBlockIds).to.deep.equal(sortedBlockIds.sort());
         });
-    } else {
-      cy.get(BLOCK_ID_ROW)
+    }
+    if (order==='descending') {
+      cy.get(BLOCK_ID_ELEMENT)
         .each(($el, index) => {
           sortedBlockIds[index] = $el.text();
         })
         .then(() => {
           expect(sortedBlockIds).to.deep.equal(sortedBlockIds.reverse());
-        });
-    }
-  }
-
-  static blocksSortedByNameInAscending(ascending: boolean) {
-    let sortedNames = [];
-    if (ascending) {
-      cy.get(BLOCK_NAME_ROW)
-        .each(($el, index) => {
-          sortedNames[index] = $el.text();
-        })
-        .then(() => {
-          expect(sortedNames).to.deep.equal(sortedNames.sort());
-        });
-    } else {
-      cy.get(BLOCK_NAME_ROW)
-        .each(($el, index) => {
-          sortedNames[index] = $el.text();
-        })
-        .then(() => {
-          expect(sortedNames).to.deep.equal(sortedNames.reverse());
         });
     }
   }

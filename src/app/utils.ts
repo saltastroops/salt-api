@@ -58,15 +58,35 @@ export function byPropertiesOf<T>(
     }
     return function (a: T, b: T) {
       let result = 0;
-      if (typeof a[key] === 'string' && typeof b[key] === 'string') {
-        result =
-          parseToLowerCase(a[key]) < parseToLowerCase(b[key])
-            ? -1
-            : parseToLowerCase(a[key]) > parseToLowerCase(b[key])
-            ? 1
-            : 0;
+      if (typeof a[key] === 'string') {
+        if (String(a[key]) < String(b[key])) {
+          result = -1;
+        } else if (String(a[key]) > String(b[key])) {
+          result = 1;
+        } else {
+          result = 0;
+        }
       } else {
-        result = a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+        const key_split = key.toString().split('.');
+        if (key_split.length > 1) {
+          key = key_split[0] as keyof T;
+          const subkey = key_split[1] as keyof T[keyof T];
+          if (a[key][subkey] < b[key][subkey]) {
+            result = -1;
+          } else if (a[key][subkey] > b[key][subkey]) {
+            result = 1;
+          } else {
+            result = 0;
+          }
+        } else {
+          if (a[key] < b[key]) {
+            result = -1;
+          } else if (a[key] > b[key]) {
+            result = 1;
+          } else {
+            result = 0;
+          }
+        }
       }
       return result * sortOrder;
     };
@@ -83,14 +103,6 @@ export function byPropertiesOf<T>(
 
     return result;
   };
-}
-
-// Generic type parameters are implicitly constrained to unknown
-// as such methods like `toString` are not available
-// the workaround is to dd an explicit constraint of {} to a type parameter to get the old behavior
-// reference: https://devblogs.microsoft.com/typescript/announcing-typescript-3-5/
-function parseToLowerCase<T extends {}>(x: T): string {
-  return x.toLocaleString().toLocaleLowerCase();
 }
 
 // @ input {deg}     Numeric; degrees number to convert
@@ -156,3 +168,55 @@ export function degreesToDms(deg: number, decimal_places = 2): string {
 
   return sign < 0 ? '-' + dms_string : '+' + dms_string;
 }
+
+// This implementation is used to concatenate string literals at the type level
+// using template literal types.
+// reference: https://stackoverflow.com/a/58436959
+type Join<K, P> = K extends string | number
+  ? P extends string | number
+    ? `${K}${'' extends P ? '' : '.'}${P}`
+    : never
+  : never;
+
+type Prev = [
+  never,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  ...0[]
+];
+
+export type Paths<T, D extends number = 10> = [D] extends [never]
+  ? never
+  : T extends Record<string, unknown>
+  ? {
+      [K in keyof T]-?: K extends string | number
+        ? `${K}` | Join<K, Paths<T[K], Prev[D]>>
+        : never;
+    }[keyof T]
+  : '';
+
+export type Leaves<T, D extends number = 10> = [D] extends [never]
+  ? never
+  // eslint-disable-next-line
+  : T extends Record<string, any>
+  ? { [K in keyof T]-?: Join<K, Leaves<T[K], Prev[D]>> }[keyof T]
+  : '';

@@ -62,12 +62,6 @@
   background-color: $completed-background-color;
 }
 
-.sortable-column:hover {
-  background: inherit;
-  border: 3px solid #d0d0d0;
-  margin: -2px;
-}
-
 .pointer {
   cursor: pointer;
 }
@@ -76,4 +70,10 @@
 }
 .pointer.active.asc:after {
   content: "▼";
+}
+
+.pointer.sortable_column:hover {
+  background: $primary-header;
+  border: 3px solid #d0d0d0;
+  margin: -2px;
 }

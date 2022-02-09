@@ -67,15 +67,50 @@ describe('Block summaries', () => {
 
   it('should have the table sorted by IDs when block ID column is clicked', () => {
     BlockSummaries.clickBlockIdColumn();
-    BlockSummaries.blocksSortedByIdInAscending(true);
+    BlockSummaries.blocksSortedBy('id', 'ascending');
     BlockSummaries.clickBlockIdColumn();
-    BlockSummaries.blocksSortedByIdInAscending(false);
+    BlockSummaries.blocksSortedBy('id', 'descending');
   });
 
-  it('should have the table sorted by names when block ID column is clicked', () => {
+  it('should have the table sorted by names when block name column is clicked', () => {
     BlockSummaries.clickBlockNameColumn();
-    BlockSummaries.blocksSortedByNameInAscending(true);
+    BlockSummaries.blocksSortedBy('name', 'ascending');
     BlockSummaries.clickBlockNameColumn();
-    BlockSummaries.blocksSortedByNameInAscending(false);
+    BlockSummaries.blocksSortedBy('name', 'descending');
+  });
+
+  it('should have the table sorted by observation time when observation time column is clicked', () => {
+    BlockSummaries.clickBlockObservationTimeColumn();
+    BlockSummaries.blocksSortedBy('observation-time', 'ascending');
+    BlockSummaries.clickBlockObservationTimeColumn();
+    BlockSummaries.blocksSortedBy('observation-time', 'descending');
+  });
+
+  it('should have the table sorted by priority when priority column is clicked', () => {
+    BlockSummaries.clickBlockPriorityColumn();
+    BlockSummaries.blocksSortedBy('priority', 'ascending');
+    BlockSummaries.clickBlockPriorityColumn();
+    BlockSummaries.blocksSortedBy('priority', 'descending');
+  });
+
+  it('should have the table sorted by maximum seeing when maximum seeing column is clicked', () => {
+    BlockSummaries.clickBlockMaximumSeeingColumn();
+    BlockSummaries.blocksSortedBy('maximum-seeing', 'ascending');
+    BlockSummaries.clickBlockMaximumSeeingColumn();
+    BlockSummaries.blocksSortedBy('maximum-seeing', 'descending');
+  });
+
+  it('should have the table sorted by remaining nights when remaining nights column is clicked', () => {
+    BlockSummaries.clickBlockRemainingNightsColumn();
+    BlockSummaries.blocksSortedBy('remaining-nights', 'ascending');
+    BlockSummaries.clickBlockRemainingNightsColumn();
+    BlockSummaries.blocksSortedBy('remaining-nights', 'descending');
+  });
+
+  it('should have the table sorted by maximum lunar phase when maximum lunar phase column is clicked', () => {
+    BlockSummaries.clickBlockMaximumLunarPhaseColumn();
+    BlockSummaries.blocksSortedBy('maximum-lunar-phase', 'ascending');
+    BlockSummaries.clickBlockMaximumLunarPhaseColumn();
+    BlockSummaries.blocksSortedBy('maximum-lunar-phase', 'descending');
   });
 });

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BlockSummary } from '../../../../types/block';
 import { byPropertiesOf } from '../../../../utils';
 

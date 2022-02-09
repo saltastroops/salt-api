@@ -3,7 +3,7 @@
   [selectedBlock]="selectedBlock"
   (selectEmitter)="selectBlock($event)"
 ></wm-block-selection>
-<div class="block-content" style="position: relative">
+<div data-test="block-content" class="block-content" style="position: relative">
   <ng-container *ngIf="isLoading">
     <div class="is-overlay" data-testid="block-view-loading">
       <wm-loading-spinner></wm-loading-spinner>
@@ -17,7 +17,7 @@
   </ng-container>
   <ng-container *ngIf="displayedBlock">
     <div [class.is-blurred]="isLoading">
-      <div class="block">
+      <div data-test="displayed-block-content" class="block">
         <wm-block [block]="displayedBlock"></wm-block>
       </div>
     </div>

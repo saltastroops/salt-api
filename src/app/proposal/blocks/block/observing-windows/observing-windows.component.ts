@@ -1,10 +1,10 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import {
   addDays,
-  subDays,
-  differenceInSeconds,
   addHours,
+  differenceInSeconds,
   parseISO,
+  subDays,
 } from 'date-fns';
 import { TimeInterval } from '../../../../types/common';
 

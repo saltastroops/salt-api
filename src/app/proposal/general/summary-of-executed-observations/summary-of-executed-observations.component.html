@@ -31,8 +31,12 @@
   <div *ngFor="let e of observations">
     <div class="summary-row row">
       <div>
-        {{ e.blockName }}
-        <span>(view details)</span>
+        <div data-test="executed-observations-block-link">
+          <a href="javascript:void(0)" (click)="onClick(e.blockName)">
+            {{ e.blockName }}
+          </a>
+        </div>
+        <span> (view details) </span>
       </div>
       <div>{{ e.observationTime }} s</div>
       <div>{{ e.priority }}</div>

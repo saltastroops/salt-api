@@ -46,8 +46,8 @@
       [attr.data-test]="blockDataTestAttribute(b)"
     >
       <div>{{ b.id }}</div>
-      <div>
-        <a href="proposal/{{ proposalCode }}/#block{{ b.id }}">{{ b.name }}</a>
+      <div data-test="block-summary-link">
+        <a href="javascript:void(0)" (click)="onClick(b.name)">{{ b.name }}</a>
       </div>
       <div>{{ b.observationTime }}</div>
       <div>{{ b.priority }}</div>

@@ -50,16 +50,18 @@
     <wm-block-summaries
       [blocks]="p.blocks"
       [proposalCode]="p.proposalCode"
+      (selectBlock)="onClick($event)"
     ></wm-block-summaries>
   </div>
 
   <div class="block">
     <wm-summary-of-executed-observations
       [blockVisits]="p.blockVisits"
+      (selectBlock)="onClick($event)"
     ></wm-summary-of-executed-observations>
   </div>
 
   <!--  TODO: Allocation is semester dependent will fix it -->
 
-  <wm-block-view [blocks]="p.blocks"></wm-block-view>
+  <wm-block-view [blocks]="p.blocks" [blockName]="blockName"></wm-block-view>
 </div>

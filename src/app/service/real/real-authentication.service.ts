@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { AccessToken } from '../../types/authentication';

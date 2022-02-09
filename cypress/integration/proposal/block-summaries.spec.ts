@@ -64,4 +64,9 @@ describe('Block summaries', () => {
     BlockSummaries.hasCompletedBlocks(false);
     BlockSummaries.hasUnobservableBlocks(false);
   });
+
+  it('should load the correct block content when a block name link is clicked', () => {
+    BlockSummaries.clickBlockNameLink(4);
+    BlockSummaries.correctBlockLoaded(4);
+  });
 });

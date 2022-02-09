@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BlockSummary } from '../../../types/block';
 
 @Component({
@@ -9,6 +9,7 @@ import { BlockSummary } from '../../../types/block';
 export class BlockSummariesComponent implements OnInit {
   @Input() blocks!: BlockSummary[];
   @Input() proposalCode!: string;
+  @Output() selectBlock = new EventEmitter<string>();
   filteredByCompleted!: boolean;
   filteredByUnobservable!: boolean;
   filteredBlocks: BlockSummary[] = [];
@@ -19,7 +20,6 @@ export class BlockSummariesComponent implements OnInit {
       localStorage.getItem('filterByCompleted') == 'true';
     this.filteredByUnobservable =
       localStorage.getItem('filterByUnobservable') == 'true';
-
     (document.getElementById('filter-completed') as HTMLInputElement).checked =
       this.filteredByCompleted;
     (
@@ -27,6 +27,10 @@ export class BlockSummariesComponent implements OnInit {
     ).checked = this.filteredByUnobservable;
 
     this.filterBlocks();
+  }
+
+  onClick(blockName: string): void {
+    this.selectBlock.emit(blockName);
   }
 
   filterByCompleted(): void {

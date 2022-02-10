@@ -113,4 +113,13 @@ describe('Block summaries', () => {
     BlockSummaries.clickBlockMaximumLunarPhaseColumn();
     BlockSummaries.blocksSortedBy('maximum-lunar-phase', 'descending');
   });
+
+  it('should have the table sorted in ascending by maximum lunar phase when the block name column is clicked bofore clicking the maximum lunar phase column', () => {
+    BlockSummaries.clickBlockNameColumn();
+    BlockSummaries.blocksSortedBy('name', 'ascending');
+    BlockSummaries.clickBlockNameColumn();
+    BlockSummaries.blocksSortedBy('name', 'descending');
+    BlockSummaries.clickBlockMaximumLunarPhaseColumn();
+    BlockSummaries.blocksSortedBy('maximum-lunar-phase', 'ascending');
+  });
 });

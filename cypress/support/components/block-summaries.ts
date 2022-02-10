@@ -13,14 +13,6 @@ const SORT_BY_MAXIMUM_SEEING_COLUMN =
   '[data-testid=block-summary-maximum-seeing]';
 const SORT_BY_MAXIMUM_LUNAR_PHASE_COLUMN =
   '[data-testid=block-summary-maximum-lunar-phase]';
-const BLOCK_ID_ELEMENT = '[data-test=block-id]';
-const BLOCK_NAME_ELEMENT = '[data-test=block-name]';
-const BLOCK_OBSERVATION_TIME_ELEMENT = '[data-test=observation-time]';
-const BLOCK_PRIORITY_ELEMENT = '[data-test=block-priority]';
-const BLOCK_MAXIMUM_SEEING_ELEMENT = '[data-test=block-maximum-sseing]';
-const BLOCK_REMAINING_NIGHTS_ELEMENT = '[data-test=block-remaining-nights]';
-const BLOCK_MAXIMUM_LUNAR_PHASE_ELEMENT =
-  '[data-test=block-maximum-lunar-phase]';
 
 export class BlockSummaries {
   static clickFilterCompleted() {
@@ -92,33 +84,12 @@ export class BlockSummaries {
   }
 
   static blocksSortedBy(column: string, order: 'ascending' | 'descending') {
-    let columnElement = '';
-    switch (column) {
-      case 'id':
-        columnElement = BLOCK_ID_ELEMENT;
-        break;
-      case 'name':
-        columnElement = BLOCK_NAME_ELEMENT;
-        break;
-      case 'observation-time':
-        columnElement = BLOCK_OBSERVATION_TIME_ELEMENT;
-        break;
-      case 'priority':
-        columnElement = BLOCK_PRIORITY_ELEMENT;
-        break;
-      case 'remaining-nights':
-        columnElement = BLOCK_REMAINING_NIGHTS_ELEMENT;
-        break;
-      case 'maximum-seeing':
-        columnElement = BLOCK_MAXIMUM_SEEING_ELEMENT;
-        break;
-      case 'maximum-lunar-phase':
-        columnElement = BLOCK_MAXIMUM_LUNAR_PHASE_ELEMENT;
-    }
-
+    let rowElement = '[data-test=block-' + column + ']';
+    let columnElement = '[data-testid=block-summary-' + column + ']';
     let sortedBlockIds = [];
-    if (order==='ascending') {
-      cy.get(BLOCK_ID_ELEMENT)
+    if (order === 'ascending') {
+      cy.get(columnElement).should('have.class', 'desc');
+      cy.get(rowElement)
         .each(($el, index) => {
           sortedBlockIds[index] = $el.text();
         })
@@ -126,8 +97,9 @@ export class BlockSummaries {
           expect(sortedBlockIds).to.deep.equal(sortedBlockIds.sort());
         });
     }
-    if (order==='descending') {
-      cy.get(BLOCK_ID_ELEMENT)
+    if (order === 'descending') {
+      cy.get(columnElement).should('have.class', 'asc');
+      cy.get(rowElement)
         .each(($el, index) => {
           sortedBlockIds[index] = $el.text();
         })

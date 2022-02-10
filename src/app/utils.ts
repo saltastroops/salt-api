@@ -25,10 +25,20 @@ export function currentSemester(): string {
   }
 }
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+type NestedKeyOf<T extends Record<string, any>> = {
+  [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
+    ? `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
+    : `${Key}`;
+}[keyof T & (string | number)];
+
 export type sortArg<T> =
   | keyof T
+  | NestedKeyOf<T>
   | `-${string & keyof T}`
-  | `+${string & keyof T}`;
+  | `+${string & keyof T}`
+  | `-${string & NestedKeyOf<T>}`
+  | `+${string & NestedKeyOf<T>}`;
 /**
  * Returns a comparator for objects of type T that can be used by sort
  * functions, where T objects are compared by the specified T properties.
@@ -59,9 +69,15 @@ export function byPropertiesOf<T>(
     return function (a: T, b: T) {
       let result = 0;
       if (typeof a[key] === 'string') {
-        if (String(a[key]) < String(b[key])) {
+        if (
+          (a[key] as unknown as string).toLocaleUpperCase() <
+          (b[key] as unknown as string).toLocaleUpperCase()
+        ) {
           result = -1;
-        } else if (String(a[key]) > String(b[key])) {
+        } else if (
+          (a[key] as unknown as string).toLocaleUpperCase() >
+          (b[key] as unknown as string).toLocaleUpperCase()
+        ) {
           result = 1;
         } else {
           result = 0;
@@ -168,55 +184,3 @@ export function degreesToDms(deg: number, decimal_places = 2): string {
 
   return sign < 0 ? '-' + dms_string : '+' + dms_string;
 }
-
-// This implementation is used to concatenate string literals at the type level
-// using template literal types.
-// reference: https://stackoverflow.com/a/58436959
-type Join<K, P> = K extends string | number
-  ? P extends string | number
-    ? `${K}${'' extends P ? '' : '.'}${P}`
-    : never
-  : never;
-
-type Prev = [
-  never,
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  13,
-  14,
-  15,
-  16,
-  17,
-  18,
-  19,
-  20,
-  ...0[]
-];
-
-export type Paths<T, D extends number = 10> = [D] extends [never]
-  ? never
-  : T extends Record<string, unknown>
-  ? {
-      [K in keyof T]-?: K extends string | number
-        ? `${K}` | Join<K, Paths<T[K], Prev[D]>>
-        : never;
-    }[keyof T]
-  : '';
-
-export type Leaves<T, D extends number = 10> = [D] extends [never]
-  ? never
-  // eslint-disable-next-line
-  : T extends Record<string, any>
-  ? { [K in keyof T]-?: Join<K, Leaves<T[K], Prev[D]>> }[keyof T]
-  : '';

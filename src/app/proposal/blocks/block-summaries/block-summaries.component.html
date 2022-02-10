@@ -28,32 +28,28 @@
   <div class="block-row headers is-info row">
     <div
       [ngClass]="sortableColumnClass('id')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-id"
+      (click)="onColumnClick($event, 'id')"
       data-testid="block-summary-id"
     >
       Block ID
     </div>
     <div
       [ngClass]="sortableColumnClass('name')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-name"
+      (click)="onColumnClick($event, 'name')"
       data-testid="block-summary-name"
     >
       Block
     </div>
     <div
       [ngClass]="sortableColumnClass('observationTime')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-observationTime"
+      (click)="onColumnClick($event, 'observationTime')"
       data-testid="block-summary-observation-time"
     >
       ObsTime
     </div>
     <div
       [ngClass]="sortableColumnClass('priority')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-priority"
+      (click)="onColumnClick($event, 'priority')"
       data-testid="block-summary-priority"
     >
       Priority
@@ -62,16 +58,14 @@
     <div>Tonight?</div>
     <div
       [ngClass]="sortableColumnClass('remainingNights')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-remainingNights"
+      (click)="onColumnClick($event, 'remainingNights')"
       data-testid="block-summary-remaining-nights"
     >
       Remaining
     </div>
     <div
       [ngClass]="sortableColumnClass('observingConditions.maximumSeeing')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-observingConditions.maximumSeeing"
+      (click)="onColumnClick($event, 'observingConditions.maximumSeeing')"
       data-testid="block-summary-maximum-seeing"
     >
       Max Seeing
@@ -79,8 +73,7 @@
     <div>Transparency</div>
     <div
       [ngClass]="sortableColumnClass('observingConditions.maximumLunarPhase')"
-      (click)="onColumnClick($event)"
-      data-sort-id="block-summary-observingConditions.maximumLunarPhase"
+      (click)="onColumnClick($event, 'observingConditions.maximumLunarPhase')"
       data-testid="block-summary-maximum-lunar-phase"
     >
       Max Lunar Phase

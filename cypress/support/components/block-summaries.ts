@@ -84,9 +84,9 @@ export class BlockSummaries {
   }
 
   static blocksSortedBy(column: string, order: 'ascending' | 'descending') {
-    let rowElement = '[data-test=block-' + column + ']';
-    let columnElement = '[data-testid=block-summary-' + column + ']';
-    let sortedBlockIds = [];
+    const rowElement = '[data-test=block-' + column + ']';
+    const columnElement = '[data-testid=block-summary-' + column + ']';
+    const sortedBlockIds = [];
     if (order === 'ascending') {
       cy.get(columnElement).should('have.class', 'desc');
       cy.get(rowElement)

@@ -88,7 +88,7 @@ export class BlockSummaries {
     const columnElement = '[data-testid=block-summary-' + column + ']';
     const sortedBlockIds = [];
     if (order === 'ascending') {
-      cy.get(columnElement).should('have.class', 'desc');
+      cy.get(columnElement).should('have.class', 'asc');
       cy.get(rowElement)
         .each(($el, index) => {
           sortedBlockIds[index] = $el.text();
@@ -98,7 +98,7 @@ export class BlockSummaries {
         });
     }
     if (order === 'descending') {
-      cy.get(columnElement).should('have.class', 'asc');
+      cy.get(columnElement).should('have.class', 'desc');
       cy.get(rowElement)
         .each(($el, index) => {
           sortedBlockIds[index] = $el.text();

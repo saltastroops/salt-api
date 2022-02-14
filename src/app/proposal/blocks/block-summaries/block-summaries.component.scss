@@ -65,10 +65,10 @@
 .pointer {
   cursor: pointer;
 }
-.pointer.active.desc:after {
+.pointer.active.asc:after {
   content: "▲";
 }
-.pointer.active.asc:after {
+.pointer.active.desc:after {
   content: "▼";
 }
 

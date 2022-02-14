@@ -128,8 +128,8 @@ export class BlockSummariesComponent implements OnInit {
     return {
       pointer: true,
       active: this.column == columnName,
-      desc: !this.isDesc,
-      asc: this.isDesc,
+      asc: !this.isDesc,
+      desc: this.isDesc,
       sortable_column: true,
     };
   }

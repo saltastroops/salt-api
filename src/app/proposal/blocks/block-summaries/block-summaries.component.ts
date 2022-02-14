@@ -106,19 +106,20 @@ export class BlockSummariesComponent implements OnInit {
     return '';
   }
 
-  onColumnClick(event: Event, columnId: sortArg<BlockSummary>): void {
-    const direction = this.columnsSortDirections[columnId] || 'asc';
+  onColumnClick(event: Event, columnName: sortArg<BlockSummary>): void {
+    this.columnsSortDirections[columnName] =
+      this.columnsSortDirections[columnName] === 'asc' ? 'desc' : 'asc';
+    const direction = this.columnsSortDirections[columnName];
 
     this.isDesc = direction === 'desc';
-    this.column = columnId;
+    this.column = columnName;
     if (direction === 'asc') {
-      this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([columnId]));
+      this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([columnName]));
     }
     if (direction === 'desc') {
-      const column = <sortArg<BlockSummary>>('-' + columnId.toString());
+      const column = <sortArg<BlockSummary>>('-' + columnName.toString());
       this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([column]));
     }
-    this.columnsSortDirections[columnId] = direction === 'asc' ? 'desc' : 'asc';
   }
 
   sortableColumnClass(columnName: sortArg<BlockSummary>): {

@@ -27,7 +27,7 @@ export class ForgotPasswordPage {
   }
 
   static requestAgain() {
-    cy.get('[data-test="request-again"]').click();
+    cy.get("[data-test='request-again']", { timeout: 15000 }).click();
   }
 
   static hasMissingUsernameOrEmailError() {
@@ -46,5 +46,11 @@ export class ForgotPasswordPage {
     cy.get("[data-test='error']")
       .contains(GENERIC_ERROR_MESSAGE)
       .should('be.visible');
+  }
+
+  static hasSuccessMessage() {
+    cy.get("[data-test='success']", { timeout: 15000 })
+      .contains(/has been sent/i)
+      .should('exist')
   }
 }

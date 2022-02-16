@@ -123,5 +123,9 @@ describe('Block summaries', () => {
     BlockSummaries.blocksSortedBy('maximum-lunar-phase', 'ascending');
     BlockSummaries.clickBlockNameColumn();
     BlockSummaries.blocksSortedBy('name', 'ascending');
+
+  it('should load the correct block content when a block name link is clicked', () => {
+    BlockSummaries.clickBlockNameLink(4);
+    BlockSummaries.correctBlockLoaded(4);
   });
 });

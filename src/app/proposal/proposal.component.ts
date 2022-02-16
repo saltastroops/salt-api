@@ -11,6 +11,7 @@ import { Proposal } from '../types/proposal';
 })
 export class ProposalComponent implements OnInit {
   proposalCode = '';
+  blockName = '';
   proposal!: Observable<Proposal>;
 
   constructor(
@@ -22,5 +23,13 @@ export class ProposalComponent implements OnInit {
     const routeParams = this.route.snapshot.paramMap;
     this.proposalCode = routeParams.get('proposal-code') || '';
     this.proposal = this.proposalService.getProposal(this.proposalCode);
+  }
+
+  onClick(block: string): void {
+    this.blockName = block;
+    const element = document.querySelector(
+      '[data-test="block-selection"]'
+    ) as HTMLElement;
+    element.scrollIntoView({ behavior: 'smooth' });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { parseISO } from 'date-fns';
 import { BlockVisit } from '../../../types/common';
 
@@ -10,6 +10,7 @@ import { BlockVisit } from '../../../types/common';
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;
   @Input() blockVisits!: BlockVisit[];
+  @Output() selectBlock = new EventEmitter<string>();
   observations!: Observation[];
 
   ngOnInit(): void {
@@ -40,6 +41,10 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
 
   observationDate(dateString: string): Date {
     return parseISO(dateString);
+  }
+
+  onClick(blockName: string): void {
+    this.selectBlock.emit(blockName);
   }
 }
 

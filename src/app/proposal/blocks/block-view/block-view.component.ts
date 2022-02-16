@@ -1,5 +1,12 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { merge, of, Subject, Subscription } from 'rxjs';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
+import { Subject, Subscription, merge, of } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -15,8 +22,9 @@ import { Block, BlockSummary } from '../../../types/block';
   templateUrl: './block-view.component.html',
   styleUrls: ['./block-view.component.scss'],
 })
-export class BlockViewComponent implements OnInit, OnDestroy {
+export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() blocks!: BlockSummary[];
+  @Input() blockName = '';
 
   readonly DEBOUNCE_TIME = 100;
 
@@ -95,5 +103,18 @@ export class BlockViewComponent implements OnInit, OnDestroy {
   selectBlock(block: BlockSummary): void {
     this.selectedBlock = block;
     this.selectedBlocks$.next(block);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    for (const propName in changes) {
+      if (propName === 'blockName') {
+        const changedProp = changes[propName];
+        const selectedBlockName = changedProp.currentValue;
+        const index = this.blocks.findIndex(
+          (block) => block.name === selectedBlockName
+        );
+        this.selectBlock(this.blocks[index]);
+      }
+    }
   }
 }

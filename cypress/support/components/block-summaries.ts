@@ -13,9 +13,7 @@ const SORT_BY_MAXIMUM_SEEING_COLUMN =
   '[data-testid=block-summary-maximum-seeing]';
 const SORT_BY_MAXIMUM_LUNAR_PHASE_COLUMN =
   '[data-testid=block-summary-maximum-lunar-phase]';
-const BLOCK_SELECTION = '[data-test="block-selection"]';
 const BLOCK_LINK = '[data-test="block-name"]';
-const BLOCK_CONTENT = '[data-test="block-content"]';
 const DISPLAYED_BLOCK_CONTENT = '[data-test="displayed-block-content"]';
 
 
@@ -65,7 +63,7 @@ export class BlockSummaries {
   }
 
   static clickBlockNameColumn() {
-    cy.get(SORT_BY_ID_COLUMN).click();
+    cy.get(SORT_BY_NAME_COLUMN).click();
   }
 
   static clickBlockObservationTimeColumn() {
@@ -112,7 +110,7 @@ export class BlockSummaries {
           expect(sortedBlockIds).to.deep.equal(sortedBlockIds.reverse());
         });
     }
-    
+  }
   static clickBlockNameLink(elementIndex: number) {
     cy.get(BLOCK_LINK).eq(elementIndex).click();
   }

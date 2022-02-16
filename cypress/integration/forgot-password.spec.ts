@@ -49,7 +49,7 @@ describe('Forgot password page', () => {
     const USERNAME = 'hettlage';
     ForgotPasswordPage.typeUsernameOrEmail(USERNAME);
     ForgotPasswordPage.submit();
-    cy.contains(/has been sent/i).should('exist');
+    ForgotPasswordPage.hasSuccessMessage();
   });
 
   it('should have the input field prepopulated when an email is requested again', () => {

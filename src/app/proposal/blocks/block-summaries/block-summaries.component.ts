@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BlockSummary } from '../../../types/block';
+import { byPropertiesOf, sortArg } from '../../../utils';
 
 @Component({
   selector: 'wm-block-summaries',
@@ -9,10 +10,13 @@ import { BlockSummary } from '../../../types/block';
 export class BlockSummariesComponent implements OnInit {
   @Input() blocks!: BlockSummary[];
   @Input() proposalCode!: string;
+  isDesc = false;
+  column = '';
   @Output() selectBlock = new EventEmitter<string>();
   filteredByCompleted!: boolean;
   filteredByUnobservable!: boolean;
   filteredBlocks: BlockSummary[] = [];
+  columnsSortDirections: { [columnName: string]: string | number | null } = {};
 
   ngOnInit(): void {
     this.filteredBlocks = this.blocks;
@@ -27,6 +31,14 @@ export class BlockSummariesComponent implements OnInit {
     ).checked = this.filteredByUnobservable;
 
     this.filterBlocks();
+    const sortableColumnElements =
+      document.querySelectorAll('.sortable-column');
+    sortableColumnElements.forEach((columnElement) => {
+      const column = columnElement.getAttribute('data-testid');
+      if (column) {
+        this.columnsSortDirections[column] = '';
+      }
+    });
   }
 
   onClick(blockName: string): void {
@@ -96,5 +108,33 @@ export class BlockSummariesComponent implements OnInit {
       return 'unobservable-block';
     }
     return '';
+  }
+
+  onColumnClick(event: Event, columnName: sortArg<BlockSummary>): void {
+    this.columnsSortDirections[columnName] =
+      this.columnsSortDirections[columnName] === 'asc' ? 'desc' : 'asc';
+    const direction = this.columnsSortDirections[columnName];
+
+    this.isDesc = direction === 'desc';
+    this.column = columnName;
+    if (direction === 'asc') {
+      this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([columnName]));
+    }
+    if (direction === 'desc') {
+      const column = <sortArg<BlockSummary>>('-' + columnName.toString());
+      this.filteredBlocks.sort(byPropertiesOf<BlockSummary>([column]));
+    }
+  }
+
+  sortableColumnClass(columnName: sortArg<BlockSummary>): {
+    [key: string]: unknown;
+  } {
+    return {
+      pointer: true,
+      active: this.column == columnName,
+      asc: !this.isDesc,
+      desc: this.isDesc,
+      sortable_column: true,
+    };
   }
 }

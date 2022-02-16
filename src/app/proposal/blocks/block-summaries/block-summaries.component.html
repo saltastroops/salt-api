@@ -26,16 +26,58 @@
 
 <div class="table is-table alternate-background">
   <div class="block-row headers is-info row">
-    <div>Block ID</div>
-    <div>Block</div>
-    <div>ObsTime</div>
-    <div>Priority</div>
+    <div
+      [ngClass]="sortableColumnClass('id')"
+      (click)="onColumnClick($event, 'id')"
+      data-testid="block-summary-id"
+    >
+      Block ID
+    </div>
+    <div
+      [ngClass]="sortableColumnClass('name')"
+      (click)="onColumnClick($event, 'name')"
+      data-testid="block-summary-name"
+    >
+      Block
+    </div>
+    <div
+      [ngClass]="sortableColumnClass('observationTime')"
+      (click)="onColumnClick($event, 'observationTime')"
+      data-testid="block-summary-observation-time"
+    >
+      ObsTime
+    </div>
+    <div
+      [ngClass]="sortableColumnClass('priority')"
+      (click)="onColumnClick($event, 'priority')"
+      data-testid="block-summary-priority"
+    >
+      Priority
+    </div>
     <div>Done Visits</div>
     <div>Tonight?</div>
-    <div>Remaining</div>
-    <div>Max Seeing</div>
+    <div
+      [ngClass]="sortableColumnClass('remainingNights')"
+      (click)="onColumnClick($event, 'remainingNights')"
+      data-testid="block-summary-remaining-nights"
+    >
+      Remaining
+    </div>
+    <div
+      [ngClass]="sortableColumnClass('observingConditions.maximumSeeing')"
+      (click)="onColumnClick($event, 'observingConditions.maximumSeeing')"
+      data-testid="block-summary-maximum-seeing"
+    >
+      Max Seeing
+    </div>
     <div>Transparency</div>
-    <div>Max Lunar Phase</div>
+    <div
+      [ngClass]="sortableColumnClass('observingConditions.maximumLunarPhase')"
+      (click)="onColumnClick($event, 'observingConditions.maximumLunarPhase')"
+      data-testid="block-summary-maximum-lunar-phase"
+    >
+      Max Lunar Phase
+    </div>
     <div>Instrument</div>
     <div>Config Mode</div>
   </div>
@@ -45,30 +87,32 @@
       [ngClass]="blockClass(b)"
       [attr.data-test]="blockDataTestAttribute(b)"
     >
-      <div>{{ b.id }}</div>
-      <div data-test="block-summary-link">
-        <a href="javascript:void(0)" (click)="onClick(b.name)">{{ b.name }}</a>
-      </div>
-      <div>{{ b.observationTime }}</div>
-      <div>{{ b.priority }}</div>
-      <div>{{ b.acceptedObservations }}/{{ b.requestedObservations }}</div>
-      <div *ngIf="b.isObservableTonight" class="is-green">
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262-green.svg"
-          alt="block is visible tonight"
-        />
-      </div>
-      <div *ngIf="!b.isObservableTonight">
-        <img
-          class="icon"
-          src="/assets/icons/noun_Cross_2120375.svg"
-          alt="block is not visible tonight"
-        />
-      </div>
-      <div>{{ b.remainingNights }}</div>
-      <div>{{ b.observingConditions.maximumSeeing }}</div>
-      <div>
+    <div data-test="block-id">{{ b.id }}</div>
+    <div data-test="block-name">
+      <a href="javascript:void(0)" (click)="onClick(b.name)">{{ b.name }}</a>
+    </div>
+    <div data-test="block-observation-time">{{ b.observationTime }}</div>
+    <div data-test="block-priority">{{ b.priority }}</div>
+    <div>{{ b.acceptedObservations }}/{{ b.requestedObservations }}</div>
+    <div *ngIf="b.isObservableTonight" class="is-green">
+      <img
+        class="icon"
+        src="/assets/icons/noun_tick_2836262-green.svg"
+        alt="block is visible tonight"
+      />
+    </div>
+    <div *ngIf="!b.isObservableTonight">
+      <img
+        class="icon"
+        src="/assets/icons/noun_Cross_2120375.svg"
+        alt="block is not visible tonight"
+      />
+    </div>
+    <div data-test="block-remaining-nights">{{ b.remainingNights }}</div>
+    <div data-test="block-maximum-seeing">
+        {{ b.observingConditions.maximumSeeing }}
+    </div>
+    <div>
         <div>{{ b.observingConditions.transparency }}</div>
         <div *ngIf="b.observingConditions.transparency === 'Any'">
           <img
@@ -99,7 +143,9 @@
           />
         </div>
       </div>
-      <div>{{ b.observingConditions.maximumLunarPhase }}</div>
+      <div data-test="block-maximum-lunar-phase">
+        {{ b.observingConditions.maximumLunarPhase }}
+      </div>
       <div class="instrument-container">
         <div *ngFor="let i of b.instruments">
           <div>

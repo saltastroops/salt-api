@@ -25,10 +25,20 @@ export function currentSemester(): string {
   }
 }
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+type NestedKeyOf<T extends Record<string, any>> = {
+  [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
+    ? `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
+    : `${Key}`;
+}[keyof T & (string | number)];
+
 export type sortArg<T> =
   | keyof T
+  | NestedKeyOf<T>
   | `-${string & keyof T}`
-  | `+${string & keyof T}`;
+  | `+${string & keyof T}`
+  | `-${string & NestedKeyOf<T>}`
+  | `+${string & NestedKeyOf<T>}`;
 /**
  * Returns a comparator for objects of type T that can be used by sort
  * functions, where T objects are compared by the specified T properties.
@@ -57,8 +67,43 @@ export function byPropertiesOf<T>(
       key = arg as keyof T;
     }
     return function (a: T, b: T) {
-      const result = a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
-
+      let result = 0;
+      if (typeof a[key] === 'string') {
+        if (
+          (a[key] as unknown as string).toLocaleUpperCase() <
+          (b[key] as unknown as string).toLocaleUpperCase()
+        ) {
+          result = -1;
+        } else if (
+          (a[key] as unknown as string).toLocaleUpperCase() >
+          (b[key] as unknown as string).toLocaleUpperCase()
+        ) {
+          result = 1;
+        } else {
+          result = 0;
+        }
+      } else {
+        const key_split = key.toString().split('.');
+        if (key_split.length > 1) {
+          key = key_split[0] as keyof T;
+          const subkey = key_split[1] as keyof T[keyof T];
+          if (a[key][subkey] < b[key][subkey]) {
+            result = -1;
+          } else if (a[key][subkey] > b[key][subkey]) {
+            result = 1;
+          } else {
+            result = 0;
+          }
+        } else {
+          if (a[key] < b[key]) {
+            result = -1;
+          } else if (a[key] > b[key]) {
+            result = 1;
+          } else {
+            result = 0;
+          }
+        }
+      }
       return result * sortOrder;
     };
   }

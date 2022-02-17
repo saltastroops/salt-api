@@ -8,22 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-node@v2
         with:
-          python-version: 3.9
-      - uses: Gr1N/setup-poetry@v4
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{runner.os }}-poetry-${{ hashFiles('python/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+          node-version: 12
       - name: Install packages
-        working-directory: ./python
-        env:
-          SDB_DSN: ""
-          PROPOSALS_DIR: "."
-          SKIP_E2E: "true"
+        run: npm install
+
+      - name: Run tests
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Linting and formatting
         run: |
-          poetry install
-          poetry run tox
+          npx eslint -c .eslintrc.json
+          npx prettier --check .

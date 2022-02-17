@@ -2,8 +2,9 @@ import {
   HttpResponseInterceptor,
   RouteMatcher,
   StaticResponse,
-} from 'cypress/types/net-stubbing';
-import { storeAccessToken } from '../../src/app/utils';
+} from "cypress/types/net-stubbing";
+
+import { storeAccessToken } from "../../src/app/utils";
 
 /**
  * Function for delaying a request until it is explicitly triggered.
@@ -12,7 +13,7 @@ import { storeAccessToken } from '../../src/app/utils';
  */
 export function interceptIndefinitely(
   requestMatcher: RouteMatcher,
-  response?: StaticResponse | HttpResponseInterceptor
+  response?: StaticResponse | HttpResponseInterceptor,
 ): { sendResponse: () => void } {
   let sendResponse;
   const trigger = new Promise((resolve) => {
@@ -32,11 +33,11 @@ export function interceptIndefinitely(
  * The user password is updated first.
  */
 export function login(username: string) {
-  cy.task('updateUserPassword', username)
+  cy.task("updateUserPassword", username)
     .then((password: string) => {
       return cy.request({
-        url: 'http://localhost:8001/token',
-        method: 'POST',
+        url: "http://localhost:8001/token",
+        method: "POST",
         form: true,
         body: { username, password },
       });
@@ -68,7 +69,7 @@ export function randomPassword() {
  * This function internally uses Cypress' intercept method.
  */
 export function forceNetworkError() {
-  cy.intercept('/**', { forceNetworkError: true });
+  cy.intercept("/**", { forceNetworkError: true });
 }
 
 /**
@@ -77,9 +78,9 @@ export function forceNetworkError() {
  * This function internally uses Cypress' intercept method.
  */
 export function forceServerError() {
-  cy.intercept('/**', {
+  cy.intercept("/**", {
     statusCode: 500,
-    body: { detail: 'This is a server error' },
+    body: { detail: "This is a server error" },
   });
 }
 
@@ -89,9 +90,9 @@ export function forceServerError() {
  * This function internally uses Cypress' intercept method.
  */
 export function forceAuthenticationError() {
-  cy.intercept('/**', {
+  cy.intercept("/**", {
     statusCode: 401,
-    body: { detail: 'Not Authorized' },
+    body: { detail: "Not Authorized" },
   });
 }
 
@@ -101,8 +102,8 @@ export function forceAuthenticationError() {
  * This function internally uses Cypress' intercept method.
  */
 export function forceForbiddenError() {
-  cy.intercept('/**', {
+  cy.intercept("/**", {
     statusCode: 403,
-    body: { detail: 'Forbidden' },
+    body: { detail: "Forbidden" },
   });
 }

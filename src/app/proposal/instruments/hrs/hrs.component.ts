@@ -1,11 +1,12 @@
-import { Component, Input } from '@angular/core';
-import { Hrs } from '../../../types/hrs';
-import { PayloadConfiguration } from '../../../types/observation';
+import { Component, Input } from "@angular/core";
+
+import { Hrs } from "../../../types/hrs";
+import { PayloadConfiguration } from "../../../types/observation";
 
 @Component({
-  selector: 'wm-hrs',
-  templateUrl: './hrs.component.html',
-  styleUrls: ['./hrs.component.scss'],
+  selector: "wm-hrs",
+  templateUrl: "./hrs.component.html",
+  styleUrls: ["./hrs.component.scss"],
 })
 export class HrsComponent {
   @Input() hrs!: Hrs;

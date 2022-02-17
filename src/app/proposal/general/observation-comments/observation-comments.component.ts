@@ -1,18 +1,20 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ObservationComment } from '../../../types/proposal';
-import { parseISO } from 'date-fns';
-import { ProposalService } from '../../../service/proposal.service';
+import { Component, Input, OnInit } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   FormGroup,
   Validators,
-} from '@angular/forms';
+} from "@angular/forms";
+
+import { parseISO } from "date-fns";
+
+import { ProposalService } from "../../../service/proposal.service";
+import { ObservationComment } from "../../../types/proposal";
 
 @Component({
-  selector: 'wm-observation-comments',
-  templateUrl: './observation-comments.component.html',
-  styleUrls: ['./observation-comments.component.scss'],
+  selector: "wm-observation-comments",
+  templateUrl: "./observation-comments.component.html",
+  styleUrls: ["./observation-comments.component.scss"],
 })
 export class ObservationCommentsComponent implements OnInit {
   @Input() observationComments!: ObservationComment[];
@@ -26,12 +28,12 @@ export class ObservationCommentsComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private proposalService: ProposalService
+    private proposalService: ProposalService,
   ) {}
 
   ngOnInit(): void {
     this.commentForm = this.formBuilder.group({
-      comment: ['', Validators.required],
+      comment: ["", Validators.required],
     });
   }
 
@@ -57,13 +59,13 @@ export class ObservationCommentsComponent implements OnInit {
           this.observationComments = data;
           this.loading = false;
           this.error = undefined;
-          this.f.comment.reset('');
+          this.f.comment.reset("");
           this.closeCommentInput();
         },
         (error: string) => {
           this.error = error;
           this.loading = false;
-        }
+        },
       );
   }
 
@@ -80,7 +82,7 @@ export class ObservationCommentsComponent implements OnInit {
   }
 
   cancel(): void {
-    this.f.comment.reset('');
+    this.f.comment.reset("");
     this.closeCommentInput();
     this.clearError();
   }

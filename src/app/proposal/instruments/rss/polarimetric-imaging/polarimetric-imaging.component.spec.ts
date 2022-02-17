@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PolarimetricImagingComponent } from './polarimetric-imaging.component';
+import { PolarimetricImagingComponent } from "./polarimetric-imaging.component";
 
-describe('PolarimetryImagingTableComponent', () => {
+describe("PolarimetryImagingTableComponent", () => {
   let component: PolarimetricImagingComponent;
   let fixture: ComponentFixture<PolarimetricImagingComponent>;
 
@@ -18,7 +18,7 @@ describe('PolarimetryImagingTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

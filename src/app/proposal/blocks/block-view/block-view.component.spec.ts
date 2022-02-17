@@ -1,16 +1,18 @@
-import { fireEvent, render, waitFor } from '@testing-library/angular';
-import { BlockViewComponent } from './block-view.component';
-import { BlockSelectionComponent } from './block-selection/block-selection.component';
-import { Observable, of, throwError } from 'rxjs';
 import {
   discardPeriodicTasks,
   fakeAsync,
   flush,
   tick,
-} from '@angular/core/testing';
-import { delay, switchMap } from 'rxjs/operators';
-import { Block, BlockSummary } from '../../../types/block';
-import { BlockService } from '../../../service/block.service';
+} from "@angular/core/testing";
+
+import { fireEvent, render, waitFor } from "@testing-library/angular";
+import { Observable, of, throwError } from "rxjs";
+import { delay, switchMap } from "rxjs/operators";
+
+import { BlockService } from "../../../service/block.service";
+import { Block, BlockSummary } from "../../../types/block";
+import { BlockSelectionComponent } from "./block-selection/block-selection.component";
+import { BlockViewComponent } from "./block-view.component";
 
 const MockBlockService = {
   /**
@@ -23,7 +25,7 @@ const MockBlockService = {
     if (id === 42 || id === 43) {
       return of(block(id)).pipe(
         delay(id),
-        switchMap(() => throwError(`Error for id ${id}.`))
+        switchMap(() => throwError(`Error for id ${id}.`)),
       );
     }
 
@@ -39,13 +41,13 @@ function block(id: number): Block {
   return { id, name: `Loaded Block ${id}` } as Block;
 }
 
-describe('BlockViewComponent', () => {
-  const loadingTestId = 'block-view-loading';
+describe("BlockViewComponent", () => {
+  const loadingTestId = "block-view-loading";
 
   const defaultBlocks: BlockSummary[] = [
-    { id: 10, name: 'Block A' },
-    { id: 11, name: 'Block B' },
-    { id: 12, name: 'Block C' },
+    { id: 10, name: "Block A" },
+    { id: 11, name: "Block B" },
+    { id: 12, name: "Block C" },
   ] as BlockSummary[];
 
   const defaultComponent = async (blocks: BlockSummary[] = defaultBlocks) => {
@@ -61,7 +63,7 @@ describe('BlockViewComponent', () => {
     });
   };
 
-  it('should render the block view', async () => {
+  it("should render the block view", async () => {
     const component = await render(BlockViewComponent, {
       componentProperties: {
         blocks: [blockSummary(0), blockSummary(1), blockSummary(2)],
@@ -74,25 +76,25 @@ describe('BlockViewComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should update all navigation elements when the user selects a block', async () => {
+  it("should update all navigation elements when the user selects a block", async () => {
     const component = await defaultComponent();
 
     // Select the third block in the first select element
-    const selectElements = component.getAllByDisplayValue('Block A');
+    const selectElements = component.getAllByDisplayValue("Block A");
     const value = (selectElements[0] as HTMLSelectElement).options[2].value;
     fireEvent.change(selectElements[0], { target: { value } });
 
     // The third block is selected in the second select element as well
     await waitFor(() => {
-      expect(component.getAllByDisplayValue('Block C')).toHaveSize(2);
+      expect(component.getAllByDisplayValue("Block C")).toHaveSize(2);
     });
   });
 
-  it('should change selected block when the user clicks on a navigation button', async () => {
+  it("should change selected block when the user clicks on a navigation button", async () => {
     const component = await defaultComponent();
 
     // The first block is shown
-    const selectElements = component.getAllByDisplayValue('Block A');
+    const selectElements = component.getAllByDisplayValue("Block A");
     const selectElement = selectElements[0] as HTMLSelectElement;
     expect(selectElement.selectedIndex).toBe(0);
 
@@ -103,24 +105,24 @@ describe('BlockViewComponent', () => {
     // Clicking on the next button selects the next block
     nextButton.click();
     await waitFor(() => {
-      expect(component.getAllByDisplayValue('Block B')).toHaveSize(2);
+      expect(component.getAllByDisplayValue("Block B")).toHaveSize(2);
     });
 
     // Clicking on the previous button selects the previous block
     previousButton.click();
     await waitFor(() => {
-      expect(component.getAllByDisplayValue('Block A')).toHaveSize(2);
+      expect(component.getAllByDisplayValue("Block A")).toHaveSize(2);
     });
   });
 
-  it('should select the first block and load it immediately', fakeAsync(async () => {
+  it("should select the first block and load it immediately", fakeAsync(async () => {
     const component = await defaultComponent([
       blockSummary(10),
       blockSummary(20),
     ]);
 
     // The first block is selected...
-    const selectElements = component.getAllByDisplayValue('Block 10');
+    const selectElements = component.getAllByDisplayValue("Block 10");
     expect(selectElements).toHaveSize(2);
 
     // ... and loaded
@@ -135,7 +137,7 @@ describe('BlockViewComponent', () => {
     discardPeriodicTasks();
   }));
 
-  it('should update content when blocks are selected', fakeAsync(async () => {
+  it("should update content when blocks are selected", fakeAsync(async () => {
     // // The following scenario is tested:
     // // Request 1 (made after two debounced selections) is successful.
     // // Request 2 fails.

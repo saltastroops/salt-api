@@ -1,5 +1,5 @@
-describe('ProposalCommentComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("ProposalCommentComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

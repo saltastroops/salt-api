@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input } from "@angular/core";
 
 @Component({
-  selector: 'wm-polarimetric-imaging',
-  templateUrl: './polarimetric-imaging.component.html',
-  styleUrls: ['./polarimetric-imaging.component.scss'],
+  selector: "wm-polarimetric-imaging",
+  templateUrl: "./polarimetric-imaging.component.html",
+  styleUrls: ["./polarimetric-imaging.component.scss"],
 })
 export class PolarimetricImagingComponent {
   @Input() filter!: string;

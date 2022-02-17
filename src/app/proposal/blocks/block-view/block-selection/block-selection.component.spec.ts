@@ -1,24 +1,24 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { BlockSelectionComponent } from './block-selection.component';
-import { BlockSummary } from '../../../../types/block';
+import { BlockSummary } from "../../../../types/block";
+import { BlockSelectionComponent } from "./block-selection.component";
 
-describe('BlockViewNavigationComponent', () => {
+describe("BlockViewNavigationComponent", () => {
   const defaultBlocks = [
-    { id: 1, name: 'A' },
-    { id: 2, name: 'B' },
-    { id: 546, name: 'C' },
+    { id: 1, name: "A" },
+    { id: 2, name: "B" },
+    { id: 546, name: "C" },
   ] as BlockSummary[];
 
   let component: BlockSelectionComponent;
   let fixture: ComponentFixture<BlockSelectionComponent>;
 
   const previousButton = () =>
-    fixture.nativeElement.querySelectorAll('button')[0];
+    fixture.nativeElement.querySelectorAll("button")[0];
 
-  const nextButton = () => fixture.nativeElement.querySelectorAll('button')[1];
+  const nextButton = () => fixture.nativeElement.querySelectorAll("button")[1];
 
-  const select = () => fixture.nativeElement.querySelector('select');
+  const select = () => fixture.nativeElement.querySelector("select");
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -34,26 +34,25 @@ describe('BlockViewNavigationComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  it('should disable the previous button for the first block', () => {
+  it("should disable the previous button for the first block", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[0];
     fixture.detectChanges();
     expect(previousButton().disabled).toBeTrue();
   });
 
-  it('should disable the previous button for an empty list', () => {
+  it("should disable the previous button for an empty list", () => {
     component.blocks = [];
     component.selectedBlock = null;
     fixture.detectChanges();
     expect(previousButton().disabled).toBeTrue();
   });
-
   [1, 2].forEach((selectedIndex) => {
-    it('should enable the previous button', () => {
+    it("should enable the previous button", () => {
       component.blocks = defaultBlocks;
       component.selectedBlock = defaultBlocks[selectedIndex];
       fixture.detectChanges();
@@ -61,22 +60,21 @@ describe('BlockViewNavigationComponent', () => {
     });
   });
 
-  it('should disable the next button', () => {
+  it("should disable the next button", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[2];
     fixture.detectChanges();
     expect(nextButton().disabled).toBeTrue();
   });
 
-  it('should disable the next button for an empty list', () => {
+  it("should disable the next button for an empty list", () => {
     component.blocks = [];
     component.selectedBlock = null;
     fixture.detectChanges();
     expect(nextButton().disabled).toBeTrue();
   });
-
   [0, 1].forEach((selectedIndex) => {
-    it('should enable the next button', () => {
+    it("should enable the next button", () => {
       component.blocks = defaultBlocks;
       component.selectedBlock = defaultBlocks[selectedIndex];
       fixture.detectChanges();
@@ -84,38 +82,38 @@ describe('BlockViewNavigationComponent', () => {
     });
   });
 
-  it('should select the previous block when the previous button is clicked', () => {
+  it("should select the previous block when the previous button is clicked", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[1];
     fixture.detectChanges();
-    const emitSpy = spyOn(component.selectEmitter, 'emit');
+    const emitSpy = spyOn(component.selectEmitter, "emit");
     previousButton().click();
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[0]);
   });
 
-  it('should select the next block', () => {
+  it("should select the next block", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[1];
     fixture.detectChanges();
-    const emitSpy = spyOn(component.selectEmitter, 'emit');
+    const emitSpy = spyOn(component.selectEmitter, "emit");
     nextButton().click();
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[2]);
   });
 
-  it('should initially select the correct option', () => {
+  it("should initially select the correct option", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[2];
     fixture.detectChanges();
     expect(select().options[2].selected).toBeTrue();
   });
 
-  it('should select the block for the selected option', () => {
+  it("should select the block for the selected option", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[0];
     fixture.detectChanges();
-    const emitSpy = spyOn(component.selectEmitter, 'emit');
+    const emitSpy = spyOn(component.selectEmitter, "emit");
     select().value = select().options[1].value;
-    select().dispatchEvent(new Event('change'));
+    select().dispatchEvent(new Event("change"));
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[1]);
   });
 });

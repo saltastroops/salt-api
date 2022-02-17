@@ -1,6 +1,6 @@
 // Import commands.js using ES2015 syntax:
-import './commands';
+import "./commands";
 
 beforeEach(() => {
-  cy.task('clearEmailInbox');
+  cy.task("clearEmailInbox");
 });

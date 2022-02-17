@@ -1,5 +1,5 @@
-describe('ForgotPasswordComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("ForgotPasswordComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

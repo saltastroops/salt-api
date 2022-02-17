@@ -1,9 +1,10 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
+
 import {
   ObservationComment,
   Proposal,
   ProposalListItem,
-} from '../types/proposal';
+} from "../types/proposal";
 
 export abstract class ProposalService {
   /**
@@ -27,7 +28,7 @@ export abstract class ProposalService {
    * If the request fails the stream terminates with a generic error message as error.
    */
   public abstract getObservationComments(
-    proposalCode: string
+    proposalCode: string,
   ): Observable<ObservationComment[]>;
 
   /**
@@ -37,6 +38,6 @@ export abstract class ProposalService {
    */
   public abstract submitObservationComment(
     proposalCode: string,
-    comment: string
+    comment: string,
   ): Observable<ObservationComment[]>;
 }

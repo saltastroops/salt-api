@@ -1,22 +1,24 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { map, switchMap, tap } from 'rxjs/operators';
-import { AccessToken } from '../../types/authentication';
-import * as camelcaseKeys from 'camelcase-keys';
-import { AuthenticationService, Redirection } from '../authentication.service';
-import { parseISO } from 'date-fns';
-import { Message } from '../../types/common';
-import { User } from '../../types/user';
-import { storeAccessToken } from '../../utils';
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+
+import * as camelcaseKeys from "camelcase-keys";
+import { parseISO } from "date-fns";
+import { BehaviorSubject, Observable, Subject, of } from "rxjs";
+import { map, switchMap, tap } from "rxjs/operators";
+
+import { environment } from "../../../environments/environment";
+import { AccessToken } from "../../types/authentication";
+import { Message } from "../../types/common";
+import { User } from "../../types/user";
+import { storeAccessToken } from "../../utils";
+import { AuthenticationService, Redirection } from "../authentication.service";
 
 const user$ = new BehaviorSubject<User | null>(null);
 
 let whoAmITrigger$: Subject<null> | null;
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class RealAuthenticationService implements AuthenticationService {
   private redirection: Redirection | null = null;
@@ -30,28 +32,28 @@ export class RealAuthenticationService implements AuthenticationService {
    * @param password Password.
    */
   login(username: string, password: string): Observable<AccessToken> {
-    const uri = environment.apiUrl + '/token';
+    const uri = environment.apiUrl + "/token";
     const headers = new HttpHeaders({
-      'Content-type': 'application/x-www-form-urlencoded',
+      "Content-type": "application/x-www-form-urlencoded",
     });
 
     const body = new HttpParams()
-      .set('username', username)
-      .set('password', password);
+      .set("username", username)
+      .set("password", password);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.http.post<any>(uri, body, { headers }).pipe(
       map((accessToken) => camelcaseKeys(accessToken, { deep: true })),
       tap((tokenData) => {
         this.setAccessToken(tokenData);
         this.updateUser();
-      })
+      }),
     );
   }
 
   logout(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('accessTokenExpiresAt');
-    sessionStorage.removeItem('user');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("accessTokenExpiresAt");
+    sessionStorage.removeItem("user");
     this.updateUser();
   }
 
@@ -64,11 +66,11 @@ export class RealAuthenticationService implements AuthenticationService {
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
+    return localStorage.getItem("accessToken");
   }
 
   _user(): Observable<User> {
-    const uri = environment.apiUrl + '/user';
+    const uri = environment.apiUrl + "/user";
     return (
       this.http
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,13 +92,13 @@ export class RealAuthenticationService implements AuthenticationService {
         .pipe(
           switchMap(() => {
             return this.isAuthenticated() ? this._user() : of(null);
-          })
+          }),
         )
         .subscribe((user) => {
           if (user) {
-            sessionStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem("user", JSON.stringify(user));
           } else {
-            sessionStorage.removeItem('user');
+            sessionStorage.removeItem("user");
           }
           user$.next(user);
         });
@@ -137,7 +139,7 @@ export class RealAuthenticationService implements AuthenticationService {
   }
 
   private static getExpiry(): Date | null {
-    const expiresAt = localStorage.getItem('accessTokenExpiresAt');
+    const expiresAt = localStorage.getItem("accessTokenExpiresAt");
     if (expiresAt) {
       return parseISO(expiresAt);
     }
@@ -150,9 +152,9 @@ export class RealAuthenticationService implements AuthenticationService {
    * @param usernameEmail Username or email
    */
   sendResetPassword(usernameEmail: string): Observable<Message> {
-    const uri = environment.apiUrl + '/users/send-password-reset-email';
+    const uri = environment.apiUrl + "/users/send-password-reset-email";
     const headers = new HttpHeaders({
-      'Content-type': 'application/json',
+      "Content-type": "application/json",
     });
 
     return this.http
@@ -172,30 +174,30 @@ export class RealAuthenticationService implements AuthenticationService {
 
     const options = {
       headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        Accept: 'application/json',
+        "Content-Type": "application/json; charset=utf-8",
+        Accept: "application/json",
         Authorization: `Bearer ${token}`,
       },
     };
     return (
       this.http
         // get the user for the token...
-        .get<User>(environment.apiUrl + '/user/', options)
+        .get<User>(environment.apiUrl + "/user/", options)
         .pipe(
           // ... and update their password
           switchMap((user) => {
             return this.http.patch<Message>(
               `${environment.apiUrl}/users/${user.username}`,
               { password },
-              options
+              options,
             );
-          })
+          }),
         )
     );
   }
 
   getUser(): Observable<User> {
-    const uri = environment.apiUrl + '/user';
+    const uri = environment.apiUrl + "/user";
     return this.http
       .get<User>(uri)
       .pipe(map((user) => camelcaseKeys(user, { deep: true })));

@@ -5,26 +5,28 @@ import {
   OnDestroy,
   OnInit,
   SimpleChanges,
-} from '@angular/core';
-import { Subject, Subscription, merge, of } from 'rxjs';
+} from "@angular/core";
+
+import { Subject, Subscription, merge, of } from "rxjs";
 import {
   catchError,
   debounceTime,
   map,
   mapTo,
   switchMap,
-} from 'rxjs/operators';
-import { BlockService } from '../../../service/block.service';
-import { Block, BlockSummary } from '../../../types/block';
+} from "rxjs/operators";
+
+import { BlockService } from "../../../service/block.service";
+import { Block, BlockSummary } from "../../../types/block";
 
 @Component({
-  selector: 'wm-block-view',
-  templateUrl: './block-view.component.html',
-  styleUrls: ['./block-view.component.scss'],
+  selector: "wm-block-view",
+  templateUrl: "./block-view.component.html",
+  styleUrls: ["./block-view.component.scss"],
 })
 export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() blocks!: BlockSummary[];
-  @Input() blockName = '';
+  @Input() blockName = "";
 
   readonly DEBOUNCE_TIME = 100;
 
@@ -48,30 +50,30 @@ export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     const trigger$ = this.selectedBlocks$.pipe(
-      debounceTime(this.DEBOUNCE_TIME)
+      debounceTime(this.DEBOUNCE_TIME),
     );
 
     const requestResult$ = trigger$.pipe(
       switchMap(({ id }) => {
         return this.blockService.getBlock(id).pipe(
           map((b) => ({ success: true, payload: b })),
-          catchError((error) => of({ success: false, payload: error }))
+          catchError((error) => of({ success: false, payload: error })),
         );
-      })
+      }),
     );
 
     const content$ = requestResult$.pipe(
-      map((v) => (v.success ? v.payload : null))
+      map((v) => (v.success ? v.payload : null)),
     );
 
     const error$ = merge(
       this.selectedBlocks$.pipe(mapTo(null)),
-      requestResult$.pipe(map((v) => (!v.success ? v.payload : null)))
+      requestResult$.pipe(map((v) => (!v.success ? v.payload : null))),
     );
 
     const isLoading$ = merge(
       this.selectedBlocks$.pipe(mapTo(true)),
-      requestResult$.pipe(mapTo(false))
+      requestResult$.pipe(mapTo(false)),
     );
 
     // If we use the async pipe in the template, at this point in time the streams just
@@ -107,11 +109,11 @@ export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     for (const propName in changes) {
-      if (propName === 'blockName') {
+      if (propName === "blockName") {
         const changedProp = changes[propName];
         const selectedBlockName = changedProp.currentValue;
         const index = this.blocks.findIndex(
-          (block) => block.name === selectedBlockName
+          (block) => block.name === selectedBlockName,
         );
         this.selectBlock(this.blocks[index]);
       }

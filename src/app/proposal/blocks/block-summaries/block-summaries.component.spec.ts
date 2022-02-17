@@ -1,16 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { BlockSummariesComponent } from './block-summaries.component';
-import { BlockSummary } from '../../../types/block';
+import { BlockSummary } from "../../../types/block";
+import { BlockSummariesComponent } from "./block-summaries.component";
 
-describe('BlockSummaryComponent', () => {
+describe("BlockSummaryComponent", () => {
   const blocks: BlockSummary[] = [
     {
       id: 123,
-      semester: '2020-2',
-      name: 'A',
+      semester: "2020-2",
+      name: "A",
       status: {
-        value: 'Completed',
+        value: "Completed",
         reason: null,
       },
       observationTime: 1380,
@@ -22,27 +22,27 @@ describe('BlockSummaryComponent', () => {
       observingConditions: {
         minimumSeeing: 1,
         maximumSeeing: 5,
-        transparency: 'Clear',
+        transparency: "Clear",
         maximumLunarPhase: 100,
         minimumLunarDistance: 10,
       },
       instruments: [
         {
-          name: 'RSS',
-          modes: ['Spectroscopy'],
-          gratings: ['pg0900'],
-          filters: ['pc03850'],
+          name: "RSS",
+          modes: ["Spectroscopy"],
+          gratings: ["pg0900"],
+          filters: ["pc03850"],
         },
       ],
     },
     {
       id: 100,
-      semester: '2009-2',
-      name: 'A',
+      semester: "2009-2",
+      name: "A",
       status: {
-        value: 'On hold',
+        value: "On hold",
         reason:
-          'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolores laborum veritatis.',
+          "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolores laborum veritatis.",
       },
       observationTime: 1380,
       priority: 1,
@@ -53,16 +53,16 @@ describe('BlockSummaryComponent', () => {
       observingConditions: {
         minimumSeeing: 1,
         maximumSeeing: 5,
-        transparency: 'Clear',
+        transparency: "Clear",
         maximumLunarPhase: 100,
         minimumLunarDistance: 10,
       },
       instruments: [
         {
-          name: 'RSS',
-          modes: ['Spectropolarimetry'],
-          gratings: ['pg2300'],
-          filters: ['pc03850'],
+          name: "RSS",
+          modes: ["Spectropolarimetry"],
+          gratings: ["pg2300"],
+          filters: ["pc03850"],
         },
       ],
     },
@@ -81,7 +81,7 @@ describe('BlockSummaryComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', async () => {
+  it("should create", async () => {
     expect(component).toBeTruthy();
   });
 });

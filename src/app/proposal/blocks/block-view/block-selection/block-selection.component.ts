@@ -1,11 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { BlockSummary } from '../../../../types/block';
-import { byPropertiesOf } from '../../../../utils';
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+
+import { BlockSummary } from "../../../../types/block";
+import { byPropertiesOf } from "../../../../utils";
 
 @Component({
-  selector: 'wm-block-selection',
-  templateUrl: './block-selection.component.html',
-  styleUrls: ['./block-selection.component.scss'],
+  selector: "wm-block-selection",
+  templateUrl: "./block-selection.component.html",
+  styleUrls: ["./block-selection.component.scss"],
 })
 export class BlockSelectionComponent implements OnInit {
   @Input() blocks!: BlockSummary[];
@@ -18,7 +19,7 @@ export class BlockSelectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.sortedBlocks = this.blocks.sort(
-      byPropertiesOf<BlockSummary>(['name'])
+      byPropertiesOf<BlockSummary>(["name"]),
     );
   }
 
@@ -40,7 +41,7 @@ export class BlockSelectionComponent implements OnInit {
   onInput(e: Event): void {
     const selectedBlockName = (e.target as HTMLInputElement).value;
     const selectedIndex = this.sortedBlocks.findIndex(
-      (block) => block.name === selectedBlockName
+      (block) => block.name === selectedBlockName,
     );
     if (selectedIndex !== -1) {
       this.selectBlock(selectedIndex);

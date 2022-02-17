@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { RssSpectroscopyComponent } from './rss-spectroscopy.component';
+import { RssSpectroscopyComponent } from "./rss-spectroscopy.component";
 
-describe('SpectroscopyTableComponent', () => {
+describe("SpectroscopyTableComponent", () => {
   let component: RssSpectroscopyComponent;
   let fixture: ComponentFixture<RssSpectroscopyComponent>;
 
@@ -18,7 +18,7 @@ describe('SpectroscopyTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

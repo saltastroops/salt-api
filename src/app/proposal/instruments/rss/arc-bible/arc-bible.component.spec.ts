@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { ArcBibleComponent } from './arc-bible.component';
+import { ArcBibleComponent } from "./arc-bible.component";
 
-describe('ArcBibleTableComponent', () => {
+describe("ArcBibleTableComponent", () => {
   let component: ArcBibleComponent;
   let fixture: ComponentFixture<ArcBibleComponent>;
 
@@ -18,7 +18,7 @@ describe('ArcBibleTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

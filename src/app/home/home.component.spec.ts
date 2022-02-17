@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClient, HttpHandler } from "@angular/common/http";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { FormBuilder } from "@angular/forms";
 
-import { HomeComponent } from './home.component';
-import { FormBuilder } from '@angular/forms';
-import { AuthenticationService } from '../service/authentication.service';
-import { RealAuthenticationService } from '../service/real/real-authentication.service';
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { AuthenticationService } from "../service/authentication.service";
+import { RealAuthenticationService } from "../service/real/real-authentication.service";
+import { HomeComponent } from "./home.component";
 
-describe('HomeComponent', () => {
+describe("HomeComponent", () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
 
@@ -28,7 +28,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

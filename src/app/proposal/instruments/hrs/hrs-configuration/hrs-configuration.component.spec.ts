@@ -1,5 +1,5 @@
-describe('ConfigurationTableComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("ConfigurationTableComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

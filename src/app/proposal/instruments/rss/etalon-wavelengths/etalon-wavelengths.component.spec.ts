@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { EtalonWavelengthsComponent } from './etalon-wavelengths.component';
+import { EtalonWavelengthsComponent } from "./etalon-wavelengths.component";
 
-describe('PolarimetryTableComponent', () => {
+describe("PolarimetryTableComponent", () => {
   let component: EtalonWavelengthsComponent;
   let fixture: ComponentFixture<EtalonWavelengthsComponent>;
 
@@ -18,7 +18,7 @@ describe('PolarimetryTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

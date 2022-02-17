@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   FormGroup,
   Validators,
-} from '@angular/forms';
-import { Observable } from 'rxjs';
-import { AccessToken } from '../types/authentication';
-import { AuthenticationService } from '../service/authentication.service';
-import { GENERIC_ERROR_MESSAGE } from '../utils';
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
 
-@Component({ templateUrl: 'login.component.html' })
+import { Observable } from "rxjs";
+
+import { AuthenticationService } from "../service/authentication.service";
+import { AccessToken } from "../types/authentication";
+import { GENERIC_ERROR_MESSAGE } from "../utils";
+
+@Component({ templateUrl: "login.component.html" })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   accessToken!: Observable<AccessToken>;
@@ -23,19 +25,19 @@ export class LoginComponent implements OnInit {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
   ) {
     // redirect to home if already logged in
     if (this.authenticationService.isAuthenticated()) {
-      window.alert('You are logged in already.');
-      this.router.navigate(['/']);
+      window.alert("You are logged in already.");
+      this.router.navigate(["/"]);
     }
   }
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
+      username: ["", Validators.required],
+      password: ["", Validators.required],
     });
   }
 
@@ -62,7 +64,7 @@ export class LoginComponent implements OnInit {
           const redirectUrlParts =
             redirection && redirection.urlParts.length
               ? redirection.urlParts
-              : ['/'];
+              : ["/"];
           const redirectQueryParams = redirection
             ? redirection.queryParams
             : {};
@@ -74,12 +76,12 @@ export class LoginComponent implements OnInit {
           // The HTTP request for a token is not intercepted, and hence there may be an
           // error response with status code 401.
           if (error.status === 401) {
-            this.error = 'Username or password is incorrect.';
+            this.error = "Username or password is incorrect.";
           } else {
             this.error = GENERIC_ERROR_MESSAGE;
           }
           this.loading = false;
-        }
+        },
       );
   }
 
@@ -88,6 +90,6 @@ export class LoginComponent implements OnInit {
   }
 
   toForgotPassword(): void {
-    this.router.navigate(['forgot-password']);
+    this.router.navigate(["forgot-password"]);
   }
 }

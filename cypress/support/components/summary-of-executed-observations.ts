@@ -9,9 +9,9 @@ export class SummaryOfExecutedObservations {
   static correctBlockLoaded(elementIndex: number) {
     cy.get(BLOCK_LINK)
       .eq(elementIndex)
-      .invoke('text')
+      .invoke("text")
       .then((expected_block_name) => {
-        cy.get(DISPLAYED_BLOCK_CONTENT).should('contain', expected_block_name);
+        cy.get(DISPLAYED_BLOCK_CONTENT).should("contain", expected_block_name);
       });
   }
 }

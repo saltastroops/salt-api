@@ -1,18 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   FormGroup,
   Validators,
-} from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthenticationService } from '../../service/authentication.service';
-import { GENERIC_ERROR_MESSAGE } from '../../utils';
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+
+import { AuthenticationService } from "../../service/authentication.service";
+import { GENERIC_ERROR_MESSAGE } from "../../utils";
 
 @Component({
-  selector: 'wm-forgot-password',
-  templateUrl: './forgot-password.component.html',
-  styleUrls: ['./forgot-password.component.scss'],
+  selector: "wm-forgot-password",
+  templateUrl: "./forgot-password.component.html",
+  styleUrls: ["./forgot-password.component.scss"],
 })
 export class ForgotPasswordComponent implements OnInit {
   forgotPasswordForm!: FormGroup;
@@ -24,12 +25,12 @@ export class ForgotPasswordComponent implements OnInit {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
   ) {}
 
   ngOnInit(): void {
     this.forgotPasswordForm = this.formBuilder.group({
-      usernameEmail: ['', Validators.required],
+      usernameEmail: ["", Validators.required],
     });
   }
 
@@ -49,12 +50,12 @@ export class ForgotPasswordComponent implements OnInit {
         },
         (error: { status: number; error: string }) => {
           if (error.status === 404) {
-            this.error = 'Unknown username or email.';
+            this.error = "Unknown username or email.";
           } else {
             this.error = GENERIC_ERROR_MESSAGE;
           }
           this.loading = false;
-        }
+        },
       );
 
     this.loading = false;

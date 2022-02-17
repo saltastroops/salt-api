@@ -1,4 +1,4 @@
-const { createConnection } = require('mysql');
+const { createConnection } = require("mysql");
 
 /**
  * Update a user's password.
@@ -13,8 +13,8 @@ export function updateUserPassword(username) {
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);
 
-    const connection = createConnection(process.env['TEST_DATABASE']);
-    const sql = 'UPDATE PiptUser SET Password=MD5(?) WHERE Username=?';
+    const connection = createConnection(process.env["TEST_DATABASE"]);
+    const sql = "UPDATE PiptUser SET Password=MD5(?) WHERE Username=?";
     connection.query(sql, [password, username], (error) => {
       if (error) {
         reject(error);
@@ -30,7 +30,7 @@ export function updateUserPassword(username) {
  */
 export function getUser(username) {
   return new Promise((resolve, reject) => {
-    const connection = createConnection(process.env['TEST_DATABASE']);
+    const connection = createConnection(process.env["TEST_DATABASE"]);
     const sql = `
       SELECT FirstName AS first_name, Surname AS surname, Email AS email
       FROM Investigator I
@@ -61,7 +61,7 @@ export function getUser(username) {
  */
 export function clearObservationComments(proposalCode: string) {
   return new Promise((resolve, reject) => {
-    const connection = createConnection(process.env['TEST_DATABASE']);
+    const connection = createConnection(process.env["TEST_DATABASE"]);
     const sql = `
       DELETE
       FROM ProposalComment

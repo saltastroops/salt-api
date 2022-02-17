@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { SalticamFiltersComponent } from './salticam-filters.component';
+import { SalticamFiltersComponent } from "./salticam-filters.component";
 
-describe('FiltersTableComponent', () => {
+describe("FiltersTableComponent", () => {
   let component: SalticamFiltersComponent;
   let fixture: ComponentFixture<SalticamFiltersComponent>;
 
@@ -18,7 +18,7 @@ describe('FiltersTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

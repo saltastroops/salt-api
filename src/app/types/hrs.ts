@@ -1,4 +1,4 @@
-import { InstrumentSummary } from './common';
+import { InstrumentSummary } from "./common";
 
 export interface Hrs {
   id: number;
@@ -35,26 +35,26 @@ export interface HrsDetector {
 }
 
 export type HrsExposureType =
-  | 'Arc'
-  | 'Bias'
-  | 'Dark'
-  | 'Flat Field'
-  | 'Science'
-  | 'Sky Flat';
+  | "Arc"
+  | "Bias"
+  | "Dark"
+  | "Flat Field"
+  | "Science"
+  | "Sky Flat";
 
 export type HrsIodineCellPosition =
-  | 'Calibration'
-  | 'In'
-  | 'Out'
-  | 'ThAr in sky fiber'
-  | 'ThAr in star fiber';
+  | "Calibration"
+  | "In"
+  | "Out"
+  | "ThAr in sky fiber"
+  | "ThAr in star fiber";
 
 export type HrsMode =
-  | 'High Resolution'
-  | 'High Stability'
-  | 'Int Cal Fiber'
-  | 'Low Resolution'
-  | 'Medium Resolution';
+  | "High Resolution"
+  | "High Stability"
+  | "Int Cal Fiber"
+  | "Low Resolution"
+  | "Medium Resolution";
 
 export interface HrsNodAndShuffle {
   nodInterval: number;
@@ -67,18 +67,18 @@ export interface HrsProcedure {
   redExposureTimes: Array<number | null>;
 }
 
-export type HrsReadoutSpeed = 'Fast' | 'None' | 'Slow';
+export type HrsReadoutSpeed = "Fast" | "None" | "Slow";
 
 export interface HrsRedDetector extends HrsDetector {
   readoutAmplifiers: 1 | 4;
 }
 
 export interface HrsSummary extends InstrumentSummary {
-  name: 'HRS';
+  name: "HRS";
   modes: HrsMode[];
 }
 
 export type HrsTargetLocation =
-  | 'The star and sky fiber are equidistant from the optical axis'
-  | 'The sky fiber is placed on the optical axis'
-  | 'The star fiber is placed on the optical axis';
+  | "The star and sky fiber are equidistant from the optical axis"
+  | "The sky fiber is placed on the optical axis"
+  | "The star fiber is placed on the optical axis";

@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ChargedTime, TimeAllocation } from '../../../types/proposal';
+import { Component, Input, OnInit } from "@angular/core";
+
+import { ChargedTime, TimeAllocation } from "../../../types/proposal";
 
 @Component({
-  selector: 'wm-charged-time',
-  templateUrl: './charged-time.component.html',
-  styleUrls: ['./charged-time.component.scss'],
+  selector: "wm-charged-time",
+  templateUrl: "./charged-time.component.html",
+  styleUrls: ["./charged-time.component.scss"],
 })
 export class ChargedTimeComponent implements OnInit {
   @Input() chargedTime!: ChargedTime;

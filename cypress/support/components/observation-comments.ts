@@ -34,50 +34,50 @@ export class ObservationComments {
   }
 
   static hasNoAddCommentForm() {
-    cy.get(ADD_COMMENT_FORM).should('not.exist');
+    cy.get(ADD_COMMENT_FORM).should("not.exist");
   }
 
   static hasNoCommentText() {
-    cy.get(ADD_COMMENT_TEXT).should('have.value', '');
+    cy.get(ADD_COMMENT_TEXT).should("have.value", "");
   }
 
   static hasDisabledAddCommentButton(disabled: boolean) {
     if (disabled) {
-      cy.get(ADD_COMMENT_BUTTON).should('be.disabled');
+      cy.get(ADD_COMMENT_BUTTON).should("be.disabled");
     } else {
-      cy.get(ADD_COMMENT_BUTTON).should('not.be.disabled');
+      cy.get(ADD_COMMENT_BUTTON).should("not.be.disabled");
     }
   }
 
   static hasDisabledSubmitButton(disabled: boolean) {
     if (disabled) {
-      cy.get(ADD_COMMENT_SUBMIT).should('be.disabled');
+      cy.get(ADD_COMMENT_SUBMIT).should("be.disabled");
     } else {
-      cy.get(ADD_COMMENT_SUBMIT).should('not.be.disabled');
+      cy.get(ADD_COMMENT_SUBMIT).should("not.be.disabled");
     }
   }
 
   static hasDisabledCancelButton(disabled: boolean) {
     if (disabled) {
-      cy.get(ADD_COMMENT_CANCEL).should('be.disabled');
+      cy.get(ADD_COMMENT_CANCEL).should("be.disabled");
     } else {
-      cy.get(ADD_COMMENT_CANCEL).should('not.be.disabled');
+      cy.get(ADD_COMMENT_CANCEL).should("not.be.disabled");
     }
   }
 
   static hasCommentError() {
-    cy.get(COMMENT_ERROR).should('be.visible').and('contain', 'comment text');
+    cy.get(COMMENT_ERROR).should("be.visible").and("contain", "comment text");
   }
 
   static hasNoCommentError() {
-    cy.get(COMMENT_ERROR).should('not.exist');
+    cy.get(COMMENT_ERROR).should("not.exist");
   }
 
   static hasSubmissionError(text: string) {
-    cy.get(SUBMISSION_ERROR).should('be.visible').and('contain', text);
+    cy.get(SUBMISSION_ERROR).should("be.visible").and("contain", text);
   }
 
   static hasNoSubmissionError() {
-    cy.get(SUBMISSION_ERROR).should('not.exist');
+    cy.get(SUBMISSION_ERROR).should("not.exist");
   }
 }

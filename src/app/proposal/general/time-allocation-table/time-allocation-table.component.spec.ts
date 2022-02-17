@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { TimeAllocationTableComponent } from './time-allocation-table.component';
+import { TimeAllocationTableComponent } from "./time-allocation-table.component";
 
-describe('AllocationTableComponent', () => {
+describe("AllocationTableComponent", () => {
   let component: TimeAllocationTableComponent;
   let fixture: ComponentFixture<TimeAllocationTableComponent>;
 
@@ -18,7 +18,7 @@ describe('AllocationTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

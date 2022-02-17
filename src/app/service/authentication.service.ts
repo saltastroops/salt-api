@@ -1,8 +1,10 @@
-import { Params } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AccessToken } from '../types/authentication';
-import { Message } from '../types/common';
-import { User } from '../types/user';
+import { Params } from "@angular/router";
+
+import { Observable } from "rxjs";
+
+import { AccessToken } from "../types/authentication";
+import { Message } from "../types/common";
+import { User } from "../types/user";
 
 export interface Redirection {
   urlParts: string[];
@@ -12,7 +14,7 @@ export interface Redirection {
 export abstract class AuthenticationService {
   public abstract login(
     username: string,
-    password: string
+    password: string,
   ): Observable<AccessToken>;
 
   public abstract logout(): void;
@@ -50,7 +52,7 @@ export abstract class AuthenticationService {
 
   public abstract changePassword(
     password: string,
-    token: string
+    token: string,
   ): Observable<Message>;
 
   public abstract getUser(): Observable<User>;

@@ -1,17 +1,17 @@
-import { ProposalPage } from '../../support/pages/proposal-page';
-import { SummaryOfExecutedObservations } from '../../support/components/summary-of-executed-observations';
+import { SummaryOfExecutedObservations } from "../../support/components/summary-of-executed-observations";
+import { ProposalPage } from "../../support/pages/proposal-page";
 import {
   forceAuthenticationError,
   forceForbiddenError,
   forceNetworkError,
   forceServerError,
   login,
-} from '../../support/utils';
+} from "../../support/utils";
 
-const USERNAME = 'hettlage';
+const USERNAME = "hettlage";
 
-describe('Block summaries', () => {
-  const PROPOSAL_CODE = '2021-2-LSP-001';
+describe("Block summaries", () => {
+  const PROPOSAL_CODE = "2021-2-LSP-001";
 
   beforeEach(() => {
     // Give I am logged in
@@ -21,7 +21,7 @@ describe('Block summaries', () => {
     ProposalPage.visit(PROPOSAL_CODE);
   });
 
-  it('should load the correct block content when a block name link is clicked', () => {
+  it("should load the correct block content when a block name link is clicked", () => {
     SummaryOfExecutedObservations.clickBlockNameLink(8);
     SummaryOfExecutedObservations.correctBlockLoaded(8);
   });

@@ -1,5 +1,5 @@
-describe('InstrumentCofigurationComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("InstrumentCofigurationComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

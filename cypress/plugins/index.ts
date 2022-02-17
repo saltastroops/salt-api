@@ -1,13 +1,13 @@
-require('dotenv').config();
-
-const axios = require('axios');
-const ms = require('smtp-tester');
-
 import {
   clearObservationComments,
   getUser,
   updateUserPassword,
-} from './database';
+} from "./database";
+
+require("dotenv").config();
+
+const axios = require("axios");
+const ms = require("smtp-tester");
 
 /**
  * @type {Cypress.PluginConfig}
@@ -34,7 +34,7 @@ export default (on, config) => {
     });
   });
 
-  on('task', {
+  on("task", {
     /**
      * Return an array with all the sent emails.
      *

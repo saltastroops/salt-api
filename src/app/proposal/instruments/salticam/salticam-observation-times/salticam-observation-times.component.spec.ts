@@ -1,5 +1,5 @@
-describe('ObservatonTimesComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("ObservatonTimesComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

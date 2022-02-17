@@ -1,4 +1,4 @@
-import { ObservationProbabilities, Ranking, TargetCoordinates } from './common';
+import { ObservationProbabilities, Ranking, TargetCoordinates } from "./common";
 
 export interface Magnitude {
   minimumMagnitude: number;
@@ -41,7 +41,7 @@ export interface Target {
 }
 
 export type TimeBase =
-  | 'BJD' // Barycentric Julian Date
-  | 'HJD' // Heliocentric Julian Date
-  | 'JD' // Julian Date
-  | 'UT'; // Universal Time
+  | "BJD" // Barycentric Julian Date
+  | "HJD" // Heliocentric Julian Date
+  | "JD" // Julian Date
+  | "UT"; // Universal Time

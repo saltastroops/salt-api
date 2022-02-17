@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   FormGroup,
   Validators,
-} from '@angular/forms';
-import { AuthenticationService } from '../../service/authentication.service';
-import { GENERIC_ERROR_MESSAGE } from '../../utils';
+} from "@angular/forms";
+
+import { AuthenticationService } from "../../service/authentication.service";
+import { GENERIC_ERROR_MESSAGE } from "../../utils";
 
 @Component({
-  selector: 'wm-inline-login',
-  templateUrl: './inline-login.component.html',
-  styleUrls: ['./inline-login.component.scss'],
+  selector: "wm-inline-login",
+  templateUrl: "./inline-login.component.html",
+  styleUrls: ["./inline-login.component.scss"],
 })
 export class InlineLoginComponent implements OnInit {
   loginForm!: FormGroup;
@@ -20,13 +21,13 @@ export class InlineLoginComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
   ) {}
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
+      username: ["", Validators.required],
+      password: ["", Validators.required],
     });
   }
 
@@ -37,11 +38,11 @@ export class InlineLoginComponent implements OnInit {
 
   login(): void {
     if (this.f.username.errors?.required) {
-      this.error = 'The username is required.';
+      this.error = "The username is required.";
       return;
     }
     if (this.f.password.errors?.required) {
-      this.error = 'The password is required.';
+      this.error = "The password is required.";
       return;
     }
 
@@ -58,12 +59,12 @@ export class InlineLoginComponent implements OnInit {
           // The HTTP request for a token is not intercepted, and hence there may be an
           // error response with status code 401.
           if (error.status === 401) {
-            this.error = 'Username or password is incorrect.';
+            this.error = "Username or password is incorrect.";
           } else {
             this.error = GENERIC_ERROR_MESSAGE;
           }
           this.loading = false;
-        }
+        },
       );
   }
 }

@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { RssSlitMaskComponent } from './rss-slit-mask.component';
+import { RssSlitMaskComponent } from "./rss-slit-mask.component";
 
-describe('SlitMaskComponent', () => {
+describe("SlitMaskComponent", () => {
   let component: RssSlitMaskComponent;
   let fixture: ComponentFixture<RssSlitMaskComponent>;
 
@@ -18,7 +18,7 @@ describe('SlitMaskComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

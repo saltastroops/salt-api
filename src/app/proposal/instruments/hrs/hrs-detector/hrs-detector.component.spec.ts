@@ -1,5 +1,5 @@
-describe('BlueDetectorTableComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("BlueDetectorTableComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

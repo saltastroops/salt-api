@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { FabryPerotComponent } from './fabry-perot.component';
+import { FabryPerotComponent } from "./fabry-perot.component";
 
-describe('PolarimetryImagingTableComponent', () => {
+describe("PolarimetryImagingTableComponent", () => {
   let component: FabryPerotComponent;
   let fixture: ComponentFixture<FabryPerotComponent>;
 
@@ -18,7 +18,7 @@ describe('PolarimetryImagingTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

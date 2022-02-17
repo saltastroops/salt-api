@@ -1,5 +1,5 @@
-describe('BvitTablesComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("BvitTablesComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

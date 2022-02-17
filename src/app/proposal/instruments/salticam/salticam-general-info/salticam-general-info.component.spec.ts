@@ -1,5 +1,5 @@
-describe('GeneralComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("GeneralComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

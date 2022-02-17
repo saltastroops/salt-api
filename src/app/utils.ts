@@ -1,15 +1,15 @@
-import { AccessToken } from './types/authentication';
+import { AccessToken } from "./types/authentication";
 
 export const GENERIC_ERROR_MESSAGE =
-  'Sorry, something has gone wrong. Please try again later.';
+  "Sorry, something has gone wrong. Please try again later.";
 
-export const NOT_LOGGED_IN_MESSAGE = 'You are not logged in.';
+export const NOT_LOGGED_IN_MESSAGE = "You are not logged in.";
 
-export const FORBIDDEN_MESSAGE = 'You are not allowed to perform this action.';
+export const FORBIDDEN_MESSAGE = "You are not allowed to perform this action.";
 
 export function storeAccessToken(tokenData: AccessToken): void {
-  localStorage.setItem('accessToken', tokenData.accessToken);
-  localStorage.setItem('accessTokenExpiresAt', tokenData.expiresAt);
+  localStorage.setItem("accessToken", tokenData.accessToken);
+  localStorage.setItem("accessTokenExpiresAt", tokenData.expiresAt);
 }
 
 export function currentSemester(): string {
@@ -50,16 +50,16 @@ export type sortArg<T> =
  * referece: https://stackoverflow.com/a/68279093/8910547
  */
 export function byPropertiesOf<T>(
-  sortBy: Array<sortArg<T>>
+  sortBy: Array<sortArg<T>>,
 ): (a: T, b: T) => number {
   function compareByProperty(arg: sortArg<T>) {
     let key: keyof T;
     let sortOrder = 1;
-    if (typeof arg === 'string' && arg.startsWith('-')) {
+    if (typeof arg === "string" && arg.startsWith("-")) {
       sortOrder = -1;
       // Typescript is not yet smart enough to infer that substring is keyof T
       key = arg.substr(1) as keyof T;
-    } else if (typeof arg === 'string' && arg.startsWith('+')) {
+    } else if (typeof arg === "string" && arg.startsWith("+")) {
       // Typescript is not yet smart enough to infer that substring is keyof T
       key = arg.substr(1) as keyof T;
     } else {
@@ -68,7 +68,7 @@ export function byPropertiesOf<T>(
     }
     return function (a: T, b: T) {
       let result = 0;
-      if (typeof a[key] === 'string') {
+      if (typeof a[key] === "string") {
         if (
           (a[key] as unknown as string).toLocaleUpperCase() <
           (b[key] as unknown as string).toLocaleUpperCase()
@@ -83,7 +83,7 @@ export function byPropertiesOf<T>(
           result = 0;
         }
       } else {
-        const key_split = key.toString().split('.');
+        const key_split = key.toString().split(".");
         if (key_split.length > 1) {
           key = key_split[0] as keyof T;
           const subkey = key_split[1] as keyof T[keyof T];
@@ -129,27 +129,27 @@ export function byPropertiesOf<T>(
 // reference https://stackoverflow.com/a/61961361
 export function degreesToHms(deg: number, decimal_places = 2): string {
   if (deg < 0) {
-    throw new Error('The degrees must be non-negative');
+    throw new Error("The degrees must be non-negative");
   }
 
   let hours = Math.floor(deg / 15);
   let minutes = Math.floor((deg / 15 - hours) * 60);
   let seconds =
     Math.round(
-      (deg / 15 - hours - minutes / 60) * 3600 * Math.pow(10, decimal_places)
+      (deg / 15 - hours - minutes / 60) * 3600 * Math.pow(10, decimal_places),
     ) / Math.pow(10, decimal_places);
 
   seconds >= 60 && (minutes++, (seconds = 0)); //if seconds rounds to 60 then increment minutes, reset seconds
   minutes == 60 && (hours++, (minutes = 0)); //if minutes rounds to 60 then increment hours, reset minutes
 
-  const ra_h = hours < 10 ? '0' + String(hours) : String(hours);
-  const ra_m = minutes < 10 ? '0' + String(minutes) : String(minutes);
+  const ra_h = hours < 10 ? "0" + String(hours) : String(hours);
+  const ra_m = minutes < 10 ? "0" + String(minutes) : String(minutes);
   const ra_s =
     seconds < 10
-      ? '0' + seconds.toFixed(decimal_places)
+      ? "0" + seconds.toFixed(decimal_places)
       : seconds.toFixed(decimal_places);
 
-  return ra_h + ':' + ra_m + ':' + ra_s;
+  return ra_h + ":" + ra_m + ":" + ra_s;
 }
 
 // @ input {deg}     Numeric; degrees number to convert
@@ -166,21 +166,21 @@ export function degreesToDms(deg: number, decimal_places = 2): string {
   let arcminutes = Math.floor((deg - degrees) * 60);
   let arcseconds =
     Math.round(
-      (deg - degrees - arcminutes / 60) * 3600 * Math.pow(10, decimal_places)
+      (deg - degrees - arcminutes / 60) * 3600 * Math.pow(10, decimal_places),
     ) / Math.pow(10, decimal_places);
 
   arcseconds >= 60 && (arcminutes++, (arcseconds = 0)); //if arcseconds rounds to 60 then increment minutes, reset seconds
   arcminutes == 60 && (degrees++, (arcminutes = 0)); //if arcminutes rounds to 60 then increment degrees, reset minutes
 
-  const dec_degrees = degrees < 10 ? '0' + String(degrees) : String(degrees);
+  const dec_degrees = degrees < 10 ? "0" + String(degrees) : String(degrees);
   const dec_arcminutes =
-    arcminutes < 10 ? '0' + String(arcminutes) : String(arcminutes);
+    arcminutes < 10 ? "0" + String(arcminutes) : String(arcminutes);
   const dec_arcseconds =
     arcseconds < 10
-      ? '0' + arcseconds.toFixed(decimal_places)
+      ? "0" + arcseconds.toFixed(decimal_places)
       : arcseconds.toFixed(decimal_places);
 
-  const dms_string = dec_degrees + ':' + dec_arcminutes + ':' + dec_arcseconds;
+  const dms_string = dec_degrees + ":" + dec_arcminutes + ":" + dec_arcseconds;
 
-  return sign < 0 ? '-' + dms_string : '+' + dms_string;
+  return sign < 0 ? "-" + dms_string : "+" + dms_string;
 }

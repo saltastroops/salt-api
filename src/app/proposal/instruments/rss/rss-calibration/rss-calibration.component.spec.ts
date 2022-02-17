@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { RssCalibrationComponent } from './rss-calibration.component';
+import { RssCalibrationComponent } from "./rss-calibration.component";
 
-describe('RssCalibrationTableComponent', () => {
+describe("RssCalibrationTableComponent", () => {
   let component: RssCalibrationComponent;
   let fixture: ComponentFixture<RssCalibrationComponent>;
 
@@ -18,7 +18,7 @@ describe('RssCalibrationTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

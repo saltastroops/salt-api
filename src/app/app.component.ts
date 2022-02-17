@@ -1,18 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthenticationService } from './service/authentication.service';
-import { FormBuilder } from '@angular/forms';
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder } from "@angular/forms";
+
+import { AuthenticationService } from "./service/authentication.service";
 
 @Component({
-  selector: 'wm-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  selector: "wm-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnInit {
-  title = 'Web Manager';
+  title = "Web Manager";
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
   ) {}
 
   ngOnInit(): void {

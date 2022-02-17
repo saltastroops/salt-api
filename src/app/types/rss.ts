@@ -1,4 +1,4 @@
-import { InstrumentSummary, Lamp } from './common';
+import { InstrumentSummary, Lamp } from "./common";
 
 export interface ArcBibleEntry {
   lamp: Lamp;
@@ -17,7 +17,7 @@ export interface Rss {
   overheadTime: number;
 }
 
-export type RssBeamSplitterOperation = 'Normal' | 'Parallel';
+export type RssBeamSplitterOperation = "Normal" | "Parallel";
 
 export interface RssConfiguration {
   mode: RssMode;
@@ -42,52 +42,52 @@ export interface RssDetector {
 }
 
 export type RssDetectorCalculation =
-  | 'Focus'
-  | 'FP Ring Radius'
-  | 'MOS Acquisition'
-  | 'MOS Mask Calibration'
-  | 'MOS Scan'
-  | 'Nod & Shuffle'
-  | 'None';
+  | "Focus"
+  | "FP Ring Radius"
+  | "MOS Acquisition"
+  | "MOS Mask Calibration"
+  | "MOS Scan"
+  | "Nod & Shuffle"
+  | "None";
 
 export type RssDetectorMode =
-  | 'Drift Scan'
-  | 'Frame Transfer'
-  | 'Normal'
-  | 'Shuffle'
-  | 'Slot Mode';
+  | "Drift Scan"
+  | "Frame Transfer"
+  | "Normal"
+  | "Shuffle"
+  | "Slot Mode";
 
 export interface RssDetectorWindow {
   height: number;
 }
 
 export type RssExposureType =
-  | 'Arc'
-  | 'Bias'
-  | 'Dark'
-  | 'Flat Field'
-  | 'Science';
+  | "Arc"
+  | "Bias"
+  | "Dark"
+  | "Flat Field"
+  | "Science";
 
 export interface RssFabryPerot {
   mode: RssFabryPerotMode;
 }
 
 export type RssFabryPerotMode =
-  | 'High Resolution'
-  | 'Low Resolution'
-  | 'Medium Resolution'
-  | 'Tunable Filter';
+  | "High Resolution"
+  | "Low Resolution"
+  | "Medium Resolution"
+  | "Tunable Filter";
 
-export type RssGain = 'Bright' | 'Faint';
+export type RssGain = "Bright" | "Faint";
 
 export type RssGrating =
-  | 'Open'
-  | 'pg0300'
-  | 'pg0900'
-  | 'pg1300'
-  | 'pg1800'
-  | 'pg2300'
-  | 'pg3000';
+  | "Open"
+  | "pg0300"
+  | "pg0900"
+  | "pg1300"
+  | "pg1800"
+  | "pg2300"
+  | "pg3000";
 
 export interface RssMask {
   barcode: string;
@@ -96,21 +96,21 @@ export interface RssMask {
 }
 
 export type RssMaskType =
-  | 'Engineering'
-  | 'Imaging'
-  | 'Longslit'
-  | 'MOS'
-  | 'Polarimetric';
+  | "Engineering"
+  | "Imaging"
+  | "Longslit"
+  | "MOS"
+  | "Polarimetric";
 
 export type RssMode =
-  | 'Fabry Perot'
-  | 'FP polarimetry'
-  | 'Imaging'
-  | 'MOS'
-  | 'MOS polarimetry'
-  | 'Polarimetric imaging'
-  | 'Spectropolarimetry'
-  | 'Spectroscopy';
+  | "Fabry Perot"
+  | "FP polarimetry"
+  | "Imaging"
+  | "MOS"
+  | "MOS polarimetry"
+  | "Polarimetric imaging"
+  | "Spectropolarimetry"
+  | "Spectroscopy";
 
 export interface RssMosMask extends RssMask {
   equinox: number | null;
@@ -139,19 +139,19 @@ export interface RssProcedure {
 }
 
 export type RssProcedureType =
-  | 'Fabry Perot'
-  | 'Focus'
-  | 'FP Cal'
-  | 'FP Polarimetry'
-  | 'FP Ring'
-  | 'MOS Acquisition'
-  | 'MOS Calibration'
-  | 'MOS Peakup'
-  | 'Node and Shuffle'
-  | 'Normal'
-  | 'Polarimetry';
+  | "Fabry Perot"
+  | "Focus"
+  | "FP Cal"
+  | "FP Polarimetry"
+  | "FP Ring"
+  | "MOS Acquisition"
+  | "MOS Calibration"
+  | "MOS Peakup"
+  | "Node and Shuffle"
+  | "Normal"
+  | "Polarimetry";
 
-export type RssReadoutSpeed = 'Fast' | 'None' | 'Slow';
+export type RssReadoutSpeed = "Fast" | "None" | "Slow";
 
 export interface RssSpectroscopy {
   grating: RssGrating;
@@ -160,7 +160,7 @@ export interface RssSpectroscopy {
 }
 
 export interface RssSummary extends InstrumentSummary {
-  name: 'RSS';
+  name: "RSS";
   modes: RssMode[];
   gratings: RssGrating[];
 }

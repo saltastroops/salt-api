@@ -87,32 +87,32 @@
       [ngClass]="blockClass(b)"
       [attr.data-test]="blockDataTestAttribute(b)"
     >
-    <div data-test="block-id">{{ b.id }}</div>
-    <div data-test="block-name">
-      <a href="javascript:void(0)" (click)="onClick(b.name)">{{ b.name }}</a>
-    </div>
-    <div data-test="block-observation-time">{{ b.observationTime }}</div>
-    <div data-test="block-priority">{{ b.priority }}</div>
-    <div>{{ b.acceptedObservations }}/{{ b.requestedObservations }}</div>
-    <div *ngIf="b.isObservableTonight" class="is-green">
-      <img
-        class="icon"
-        src="/assets/icons/noun_tick_2836262-green.svg"
-        alt="block is visible tonight"
-      />
-    </div>
-    <div *ngIf="!b.isObservableTonight">
-      <img
-        class="icon"
-        src="/assets/icons/noun_Cross_2120375.svg"
-        alt="block is not visible tonight"
-      />
-    </div>
-    <div data-test="block-remaining-nights">{{ b.remainingNights }}</div>
-    <div data-test="block-maximum-seeing">
+      <div data-test="block-id">{{ b.id }}</div>
+      <div data-test="block-name">
+        <a href="javascript:void(0)" (click)="onClick(b.name)">{{ b.name }}</a>
+      </div>
+      <div data-test="block-observation-time">{{ b.observationTime }}</div>
+      <div data-test="block-priority">{{ b.priority }}</div>
+      <div>{{ b.acceptedObservations }}/{{ b.requestedObservations }}</div>
+      <div *ngIf="b.isObservableTonight" class="is-green">
+        <img
+          class="icon"
+          src="/assets/icons/noun_tick_2836262-green.svg"
+          alt="block is visible tonight"
+        />
+      </div>
+      <div *ngIf="!b.isObservableTonight">
+        <img
+          class="icon"
+          src="/assets/icons/noun_Cross_2120375.svg"
+          alt="block is not visible tonight"
+        />
+      </div>
+      <div data-test="block-remaining-nights">{{ b.remainingNights }}</div>
+      <div data-test="block-maximum-seeing">
         {{ b.observingConditions.maximumSeeing }}
-    </div>
-    <div>
+      </div>
+      <div>
         <div>{{ b.observingConditions.transparency }}</div>
         <div *ngIf="b.observingConditions.transparency === 'Any'">
           <img

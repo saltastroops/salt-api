@@ -1,4 +1,4 @@
-import { InstrumentSummary } from './common';
+import { InstrumentSummary } from "./common";
 
 export interface Salticam {
   id: number;
@@ -21,10 +21,10 @@ export interface SalticamDetector {
 }
 
 export type SalticamDetectorMode =
-  | 'Drift Scan'
-  | 'Frame Transfer'
-  | 'Normal'
-  | 'Slot Mode';
+  | "Drift Scan"
+  | "Frame Transfer"
+  | "Normal"
+  | "Slot Mode";
 
 export interface SalticamDetectorWindow {
   centerRightAscension: number;
@@ -38,23 +38,23 @@ export interface SalticamExposure {
   exposureTime: number;
 }
 
-export type SalticamExposureType = 'Bias' | 'Flat Field' | 'Science';
+export type SalticamExposureType = "Bias" | "Flat Field" | "Science";
 
 export interface SalticamFilter {
   name: string;
   description: string;
 }
 
-export type SalticamGain = 'Bright' | 'Faint';
+export type SalticamGain = "Bright" | "Faint";
 
 export interface SalticamProcedure {
   cycles: number;
   exposures: SalticamExposure[];
 }
 
-export type SalticamReadoutSpeed = 'Fast' | 'None' | 'Slow';
+export type SalticamReadoutSpeed = "Fast" | "None" | "Slow";
 
 export interface SalticamSummary extends InstrumentSummary {
-  name: 'Salticam';
-  modes: Array<''>;
+  name: "Salticam";
+  modes: Array<"">;
 }

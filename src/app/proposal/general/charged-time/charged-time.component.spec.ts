@@ -1,8 +1,9 @@
-import { ChargedTimeComponent } from './charged-time.component';
-import { render } from '@testing-library/angular';
-import { ChargedTime, TimeAllocation } from '../../../types/proposal';
+import { render } from "@testing-library/angular";
 
-describe('ChargedTimeTableComponent', () => {
+import { ChargedTime, TimeAllocation } from "../../../types/proposal";
+import { ChargedTimeComponent } from "./charged-time.component";
+
+describe("ChargedTimeTableComponent", () => {
   const charged_time: ChargedTime = {
     priority0: 600,
     priority1: 100,
@@ -12,56 +13,56 @@ describe('ChargedTimeTableComponent', () => {
   };
   const time_allocations: TimeAllocation[] = [
     {
-      partnerName: 'South Africa',
-      partnerCode: 'RSA',
+      partnerName: "South Africa",
+      partnerCode: "RSA",
       priority0: 2000,
       priority1: 60000,
       priority2: 7000,
       priority3: 600,
       priority4: 3000,
       tacComment:
-        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
-        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
+        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  " +
+        "qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.",
     },
     {
-      partnerName: 'South Africa',
-      partnerCode: 'RSA',
+      partnerName: "South Africa",
+      partnerCode: "RSA",
       priority0: 2000,
       priority1: 60000,
       priority2: 7000,
       priority3: 600,
       priority4: 3000,
       tacComment:
-        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
-        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
+        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  " +
+        "qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.",
     },
     {
-      partnerName: 'South Africa',
-      partnerCode: 'RSA',
+      partnerName: "South Africa",
+      partnerCode: "RSA",
       priority0: 2000,
       priority1: 60000,
       priority2: 7000,
       priority3: 600,
       priority4: 3000,
       tacComment:
-        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
-        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
+        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  " +
+        "qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.",
     },
     {
-      partnerName: 'South Africa',
-      partnerCode: 'RSA',
+      partnerName: "South Africa",
+      partnerCode: "RSA",
       priority0: 2000,
       priority1: 60000,
       priority2: 7000,
       priority3: 600,
       priority4: 3000,
       tacComment:
-        'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  ' +
-        'qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.',
+        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque laborum possimus  " +
+        "qui quisquam recusandae temporibus veritatis! Accusamus deserunt, illum.",
     },
   ];
 
-  it('should create', async () => {
+  it("should create", async () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {
         chargedTime: charged_time,
@@ -71,25 +72,25 @@ describe('ChargedTimeTableComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the correct absolute completion', async () => {
+  it("should display the correct absolute completion", async () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {
         chargedTime: charged_time,
         timeAllocation: time_allocations[0],
       },
     });
-    const completion = component.getByTestId('absolute-completion');
-    expect(completion.innerText).toContain('3700/69600');
+    const completion = component.getByTestId("absolute-completion");
+    expect(completion.innerText).toContain("3700/69600");
   });
 
-  it('should display the correct relative completion', async () => {
+  it("should display the correct relative completion", async () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {
         chargedTime: charged_time,
         timeAllocation: time_allocations[0],
       },
     });
-    const completion = component.getByTestId('relative-completion');
-    expect(completion.innerText).toContain('5.3%');
+    const completion = component.getByTestId("relative-completion");
+    expect(completion.innerText).toContain("5.3%");
   });
 });

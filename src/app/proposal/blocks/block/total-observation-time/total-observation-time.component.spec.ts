@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { TotalObservationTimeComponent } from './total-observation-time.component';
+import { TotalObservationTimeComponent } from "./total-observation-time.component";
 
-describe('TotalObsTimeComponent', () => {
+describe("TotalObsTimeComponent", () => {
   let component: TotalObservationTimeComponent;
   let fixture: ComponentFixture<TotalObservationTimeComponent>;
 
@@ -18,7 +18,7 @@ describe('TotalObsTimeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

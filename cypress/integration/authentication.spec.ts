@@ -1,135 +1,135 @@
-import { LoginPage } from '../support/pages/login-page';
+import { ObservationComments } from "../support/components/observation-comments";
+import { LoginPage } from "../support/pages/login-page";
 import {
-  ProposalPage,
   PROPOSAL_BASE_URL,
-} from '../support/pages/proposal-page';
-import { ObservationComments } from '../support/components/observation-comments';
+  ProposalPage,
+} from "../support/pages/proposal-page";
 
-const USERNAME = 'hettlage';
+const USERNAME = "hettlage";
 
-describe('Authentication', () => {
-  it('should handle HTTP requests with a missing authentication token', () => {
-    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+describe("Authentication", () => {
+  it("should handle HTTP requests with a missing authentication token", () => {
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
       // Then user details are stored
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('not.be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("not.be.null");
 
       // And I can load a proposal page
-      ProposalPage.visit('2020-2-SCI-043');
-      cy.url().should('contain', PROPOSAL_BASE_URL);
+      ProposalPage.visit("2020-2-SCI-043");
+      cy.url().should("contain", PROPOSAL_BASE_URL);
 
       // And when I then delete the authentication token
-      cy.window().its('localStorage').invoke('removeItem', 'accessToken');
+      cy.window().its("localStorage").invoke("removeItem", "accessToken");
 
       // And try to add an observation comment
-      ObservationComments.addComment('This is a test comment.');
+      ObservationComments.addComment("This is a test comment.");
 
       // Then I get an error message
-      ObservationComments.hasSubmissionError('logged in');
+      ObservationComments.hasSubmissionError("logged in");
 
       // And the user details are removed
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("be.null");
     });
   });
 
-  it('should handle HTTP requests with an invalid authentication token', () => {
-    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+  it("should handle HTTP requests with an invalid authentication token", () => {
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
       // Then the authentication token and user details are stored
       cy.window()
-        .its('localStorage')
-        .invoke('getItem', 'accessToken')
-        .should('not.be.null');
+        .its("localStorage")
+        .invoke("getItem", "accessToken")
+        .should("not.be.null");
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('not.be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("not.be.null");
 
       // And I can load a proposal page
-      ProposalPage.visit('2020-2-SCI-043');
+      ProposalPage.visit("2020-2-SCI-043");
 
       // And when I then tamper with the authentication token
       cy.window()
-        .its('localStorage')
-        .invoke('setItem', 'accessToken', 'invalid');
+        .its("localStorage")
+        .invoke("setItem", "accessToken", "invalid");
 
       // And try to add an observation comment
-      ObservationComments.addComment('This is a test comment.');
+      ObservationComments.addComment("This is a test comment.");
 
       // Then I get an error message
-      ObservationComments.hasSubmissionError('logged in');
+      ObservationComments.hasSubmissionError("logged in");
 
       // And the authentication token and user details are removed
       cy.window()
-        .its('localStorage')
-        .invoke('getItem', 'accessToken')
-        .should('be.null');
+        .its("localStorage")
+        .invoke("getItem", "accessToken")
+        .should("be.null");
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("be.null");
     });
   });
 
-  it('should request the user details when logging in', () => {
-    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+  it("should request the user details when logging in", () => {
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
       // Then the authentication token and user details are stored
       cy.window()
-        .its('localStorage')
-        .invoke('getItem', 'accessToken')
-        .should('not.be.null');
+        .its("localStorage")
+        .invoke("getItem", "accessToken")
+        .should("not.be.null");
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('not.be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("not.be.null");
     });
   });
 
-  it('should request the user details on page load', () => {
-    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+  it("should request the user details on page load", () => {
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
       // And remove the user details again after they have been saved
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('not.be.null');
-      cy.window().its('sessionStorage').invoke('removeItem', 'user');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("not.be.null");
+      cy.window().its("sessionStorage").invoke("removeItem", "user");
 
       // And go to a proposal page
-      ProposalPage.visit('2020-2-SCI-043');
+      ProposalPage.visit("2020-2-SCI-043");
 
       // Then the proposal page is loaded
-      cy.url().should('contain', PROPOSAL_BASE_URL);
+      cy.url().should("contain", PROPOSAL_BASE_URL);
 
       // And the user details are re-requested
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('not.be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("not.be.null");
     });
   });
 
-  it('should remove the authentication token and user details when the user logs out', () => {
-    cy.task('updateUserPassword', USERNAME).then((password: string) => {
+  it("should remove the authentication token and user details when the user logs out", () => {
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // Ensure the logout link is not hidden because of the screen size
       cy.viewport(1500, 2000);
 
@@ -139,26 +139,26 @@ describe('Authentication', () => {
 
       // Then the authentication token and user details are stored
       cy.window()
-        .its('localStorage')
-        .invoke('getItem', 'accessToken')
-        .should('not.be.null');
+        .its("localStorage")
+        .invoke("getItem", "accessToken")
+        .should("not.be.null");
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('not.be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("not.be.null");
 
       // And when I logout again
       cy.get('[data-test="logout"]').click();
 
       // Then the authentication token and user details are removed
       cy.window()
-        .its('localStorage')
-        .invoke('getItem', 'accessToken')
-        .should('be.null');
+        .its("localStorage")
+        .invoke("getItem", "accessToken")
+        .should("be.null");
       cy.window()
-        .its('sessionStorage')
-        .invoke('getItem', 'user')
-        .should('be.null');
+        .its("sessionStorage")
+        .invoke("getItem", "user")
+        .should("be.null");
     });
   });
 });

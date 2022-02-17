@@ -1,6 +1,6 @@
-import { GENERIC_ERROR_MESSAGE } from '../../../src/app/utils';
+import { GENERIC_ERROR_MESSAGE } from "../../../src/app/utils";
 
-export const LOGIN_URL = '/login';
+export const LOGIN_URL = "/login";
 
 const USERNAME_INPUT = "[data-test='login-username']";
 const PASSWORD_INPUT = "[data-test='login-password']";
@@ -22,7 +22,7 @@ export class LoginPage {
   static hasUsernameError() {
     cy.get(ERROR)
       .contains(/username/i)
-      .should('be.visible');
+      .should("be.visible");
   }
 
   static typePassword(password: string) {
@@ -46,17 +46,17 @@ export class LoginPage {
   static hasPasswordError() {
     cy.get(ERROR)
       .contains(/password/i)
-      .should('be.visible');
+      .should("be.visible");
   }
 
   static hasGenericError() {
-    cy.get(ERROR).should('contain', GENERIC_ERROR_MESSAGE).and('be.visible');
+    cy.get(ERROR).should("contain", GENERIC_ERROR_MESSAGE).and("be.visible");
   }
 
   static hasUsernameOrPasswordError() {
     cy.get(ERROR)
       .contains(/username or password/i)
-      .should('be.visible');
+      .should("be.visible");
   }
 
   static forgotPasswordLink() {

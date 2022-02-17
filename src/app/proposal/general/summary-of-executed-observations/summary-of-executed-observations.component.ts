@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { parseISO } from 'date-fns';
-import { BlockVisit } from '../../../types/common';
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+
+import { parseISO } from "date-fns";
+
+import { BlockVisit } from "../../../types/common";
 
 @Component({
-  selector: 'wm-summary-of-executed-observations',
-  templateUrl: './summary-of-executed-observations.component.html',
-  styleUrls: ['./summary-of-executed-observations.component.scss'],
+  selector: "wm-summary-of-executed-observations",
+  templateUrl: "./summary-of-executed-observations.component.html",
+  styleUrls: ["./summary-of-executed-observations.component.scss"],
 })
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;

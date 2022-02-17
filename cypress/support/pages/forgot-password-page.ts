@@ -1,6 +1,6 @@
-import { GENERIC_ERROR_MESSAGE } from '../../../src/app/utils';
+import { GENERIC_ERROR_MESSAGE } from "../../../src/app/utils";
 
-export const FORGOT_PASSWORD_URL = '/forgot-password';
+export const FORGOT_PASSWORD_URL = "/forgot-password";
 
 export class ForgotPasswordPage {
   static visit() {
@@ -13,8 +13,8 @@ export class ForgotPasswordPage {
 
   static hasUsernameOrEmail(usernameOrEmail: string) {
     cy.get("[data-test='username-email']").should(
-      'have.value',
-      usernameOrEmail
+      "have.value",
+      usernameOrEmail,
     );
   }
 
@@ -33,24 +33,24 @@ export class ForgotPasswordPage {
   static hasMissingUsernameOrEmailError() {
     cy.get("[data-test='error']")
       .contains(/required/i)
-      .should('be.visible');
+      .should("be.visible");
   }
 
   static hasUnknownUsernameOrEmailError() {
     cy.get("[data-test='error']")
       .contains(/unknown/i)
-      .should('be.visible');
+      .should("be.visible");
   }
 
   static hasGenericError() {
     cy.get("[data-test='error']")
       .contains(GENERIC_ERROR_MESSAGE)
-      .should('be.visible');
+      .should("be.visible");
   }
 
   static hasSuccessMessage() {
     cy.get("[data-test='success']", { timeout: 15000 })
       .contains(/has been sent/i)
-      .should('exist')
+      .should("exist");
   }
 }

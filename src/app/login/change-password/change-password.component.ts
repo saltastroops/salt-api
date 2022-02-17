@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   FormGroup,
   Validators,
-} from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthenticationService } from '../../service/authentication.service';
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+
+import { AuthenticationService } from "../../service/authentication.service";
 
 @Component({
-  selector: 'wm-change-password',
-  templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.scss'],
+  selector: "wm-change-password",
+  templateUrl: "./change-password.component.html",
+  styleUrls: ["./change-password.component.scss"],
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;
@@ -24,13 +25,13 @@ export class ChangePasswordComponent implements OnInit {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
   ) {}
 
   ngOnInit(): void {
     this.changePasswordForm = this.formBuilder.group({
-      password: ['', Validators.required],
-      retypedPassword: ['', Validators.required],
+      password: ["", Validators.required],
+      retypedPassword: ["", Validators.required],
     });
     this.route.params.subscribe((params) => {
       this.token = params.token;
@@ -50,7 +51,7 @@ export class ChangePasswordComponent implements OnInit {
       return;
     }
     if (this.f.password.value !== this.f.retypedPassword.value) {
-      this.error = 'Password mismatch.';
+      this.error = "Password mismatch.";
       return;
     }
 
@@ -60,12 +61,12 @@ export class ChangePasswordComponent implements OnInit {
       .subscribe(
         () => {
           this.loading = false;
-          this.router.navigate(['/login']);
+          this.router.navigate(["/login"]);
         },
         (error: string) => {
           this.error = error;
           this.loading = false;
-        }
+        },
       );
   }
 

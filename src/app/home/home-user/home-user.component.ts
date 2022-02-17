@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { ProposalListItem } from '../../types/proposal';
-import { ProposalService } from '../../service/proposal.service';
-import { currentSemester } from '../../utils';
+import { Component, OnInit } from "@angular/core";
+
+import { ProposalService } from "../../service/proposal.service";
+import { ProposalListItem } from "../../types/proposal";
+import { currentSemester } from "../../utils";
 
 @Component({
-  selector: 'wm-home-user',
-  templateUrl: './home-user.component.html',
-  styleUrls: ['./home-user.component.scss'],
+  selector: "wm-home-user",
+  templateUrl: "./home-user.component.html",
+  styleUrls: ["./home-user.component.scss"],
 })
 export class HomeUserComponent implements OnInit {
   proposals?: ProposalListItem[];

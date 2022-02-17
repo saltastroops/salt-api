@@ -1,9 +1,9 @@
 export type UserRole =
-  | 'Administrator'
-  | 'SALT Astronomer'
-  | 'SALT Operator'
-  | 'TAC Chair'
-  | 'TAC Member';
+  | "Administrator"
+  | "SALT Astronomer"
+  | "SALT Operator"
+  | "TAC Chair"
+  | "TAC Member";
 
 export interface User {
   username: string;

@@ -4,8 +4,8 @@ import {
   ObservationProbabilities,
   Ranking,
   TimeInterval,
-} from './common';
-import { Observation } from './observation';
+} from "./common";
+import { Observation } from "./observation";
 
 export interface Block {
   id: number;
@@ -28,13 +28,13 @@ export interface Block {
 }
 
 export type BlockStatusValue =
-  | 'Active'
-  | 'Completed'
-  | 'Deleted'
-  | 'Expired'
-  | 'Not set'
-  | 'On hold'
-  | 'Superseded';
+  | "Active"
+  | "Completed"
+  | "Deleted"
+  | "Expired"
+  | "Not set"
+  | "On hold"
+  | "Superseded";
 
 export interface BlockStatus {
   value: BlockStatusValue;
@@ -64,4 +64,4 @@ export interface ObservingConditions {
   minimumLunarDistance: number;
 }
 
-export type Transparency = 'Any' | 'Clear' | 'Thick cloud' | 'Thin cloud';
+export type Transparency = "Any" | "Clear" | "Thick cloud" | "Thin cloud";

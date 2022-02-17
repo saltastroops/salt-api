@@ -1,19 +1,21 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges } from "@angular/core";
+
 import {
   addDays,
   addHours,
   differenceInSeconds,
   parseISO,
   subDays,
-} from 'date-fns';
-import { TimeInterval } from '../../../../types/common';
+} from "date-fns";
+
+import { TimeInterval } from "../../../../types/common";
 
 type ObservingWindow = { start: Date; end: Date };
 
 @Component({
-  selector: 'wm-observing-windows',
-  templateUrl: './observing-windows.component.html',
-  styleUrls: ['./observing-windows.component.scss'],
+  selector: "wm-observing-windows",
+  templateUrl: "./observing-windows.component.html",
+  styleUrls: ["./observing-windows.component.scss"],
 })
 export class ObservingWindowsComponent implements OnChanges {
   @Input() observingWindows!: TimeInterval[];
@@ -55,7 +57,7 @@ export class ObservingWindowsComponent implements OnChanges {
   tonightsObservingWindows(): ObservingWindow[] {
     const night = this.tonight();
     const tonightsWindows = this.observingWindowList.filter(
-      (o) => o.end >= night.start && o.end < night.end
+      (o) => o.end >= night.start && o.end < night.end,
     );
     return tonightsWindows.sort(this._compareObservingWindows);
   }
@@ -67,10 +69,10 @@ export class ObservingWindowsComponent implements OnChanges {
   numberOfObservableNightsRemaining(): number {
     const tomorrow = addDays(this.tonight().start, 1);
     const remainingWindows = this.observingWindowList.filter(
-      (o: ObservingWindow) => tomorrow <= o.start
+      (o: ObservingWindow) => tomorrow <= o.start,
     );
     const remainingNights = new Set(
-      remainingWindows.map((w) => this.nightStart(w.start))
+      remainingWindows.map((w) => this.nightStart(w.start)),
     );
     return remainingNights.size;
   }

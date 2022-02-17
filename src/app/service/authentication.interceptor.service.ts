@@ -1,19 +1,21 @@
-import { Injectable } from '@angular/core';
 import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
   HttpErrorResponse,
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { AuthenticationService } from './authentication.service';
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+} from "@angular/common/http";
+import { Injectable } from "@angular/core";
+
+import { Observable, throwError } from "rxjs";
+import { catchError } from "rxjs/operators";
+
 import {
   FORBIDDEN_MESSAGE,
   GENERIC_ERROR_MESSAGE,
   NOT_LOGGED_IN_MESSAGE,
-} from '../utils';
+} from "../utils";
+import { AuthenticationService } from "./authentication.service";
 
 @Injectable()
 export class AuthenticationInterceptor implements HttpInterceptor {
@@ -30,11 +32,11 @@ export class AuthenticationInterceptor implements HttpInterceptor {
    */
   intercept(
     request: HttpRequest<unknown>,
-    next: HttpHandler
+    next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
     if (
-      request.url.split('/').slice(-1)[0] === 'token' ||
-      request.url.split('/').slice(-1)[0] === 'send-password-reset-email'
+      request.url.split("/").slice(-1)[0] === "token" ||
+      request.url.split("/").slice(-1)[0] === "send-password-reset-email"
     ) {
       return next.handle(request);
     }
@@ -42,8 +44,8 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     if (token) {
       request = request.clone({
         setHeaders: {
-          'Content-Type': 'application/json; charset=utf-8',
-          Accept: 'application/json',
+          "Content-Type": "application/json; charset=utf-8",
+          Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -54,7 +56,7 @@ export class AuthenticationInterceptor implements HttpInterceptor {
           this.authenticationService.logout();
         }
         return httpErrorObservable(err);
-      })
+      }),
     );
   }
 }
@@ -71,7 +73,7 @@ function httpErrorObservable(err: HttpErrorResponse): Observable<never> {
     message = err.error.detail;
   } else if (err.error && err.error.message) {
     message = err.error.message;
-  } else if (err.error && typeof err.error === 'string') {
+  } else if (err.error && typeof err.error === "string") {
     message = err.error;
   }
   return throwError(message);

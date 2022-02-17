@@ -1,18 +1,18 @@
-import { Lamp, TargetCoordinates, TimeInterval } from './common';
-import { Salticam } from './salticam';
-import { Rss } from './rss';
-import { Hrs } from './hrs';
-import { Bvit } from './bvit';
-import { Target } from './target';
+import { Bvit } from "./bvit";
+import { Lamp, TargetCoordinates, TimeInterval } from "./common";
+import { Hrs } from "./hrs";
+import { Rss } from "./rss";
+import { Salticam } from "./salticam";
+import { Target } from "./target";
 
 export type CalibrationFilter =
-  | 'Blue and Red'
-  | 'Clear and ND'
-  | 'Clear and UV'
-  | 'ND and Clear'
-  | 'None'
-  | 'Red and Clear'
-  | 'UV and Blue';
+  | "Blue and Red"
+  | "Clear and ND"
+  | "Clear and UV"
+  | "ND and Clear"
+  | "None"
+  | "Red and Clear"
+  | "UV and Blue";
 
 export interface DitherPattern {
   horizontalTiles: number;
@@ -29,14 +29,14 @@ export interface FinderChart {
 }
 
 export type GuideMethod =
-  | 'HRS Probe'
-  | 'Manual'
-  | 'None'
-  | 'QUACK'
-  | 'RSS Probe'
-  | 'SALTICAM'
-  | 'SALTICAM Probe'
-  | 'Slitviewer';
+  | "HRS Probe"
+  | "Manual"
+  | "None"
+  | "QUACK"
+  | "RSS Probe"
+  | "SALTICAM"
+  | "SALTICAM Probe"
+  | "Slitviewer";
 
 export interface GuideStar extends TargetCoordinates {
   magnitude: number;
@@ -69,10 +69,10 @@ export interface PayloadConfiguration {
 }
 
 export type PayloadConfigurationType =
-  | 'Acquisition'
-  | 'Calibration'
-  | 'Instrument Acquisition'
-  | 'Science';
+  | "Acquisition"
+  | "Calibration"
+  | "Instrument Acquisition"
+  | "Science";
 
 export interface PhaseInterval {
   start: number;

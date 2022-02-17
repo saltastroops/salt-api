@@ -1,5 +1,5 @@
-describe('ObservingConditionsComponent', () => {
-  it('should be a passing placeholder test', () => {
+describe("ObservingConditionsComponent", () => {
+  it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });
 });

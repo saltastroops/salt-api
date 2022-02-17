@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { ProposalProgressTableComponent } from './proposal-progress-table.component';
+import { ProposalProgressTableComponent } from "./proposal-progress-table.component";
 
-describe('ProposalProgressTableComponent', () => {
+describe("ProposalProgressTableComponent", () => {
   let component: ProposalProgressTableComponent;
   let fixture: ComponentFixture<ProposalProgressTableComponent>;
 
@@ -18,7 +18,7 @@ describe('ProposalProgressTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

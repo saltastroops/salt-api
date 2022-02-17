@@ -1,6 +1,6 @@
-import { BlockVisit, PartnerCode, PartnerName } from './common';
-import { Phase1Target } from './target';
-import { BlockSummary } from './block';
+import { BlockSummary } from "./block";
+import { BlockVisit, PartnerCode, PartnerName } from "./common";
+import { Phase1Target } from "./target";
 
 export interface Affiliation {
   partnerName: PartnerName;
@@ -87,17 +87,17 @@ export interface ProposalListItem {
 }
 
 export type ProposalStatusValue =
-  | 'Accepted'
-  | 'Active'
-  | 'Completed'
-  | 'Deleted'
-  | 'Expired'
-  | 'In preparation'
-  | 'Inactive'
-  | 'Rejected'
-  | 'Superseded'
-  | 'Under scientific review'
-  | 'Under technical review';
+  | "Accepted"
+  | "Active"
+  | "Completed"
+  | "Deleted"
+  | "Expired"
+  | "In preparation"
+  | "Inactive"
+  | "Rejected"
+  | "Superseded"
+  | "Under scientific review"
+  | "Under technical review";
 
 export interface ProposalStatus {
   value: ProposalStatusValue;
@@ -105,15 +105,15 @@ export interface ProposalStatus {
 }
 
 export type ProposalType =
-  | 'Commissioning'
+  | "Commissioning"
   | "Director's Discretionary Time"
-  | 'Engineering'
-  | 'Gravitational Wave Event'
-  | 'Key Science Program'
-  | 'Large Science Proposal'
-  | 'Science'
-  | 'Science - Long Term'
-  | 'Science Verification';
+  | "Engineering"
+  | "Gravitational Wave Event"
+  | "Key Science Program"
+  | "Large Science Proposal"
+  | "Science"
+  | "Science - Long Term"
+  | "Science Verification";
 
 export interface RequestedTime {
   totalRequestedTime: number;

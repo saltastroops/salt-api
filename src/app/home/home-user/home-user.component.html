@@ -16,25 +16,94 @@
 
 <div class="radio-buttons">
   <label>
-    <input type="radio" id="current_semester" value="" />
+    <input
+      type="radio"
+      id="current_semester"
+      value="current_semester"
+      name="semester_filter"
+      [checked]="semesterFilter === 'current_semester'"
+      (click)="onSemesterFilterClick('current_semester')"
+      data-test="current-semester"
+    />
     Show proposals for the current semester
   </label>
   <label>
-    <input type="radio" id="next_semester" value="" />
-    Show proposals for the next semester
+    <input
+      type="radio"
+      id="current_and_next_semester"
+      value="current_and_next_semester"
+      name="semester_filter"
+      [checked]="semesterFilter === 'current_and_next_semester'"
+      (click)="onSemesterFilterClick('current_and_next_semester')"
+      data-test="current-and-next-semester"
+    />
+    Show proposals for the current and next semester
   </label>
   <label>
-    <input type="radio" id="semester_range" value="" />
+    <input
+      type="radio"
+      id="semester_range"
+      name="semester_filter"
+      [checked]="semesterFilter === 'semester_range'"
+      (click)="onSemesterFilterClick('semester_range')"
+      data-test="semester-range"
+    />
     Show proposals from Semester
-    <input type="text" id="start_semester" placeholder="yyyy-s" /> to Semester
-    <input type="text" id="end_semester" placeholder="yyyy-s" />
-    <input type="button" id="apply" value="Apply" />
+    <input
+      type="text"
+      id="start_semester"
+      [value]="startSemesterValue"
+      placeholder="yyyy-s"
+      data-test="start-semester"
+      [(ngModel)]="startSemesterValue"
+      [disabled]="semesterFilter !== 'semester_range'"
+    />
+    to Semester
+    <input
+      type="text"
+      id="end_semester"
+      [value]="endSemesterValue"
+      placeholder="yyyy-s"
+      data-test="end-semester"
+      [(ngModel)]="endSemesterValue"
+      [disabled]="semesterFilter !== 'semester_range'"
+    />
+    <input
+      type="button"
+      id="apply"
+      value="Apply"
+      (click)="applySemesterRangeFilter()"
+      [disabled]="semesterFilter !== 'semester_range'"
+      data-test="apply"
+    />
+    <div *ngIf="!isValidSemester" class="invalid-feedback">
+      <div class="has-text-danger" data-test="semester-error">
+        {{ semesterErrorMessage }}
+      </div>
+    </div>
   </label>
   <label>
-    <input type="radio" id="single_semester" value="" />
+    <input
+      type="radio"
+      id="single_semester"
+      value="single_semester"
+      name="semester_filter"
+      [checked]="semesterFilter === 'single_semester'"
+      (click)="onSemesterFilterClick('single_semester')"
+      data-test="single-semester"
+    />
     Show proposals for the selected Semester
-    <select id="semester" [(ngModel)]="selectedSemester">
-      <option *ngFor="let semester of availableSemesters()">
+    <select
+      id="semester"
+      (change)="onSemesterSelect($event)"
+      [disabled]="semesterFilter !== 'single_semester'"
+      data-test="select-semester"
+    >
+      <option
+        *ngFor="let semester of availableSemesters(); index as i"
+        [value]="i"
+        [selected]="semester === selectedSemester"
+      >
         {{ semester }}
       </option>
     </select>
@@ -43,49 +112,125 @@
 <br />
 Show
 <div class="checkboxes">
-  <label for="attention_only"
-    ><input type="checkbox" id="attention_only" value="" /> only proposals
-    requiring your attention
+  <label for="requiring_attention"
+    ><input
+      type="checkbox"
+      id="requiring_attention"
+      [checked]="filterProposalsBy['requiring_attention'] === 'true'"
+      (click)="filterProposals('requiring_attention')"
+      data-test="requiring-attention"
+    />
+    only proposals requiring your attention
   </label>
   <label for="unchecked"
-    ><input type="checkbox" id="unchecked" value="" /> only unchecked proposals
+    ><input
+      type="checkbox"
+      id="unchecked"
+      [checked]="filterProposalsBy['unchecked'] === 'true'"
+      (click)="filterProposals('unchecked')"
+      data-test="unchecked"
+    />
+    only unchecked proposals
   </label>
   <label for="unassigned"
-    ><input type="checkbox" id="unassigned" value="" /> only unassigned
-    proposals
+    ><input
+      type="checkbox"
+      id="unassigned"
+      [checked]="filterProposalsBy['unassigned'] === 'true'"
+      (click)="filterProposals('unassigned')"
+      data-test="unassigned"
+    />
+    only unassigned proposals
   </label>
   <label for="active"
-    ><input type="checkbox" id="active" value="" /> only active proposals
+    ><input
+      type="checkbox"
+      id="active"
+      [checked]="filterProposalsBy['acive'] === 'true'"
+      (click)="filterProposals('active')"
+      data-test="active"
+    />
+    only active proposals
   </label>
   <label for="completed"
-    ><input type="checkbox" id="completed" value="" /> only completed proposals
+    ><input
+      type="checkbox"
+      id="completed"
+      [checked]="filterProposalsBy['completed'] === 'true'"
+      (click)="filterProposals('completed')"
+      data-test="completed"
+    />
+    only completed proposals
   </label>
   <label for="science"
-    ><input type="checkbox" id="science" value="" /> only science proposals
+    ><input
+      type="checkbox"
+      id="science"
+      [checked]="filterProposalsBy['science'] === 'true'"
+      (click)="filterProposals('science')"
+      data-test="science"
+    />
+    only science proposals
   </label>
   <label for="ddt"
-    ><input type="checkbox" id="ddt" value="" /> only director's discretionary
-    time
+    ><input
+      type="checkbox"
+      id="ddt"
+      [checked]="filterProposalsBy['ddt'] === 'true'"
+      (click)="filterProposals('ddt')"
+      data-test="ddt"
+    />
+    only director's discretionary time
   </label>
-  <label for="rejected"
-    ><input type="checkbox" id="rejected" value="" /> only rejected, completed
-    and expired proposals
+  <label for="rejected_completed_expired"
+    ><input
+      type="checkbox"
+      id="rejected_completed_expired"
+      [checked]="filterProposalsBy['rejected_completed_expired'] === 'true'"
+      (click)="filterProposals('rejected_completed_expired')"
+      data-test="rejected-completed-expired"
+    />
+    only rejected, completed and expired proposals
   </label>
   <label for="my_proposals"
-    ><input type="checkbox" id="my_proposals" value="" /> only your proposals
+    ><input
+      type="checkbox"
+      id="my_proposals"
+      [checked]="filterProposalsBy['my_proposals'] === 'true'"
+      (click)="filterProposals('my_proposals')"
+      data-test="my-proposals"
+    />
+    only your proposals
   </label>
   <label for="phase1"
-    ><input type="checkbox" id="phase1" value="" /> only phase 1 proposals
+    ><input
+      type="checkbox"
+      id="phase1"
+      [checked]="filterProposalsBy['phase1'] === 'true'"
+      (click)="filterProposals('phase1')"
+      data-test="phase1"
+    />
+    only phase 1 proposals
   </label>
   <label for="phase2"
-    ><input type="checkbox" id="phase2" value="" /> only phase 2 proposals
+    ><input
+      type="checkbox"
+      id="phase2"
+      [checked]="filterProposalsBy['phase2'] === 'true'"
+      (click)="filterProposals('phase2')"
+      data-test="phase2"
+    />
+    only phase 2 proposals
   </label>
   <label for="commissioning"
-    ><input type="checkbox" id="commissioning" value="" /> only commissioning
-    proposals
-  </label>
-  <label for="deleted"
-    ><input type="checkbox" id="deleted" value="" /> show deleted proposals
+    ><input
+      type="checkbox"
+      id="commissioning"
+      [checked]="filterProposalsBy['commissioning'] === 'true'"
+      (click)="filterProposals('commissioning')"
+      data-test="commissioning"
+    />
+    only commissioning proposals
   </label>
 </div>
 <br /><br />
@@ -105,8 +250,15 @@ Show
     <div>PI</div>
     <div>Astronomer</div>
   </div>
-  <div *ngIf="proposals">
-    <div class="row proposals" *ngFor="let proposal of proposals">
+  <div
+    *ngIf="proposals && !loading; else loading_indicator"
+    style="position: relative"
+  >
+    <div
+      class="row proposals"
+      data-test="proposal-row"
+      *ngFor="let proposal of filteredProposals"
+    >
       <div>{{ proposal.id }}</div>
       <div>
         <a [routerLink]="['/proposal', proposal.proposalCode]">
@@ -114,22 +266,27 @@ Show
         </a>
       </div>
       <div>{{ proposal.title }}</div>
-      <div>{{ proposal.semester }}</div>
-      <div>{{ proposal.phase }}</div>
-      <div>{{ proposal.status.value }}</div>
+      <div data-test="proposal-semester">{{ proposal.semester }}</div>
+      <div data-test="phase">{{ proposal.phase }}</div>
+      <div data-test="proposal-status">{{ proposal.status.value }}</div>
       <div>{{ proposal.status.reason }}</div>
-      <div>{{ proposal.proposalType }}</div>
-      <div>
+      <div data-test="proposal-type">{{ proposal.proposalType }}</div>
+      <div data-test="principal-investigator">
         {{ proposal.principalInvestigator.givenName }}
         {{ proposal.principalInvestigator.familyName }}
       </div>
-      <div>
+      <div data-test="liaison-astronomer">
         <span *ngIf="proposal.liaisonAstronomer">{{
           proposal.liaisonAstronomer.givenName
         }}</span>
       </div>
     </div>
   </div>
+  <ng-template #loading_indicator>
+    <div class="loading-indicator">
+      <wm-loading-spinner></wm-loading-spinner>
+    </div>
+  </ng-template>
 </div>
 <div class="table legend">
   <div class="row headers">

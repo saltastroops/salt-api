@@ -1,3 +1,4 @@
+@import "src/styles";
 h1 {
   color: black;
   font-weight: bold;
@@ -6,6 +7,10 @@ h1 {
 
 p {
   margin: 0.5rem 0 1rem 0;
+}
+
+input {
+  outline: none;
 }
 
 .left {
@@ -59,4 +64,14 @@ div label {
 
 .sa {
   background: gold;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.has-text-danger {
+  font-size: 12px;
 }

@@ -4,9 +4,10 @@ import {
   updateUserPassword,
 } from "./database";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 
-const axios = require("axios");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const ms = require("smtp-tester");
 
 /**
@@ -17,7 +18,8 @@ const ms = require("smtp-tester");
 // The SMTP testing has been adapted from
 // https://www.cypress.io/blog/2021/05/11/testing-html-emails-using-cypress/
 
-export default (on, config) => {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export default (on): void => {
   // Start the SMTP server on port 7777
   const port = 7777;
   const mailServer = ms.init(port);

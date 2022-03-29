@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { createConnection } = require("mysql");
 
 /**
@@ -6,7 +7,7 @@ const { createConnection } = require("mysql");
  * A random string is chosen as the new password. The function returns a promise which
  * resolves to the new password.
  */
-export function updateUserPassword(username) {
+export function updateUserPassword(username: string): Promise<string> {
   return new Promise((resolve, reject) => {
     // Taken from https://gist.github.com/6174/6062387
     const password =
@@ -28,7 +29,7 @@ export function updateUserPassword(username) {
 /**
  * Return a promise with a user's preferred details.
  */
-export function getUser(username) {
+export function getUser(username: string): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const connection = createConnection(process.env["TEST_DATABASE"]);
     const sql = `
@@ -59,7 +60,9 @@ export function getUser(username) {
 /**
  * Delete all observation comments for a proposal.
  */
-export function clearObservationComments(proposalCode: string) {
+export function clearObservationComments(
+  proposalCode: string,
+): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const connection = createConnection(process.env["TEST_DATABASE"]);
     const sql = `

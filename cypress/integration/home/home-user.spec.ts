@@ -1,0 +1,389 @@
+import { currentSemester } from "../../../src/app/utils";
+import { HomeUser } from "../../support/components/home-user";
+import { HomePage } from "../../support/pages/home-page";
+import { freezeDate, login } from "../../support/utils";
+
+let USERNAME = Cypress.env("defaultUsername");
+
+describe("Home User", () => {
+  beforeEach(() => {
+    freezeDate(2020, 6);
+
+    // Given I am logged in
+    login(USERNAME);
+
+    // And I visit the home page
+    HomePage.visit();
+  });
+
+  it("should show an alert regarding the hard limit", () => {
+    HomeUser.semesterRangeInputsDisabled(true);
+    HomeUser.semesterSelectDisabled(true);
+    cy.on("window:alert", (text) => {
+      expect(text).contains(
+        "1000 or more proposals satisfy the filter criteria.",
+      );
+    });
+  });
+
+  it("should show proposals for the current semester", () => {
+    HomeUser.semesterRangeInputsDisabled(true);
+    HomeUser.semesterSelectDisabled(true);
+    HomeUser.clickCurrentSemesterRadioButton();
+    cy.wait(1000);
+    HomeUser.filteredBySingleSemester(currentSemester());
+  });
+
+  it("should show proposals for the current semester when the page is reloaded after clicking the current semester filter", () => {
+    HomeUser.clickCurrentSemesterRadioButton();
+    cy.wait(1000);
+    HomeUser.filteredBySingleSemester(currentSemester());
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.currentSemesterRadioButtonChecked(true);
+    HomeUser.filteredBySingleSemester(currentSemester());
+  });
+
+  it("should show proposals for the current and next semester", () => {
+    HomeUser.clickCurrentAndNextSemesterRadioButton();
+    HomeUser.filteredByCurrentAndNextSemester();
+  });
+
+  it("should show proposals for the current and next semester when the page is reloaded after clicking the current and next semester filter", () => {
+    HomeUser.clickCurrentAndNextSemesterRadioButton();
+    HomeUser.filteredByCurrentAndNextSemester();
+    cy.reload();
+    HomeUser.currentAndNextSemesterRadioButtonChecked(true);
+    HomeUser.filteredByCurrentAndNextSemester();
+  });
+
+  it("should show proposals for the given input semester range", () => {
+    const start_semester = "2019-1";
+    const end_semester = "2021-2";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.semesterRangeInputsDisabled(false);
+    HomeUser.semesterSelectDisabled(true);
+    HomeUser.typeSemesterRanges(start_semester, end_semester);
+    HomeUser.clickApplyButton();
+    cy.wait(2000);
+    HomeUser.filteredBySemesterRange(start_semester, end_semester);
+  });
+
+  it("should show proposals for the given input semester range when the page is reloaded after clicking the semester range filter", () => {
+    const start_semester = "2018-1";
+    const end_semester = "2020-2";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, end_semester);
+    HomeUser.clickApplyButton();
+    cy.wait(2000);
+    HomeUser.filteredBySemesterRange(start_semester, end_semester);
+    cy.reload();
+    HomeUser.semesterRangeRadioButtonChecked(true);
+    HomeUser.filteredBySemesterRange(start_semester, end_semester);
+  });
+
+  it("should show an error message when no input semester is provided", () => {
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.clickApplyButton();
+    HomeUser.noInputSemesterError();
+  });
+
+  it("should trigger an alert when a wrong input semester is provided", () => {
+    const start_semester = "2010-3";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.wrongInputSemesterError(start_semester);
+  });
+
+  it("should trigger an alert and show no proposals when a wrong input semester is provided and the page is reloaded", () => {
+    const start_semester = "2010-3";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.wrongInputSemesterError(start_semester);
+    cy.reload();
+    HomeUser.wrongInputSemesterError(start_semester);
+    HomeUser.proposalsListEmpty();
+  });
+
+  it("should show proposals from the given input start semester onwards", () => {
+    const start_semester = "2018-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    cy.wait(2000);
+    HomeUser.filteredBySemesterRange(start_semester, "");
+  });
+
+  it("should show proposals up to the given input semester", () => {
+    const end_semester = "2018-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges("", end_semester);
+    HomeUser.clickApplyButton();
+    cy.wait(2000);
+    HomeUser.filteredBySemesterRange("", end_semester);
+  });
+
+  it("should show proposals for the selected semester when the semester is selected from the options", () => {
+    const select_semester = "2020-1";
+    HomeUser.clickSingleSemesterRadioButton();
+    HomeUser.semesterRangeInputsDisabled(true);
+    HomeUser.semesterSelectDisabled(false);
+    HomeUser.selectSemester(select_semester);
+    cy.wait(2000);
+    HomeUser.filteredBySingleSemester(select_semester);
+  });
+
+  it("should show proposals for the selected semester when the semester is selected from the options and the page is reloaded", () => {
+    const select_semester = "2020-1";
+    HomeUser.clickSingleSemesterRadioButton();
+    HomeUser.selectSemester(select_semester);
+    cy.wait(2000);
+    HomeUser.filteredBySingleSemester(select_semester);
+    cy.reload();
+    HomeUser.singleSemesterRadioButtonChecked(true);
+    HomeUser.filteredBySingleSemester(select_semester);
+  });
+
+  it("should show proposals for the current and then show proposals for the selected semester", () => {
+    const select_semester = "2018-1";
+    HomeUser.clickCurrentSemesterRadioButton();
+    cy.wait(2000);
+    HomeUser.filteredBySingleSemester(currentSemester());
+    HomeUser.clickSingleSemesterRadioButton();
+    HomeUser.selectSemester(select_semester);
+    cy.wait(2000);
+    HomeUser.filteredBySingleSemester(select_semester);
+  });
+
+  it("should show only unchecked proposals", () => {
+    HomeUser.clickUncheckedCheckbox();
+    HomeUser.filteredUncheckedProposals();
+  });
+
+  it("should show only unchecked proposals when the unchecked checkbox is checked and the page is reloaded", () => {
+    HomeUser.clickUncheckedCheckbox();
+    HomeUser.filteredUncheckedProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.uncheckedFilterCheckboxChecked(true);
+    HomeUser.filteredUncheckedProposals();
+  });
+
+  it("should show only unassigned proposals", () => {
+    HomeUser.clickUnassignedCheckbox();
+    HomeUser.filteredUnassignedProposals();
+  });
+
+  it("should show only unassigned proposals when the unassigned checkbox is checked and the page is reloaded", () => {
+    HomeUser.clickUnassignedCheckbox();
+    HomeUser.filteredUnassignedProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.unassignedFilterCheckboxChecked(true);
+    HomeUser.filteredUnassignedProposals();
+  });
+
+  it("should show only completed proposals", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickCompletedCheckbox();
+    HomeUser.filteredCompletedProposals();
+  });
+
+  it("should show only completed proposals when the completed checkbox is clicked and the page is reloaded", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickCompletedCheckbox();
+    HomeUser.filteredCompletedProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.completedFilterCheckboxChecked(true);
+    HomeUser.filteredCompletedProposals();
+  });
+
+  it("should show only rejected, completed and expired proposals", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickRejectedCompletedExpiredCheckbox();
+    HomeUser.filteredRejectedCompletedExpiredProposals();
+  });
+
+  it("should show only active proposals when the active checkbox is clicked", () => {
+    HomeUser.clickActiveCheckbox();
+    HomeUser.filteredActiveProposals();
+  });
+
+  it("should show only active proposals when the active checkbox is clicked and the page is reloaded", () => {
+    HomeUser.clickActiveCheckbox();
+    HomeUser.filteredActiveProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.activeFilterCheckboxChecked(true);
+    HomeUser.filteredActiveProposals();
+  });
+
+  it("should show only DDT proposals when the DDT checkbox is clicked", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickDDTCheckbox();
+    HomeUser.filteredDDTProposals();
+  });
+
+  it("should show only DDT proposals when the DDT checkbox is clicked and the page is reloaded", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickDDTCheckbox();
+    HomeUser.filteredDDTProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.ddtFilterCheckboxChecked(true);
+    HomeUser.filteredDDTProposals();
+  });
+
+  it("should show only commissioning proposals when the commissioning checkbox is clicked", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickCommissioningCheckbox();
+    HomeUser.filteredCommissioningProposals();
+  });
+
+  it("should show only commissioning proposals when the commissioning checkbox is clicked and the page is reloaded", () => {
+    const start_semester = "2006-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickCommissioningCheckbox();
+    HomeUser.filteredCommissioningProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.commissioningFilterCheckboxChecked(true);
+    HomeUser.filteredCommissioningProposals();
+  });
+
+  it("should show only science proposals when the science checkbox is clicked", () => {
+    HomeUser.clickScienceCheckbox();
+    HomeUser.filteredScienceProposals();
+  });
+
+  it("should show only science proposals when the science checkbox is clicked and the page is reloaded", () => {
+    HomeUser.clickScienceCheckbox();
+    HomeUser.filteredScienceProposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.scienceFilterCheckboxChecked(true);
+    HomeUser.filteredScienceProposals();
+  });
+
+  it("should show current and next semester, and additionally filter unchecked proposals", () => {
+    HomeUser.semesterRangeInputsDisabled(true);
+    HomeUser.semesterSelectDisabled(true);
+    freezeDate(2021, 6);
+    HomeUser.clickCurrentAndNextSemesterRadioButton();
+    HomeUser.filteredByCurrentAndNextSemester();
+    HomeUser.clickUncheckedCheckbox();
+    HomeUser.filteredUncheckedProposals();
+  });
+
+  it("should show only phase 1 proposals", () => {
+    HomeUser.clickPhase1Checkbox();
+    HomeUser.filteredPhase1Proposals();
+  });
+
+  it("should show only phase 1 proposals when phase 1 checkbox is checked and the page is reloaded", () => {
+    HomeUser.clickPhase1Checkbox();
+    HomeUser.filteredPhase1Proposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.phase1FilterCheckboxChecked(true);
+    HomeUser.filteredPhase1Proposals();
+  });
+
+  it("should show only phase 2 proposals", () => {
+    HomeUser.clickPhase2Checkbox();
+    HomeUser.filteredPhase2Proposals();
+  });
+
+  it("should show only phase 2 proposals when phase 2 checkbox is checked and the page is reloaded", () => {
+    HomeUser.clickPhase2Checkbox();
+    HomeUser.filteredPhase2Proposals();
+    cy.reload();
+    cy.wait(2000);
+    HomeUser.phase2FilterCheckboxChecked(true);
+    HomeUser.filteredPhase2Proposals();
+  });
+});
+
+describe("Home User - PI", () => {
+  beforeEach(() => {
+    USERNAME = Cypress.env("piUsername");
+
+    // Given I am logged in
+    login(USERNAME);
+
+    // And I visit the home page
+    HomePage.visit();
+  });
+
+  it("should show my proposals", () => {
+    HomeUser.clickMyProposalsCheckbox();
+    HomeUser.filteredMyProposals(USERNAME);
+  });
+});
+
+describe("Home User - PC", () => {
+  beforeEach(() => {
+    USERNAME = Cypress.env("pcUsername");
+
+    // Given I am logged in
+    login(USERNAME);
+
+    // And I visit the home page
+    HomePage.visit();
+  });
+
+  it("should show only proposals requiring your attention", () => {
+    HomeUser.clickRequiringAttentionCheckbox();
+    HomeUser.filteredProposalsRequiringAttention(USERNAME);
+  });
+
+  it("should show my proposals", () => {
+    HomeUser.clickMyProposalsCheckbox();
+    HomeUser.filteredMyProposals(USERNAME);
+  });
+});
+
+describe("Home User - SALT Astronomer", () => {
+  beforeEach(() => {
+    USERNAME = Cypress.env("saltAstronomerUsername");
+
+    // Given I am logged in
+    login(USERNAME);
+
+    // And I visit the home page
+    HomePage.visit();
+  });
+
+  it("should show only proposals requiring astronomer's attention", () => {
+    HomeUser.clickRequiringAttentionCheckbox();
+    HomeUser.filteredProposalsRequiringAttention(USERNAME);
+  });
+
+  it("should show my proposals", () => {
+    HomeUser.clickMyProposalsCheckbox();
+    HomeUser.filteredMyProposals(USERNAME);
+  });
+});

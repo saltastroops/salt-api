@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 
 import * as camelcaseKeys from "camelcase-keys";
@@ -36,9 +36,15 @@ export class RealProposalService implements ProposalService {
   /**
    * Get a list of proposals from the API server.
    */
-  getProposals(): Observable<ProposalListItem[]> {
+  getProposals(
+    from_semester: string,
+    to_semester: string,
+  ): Observable<ProposalListItem[]> {
     const uri = environment.apiUrl + "/proposals/";
-    return this.http.get<ProposalListItem[]>(uri).pipe(
+    const params = new HttpParams()
+      .set("from", from_semester)
+      .set("to", to_semester);
+    return this.http.get<ProposalListItem[]>(uri, { params }).pipe(
       map((proposals) => {
         return proposals.map((proposal) =>
           camelcaseKeys(proposal, { deep: true }),

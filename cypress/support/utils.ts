@@ -32,7 +32,7 @@ export function interceptIndefinitely(
  *
  * The user password is updated first.
  */
-export function login(username: string) {
+export function login(username: string): void {
   cy.task("updateUserPassword", username)
     .then((password: string) => {
       return cy.request({
@@ -55,7 +55,7 @@ export function login(username: string) {
 /**
  * Generate a random password.
  */
-export function randomPassword() {
+export function randomPassword(): string {
   // Taken from https://gist.github.com/6174/6062387
   return (
     Math.random().toString(36).substring(2, 15) +
@@ -68,7 +68,7 @@ export function randomPassword() {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceNetworkError() {
+export function forceNetworkError(): void {
   cy.intercept("/**", { forceNetworkError: true });
 }
 
@@ -77,7 +77,7 @@ export function forceNetworkError() {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceServerError() {
+export function forceServerError(): void {
   cy.intercept("/**", {
     statusCode: 500,
     body: { detail: "This is a server error" },
@@ -89,7 +89,7 @@ export function forceServerError() {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceAuthenticationError() {
+export function forceAuthenticationError(): void {
   cy.intercept("/**", {
     statusCode: 401,
     body: { detail: "Not Authorized" },
@@ -101,9 +101,27 @@ export function forceAuthenticationError() {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceForbiddenError() {
+export function forceForbiddenError(): void {
   cy.intercept("/**", {
     statusCode: 403,
     body: { detail: "Forbidden" },
   });
+}
+
+/**
+ * Override native global functions related to time.
+ *
+ * This function overrides the current datetime of the test setup.
+ */
+export function freezeDate(year: number, month: number): void {
+  const now = new Date(year, month);
+  cy.clock(now, ["Date"]);
+
+  // override Date class methods to return the same year and month
+  Date.prototype.getFullYear = () => {
+    return year;
+  };
+  Date.prototype.getMonth = () => {
+    return month;
+  };
 }

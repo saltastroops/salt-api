@@ -20,7 +20,10 @@ export abstract class ProposalService {
    *
    * If the request fails the stream terminates with a generic error message as error.
    */
-  public abstract getProposals(): Observable<ProposalListItem[]>;
+  public abstract getProposals(
+    from_semester: string,
+    to_semester: string,
+  ): Observable<ProposalListItem[]>;
 
   /**
    * Get the list of observation comments for a proposal from the API server.

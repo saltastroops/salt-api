@@ -6,6 +6,7 @@ export type UserRole =
   | "TAC Member";
 
 export interface User {
+  id: number;
   username: string;
   givenName: string;
   familyName: string;

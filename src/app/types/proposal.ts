@@ -17,6 +17,10 @@ export interface ChargedTime {
   priority4: number;
 }
 
+export interface ProposalUser extends ContactDetails {
+  id: number;
+}
+
 export interface ContactDetails {
   givenName: string;
   familyName: string;
@@ -35,17 +39,13 @@ export interface GeneralProposalInfo {
   targetOfOpportunity: boolean;
   totalRequestedTime: number;
   dataReleaseDate: string;
-  liaisonSaltAstronomer: ContactDetails | null;
+  liaisonSaltAstronomer: ProposalUser | null;
   summaryForSaltAstronomer: string;
   summaryForNightLog: string;
   isSelfActivatable: boolean;
 }
 
-export interface Investigator {
-  userId: number;
-  givenName: string;
-  familyName: string;
-  email: string;
+export interface Investigator extends ProposalUser {
   affiliation: Affiliation;
   isPc: boolean;
   isPi: boolean;
@@ -81,9 +81,9 @@ export interface ProposalListItem {
   phase: 1 | 2;
   status: ProposalStatus;
   proposalType: ProposalType;
-  principalInvestigator: ContactDetails;
-  principalContact: ContactDetails;
-  liaisonAstronomer: ContactDetails | null;
+  principalInvestigator: ProposalUser;
+  principalContact: ProposalUser;
+  liaisonAstronomer: ProposalUser | null;
 }
 
 export type ProposalStatusValue =

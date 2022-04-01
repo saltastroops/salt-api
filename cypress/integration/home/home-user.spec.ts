@@ -30,16 +30,13 @@ describe("Home User", () => {
     HomeUser.semesterRangeInputsDisabled(true);
     HomeUser.semesterSelectDisabled(true);
     HomeUser.clickCurrentSemesterRadioButton();
-    cy.wait(1000);
     HomeUser.filteredBySingleSemester(currentSemester());
   });
 
   it("should show proposals for the current semester when the page is reloaded after clicking the current semester filter", () => {
     HomeUser.clickCurrentSemesterRadioButton();
-    cy.wait(1000);
     HomeUser.filteredBySingleSemester(currentSemester());
     cy.reload();
-    cy.wait(2000);
     HomeUser.currentSemesterRadioButtonChecked(true);
     HomeUser.filteredBySingleSemester(currentSemester());
   });
@@ -65,7 +62,6 @@ describe("Home User", () => {
     HomeUser.semesterSelectDisabled(true);
     HomeUser.typeSemesterRanges(start_semester, end_semester);
     HomeUser.clickApplyButton();
-    cy.wait(2000);
     HomeUser.filteredBySemesterRange(start_semester, end_semester);
   });
 
@@ -75,7 +71,6 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, end_semester);
     HomeUser.clickApplyButton();
-    cy.wait(2000);
     HomeUser.filteredBySemesterRange(start_semester, end_semester);
     cy.reload();
     HomeUser.semesterRangeRadioButtonChecked(true);
@@ -112,7 +107,6 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
-    cy.wait(2000);
     HomeUser.filteredBySemesterRange(start_semester, "");
   });
 
@@ -121,7 +115,6 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges("", end_semester);
     HomeUser.clickApplyButton();
-    cy.wait(2000);
     HomeUser.filteredBySemesterRange("", end_semester);
   });
 
@@ -131,7 +124,6 @@ describe("Home User", () => {
     HomeUser.semesterRangeInputsDisabled(true);
     HomeUser.semesterSelectDisabled(false);
     HomeUser.selectSemester(select_semester);
-    cy.wait(2000);
     HomeUser.filteredBySingleSemester(select_semester);
   });
 
@@ -139,7 +131,6 @@ describe("Home User", () => {
     const select_semester = "2020-1";
     HomeUser.clickSingleSemesterRadioButton();
     HomeUser.selectSemester(select_semester);
-    cy.wait(2000);
     HomeUser.filteredBySingleSemester(select_semester);
     cy.reload();
     HomeUser.singleSemesterRadioButtonChecked(true);
@@ -149,11 +140,10 @@ describe("Home User", () => {
   it("should show proposals for the current and then show proposals for the selected semester", () => {
     const select_semester = "2018-1";
     HomeUser.clickCurrentSemesterRadioButton();
-    cy.wait(2000);
     HomeUser.filteredBySingleSemester(currentSemester());
     HomeUser.clickSingleSemesterRadioButton();
     HomeUser.selectSemester(select_semester);
-    cy.wait(2000);
+    cy.wait(1500);
     HomeUser.filteredBySingleSemester(select_semester);
   });
 
@@ -166,7 +156,6 @@ describe("Home User", () => {
     HomeUser.clickUncheckedCheckbox();
     HomeUser.filteredUncheckedProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.uncheckedFilterCheckboxChecked(true);
     HomeUser.filteredUncheckedProposals();
   });
@@ -180,7 +169,6 @@ describe("Home User", () => {
     HomeUser.clickUnassignedCheckbox();
     HomeUser.filteredUnassignedProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.unassignedFilterCheckboxChecked(true);
     HomeUser.filteredUnassignedProposals();
   });
@@ -202,7 +190,6 @@ describe("Home User", () => {
     HomeUser.clickCompletedCheckbox();
     HomeUser.filteredCompletedProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.completedFilterCheckboxChecked(true);
     HomeUser.filteredCompletedProposals();
   });
@@ -225,7 +212,6 @@ describe("Home User", () => {
     HomeUser.clickActiveCheckbox();
     HomeUser.filteredActiveProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.activeFilterCheckboxChecked(true);
     HomeUser.filteredActiveProposals();
   });
@@ -247,7 +233,6 @@ describe("Home User", () => {
     HomeUser.clickDDTCheckbox();
     HomeUser.filteredDDTProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.ddtFilterCheckboxChecked(true);
     HomeUser.filteredDDTProposals();
   });
@@ -269,7 +254,6 @@ describe("Home User", () => {
     HomeUser.clickCommissioningCheckbox();
     HomeUser.filteredCommissioningProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.commissioningFilterCheckboxChecked(true);
     HomeUser.filteredCommissioningProposals();
   });
@@ -283,7 +267,6 @@ describe("Home User", () => {
     HomeUser.clickScienceCheckbox();
     HomeUser.filteredScienceProposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.scienceFilterCheckboxChecked(true);
     HomeUser.filteredScienceProposals();
   });
@@ -307,7 +290,6 @@ describe("Home User", () => {
     HomeUser.clickPhase1Checkbox();
     HomeUser.filteredPhase1Proposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.phase1FilterCheckboxChecked(true);
     HomeUser.filteredPhase1Proposals();
   });
@@ -321,7 +303,6 @@ describe("Home User", () => {
     HomeUser.clickPhase2Checkbox();
     HomeUser.filteredPhase2Proposals();
     cy.reload();
-    cy.wait(2000);
     HomeUser.phase2FilterCheckboxChecked(true);
     HomeUser.filteredPhase2Proposals();
   });

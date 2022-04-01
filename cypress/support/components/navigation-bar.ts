@@ -6,6 +6,13 @@ const WELCOME_MESSAGE = '[data-test="welcome-message"]';
 const INLINE_LOGIN_ERROR = '[data-test="inline-login-error"]';
 const INLINE_LOGIN_SUBMIT = '[data-test="inline-login-submit"]';
 
+const HOME_TAB = '[data-test="home-tab"]';
+const SO_PAGE_TAB = '[data-test="so-page-tab"]';
+const SA_PAGES_TAB = '[data-test="sa-pages-tab"]';
+const OPTIONS_TAB = '[data-test="options-tab"]';
+const GRAVITATIONAL_WAVES_TAB = '[data-test="gravitational-waves-tab"]';
+const ADMIN_TAB = '[data-test="admin-tab"]';
+
 export class NavigationBar {
   static typeUsername(username: string) {
     cy.get('[data-test="inline-login-username"]').type(username);
@@ -67,5 +74,42 @@ export class NavigationBar {
 
   static hasNoWelcomeMessage() {
     return cy.get(WELCOME_MESSAGE).should("not.exist");
+  }
+
+  static hasHomeTab() {
+    cy.get(HOME_TAB).should("be.visible");
+  }
+  static hasNoHomeTab() {
+    cy.get(HOME_TAB).should("not.exist");
+  }
+  static hasSOPageTab() {
+    cy.get(SO_PAGE_TAB).should("be.visible");
+  }
+  static hasNoSOPageTab() {
+    cy.get(SO_PAGE_TAB).should("not.exist");
+  }
+  static hasSAPagesTab() {
+    cy.get(SA_PAGES_TAB).should("be.visible");
+  }
+  static hasNoSAPagesTab() {
+    cy.get(SA_PAGES_TAB).should("not.exist");
+  }
+  static hasOptionsTab() {
+    cy.get(OPTIONS_TAB).should("be.visible");
+  }
+  static hasNoOptionsTab() {
+    cy.get(OPTIONS_TAB).should("not.exist");
+  }
+  static hasAdminTab() {
+    cy.get(ADMIN_TAB).should("be.visible");
+  }
+  static hasNoAdminTab() {
+    cy.get(ADMIN_TAB).should("not.exist");
+  }
+  static hasGravitationalWavesTab() {
+    cy.get(GRAVITATIONAL_WAVES_TAB).should("be.visible");
+  }
+  static hasNoGravitationalWavesTab() {
+    cy.get(GRAVITATIONAL_WAVES_TAB).should("not.exist");
   }
 }

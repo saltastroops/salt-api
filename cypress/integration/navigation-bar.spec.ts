@@ -8,6 +8,8 @@ import {
 } from "../support/utils";
 
 const USERNAME = "hettlage";
+const ADMINISTRATOR = "nhlavutelo";
+const INVESTIGATOR = "kevin";
 
 describe("Inline login form", () => {
   beforeEach(() => {
@@ -83,7 +85,7 @@ describe("Inline login form", () => {
   });
 
   it("should indicate a loading state until an unsuccessful login request finishes", () => {
-    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+    cy.task("updateUserPassword", USERNAME).then(() => {
       const interception = interceptIndefinitely("token");
       HomePage.visit();
       NavigationBar.typeUsername(USERNAME);
@@ -95,4 +97,66 @@ describe("Inline login form", () => {
       });
     });
   });
+  // TODO the tab should be removed when the user logout
+});
+
+describe("Navigation bar", () => {
+  beforeEach(() => {
+    // Ensure the inline login form is not hidden because of a small screen size
+    cy.viewport(1500, 2000);
+  });
+  it("Should show all tabs for admin", () => {
+    cy.task("updateUserPassword", ADMINISTRATOR).then((password: string) => {
+      cy.task("getUser", ADMINISTRATOR).then(() => {
+        HomePage.visit();
+        NavigationBar.typeUsername(ADMINISTRATOR);
+        NavigationBar.typePassword(password);
+        NavigationBar.submitLogin();
+        // When the user had logged in the following tabs should be visible
+        NavigationBar.hasHomeTab();
+        NavigationBar.hasSOPageTab();
+        NavigationBar.hasSAPagesTab();
+        NavigationBar.hasOptionsTab();
+        NavigationBar.hasGravitationalWavesTab();
+        NavigationBar.hasAdminTab();
+      });
+    });
+  });
+
+  it("Should show only show tabs available to Investigators", () => {
+    cy.task("updateUserPassword", INVESTIGATOR).then((password: string) => {
+      cy.task("getUser", INVESTIGATOR).then(() => {
+        HomePage.visit();
+        NavigationBar.typeUsername(INVESTIGATOR);
+        NavigationBar.typePassword(password);
+        NavigationBar.submitLogin();
+        // When the user had logged in the following tabs should be visible
+        NavigationBar.hasHomeTab();
+        NavigationBar.hasNoSOPageTab();
+        NavigationBar.hasNoSAPagesTab();
+        NavigationBar.hasOptionsTab();
+        NavigationBar.hasGravitationalWavesTab();
+        NavigationBar.hasNoAdminTab();
+      });
+    });
+  });
+
+  // it("Should show only show tabs available to SALT Astronomers", () => {
+  //   cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
+  //     cy.task("getUser", SALT_ASTRONOMER).then(() => {
+  //       HomePage.visit();
+  //       NavigationBar.typeUsername(SALT_ASTRONOMER);
+  //       NavigationBar.typePassword(password);
+  //       NavigationBar.submitLogin();
+  //       // When the user had logged in the following tabs should be visible
+  //       NavigationBar.hasHomeTab();
+  //       NavigationBar.hasSOPageTab();
+  //       NavigationBar.hasSAPagesTab();
+  //       NavigationBar.hasOptionsTab();
+  //       NavigationBar.hasGravitationalWavesTab();
+  //       NavigationBar.hasNoAdminTab();
+  //     });
+  //   })
+  //
+  // })
 });

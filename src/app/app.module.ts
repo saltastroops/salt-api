@@ -74,6 +74,7 @@ import { RealAuthenticationService } from "./service/real/real-authentication.se
 import { RealBlockService } from "./service/real/real-block.service";
 import { RealProposalService } from "./service/real/real-proposal.service";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
+import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 
 @NgModule({
   declarations: [
@@ -136,6 +137,7 @@ import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinne
     HomeGuestComponent,
     NavigationBarComponent,
     ChangePasswordComponent,
+    PageMissingComponent,
   ],
   imports: [
     BrowserModule,

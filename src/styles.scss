@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-
+// Variables overriding Bulma values. These must be set before Bulma is imported.
 $primary: #00667d;
 $success: #27e8a7;
 $danger: #df4576;
@@ -7,6 +7,17 @@ $warning: #ccaa00;
 $link: #0e0eee;
 $white: #f2f6fa;
 $size-6: 0.8rem;
+
+$navbar-burger-color: #f1f1f1;
+$navbar-background-color: #273643;
+$navbar-item-hover-background-color: #3f4f62;
+$navbar-item-hover-color: $white;
+$navbar-item-color: #f1f1f1;
+$navbar-dropdown-arrow: #f1f1f1;
+$navbar-tab-active-color: #f1f1f1;
+$navbar-tab-active-background-color: #273643;
+$navbar-dropdown-background-color: $primary;
+// End: Variables overriding Bulma values
 
 @import "./node_modules/bulma/bulma.sass";
 

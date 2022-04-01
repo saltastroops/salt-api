@@ -1,0 +1,26 @@
+@import "src/styles";
+
+.has-two-columns {
+  align-items: center;
+}
+.has-two-columns > div {
+  margin-right: 1em;
+}
+.has-two-columns > div:last-child {
+  margin-right: 0;
+}
+
+$navbar-item-color: lighten($text, 30%);
+
+.navbar-item.is-tab {
+  border-bottom: 0 solid transparent;
+  min-height: -1rem;
+  padding-bottom: calc(0.5rem - 1px);
+}
+
+.navbar-item.is-tab.is-active {
+  border-bottom-color: $white;
+}
+.has-two-columns {
+  grid-template-columns: 70% 30%;
+}

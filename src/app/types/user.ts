@@ -3,6 +3,7 @@ export type UserRole =
   | "SALT Astronomer"
   | "SALT Operator"
   | "TAC Chair"
+  | "Technician"
   | "TAC Member";
 
 export interface User {

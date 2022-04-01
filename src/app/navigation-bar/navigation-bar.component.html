@@ -1,26 +1,113 @@
-<div class="navbar">
-  <div class="navbar-menu">
-    <div class="navbar-start">
-      <div class="navbar-item"><a [routerLink]="['/']">Home</a></div>
-      <!--    <input type="button" id="register" value="Register new user"/>-->
-    </div>
-    <div class="navbar-end">
-      <ng-container *ngIf="user$ | async as user; else inlineLoginForm">
-        <div class="navbar-item welcome-message" data-test="welcome-message">
-          Hello {{ user.givenName }} {{ user.familyName }}
-        </div>
-        <div
-          class="navbar-item is-clickable"
-          (click)="logout()"
-          data-test="logout"
-        >
-          Logout
-        </div>
-      </ng-container>
+<div>
+  <div class="navbar">
+    <div class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" routerLink="/" data-test="home-tab"> Home </a>
+        <!--    <input type="button" id="register" value="Register new user"/>-->
+        <ng-container *ngIf="user$ | async as user">
+          <a
+            *ngIf="hasAnyRole(user, ['SALT Astronomer', 'SALT Operator'])"
+            class="navbar-item"
+            routerLink="so-pages"
+            data-test="so-page-tab"
+          >
+            SO Page
+          </a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link" data-test="options-tab"> Options </a>
+            <div class="navbar-dropdown">
+              <a
+                *ngIf="hasAnyRole(user, ['SALT Astronomer'])"
+                routerLink="investigators"
+                class="navbar-item"
+              >
+                List Investigators
+              </a>
+              <a routerLink="edit-contact-info" class="navbar-item">
+                Edit Contact Information
+              </a>
+              <a routerLink="add-contact" class="navbar-item"> Add Contact </a>
+              <a routerLink="user-statistics" class="navbar-item">
+                Edit User Statistics
+              </a>
+              <a
+                *ngIf="hasAnyRole(user, ['Administrator'])"
+                routerLink="edit-rights"
+                class="navbar-item"
+              >
+                Edit rights
+              </a>
+            </div>
+          </div>
+          <div
+            class="navbar-item has-dropdown is-hoverable"
+            *ngIf="hasAnyRole(user, ['Administrator'])"
+          >
+            <a class="navbar-link" data-test="admin-tab"> Admin </a>
+            <div class="navbar-dropdown">
+              <a routerLink="/xx1" class="navbar-item">
+                Change Default Settings
+              </a>
+              <a routerLink="/xx2" class="navbar-item"> Change versions </a>
+              <a routerLink="/xx3" class="navbar-item"> View Mapper Logs </a>
+              <a routerLink="switch-user" class="navbar-item"> Switch user </a>
+            </div>
+          </div>
+          <div
+            class="navbar-item has-dropdown is-hoverable"
+            *ngIf="
+              hasAnyRole(user, [
+                'SALT Astronomer',
+                'SALT Operator',
+                'Technician'
+              ])
+            "
+          >
+            <a class="navbar-link" data-test="sa-pages-tab"> SA Pages </a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" routerLink="mos"> MOS </a>
+              <a class="navbar-item" routerLink="required-filters">
+                Required Filters
+              </a>
+              <a class="navbar-item" routerLink="filters-no-longer-needed">
+                Filters No Longer Needed
+              </a>
+              <a class="navbar-item" routerLink="fabry-perot"> Fabry-Perot </a>
+            </div>
+          </div>
 
-      <ng-template #inlineLoginForm>
-        <wm-inline-login class="navbar-item"></wm-inline-login>
-      </ng-template>
+          <a
+            class="navbar-item"
+            routerLink="gravitational-waves"
+            data-test="gravitational-waves-tab"
+          >
+            Gravitational Waves
+          </a>
+          <div class="navbar-item has-two-columns">
+            <div>
+              <input class="input" type="text" placeholder="Proposal code" />
+            </div>
+            <div><button class="input" type="button">Go to</button></div>
+          </div>
+        </ng-container>
+      </div>
+      <div class="navbar-end">
+        <ng-container *ngIf="user$ | async as user; else inlineLoginForm">
+          <div class="navbar-item welcome-message" data-test="welcome-message">
+            Hello {{ user.givenName }} {{ user.familyName }}
+          </div>
+          <div
+            class="navbar-item is-clickable"
+            (click)="logout()"
+            data-test="logout"
+          >
+            Logout
+          </div>
+        </ng-container>
+        <ng-template #inlineLoginForm>
+          <wm-inline-login class="navbar-item"></wm-inline-login>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>

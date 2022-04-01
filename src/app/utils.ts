@@ -1,4 +1,5 @@
 import { AccessToken } from "./types/authentication";
+import { User, UserRole } from "./types/user";
 
 export const GENERIC_ERROR_MESSAGE =
   "Sorry, something has gone wrong. Please try again later.";
@@ -183,4 +184,11 @@ export function degreesToDms(deg: number, decimal_places = 2): string {
   const dms_string = dec_degrees + ":" + dec_arcminutes + ":" + dec_arcseconds;
 
   return sign < 0 ? "-" + dms_string : "+" + dms_string;
+}
+
+export function hasAnyRole(user: User, roles: UserRole[]): boolean {
+  if (user.roles.includes("Administrator")) {
+    return true;
+  }
+  return user.roles.some((role) => roles.includes(role));
 }

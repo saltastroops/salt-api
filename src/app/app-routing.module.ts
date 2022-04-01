@@ -7,6 +7,7 @@ import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password
 import { LoginComponent } from "./login/login.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { AuthGuardService } from "./service/auth-guard.service";
+import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -18,6 +19,10 @@ const routes: Routes = [
   },
   { path: "forgot-password", component: ForgotPasswordComponent },
   { path: "change-password/:token", component: ChangePasswordComponent },
+  { path: "so-pages", component: PageMissingComponent },
+  { path: "investigators", component: PageMissingComponent },
+  { path: "page-missing", component: PageMissingComponent },
+  { path: "**", redirectTo: "/page-missing", pathMatch: "full" },
 ];
 
 @NgModule({

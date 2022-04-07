@@ -279,7 +279,7 @@ export function AutoUnsubcribe() {
           property.unsubscribe();
         }
       }
-      orig.apply();
+      orig?.apply();
     };
   };
 }

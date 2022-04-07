@@ -1,4 +1,8 @@
-import { degreesToDms, degreesToHms } from "./utils";
+import {
+  convertRightAscensionHMSToDegrees,
+  degreesToDms,
+  degreesToHms,
+} from "./utils";
 
 describe("degreesToDms", () => {
   it("should return 55.23456 degrees in degrees:minutes:seconds", () => {
@@ -45,5 +49,117 @@ describe("Unit test for angle (degrees) to hours:minutes:seconds conversion func
 
   it("should raise an error for a negative degrees value", () => {
     expect(() => degreesToHms(-55.23456)).toThrowError(/negative/);
+  });
+});
+
+describe("Unit test for hours:minutes:seconds to angle (degrees) conversion functions ", () => {
+  it("It should work", () => {
+    expect(convertRightAscensionHMSToDegrees("0:10:10")).toBeCloseTo(
+      2.541667,
+      5,
+    );
+    expect(convertRightAscensionHMSToDegrees("10:10:10")).toBeCloseTo(
+      152.54166666666666,
+      5,
+    );
+    expect(convertRightAscensionHMSToDegrees("10:0:10")).toBeCloseTo(
+      150.04166666666669,
+      5,
+    );
+    expect(convertRightAscensionHMSToDegrees("10:10:00")).toBeCloseTo(152.5, 5);
+  });
+  it("should return 0 degrees for 0:00:00", () => {
+    expect(convertRightAscensionHMSToDegrees("0:00:00")).toBeCloseTo(0, 5);
+  });
+
+  it("should return 180 degrees for 12:00:00", () => {
+    expect(convertRightAscensionHMSToDegrees("12:00:00")).toBeCloseTo(180, 5);
+  });
+
+  it("should return 22.5 degrees for 01:30:00.00", () => {
+    expect(convertRightAscensionHMSToDegrees("01:30:00.00")).toBeCloseTo(
+      22.5,
+      5,
+    );
+  });
+
+  it("should return 60 for 04:00:00.00", () => {
+    expect(convertRightAscensionHMSToDegrees("04:00:00.00")).toBeCloseTo(60, 5);
+  });
+
+  it("should default seconds to 0, if seconds are not provided", () => {
+    expect(convertRightAscensionHMSToDegrees("04:00")).toBeCloseTo(60, 5);
+  });
+
+  it("should default seconds and minutes to 0, if seconds and minutes are not provided", () => {
+    expect(convertRightAscensionHMSToDegrees("04")).toBeCloseTo(60, 5);
+  });
+
+  it("should raise an error for a negative hours", () => {
+    expect(() =>
+      convertRightAscensionHMSToDegrees("-04:00:00.00"),
+    ).toThrowError(/less than 0/);
+  });
+  it("should raise an error for an invalid format", () => {
+    [
+      "::",
+      ":05:05:05",
+      ":05:05:05:",
+      "05:05:05:",
+      ":05:",
+      ":05",
+      "05'",
+      "05;",
+      "05,",
+      "05.",
+      '05"',
+      "05 ",
+      "12.5.0.9",
+    ].forEach((ra) => {
+      expect(() => convertRightAscensionHMSToDegrees(ra)).toThrowError(
+        /Right ascension is invalid/,
+      );
+    });
+  });
+
+  it("should raise an error for hours greater or equal to 24", () => {
+    expect(() => convertRightAscensionHMSToDegrees("25:00:15")).toThrowError(
+      /between 0 and 23/,
+    );
+    expect(() => convertRightAscensionHMSToDegrees("24:00:00")).toThrowError(
+      /between 0 and 23/,
+    );
+  });
+
+  it("should raise an error for minutes greater than or equal to 60", () => {
+    expect(() => convertRightAscensionHMSToDegrees("12:60:30")).toThrowError(
+      /not be greater than or equal to 60/,
+    );
+  });
+
+  it("should raise an error for seconds greater or equal to 60", () => {
+    expect(() => convertRightAscensionHMSToDegrees("12:30:60")).toThrowError(
+      /not be greater than or equal to 60/,
+    );
+  });
+  it("should raise an error for characters", () => {
+    expect(() => convertRightAscensionHMSToDegrees("aa:30:60")).toThrowError(
+      /Right ascension is invalid/,
+    );
+    expect(() => convertRightAscensionHMSToDegrees("aa:bb:60")).toThrowError(
+      /Right ascension is invalid/,
+    );
+    expect(() => convertRightAscensionHMSToDegrees("12:30:cc")).toThrowError(
+      /Right ascension is invalid/,
+    );
+    expect(() => convertRightAscensionHMSToDegrees("12:bb:cc")).toThrowError(
+      /Right ascension is invalid/,
+    );
+    expect(() => convertRightAscensionHMSToDegrees("aa:bb:60")).toThrowError(
+      /Right ascension is invalid/,
+    );
+    expect(() => convertRightAscensionHMSToDegrees("aa:bb:cc")).toThrowError(
+      /Right ascension is invalid/,
+    );
   });
 });

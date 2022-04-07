@@ -1,0 +1,11 @@
+<div *ngIf="obsoleteMasks | async as o" class="masks-to-remove">
+  <p>
+    The following RSS masks are currently in the slit mask magazine, but aren't
+    needed any longer.
+  </p>
+  <div class="content is-take-mask-out-background">
+    <ul>
+      <li *ngFor="let s of o">{{ s }}</li>
+    </ul>
+  </div>
+</div>

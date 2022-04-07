@@ -1,0 +1,114 @@
+<div style="position: relative">
+  <div *ngIf="loading" [ngClass]="loading ? 'is-overlay' : ''">
+    <wm-loading-spinner></wm-loading-spinner>
+  </div>
+  <wm-mos-mask-update-modal #mosModal></wm-mos-mask-update-modal>
+  <table class="table table-cell-heading-color">
+    <thead>
+      <tr class="table-header">
+        <th>Proposal Code</th>
+        <th>PI</th>
+        <th>Liaison SA</th>
+        <th>Block Name</th>
+        <th>Block Status</th>
+        <th>Priority</th>
+        <th>RA Centre</th>
+        <th>Barcode</th>
+        <th>Cut By</th>
+        <th>Cut Date</th>
+        <th>In Magazine?</th>
+        <th>Block Finished?</th>
+        <th>Edit</th>
+        <th>Other Barcodes</th>
+        <th>Mask Comment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container
+        *ngFor="let mb of mosBlocks | sortByArgs: 'proposalCode':'blockName'"
+      >
+        <tr [ngClass]="rowColor(mb)">
+          <td>
+            <a [routerLink]="['/proposal', mb.proposalCode]">
+              {{ mb.proposalCode }}
+            </a>
+          </td>
+          <td>{{ mb.piSurname }}</td>
+          <td>{{ mb.liaisonAstronomer }}</td>
+          <td>{{ mb.blockName }}</td>
+          <td>{{ mb.blockStatus }}</td>
+          <td>{{ mb.priority }}</td>
+          <td>{{ degreesToHms(mb.raCenter, 0) }}</td>
+          <td>{{ mb.barcode }}</td>
+          <td>{{ mb.cutBy }}</td>
+          <td>{{ mb.cutDate }}</td>
+          <td>
+            <div
+              *ngIf="
+                mosMasksInMagazine.includes(mb.barcode);
+                then tick;
+                else cross
+              "
+            ></div>
+            <ng-template #tick>
+              <img
+                class="icon is-small"
+                src="/assets/icons/noun_tick_2836262-green.svg"
+                alt="The mask is in the magazine"
+              />
+            </ng-template>
+            <ng-template #cross>
+              <img
+                class="icon is-small"
+                src="/assets/icons/noun_Cross_2120375.svg"
+                alt="The mask is not in the magazine"
+              />
+            </ng-template>
+          </td>
+          <td>
+            <div *ngIf="mb.nVisits <= mb.nDone; then tick; else cross"></div>
+            <ng-template #tick>
+              <img
+                class="icon is-small"
+                src="/assets/icons/noun_tick_2836262-green.svg"
+                alt="The block is complete"
+              />
+            </ng-template>
+            <ng-template #cross>
+              <img
+                class="icon is-small"
+                src="/assets/icons/noun_Cross_2120375.svg"
+                alt="The block is not complete"
+              />
+            </ng-template>
+          </td>
+          <td>
+            <button
+              [disabled]="loading"
+              class="button"
+              (click)="mosModal.openModal(mb)"
+            >
+              Edit
+            </button>
+          </td>
+          <td>TODO Still to ask</td>
+          <td>{{ mb.maskComment }}</td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+  <div *ngIf="!mosBlocks?.length" class="has-text-centered">
+    <img
+      class="icon is-large"
+      src="/assets/icons/noun-zero-document-723179.svg"
+      alt="No MOS blocks found"
+    />
+  </div>
+  <div *ngIf="mosBlockError" class="has-text-centered">
+    <img
+      class="icon is-small"
+      src="/assets/icons/noun-error-1645402.svg"
+      alt="Error"
+    />
+  </div>
+</div>

@@ -1,0 +1,131 @@
+<div>
+  <h2 class="title is-2">MOS</h2>
+  <hr class="heading-line mos-header" />
+  <wm-obsolete-masks></wm-obsolete-masks>
+  <div>
+    <div>
+      <div class="has-two-columns has-long-spaces">
+        <div>Semester</div>
+        <div>
+          <div class="select">
+            <select
+              [(ngModel)]="selectedSemester"
+              id="semester"
+              (change)="semesterChange($event)"
+            >
+              <option *ngFor="let semester of availableSemesters">
+                {{ semester }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="isIncludeNextSemester"
+            #includeNextSemester
+            (change)="
+              includeSemester(
+                'mosIncludeNextSemester',
+                includeNextSemester.checked
+              )
+            "
+          />
+          Include next semester
+        </label>
+      </div>
+      <div>
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="isIncludePreviousSemester"
+            id="includePreviousSemester"
+            #includePreviousSemester
+            (change)="
+              includeSemester(
+                'mosIncludePreviousSemester',
+                includePreviousSemester.checked
+              )
+            "
+          />
+          Include previous semester
+        </label>
+      </div>
+      <table class="table">
+        <tr>
+          <td>Filter by PI</td>
+          <td>
+            <input
+              class="input is-small"
+              type="text"
+              id="piSurname"
+              #piSurname
+              (keyup)="filterBlocksForDisplay()"
+            />
+          </td>
+          <td>Proposal Code</td>
+          <td>
+            <input
+              #proposalCode
+              class="input is-small"
+              type="text"
+              (keyup)="filterBlocksForDisplay()"
+            />
+          </td>
+          <td>Barcode</td>
+          <td>
+            <input
+              id="barcode"
+              #barcode
+              class="input is-small"
+              type="text"
+              (keyup)="filterBlocksForDisplay()"
+            />
+          </td>
+          <td>RA Centre between</td>
+          <td class="is-one-third">
+            <input
+              [className]="raMinError ? 'is-danger input' : 'input'"
+              class="input is-small"
+              type="text"
+              #raMinimum
+              (keyup)="filterBlocksForDisplay()"
+            />
+            <p class="help is-danger" *ngIf="raMinError">
+              {{ raMinError }}
+            </p>
+          </td>
+          <td>hh:mm:ss</td>
+          <td>and</td>
+          <td>
+            <input
+              [className]="raMaxError ? 'is-danger input' : 'input'"
+              class="input is-small"
+              type="text"
+              #raMaximum
+              (keyup)="filterBlocksForDisplay()"
+            />
+            <p class="help is-danger" *ngIf="raMaxError">
+              {{ raMaxError }}
+            </p>
+          </td>
+          <td>hh:mm:ss</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <wm-mos-legend></wm-mos-legend>
+
+  <div *ngIf="error">
+    <h4 class="subtitle is-4 invalid-feedback">{{ error }}</h4>
+  </div>
+
+  <wm-mos-blocks-table
+    [mosBlocks]="displayedMosBlocks"
+    [requiredMosMasks]="requiredMosMasks"
+    [loading]="loading"
+  ></wm-mos-blocks-table>
+</div>

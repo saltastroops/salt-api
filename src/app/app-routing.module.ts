@@ -5,6 +5,7 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { MosComponent } from "./mos/mos.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { AuthGuardService } from "./service/auth-guard.service";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
@@ -19,6 +20,8 @@ const routes: Routes = [
   },
   { path: "forgot-password", component: ForgotPasswordComponent },
   { path: "change-password/:token", component: ChangePasswordComponent },
+  { path: "mos", component: MosComponent, canActivate: [AuthGuardService] },
+
   { path: "so-pages", component: PageMissingComponent },
   { path: "investigators", component: PageMissingComponent },
   { path: "page-missing", component: PageMissingComponent },

@@ -5,6 +5,7 @@ import {
   FormGroup,
   Validators,
 } from "@angular/forms";
+import { Router } from "@angular/router";
 
 import { AuthenticationService } from "../../service/authentication.service";
 import { GENERIC_ERROR_MESSAGE } from "../../utils";
@@ -22,6 +23,7 @@ export class InlineLoginComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthenticationService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +55,17 @@ export class InlineLoginComponent implements OnInit {
       .login(this.f.username.value, this.f.password.value)
       .subscribe(
         () => {
+          const redirection = this.authService.getRedirection();
+          const redirectUrlParts =
+            redirection && redirection.urlParts.length
+              ? redirection.urlParts
+              : ["/"];
+          const redirectQueryParams = redirection
+            ? redirection.queryParams
+            : {};
+          this.router.navigate(redirectUrlParts, {
+            queryParams: redirectQueryParams,
+          });
           this.loading = false;
         },
         (error: { status: number; error: string }) => {

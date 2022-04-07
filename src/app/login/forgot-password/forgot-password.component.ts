@@ -7,6 +7,8 @@ import {
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
+import { Subscription } from "rxjs";
+
 import { AuthenticationService } from "../../service/authentication.service";
 import { GENERIC_ERROR_MESSAGE } from "../../utils";
 
@@ -21,6 +23,8 @@ export class ForgotPasswordComponent implements OnInit {
   loading = false;
   error: string | undefined = undefined;
   showSuccessMessage = false;
+  private authSubscription!: Subscription;
+
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -41,7 +45,7 @@ export class ForgotPasswordComponent implements OnInit {
       return;
     }
     this.loading = true;
-    this.authenticationService
+    this.authSubscription = this.authenticationService
       .sendResetPassword(this.f.usernameEmail.value)
       .subscribe(
         () => {

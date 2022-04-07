@@ -58,8 +58,7 @@ export class LoginComponent implements OnInit {
     this.authenticationService
       .login(this.f.username.value, this.f.password.value)
       .subscribe(
-        (data: AccessToken) => {
-          this.authenticationService.setAccessToken(data);
+        () => {
           const redirection = this.authenticationService.getRedirection();
           const redirectUrlParts =
             redirection && redirection.urlParts.length

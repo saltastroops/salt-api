@@ -7,7 +7,7 @@ import { AuthenticationService } from "../../service/authentication.service";
 import { ProposalService } from "../../service/proposal.service";
 import { ProposalListItem } from "../../types/proposal";
 import { User } from "../../types/user";
-import { currentSemester } from "../../utils";
+import { availableSemesters, currentSemester } from "../../utils";
 
 @Component({
   selector: "wm-home-user",
@@ -22,6 +22,7 @@ export class HomeUserComponent implements OnInit {
   semesterRange$ = new Subject<[string, string]>();
 
   selectedSemester: string = currentSemester();
+  availableSemesters: string[] = availableSemesters();
   startSemester = "";
   endSemester = "";
   startSemesterValue: string | null = "";
@@ -97,10 +98,10 @@ export class HomeUserComponent implements OnInit {
     this.filterFunctions["rejected_completed_expired"] =
       this.filterRejectedCompletedExpiredProposals;
 
-    const index = this.availableSemesters().findIndex(
+    const index = this.availableSemesters.findIndex(
       (semester) => semester == currentSemester(),
     );
-    this.nextSemester = this.availableSemesters()[index + 1];
+    this.nextSemester = this.availableSemesters[index + 1];
   }
 
   loadFilters(): void {
@@ -228,7 +229,7 @@ export class HomeUserComponent implements OnInit {
       this.endSemester = end_s;
       this.isValidSemester = true;
       this.semesterRange$.next([start_s, end_s]);
-    } catch (e) {
+    } catch (e: any) {
       this.semesterErrorMessage = e.message;
       this.isValidSemester = false;
     }
@@ -271,19 +272,9 @@ export class HomeUserComponent implements OnInit {
     this.filterProposalsBySemesters(start_semester, end_semester);
   }
 
-  availableSemesters(): string[] {
-    const startYear = 2006;
-    const endYear = new Date().getFullYear() + 5;
-    const semesters: string[] = [];
-    for (let year = startYear; year <= endYear; year++) {
-      semesters.push(`${year}-1`, `${year}-2`);
-    }
-    return semesters;
-  }
-
   onSemesterSelect(event: Event): void {
     const index = parseInt((event.target as HTMLSelectElement).value, 10);
-    this.selectedSemester = this.availableSemesters()[index];
+    this.selectedSemester = this.availableSemesters[index];
     this.filterProposalsBy["selected_semester"] = this.selectedSemester;
     this.storeFilters();
     this.filterBySingleSemester();

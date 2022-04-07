@@ -17,9 +17,15 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { MosLegendComponent } from "./mos/legend/mos-legend.component";
+import { MosBlocksTableComponent } from "./mos/mos-blocks-table/mos-blocks-table.component";
+import { MosMaskUpdateModalComponent } from "./mos/mos-blocks-table/mos-mask-update-modal/mos-mask-update-modal.component";
+import { MosComponent } from "./mos/mos.component";
+import { ObsoleteMasksComponent } from "./mos/obsolete-masks/obsolete-masks.component";
 import { InlineLoginComponent } from "./navigation-bar/inline-login/inline-login.component";
 import { NavigationBarComponent } from "./navigation-bar/navigation-bar.component";
-import { nl2brPipe } from "./nl2br.pipe";
+import { nl2brPipe } from "./pipes/nl2br.pipe";
+import { SortByArgsPipe } from "./pipes/sort-by-args.pipe";
 import { BlockSummariesComponent } from "./proposal/blocks/block-summaries/block-summaries.component";
 import { BlockSelectionComponent } from "./proposal/blocks/block-view/block-selection/block-selection.component";
 import { BlockViewComponent } from "./proposal/blocks/block-view/block-view.component";
@@ -69,6 +75,7 @@ import { AuthGuardService } from "./service/auth-guard.service";
 import { AuthenticationInterceptor } from "./service/authentication.interceptor.service";
 import { AuthenticationService } from "./service/authentication.service";
 import { BlockService } from "./service/block.service";
+import { MosService } from "./service/mos.service";
 import { ProposalService } from "./service/proposal.service";
 import { RealAuthenticationService } from "./service/real/real-authentication.service";
 import { RealBlockService } from "./service/real/real-block.service";
@@ -137,6 +144,12 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
     HomeGuestComponent,
     NavigationBarComponent,
     ChangePasswordComponent,
+    MosComponent,
+    MosLegendComponent,
+    MosBlocksTableComponent,
+    MosMaskUpdateModalComponent,
+    SortByArgsPipe,
+    ObsoleteMasksComponent,
     PageMissingComponent,
   ],
   imports: [
@@ -172,6 +185,7 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
       useClass: AuthenticationInterceptor,
       multi: true,
     },
+    MosService,
   ],
   bootstrap: [AppComponent],
 })

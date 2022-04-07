@@ -92,7 +92,7 @@
       (click)="onSemesterFilterClick('single_semester')"
       data-test="single-semester"
     />
-    Show proposals for the selected Semester
+    Show proposals for the selected semester
     <select
       id="semester"
       (change)="onSemesterSelect($event)"
@@ -100,7 +100,7 @@
       data-test="select-semester"
     >
       <option
-        *ngFor="let semester of availableSemesters(); index as i"
+        *ngFor="let semester of availableSemesters; index as i"
         [value]="i"
         [selected]="semester === selectedSemester"
       >
@@ -234,7 +234,7 @@ Show
   </label>
 </div>
 <br /><br />
-<div class="table alternate-background">
+<div class="grid-table alternate-background">
   <div class="row secondary-header">
     <div class="has-text-centered">Proposals</div>
   </div>
@@ -288,7 +288,7 @@ Show
     </div>
   </ng-template>
 </div>
-<div class="table legend">
+<div class="grid-table legend">
   <div class="row headers">
     <div class="has-text-centered">Legend</div>
   </div>

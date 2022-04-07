@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
 
 import { Observable } from "rxjs";
 
@@ -16,7 +17,10 @@ export class NavigationBarComponent implements OnInit {
   selectedUri!: string;
   hasAnyRole = hasAnyRole;
 
-  constructor(private authService: AuthenticationService) {}
+  constructor(
+    private authService: AuthenticationService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.selectedUri = sessionStorage.getItem("selectedUri") || "";
@@ -25,6 +29,7 @@ export class NavigationBarComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(["/"]);
   }
 
   selectUri(uri: string): void {

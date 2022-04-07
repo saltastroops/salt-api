@@ -35,7 +35,6 @@ describe("RealProposalService", () => {
 
     service.getProposal("2020-1-MLT-005").subscribe((data) => {
       const expected = camelcaseKeys(proposal, { deep: true });
-      console.log({ data, expected });
       expect(data).toEqual(expected);
     });
 

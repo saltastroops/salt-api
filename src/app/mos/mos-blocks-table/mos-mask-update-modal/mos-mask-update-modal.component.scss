@@ -1,0 +1,10 @@
+@import "src/styles";
+
+.danger {
+  background-color: $danger;
+  opacity: 0.5;
+}
+
+.invalid-feedback {
+  font-size: 150%;
+}

@@ -39,10 +39,18 @@ $proposal-summary-color: #f5b642;
 $error-background-color: #ffb0b0;
 $success-background-color: #b0ffb0;
 $completed-background-color: #5aeafa;
+$warning-background-color: #fce97c;
+$blue-background-color: #70e7ff;
 $table-border-color: #aaaaaa;
 $hrs-color: #9309ce;
 $bvit-color: #d44f12;
 $salticam-color: #0c5fc4;
+
+$red-background: #ffb0b0;
+$clear-background: transparent;
+$orange-background: #ccaa00;
+$yellow-background: #e7fa5a;
+$mos-color: #5f8ba3;
 
 body {
   font-family: "Helvetica Neue", sans-serif;
@@ -58,7 +66,7 @@ body {
   background: $dark-strip;
 }
 
-.table {
+.grid-table {
   display: grid;
   grid-template-columns: 1fr;
   grid-row-gap: 0.07em;
@@ -66,7 +74,7 @@ body {
   background-color: $table-border-color; /* This serves as a border color, as the
                                              background is visible in the row gaps. */
 }
-.table > div {
+.grid-table > div {
   background: $light-strip;
 }
 .headers > div {
@@ -161,11 +169,25 @@ html {
 .title {
   margin-top: 2.5rem;
 }
-.is-green-background {
-  background: $success-background-color;
+
+.is-ready-mask-background {
+  background: #b0ffb0;
 }
-.is-red-background {
-  background-color: $error-background-color;
+
+.is-take-mask-out-background {
+  background-color: $red-background;
+}
+
+.is-cut-mask-background {
+  background-color: $orange-background;
+}
+
+.is-put-mask-background {
+  background-color: $yellow-background;
+}
+
+.is-no-action-mask-background {
+  background-color: $clear-background;
 }
 
 .has-two-columns {
@@ -175,6 +197,18 @@ html {
 .has-three-columns {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+}
+.has-four-columns {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+.has-five-columns {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+.has-six-columns {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
 }
 $rss-header-config-color: #ff0000;
 $rss-science-config-color: #ff9696;

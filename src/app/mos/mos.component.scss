@@ -1,0 +1,64 @@
+@import "src/styles";
+.mos-row {
+  display: grid;
+  grid-template-columns:
+    8% 1fr repeat(3, 9%) 6% repeat(4, 1fr) 8% repeat(4, 1fr)
+    10%;
+  align-items: center;
+}
+
+.mos-header {
+  background-color: $mos-color;
+}
+
+.is-overlay {
+  display: flex;
+  justify-content: center;
+}
+
+.has-long-spaces {
+  grid-template-columns: 13% 10%;
+}
+
+.has-two-columns {
+  align-items: center;
+}
+.has-three-columns {
+  align-items: center;
+}
+.has-two-columns > div:last-child {
+  margin-right: 1em;
+}
+.has-three-columns > div:last-child {
+  margin-right: 1em;
+}
+.has-three-columns > div:nth-child(n-1) {
+  margin-right: 0.5em;
+}
+
+.has-short-spaces {
+  grid-template-columns: 30% 70%;
+}
+.table {
+  padding: 0;
+  background-color: transparent;
+}
+.table > td {
+  padding: 1px;
+  background-color: transparent;
+}
+
+.short-space {
+  grid-template-columns: 15% 60% 25%;
+}
+
+.modal-two-columns {
+  gap: 0.5em;
+}
+
+.is-danger-background {
+  background-color: $danger;
+}
+.masks-to-remove {
+  margin-bottom: 2em;
+}

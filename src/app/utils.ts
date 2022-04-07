@@ -68,7 +68,7 @@ export function byPropertiesOf<T>(
       key = arg as keyof T;
     }
     return function (a: T, b: T) {
-      let result = 0;
+      let result;
       if (typeof a[key] === "string") {
         if (
           (a[key] as unknown as string).toLocaleUpperCase() <
@@ -184,6 +184,104 @@ export function degreesToDms(deg: number, decimal_places = 2): string {
   const dms_string = dec_degrees + ":" + dec_arcminutes + ":" + dec_arcseconds;
 
   return sign < 0 ? "-" + dms_string : "+" + dms_string;
+}
+
+export function availableSemesters(): string[] {
+  const startYear = 2006;
+  const endYear = new Date().getFullYear() + 5;
+  const semesters: string[] = [];
+  for (let year = startYear; year <= endYear; year++) {
+    semesters.push(`${year}-1`, `${year}-2`);
+  }
+  return semesters;
+}
+
+export function nextSemesterOf(semester: string): string {
+  const semester_regex = new RegExp("^20d{2}-[12]");
+
+  if (semester_regex.test(semester)) {
+    throw new Error("incorrect semester format");
+  }
+  const year_sem = semester.split("-");
+  let year = Number(year_sem[0]);
+  let sem = Number(year_sem[1]);
+  if (sem === 2) {
+    year += 1;
+    sem = 1;
+  } else {
+    sem = 2;
+  }
+  return `${year}-${sem}`;
+}
+
+// @ input {input}  String; the right ascension.
+//
+// @ return {Degrees} Number;
+export function convertRightAscensionHMSToDegrees(input: string): number {
+  if (!input) {
+    throw Error("Right ascension should not be an empty string.");
+  }
+
+  if (!/^[+-]?\d{1,2}(([:; "']\d{1,2})?[:; "']\d{1,2}(\.\d*)?)?$/.test(input)) {
+    throw Error("Right ascension is invalid.");
+  }
+
+  const parts = input.split(/[:; "']/);
+  const hours = Number(parts[0]);
+  const minutes = parts[1] === undefined ? 0 : Number(parts[1]);
+  const seconds = parts[2] === undefined ? 0 : Number(parts[2]);
+
+  if (hours < 0) {
+    throw new Error("Hours cannot be less than 0");
+  }
+
+  if (hours >= 24) {
+    throw new Error("Hours should be a value between 0 and 23.");
+  }
+  if (minutes >= 60) {
+    throw new Error("Minutes cannot be greater than or equal to 60.");
+  }
+  if (seconds >= 60) {
+    throw new Error("Seconds cannot be greater than or equal to 60.");
+  }
+  return (hours + minutes / 60 + seconds / (60 * 60)) * 15;
+}
+
+export function previousSemesterOf(semester: string): string {
+  const semester_regex = new RegExp("^20d{2}-[12]");
+
+  if (semester_regex.test(semester)) {
+    throw new Error("incorrect semester format");
+  }
+  const year_sem = semester.split("-");
+  let year = Number(year_sem[0]);
+  let sem = Number(year_sem[1]);
+  if (sem === 1) {
+    year -= 1;
+    sem = 2;
+  } else {
+    sem = 1;
+  }
+
+  return `${year}-${sem}`;
+}
+
+// reference https://blog.bitsrc.io/6-ways-to-unsubscribe-from-observables-in-angular-ab912819a78f
+// 5. Use Decorator to automate Unsubscription
+// This decorator can only work when there is a subscription property.
+export function AutoUnsubcribe() {
+  return function (constructor: any) {
+    const orig = constructor.prototype.ngOnDestroy;
+    constructor.prototype.ngOnDestroy = function () {
+      for (const prop in this) {
+        const property = this[prop];
+        if (typeof property?.unsubscribe === "function") {
+          property.unsubscribe();
+        }
+      }
+      orig.apply();
+    };
+  };
 }
 
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {

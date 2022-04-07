@@ -1,0 +1,19 @@
+@import "src/styles";
+
+.square {
+  height: 15px;
+  width: 15px;
+}
+.padded {
+  padding-bottom: 5px;
+}
+.title {
+  margin-top: 1rem;
+}
+.has-two-columns {
+  grid-template-columns: 30px 1fr;
+}
+
+.has-border {
+  border: 1px solid gray;
+}

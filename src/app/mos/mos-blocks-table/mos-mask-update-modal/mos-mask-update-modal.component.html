@@ -1,0 +1,75 @@
+<div class="modal" [ngClass]="isModalActive ? 'is-active' : ''">
+  <div
+    class="modal-background"
+    [ngClass]="error.mosBlockError ? 'danger' : ''"
+  ></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Edit MOS mask details</p>
+      <button class="delete" aria-label="close" (click)="closeModal()"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="has-two-columns modal-two-columns">
+        <div class="field">
+          <label class="label">Cut by</label>
+          <div class="control">
+            <input
+              [className]="error.cutByError ? 'is-danger input' : 'input'"
+              type="text"
+              #cutBy
+              [value]="mosBlock?.cutBy"
+              (keyup)="updateMosMaskMetadata('cutBy', cutBy.value)"
+            />
+          </div>
+          <div *ngIf="error.cutByError">
+            <p class="help is-danger">{{ error.cutByError }}</p>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Cut date</label>
+          <div class="control">
+            <input
+              [className]="error.cutDateError ? 'is-danger input' : 'input'"
+              type="text"
+              [value]="mosBlock?.cutDate"
+              #cutDate
+              (keyup)="updateMosMaskMetadata('cutDate', cutDate.value)"
+            />
+          </div>
+          <div *ngIf="error.cutDateError">
+            <p class="help is-danger">{{ error.cutDateError }}</p>
+          </div>
+        </div>
+        <div></div>
+        <div class="field">
+          <button class="button" (click)="setCutDateToToday()">Today</button>
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label class="label">Comment</label>
+          <div class="control">
+            <textarea
+              class="textarea"
+              type="textarea"
+              [value]="mosBlock?.maskComment"
+              #maskComment
+              (change)="updateMosMaskMetadata('maskComment', maskComment.value)"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" (click)="updateMosMask()">Send</button>
+      <button class="button" (click)="closeModal()">Cancel</button>
+      <br />
+      <p class="invalid-feedback">{{ error.mosBlockError }}</p>
+    </footer>
+  </div>
+  <button
+    class="modal-close is-large"
+    aria-label="close"
+    (click)="closeModal()"
+  ></button>
+</div>

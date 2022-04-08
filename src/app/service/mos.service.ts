@@ -47,14 +47,14 @@ export class MosService {
     return this.http.get<string[]>(uri);
   }
   getObsoleteRssMasks(): Observable<string[]> {
-    const uri = environment.apiUrl + "/rss/mos-obsolete-masks-in-magazine";
+    const uri = environment.apiUrl + "/rss/obsolete-masks-in-magazine";
     return this.http.get<string[]>(uri);
   }
 
   updateMosMask(mask: MosMaskCutDetails): Observable<MosMaskCutDetails> {
-    const uri = environment.apiUrl + "/rss/mos-mask/" + mask.barcode;
+    const uri = environment.apiUrl + "/rss/mos-mask-metadata/" + mask.barcode;
     return this.http
-      .patch<any>(uri, {
+      .patch<MosMaskCutDetails>(uri, {
         cut_by: mask.cutBy,
         cut_date: mask.cutDate,
         mask_comment: mask.maskComment,

@@ -111,8 +111,9 @@ export class MosComponent implements OnInit {
         (data) => {
           data.forEach((m: MosBlock) => {
             if (
-              m.blockStatus.toLocaleLowerCase() === "active" ||
-              m.blockStatus.toLocaleLowerCase() === "on hold"
+              (m.blockStatus.toLocaleLowerCase() === "active" ||
+              m.blockStatus.toLocaleLowerCase() === "on hold") &&
+              m.remainingNights > 0
             ) {
               this.requiredMosMasks.push(m.barcode);
             }

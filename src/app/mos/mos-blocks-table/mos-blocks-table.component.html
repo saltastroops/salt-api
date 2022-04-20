@@ -13,6 +13,7 @@
         <th>Block Status</th>
         <th>Priority</th>
         <th>RA Centre</th>
+        <th>Remaining Nights</th>
         <th>Barcode</th>
         <th>Cut By</th>
         <th>Cut Date</th>
@@ -39,6 +40,7 @@
           <td>{{ mb.blockStatus }}</td>
           <td>{{ mb.priority }}</td>
           <td>{{ degreesToHms(mb.raCenter, 0) }}</td>
+          <td>{{ mb.remainingNights }}</td>
           <td>{{ mb.barcode }}</td>
           <td>{{ mb.cutBy }}</td>
           <td>{{ mb.cutDate }}</td>
@@ -91,7 +93,7 @@
               Edit
             </button>
           </td>
-          <td>TODO Still to ask</td>
+          <td><p *ngFor="let ob of mb.otherBarcodes">{{ob}}</p></td>
           <td>{{ mb.maskComment }}</td>
         </tr>
       </ng-container>

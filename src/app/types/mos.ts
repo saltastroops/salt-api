@@ -12,6 +12,8 @@ export interface MosBlock {
   cutDate: string;
   maskComment: string;
   liaisonAstronomer: string;
+  otherBarcodes: string[];
+  remainingNights: number;
   // mosMask: MosMask;
 }
 

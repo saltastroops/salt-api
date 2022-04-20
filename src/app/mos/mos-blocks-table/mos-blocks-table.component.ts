@@ -50,12 +50,13 @@ export class MosBlocksTableComponent implements OnInit {
     }
     if (
       block.blockStatus === "Active" &&
-      this.mosMasksInMagazine.includes(block.barcode)
+      this.mosMasksInMagazine.includes(block.barcode) &&
+      block.remainingNights > 0
     ) {
       return "is-ready-mask-background";
     }
     if (
-      block.blockStatus === "Completed" &&
+      (block.blockStatus === "Completed" || block.remainingNights <= 0) &&
       this.mosMasksInMagazine.includes(block.barcode) &&
       !this.requiredMosMasks.includes(block.barcode)
     ) {

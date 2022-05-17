@@ -17,6 +17,7 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosLegendComponent } from "./mos/legend/mos-legend.component";
 import { MosBlocksTableComponent } from "./mos/mos-blocks-table/mos-blocks-table.component";
 import { MosMaskUpdateModalComponent } from "./mos/mos-blocks-table/mos-mask-update-modal/mos-mask-update-modal.component";
@@ -82,6 +83,7 @@ import { RealBlockService } from "./service/real/real-block.service";
 import { RealProposalService } from "./service/real/real-proposal.service";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
+import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 
 @NgModule({
   declarations: [
@@ -151,6 +153,8 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
     SortByArgsPipe,
     ObsoleteMasksComponent,
     PageMissingComponent,
+    ManageUserProfileComponent,
+    SmallLoadingSpinnerComponent,
   ],
   imports: [
     BrowserModule,

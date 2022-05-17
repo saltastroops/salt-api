@@ -22,13 +22,13 @@ export class HomeUserComponent implements OnInit {
   semesterRange$ = new Subject<[string, string]>();
 
   selectedSemester: string = currentSemester();
-  availableSemesters: string[] = availableSemesters();
   startSemester = "";
   endSemester = "";
   startSemesterValue: string | null = "";
   endSemesterValue = "";
   nextSemester!: string;
   semesterFilter = "";
+  availableSemesters = availableSemesters();
   otherFilterByProperties: { [elementId: string]: string | boolean } = {};
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   filterProposalsBy: { [elementId: string]: any } = {};
@@ -229,7 +229,7 @@ export class HomeUserComponent implements OnInit {
       this.endSemester = end_s;
       this.isValidSemester = true;
       this.semesterRange$.next([start_s, end_s]);
-    } catch (e: any) {
+    } catch (e) {
       this.semesterErrorMessage = e.message;
       this.isValidSemester = false;
     }

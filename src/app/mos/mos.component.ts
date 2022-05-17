@@ -112,7 +112,7 @@ export class MosComponent implements OnInit {
           data.forEach((m: MosBlock) => {
             if (
               (m.blockStatus.toLocaleLowerCase() === "active" ||
-              m.blockStatus.toLocaleLowerCase() === "on hold") &&
+                m.blockStatus.toLocaleLowerCase() === "on hold") &&
               m.remainingNights > 0
             ) {
               this.requiredMosMasks.push(m.barcode);
@@ -130,10 +130,13 @@ export class MosComponent implements OnInit {
       );
   }
 
-  semesterChange(event: any): void {
-    this.selectedSemester = event.target.value;
+  semesterChange(event: Event): void {
+    this.selectedSemester = (event.target as HTMLSelectElement).value;
     this.queryMosBlocks();
-    sessionStorage.setItem("mosSelectedSemester", event.target.value);
+    sessionStorage.setItem(
+      "mosSelectedSemester",
+      (event.target as HTMLSelectElement).value,
+    );
   }
 
   includeSemester(name: string, checked: boolean): void {
@@ -150,11 +153,13 @@ export class MosComponent implements OnInit {
         this.raMinError = undefined;
       }
       return convertRightAscensionHMSToDegrees(ra);
-    } catch (e: any) {
-      if (whichRa === "min") {
-        this.raMinError = e.message;
-      } else {
-        this.raMaxError = e.message;
+    } catch (e) {
+      if (e instanceof Error) {
+        if (whichRa === "min") {
+          this.raMinError = e.message;
+        } else {
+          this.raMaxError = e.message;
+        }
       }
     }
     return whichRa === "min" ? 0 : 360;

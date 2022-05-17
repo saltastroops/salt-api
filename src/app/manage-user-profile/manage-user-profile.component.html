@@ -1,0 +1,167 @@
+<div class="edit-contact-info">
+  <div *ngIf="user$ | async as user">
+    <h2 class="title is-2">Manage user profile</h2>
+    <hr class="heading-line edit-contact-info-header" />
+    <div id="select-user" *ngIf="user.roles.includes('Administrator')">
+      <div>
+        <span class="title is-5">Select user</span>
+      </div>
+      <div>
+        <select (change)="onSelectUser($event)">
+          <option
+            *ngFor="let u of users"
+            [value]="u.id"
+            [selected]="u.id === selectedUserId"
+          >
+            {{ u.familyName }}, {{ u.givenName }}
+          </option>
+        </select>
+      </div>
+      <div *ngIf="!users" class="users-loading">
+        <div class="loading-spinner">
+          <wm-small-loading-spinner></wm-small-loading-spinner>
+        </div>
+      </div>
+    </div>
+    <hr class="section-line" />
+    <div>
+      <h2 class="title is-4">
+        Edit contacts for '{{ selectedUser?.givenName }}
+        {{ selectedUser?.familyName }}'
+      </h2>
+      <div id="username">
+        <table>
+          <tr>
+            <td>
+              <p>
+                <b>Username:</b>
+              </p>
+            </td>
+            <td>
+              <p>
+                {{ selectedUser?.username }}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <br />
+      <p>
+        A <b>contact</b> is a set of contact information for you at various
+        institutions. Therefore, if you collaborate on proposals for different
+        institutions, you should have one contact for each. Note that you cannot
+        use the same email address for two contacts!
+      </p>
+    </div>
+    <hr class="section-line" />
+    <br />
+    <div class="form-container">
+      <ng-container *ngIf="isLoadingForm && !selectedUserId">
+        <div class="form-overlay loading-spinner is-overlay">
+          <wm-loading-spinner></wm-loading-spinner>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="showForm && selectedUserId">
+        <div class="user-profile" [ngClass]="isLoadingForm ? 'is-blurred' : {}">
+          <form [formGroup]="userProfile">
+            <table>
+              <tr>
+                <td>Name:</td>
+                <td>
+                  <input
+                    type="text"
+                    id="givenName"
+                    formControlName="givenName"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Surname:</td>
+                <td>
+                  <input
+                    type="text"
+                    id="familyName"
+                    formControlName="familyName"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Partner:</td>
+                <td>
+                  <select
+                    (change)="onSelectPartner($event)"
+                    formControlName="partner"
+                  >
+                    <option
+                      *ngFor="let partner of partners"
+                      [value]="Partner[partner]"
+                      [selected]="partner === selectedPartnerCode"
+                    >
+                      {{ Partner[partner] }}
+                    </option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Institution:</td>
+                <td>
+                  <select formControlName="institutionName">
+                    <option
+                      *ngFor="let institution of partnerInstitutions"
+                      [value]="institution.name"
+                      [selected]="institution.name === selectedInstitution"
+                    >
+                      {{ institutionString(institution) }}
+                    </option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Email:</td>
+                <td>
+                  <input type="text" id="email" formControlName="email" />
+                </td>
+              </tr>
+              <tr>
+                <td>Password:</td>
+                <td>
+                  <input
+                    type="password"
+                    id="password"
+                    formControlName="password"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Retype password:</td>
+                <td>
+                  <input
+                    type="password"
+                    id="retypePassword"
+                    formControlName="retypePassword"
+                  />
+                </td>
+              </tr>
+            </table>
+            <div id="manage-user">
+              <table>
+                <tr>
+                  <td>
+                    <button>Submit</button>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </form>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="error">
+        <
+        <div class="message is-danger">
+          <div class="message-header">Error</div>
+          <div class="message-body">{{ error }}</div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

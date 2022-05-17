@@ -190,6 +190,18 @@ html {
   background-color: $clear-background;
 }
 
+.is-orange-background {
+  background-color: $warning;
+}
+
+.is-yellow-background {
+  background-color: $investigators-color;
+}
+
+.is-clear-background {
+  background-color: white;
+}
+
 .has-two-columns {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -304,4 +316,10 @@ $bvit-calibration-config-color: #999999;
 
 .input {
   margin-bottom: 0.5em;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

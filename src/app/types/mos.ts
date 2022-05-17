@@ -1,5 +1,7 @@
 export interface MosBlock {
+  proposalId: number;
   proposalCode: string;
+  proposalCodeId: number;
   piSurname: string;
   blockStatus: string;
   blockName: string;

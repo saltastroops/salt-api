@@ -93,7 +93,9 @@
               Edit
             </button>
           </td>
-          <td><p *ngFor="let ob of mb.otherBarcodes">{{ob}}</p></td>
+          <td>
+            <p *ngFor="let ob of mb.otherBarcodes">{{ ob }}</p>
+          </td>
           <td>{{ mb.maskComment }}</td>
         </tr>
       </ng-container>

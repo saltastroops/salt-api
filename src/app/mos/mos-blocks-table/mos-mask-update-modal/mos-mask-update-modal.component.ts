@@ -1,7 +1,6 @@
 import { Component, HostListener, Input } from "@angular/core";
 
 import { format } from "date-fns";
-import { Subscription } from "rxjs";
 
 import { MosService } from "../../../service/mos.service";
 import { MosBlock } from "../../../types/mos";
@@ -14,6 +13,7 @@ import { AutoUnsubcribe } from "../../../utils";
 })
 @AutoUnsubcribe()
 export class MosMaskUpdateModalComponent {
+  @Input() selectedMosBlock!: MosBlock;
   @Input() error: {
     cutByError: string | undefined;
     cutDateError: string | undefined;
@@ -25,8 +25,6 @@ export class MosMaskUpdateModalComponent {
   };
   isModalActive!: boolean;
   mosBlock!: MosBlock;
-  _mosBlock!: MosBlock;
-  private updateMosMaskSubscription!: Subscription;
 
   constructor(private mosService: MosService) {}
 
@@ -37,7 +35,6 @@ export class MosMaskUpdateModalComponent {
 
   openModal(mosBlock: MosBlock): void {
     this.isModalActive = true;
-    this._mosBlock = mosBlock;
     this.mosBlock = { ...mosBlock };
   }
 
@@ -58,7 +55,7 @@ export class MosMaskUpdateModalComponent {
   }
 
   setCutDateToToday(): void {
-    this.mosBlock!.cutDate = format(new Date(), "yyyy-MM-dd");
+    this.mosBlock.cutDate = format(new Date(), "yyyy-MM-dd");
   }
 
   updateMosMask(): void {
@@ -83,27 +80,25 @@ export class MosMaskUpdateModalComponent {
     }
 
     const mask = {
-      barcode: this.mosBlock!.barcode,
-      cutDate: this.mosBlock!.cutDate,
-      cutBy: this.mosBlock!.cutBy,
-      maskComment: this.mosBlock!.maskComment,
+      barcode: this.mosBlock.barcode,
+      cutDate: this.mosBlock.cutDate,
+      cutBy: this.mosBlock.cutBy,
+      maskComment: this.mosBlock.maskComment,
     };
 
-    this.updateMosMaskSubscription = this.mosService
-      .updateMosMask(mask)
-      .subscribe(
-        (data) => {
-          if (this._mosBlock) {
-            this._mosBlock.cutDate = data.cutDate;
-            this._mosBlock.cutBy = data.cutBy;
-            this._mosBlock.maskComment = data.maskComment;
-          }
-          this.closeModal();
-        },
-        () => {
-          this.error.mosBlockError = "Failed to update mask details.";
-        },
-      );
+    this.mosService.updateMosMask(mask).subscribe(
+      (data) => {
+        if (this.selectedMosBlock) {
+          this.selectedMosBlock.cutDate = data.cutDate;
+          this.selectedMosBlock.cutBy = data.cutBy;
+          this.selectedMosBlock.maskComment = data.maskComment;
+        }
+        this.closeModal();
+      },
+      () => {
+        this.error.mosBlockError = "Failed to update mask details.";
+      },
+    );
   }
   clearErrors(): void {
     this.error = {

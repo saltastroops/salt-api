@@ -1,3 +1,5 @@
+import { Institution } from "./institution";
+
 export type UserRole =
   | "Administrator"
   | "SALT Astronomer"
@@ -12,5 +14,13 @@ export interface User {
   givenName: string;
   familyName: string;
   email: string;
+  alternativeEmails: string[];
   roles: UserRole[];
+  affiliations: Institution[];
+}
+
+export interface UserListItem {
+  id: number;
+  familyName: string;
+  givenName: string;
 }

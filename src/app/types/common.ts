@@ -96,3 +96,21 @@ export interface TimeInterval {
 export interface Message {
   message: string;
 }
+
+export enum Partner {
+  AMNH = "American Museum of Natural History",
+  CMU = "Carnegie Mellon University",
+  DC = "Dartmouth College",
+  DUR = "Durham University",
+  GU = "Georg-August-Universität Göttingen",
+  HET = "Hobby Eberly Telescope Board",
+  IUCAA = "Inter-University Centre for Astronomy & Astrophysics",
+  OTH = "Other",
+  POL = "Poland",
+  RSA = "South Africa",
+  RU = "Rutgers University",
+  UC = "University of Canterbury",
+  UKSC = "UK SALT Consortium",
+  UNC = "University of North Carolina - Chapel Hill",
+  UW = "University of Wisconsin-Madison",
+}

@@ -48,7 +48,8 @@ export class MosService {
   }
 
   getObsoleteRssMasks(): Observable<string[]> {
-    const uri = environment.apiUrl + "/rss/obsolete-masks-in-magazine?mask_type=MOS";
+    const uri =
+      environment.apiUrl + "/rss/obsolete-masks-in-magazine?mask_type=MOS";
     return this.http.get<string[]>(uri);
   }
 
@@ -61,5 +62,18 @@ export class MosService {
         mask_comment: mask.maskComment,
       })
       .pipe(map((mosBlock) => camelcaseKeys(mosBlock, { deep: true })));
+  }
+
+  getCurrentMosMasks(): Observable<string[]> {
+    const uri = environment.apiUrl + "/rss/current-mos-masks";
+    const headers = new HttpHeaders({
+      "Content-type": "application/json",
+    });
+
+    return this.http.get<string[]>(uri, { headers }).pipe(
+      map((masks: string[]) => {
+        return masks;
+      }),
+    );
   }
 }

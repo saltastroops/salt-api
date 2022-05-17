@@ -1,0 +1,103 @@
+.edit-contact-info {
+  height: 100%;
+  position: relative;
+}
+
+.edit-contact-info-header {
+  background-color: limegreen;
+}
+
+p {
+  font-size: 17px;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 15px 15px;
+}
+
+.user-profile td {
+  font-size: 15px;
+  align-content: center;
+}
+
+input {
+  width: 300px;
+  flex: 0 0 280px;
+  margin-left: 50px;
+}
+
+select {
+  width: 300px;
+  margin-left: 50px;
+}
+
+.change-contacts {
+  width: 250px;
+  margin-left: 350px;
+}
+
+.loading-indicator {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-line {
+  position: relative;
+  height: 0.05rem;
+  background-color: black;
+  opacity: 0.5;
+}
+
+#select-user {
+  padding: 0 5px 0 20px;
+  display: inline-grid;
+  align-items: center;
+  grid-template-columns: auto auto auto;
+}
+
+#username {
+  display: flex;
+  width: 350px;
+  height: 50px;
+  border: 0.15rem dotted rgba(0, 0, 0, 0.5);
+  margin-top: 0;
+}
+
+#manage-user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#manage-user button {
+  width: 150px;
+  height: 30px;
+  font-size: 14px;
+}
+
+#manage-user button:hover {
+  background-color: #91b4d5;
+}
+
+#select-user select {
+  margin-left: 20px;
+}
+
+.form-overlay {
+  position: absolute;
+}
+
+.users-loading {
+  padding-bottom: 12px;
+}
+
+.loading-spinner {
+  position: absolute;
+}
+
+.form-container {
+  position: relative;
+}

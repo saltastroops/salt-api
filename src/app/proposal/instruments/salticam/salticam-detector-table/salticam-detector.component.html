@@ -1,25 +1,27 @@
-<div class="grid-table alternate-background">
-  <div class="row secondary-header">
-    <div class="has-text-centered">Detector</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Iterations</div>
-    <div>{{ detector.iterations }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>RoSpeed</div>
-    <div>{{ detector.readoutSpeed }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Gain</div>
-    <div>{{ detector.gain }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Mode</div>
-    <div>{{ detector.mode }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Binning</div>
-    <div>{{ detector.preBinnedRows }} x {{ detector.preBinnedColumns }}</div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="secondary-header">
+      <th colspan="2" class="has-text-centered">Detector</th>
+    </tr>
+    <tr>
+      <th>Iterations</th>
+      <td>{{ detector.iterations }}</td>
+    </tr>
+    <tr>
+      <th>RoSpeed</th>
+      <td>{{ detector.readoutSpeed }}</td>
+    </tr>
+    <tr>
+      <th>Gain</th>
+      <td>{{ detector.gain }}</td>
+    </tr>
+    <tr>
+      <th>Mode</th>
+      <td>{{ detector.mode }}</td>
+    </tr>
+    <tr>
+      <th>Binning</th>
+      <td>{{ detector.preBinnedRows }} x {{ detector.preBinnedColumns }}</td>
+    </tr>
+  </table>
 </div>

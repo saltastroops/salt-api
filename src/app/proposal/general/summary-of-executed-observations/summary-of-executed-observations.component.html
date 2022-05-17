@@ -1,86 +1,91 @@
 <h2 class="title is-2">Summary of executed observations</h2>
 <hr class="heading-line summary-header" />
-<div class="grid-table alternate-background">
-  <div class="summary-row headers row">
-    <div>Block</div>
-    <div>Observation time</div>
-    <div>Priority</div>
-    <div>Max Lunar Phase</div>
-    <div>Target(s)</div>
-    <div>Observation date</div>
-    <div>Accepted?</div>
-    <div>Rejection reason</div>
-    <div>Edit</div>
-    <div>Data</div>
-  </div>
-  <div class="select-all-row row">
-    <div></div>
-    <div class="">
-      <label class="checkbox">
-        <input
-          #toggleSelectionAll
-          type="checkbox"
-          [checked]="selectAll"
-          (change)="selectDeselectAll(toggleSelectionAll.checked)"
-          data-testid="select-all-observations-checkbox"
-        />
-        Select/Deselect all
-      </label>
-    </div>
-  </div>
-  <div *ngFor="let e of observations">
-    <div class="summary-row row">
-      <div>
-        <div data-test="executed-observations-block-link">
-          <a href="javascript:void(0)" (click)="onClick(e.blockName)">
-            {{ e.blockName }}
-          </a>
-        </div>
-        <span> (view details) </span>
-      </div>
-      <div>{{ e.observationTime }} s</div>
-      <div>{{ e.priority }}</div>
-      <div>{{ e.maximumLunarPhase }}</div>
-      <div class="targets-container">
-        <div *ngFor="let t of e.targets">
-          <div>
-            <span>{{ t }}</span>
-          </div>
-        </div>
-      </div>
-      <div>{{ observationDate(e.night) | dfnsFormat: "d MMMM yyyy" }}</div>
-      <div *ngIf="e.status === 'Accepted'" class="is-green">
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262-green.svg"
-          alt="block has been accepted"
-        />
-      </div>
-      <div *ngIf="e.status === 'Rejected'">
-        <img
-          class="icon"
-          src="/assets/icons/noun_Cross_2120375.svg"
-          alt="block has been rejected"
-        />
-      </div>
-      <div>{{ e.rejectionReason }}</div>
-      <div *ngIf="e.status === 'Accepted'">
-        <button class="button is-danger is-small">Reject</button>
-      </div>
-      <div *ngIf="e.status === 'Rejected'">
-        <button class="button is-success is-small">Accept</button>
-      </div>
-      <div>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Block</th>
+      <th>Observation time</th>
+      <th>Priority</th>
+      <th>Max Lunar Phase</th>
+      <th>Target(s)</th>
+      <th>Observation date</th>
+      <th>Accepted?</th>
+      <th>Rejection reason</th>
+      <th>Edit</th>
+      <th>Data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="9"></td>
+      <td>
         <label class="checkbox">
           <input
+            #toggleSelectionAll
             type="checkbox"
-            [checked]="e.downloadObservation"
-            (change)="toggleRequestData(e.blockId)"
-            data-testid="download-observation-checkbox"
+            [checked]="selectAll"
+            (change)="selectDeselectAll(toggleSelectionAll.checked)"
+            data-testid="select-all-observations-checkbox"
           />
-          Request data
+          Select/Deselect all
         </label>
-      </div>
-    </div>
-  </div>
-</div>
+      </td>
+    </tr>
+    <tr *ngFor="let e of observations">
+        <td>
+          <div data-test="executed-observations-block-link">
+            <a href="javascript:void(0)" (click)="onClick(e.blockName)">
+              {{ e.blockName }}
+            </a>
+          </div>
+          <span> (view details) </span>
+        </td>
+        <td class="has-text-right">{{ e.observationTime }} s</td>
+        <td>{{ e.priority }}</td>
+        <td>{{ e.maximumLunarPhase }}</td>
+        <td class="targets-container">
+          <div *ngFor="let t of e.targets">
+            <div>
+              <span>{{ t }}</span>
+            </div>
+          </div>
+        </td>
+        <td>{{ observationDate(e.night) | dfnsFormat: "d MMMM yyyy" }}</td>
+        <td *ngIf="e.status === 'Accepted'" class="is-green">
+          <img
+            class="icon"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="block has been accepted"
+          />
+        </td>
+        <td *ngIf="e.status === 'Rejected'">
+          <img
+            class="icon"
+            src="/assets/icons/noun_Cross_2120375.svg"
+            alt="block has been rejected"
+          />
+        </td>
+        <td>{{ e.rejectionReason }}</td>
+        <td *ngIf="e.status === 'Accepted'">
+          <button class="button is-danger is-small">Reject</button>
+        </td>
+        <td *ngIf="e.status === 'Rejected'">
+          <button class="button is-success is-small">Accept</button>
+        </td>
+        <td>
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              [checked]="e.downloadObservation"
+              (change)="toggleRequestData(e.blockId)"
+              data-testid="download-observation-checkbox"
+            />
+            Request data
+          </label>
+        </td>
+    </tr>
+  </tbody>
+
+
+
+</table>

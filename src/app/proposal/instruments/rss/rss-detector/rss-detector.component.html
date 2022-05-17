@@ -1,40 +1,49 @@
-<div class="grid-table alternate-background">
-  <div class="secondary-header row">
-    <div class="has-text-centered">Detector</div>
-  </div>
-  <div class="row headers detector-section">
-    <div>Iterations</div>
-    <div>RoSpeed</div>
-    <div>Gain</div>
-    <div>Mode</div>
-    <div>Binning (spatial × spectral)</div>
-  </div>
-  <div class="row detector-section">
-    <div>{{ detector.iterations }}</div>
-    <div>{{ detector.readoutSpeed }}</div>
-    <div>{{ detector.gain }}</div>
-    <div>{{ detector.mode }}</div>
-    <div>{{ detector.preBinnedRows }} × {{ detector.preBinnedColumns }}</div>
-  </div>
-  <div class="row headers exposure-section">
-    <div>Exp. type</div>
-    <div>Exp. time</div>
-    <div>Window height</div>
-  </div>
-  <div class="row exposure-section">
-    <div>{{ detector.exposureType }}</div>
-    <div>{{ detector.exposureTime }} sec</div>
-    <div>
-      <span *ngIf="detector.detectorWindow">{{
-        detector.detectorWindow?.height
-      }}</span>
-      <span
-        *ngIf="
-          detector.detectorWindow === null ||
-          detector.detectorWindow.height !== null
-        "
-        >No Window</span
-      >
-    </div>
-  </div>
+<div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="5" class="has-text-centered">Detector</th>
+      </tr>
+      <tr>
+        <th>Iterations</th>
+        <th>RoSpeed</th>
+        <th>Gain</th>
+        <th>Mode</th>
+        <th>Binning (spatial × spectral)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ detector.iterations }}</td>
+        <td>{{ detector.readoutSpeed }}</td>
+        <td>{{ detector.gain }}</td>
+        <td>{{ detector.mode }}</td>
+        <td>{{ detector.preBinnedRows }} × {{ detector.preBinnedColumns }}</td>
+      </tr>
+    </tbody>
+    <thead>
+      <tr>
+        <th colspan="2">Exp. type</th>
+        <th colspan="2">Exp. time</th>
+        <th>Window height</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="2">{{ detector.exposureType }}</td>
+        <td colspan="2">{{ detector.exposureTime }} sec</td>
+        <td>
+          <span *ngIf="detector.detectorWindow">{{
+            detector.detectorWindow?.height
+            }}</span>
+            <span
+              *ngIf="
+              detector.detectorWindow === null ||
+              detector.detectorWindow.height !== null
+            "
+            >No Window</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>

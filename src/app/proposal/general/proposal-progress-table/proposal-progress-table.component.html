@@ -1,19 +1,26 @@
-<div class="grid-table">
-  <div class="secondary-header row">
-    <div class="has-text-centered">Proposal Progress</div>
-  </div>
-  <div class="row">
-    <div>
-      <p *ngIf="proposalProgress">{{ proposalProgress }}</p>
-    </div>
-    <div>
-      <p *ngIf="!proposalProgress">
-        No progress report has been submitted yet.
-      </p>
-    </div>
-    <div><button class="button">Edit</button></div>
-    <div>
-      <a class="has-text-link">Show progress for other semesters</a>
-    </div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="secondary-header">
+      <th colspan="2" class="has-text-centered">Proposal Progress</th>
+    </tr>
+    <tr>
+      <td>
+        <p *ngIf="proposalProgress">{{ proposalProgress }}</p>
+      </td>
+      <td>
+        <p *ngIf="!proposalProgress">
+          No progress report has been submitted yet.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><button class="button">Edit</button></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <a class="has-text-link">Show progress for other semesters</a>
+      </td>
+    </tr>
+  </table>
 </div>
+

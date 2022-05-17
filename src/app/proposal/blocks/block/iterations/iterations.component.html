@@ -1,27 +1,30 @@
-<div class="grid-table alternate-background">
-  <div class="row secondary-header conditions-header-main">
-    <div class="has-text-centered">Iterations</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Wait</div>
-    <div class="has-text-right">{{ block.waitPeriod }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Visits</div>
-    <div class="has-text-right">{{ block.requestedObservations }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Attempted</div>
-    <div class="has-text-right">{{ rejectedObservations }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Done</div>
-    <div class="has-text-right">{{ acceptedObservations }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Shutter open time</div>
-    <div class="has-text-right">
-      {{ block.observationTime - block.overheadTime }}
-    </div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="secondary-header">
+      <th colspan="2" class="has-text-centered">Iterations</th>
+    </tr>
+    <tr>
+      <th>Wait</th>
+      <td>{{ block.waitPeriod }}</td>
+    </tr>
+    <tr>
+      <th>Visits</th>
+      <td>{{ block.requestedObservations }}</td>
+    </tr>
+    <tr>
+      <th>Attempted</th>
+      <td>{{ rejectedObservations }}</td>
+    </tr>
+    <tr>
+      <th>Done</th>
+      <td>{{ acceptedObservations }}</td>
+    </tr>
+    <tr>
+      <th>Shutter open time</th>
+      <td>
+        {{ block.observationTime - block.overheadTime }}
+      </td>
+    </tr>
+  </table>
+
 </div>

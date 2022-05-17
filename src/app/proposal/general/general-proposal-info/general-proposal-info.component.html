@@ -1,56 +1,72 @@
-<div class="grid-table alternate-background">
-  <div class="headers row">
-    <div class="has-text-centered">General</div>
-  </div>
-  <div class="secondary-header row">
-    <div class="has-text-centered">Title</div>
-  </div>
-  <div class="row">
-    <div>{{ generalProposalInfo.title }}</div>
-  </div>
-  <div class="proposal-info-row headers row">
-    <div>PID</div>
-    <div>Code</div>
-    <div>Phase</div>
-    <div>Semester</div>
-    <div>First Submission</div>
-    <div>Current Submission</div>
-  </div>
-
-  <div class="proposal-info-row row">
-    <div>n/a</div>
-    <div>{{ proposalCode }}</div>
-    <div>{{ phase }}</div>
-    <div>
-      <div class="select">
-        <select [formControl]="semesterControl">
-          <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
-            {{ s }}
-          </option>
-        </select>
-      </div>
-    </div>
-    <div>
-      {{ firstSubmission | dfnsFormat: "d MMMM yyyy" }}
-    </div>
-    <div>
-      {{ currentSubmission | dfnsFormat: "d MMMM yyyy" }}
-      (#{{ generalProposalInfo.submissionNumber }})
-    </div>
-  </div>
-
-  <div class="secondary-header row has-text-centered">
-    <div class="has-text-centered">Abstract</div>
-  </div>
-  <div class="row">
-    <div [innerHTML]="generalProposalInfo.abstract | nl2br"></div>
-  </div>
-  <div class="secondary-header row">
-    <div class="has-text-centered">Status</div>
-  </div>
-  <div class="row">
-    <div class="{{ backgroundColor }}" id="proposal-comment">
-      {{ statusDescription }}
-    </div>
-  </div>
+<div>
+  <table class="table is-striped">
+    <tr class="secondary-header">
+      <th colspan="6" class="has-text-centered">General</th>
+    </tr>
+    <thead>
+      <tr>
+        <th colspan="6" class="has-text-centered">Title</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="6">{{ generalProposalInfo.title }}</td>
+      </tr>
+    </tbody>
+    <thead>
+      <tr>
+        <th>PID</th>
+        <th>Code</th>
+        <th>Phase</th>
+        <th>Semester</th>
+        <th>First Submission</th>
+        <th>Current Submission</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>n/a</td>
+        <td>{{ proposalCode }}</td>
+        <td>{{ phase }}</td>
+        <td>
+          <div class="select">
+            <select [formControl]="semesterControl">
+              <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
+                {{ s }}
+              </option>
+            </select>
+          </div>
+        </td>
+        <td>
+          {{ firstSubmission | dfnsFormat: "d MMMM yyyy" }}
+        </td>
+        <td>
+          {{ currentSubmission | dfnsFormat: "d MMMM yyyy" }}
+          (#{{ generalProposalInfo.submissionNumber }})
+        </td>
+      </tr>
+    </tbody>
+    <thead>
+      <tr>
+        <th colspan="6" class="has-text-centered">Abstract</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="6" [innerHTML]="generalProposalInfo.abstract | nl2br"></td>
+      </tr>
+    </tbody>
+    <thead>
+      <tr>
+        <th colspan="6" class="has-text-centered">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="6" class="{{ backgroundColor }}" id="proposal-comment">
+          {{ statusDescription }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>

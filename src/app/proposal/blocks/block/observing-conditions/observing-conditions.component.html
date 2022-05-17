@@ -1,21 +1,29 @@
-<div class="grid-table">
-  <div class="row secondary-header">
-    <div class="has-text-centered">Observing conditions</div>
-  </div>
-  <div class="row headers conditions">
-    <div>Transparency</div>
-    <div>Max Lunar Phase</div>
-    <div>Min Lunar Distance</div>
-    <div>Min Seeing</div>
-    <div>Max Seeing</div>
-    <div>Obs Time</div>
-  </div>
-  <div class="row conditions">
-    <div>{{ block.observingConditions.transparency }}</div>
-    <div>{{ block.observingConditions.maximumLunarPhase }}</div>
-    <div>{{ block.observingConditions.minimumLunarDistance }}</div>
-    <div>{{ block.observingConditions.minimumSeeing }}</div>
-    <div>{{ block.observingConditions.maximumSeeing }}</div>
-    <div>{{ block.observationTime }}</div>
-  </div>
+<div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="6" class="has-text-centered">Observing conditions</th>
+      </tr>
+      <tr>
+        <th>Transparency</th>
+        <th>Max Lunar Phase</th>
+        <th>Min Lunar Distance</th>
+        <th>Min Seeing</th>
+        <th>Max Seeing</th>
+        <th>Obs Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ block.observingConditions.transparency }}</td>
+        <td>{{ block.observingConditions.maximumLunarPhase }}</td>
+        <td>{{ block.observingConditions.minimumLunarDistance }}</td>
+        <td>{{ block.observingConditions.minimumSeeing }}</td>
+        <td>{{ block.observingConditions.maximumSeeing }}</td>
+        <td>{{ block.observationTime }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+
 </div>

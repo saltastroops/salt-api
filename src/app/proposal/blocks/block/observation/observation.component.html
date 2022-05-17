@@ -1,58 +1,82 @@
 <h2 class="title is-2">Observation</h2>
 <hr class="heading-line observation-header" />
-<div class="grid-table alternate-background">
-  <div class="row secondary-header payload-main-headers has-right-border">
-    <div class="has-text-centered">Pointing</div>
-    <div class="has-text-centered">Acquisition</div>
-    <div class="has-text-centered">Configurations</div>
-    <div class="has-text-centered">Pipeline Config</div>
-    <div class="has-text-centered">Observation Times</div>
-  </div>
-  <div class="row headers payload-table-row">
-    <div>Position Angles</div>
-    <div>Constraints</div>
-    <div>Data Access Method</div>
-    <div>Doc format</div>
-    <div></div>
-    <div>Shutter Open Time</div>
-    <div>Overhead</div>
-    <div>Charged</div>
-  </div>
-  <div class="row payload-table-row">
-    <div>{{ positionAngles.join(" ") }}&#176;</div>
-    <div>n/a</div>
-    <div>n/a</div>
-    <div>n/a</div>
-    <div class="has-text-centered">
-      <button class="button is-small">edit</button>
-    </div>
-    <div>{{ observation.observationTime - observation.overheadTime }} sec</div>
-    <div>{{ observation.overheadTime }} sec</div>
-    <div>{{ observation.observationTime }} sec</div>
-  </div>
+<div>
+  <table class="table is-bordered">
+    <thead>
+      <tr class="has-text-centered secondary-header">
+        <th>Pointing</th>
+        <th colspan="3">Acquisition</th>
+        <th colspan="2">Configurations</th>
+        <th colspan="3">Pipeline Config</th>
+        <th colspan="3">Observation Times</th>
+      </tr>
+      <tr>
+        <th>Min useful time</th>
+        <th>Target</th>
+        <th>Payload/Instrument configuration</th>
+        <th>Position Angle(s)</th>
+        <th>Constraints</th>
+        <th>Payloads</th>
+        <th>Data Access Method</th>
+        <th>Doc format</th>
+        <th></th>
+        <th>Shutter Open Time</th>
+        <th>Overhead</th>
+        <th>Charged</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>To discuss sec</td>
+        <td>{{observation.target.name}}</td>
+        <td>To discuss</td>
+        <td>{{ positionAngles.join(" ") }}&#176;</td>
+<!--        TODO this values shouldn't be hard coded-->
+        <td>n/a</td>
+        <td>n/a</td>
+        <td>To discuss</td>
+        <td>n/a</td>
+        <td class="has-text-centered">
+          <button class="button is-small">edit</button>
+        </td>
+        <td class="has-text-right">{{ observation.observationTime - observation.overheadTime }} sec</td>
+        <td class="has-text-right">{{ observation.overheadTime }} sec</td>
+        <td class="has-text-right">{{ observation.observationTime }} sec</td>
+      </tr>
+    </tbody>
+  </table>
 
-  <div class="row secondary-header">
-    <div class="has-text-centered">
-      Finding charts ({{ firstValidFrom | dfnsFormat: "d MMMM yyyy H:mm" }} to
-      {{ lastValidUntil | dfnsFormat: "d MMMM yyyy H:mm" }})
-    </div>
-  </div>
-  <div class="row headers finder-chart-row">
-    <div>Chart</div>
-    <div>Comment</div>
-  </div>
-  <div *ngFor="let c of observation.finderCharts">
-    <div class="row finder-chart-row">
-      <div>
-        <img
-          src="/assets/noun_Night_771441.png"
-          alt="Finding chart"
-          class="image is-128x128"
-        />
-      </div>
-      <div><p *ngIf="c.comment" [innerHTML]="c.comment | nl2br"></p></div>
-    </div>
-  </div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="2" class="has-text-centered">
+          Finding charts ({{ firstValidFrom | dfnsFormat: "d MMMM yyyy H:mm" }} to
+          {{ lastValidUntil | dfnsFormat: "d MMMM yyyy H:mm" }})
+        </th>
+      </tr>
+      <tr>
+        <th>Chart</th>
+        <th class="has-text-left">Comment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of observation.finderCharts">
+        <td>
+          <img
+            src="/assets/noun_Night_771441.png"
+            alt="Finding chart"
+            class="image is-128x128"
+          />
+        </td>
+        <td>
+          <p *ngIf="c.comment; then comment else noComment" [innerHTML]="c.comment | nl2br"></p>
+          <ng-template #comment><p *ngIf="c.comment" [innerHTML]="c.comment | nl2br"></p></ng-template>
+          <ng-template #noComment><p #noneText>None</p></ng-template>
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <h2 class="title is-2">Target - {{ observation.target.name }}</h2>

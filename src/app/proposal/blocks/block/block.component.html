@@ -3,25 +3,23 @@
 
 <div class="block">
   <wm-observing-conditions [block]="block"></wm-observing-conditions>
-  <div class="has-two-columns">
-    <div>
-      <wm-iterations [block]="block"></wm-iterations>
-      <wm-total-observation-time
-        [overhead]="block.overheadTime"
-        [totalObservationTime]="block.observationTime"
-      ></wm-total-observation-time>
-    </div>
+  <div class="inline-view">
+    <wm-iterations [block]="block"></wm-iterations>
     <wm-observation-probabilities
       [probabilities]="block.observationProbabilities"
     ></wm-observation-probabilities>
+    <wm-total-observation-time
+      [overhead]="block.overheadTime"
+      [totalObservationTime]="block.observationTime"
+    ></wm-total-observation-time>
+    <wm-priority-comment
+      [comment]="block.comment"
+      [priority]="block.priority"
+    ></wm-priority-comment>
+    <wm-observing-windows
+      [observingWindows]="block.observingWindows"
+    ></wm-observing-windows>
   </div>
-  <wm-priority-comment
-    [comment]="block.comment"
-    [priority]="block.priority"
-  ></wm-priority-comment>
-  <wm-observing-windows
-    [observingWindows]="block.observingWindows"
-  ></wm-observing-windows>
   <wm-observation
     *ngFor="let o of block.observations"
     [observation]="o"

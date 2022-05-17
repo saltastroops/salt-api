@@ -15,3 +15,29 @@
   justify-content: space-between;
   flex-wrap: wrap;
 }
+.square {
+  height: 15px;
+  width: 15px;
+}
+
+.red > th{
+  background-color: #f20505;
+  color: white;
+  text-align: left;
+  font-weight: bolder;
+  font-size: 0.85rem;
+  height: 100%;
+}
+
+.blue > th {
+  background-color: #0524f2;
+  color: white;
+  text-align: left;
+  font-weight: bolder;
+  font-size: 0.85rem;
+  height: 100%;
+}
+
+.padded {
+  padding-left: 2rem;
+}

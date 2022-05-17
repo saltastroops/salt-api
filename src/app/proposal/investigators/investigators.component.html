@@ -1,55 +1,61 @@
 <h2 class="title is-2">Investigators</h2>
 <hr class="heading-line investigators-header" />
+<table class="table">
+  <thead>
+    <tr class="headers">
+      <th>PI</th>
+      <th>PC</th>
+      <th>Name</th>
+      <th>Partner</th>
+      <th>Institution</th>
+      <th>Department</th>
+      <th></th>
+    </tr>
+  </thead>
 
-<div class="grid-table alternate-background">
-  <div class="investigator-row headers row">
-    <div>PI</div>
-    <div>PC</div>
-    <div>Name</div>
-    <div>Partner</div>
-    <div>Institution</div>
-    <div>Department</div>
-    <div></div>
-  </div>
-  <div *ngFor="let i of investigators">
-    <div
-      class="investigator-row row"
+  <tbody>
+    <tr
+      *ngFor="let i of investigators"
       [class.is-green-background]="i.hasApprovedProposal === true"
       [class.is-red-background]="i.hasApprovedProposal === false"
     >
-      <div *ngIf="i.isPi">
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262.svg"
-          alt="is principal investigator."
-        />
-      </div>
-      <div *ngIf="!i.isPi"></div>
-      <div *ngIf="i.isPc">
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262.svg"
-          alt="is proposal contact."
-        />
-      </div>
-      <div *ngIf="!i.isPc"></div>
-      <div>{{ i.givenName + " " + i.familyName }}</div>
-      <div>{{ i.affiliation.partnerName }}</div>
-      <div>{{ i.affiliation.institute }}</div>
-      <div>{{ i.affiliation.department }}</div>
+      <td *ngIf="i.isPi">
+        <div>
+          <img
+            class="icon"
+            src="/assets/icons/noun_tick_2836262.svg"
+            alt="is principal investigator."
+          />
+        </div>
+      </td>
+      <td *ngIf="!i.isPi"></td>
+      <td *ngIf="i.isPc">
+        <div>
+          <img
+            class="icon"
+            src="/assets/icons/noun_tick_2836262.svg"
+            alt="is proposal contact."
+          />
+        </div>
+      </td>
+      <td *ngIf="!i.isPc"></td>
+      <td>{{ i.givenName + " " + i.familyName }}</td>
+      <td>{{ i.affiliation.partnerName }}</td>
+      <td>{{ i.affiliation.institution }}</td>
+      <td>{{ i.affiliation.department }}</td>
       <!-- TODO: Replace with correct code -->
       <ng-template [ngIf]="i.hasApprovedProposal === true">
-        <div><button class="button is-danger is-small">Reject</button></div>
+        <td><div><button class="button is-danger is-small">Reject</button></div></td>
       </ng-template>
       <ng-template [ngIf]="i.hasApprovedProposal === false">
-        <div><button class="button is-success is-small">Accept</button></div>
+        <td><div><button class="button is-success is-small">Accept</button></div></td>
       </ng-template>
       <ng-template [ngIf]="i.hasApprovedProposal === null || undefined">
-        <div class="accept-reject">
+        <td class="accept-reject">
           <div><button class="button is-success is-small">Accept</button></div>
           <div><button class="button is-danger is-small">Reject</button></div>
-        </div>
+        </td>
       </ng-template>
-    </div>
-  </div>
-</div>
+    </tr>
+  </tbody>
+</table>

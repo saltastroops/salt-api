@@ -1,23 +1,29 @@
-<div class="grid-table">
-  <div class="row secondary-header">
-    <div class="has-text-centered">Configuration</div>
-  </div>
-  <div class="row headers configuration">
-    <div>Mode</div>
-    <div>Exposure Type</div>
-    <div>Iodine Cell</div>
-    <div>Nod Interval</div>
-    <div>Nod Count</div>
-    <div>Target Location</div>
-    <div>Fibre Separation</div>
-  </div>
-  <div class="row configuration">
-    <div>{{ hrsConfig.mode }}</div>
-    <div>{{ hrsConfig.exposureType }}</div>
-    <div>{{ hrsConfig.iodineCellPosition }}</div>
-    <div>{{ hrsConfig.nodAndShuffle?.nodInterval }}</div>
-    <div>{{ hrsConfig.nodAndShuffle?.nodCount }}</div>
-    <div>{{ hrsConfig.targetLocation }}</div>
-    <div>{{ hrsConfig.fiberSeparation }}</div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="secondary-header">
+      <td colspan="7" class="has-text-centered">Configuration</td>
+    </tr>
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>Exposure Type</th>
+        <th>Iodine Cell</th>
+        <th>Nod Interval</th>
+        <th>Nod Count</th>
+        <th>Target Location</th>
+        <th>Fibre Separation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ hrsConfig.mode }}</td>
+        <td>{{ hrsConfig.exposureType }}</td>
+        <td>{{ hrsConfig.iodineCellPosition }}</td>
+        <td>{{ hrsConfig.nodAndShuffle?.nodInterval }}</td>
+        <td>{{ hrsConfig.nodAndShuffle?.nodCount }}</td>
+        <td>{{ hrsConfig.targetLocation }}</td>
+        <td>{{ hrsConfig.fiberSeparation }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

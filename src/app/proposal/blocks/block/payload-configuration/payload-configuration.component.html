@@ -4,22 +4,28 @@
 </h2>
 <hr class="heading-line {{ headerLine }}" />
 <div class="payload-configuration-container">
-  <div class="grid-table">
-    <div class="row secondary-header">
-      <div class="has-text-centered">Telescope/Payload configuration</div>
-    </div>
-    <div class="row headers payload-configuration-row">
-      <div>Guide method</div>
-      <div>PA</div>
-      <div>Iterations</div>
-      <div>Dither</div>
-    </div>
-    <div class="row payload-configuration-row">
-      <div>{{ payloadConfiguration.guideMethod || "None" }}</div>
-      <div>{{ telescopeConfiguration.positionAngle }}</div>
-      <div>{{ telescopeConfiguration.iterations }}</div>
-      <div>{{ ditherPatternDescription }}</div>
-    </div>
+  <div>
+    <table class="table">
+      <thead>
+        <tr class="secondary-header">
+          <th colspan="4" class="has-text-centered">Telescope/Payload configuration</th>
+        </tr>
+        <tr>
+          <th>Guide method</th>
+          <th>PA</th>
+          <th>Iterations</th>
+          <th>Dither</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ payloadConfiguration.guideMethod || "None" }}</td>
+          <td>{{ telescopeConfiguration.positionAngle }}</td>
+          <td>{{ telescopeConfiguration.iterations }}</td>
+          <td>{{ ditherPatternDescription }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <div *ngIf="payloadConfiguration.instruments.salticam">

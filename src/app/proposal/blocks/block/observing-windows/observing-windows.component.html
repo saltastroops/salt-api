@@ -1,10 +1,12 @@
-<div class="observing-windows-container">
-  <div class="grid-table">
-    <div class="row headers">
-      <div>Observing Windows</div>
-    </div>
-    <div class="row">
-      <div>
+<div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="has-text-centered">Observing Windows</th>
+      </tr>
+    </thead>
+    <tr>
+      <td>
         <p *ngIf="blocksObservableTonight.length === 0">
           This block is <b>NOT</b> observable tonight.
         </p>
@@ -46,8 +48,8 @@
             >Hide observing windows.</a
           >
         </p>
-      </div>
-    </div>
+      </td>
+    </tr>
     <div *ngIf="showObservingWindow" class="alternate-background">
       <div class="headers observing-windows row">
         <div>Night starting on</div>
@@ -99,5 +101,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </table>
 </div>

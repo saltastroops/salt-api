@@ -1,13 +1,5 @@
-.finder-chart-row {
-  display: grid;
-  grid-template-columns: 15% 1fr;
-}
-.payload-table-row {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-}
+@import "src/styles";
 
-.payload-main-headers {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr) repeat(2, 3fr);
+.secondary-header {
+  background-color: $secondary-header;
 }

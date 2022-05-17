@@ -1,18 +1,21 @@
-<div class="grid-table alternate-background">
-  <div class="row secondary-header">
-    <div class="has-text-centered">{{ pattern.name }}</div>
-  </div>
-  <div class="row headers has-three-columns">
-    <div>#</div>
-    <div>Half-Wave Pattern</div>
-    <div>Quarter-Wave Pattern</div>
-  </div>
-  <div
-    *ngFor="let p of pattern.wavePlateAngles; let i = index"
-    class="row has-three-columns"
-  >
-    <div>{{ i }}</div>
-    <div>{{ p.halfWave }}</div>
-    <div>{{ p.quarterWave }}</div>
-  </div>
+<div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="3" class="has-text-centered">{{ pattern.name }}</th>
+      </tr>
+      <tr>
+        <th>#</th>
+        <th>Half-Wave Pattern</th>
+        <th>Quarter-Wave Pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of pattern.wavePlateAngles; let i = index">
+        <td>{{ i }}</td>
+        <td>{{ p.halfWave }}</td>
+        <td>{{ p.quarterWave }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

@@ -1,31 +1,33 @@
-<div class="grid-table alternate-background">
-  <div class="row secondary-header">
-    <div class="has-text-centered">{{ detectorColor }} Detector</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Iteration</div>
-    <div>{{ hrsDetector.iterations }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>RoSpeed</div>
-    <div>{{ hrsDetector.readoutSpeed }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Amplifiers</div>
-    <div>{{ hrsDetector.readoutAmplifiers }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>PreBinColumns</div>
-    <div>{{ hrsDetector.preBinnedColumns }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>PreBinRows</div>
-    <div>{{ hrsDetector.preBinnedRows }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Exposure times</div>
-    <div class="exposure-times" *ngFor="let h of exposureTimes">
-      <p>{{ h }} sec</p>
-    </div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="has-text-centered" [ngClass]="detectorColor.toLocaleLowerCase()">
+      <th colspan="2">{{ detectorColor }} Detector </th>
+    </tr>
+    <tr>
+      <th>Iteration</th>
+      <td>{{ hrsDetector.iterations }}</td>
+    </tr>
+    <tr>
+      <th>RoSpeed</th>
+      <td>{{ hrsDetector.readoutSpeed }}</td>
+    </tr>
+    <tr>
+      <th>Amplifiers</th>
+      <td>{{ hrsDetector.readoutAmplifiers }}</td>
+    </tr>
+    <tr>
+      <th>PreBinColumns</th>
+      <td>{{ hrsDetector.preBinnedColumns }}</td>
+    </tr>
+    <tr>
+      <th>PreBinRows</th>
+      <td>{{ hrsDetector.preBinnedRows }}</td>
+    </tr>
+    <tr>
+      <th>Exposure times</th>
+      <td class="exposure-times" *ngFor="let h of exposureTimes">
+        <p>{{ h }} sec</p>
+      </td>
+    </tr>
+  </table>
 </div>

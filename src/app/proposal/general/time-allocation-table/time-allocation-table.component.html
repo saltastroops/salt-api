@@ -1,32 +1,36 @@
-<div class="grid-table alternate-background">
-  <div class="secondary-header row">
-    <div class="has-text-centered">Time Allocation (seconds)</div>
-  </div>
-  <div class="allocation-row headers row">
-    <div>Partner</div>
-    <div>Priority 0</div>
-    <div>Priority 1</div>
-    <div>Priority 2</div>
-    <div>Priority 3</div>
-    <div>Priority 4</div>
-    <div>TAC Comment</div>
-  </div>
-  <div *ngFor="let a of time_allocations">
-    <div class="allocation-row row">
-      <div>{{ a.partnerName }}</div>
-      <div>{{ a.priority0 }}</div>
-      <div>{{ a.priority1 }}</div>
-      <div>{{ a.priority2 }}</div>
-      <div>{{ a.priority3 }}</div>
-      <div>{{ a.priority4 }}</div>
-      <div *ngIf="!!a.tacComment">
-        <span class="has-text-link" tooltip="{{ a.tacComment }}">
-          Show comment
-        </span>
-      </div>
-      <div *ngIf="!a.tacComment">
-        <span>No comment</span>
-      </div>
-    </div>
-  </div>
+<div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="7" class="has-text-centered">Time Allocation (seconds)</th>
+      </tr>
+      <tr>
+        <th>Partner</th>
+        <th>Priority 0</th>
+        <th>Priority 1</th>
+        <th>Priority 2</th>
+        <th>Priority 3</th>
+        <th>Priority 4</th>
+        <th>TAC Comment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let a of time_allocations">
+        <td>{{ a.partnerName }}</td>
+        <td>{{ a.priority0 }}</td>
+        <td>{{ a.priority1 }}</td>
+        <td>{{ a.priority2 }}</td>
+        <td>{{ a.priority3 }}</td>
+        <td>{{ a.priority4 }}</td>
+        <td *ngIf="!!a.tacComment">
+          <span class="has-text-link" tooltip="{{ a.tacComment }}">
+            Show comment
+          </span>
+        </td>
+        <td *ngIf="!a.tacComment">
+          <span>No comment</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>

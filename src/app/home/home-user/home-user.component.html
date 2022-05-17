@@ -234,61 +234,78 @@ Show
   </label>
 </div>
 <br /><br />
-<div class="grid-table alternate-background">
-  <div class="row secondary-header">
-    <div class="has-text-centered">Proposals</div>
-  </div>
-  <div class="row headers proposals">
-    <div>Proposal ID</div>
-    <div>Proposal Code</div>
-    <div>Title</div>
-    <div>Semester</div>
-    <div>Phase</div>
-    <div>Proposal Status</div>
-    <div>Proposal Status Reason</div>
-    <div>Proposal Type</div>
-    <div>PI</div>
-    <div>Astronomer</div>
-  </div>
-  <div
-    *ngIf="proposals && !loading; else loading_indicator"
-    style="position: relative"
+<br /><br />
+<br /><br />
+<br /><br />
+<br /><br />
+<br /><br />
+<div class="table alternate-background">
+
+</div>
+
+
+<table class="table">
+  <tr class="secondary-header">
+    <th colspan="10" class="has-text-centered">Proposals</th>
+  </tr>
+  <thead>
+    <tr class="table-header">
+      <th>Proposal ID</th>
+      <th class="proposal-code-column">Proposal Code</th>
+      <th>Title</th>
+      <th>Semester</th>
+      <th>Phase</th>
+      <th>Proposal Status</th>
+      <th>Proposal Status Reason</th>
+      <th>Proposal Type</th>
+      <th>PI</th>
+      <th>Astronomer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr
+    data-test="proposal-row"
+    *ngFor="let proposal of filteredProposals"
   >
-    <div
-      class="row proposals"
-      data-test="proposal-row"
-      *ngFor="let proposal of filteredProposals"
-    >
-      <div>{{ proposal.id }}</div>
-      <div>
+      <td>{{ proposal.id }}</td>
+      <td>
         <a [routerLink]="['/proposal', proposal.proposalCode]">
           {{ proposal.proposalCode }}
         </a>
-      </div>
-      <div>{{ proposal.title }}</div>
-      <div data-test="proposal-semester">{{ proposal.semester }}</div>
-      <div data-test="phase">{{ proposal.phase }}</div>
-      <div data-test="proposal-status">{{ proposal.status.value }}</div>
-      <div>{{ proposal.status.reason }}</div>
-      <div data-test="proposal-type">{{ proposal.proposalType }}</div>
-      <div data-test="principal-investigator">
+      </td>
+      <td>{{ proposal.title }}</td>
+      <td data-test="proposal-semester">{{ proposal.semester }}</td>
+      <td data-test="phase">{{ proposal.phase }}</td>
+      <td data-test="proposal-status">{{ proposal.status.value }}</td>
+      <td>{{ proposal.status.reason }}</td>
+      <td data-test="proposal-type">{{ proposal.proposalType }}</td>
+      <td data-test="principal-investigator">
         {{ proposal.principalInvestigator.givenName }}
         {{ proposal.principalInvestigator.familyName }}
-      </div>
-      <div data-test="liaison-astronomer">
-        <span *ngIf="proposal.liaisonAstronomer">{{
-          proposal.liaisonAstronomer.givenName
-        }}</span>
-      </div>
-    </div>
-  </div>
-  <ng-template #loading_indicator>
-    <div class="loading-indicator">
-      <wm-loading-spinner></wm-loading-spinner>
-    </div>
-  </ng-template>
+      </td>
+      <td data-test="liaison-astronomer">
+          <span *ngIf="proposal.liaisonAstronomer">{{
+            proposal.liaisonAstronomer.givenName
+            }}</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+<div
+  *ngIf="proposals && !loading; else loading_indicator"
+  style="position: relative"
+>
 </div>
-<div class="grid-table legend">
+<ng-template #loading_indicator>
+  <div class="loading-indicator">
+    <wm-loading-spinner></wm-loading-spinner>
+  </div>
+</ng-template>
+
+<div class="table-container legend">
   <div class="row headers">
     <div class="has-text-centered">Legend</div>
   </div>

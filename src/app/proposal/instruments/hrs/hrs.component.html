@@ -2,12 +2,10 @@
   HRS {{ payloadConfiguration.payloadConfigurationType }} Configuration
 </h2>
 <hr class="heading-line hrs-header" />
-<div class="hrs">
-  <div class="has-two-columns">
+<div>
+  <div class="inline-view">
     <wm-hrs-general-info [hrsProcedure]="hrs.procedure"></wm-hrs-general-info>
     <wm-hrs-observing-times [hrs]="hrs"></wm-hrs-observing-times>
-  </div>
-  <div class="has-two-columns">
     <wm-hrs-detector [hrs]="hrs" detectorColor="Blue"></wm-hrs-detector>
     <wm-hrs-detector [hrs]="hrs" detectorColor="Red"></wm-hrs-detector>
   </div>

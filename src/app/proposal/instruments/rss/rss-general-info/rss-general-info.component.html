@@ -1,23 +1,25 @@
-<div class="grid-table alternate-background">
-  <div class="row secondary-header">
-    <div class="has-text-centered">General</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Cycles</div>
-    <div class="has-text-right">{{ rss.procedure.cycles }}</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Total Exp. Time</div>
-    <div class="has-text-right">
-      {{ rss.observationTime - rss.overheadTime }} sec
-    </div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Overhead</div>
-    <div class="has-text-right">{{ rss.overheadTime }} sec</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Charged</div>
-    <div class="has-text-right">{{ rss.observationTime }} sec</div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="secondary-header">
+      <th colspan="2" class="has-text-centered">General</th>
+    </tr>
+    <tr>
+      <th>Cycles</th>
+      <td class="has-text-right">{{ rss.procedure.cycles }}</td>
+    </tr>
+    <tr>
+      <th>Total Exp. Time</th>
+      <td class="has-text-right">
+        {{ rss.observationTime - rss.overheadTime }} sec
+      </td>
+    </tr>
+    <tr>
+      <th>Overhead</th>
+      <td class="has-text-right">{{ rss.overheadTime }} sec</td>
+    </tr>
+    <tr>
+      <th>Charged</th>
+      <td class="has-text-right">{{ rss.observationTime }} sec</td>
+    </tr>
+  </table>
 </div>

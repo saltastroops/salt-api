@@ -1,17 +1,19 @@
-<div class="grid-table alternate-background">
-  <div class="row secondary-header">
-    <div class="has-text-centered">Observation times</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Shutter open time</div>
-    <div>{{ hrs.observationTime - hrs.overheadTime }} sec</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Overhead</div>
-    <div>{{ hrs.overheadTime }} sec</div>
-  </div>
-  <div class="row has-two-columns">
-    <div>Charged</div>
-    <div>{{ hrs.observationTime }} sec</div>
-  </div>
+<div>
+  <table class="table">
+    <tr class="secondary-header">
+      <th colspan="2" class="has-text-centered">Observation times</th>
+    </tr>
+    <tr>
+      <th>Shutter open time</th>
+      <td class="has-text-right">{{ hrs.observationTime - hrs.overheadTime }} sec</td>
+    </tr>
+    <tr>
+      <th>Overhead</th>
+      <td class="has-text-right">{{ hrs.overheadTime }} sec</td>
+    </tr>
+    <tr>
+      <th>Charged</th>
+      <td class="has-text-right">{{ hrs.observationTime }} sec</td>
+    </tr>
+  </table>
 </div>

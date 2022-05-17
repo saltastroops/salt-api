@@ -1,18 +1,24 @@
-<div class="grid-table">
-  <div class="row secondary-header">
-    <div class="has-text-centered">Filters</div>
-  </div>
-  <div class="row headers filters">
-    <div>Name</div>
-    <div>Description</div>
-    <div>Exposure time</div>
-  </div>
-  <div class="row filters" *ngFor="let f of salticamExposures">
-    <div>{{ f.filter.name }}</div>
-    <div>{{ f.filter.description }}</div>
-    <div>{{ f.exposureTime }} sec</div>
-  </div>
-  <div class="row filters-row">
-    <div>The filter is current unavailable</div>
-  </div>
+<div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="3" class="has-text-centered">Filters</th>
+      </tr>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Exposure time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let f of salticamExposures">
+        <td>{{ f.filter.name }}</td>
+        <td>{{ f.filter.description }}</td>
+        <td>{{ f.exposureTime }} sec</td>
+      </tr>
+      <tr>
+        <td colspan="3">The filter is current unavailable</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

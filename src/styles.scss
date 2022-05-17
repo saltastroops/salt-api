@@ -7,6 +7,12 @@ $warning: #ccaa00;
 $link: #0e0eee;
 $white: #f2f6fa;
 $size-6: 0.8rem;
+$light-strip: #efefef;
+$dark-strip: #dedede;
+$secondary-header: #7390aa;
+$tertiary-header: #91b4d5;
+$primary-header: #506477;
+$proposal-color: #5aeafa;
 
 $navbar-burger-color: #f1f1f1;
 $navbar-background-color: #273643;
@@ -17,16 +23,14 @@ $navbar-dropdown-arrow: #f1f1f1;
 $navbar-tab-active-color: #f1f1f1;
 $navbar-tab-active-background-color: #273643;
 $navbar-dropdown-background-color: $primary;
+
+$table-head-background-color: $primary-header;
+$table-head-cell-color: $white;
+$table-cell-text-align: left;
 // End: Variables overriding Bulma values
 
 @import "./node_modules/bulma/bulma.sass";
 
-$light-strip: #efefef;
-$dark-strip: #dedede;
-$secondary-header: #7390aa;
-$tertiary-header: #91b4d5;
-$primary-header: #506477;
-$proposal-color: #5aeafa;
 $block-color: #fa5a5a;
 $observation-color: #5afa87;
 $target-color: #f5b642;
@@ -55,6 +59,10 @@ $mos-color: #5f8ba3;
 body {
   font-family: "Helvetica Neue", sans-serif;
   font-size: 0.8rem;
+  overflow-x: scroll;
+}
+.table {
+  overflow-x: scroll;
 }
 
 .row > div {
@@ -66,17 +74,6 @@ body {
   background: $dark-strip;
 }
 
-.grid-table {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-row-gap: 0.07em;
-  border: 1px solid $table-border-color;
-  background-color: $table-border-color; /* This serves as a border color, as the
-                                             background is visible in the row gaps. */
-}
-.grid-table > div {
-  background: $light-strip;
-}
 .headers > div {
   background: $primary-header;
   color: white;
@@ -85,7 +82,17 @@ body {
   font-size: 0.85rem;
   height: 100%;
 }
-.secondary-header > div {
+.table-header > th {
+  background: $primary-header;
+  color: white;
+  text-align: left;
+  font-weight: bolder;
+  font-size: 0.85rem;
+}
+thead {
+  color: white;
+}
+.secondary-header > th {
   background: $secondary-header;
   color: white;
   text-align: left;
@@ -317,6 +324,17 @@ $bvit-calibration-config-color: #999999;
 .input {
   margin-bottom: 0.5em;
 }
+
+.proposal-code-column {
+  min-width: 120px;
+  width: 120px;
+}
+
+.inline-view div {
+  display: inline-block;
+  padding-right: 2em;
+  padding-bottom: 2em;
+  vertical-align:top;
 
 .loading-spinner {
   display: flex;

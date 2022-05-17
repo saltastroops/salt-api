@@ -24,144 +24,190 @@
 
 <br />
 
-<div class="grid-table is-table alternate-background">
-  <div class="block-row headers is-info row">
-    <div
-      [ngClass]="sortableColumnClass('id')"
-      (click)="onColumnClick($event, 'id')"
-      data-testid="block-summary-id"
-    >
-      Block ID
-    </div>
-    <div
-      [ngClass]="sortableColumnClass('name')"
-      (click)="onColumnClick($event, 'name')"
-      data-testid="block-summary-name"
-    >
-      Block
-    </div>
-    <div
-      [ngClass]="sortableColumnClass('observationTime')"
-      (click)="onColumnClick($event, 'observationTime')"
-      data-testid="block-summary-observation-time"
-    >
-      ObsTime
-    </div>
-    <div
-      [ngClass]="sortableColumnClass('priority')"
-      (click)="onColumnClick($event, 'priority')"
-      data-testid="block-summary-priority"
-    >
-      Priority
-    </div>
-    <div>Done Visits</div>
-    <div>Tonight?</div>
-    <div
-      [ngClass]="sortableColumnClass('remainingNights')"
-      (click)="onColumnClick($event, 'remainingNights')"
-      data-testid="block-summary-remaining-nights"
-    >
-      Remaining
-    </div>
-    <div
-      [ngClass]="sortableColumnClass('observingConditions.maximumSeeing')"
-      (click)="onColumnClick($event, 'observingConditions.maximumSeeing')"
-      data-testid="block-summary-maximum-seeing"
-    >
-      Max Seeing
-    </div>
-    <div>Transparency</div>
-    <div
-      [ngClass]="sortableColumnClass('observingConditions.maximumLunarPhase')"
-      (click)="onColumnClick($event, 'observingConditions.maximumLunarPhase')"
-      data-testid="block-summary-maximum-lunar-phase"
-    >
-      Max Lunar Phase
-    </div>
-    <div>Instrument</div>
-    <div>Config Mode</div>
-  </div>
-  <div *ngFor="let b of filteredBlocks">
-    <div
-      class="block-row row"
-      [ngClass]="blockClass(b)"
-      [attr.data-test]="blockDataTestAttribute(b)"
-    >
-      <div data-test="block-id">{{ b.id }}</div>
-      <div data-test="block-name">
-        <a href="javascript:void(0)" (click)="onClick(b.name)">{{ b.name }}</a>
-      </div>
-      <div data-test="block-observation-time">{{ b.observationTime }}</div>
-      <div data-test="block-priority">{{ b.priority }}</div>
-      <div>{{ b.acceptedObservations }}/{{ b.requestedObservations }}</div>
-      <div *ngIf="b.isObservableTonight" class="is-green">
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262-green.svg"
-          alt="block is visible tonight"
-        />
-      </div>
-      <div *ngIf="!b.isObservableTonight">
-        <img
-          class="icon"
-          src="/assets/icons/noun_Cross_2120375.svg"
-          alt="block is not visible tonight"
-        />
-      </div>
-      <div data-test="block-remaining-nights">{{ b.remainingNights }}</div>
-      <div data-test="block-maximum-seeing">
-        {{ b.observingConditions.maximumSeeing }}
-      </div>
-      <div>
-        <div>{{ b.observingConditions.transparency }}</div>
-        <div *ngIf="b.observingConditions.transparency === 'Any'">
+<table class="table is-bordered">
+  <thead>
+    <tr>
+      <th
+        [ngClass]="sortableColumnClass('id')"
+        (click)="onColumnClick($event, 'id')"
+        data-testid="block-summary-id"
+      >
+        Block ID
+      </th>
+      <th
+        [ngClass]="sortableColumnClass('name')"
+        (click)="onColumnClick($event, 'name')"
+        data-testid="block-summary-name"
+      >
+        Block
+      </th>
+      <th
+        [ngClass]="sortableColumnClass('observationTime')"
+        (click)="onColumnClick($event, 'observationTime')"
+        data-testid="block-summary-observation-time"
+      >
+        ObsTime
+      </th>
+      <th
+        [ngClass]="sortableColumnClass('priority')"
+        (click)="onColumnClick($event, 'priority')"
+        data-testid="block-summary-priority"
+      >
+        Priority
+      </th>
+      <th>Done Visits</th>
+      <th>Tonight?</th>
+      <th
+        [ngClass]="sortableColumnClass('remainingNights')"
+        (click)="onColumnClick($event, 'remainingNights')"
+        data-testid="block-summary-remaining-nights"
+      >
+        Remaining
+      </th>
+      <th
+        [ngClass]="sortableColumnClass('observingConditions.maximumSeeing')"
+        (click)="onColumnClick($event, 'observingConditions.maximumSeeing')"
+        data-testid="block-summary-maximum-seeing"
+      >
+        Max Seeing
+      </th>
+      <th>Transparency</th>
+      <th
+        [ngClass]="sortableColumnClass('observingConditions.maximumLunarPhase')"
+        (click)="onColumnClick($event, 'observingConditions.maximumLunarPhase')"
+        data-testid="block-summary-maximum-lunar-phase"
+      >
+        Max Lunar Phase
+      </th>
+      <th>Instrument</th>
+      <th>Config Mode</th>
+      <th>Grating/Filter</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <ng-container *ngFor="let b of filteredBlocks">
+      <tr
+        [ngClass]="blockClass(b)"
+        [attr.data-test]="blockDataTestAttribute(b)"
+      >
+        <!--
+        The instrument setups are defined in separate table rows, but need to be
+        displayed to the right of the other columns. This means the other
+        columns must extend across their own row as well as the instrument setup
+        rows; hence the need for a rowspan of b.instruments.length + 1.
+        -->
+        <td data-test="block-id" [attr.rowspan]="b.instruments.length + 1">
+          {{ b.id }}
+        </td>
+        <td data-test="block-name" [attr.rowspan]="b.instruments.length + 1">
+          <a href="javascript:void(0)" (click)="onClick(b.name)">{{
+            b.name
+          }}</a>
+        </td>
+        <td
+          class="has-text-right"
+          data-test="block-observation-time"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
+          {{ b.observationTime }}
+        </td>
+        <td
+          data-test="block-priority"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
+          {{ b.priority }}
+        </td>
+        <td [attr.rowspan]="b.instruments.length + 1">
+          {{ b.acceptedObservations }}/{{ b.requestedObservations }}
+        </td>
+        <td
+          *ngIf="b.isObservableTonight"
+          class="is-green"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
           <img
             class="icon"
-            src="/assets/icons/noun_Cloud_moon_2462941.svg"
-            alt="any weather conditions"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="block is visible tonight"
           />
-        </div>
-        <div *ngIf="b.observingConditions.transparency === 'Clear'">
+        </td>
+        <td
+          *ngIf="!b.isObservableTonight"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
           <img
             class="icon"
-            src="/assets/icons/noun_Night_2325384.svg"
-            alt="clear sky"
+            src="/assets/icons/noun_Cross_2120375.svg"
+            alt="block is not visible tonight"
           />
-        </div>
-        <div *ngIf="b.observingConditions.transparency === 'Thin cloud'">
-          <img
-            class="icon"
-            src="/assets/icons/noun_Cloud_1188472.svg"
-            alt="thin clouds"
-          />
-        </div>
-        <div *ngIf="b.observingConditions.transparency === 'Thick cloud'">
-          <img
-            class="icon"
-            src="/assets/icons/noun_Cloud_2891552.svg"
-            alt="thick clouds"
-          />
-        </div>
-      </div>
-      <div data-test="block-maximum-lunar-phase">
-        {{ b.observingConditions.maximumLunarPhase }}
-      </div>
-      <div class="instrument-container">
-        <div *ngFor="let i of b.instruments">
-          <div>
-            <a href="proposal/{{ proposalCode }}/#">{{ i.name }}</a>
+        </td>
+        <td
+          data-test="block-remaining-nights"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
+          {{ b.remainingNights }}
+        </td>
+        <td
+          data-test="block-maximum-seeing"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
+          {{ b.observingConditions.maximumSeeing }}
+        </td>
+        <td [attr.rowspan]="b.instruments.length + 1">
+          <div>{{ b.observingConditions.transparency }}</div>
+          <div *ngIf="b.observingConditions.transparency === 'Any'">
+            <img
+              class="icon"
+              src="/assets/icons/noun_Cloud_moon_2462941.svg"
+              alt="any weather conditions"
+            />
           </div>
-          <div>
-            <div *ngFor="let m of i.modes">
-              {{ m }}
-            </div>
-            <div *ngIf="i.gratings || i.filters">
-              <div *ngFor="let g of i.gratings">{{ g }}</div>
-              <div *ngFor="let t of i.filters">{{ t }}</div>
-            </div>
+          <div *ngIf="b.observingConditions.transparency === 'Clear'">
+            <img
+              class="icon"
+              src="/assets/icons/noun_Night_2325384.svg"
+              alt="clear sky"
+            />
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+          <div *ngIf="b.observingConditions.transparency === 'Thin cloud'">
+            <img
+              class="icon"
+              src="/assets/icons/noun_Cloud_1188472.svg"
+              alt="thin clouds"
+            />
+          </div>
+          <div *ngIf="b.observingConditions.transparency === 'Thick cloud'">
+            <img
+              class="icon"
+              src="/assets/icons/noun_Cloud_2891552.svg"
+              alt="thick clouds"
+            />
+          </div>
+        </td>
+        <td
+          data-test="block-maximum-lunar-phase"
+          [attr.rowspan]="b.instruments.length + 1"
+        >
+          {{ b.observingConditions.maximumLunarPhase }}
+        </td>
+      </tr>
+      <tr *ngFor="let i of b.instruments" [ngClass]="blockClass(b)">
+        <td>
+          <a href="proposal/{{ proposalCode }}/#">{{ i.name }}</a>
+        </td>
+        <td>
+          <div *ngFor="let m of i.modes">
+            {{ m }}
+          </div>
+        </td>
+        <td>
+          <div *ngIf="i.gratings || i.filters">
+            <div *ngFor="let g of i.gratings">{{ g }}</div>
+            <div *ngFor="let t of i.filters">{{ t }}</div>
+          </div>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>

@@ -1,21 +1,30 @@
-<div class="grid-table alternate-background" *ngIf="arcBibleEntries">
-  <div class="secondary-header row">
-    <div class="has-text-centered">Arc Bible</div>
-  </div>
-  <div class="row has-three-columns headers">
-    <div>Lamp</div>
-    <div>Base exp. time</div>
-    <div>Corrected Exp. time</div>
-  </div>
-  <div *ngFor="let ab of arcBibleEntries" class="row has-three-columns">
-    <div>
-      {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
-    </div>
-    <div *ngIf="ab.originalExposureTime; else elseBlock">
-      {{ ab.originalExposureTime }} sec
-    </div>
-    <ng-template #elseBlock><div>n/a</div></ng-template>
-    <div>{{ ab.originalExposureTime }} sec</div>
-    <div>{{ ab.preferredExposureTime }} sec</div>
-  </div>
+<div *ngIf="arcBibleEntries">
+  <table class="table">
+    <thead>
+    <tr class="secondary-header">
+      <th  colspan="4" class="has-text-centered">Arc Bible</th>
+    </tr>
+      <tr>
+        <th>Lamp</th>
+        <th>Base exp. time</th>
+        <th>Corrected Exp. time</th>
+        <th>Preferred Exp. time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ab of arcBibleEntries">
+        <td>
+          {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
+        </td>
+        <td *ngIf="ab.originalExposureTime; else elseBlock">
+          {{ ab.originalExposureTime }} sec
+        </td>
+        <ng-template #elseBlock><td>n/a</td></ng-template>
+        <td>{{ ab.originalExposureTime }} sec</td>
+        <td>{{ ab.preferredExposureTime }} sec</td>
+      </tr>
+    </tbody>
+  </table>
+
+
 </div>

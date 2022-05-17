@@ -1,105 +1,114 @@
-<div class="proposal-details-row main-details">
-  <div class="grid-table alternate-background">
-    <div class="secondary-header row">
-      <div class="has-text-centered">Details</div>
-    </div>
-    <div class="row proposal-details-row">
-      <div>Status</div>
-      <div>{{ generalProposalInfo.status.value }}</div>
-    </div>
-    <div
-      class="row proposal-details-row"
-      *ngIf="generalProposalInfo.status.reason"
-    >
-      <div>Status reason</div>
-      <div>{{ generalProposalInfo.status.reason }}</div>
-    </div>
-    <div class="row proposal-details-row">
-      <div>Type</div>
-      <div>{{ generalProposalInfo.proposalType }}</div>
-    </div>
-    <div class="row proposal-details-row">
-      <div>Target of Opportunity</div>
-      <div *ngIf="generalProposalInfo.targetOfOpportunity">
-        <div>
-          <img
-            class="icon is-small"
-            src="/assets/icons/noun_tick_2836262-green.svg"
-            alt="Is target of opportunity"
-          />
+<div class="inline-view">
+  <div>
+    <table class="table">
+      <tr class="secondary-header">
+        <th colspan="2" class="has-text-centered">Details</th>
+      </tr>
+      <tbody>
+        <tr>
+          <th>Status</th>
+          <td>{{ generalProposalInfo.status.value }}</td>
+        </tr>
+        <div
+          class="row proposal-details-row"
+          *ngIf="generalProposalInfo.status.reason"
+        >
+          <div>Status reason</div>
+          <div>{{ generalProposalInfo.status.reason }}</div>
         </div>
-      </div>
-      <div *ngIf="!generalProposalInfo.targetOfOpportunity">
-        <div>
-          <img
-            class="icon is-small"
-            src="/assets/icons/noun_Cross_2120375.svg"
-            alt="Is not target of opportunity"
-          />
-        </div>
-      </div>
-    </div>
-    <div class="row proposal-details-row">
-      <div>Total time</div>
-      <div>{{ generalProposalInfo.totalRequestedTime }}</div>
-    </div>
-    <div class="row proposal-details-row">
-      <div>Proprietary period</div>
-      <div class="proprietary-period">
-        <div>{{ generalProposalInfo.dataReleaseDate }}</div>
-        <div><button class="button is-small">change</button></div>
-      </div>
-    </div>
+        <tr>
+          <th>Type</th>
+          <td>{{ generalProposalInfo.proposalType }}</td>
+        </tr>
+        <tr>
+          <th>Target of Opportunity</th>
+          <td *ngIf="generalProposalInfo.targetOfOpportunity">
+            <div>
+              <img
+                class="icon is-small"
+                src="/assets/icons/noun_tick_2836262-green.svg"
+                alt="Is target of opportunity"
+              />
+            </div>
+          </td>
+          <td *ngIf="!generalProposalInfo.targetOfOpportunity">
+            <div>
+              <img
+                class="icon is-small"
+                src="/assets/icons/noun_Cross_2120375.svg"
+                alt="Is not target of opportunity"
+              />
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Total time</th>
+          <td>{{ generalProposalInfo.totalRequestedTime }}</td>
+        </tr>
+        <tr>
+          <th>Proprietary period</th>
+          <td class="proprietary-period">
+            <div>{{ generalProposalInfo.dataReleaseDate }}</div>
+            <div><button class="button is-small">change</button></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <div>
-    <div class="grid-table download-and-astronomer">
-      <div>
-        <div class="secondary-header row">
-          <div class="has-text-centered">Download</div>
-        </div>
-        <div class="row">
-          <div><a>Download zip file</a></div>
-        </div>
-        <div class="row">
-          <div><a>Download summary</a></div>
-        </div>
-      </div>
-      <div>
-        <div class="secondary-header row">
-          <div class="has-text-centered">Responsible SALT Astronomer:</div>
-        </div>
-        <div class="row proposal-details-row">
-          <div *ngIf="generalProposalInfo.liaisonSaltAstronomer">
+    <table class="table">
+
+        <tr class="secondary-header">
+          <th colspan="2" class="has-text-centered">Download</th>
+        </tr>
+        <tr>
+          <td colspan="2"><a class="has-text-link">Download zip file</a></td>
+        </tr>
+        <tr>
+          <td colspan="2"><a>Download summary</a></td>
+        </tr>
+
+        <tr class="secondary-header">
+          <th colspan="2" class="has-text-centered">Responsible SALT Astronomer:</th>
+        </tr>
+        <tr>
+          <td *ngIf="generalProposalInfo.liaisonSaltAstronomer">
             <a>
               <!--      TODO Send email.-->
               {{ generalProposalInfo.liaisonSaltAstronomer.givenName }}
               {{ generalProposalInfo.liaisonSaltAstronomer.familyName }}
             </a>
-          </div>
-          <div *ngIf="!generalProposalInfo.liaisonSaltAstronomer">None</div>
-          <div class="">
+          </td>
+          <td *ngIf="!generalProposalInfo.liaisonSaltAstronomer">None</td>
+          <td>
             <button class="is-pulled-right button is-small">Edit</button>
+          </td>
+        </tr>
+    </table>
+  </div>
+
+  <div>
+    <table class="table">
+      <tr class="secondary-header">
+        <th class="has-text-centered">Summary For SALT Astronomer</th>
+      </tr>
+      <tr>
+        <td>
+          <div class="notificati">
+            <p [innerHTML]="generalProposalInfo.summaryForSaltAstronomer | nl2br"></p>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="grid-table">
-  <div class="secondary-header row">
-    <div class="has-text-centered">Summary For SALT Astronomer</div>
-  </div>
-  <div class="notification">
-    <div>
-      <p [innerHTML]="generalProposalInfo.summaryForSaltAstronomer | nl2br"></p>
-    </div>
-  </div>
-  <div class="secondary-header row">
-    <div class="has-text-centered">Summary For The Night Log</div>
-  </div>
-  <div class="proposal-details-row notification">
-    <div class="">
-      <p>{{ generalProposalInfo.summaryForNightLog }}</p>
-    </div>
+        </td>
+
+      </tr>
+      <tr class="secondary-header">
+        <th class="has-text-centered">Summary For The Night Log</th>
+      </tr>
+      <tr>
+        <td>
+          <p>{{ generalProposalInfo.summaryForNightLog }}</p>
+        </td>
+      </tr>
+
+    </table>
   </div>
 </div>

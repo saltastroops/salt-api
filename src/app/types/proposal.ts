@@ -5,7 +5,7 @@ import { Phase1Target } from "./target";
 export interface Affiliation {
   partnerName: PartnerName;
   partnerCode: PartnerCode;
-  institute: string;
+  institution: string;
   department: string;
 }
 

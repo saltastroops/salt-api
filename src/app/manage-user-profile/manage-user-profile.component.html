@@ -23,8 +23,8 @@
         </div>
       </div>
     </div>
-    <hr class="section-line" />
-    <div>
+    <div *ngIf="selectedUserId">
+      <hr class="section-line" />
       <h2 class="title is-4">
         Edit contacts for '{{ selectedUser?.givenName }}
         {{ selectedUser?.familyName }}'
@@ -52,12 +52,12 @@
         institutions, you should have one contact for each. Note that you cannot
         use the same email address for two contacts!
       </p>
+      <hr class="section-line" />
     </div>
-    <hr class="section-line" />
     <br />
     <div class="form-container">
-      <ng-container *ngIf="isLoadingForm && !selectedUserId">
-        <div class="form-overlay loading-spinner is-overlay">
+      <ng-container *ngIf="isLoadingForm">
+        <div class="loading-spinner is-overlay">
           <wm-loading-spinner></wm-loading-spinner>
         </div>
       </ng-container>

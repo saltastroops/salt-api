@@ -51,7 +51,6 @@ export class ManageUserProfileComponent implements OnInit {
     });
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {
-        this.isLoadingForm = true;
         this.selectedUserId$.next(user.id);
       }),
     );

@@ -35,13 +35,14 @@
         <td>
           <span *ngIf="detector.detectorWindow">{{
             detector.detectorWindow?.height
-            }}</span>
-            <span
-              *ngIf="
+          }}</span>
+          <span
+            *ngIf="
               detector.detectorWindow === null ||
               detector.detectorWindow.height !== null
             "
-            >No Window</span>
+            >No Window</span
+          >
         </td>
       </tr>
     </tbody>

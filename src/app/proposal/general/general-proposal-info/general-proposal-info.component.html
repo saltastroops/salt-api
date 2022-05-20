@@ -31,7 +31,10 @@
         <td>
           <div class="select">
             <select [formControl]="semesterControl">
-              <option *ngFor="let s of generalProposalInfo.semesters" [value]="s">
+              <option
+                *ngFor="let s of generalProposalInfo.semesters"
+                [value]="s"
+              >
                 {{ s }}
               </option>
             </select>

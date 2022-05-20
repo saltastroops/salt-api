@@ -1,12 +1,16 @@
 <div>
   <table class="table">
     <tr class="secondary-header">
-      <th colspan="2" class="has-text-centered">Charged Time To Date (seconds)</th>
+      <th colspan="2" class="has-text-centered">
+        Charged Time To Date (seconds)
+      </th>
     </tr>
     <tbody>
       <tr>
         <th>Priority 0</th>
-        <td><div>{{ chargedTime.priority0 }}</div></td>
+        <td>
+          <div>{{ chargedTime.priority0 }}</div>
+        </td>
       </tr>
       <tr>
         <th>Priority 1</th>
@@ -33,7 +37,9 @@
       <tr>
         <th>P1-P3 Completion (%)</th>
         <td data-testid="relative-completion">
-          {{ (chargedTimeP0ToP3 / allocatedP0ToP3Time) * 100 | number: "1.0-1" }}%
+          {{
+            (chargedTimeP0ToP3 / allocatedP0ToP3Time) * 100 | number: "1.0-1"
+          }}%
         </td>
       </tr>
     </tbody>

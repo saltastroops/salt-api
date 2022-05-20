@@ -52,3 +52,5 @@ import "zone.js/dist/zone";
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+(window as any).global = window;

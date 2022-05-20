@@ -24,6 +24,7 @@ describe("ManageUserProfileComponent", () => {
         institutionId: 1,
         name: 'Institution A',
         partnerCode: 'RSA',
+        partnerName: 'Partner A',
         department: ''
       }
     ]

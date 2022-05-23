@@ -239,10 +239,7 @@ Show
 <br /><br />
 <br /><br />
 <br /><br />
-<div class="table alternate-background">
-
-</div>
-
+<div class="table alternate-background"></div>
 
 <table class="table">
   <tr class="secondary-header">
@@ -263,10 +260,7 @@ Show
     </tr>
   </thead>
   <tbody>
-    <tr
-    data-test="proposal-row"
-    *ngFor="let proposal of filteredProposals"
-  >
+    <tr data-test="proposal-row" *ngFor="let proposal of filteredProposals">
       <td>{{ proposal.id }}</td>
       <td>
         <a [routerLink]="['/proposal', proposal.proposalCode]">
@@ -284,21 +278,18 @@ Show
         {{ proposal.principalInvestigator.familyName }}
       </td>
       <td data-test="liaison-astronomer">
-          <span *ngIf="proposal.liaisonAstronomer">{{
-            proposal.liaisonAstronomer.givenName
-            }}</span>
+        <span *ngIf="proposal.liaisonAstronomer">{{
+          proposal.liaisonAstronomer.givenName
+        }}</span>
       </td>
     </tr>
   </tbody>
 </table>
 
-
-
 <div
   *ngIf="proposals && !loading; else loading_indicator"
   style="position: relative"
->
-</div>
+></div>
 <ng-template #loading_indicator>
   <div class="loading-indicator">
     <wm-loading-spinner></wm-loading-spinner>

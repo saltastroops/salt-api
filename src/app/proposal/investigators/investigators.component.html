@@ -45,10 +45,14 @@
       <td>{{ i.affiliation.department }}</td>
       <!-- TODO: Replace with correct code -->
       <ng-template [ngIf]="i.hasApprovedProposal === true">
-        <td><div><button class="button is-danger is-small">Reject</button></div></td>
+        <td>
+          <div><button class="button is-danger is-small">Reject</button></div>
+        </td>
       </ng-template>
       <ng-template [ngIf]="i.hasApprovedProposal === false">
-        <td><div><button class="button is-success is-small">Accept</button></div></td>
+        <td>
+          <div><button class="button is-success is-small">Accept</button></div>
+        </td>
       </ng-template>
       <ng-template [ngIf]="i.hasApprovedProposal === null || undefined">
         <td class="accept-reject">

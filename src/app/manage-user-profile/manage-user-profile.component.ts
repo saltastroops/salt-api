@@ -1,6 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
 
 import { Observable, Subject, of } from "rxjs";
 import { catchError, debounceTime, switchMap, take, tap } from "rxjs/operators";
@@ -33,7 +32,6 @@ export class ManageUserProfileComponent implements OnInit {
 
   constructor(
     private authService: AuthenticationService,
-    private activatedRoute: ActivatedRoute,
     private userService: UserService,
     private institutionService: InstitutionService,
     private formBuilder: FormBuilder,

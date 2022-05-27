@@ -9,6 +9,7 @@ import { Observation } from "./observation";
 
 export interface Block {
   id: number;
+  code: string | null;
   name: string;
   proposalCode: string;
   semester: string;

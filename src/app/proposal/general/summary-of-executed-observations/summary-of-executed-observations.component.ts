@@ -19,7 +19,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   @Output() selectBlock = new EventEmitter<string>();
   observations!: Observation[];
   user!: User;
-  enableEditBlockButton = false;
+  showEditBlockButton = false;
 
   constructor(private authService: AuthenticationService) {}
 
@@ -29,7 +29,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
       .pipe(take(1))
       .subscribe((user) => {
         this.user = user;
-        this.enableEditBlockButton = !hasAnyRole(user, [
+        this.showEditBlockButton = !hasAnyRole(user, [
           "SALT Astronomer",
           "SALT Operator",
         ]);

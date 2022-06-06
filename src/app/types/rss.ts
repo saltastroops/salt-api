@@ -157,6 +157,7 @@ export interface RssSpectroscopy {
   grating: RssGrating;
   gratingAngle: number;
   cameraAngle: number;
+  cameraStation: number;
 }
 
 export interface RssSummary extends InstrumentSummary {

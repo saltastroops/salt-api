@@ -7,9 +7,11 @@ import {
   interceptIndefinitely,
 } from "../support/utils";
 
-const USERNAME = "hettlage";
-const ADMINISTRATOR = "nhlavutelo";
-const INVESTIGATOR = "kevin";
+const USERNAME = Cypress.env("defaultUsername");
+const ADMINISTRATOR = Cypress.env("administrator");
+const INVESTIGATOR = Cypress.env("investigator");
+const SALT_ASTRONOMER = Cypress.env("saltAstronomerUsername");
+const TAC_MEMBER = Cypress.env("tacMember");
 
 describe("Inline login form", () => {
   beforeEach(() => {
@@ -141,22 +143,39 @@ describe("Navigation bar", () => {
     });
   });
 
-  // it("Should show only show tabs available to SALT Astronomers", () => {
-  //   cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
-  //     cy.task("getUser", SALT_ASTRONOMER).then(() => {
-  //       HomePage.visit();
-  //       NavigationBar.typeUsername(SALT_ASTRONOMER);
-  //       NavigationBar.typePassword(password);
-  //       NavigationBar.submitLogin();
-  //       // When the user had logged in the following tabs should be visible
-  //       NavigationBar.hasHomeTab();
-  //       NavigationBar.hasSOPageTab();
-  //       NavigationBar.hasSAPagesTab();
-  //       NavigationBar.hasOptionsTab();
-  //       NavigationBar.hasGravitationalWavesTab();
-  //       NavigationBar.hasNoAdminTab();
-  //     });
-  //   })
-  //
-  // })
+  it("Should show only show tabs available to SALT Astronomers", () => {
+    cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
+      cy.task("getUser", SALT_ASTRONOMER).then(() => {
+        HomePage.visit();
+        NavigationBar.typeUsername(SALT_ASTRONOMER);
+        NavigationBar.typePassword(password);
+        NavigationBar.submitLogin();
+        // When the user had logged in the following tabs should be visible
+        NavigationBar.hasHomeTab();
+        NavigationBar.hasSOPageTab();
+        NavigationBar.hasSAPagesTab();
+        NavigationBar.hasOptionsTab();
+        NavigationBar.hasGravitationalWavesTab();
+        NavigationBar.hasNoAdminTab();
+      });
+    });
+  });
+
+  it.only("Should show only show tabs available to SALT Operators", () => {
+    cy.task("updateUserPassword", TAC_MEMBER).then((password: string) => {
+      cy.task("getUser", TAC_MEMBER).then(() => {
+        HomePage.visit();
+        NavigationBar.typeUsername(TAC_MEMBER);
+        NavigationBar.typePassword(password);
+        NavigationBar.submitLogin();
+        // When the user had logged in the following tabs should be visible
+        NavigationBar.hasHomeTab();
+        NavigationBar.hasNoSOPageTab();
+        NavigationBar.hasNoSAPagesTab();
+        NavigationBar.hasOptionsTab();
+        NavigationBar.hasGravitationalWavesTab();
+        NavigationBar.hasNoAdminTab();
+      });
+    });
+  });
 });

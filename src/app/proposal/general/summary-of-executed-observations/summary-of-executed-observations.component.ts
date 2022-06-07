@@ -30,6 +30,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
       .subscribe((user) => {
         this.user = user;
         this.showEditBlockButton = !hasAnyRole(user, [
+          "Administrator",
           "SALT Astronomer",
           "SALT Operator",
         ]);

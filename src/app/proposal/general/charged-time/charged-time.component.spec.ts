@@ -66,7 +66,7 @@ describe("ChargedTimeTableComponent", () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {
         chargedTime: charged_time,
-        timeAllocation: time_allocations[0],
+        timeAllocations: time_allocations,
       },
     });
     expect(component).toBeTruthy();
@@ -76,21 +76,21 @@ describe("ChargedTimeTableComponent", () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {
         chargedTime: charged_time,
-        timeAllocation: time_allocations[0],
+        timeAllocations: time_allocations,
       },
     });
     const completion = component.getByTestId("absolute-completion");
-    expect(completion.innerText).toContain("3700/69600");
+    expect(completion.innerText).toContain("3700/278400");
   });
 
   it("should display the correct relative completion", async () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {
         chargedTime: charged_time,
-        timeAllocation: time_allocations[0],
+        timeAllocations: time_allocations,
       },
     });
     const completion = component.getByTestId("relative-completion");
-    expect(completion.innerText).toContain("5.3%");
+    expect(completion.innerText).toContain("1.3%");
   });
 });

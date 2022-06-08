@@ -9,16 +9,21 @@ import { ChargedTime, TimeAllocation } from "../../../types/proposal";
 })
 export class ChargedTimeComponent implements OnInit {
   @Input() chargedTime!: ChargedTime;
-  @Input() timeAllocation!: TimeAllocation;
+  @Input() timeAllocations!: TimeAllocation[];
   allocatedP0ToP3Time = 0;
   chargedTimeP0ToP3 = 0;
 
   ngOnInit(): void {
-    this.allocatedP0ToP3Time = this.timeAllocation
-      ? this.timeAllocation.priority0 +
-        this.timeAllocation.priority1 +
-        this.timeAllocation.priority2 +
-        this.timeAllocation.priority3
+    this.allocatedP0ToP3Time = this.timeAllocations
+      ? this.timeAllocations
+          .map(
+            (timeAllocation) =>
+              timeAllocation.priority0 +
+              timeAllocation.priority1 +
+              timeAllocation.priority2 +
+              timeAllocation.priority3,
+          )
+          .reduce((a, b) => a + b, 0)
       : 0;
     this.chargedTimeP0ToP3 =
       this.chargedTime.priority0 +

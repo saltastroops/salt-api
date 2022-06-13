@@ -2,8 +2,11 @@ import { TestBed } from "@angular/core/testing";
 
 import { fireEvent, render } from "@testing-library/angular";
 import { DateFnsModule } from "ngx-date-fns";
+import { of } from "rxjs";
 
+import { AuthenticationService } from "../../../service/authentication.service";
 import { BlockVisit } from "../../../types/common";
+import { User } from "../../../types/user";
 import { SummaryOfExecutedObservationsComponent } from "./summary-of-executed-observations.component";
 
 describe("SummaryOfExecutedObservationsComponent", () => {
@@ -35,10 +38,34 @@ describe("SummaryOfExecutedObservationsComponent", () => {
     },
   ];
 
+  const expectedUser: User = {
+    id: 1,
+    username: "Jdoe",
+    givenName: "John",
+    familyName: "Doe",
+    email: "johndoe@exmaple.com",
+    alternativeEmails: [],
+    roles: [],
+    affiliations: [
+      {
+        institutionId: 1,
+        name: "Institution A",
+        partnerCode: "RSA",
+        partnerName: "Partner A",
+        department: "",
+      },
+    ],
+  };
+
   beforeEach(async () => {
+    const getUserSpy = jasmine.createSpyObj("AuthenticationService", {
+      getUser: of(expectedUser),
+    });
+
     await TestBed.configureTestingModule({
       declarations: [SummaryOfExecutedObservationsComponent],
       imports: [DateFnsModule.forRoot()],
+      providers: [{ provide: AuthenticationService, useValue: getUserSpy }],
     }).compileComponents();
   });
 

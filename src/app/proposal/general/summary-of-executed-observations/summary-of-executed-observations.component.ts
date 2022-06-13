@@ -1,8 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 
 import { parseISO } from "date-fns";
+import { take } from "rxjs/operators";
 
+import { AuthenticationService } from "../../../service/authentication.service";
 import { BlockVisit } from "../../../types/common";
+import { User } from "../../../types/user";
+import { hasAnyRole } from "../../../utils";
 
 @Component({
   selector: "wm-summary-of-executed-observations",
@@ -14,8 +18,23 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   @Input() blockVisits!: BlockVisit[];
   @Output() selectBlock = new EventEmitter<string>();
   observations!: Observation[];
+  user!: User;
+  showEditBlockButton = false;
+
+  constructor(private authService: AuthenticationService) {}
 
   ngOnInit(): void {
+    this.authService
+      .getUser()
+      .pipe(take(1))
+      .subscribe((user) => {
+        this.user = user;
+        this.showEditBlockButton = !hasAnyRole(user, [
+          "Administrator",
+          "SALT Astronomer",
+          "SALT Operator",
+        ]);
+      });
     this.observations = this.blockVisits.map((o) => ({
       ...o,
       downloadObservation: this.selectAll,

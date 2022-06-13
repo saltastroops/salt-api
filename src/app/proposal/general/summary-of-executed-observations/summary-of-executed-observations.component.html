@@ -67,10 +67,20 @@
       </td>
       <td>{{ e.rejectionReason }}</td>
       <td *ngIf="e.status === 'Accepted'">
-        <button class="button is-danger is-small">Reject</button>
+        <button
+          class="button is-danger is-small"
+          [hidden]="showEditBlockButton"
+        >
+          Put block on hold
+        </button>
       </td>
       <td *ngIf="e.status === 'Rejected'">
-        <button class="button is-success is-small">Accept</button>
+        <button
+          class="button is-success is-small"
+          [hidden]="showEditBlockButton"
+        >
+          Put block off hold
+        </button>
       </td>
       <td>
         <label class="checkbox">

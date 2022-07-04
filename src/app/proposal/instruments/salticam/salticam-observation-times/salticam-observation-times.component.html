@@ -6,17 +6,20 @@
     <tr>
       <th>Shutter open time</th>
       <td class="has-text-right">
-        {{ (salticam.observationTime - salticam.overheadTime).toFixed(1) }} sec
+        {{ salticam.observationTime - salticam.overheadTime | number: "1.2-2" }}
+        sec
       </td>
     </tr>
     <tr>
       <th>Overhead</th>
-      <td class="has-text-right">{{ salticam.overheadTime.toFixed(1) }} sec</td>
+      <td class="has-text-right">
+        {{ salticam.overheadTime | number: "1.2-2" }} sec
+      </td>
     </tr>
     <tr>
       <th>Charged</th>
       <td class="has-text-right">
-        {{ salticam.observationTime.toFixed(1) }} sec
+        {{ salticam.observationTime | number: "1.2-2" }} sec
       </td>
     </tr>
   </table>

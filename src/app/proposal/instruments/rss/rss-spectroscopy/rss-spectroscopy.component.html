@@ -11,13 +11,13 @@
       <th>Grating</th>
       <td>{{ spectroscopy.grating }}</td>
       <th>Grating angle</th>
-      <td>{{ spectroscopy.gratingAngle }}&#176;</td>
+      <td>{{ spectroscopy.gratingAngle | number: "1.2-2" }}&#176;</td>
     </tr>
     <tr class="double-boarder">
       <th>Camera station</th>
       <td>{{ spectroscopy.cameraStation }}</td>
       <th>Camera angle</th>
-      <td>{{ spectroscopy.cameraAngle }}&#176;</td>
+      <td>{{ spectroscopy.cameraAngle | number: "1.2-2" }}&#176;</td>
     </tr>
   </table>
 </div>

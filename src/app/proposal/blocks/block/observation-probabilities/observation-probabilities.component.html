@@ -7,23 +7,27 @@
     </tr>
     <tr>
       <th>Moon prob</th>
-      <td>{{ probabilities.moon || "Not calculated" }}</td>
+      <td>{{ probabilities.moon | number: "1.2-2" || "Not calculated" }}</td>
     </tr>
     <tr>
       <th>Competition prob</th>
-      <td>{{ probabilities.competition || "Not calculated" }}</td>
+      <td>
+        {{ probabilities.competition | number: "1.2-2" || "Not calculated" }}
+      </td>
     </tr>
     <tr>
       <th>Observability prob</th>
-      <td>{{ probabilities.observability || "Not calculated" }}</td>
+      <td>
+        {{ probabilities.observability | number: "1.2-2" || "Not calculated" }}
+      </td>
     </tr>
     <tr>
       <th>Seeing prob</th>
-      <td>{{ probabilities.seeing || "Not calculated" }}</td>
+      <td>{{ probabilities.seeing | number: "1.2-2" || "Not calculated" }}</td>
     </tr>
     <tr>
       <th>Total prob</th>
-      <td>{{ probabilities.total }}</td>
+      <td>{{ probabilities.total | number: "1.2-2" }}</td>
     </tr>
   </table>
 </div>

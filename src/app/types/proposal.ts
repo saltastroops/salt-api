@@ -1,4 +1,4 @@
-import { BlockSummary } from "./block";
+import { BlockSummary, Transparency } from "./block";
 import { BlockVisit, PartnerCode, PartnerName } from "./common";
 import { Phase1Target } from "./target";
 
@@ -132,4 +132,33 @@ export interface TimeAllocation {
   priority2: number;
   priority3: number;
   priority4: number;
+}
+
+export interface ProposalProgress {
+  requestedTime: number | null;
+  semester: string | null;
+  partnerRequestedPercentages: {
+    partnerCode: string;
+    partnerName: string;
+    requestedPercentage: number;
+  }[];
+  maximumSeeing: number | null;
+  transparency: Transparency | null;
+  lastObservingConstraints: {
+    seeing: number;
+    transparency: string;
+    description: string;
+  };
+  descriptionOfObservingConstraints: string;
+  changeReason: string | null;
+  summaryOfProposalStatus: string | null;
+  strategyChanges: string | null;
+  previousTimeRequests: TimeStatistics[];
+}
+
+export interface TimeStatistics {
+  semester: string;
+  requestedTime: number;
+  allocatedTime: number;
+  observedTime: number;
 }

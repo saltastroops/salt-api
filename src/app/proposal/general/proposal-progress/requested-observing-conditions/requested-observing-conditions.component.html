@@ -1,0 +1,18 @@
+<h2 class="title is-5">Previously requested observing conditions</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Max Seeing</th>
+      <th>Transparency</th>
+      <th>Brief description of observing constraints</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ lastObservingConstraints.seeing | number: "1.2" }}</td>
+      <td>{{ lastObservingConstraints.transparency }}</td>
+      <td>{{ lastObservingConstraints.description }}</td>
+    </tr>
+  </tbody>
+</table>

@@ -2,14 +2,15 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 
 import * as camelcaseKeys from "camelcase-keys";
-import { Observable } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { Observable, throwError } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
 import {
   ObservationComment,
   Proposal,
   ProposalListItem,
+  ProposalProgress,
 } from "../../types/proposal";
 import { ProposalService } from "../proposal.service";
 
@@ -90,6 +91,20 @@ export class RealProposalService implements ProposalService {
       switchMap(() => this.http.get(uri)),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((comments: any) => camelcaseKeys(comments, { deep: true })),
+    );
+  }
+  getProgressReport(
+    proposalCode: string,
+    semester: string,
+  ): Observable<ProposalProgress> {
+    const uri = environment.apiUrl + `/progress/${proposalCode}/${semester}`;
+    return this.http.get<ProposalProgress>(uri).pipe(
+      map((progressReport: ProposalProgress) =>
+        camelcaseKeys(progressReport, { deep: true }),
+      ),
+      catchError(() => {
+        return throwError("Oops. Something is wrong.");
+      }),
     );
   }
 }

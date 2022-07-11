@@ -1,0 +1,397 @@
+<div class="progress-report-form">
+  <h2 class="title is-5">Requests for next semester ({{ nextSemester }})</h2>
+  <form [formGroup]="proposalProgressForm" (ngSubmit)="submit()">
+    <table class="table has-fixed-size">
+      <col width="150" />
+      <col width="100" />
+      <col width="20" />
+      <tbody>
+        <tr>
+          <td>Requested Time</td>
+          <td class="form-group">
+            <input
+              #requestedTime
+              (keyup)="validateRequestedTimeValue(requestedTime.value)"
+              type="text"
+              formControlName="requestedTime"
+              class="input"
+              data-test="requested-time"
+              [ngClass]="{
+                'is-danger':
+                  (f.requestedTime.dirty || submitted) && f.requestedTime.errors
+              }"
+            />
+            <p
+              *ngIf="
+                (f.requestedTime.dirty || submitted) && f.requestedTime.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.requestedTime.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The requested time is required
+              </label>
+              <label
+                class="has-text-danger"
+                *ngIf="f.requestedTime.errors.message"
+              >
+                {{ f.requestedTime.errors.message }}
+              </label>
+            </p>
+          </td>
+          <td>sec</td>
+        </tr>
+        <ng-container
+          formArrayName="partnerRequestedPercentages"
+          *ngFor="let t of partnerRequestedPercentages.controls; let i = index"
+        >
+          <tr
+            class="row"
+            [formGroupName]="i"
+            (keyup)="validatePartnerRequestedPercentagesControls()"
+          >
+            <td>Requested from {{ t.value.partnerCode }}</td>
+            <td>
+              <input
+                #partnerPercentage
+                formControlName="requestedPercentages"
+                id="{{ 'name' + i }}"
+                type="text"
+                class="input"
+                (keyup)="
+                  validatePercentageValue(
+                    partnerPercentage.value,
+                    t.value.partnerCode,
+                    i
+                  )
+                "
+                [ngClass]="{
+                  'is-danger':
+                    (partnerRequestedPercentages.controls[i]?.get(
+                      'requestedPercentages'
+                    )?.dirty ||
+                      submitted) &&
+                    partnerRequestedPercentages.controls[i]?.get(
+                      'requestedPercentages'
+                    )?.errors &&
+                    t.value.partnerCode !== 'OTH'
+                }"
+              />
+              <p
+                *ngIf="
+                  (partnerRequestedPercentages.controls[i]?.get(
+                    'requestedPercentages'
+                  )?.dirty ||
+                    submitted) &&
+                  partnerRequestedPercentages.controls[i]?.get(
+                    'requestedPercentages'
+                  )?.errors
+                "
+                class="invalid-feedback"
+              >
+                <label
+                  *ngIf="
+                    partnerRequestedPercentages.controls[i]?.get(
+                      'requestedPercentages'
+                    )?.errors?.required
+                  "
+                  class="has-text-danger"
+                  data-test="error"
+                >
+                  The requested percentage for the partner
+                  {{ t.value.partnerCode }} is required.
+                </label>
+                <label
+                  class="has-text-danger"
+                  *ngIf="
+                    partnerRequestedPercentages.controls[i]?.get(
+                      'requestedPercentages'
+                    )?.errors?.message
+                  "
+                >
+                  {{
+                    partnerRequestedPercentages.controls[i]?.get(
+                      "requestedPercentages"
+                    )?.errors?.message
+                  }}
+                </label>
+              </p>
+            </td>
+            <td>%</td>
+          </tr>
+        </ng-container>
+        <ng-container *ngIf="partnerRequestedPercentages.errors">
+          <tr>
+            <td colspan="3">
+              <p>
+                <label class="has-text-danger">{{
+                  partnerRequestedPercentages?.errors?.message
+                }}</label>
+              </p>
+            </td>
+          </tr>
+        </ng-container>
+        <tr>
+          <td>Maximum Seeing</td>
+          <td class="form-group">
+            <input
+              #maximumSeeing
+              (keyup)="validateMaximumSeeingValue(maximumSeeing.value)"
+              type="text"
+              formControlName="maximumSeeing"
+              class="input"
+              data-test="requested-time"
+              [ngClass]="{
+                'is-danger':
+                  (f.maximumSeeing.dirty || submitted) && f.maximumSeeing.errors
+              }"
+            />
+            <p
+              *ngIf="
+                (f.maximumSeeing.dirty || submitted) && f.maximumSeeing.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.maximumSeeing.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The maximum seeing is required
+              </label>
+              <label
+                class="has-text-danger"
+                *ngIf="f.maximumSeeing.errors.message"
+              >
+                {{ f.maximumSeeing.errors.message }}
+              </label>
+            </p>
+          </td>
+          <td>arcsec</td>
+        </tr>
+        <tr>
+          <td>Transparency</td>
+          <td class="form-group">
+            <label class="select">
+              <select
+                [ngClass]="{
+                  'is-danger':
+                    (f.maximumSeeing.dirty || submitted) &&
+                    f.transparency.errors
+                }"
+                (change)="changeTransparency($event)"
+                formControlName="transparency"
+              >
+                <option [ngValue]="''" disabled>Select</option>
+                <option [ngValue]="'Any'">Any</option>
+                <option [ngValue]="'Clear'">Clear</option>
+                <option [ngValue]="'Thick cloud'">Thick cloud</option>
+                <option [ngValue]="'Thin cloud'">Thin cloud</option>
+              </select>
+            </label>
+            <p
+              *ngIf="
+                (f.transparency.dirty || submitted) && f.transparency.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.transparency.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The transparency is required
+              </label>
+              <label
+                *ngIf="f.transparency.errors.message"
+                class="has-text-danger"
+                data-test="error"
+              >
+                {{ f.transparency.errors.message }}
+              </label>
+            </p>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="3" class="form-group">
+            Description of observing constraints
+            <textarea
+              class="textarea"
+              formControlName="descriptionOfObservingConstraints"
+              data-test="requested-time"
+              [ngClass]="{
+                'is-danger':
+                  (f.descriptionOfObservingConstraints.dirty || submitted) &&
+                  f.descriptionOfObservingConstraints.errors
+              }"
+            ></textarea>
+            <p
+              *ngIf="
+                (f.descriptionOfObservingConstraints.dirty || submitted) &&
+                f.descriptionOfObservingConstraints.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.descriptionOfObservingConstraints.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The description of observing constraints is required
+              </label>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="form-group">
+            Reasons why the time request has changed
+            <textarea
+              class="textarea"
+              rows="10"
+              formControlName="changeReason"
+              data-test="requested-time"
+              [ngClass]="{
+                'is-danger':
+                  (f.changeReason.dirty || submitted) && f.changeReason.errors
+              }"
+            ></textarea>
+            <p
+              *ngIf="
+                (f.changeReason.dirty || submitted) && f.changeReason.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.changeReason.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The reasons for the time request change are required.
+              </label>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="form-group">
+            Summary of your proposal's status
+            <textarea
+              class="textarea"
+              rows="10"
+              formControlName="summaryOfProposalStatus"
+              data-test="requested-time"
+              [ngClass]="{
+                'is-danger':
+                  (f.summaryOfProposalStatus.dirty || submitted) &&
+                  f.summaryOfProposalStatus.errors
+              }"
+            ></textarea>
+            <p
+              *ngIf="
+                (f.summaryOfProposalStatus.dirty || submitted) &&
+                f.summaryOfProposalStatus.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.summaryOfProposalStatus.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The summary of your proposal's status is required
+              </label>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="form-group">
+            Strategy changes
+            <textarea
+              class="textarea"
+              rows="10"
+              formControlName="strategyChanges"
+              data-test="requested-time"
+              [ngClass]="{
+                'is-danger':
+                  (f.strategyChanges.dirty || submitted) &&
+                  f.strategyChanges.errors
+              }"
+            ></textarea>
+            <p
+              *ngIf="
+                (f.strategyChanges.dirty || submitted) &&
+                f.strategyChanges.errors
+              "
+              class="invalid-feedback"
+            >
+              <label
+                *ngIf="f.strategyChanges.errors.required"
+                class="has-text-danger"
+                data-test="error"
+              >
+                The strategy changes are required.
+              </label>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <label class="label">
+              You may optionally upload a supplementary pdf file, or retain an
+              existing one.
+            </label>
+          </td>
+        </tr>
+        <tr>
+          <td>Supplementary PDF File:</td>
+          <td class="form-group">
+            <label
+              class="file-label"
+              [ngClass]="{ 'has-text-danger': wrongFileType }"
+            >
+              <input
+                class="file-input is-danger"
+                type="file"
+                name="supplementary-pdf"
+                accept=".pdf"
+                #fileInput
+                (change)="onFileInput(fileInput.files)"
+              />
+              <span class="file-cta">
+                <span class="file-label"> Browse... </span>
+              </span>
+              <span class="file-name">
+                {{ file ? file.name : "No file selected." }}
+              </span>
+            </label>
+            <p *ngIf="wrongFileType" class="has-text-danger" data-test="error">
+              You can only submit a PDF file.
+            </p>
+          </td>
+          <td>
+            <button class="button" type="button" (click)="removeFile()">
+              Clear
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td class="form-group" colspan="3">
+            <button
+              class="button is-primary {{ loading ? 'is-loading' : '' }}"
+              data-test="progress-report-submit"
+              type="submit"
+            >
+              Submit
+            </button>
+            <div *ngIf="error">
+              <p class="has-text-danger" data-test="error">{{ error }}</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</div>

@@ -1,0 +1,23 @@
+<div>
+  <h2 class="title is-2">Proposal Progress</h2>
+  <hr class="heading-line proposal-progress-header" />
+  <div *ngIf="showForm" class="progress-report-view">
+    <wm-proposal-progress-table
+      [proposal]="proposal"
+      [progressReport]="proposalProgress"
+    ></wm-proposal-progress-table>
+  </div>
+  <div class="edit-button">
+    <button *ngIf="showForm" class="button" (click)="closeForm()">
+      Close Edit
+    </button>
+    <button
+      *ngIf="!showForm"
+      class="button"
+      [class.loading]="loading"
+      (click)="showProgressReportForm()"
+    >
+      Edit
+    </button>
+  </div>
+</div>

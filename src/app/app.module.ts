@@ -43,7 +43,11 @@ import { ChargedTimeComponent } from "./proposal/general/charged-time/charged-ti
 import { GeneralProposalInfoComponent } from "./proposal/general/general-proposal-info/general-proposal-info.component";
 import { ObservationCommentsComponent } from "./proposal/general/observation-comments/observation-comments.component";
 import { ProposalDetailsComponent } from "./proposal/general/proposal-details/proposal-details.component";
-import { ProposalProgressTableComponent } from "./proposal/general/proposal-progress-table/proposal-progress-table.component";
+import { ProgressRequestFormComponent } from "./proposal/general/proposal-progress/progress-request-form/progress-request-form.component";
+import { ProposalProgressTableComponent } from "./proposal/general/proposal-progress/proposal-progress-table/proposal-progress-table.component";
+import { ProposalProgressComponent } from "./proposal/general/proposal-progress/proposal-progress.component";
+import { RequestedObservingConditionsComponent } from "./proposal/general/proposal-progress/requested-observing-conditions/requested-observing-conditions.component";
+import { SubmittedTimeRequestsComponent } from "./proposal/general/proposal-progress/submitted-time-requests/submitted-time-requests.component";
 import { SummaryOfExecutedObservationsComponent } from "./proposal/general/summary-of-executed-observations/summary-of-executed-observations.component";
 import { TimeAllocationTableComponent } from "./proposal/general/time-allocation-table/time-allocation-table.component";
 import { BvitComponent } from "./proposal/instruments/bvit/bvit.component";
@@ -102,7 +106,6 @@ import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/sma
     TimeAllocationTableComponent,
     ChargedTimeComponent,
     ObservationCommentsComponent,
-    ProposalProgressTableComponent,
     RssSpectroscopyComponent,
     RssSlitMaskComponent,
     SalticamDetectorComponent,
@@ -155,6 +158,11 @@ import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/sma
     PageMissingComponent,
     ManageUserProfileComponent,
     SmallLoadingSpinnerComponent,
+    ProposalProgressTableComponent,
+    ProposalProgressComponent,
+    RequestedObservingConditionsComponent,
+    SubmittedTimeRequestsComponent,
+    ProgressRequestFormComponent,
   ],
   imports: [
     BrowserModule,

@@ -4,6 +4,7 @@ import {
   ObservationComment,
   Proposal,
   ProposalListItem,
+  ProposalProgress,
 } from "../types/proposal";
 
 export abstract class ProposalService {
@@ -43,4 +44,9 @@ export abstract class ProposalService {
     proposalCode: string,
     comment: string,
   ): Observable<ObservationComment[]>;
+
+  public abstract getProgressReport(
+    proposalCode: string,
+    semester: string,
+  ): Observable<ProposalProgress>;
 }

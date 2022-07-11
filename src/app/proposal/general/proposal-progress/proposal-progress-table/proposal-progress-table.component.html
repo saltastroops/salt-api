@@ -1,0 +1,11 @@
+<div class="inline-view">
+  <wm-submitted-time-requests
+    [submittedTimeRequests]="progressReport.previousTimeRequests"
+  ></wm-submitted-time-requests>
+  <wm-requested-observing-conditions
+    [lastObservingConstraints]="progressReport.lastObservingConstraints"
+  ></wm-requested-observing-conditions>
+</div>
+<wm-progress-request-form
+  [progressReport]="progressReport"
+></wm-progress-request-form>

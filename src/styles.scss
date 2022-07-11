@@ -49,7 +49,7 @@ $table-border-color: #aaaaaa;
 $hrs-color: #9309ce;
 $bvit-color: #d44f12;
 $salticam-color: #0c5fc4;
-
+$proposal-progress-color: #a83287;
 $red-background: #ffb0b0;
 $clear-background: transparent;
 $orange-background: #ccaa00;
@@ -143,11 +143,9 @@ html {
 .pool-header {
   background-color: $pool-color;
 }
-
 .summary-header {
   background-color: $proposal-comment-color;
 }
-
 .comment-header {
   background-color: $proposal-summary-color;
 }
@@ -156,6 +154,9 @@ html {
 }
 .salticam-header {
   background-color: $salticam-color;
+}
+.proposal-progress-header {
+  background-color: $proposal-progress-color;
 }
 .heading-line {
   height: 1rem;
@@ -295,6 +296,14 @@ $bvit-calibration-config-color: #999999;
 .has-three-columns {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+}
+.has-four-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.has-five-columns {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .has-right-border > div {

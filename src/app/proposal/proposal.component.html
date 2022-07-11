@@ -17,21 +17,18 @@
     ></wm-proposal-details>
   </div>
 
-  <div class="block">
-    <wm-time-allocation-table
-      [time_allocations]="p.timeAllocations"
-    ></wm-time-allocation-table>
-  </div>
-
   <div class="inline-view">
     <wm-charged-time
       [chargedTime]="p.chargedTime"
       [timeAllocations]="p.timeAllocations"
     ></wm-charged-time>
+    <wm-time-allocation-table
+      [time_allocations]="p.timeAllocations"
+    ></wm-time-allocation-table>
+  </div>
 
-    <wm-proposal-progress-table
-      [proposalProgress]="'TO BE IMPLEMENTED'"
-    ></wm-proposal-progress-table>
+  <div class="block">
+    <wm-proposal-progress [proposal]="p"></wm-proposal-progress>
   </div>
 
   <div class="block">

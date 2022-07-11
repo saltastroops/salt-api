@@ -270,7 +270,8 @@ export function previousSemesterOf(semester: string): string {
 // 5. Use Decorator to automate Unsubscription
 // This decorator can only work when there is a subscription property.
 export function AutoUnsubcribe() {
-  return function (constructor: any) {
+  return function (constructor: any): void {
+    // eslint-disable-line
     const orig = constructor.prototype.ngOnDestroy;
     constructor.prototype.ngOnDestroy = function () {
       for (const prop in this) {

@@ -1,0 +1,23 @@
+<h2 class="title is-5">Previously submitted time requests for all semesters</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Semester</th>
+      <th>Requested Time</th>
+      <th>Allocated Time</th>
+      <th>Observed Time</th>
+      <th>Completion</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let s of submittedTimeRequests">
+      <td>{{ s.semester }}</td>
+      <td>{{ s.requestedTime }}</td>
+      <td>{{ s.allocatedTime }}</td>
+      <td>{{ s.observedTime }}</td>
+      <td>{{ (s.observedTime / s.allocatedTime) * 100 | number: "1.0-1" }}%</td>
+    </tr>
+  </tbody>
+</table>

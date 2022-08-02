@@ -3,7 +3,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import AnyUrl, BaseModel, EmailStr, Field
 
 from saltapi.web.schema.block import BlockSummary
 from saltapi.web.schema.common import (
@@ -553,13 +553,13 @@ class ProposalProgress(BaseModel):
         description="The last observing conditions.",
     )
 
-    proposal_progress_pdf: Optional[pathlib.Path] = Field(
+    proposal_progress_pdf: Optional[AnyUrl] = Field(
         ...,
         title="Proposal progress report pdf",
         description="Proposal progress report pdf",
     )
 
-    additional_pdf: Optional[pathlib.Path] = Field(
+    additional_pdf: Optional[AnyUrl] = Field(
         ...,
         title="Proposal progress report pdf",
         description="Proposal progress report pdf",

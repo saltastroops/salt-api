@@ -76,6 +76,12 @@ class Settings(BaseSettings):
     # API key for the mapping tool
     mapping_tool_api_key: str
 
+    # No-reply email address for the mapping tool
+    mapping_tool_no_reply_email: str
+
+    # Email address for submission notifications by the mapping tool
+    mapping_tool_submit_email: str
+
     # URL for accessing Web Manager services
     mapping_tool_web_manager_url: HttpUrl
 

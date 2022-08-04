@@ -179,6 +179,8 @@ class SubmissionService:
             if settings.smtp_server
             else "",
             "MAPPING_TOOL_FROM_EMAIL": settings.from_email,
+            "MAPPING_TOOL_SUBMIT_EMAIL": settings.mapping_tool_submit_email,
+            "MAPPING_TOOL_NO_REPLY_EMAIL": settings.mapping_tool_no_reply_email,
             "MAPPING_TOOL_MAILCHIMP_API_KEY": settings.mapping_tool_mailchimp_api_key,
             "MAPPING_TOOL_MAILCHIMP_LIST_ID": settings.mapping_tool_mailchimp_list_id,
         }

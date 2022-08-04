@@ -64,7 +64,7 @@ FROM Proposal P
          JOIN ProposalStatus PS ON PGI.ProposalStatus_Id = PS.ProposalStatus_Id
          JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
          JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
-         LEFT JOIN ProposalInactiveReason PIR 
+         LEFT JOIN ProposalInactiveReason PIR
             ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator Astronomer
             ON C.Astronomer_Id = Astronomer.Investigator_Id
@@ -457,7 +457,7 @@ FROM Proposal P
          JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
          JOIN ProposalStatus PS ON PGI.ProposalStatus_Id = PS.ProposalStatus_Id
          JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
-         LEFT JOIN ProposalInactiveReason PIR 
+         LEFT JOIN ProposalInactiveReason PIR
             ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
          LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
@@ -1375,13 +1375,13 @@ VALUES(
         requested_time_amount: int,
     ) -> None:
         """ """
-        stmt = text(
+        text(
             """
 INSERT INTO MultiPartner(
-    ProposalCode_Id, 
-    Partner_Id, 
-    Semester_Id, 
-    ReqTimePercent, 
+    ProposalCode_Id,
+    Partner_Id,
+    Semester_Id,
+    ReqTimePercent,
     ReqTimeAmount
 )
 VALUES (
@@ -1469,7 +1469,7 @@ ORDER BY semester DESC;
     def _get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
-SELECT  
+SELECT
     CONCAT(S.`Year`, '-', S.Semester) AS semester,
     SUM(Obstime)                AS observed_time
 FROM Proposal		    AS P
@@ -1582,7 +1582,7 @@ WHERE PC.Proposal_Code = :proposal_code
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
             """
-SELECT 
+SELECT
     MaxSeeing							AS maximum_seeing,
     Transparency						AS transparency,
     ObservingConditionsDescription		AS description_of_observing_constraints,
@@ -1597,7 +1597,7 @@ FROM P1ObservingConditions OC
     JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
     JOIN P1MinTime MT ON (
-        OC.ProposalCode_Id = MT.ProposalCode_Id 
+        OC.ProposalCode_Id = MT.ProposalCode_Id
         AND OC.Semester_Id = MT.Semester_Id
     )
     LEFT JOIN ProposalProgress PP ON (

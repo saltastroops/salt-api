@@ -6,8 +6,8 @@ def create_progress_report_html(
     semester: str,
     previous_requests: List[Dict[str, Any]],
     previous_conditions: Dict[str, Any],
-    new_request: Dict[str, any],
-):
+    new_request: Dict[str, Any],
+) -> None:
     html_content = """
 <!DOCTYPE html>
 <html lang="en">
@@ -61,7 +61,7 @@ def create_progress_report_html(
     <body>
         <div>
             <h2>
-                Multisemester Proposal Progress Report: 
+                Multisemester Proposal Progress Report:
             </h2>
     """
     html_content += f"""
@@ -77,7 +77,7 @@ def create_progress_report_html(
                     <div>
                       <i>
                         This section lists the originally requested times, as well as
-                         the allocated times and the completion. It also gives the 
+                         the allocated times and the completion. It also gives the
                          originally requested observing conditions.
                       </i>
                     </div>
@@ -94,13 +94,13 @@ def create_progress_report_html(
                         <th>Completion</th>
                       </tr>
 """
-    for p in sorted(previous_requests, key=lambda i: i["semester"]):
+    for p in sorted(previous_requests, key=lambda i: str(i["semester"])):
         html_content += f"""
                       <tr>
                         <td>{p['semester']}</td>
-                        <td>{p['requested']} seconds</td> 
-                        <td>{p['allocated']} seconds</td> 
-                        <td>{p['observed']} seconds</td> 
+                        <td>{p['requested']} seconds</td>
+                        <td>{p['allocated']} seconds</td>
+                        <td>{p['observed']} seconds</td>
                         <td>{round((p['observed']/p['allocated'])*100, 1)} %</td>
                       </tr>
         """
@@ -119,7 +119,7 @@ def create_progress_report_html(
                             <div class="right">
                                 {previous_conditions['transparency']}
                             </div>
-                        </div>    
+                        </div>
                         <div>
                             <b>Brief description of observing conditions:</b>
                         </div>
@@ -166,13 +166,21 @@ def create_progress_report_html(
                     <br>
                     <div>
                         <b>
-                            The following reasons are given for changes from the 
+                            The following reasons are given for changes from the
                             original requests.
                         </b>
                     </div>
-                    <div class="left-shifted">Please see the attached document. -- TODO Double Check this content --</div>
+                    <div class="left-shifted">
+                    Please see the attached document.
+                    -- TODO Double Check this content --
+                    </div>
                     <br>
-                    <div><b>A supplementary pdf is attached to this report -- TODO: this needs to be a boolean to show --</b></div>
+                    <div>
+                        <b>
+                            A supplementary pdf is attached to this report
+                            -- TODO: this needs to be a boolean to show --
+                        </b>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -180,11 +188,16 @@ def create_progress_report_html(
                     <div><h3>3.</h3></div>
                     <div><h3>STATUS SUMMARY</h3></div>
                     <div></div>
-                    <div><i>This section gives a summary of the proposal status.</i></div>
+                    <div>
+                        <i>This section gives a summary of the proposal status.</i>
+                    </div>
                 </div>
                 <hr>
                 <div>
-                    <p>Please see the attached document.-- TODO Double Check this content --</p>
+                    <p>
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </p>
                 </div>
             </div>
             <div class="section">
@@ -192,11 +205,19 @@ def create_progress_report_html(
                     <div><h3>4.</h3></div>
                     <div><h3>STRATEGY CHANGES</h3></div>
                     <div></div>
-                    <div><i>This section outlines how the TAC suggestions regarding a change of strategy will be addressed.</i></div>
+                    <div>
+                        <i>
+                            This section outlines how the TAC suggestions regarding a
+                            change of strategy will be addressed.
+                        </i>
+                    </div>
                 </div>
                 <hr>
                 <div>
-                    <p>Please see the attached document.-- TODO Double Check this content --</p>
+                    <p>
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </p>
                 </div>
             </div>
         </div>
@@ -216,5 +237,5 @@ def create_progress_report_html(
             </div>
         </div>
     </body>
-</html>  
+</html>
     """

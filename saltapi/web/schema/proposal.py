@@ -1,8 +1,9 @@
+import pathlib
 from datetime import date, datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import AnyUrl, BaseModel, EmailStr, Field
 
 from saltapi.web.schema.block import BlockSummary
 from saltapi.web.schema.common import (
@@ -378,12 +379,14 @@ class PartnerRequestedPercentage(BaseModel):
     Requested Percentage for a partner
     """
 
-    partner_code: PartnerCode = (
-        Field(..., title="Partner code", description="Partner code, such as IUCAA."),
+    partner_code: PartnerCode = Field(
+        ..., title="Partner code", description="Partner code, such as IUCAA."
     )
-    partner_name: PartnerName = (
-        Field(..., title="Partner name ", description="Name of the partner."),
+
+    partner_name: PartnerName = Field(
+        ..., title="Partner name ", description="Name of the partner."
     )
+
     requested_percentage: float = Field(
         ..., title="Percentage", description="Percentage requested from a partner."
     )
@@ -453,9 +456,7 @@ class SubmissionAcknowledgment(BaseModel):
 
 class ObservingConstraints(BaseModel):
     seeing: float = Field(..., title="Seeing", description="The seeing")
-    transparency: str = (
-        Field(..., title="Transparency", description="The transparency"),
-    )
+    transparency: str = Field(..., title="Transparency", description="The transparency")
     description: str = Field(
         ...,
         title="Description",
@@ -550,4 +551,16 @@ class ProposalProgress(BaseModel):
         ...,
         title="Last requested observing conditions",
         description="The last observing conditions.",
+    )
+
+    proposal_progress_pdf: Optional[AnyUrl] = Field(
+        ...,
+        title="Proposal progress report pdf",
+        description="Proposal progress report pdf",
+    )
+
+    additional_pdf: Optional[AnyUrl] = Field(
+        ...,
+        title="Proposal progress report pdf",
+        description="Proposal progress report pdf",
     )

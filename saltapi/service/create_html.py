@@ -6,8 +6,8 @@ def create_progress_report_html(
     semester: str,
     previous_requests: List[Dict[str, Any]],
     previous_conditions: Dict[str, Any],
-    new_request: Dict[str, Any],
-) -> None:
+    new_request: Dict[str, any],
+):
     html_content = """
 <!DOCTYPE html>
 <html lang="en">

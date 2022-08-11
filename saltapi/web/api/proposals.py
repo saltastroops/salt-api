@@ -456,7 +456,7 @@ def put_progress_report(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
-        proposal_service = services.proposal_service(unit_of_work.connection)
+        # proposal_service = services.proposal_service(unit_of_work.connection)
 
     # TODO Save the pdfs. Both the supplementary PDF and the newly created file.
     # * Where to save the created files.

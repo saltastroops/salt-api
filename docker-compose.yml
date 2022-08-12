@@ -2,8 +2,13 @@ version: "3.5"
 services:
   web-manager-frontend:
     container_name: web-manager-container # Container name
-    build: . # Location of our Dockerfile
+    build:
+      context: . # Location of our Dockerfile
+      args:
+        - API_SERVER_URL=${API_SERVER_URL}
+    env_file:
+      - .env
     environment:
-      - API_SERVER_URL="${API_SERVER_URL}"
+      - API_SERVER_URL=${API_SERVER_URL}
     ports:
-      - 4200:80 # Port mapping
+      - ${PORT}:80 # Port mapping

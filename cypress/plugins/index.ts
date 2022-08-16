@@ -1,3 +1,5 @@
+import { PathLike } from "fs";
+
 import {
   clearObservationComments,
   getUser,
@@ -9,6 +11,9 @@ require("dotenv").config();
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ms = require("smtp-tester");
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require("fs");
 
 /**
  * @type {Cypress.PluginConfig}
@@ -54,7 +59,7 @@ export default (on): void => {
     },
 
     /**
-     * Clear all the sent emails.
+     * Clear all sent emails.
      */
     clearEmailInbox() {
       emailInbox = [];
@@ -80,6 +85,26 @@ export default (on): void => {
      */
     clearObservationComments(proposalCode: string) {
       return clearObservationComments(proposalCode);
+    },
+
+    /**
+     * Read a file with JSON content and return its content as an object.
+     */
+    readJsonFile(filePath: PathLike) {
+      if (!fs.existsSync(filePath)) {
+        return null;
+      }
+      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    },
+
+    /**
+     * Create a directory and any non-existing parent directories.
+     */
+    createDirectory(filePath: PathLike) {
+      if (!fs.existsSync(filePath)) {
+        fs.mkdirSync(filePath, { recursive: true });
+      }
+      return null;
     },
   });
 };

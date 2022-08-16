@@ -2,10 +2,18 @@ import { ChangePasswordPage } from "../../support/pages/login/change-password-pa
 import {
   forceNetworkError,
   forceServerError,
+  getApiUrl,
   interceptIndefinitely,
 } from "../../support/utils";
 
+const apiUrl = getApiUrl();
+
 describe("Change password page", () => {
+  beforeEach(() => {
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+  });
   it("should show an error if the form is submitted without any input", () => {
     ChangePasswordPage.visit("some-token");
     ChangePasswordPage.submit();
@@ -77,7 +85,6 @@ describe("Change password page", () => {
   it("should show a meaningful error if the password is changed with an invalid token", () => {
     ChangePasswordPage.visit("invalid-token");
     ChangePasswordPage.changePassword("new-password");
-
     ChangePasswordPage.hasAuthenticationError();
     ChangePasswordPage.isNotLoading();
   });

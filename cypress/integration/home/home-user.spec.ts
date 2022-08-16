@@ -1,7 +1,14 @@
 import { currentSemester } from "../../../src/app/utils";
 import { HomeUser } from "../../support/components/home-user";
 import { HomePage } from "../../support/pages/home-page";
-import { freezeDate, login } from "../../support/utils";
+import { LoginPage } from "../../support/pages/login/login-page";
+import {
+  freezeDate,
+  getApiUrl,
+  userDetailsAreStored,
+} from "../../support/utils";
+
+const apiUrl = getApiUrl();
 
 let USERNAME = Cypress.env("defaultUsername");
 
@@ -9,8 +16,20 @@ describe("Home User", () => {
   beforeEach(() => {
     freezeDate(2020, 6);
 
-    // Given I am logged in
-    login(USERNAME);
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // Then user details are stored
+    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();
@@ -311,9 +330,19 @@ describe("Home User", () => {
 describe("Home User - PI", () => {
   beforeEach(() => {
     USERNAME = Cypress.env("piUsername");
+    cy.recordHttp(apiUrl + "/token").as("token");
 
-    // Given I am logged in
-    login(USERNAME);
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // Then user details are stored
+    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();
@@ -328,20 +357,30 @@ describe("Home User - PI", () => {
 describe("Home User - PC", () => {
   beforeEach(() => {
     USERNAME = Cypress.env("pcUsername");
+    cy.recordHttp(apiUrl + "/token").as("token");
 
-    // Given I am logged in
-    login(USERNAME);
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // Given I am logged in
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // Then user details are stored
+    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();
   });
 
-  it("should show only proposals requiring your attention", () => {
+  it("should show only proposals requiring principal contact's attention", () => {
     HomeUser.clickRequiringAttentionCheckbox();
     HomeUser.filteredProposalsRequiringAttention(USERNAME);
   });
 
-  it("should show my proposals", () => {
+  it("should show principal contact's proposals", () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -350,9 +389,19 @@ describe("Home User - PC", () => {
 describe("Home User - SALT Astronomer", () => {
   beforeEach(() => {
     USERNAME = Cypress.env("saltAstronomerUsername");
+    cy.recordHttp(apiUrl + "/token").as("token");
 
-    // Given I am logged in
-    login(USERNAME);
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // Given I am logged in
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // Then user details are stored
+    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();
@@ -363,7 +412,7 @@ describe("Home User - SALT Astronomer", () => {
     HomeUser.filteredProposalsRequiringAttention(USERNAME);
   });
 
-  it("should show my proposals", () => {
+  it("should show astronomer's proposals", () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });

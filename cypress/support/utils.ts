@@ -1,10 +1,37 @@
+import "cypress-network-idle";
 import {
   HttpResponseInterceptor,
   RouteMatcher,
   StaticResponse,
 } from "cypress/types/net-stubbing";
+import { PathLike } from "fs";
+import * as path from "path";
 
 import { storeAccessToken } from "../../src/app/utils";
+
+export let recordedResponses;
+export let recordedRequestsAliases;
+
+/**
+ * Reset a dictionary of recorded responses.
+ */
+export function resetRecordedResponse(): void {
+  recordedResponses = {};
+}
+
+/**
+ * Reset a list of recorded aliases.
+ */
+export function resetRecordedRequestsAliases(): void {
+  recordedRequestsAliases = [];
+}
+
+/**
+ * Save alias to list.
+ */
+export function saveAlias(key: string): void {
+  recordedRequestsAliases.push(key);
+}
 
 /**
  * Function for delaying a request until it is explicitly triggered.
@@ -36,7 +63,7 @@ export function login(username: string): void {
   cy.task("updateUserPassword", username)
     .then((password: string) => {
       return cy.request({
-        url: "http://localhost:8001/token",
+        url: "http://127.0.0.1:8001/token",
         method: "POST",
         form: true,
         body: { username, password },
@@ -124,4 +151,107 @@ export function freezeDate(year: number, month: number): void {
   Date.prototype.getMonth = () => {
     return month;
   };
+}
+
+/**
+ * Generate mock directory path.
+ */
+export function generateMockPath(directoryPath: PathLike): string[] {
+  const currentTestTitle = Cypress.currentTest.title;
+  const currentTestFile = path
+    .basename(Cypress.spec.name.toString())
+    .split(".")[0];
+  const currentTestFileDirTree = path
+    .dirname(Cypress.spec.relative)
+    .split(path.sep)
+    .slice(2);
+  const mockFile =
+    "test-" + currentTestTitle.toString().split(" ").join("-") + ".json";
+  return [
+    path.join(
+      directoryPath.toString(),
+      currentTestFileDirTree.join(path.sep),
+      currentTestFile.toString().split(" ").join("-"),
+    ),
+    mockFile,
+  ];
+}
+
+/**
+ * Save response to a dictionary.
+ */
+export function saveResponse(key: string, response: string): void {
+  recordedResponses[key] = response;
+}
+
+/**
+ * Get the next recorded/stored responses.
+ */
+export function getResponse(key: string): string {
+  return recordedResponses[key];
+}
+
+/**
+ * Get API Url.
+ */
+export function getApiUrl(): string {
+  const apiUrl = Cypress.env("apiUrl") || null;
+  if (!apiUrl) {
+    throw new Error(
+      "API URL not found. \nTo set mock files directory, " +
+        "use environment variable ``apiUrl`` in the `cypress.env.json` file or on the CLI. " +
+        "\ne.g. CLI: ``cypress run --env apiUrl='http://apir/url'``",
+    );
+  }
+  return apiUrl;
+}
+
+/**
+ * Disable and/or clear the browser cache.
+ */
+export function disableBrowserCache(): void {
+  // Taken from https://docs.cypress.io/api/commands/intercept#Stubbing-a-response
+  cy.intercept(
+    { url: getApiUrl() + "/**/*", middleware: true },
+    // Delete 'if-none-match' header from all outgoing requests
+    (req) => {
+      delete req.headers["if-none-match"];
+
+      req.on("before:response", (res) => {
+        // force all API responses to not be cached
+        res.headers["cache-control"] = "no-store";
+      });
+    },
+  );
+
+  // Taken from https://github.com/cypress-io/cypress/issues/14459#issuecomment-768616195
+  Cypress.automation("remote:debugger:protocol", {
+    command: "Network.enable",
+    params: {},
+  });
+  Cypress.automation("remote:debugger:protocol", {
+    command: "Network.setCacheDisabled",
+    params: { cacheDisabled: true },
+  });
+}
+
+/**
+ * Prepare to capture network calls.
+ */
+export function prepareForNetworkIdle(): void {
+  cy.waitForNetworkIdlePrepare({
+    method: "*",
+    pattern: getApiUrl() + "/**",
+    alias: "recordHttp",
+  });
+}
+
+/**
+ * Check that user details are stored in session storage.
+ */
+export function userDetailsAreStored(): void {
+  cy.window()
+    .its("sessionStorage")
+    .invoke("getItem", "user")
+    .should("not.be.null");
 }

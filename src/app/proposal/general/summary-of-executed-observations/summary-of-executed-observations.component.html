@@ -33,8 +33,12 @@
     </tr>
     <tr *ngFor="let e of observations">
       <td>
-        <div data-test="executed-observations-block-link">
-          <a href="javascript:void(0)" (click)="onClick(e.blockName)">
+        <div>
+          <a
+            data-test="executed-observations-block-link"
+            href="javascript:void(0)"
+            (click)="onClick(e.blockName)"
+          >
             {{ e.blockName }}
           </a>
         </div>

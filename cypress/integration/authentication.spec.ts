@@ -1,13 +1,26 @@
 import { ObservationComments } from "../support/components/observation-comments";
-import { LoginPage } from "../support/pages/login-page";
+import { LoginPage } from "../support/pages/login/login-page";
 import {
   PROPOSAL_BASE_URL,
   ProposalPage,
 } from "../support/pages/proposal-page";
+import { getApiUrl, userDetailsAreStored } from "../support/utils";
+
+const apiUrl = getApiUrl();
 
 const USERNAME = "hettlage";
 
 describe("Authentication", () => {
+  beforeEach(() => {
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+  });
+
   it("should handle HTTP requests with a missing authentication token", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -15,13 +28,11 @@ describe("Authentication", () => {
       LoginPage.login(USERNAME, password);
 
       // Then user details are stored
-      cy.window()
-        .its("sessionStorage")
-        .invoke("getItem", "user")
-        .should("not.be.null");
+      userDetailsAreStored();
 
       // And I can load a proposal page
       ProposalPage.visit("2020-2-SCI-043");
+
       cy.url().should("contain", PROPOSAL_BASE_URL);
 
       // And when I then delete the authentication token
@@ -52,10 +63,8 @@ describe("Authentication", () => {
         .its("localStorage")
         .invoke("getItem", "accessToken")
         .should("not.be.null");
-      cy.window()
-        .its("sessionStorage")
-        .invoke("getItem", "user")
-        .should("not.be.null");
+      // Then user details are stored
+      userDetailsAreStored();
 
       // And I can load a proposal page
       ProposalPage.visit("2020-2-SCI-043");
@@ -94,10 +103,8 @@ describe("Authentication", () => {
         .its("localStorage")
         .invoke("getItem", "accessToken")
         .should("not.be.null");
-      cy.window()
-        .its("sessionStorage")
-        .invoke("getItem", "user")
-        .should("not.be.null");
+      // Then user details are stored
+      userDetailsAreStored();
     });
   });
 
@@ -121,10 +128,7 @@ describe("Authentication", () => {
       cy.url().should("contain", PROPOSAL_BASE_URL);
 
       // And the user details are re-requested
-      cy.window()
-        .its("sessionStorage")
-        .invoke("getItem", "user")
-        .should("not.be.null");
+      userDetailsAreStored();
     });
   });
 
@@ -142,10 +146,8 @@ describe("Authentication", () => {
         .its("localStorage")
         .invoke("getItem", "accessToken")
         .should("not.be.null");
-      cy.window()
-        .its("sessionStorage")
-        .invoke("getItem", "user")
-        .should("not.be.null");
+      // user details are stored
+      userDetailsAreStored();
 
       // And when I logout again
       cy.get('[data-test="logout"]').click();

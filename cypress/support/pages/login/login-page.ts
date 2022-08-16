@@ -1,4 +1,4 @@
-import { GENERIC_ERROR_MESSAGE } from "../../../src/app/utils";
+import { GENERIC_ERROR_MESSAGE } from "../../../../src/app/utils";
 
 export const LOGIN_URL = "/login";
 

@@ -4,8 +4,11 @@ import { User } from "../support/types";
 import {
   forceNetworkError,
   forceServerError,
+  getApiUrl,
   interceptIndefinitely,
 } from "../support/utils";
+
+const apiUrl = getApiUrl();
 
 const USERNAME = Cypress.env("defaultUsername");
 const ADMINISTRATOR = Cypress.env("administrator");
@@ -17,6 +20,14 @@ describe("Inline login form", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
+
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
   });
 
   it("should give an error if the username is missing", () => {
@@ -53,6 +64,7 @@ describe("Inline login form", () => {
 
   it("should give an error if the username or password is incorrect", () => {
     cy.task("updateUserPassword");
+    HomePage.visit();
     NavigationBar.typeUsername(USERNAME);
     NavigationBar.typePassword("secret");
     NavigationBar.submitLogin();
@@ -106,6 +118,14 @@ describe("Navigation bar", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
+
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
   });
   it("Should show all tabs for admin", () => {
     cy.task("updateUserPassword", ADMINISTRATOR).then((password: string) => {
@@ -114,6 +134,7 @@ describe("Navigation bar", () => {
         NavigationBar.typeUsername(ADMINISTRATOR);
         NavigationBar.typePassword(password);
         NavigationBar.submitLogin();
+
         // When the user had logged in the following tabs should be visible
         NavigationBar.hasHomeTab();
         NavigationBar.hasSOPageTab();
@@ -132,6 +153,7 @@ describe("Navigation bar", () => {
         NavigationBar.typeUsername(INVESTIGATOR);
         NavigationBar.typePassword(password);
         NavigationBar.submitLogin();
+
         // When the user had logged in the following tabs should be visible
         NavigationBar.hasHomeTab();
         NavigationBar.hasNoSOPageTab();
@@ -150,6 +172,7 @@ describe("Navigation bar", () => {
         NavigationBar.typeUsername(SALT_ASTRONOMER);
         NavigationBar.typePassword(password);
         NavigationBar.submitLogin();
+
         // When the user had logged in the following tabs should be visible
         NavigationBar.hasHomeTab();
         NavigationBar.hasSOPageTab();
@@ -161,13 +184,14 @@ describe("Navigation bar", () => {
     });
   });
 
-  it.only("Should show only show tabs available to SALT Operators", () => {
+  it("Should show only show tabs available to SALT Operators", () => {
     cy.task("updateUserPassword", TAC_MEMBER).then((password: string) => {
       cy.task("getUser", TAC_MEMBER).then(() => {
         HomePage.visit();
         NavigationBar.typeUsername(TAC_MEMBER);
         NavigationBar.typePassword(password);
         NavigationBar.submitLogin();
+
         // When the user had logged in the following tabs should be visible
         NavigationBar.hasHomeTab();
         NavigationBar.hasNoSOPageTab();

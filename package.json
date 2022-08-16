@@ -53,6 +53,8 @@
     "@typescript-eslint/eslint-plugin": "4.28.2",
     "@typescript-eslint/parser": "4.28.2",
     "cypress": "^8.4.0",
+    "cypress-grep": "^3.0.2",
+    "cypress-network-idle": "^1.10.0",
     "cypress-recurse": "^1.8.1",
     "dotenv": "^10.0.0",
     "eslint": "^7.26.0",

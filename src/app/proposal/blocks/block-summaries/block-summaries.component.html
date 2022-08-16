@@ -100,10 +100,13 @@
         <td data-test="block-id" [attr.rowspan]="b.instruments.length + 1">
           {{ b.id }}
         </td>
-        <td data-test="block-name" [attr.rowspan]="b.instruments.length + 1">
-          <a href="javascript:void(0)" (click)="onClick(b.name)">{{
-            b.name
-          }}</a>
+        <td [attr.rowspan]="b.instruments.length + 1">
+          <a
+            data-test="block-name"
+            href="javascript:void(0)"
+            (click)="onClick(b.name)"
+            >{{ b.name }}</a
+          >
         </td>
         <td
           class="has-text-right"

@@ -187,7 +187,7 @@ export class RealAuthenticationService implements AuthenticationService {
           // ... and update their password
           switchMap((user) => {
             return this.http.patch<Message>(
-              `${environment.apiUrl}/users/${user.username}`,
+              `${environment.apiUrl}/users/${user.id}`,
               { password },
               options,
             );

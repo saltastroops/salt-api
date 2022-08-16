@@ -1,17 +1,21 @@
 import { recurse } from "cypress-recurse";
 
 import { ForgotPasswordPage } from "../support/pages/forgot-password-page";
-import { LoginPage } from "../support/pages/login-page";
 import { ChangePasswordPage } from "../support/pages/login/change-password-page";
+import { LoginPage } from "../support/pages/login/login-page";
 import { User } from "../support/types";
 import {
   forceNetworkError,
   forceServerError,
+  getApiUrl,
   randomPassword,
 } from "../support/utils";
 
+const apiUrl = getApiUrl();
+
 describe("Forgot password page", () => {
   beforeEach(() => {
+    cy.recordHttp(apiUrl + "/users/**").as("users");
     ForgotPasswordPage.visit();
   });
 
@@ -57,7 +61,6 @@ describe("Forgot password page", () => {
     const USERNAME = "hettlage";
     ForgotPasswordPage.typeUsernameOrEmail(USERNAME);
     ForgotPasswordPage.submit();
-
     ForgotPasswordPage.requestAgain();
     ForgotPasswordPage.hasUsernameOrEmail(USERNAME);
   });

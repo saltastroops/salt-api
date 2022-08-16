@@ -1,15 +1,28 @@
-import { FORGOT_PASSWORD_URL } from "../support/pages/forgot-password-page";
-import { LOGIN_URL, LoginPage } from "../support/pages/login-page";
+import { FORGOT_PASSWORD_URL } from "../../support/pages/forgot-password-page";
+import { LOGIN_URL, LoginPage } from "../../support/pages/login/login-page";
 import {
   PROPOSAL_BASE_URL,
   ProposalPage,
-} from "../support/pages/proposal-page";
-import { forceNetworkError, forceServerError, login } from "../support/utils";
+} from "../../support/pages/proposal-page";
+import {
+  forceNetworkError,
+  forceServerError,
+  getApiUrl,
+} from "../../support/utils";
+
+const apiUrl = getApiUrl();
 
 const USERNAME = "hettlage";
 
 describe("Login page", () => {
   beforeEach(() => {
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
     LoginPage.visit();
   });
 
@@ -58,9 +71,7 @@ describe("Login page", () => {
   });
 
   it("should give an error if you login with an incorrect password", () => {
-    LoginPage.typeUsername(USERNAME);
-    LoginPage.typePassword("incorrect");
-    LoginPage.submit();
+    LoginPage.login(USERNAME, "incorrect");
     LoginPage.hasUsernameOrPasswordError();
   });
 
@@ -75,9 +86,10 @@ describe("Login page", () => {
   });
 
   it("should redirect to another page if you are logged in already", () => {
-    login(USERNAME);
-    LoginPage.visit();
-    cy.url().should("not.contain", LOGIN_URL);
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      LoginPage.login(USERNAME, password);
+      cy.url().should("not.contain", LOGIN_URL);
+    });
   });
 
   it("should take me to the originally requested page after logging in", () => {

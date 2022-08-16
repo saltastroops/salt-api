@@ -285,7 +285,8 @@ export class HomeUserComponent implements OnInit {
   ): ProposalListItem[] => {
     return proposals.filter(
       (proposal) =>
-        proposal.liaisonAstronomer?.id === this.user.id &&
+        proposal.liaisonAstronomer?.givenName === this.user.givenName &&
+        proposal.liaisonAstronomer.familyName === this.user.familyName &&
         (proposal.status.value === "Under technical review" ||
           proposal.status.value === "Under scientific review"),
     );
@@ -294,8 +295,10 @@ export class HomeUserComponent implements OnInit {
   filterMyProposals = (proposals: ProposalListItem[]): ProposalListItem[] => {
     return proposals.filter(
       (proposal) =>
-        proposal.principalInvestigator.id === this.user.id ||
-        proposal.liaisonAstronomer?.id === this.user.id,
+        (proposal.principalInvestigator.givenName === this.user.givenName &&
+          proposal.principalInvestigator.familyName === this.user.familyName) ||
+        (proposal.liaisonAstronomer?.givenName === this.user.givenName &&
+          proposal.liaisonAstronomer.familyName === this.user.familyName),
     );
   };
 

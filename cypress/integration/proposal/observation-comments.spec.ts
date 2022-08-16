@@ -4,14 +4,18 @@ import {
   NOT_LOGGED_IN_MESSAGE,
 } from "../../../src/app/utils";
 import { ObservationComments } from "../../support/components/observation-comments";
+import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
 import {
   forceAuthenticationError,
   forceForbiddenError,
   forceNetworkError,
   forceServerError,
-  login,
+  getApiUrl,
+  userDetailsAreStored,
 } from "../../support/utils";
+
+const apiUrl = getApiUrl();
 
 const USERNAME = "hettlage";
 
@@ -19,8 +23,20 @@ describe("Observation comments", () => {
   const PROPOSAL_CODE = "2020-1-SCI-007";
 
   beforeEach(() => {
-    // Give I am logged in
-    login(USERNAME);
+    cy.recordHttp(apiUrl + "/token").as("token");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+    // Then user details are stored
+    userDetailsAreStored();
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);

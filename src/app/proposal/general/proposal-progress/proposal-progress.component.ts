@@ -2,8 +2,11 @@ import { Component, Input } from "@angular/core";
 
 import { ProposalService } from "../../../service/proposal.service";
 import { Proposal, ProposalProgress } from "../../../types/proposal";
-import { getNextSemester } from "../../../util";
-import { AutoUnsubcribe, GENERIC_ERROR_MESSAGE } from "../../../utils";
+import {
+  AutoUnsubcribe,
+  GENERIC_ERROR_MESSAGE,
+  currentSemester,
+} from "../../../utils";
 
 @AutoUnsubcribe()
 @Component({
@@ -24,7 +27,7 @@ export class ProposalProgressComponent {
     this.loading = true;
 
     this.proposalService
-      .getProgressReport(this.proposal.proposalCode, getNextSemester())
+      .getProgressReport(this.proposal.proposalCode, currentSemester())
       .subscribe(
         (data) => {
           this.proposalProgress = { ...data };

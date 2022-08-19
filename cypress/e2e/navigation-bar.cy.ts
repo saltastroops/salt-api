@@ -5,16 +5,17 @@ import {
   forceNetworkError,
   forceServerError,
   getApiUrl,
+  getEnvVariable,
   interceptIndefinitely,
 } from "../support/utils";
 
 const apiUrl = getApiUrl();
 
-const USERNAME = Cypress.env("defaultUsername");
-const ADMINISTRATOR = Cypress.env("administrator");
-const INVESTIGATOR = Cypress.env("investigator");
-const SALT_ASTRONOMER = Cypress.env("saltAstronomerUsername");
-const TAC_MEMBER = Cypress.env("tacMember");
+const USERNAME = getEnvVariable("defaultUsername");
+const ADMINISTRATOR = getEnvVariable("administrator");
+const INVESTIGATOR = getEnvVariable("investigator");
+const SALT_ASTRONOMER = getEnvVariable("saltAstronomerUsername");
+const TAC_MEMBER = getEnvVariable("tacMember");
 
 describe("Inline login form", () => {
   beforeEach(() => {
@@ -184,7 +185,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("Should show only show tabs available to SALT Operators", () => {
+  it("Should show only show tabs available to TAC members", () => {
     cy.task("updateUserPassword", TAC_MEMBER).then((password: string) => {
       cy.task("getUser", TAC_MEMBER).then(() => {
         HomePage.visit();

@@ -13,6 +13,28 @@ export let recordedResponses;
 export let recordedRequestsAliases;
 
 /**
+ * Get an environment variable.
+ *
+ * An error is raised if the environment variable is not set.
+ */
+export function getEnvVariable(name: string): string {
+  const value = Cypress.env(name);
+  if (value === undefined) {
+    throw new Error(
+      "Environment variable not set: " +
+        name +
+        "\n\n" +
+        "You can set an environment variable in the file " +
+        "cypress.env.json or by passing it with the --env " +
+        "command line option (e.g., --env " +
+        name +
+        '="abc").',
+    );
+  }
+  return value;
+}
+
+/**
  * Reset a dictionary of recorded responses.
  */
 export function resetRecordedResponse(): void {
@@ -195,15 +217,7 @@ export function getResponse(key: string): string {
  * Get API Url.
  */
 export function getApiUrl(): string {
-  const apiUrl = Cypress.env("apiUrl") || null;
-  if (!apiUrl) {
-    throw new Error(
-      "API URL not found. \nTo set mock files directory, " +
-        "use environment variable ``apiUrl`` in the `cypress.env.json` file or on the CLI. " +
-        "\ne.g. CLI: ``cypress run --env apiUrl='http://apir/url'``",
-    );
-  }
-  return apiUrl;
+  return getEnvVariable("apiUrl");
 }
 
 /**
@@ -223,16 +237,6 @@ export function disableBrowserCache(): void {
       });
     },
   );
-
-  // Taken from https://github.com/cypress-io/cypress/issues/14459#issuecomment-768616195
-  Cypress.automation("remote:debugger:protocol", {
-    command: "Network.enable",
-    params: {},
-  });
-  Cypress.automation("remote:debugger:protocol", {
-    command: "Network.setCacheDisabled",
-    params: { cacheDisabled: true },
-  });
 }
 
 /**

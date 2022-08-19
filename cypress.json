@@ -1,9 +1,0 @@
-{
-  "baseUrl": "http://127.0.0.1:4200",
-  "video": false,
-  "defaultCommandTimeout": 15000,
-  "retries": {
-    "runMode": 4,
-    "openMode": 0
-  }
-}

@@ -5,12 +5,13 @@ import { LoginPage } from "../../support/pages/login/login-page";
 import {
   freezeDate,
   getApiUrl,
+  getEnvVariable,
   userDetailsAreStored,
 } from "../../support/utils";
 
 const apiUrl = getApiUrl();
 
-let USERNAME = Cypress.env("defaultUsername");
+let USERNAME = getEnvVariable("defaultUsername");
 
 describe("Home User", () => {
   beforeEach(() => {
@@ -329,7 +330,7 @@ describe("Home User", () => {
 
 describe("Home User - PI", () => {
   beforeEach(() => {
-    USERNAME = Cypress.env("piUsername");
+    USERNAME = getEnvVariable("piUsername");
     cy.recordHttp(apiUrl + "/token").as("token");
 
     cy.recordHttp(apiUrl + "/user").as("user");
@@ -356,7 +357,7 @@ describe("Home User - PI", () => {
 
 describe("Home User - PC", () => {
   beforeEach(() => {
-    USERNAME = Cypress.env("pcUsername");
+    USERNAME = getEnvVariable("pcUsername");
     cy.recordHttp(apiUrl + "/token").as("token");
 
     cy.recordHttp(apiUrl + "/user").as("user");
@@ -388,7 +389,7 @@ describe("Home User - PC", () => {
 
 describe("Home User - SALT Astronomer", () => {
   beforeEach(() => {
-    USERNAME = Cypress.env("saltAstronomerUsername");
+    USERNAME = getEnvVariable("saltAstronomerUsername");
     cy.recordHttp(apiUrl + "/token").as("token");
 
     cy.recordHttp(apiUrl + "/user").as("user");

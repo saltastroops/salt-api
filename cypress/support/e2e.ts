@@ -39,13 +39,7 @@ class HTTPError extends Error {
 }
 export default HTTPError;
 
-// load and register the grep feature using "require" function
-// https://github.com/cypress-io/cypress-grep
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const registerCypressGrep = require("cypress-grep");
-registerCypressGrep();
-
-const recordHttpConfig = JSON.parse(Cypress.env("recordHttpConfig") || "{}");
+const recordHttpConfig = Cypress.env("recordHttpConfig") || {};
 const mockIntercepts = recordHttpConfig.mockIntercepts || false;
 const mockFilesDirectory = recordHttpConfig.mockFilesDirectory || null;
 

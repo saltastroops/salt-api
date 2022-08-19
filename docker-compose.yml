@@ -4,11 +4,7 @@ services:
     container_name: web-manager-container # Container name
     build:
       context: . # Location of our Dockerfile
-      args:
-        - API_SERVER_URL=${API_SERVER_URL}
     env_file:
       - .env
-    environment:
-      - API_SERVER_URL=${API_SERVER_URL}
     ports:
       - ${PORT}:80 # Port mapping

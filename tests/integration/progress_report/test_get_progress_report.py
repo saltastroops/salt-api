@@ -1,5 +1,4 @@
-from pathlib import Path
-
+import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
@@ -17,7 +16,7 @@ def test_get_progress_report_returns_401_for_non_authenticated_user(
     client: TestClient,
 ) -> None:
     semester = "2018-2"
-    proposal_code = "2022-1-SCI-025"
+    proposal_code = "2018-2-LSP-001"
     not_authenticated(client)
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
 
@@ -28,7 +27,7 @@ def test_get_progress_report_returns_403_for_non_authorised_user(
     client: TestClient,
 ) -> None:
     semester = "2018-2"
-    proposal_code = "2022-1-SCI-025"
+    proposal_code = "2018-2-LSP-001"
     authenticate("TestUser", client)
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
 
@@ -46,17 +45,44 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_get_returns_progress_report_for_authorised_user(
+    client: TestClient,
+) -> None:
+    semester = "2020-2"
+    proposal_code = "2020-2-SCI-035"
+    authenticate(USERNAME, client)
+
+    response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
+
+    proposal_progress_report = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert proposal_progress_report["semester"] == semester
+    assert proposal_progress_report["requested_time"] == 26400
+    assert proposal_progress_report["maximum_seeing"] == 3.0
+    assert proposal_progress_report["transparency"] == "Thin cloud"
+    assert proposal_progress_report["change_reason"] is None
+    assert proposal_progress_report["proposal_progress_pdf"] is None
+    assert proposal_progress_report["additional_pdf"] is None
+    assert proposal_progress_report["previous_time_requests"][0]["semester"] == semester
+    assert (
+        proposal_progress_report["previous_time_requests"][0]["requested_time"] == 26400
+    )
+    assert (
+        proposal_progress_report["previous_time_requests"][0]["allocated_time"] == 26400
+    )
+    assert (
+        proposal_progress_report["previous_time_requests"][0]["observed_time"] == 16332
+    )
+
+
+# TODO: Properly handle getting pdf files
 def test_get_returns_progress_report_and_pdf_files_for_authorised_user(
     client: TestClient,
 ) -> None:
     semester = "2018-2"
     proposal_code = "2018-2-LSP-001"
-    expected_progress_report_pdf_path = (
-        "/Included/ProposalProgressReport-505998bf6cb6d910b7de8567c21e45f4.pdf"
-    )
-    expected_additional_progress_report_pdf_path = (
-        "/Included/ProposalProgressSupplementary-0e5b27408c40240de7c1c42f9eef7805.pdf"
-    )
+
     authenticate(USERNAME, client)
 
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
@@ -71,46 +97,41 @@ def test_get_returns_progress_report_and_pdf_files_for_authorised_user(
         proposal_code + "/" + semester + "/" + "report.pdf"
     ) in proposal_progress_report["proposal_progress_pdf"]
     assert (
-        proposal_code + "/" + semester + "/" + "supplementary-report.pdf"
+        proposal_code + "/" + semester + "/" + "supplementary-file.pdf"
     ) in proposal_progress_report["additional_pdf"]
 
-    try:
-        progress_pdf_response = client.get(
-            proposal_progress_report["proposal_progress_pdf"]
-        )
+    progress_pdf_response = client.get(
+        proposal_progress_report["proposal_progress_pdf"]
+    )
 
-        assert progress_pdf_response.headers[
-            "content-disposition"
-        ] == 'attachment; filename="{}"'.format(
-            Path(expected_progress_report_pdf_path).name
-        )
-        assert progress_pdf_response.headers["content-type"] == "application/pdf"
+    assert progress_pdf_response.headers[
+        "content-disposition"
+    ] == 'attachment; filename="{}"'.format("ProgressReport_{}.pdf".format(semester))
+    assert progress_pdf_response.headers["content-type"] == "application/pdf"
 
-        additional_pdf_response = client.get(proposal_progress_report["additional_pdf"])
+    additional_pdf_response = client.get(proposal_progress_report["additional_pdf"])
 
-        assert additional_pdf_response.headers[
-            "content-disposition"
-        ] == 'attachment; filename="{}"'.format(
-            Path(expected_additional_progress_report_pdf_path).name
-        )
-        assert additional_pdf_response.headers["content-type"] == "application/pdf"
-
-    except RuntimeError as excinfo:
-        assert any(
-            file_path
-            in [
-                expected_progress_report_pdf_path,
-                expected_additional_progress_report_pdf_path,
-            ]
-            for file_path in excinfo.__str__()
-        )
+    assert additional_pdf_response.headers[
+        "content-disposition"
+    ] == 'attachment; filename="{}"'.format(
+        "SupplementaryProgressReport_{}.pdf".format(semester)
+    )
+    assert additional_pdf_response.headers["content-type"] == "application/pdf"
 
 
+@pytest.mark.parametrize(
+    "proposal_code,semester",
+    [
+        ("2019-2-SCI-003", "2019-2"),
+        ("2017-1-SCI-031", "2017-1"),
+        ("2020-2-SCI-035", "2020-2"),
+    ],
+)
 def test_get_returns_progress_report_and_no_pdf_files_for_authorised_user(
+    proposal_code: str,
+    semester: str,
     client: TestClient,
 ) -> None:
-    semester = "2022-1"
-    proposal_code = "2022-1-SCI-025"
     authenticate(USERNAME, client)
 
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)

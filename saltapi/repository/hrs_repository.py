@@ -76,8 +76,8 @@ WHERE H.Hrs_Id = :hrs_id
             "blue_detector": self._blue_detector(row),
             "red_detector": self._red_detector(row),
             "procedure": self._procedure(row),
-            "observation_time": row.observation_time,
-            "overhead_time": row.overhead_time,
+            "observation_time": float(row.observation_time),
+            "overhead_time": float(row.overhead_time),
         }
 
         return hrs
@@ -129,7 +129,7 @@ WHERE H.Hrs_Id = :hrs_id
             "mode": self._mode(row),
             "exposure_type": row.exposure_type,
             "target_location": self._target_location(row),
-            "fiber_separation": row.fiber_separation,
+            "fiber_separation": float(row.fiber_separation),
             "iodine_cell_position": self._iodine_cell_position(row),
             "is_th_ar_lamp_on": True if row.th_ar_lamp_on else False,
             "nod_and_shuffle": nod_and_shuffle,
@@ -185,8 +185,8 @@ WHERE H.Hrs_Id = :hrs_id
             )
         orders = list(orders_set)
         orders.sort()
-        blue_exposure_times = [blue_pattern.get(order) for order in orders]
-        red_exposure_times = [red_pattern.get(order) for order in orders]
+        blue_exposure_times = [float(blue_pattern.get(order)) for order in orders]
+        red_exposure_times = [float(red_pattern.get(order)) for order in orders]
 
         procedure = {
             "cycles": row.cycles,

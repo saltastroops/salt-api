@@ -87,22 +87,6 @@ def read_testdata(path: str) -> Any:
         return yaml.safe_load(f)
 
 
-@pytest.fixture(scope="session")
-def testdata() -> Generator[Callable[[str], Any], None, None]:
-    """
-    Load test data from a YAML file.
-
-    The test data must be contained in a YAML file located in the folder tests/testdata
-    or any subfolder thereof. The file path relative to the tests/testdata folder must
-    be passed as the argument of the function returned by this fixture.
-
-    The YAML file must contain a single document only (i.e. it must contain no "---"
-    separators). Its content is returned in the way PyYAML returns YAML content.
-    """
-
-    yield read_testdata
-
-
 @pytest.fixture()
 def client() -> Generator[TestClient, None, None]:
     yield TestClient(app)

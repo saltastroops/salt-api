@@ -26,19 +26,13 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import User
 from saltapi.service.user_service import UserService
 
-engine: Optional[Engine] = None
-sdb_dsn = os.environ.get("SDB_DSN")
-if sdb_dsn:
-    echo_sql = True if os.environ.get("ECHO_SQL") else False  # SQLAlchemy needs a bool
-    engine = create_engine(sdb_dsn, echo=echo_sql, future=True)
-
 
 def get_user_authentication_function() -> Callable[[str, str], User]:
     def authenticate_user(username: str, password: str) -> User:
         if password != USER_PASSWORD:
             raise NotFoundError("No user found for username and password")
 
-        with cast(Engine, engine).connect() as connection:
+        with cast(Engine, _create_engine()).connect() as connection:
             user_repository = UserRepository(connection)
             user_service = UserService(user_repository)
             user = user_service.get_user_by_username(username)
@@ -63,14 +57,20 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 
 
+def _create_engine():
+    sdb_dsn = os.environ.get("SDB_DSN")
+    if sdb_dsn:
+        echo_sql = True if os.environ.get("ECHO_SQL") else False  # SQLAlchemy needs a bool
+        return create_engine(sdb_dsn, echo=echo_sql, future=True)
+    else:
+        raise ValueError(
+            "No SDB_DSN environment variable set"
+        )
+
+
 @pytest.fixture(scope="function")
 def db_connection() -> Generator[Connection, None, None]:
-    if not engine:
-        raise ValueError(
-            "No SQLAlchemy engine set. Have you defined the SDB_DSN environment "
-            "variable?"
-        )
-    with engine.connect() as connection:
+    with _create_engine().connect() as connection:
         yield connection
 
 

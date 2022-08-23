@@ -14,7 +14,6 @@ dotenv.load_dotenv(os.environ["DOTENV_FILE"])
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Optional, cast
 
-import pytest_regressions
 import pytest
 import yaml
 from fastapi.testclient import TestClient
@@ -62,12 +61,12 @@ ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 def _create_engine():
     sdb_dsn = os.environ.get("SDB_DSN")
     if sdb_dsn:
-        echo_sql = True if os.environ.get("ECHO_SQL") else False  # SQLAlchemy needs a bool
+        echo_sql = (
+            True if os.environ.get("ECHO_SQL") else False
+        )  # SQLAlchemy needs a bool
         return create_engine(sdb_dsn, echo=echo_sql, future=True)
     else:
-        raise ValueError(
-            "No SDB_DSN environment variable set"
-        )
+        raise ValueError("No SDB_DSN environment variable set")
 
 
 @pytest.fixture(scope="function")

@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 
 import dotenv
@@ -13,6 +14,7 @@ dotenv.load_dotenv(os.environ["DOTENV_FILE"])
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Optional, cast
 
+import pytest_regressions
 import pytest
 import yaml
 from fastapi.testclient import TestClient
@@ -72,6 +74,27 @@ def _create_engine():
 def db_connection() -> Generator[Connection, None, None]:
     with _create_engine().connect() as connection:
         yield connection
+
+
+def _data_file(data_type: str, request: pytest.FixtureRequest) -> Path:
+    if "TEST_DATA_DIR" not in os.environ:
+        pytest.fail("Environment variable not set: TEST_DATA_DIR")
+    root_dir = Path(os.environ["TEST_DATA_DIR"]) / data_type
+
+    test_file = request.path.relative_to(request.config.rootpath)
+    parent_dir = root_dir / test_file.stem
+    return parent_dir / (re.sub(r"\W", "_", request.node.name) + ".yml")
+
+
+@pytest.fixture(scope="function")
+def check_data(data_regression: Any, request: pytest.FixtureRequest) -> None:
+    # Figure out the file path for the data file
+    data_file = _data_file("regression", request)
+
+    def f(data: Any):
+        data_regression.check(data, fullpath=data_file)
+
+    yield f
 
 
 def read_testdata(path: str) -> Any:

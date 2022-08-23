@@ -1579,14 +1579,13 @@ WHERE PC.Proposal_Code = :proposal_code
             prp.append(tmp[pc])
         return prp
 
-    def list_of_progress_reports_pdfs(self, proposal_code: str) -> Dict[str, Any]:
-        separator = ":::"
+    def list_of_progress_report_pdfs(self, proposal_code: str) -> List[str]:
         stmt = text(
             """
-SELECT
-    GROUP_CONCAT(DISTINCT CONCAT(S.`Year`, '-', S.Semester) ORDER BY S.`Year` DESC, S.Semester DESC SEPARATOR :separator) AS semesters,
-    GROUP_CONCAT(DISTINCT COALESCE(ReportPath, 'NULL') ORDER BY S.`Year` DESC, S.Semester DESC SEPARATOR :separator) AS proposal_progress_pdfs,
-    GROUP_CONCAT(DISTINCT COALESCE(SupplementaryPath, 'NULL') ORDER BY S.`Year` DESC, S.Semester DESC SEPARATOR :separator) AS additional_pdfs
+SELECT DISTINCT
+    CONCAT(S.`Year`, '-', S.Semester) AS semester,
+    ReportPath AS proposal_progress_pdf,
+    SupplementaryPath AS additional_pdf
 FROM P1ObservingConditions OC
          JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
          JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
@@ -1595,49 +1594,16 @@ FROM P1ObservingConditions OC
         AND OC.Semester_Id = PP.Semester_Id
     )
 WHERE PC.Proposal_Code = :proposal_code
+ORDER BY S.`Year` DESC, S.Semester
             """
         )
-        result = self.connection.execute(
-            stmt, {"separator": separator, "proposal_code": proposal_code}
-        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
 
-        progress_reports_pdfs = dict()
+        semesters = []
         for row in result:
-            semesters = row[0].split(separator)
-            proposal_progress_pdfs = row[1].split(separator)
+            semesters.append(row["semester"])
 
-            for i, semester in enumerate(semesters):
-                progress_reports_pdfs[semester] = proposal_progress_pdfs[i]
-
-        return progress_reports_pdfs
-
-    def get_progress_report_pdf(self, proposal_code: str, semester: str) -> str:
-        stmt = text(
-            """
-SELECT 
-    ReportPath                          AS proposal_progress_pdf
-FROM P1ObservingConditions OC
-    JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
-    JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-    JOIN P1MinTime MT ON (
-        OC.ProposalCode_Id = MT.ProposalCode_Id 
-        AND OC.Semester_Id = MT.Semester_Id
-    )
-    LEFT JOIN ProposalProgress PP ON (
-        OC.ProposalCode_Id = PP.ProposalCode_Id
-        AND OC.Semester_Id = PP.Semester_Id
-    )
-WHERE PC.Proposal_Code = :proposal_code
-    AND CONCAT(S.`Year`, '-', S.Semester) = :semester
-    """
-        )
-        result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "semester": semester}
-        )
-
-        row = result.scalar_one_or_none()
-
-        return cast(str, row)
+        return semesters
 
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
@@ -1721,33 +1687,3 @@ WHERE PC.Proposal_Code = :proposal_code
                     proposal_code, semester
                 ),
             }
-
-    def get_supplementary_progress_report_pdf(
-        self, proposal_code: str, semester: str
-    ) -> str:
-        stmt = text(
-            """
-SELECT 
-    SupplementaryPath                   AS additional_pdf
-FROM P1ObservingConditions OC
-    JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
-    JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-    JOIN P1MinTime MT ON (
-        OC.ProposalCode_Id = MT.ProposalCode_Id 
-        AND OC.Semester_Id = MT.Semester_Id
-    )
-    LEFT JOIN ProposalProgress PP ON (
-        OC.ProposalCode_Id = PP.ProposalCode_Id
-        AND OC.Semester_Id = PP.Semester_Id
-    )
-WHERE PC.Proposal_Code = :proposal_code
-    AND CONCAT(S.`Year`, '-', S.Semester) = :semester
-    """
-        )
-        result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "semester": semester}
-        )
-
-        row = result.scalar_one_or_none()
-
-        return cast(str, row)

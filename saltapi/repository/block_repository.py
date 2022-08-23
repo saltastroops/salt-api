@@ -88,8 +88,8 @@ WHERE B.Block_Id = :block_id;
             "minimum_seeing": row.minimum_seeing,
             "maximum_seeing": row.maximum_seeing,
             "transparency": row.transparency,
-            "minimum_lunar_distance": row.minimum_lunar_distance,
-            "maximum_lunar_phase": row.maximum_lunar_phase,
+            "minimum_lunar_distance": float(row.minimum_lunar_distance),
+            "maximum_lunar_phase": float(row.maximum_lunar_phase),
         }
         observation_probabilities = {
             "moon": row.moon_probability,
@@ -575,7 +575,7 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
         return {
             "horizontal_tiles": row["dp_horizontal_tiles"],
             "vertical_tiles": row["dp_vertical_tiles"],
-            "offset_size": row["dp_offset_size"],
+            "offset_size": float(row["dp_offset_size"]),
             "steps": row["dp_steps"],
             "description": row["dp_description"],
         }
@@ -592,8 +592,8 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
             return None
 
         return {
-            "right_ascension": ra,
-            "declination": dec,
+            "right_ascension": float(ra),
+            "declination": float(dec),
             "equinox": row.gs_equinox,
             "magnitude": row.gs_magnitude,
         }

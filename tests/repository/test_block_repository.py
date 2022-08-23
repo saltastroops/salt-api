@@ -1,4 +1,4 @@
-from typing import Any, Callable, cast
+from typing import Any, cast
 
 import pytest
 from sqlalchemy.engine import Connection
@@ -11,8 +11,6 @@ from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.instrument import BVIT, HRS, RSS, Salticam
 from saltapi.service.target import Target
 from tests.markers import nodatabase
-
-TEST_DATA = "repository/block_repository.yaml"
 
 
 class FakeTargetRepository:
@@ -43,233 +41,58 @@ def create_block_repository(connection: Connection) -> BlockRepository:
 
 
 @nodatabase
-def test_get_block_returns_block_content(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["general_block_details"]
-    block_id = data["id"]
+@pytest.mark.parametrize(
+    "block_id",
+    [
+        79390,  # general block content, accepted and rejected block visits
+        89175,  # observing windows
+        88649,  # target
+        75444,  # finder charts without comments
+        75551,  # finder charts with and without comments
+        87431,  # finder charts with validity range
+        88042,  # time restrictions
+        69787,  # phase constraints
+        89403,  # no time restrictions, no phase constraints
+        89463,  # telescope configuration with position angle
+        89382,  # telescope configuration without position angle
+        89445,  # telescope configurations with and without dither pattern
+        89204,  # guide star
+        89480,  # no guide star
+        89326,  # payload configurations with acquisition, science and calibration
+        89444,  # two telescope configurations with two payload configurations; Salticam
+        # and RSS
+        76620,  # one telescope configuration with two payload configurations; Salticam
+        # and HRS
+        73735,  # one telescope configuration with two payload configuration and one
+        # telescope configuration with one payload configuration; Salticam and BVIT
+        1023,  # two telescope configurations with one payload configuration; multiple
+        # instrument setups in payload configuration; Salticam
+    ],
+)
+def test_get_block(block_id: int, db_connection: Connection, check_data: Any) -> None:
     block_repository = create_block_repository(db_connection)
     block = block_repository.get(block_id)
-
-    for key in data:
-        assert key in block
-        assert block[key] == data[key]
+    check_data(block)
 
 
 @nodatabase
+@pytest.mark.parametrize(
+    "block_id",
+    [
+        9005,  # subblock iterations
+        9495,  # two observations in a pointing
+    ],
+)
 def test_get_raises_error_for_too_complicated_blocks(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    block_id: int, db_connection: Connection
 ) -> None:
     # Blocks with multiple observations or with subblocks or subsubblocks should cause
     # an error
 
-    data = testdata(TEST_DATA)["too_complicated_blocks"]
-    block_ids = data["block_ids"]
     block_repository = create_block_repository(db_connection)
-    for block_id in block_ids:
-        with pytest.raises(ValueError) as excinfo:
-            block_repository.get(block_id)
-        assert "supported" in str(excinfo)
-
-
-@nodatabase
-def test_get_returns_block_visits(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["block_visits"]
-    block_id = data["block_id"]
-    expected_observations = data["visits"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    observations = block["block_visits"]
-
-    assert len(observations) == len(expected_observations)
-    for i in range(len(observations)):
-        assert observations[i] == expected_observations[i]
-
-
-@nodatabase
-def test_get_returns_observing_windows(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["observing_windows"]
-    block_id = data["block_id"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    observing_windows = block["observing_windows"]
-
-    assert len(observing_windows) == data["window_count"]
-    assert observing_windows[0] == data["first_window"]
-    assert observing_windows[-1] == data["last_window"]
-    for i in range(len(observing_windows) - 1):
-        # the windows are sorted
-        assert observing_windows[i]["start"] < observing_windows[i + 1]["start"]
-
-
-@nodatabase
-def test_target(db_connection: Connection, testdata: Callable[[str], Any]) -> None:
-    data = testdata(TEST_DATA)["target"]
-    block_id = data["block_id"]
-    expected_target_id = data["target_id"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    target = block["observations"][0]["target"]
-
-    assert target == f"Target with id {expected_target_id}"
-
-
-@nodatabase
-def test_finder_charts(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["finder_charts"]
-    for d in data:
-        block_id = d["block_id"]
-        expected_finder_charts = d["finder_charts"]
-        block_repository = create_block_repository(db_connection)
-        block = block_repository.get(block_id)
-        finder_charts = block["observations"][0]["finder_charts"]
-
-        assert finder_charts == expected_finder_charts
-
-
-@nodatabase
-def test_finder_charts_with_validity(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["finder_charts_with_validity"]
-    block_id = data["block_id"]
-    expected_last_finder_chart = data["last_finder_chart"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    finder_charts = block["observations"][0]["finder_charts"]
-
-    assert finder_charts[-1] == expected_last_finder_chart
-
-
-@nodatabase
-def test_time_restrictions(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["time_restrictions"]
-    block_id = data["block_id"]
-    expected_restrictions = data["restrictions"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    restrictions = block["observations"][0]["time_restrictions"]
-
-    assert len(restrictions) == len(expected_restrictions)
-    for i in range(len(restrictions)):
-        assert restrictions[i]["end"] == expected_restrictions[i]["end"]
-
-
-@nodatabase
-def test_no_time_restrictions(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["no_time_restrictions"]
-    block_id = data["block_id"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    restrictions = block["observations"][0]["time_restrictions"]
-
-    assert restrictions is None
-
-
-@nodatabase
-def test_phase_constraints(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["phase_constraints"]
-    block_id = data["block_id"]
-    expected_constraints = data["constraints"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    constraints = block["observations"][0]["phase_constraints"]
-
-    assert constraints == expected_constraints
-
-
-@nodatabase
-def test_no_phase_constraints(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["no_phase_constraints"]
-    block_id = data["block_id"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    constraints = block["observations"][0]["phase_constraints"]
-
-    assert constraints is None
-
-
-@nodatabase
-def test_telescope_configuration(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["telescope_configurations"]
-    for d in data:
-        block_id = d["block_id"]
-        expected_telescope_config = d["telescope_config"]
-        block_repository = create_block_repository(db_connection)
-        block = block_repository.get(block_id)
-        telescope_config = block["observations"][0]["telescope_configurations"][0]
-
-        for key in expected_telescope_config:
-            assert key in telescope_config
-            assert telescope_config[key] == expected_telescope_config[key]
-
-
-@nodatabase
-def test_dither_pattern(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["dither_pattern"]
-    block_id = data["block_id"]
-    expected_telescope_configs = data["telescope_configs"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    telescope_configs = block["observations"][0]["telescope_configurations"]
-
-    assert len(telescope_configs) == len(expected_telescope_configs)
-    for i in range(len(telescope_configs)):
-        assert (
-            telescope_configs[i]["dither_pattern"]
-            == expected_telescope_configs[i]["dither_pattern"]
-        )
-
-
-@nodatabase
-def test_guide_star(db_connection: Connection, testdata: Callable[[str], Any]) -> None:
-    data = testdata(TEST_DATA)["guide_star"]
-    for d in data:
-        block_id = d["block_id"]
-        expected_guide_star = d["star"]
-        block_repository = create_block_repository(db_connection)
-        block = block_repository.get(block_id)
-        guide_star = block["observations"][0]["telescope_configurations"][0][
-            "guide_star"
-        ]
-        assert pytest.approx(guide_star["right_ascension"]) == pytest.approx(
-            expected_guide_star["right_ascension"]
-        )
-        assert guide_star["declination"] == pytest.approx(
-            expected_guide_star["declination"]
-        )
-        assert guide_star["equinox"] == expected_guide_star["equinox"]
-        assert guide_star["magnitude"] == expected_guide_star["magnitude"]
-
-
-@nodatabase
-def test_no_guide_star(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["no_guide_star"]
-    block_id = data["block_id"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    guide_star = block["observations"][0]["telescope_configurations"][0]["guide_star"]
-    assert guide_star is None
+    with pytest.raises(ValueError) as excinfo:
+        block_repository.get(block_id)
+    assert "supported" in str(excinfo)
 
 
 @nodatabase
@@ -280,85 +103,19 @@ def test_get_raises_error_for_non_existing_block(db_connection: Connection) -> N
 
 
 @nodatabase
-def test_payload_configurations(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["payload_configurations"]
-    block_id = data["block_id"]
-    expected_configs = data["configurations"]
-    block_repository = create_block_repository(db_connection)
-    block = block_repository.get(block_id)
-    configs = block["observations"][0]["telescope_configurations"][0][
-        "payload_configurations"
-    ]
-
-    assert len(configs) == len(expected_configs)
-
-    for i in range(len(configs)):
-        # instruments must be compared separately
-        instruments = set(configs[i]["instruments"].keys()).union(
-            expected_configs[i]["instruments"].keys()
-        )
-        for instrument in instruments:
-            assert configs[i]["instruments"].get(instrument) == expected_configs[i][
-                "instruments"
-            ].get(instrument)
-        del configs[i]["instruments"]
-        del expected_configs[i]["instruments"]
-
-        assert configs[i] == expected_configs[i]
-
-
-@nodatabase
-def test_get_block_instruments(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["block_instruments"]
-    for d in data:
-        block_id = d["block_id"]
-        expected_observations = d["observations"]
-        block_repository = create_block_repository(db_connection)
-        block = block_repository.get(block_id)
-        observations = block["observations"]
-
-        assert len(observations) == len(expected_observations)
-        for i in range(len(observations)):
-            expected_telescope_configs = expected_observations[i][
-                "telescope_configurations"
-            ]
-            telescope_configs = observations[i]["telescope_configurations"]
-
-            assert len(expected_telescope_configs) == len(telescope_configs)
-            for j in range(len(telescope_configs)):
-                expected_payload_configs = expected_telescope_configs[j][
-                    "payload_configurations"
-                ]
-                payload_configs = telescope_configs[j]["payload_configurations"]
-
-                assert len(payload_configs) == len(expected_payload_configs)
-
-                for k in range(len(payload_configs)):
-                    instruments = set(payload_configs[k]["instruments"].keys()).union(
-                        expected_payload_configs[k]["instruments"].keys()
-                    )
-                    for instrument in instruments:
-                        assert payload_configs[k]["instruments"].get(
-                            instrument
-                        ) == expected_payload_configs[k]["instruments"].get(instrument)
-
-
-@nodatabase
+@pytest.mark.parametrize(
+    "block_id",
+    [
+        2339,  # block expired
+        1,  # block on hold, block in queue
+    ],
+)
 def test_get_block_status(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    block_id: int, db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["block_status"]
-    for d in data:
-        block_id = d["block_id"]
-        expected_status = d["status"]
-        block_repository = create_block_repository(db_connection)
-        status = block_repository.get_block_status(block_id)
-
-        assert expected_status == status
+    block_repository = create_block_repository(db_connection)
+    status = block_repository.get_block_status(block_id)
+    check_data(status)
 
 
 @nodatabase
@@ -408,30 +165,20 @@ def test_update_block_status_raises_error_for_wrong_status(
 
 
 @nodatabase
+@pytest.mark.parametrize(
+    "block_visit_id",
+    [
+        5479,  # accepted block visit
+        5457,  # rejected block visit
+        1,  # block in queue
+    ],
+)
 def test_get_block_visit(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    block_visit_id: int, db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["block_visit"]
-    for d in data:
-        block_visit_id = d["id"]
-        block_repository = create_block_repository(db_connection)
-        block_visit = block_repository.get_block_visit(block_visit_id)
-        assert block_visit_id == block_visit["id"]
-        assert d["status"] == block_visit["status"]
-
-
-@nodatabase
-def test_get_block_visit_status(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["block_visit_status"]
-    for d in data:
-        block_visit_id = d["id"]
-        expected_status = d["status"]
-        block_repository = create_block_repository(db_connection)
-        status = block_repository.get_block_visit(block_visit_id)["status"]
-
-        assert expected_status == status
+    block_repository = create_block_repository(db_connection)
+    block_visit = block_repository.get_block_visit(block_visit_id)
+    check_data(block_visit)
 
 
 @nodatabase
@@ -444,7 +191,7 @@ def test_get_block_visit_status_raises_error_for_wrong_block_visit_id(
 
 
 @nodatabase
-def test_get_block_visit_status_raises_error_for_deleted_status(
+def test_get_block_visit_raises_error_for_deleted_status(
     db_connection: Connection,
 ) -> None:
     block_repository = create_block_repository(db_connection)

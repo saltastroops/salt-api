@@ -1,5 +1,4 @@
 import pathlib
-import urllib.parse
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -118,87 +117,17 @@ class ProposalService:
             ],
         )
 
-    def list_of_progress_reports_pdfs(
-        self, proposal_code: ProposalCode
-    ) -> Dict[str, Any]:
-        progress_reports_list = self.repository.list_of_progress_reports_pdfs(
+    def list_of_progress_report_pdfs(self, proposal_code: ProposalCode) -> List[str]:
+        progress_report_semester_list = self.repository.list_of_progress_report_pdfs(
             proposal_code
         )
 
-        current_semester = Semester(semester_of_datetime(datetime.now(tz=pytz.utc)))
+        current_semester = semester_of_datetime(datetime.now(tz=pytz.utc))
 
-        if current_semester in progress_reports_list:
-            del progress_reports_list[current_semester]
+        if current_semester in progress_report_semester_list:
+            progress_report_semester_list.remove(current_semester)
 
-        progress_reports_list = {
-            k: v for k, v in progress_reports_list.items() if v != "NULL"
-        }
-
-        progress_reports_list = {
-            key: urllib.parse.quote(
-                pathlib.Path(
-                    proposals_dir
-                    / proposal_code
-                    / "Included"
-                    / progress_reports_list[key]
-                )
-                .resolve()
-                .as_posix(),
-                safe="",
-            )
-            for key in progress_reports_list
-        }
-
-        return progress_reports_list
-
-    def get_progress_report_pdf(
-        self, proposal_code: ProposalCode, semester: Semester
-    ) -> str:
-        progress_report_pdf = self.repository.get_progress_report_pdf(
-            proposal_code, semester
-        )
-
-        progress_report_pdf_path = (
-            urllib.parse.quote(
-                pathlib.Path(
-                    proposals_dir / proposal_code / "Included" / progress_report_pdf
-                )
-                .resolve()
-                .as_posix(),
-                safe="",
-            )
-            if progress_report_pdf
-            else None
-        )
-
-        return progress_report_pdf_path
-
-    def get_supplementary_progress_report_pdf(
-        self, proposal_code: ProposalCode, semester: Semester
-    ) -> str:
-        supplementary_progress_report_pdf = (
-            self.repository.get_supplementary_progress_report_pdf(
-                proposal_code, semester
-            )
-        )
-
-        progress_report_pdf_path = (
-            urllib.parse.quote(
-                pathlib.Path(
-                    proposals_dir
-                    / proposal_code
-                    / "Included"
-                    / supplementary_progress_report_pdf
-                )
-                .resolve()
-                .as_posix(),
-                safe="",
-            )
-            if supplementary_progress_report_pdf
-            else None
-        )
-
-        return progress_report_pdf_path
+        return progress_report_semester_list
 
     def get_progress_report(
         self, proposal_code: ProposalCode, semester: Semester
@@ -206,32 +135,26 @@ class ProposalService:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
         progress_report_pdf_path = (
-            urllib.parse.quote(
-                pathlib.Path(
-                    proposals_dir
-                    / proposal_code
-                    / "Included"
-                    / progress_report["proposal_progress_pdf"]
-                )
-                .resolve()
-                .as_posix(),
-                safe="",
+            pathlib.Path(
+                proposals_dir
+                / proposal_code
+                / "Included"
+                / progress_report["proposal_progress_pdf"]
             )
+            .resolve()
+            .as_uri()
             if progress_report["proposal_progress_pdf"]
             else None
         )
         additional_progress_report_pdf_path = (
-            urllib.parse.quote(
-                pathlib.Path(
-                    proposals_dir
-                    / proposal_code
-                    / "Included"
-                    / progress_report["additional_pdf"]
-                )
-                .resolve()
-                .as_posix(),
-                safe="",
+            pathlib.Path(
+                proposals_dir
+                / proposal_code
+                / "Included"
+                / progress_report["additional_pdf"]
             )
+            .resolve()
+            .as_uri()
             if progress_report["additional_pdf"]
             else None
         )

@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Change directory
-        run: cd ../../cypress/
+        run: cd cypress
 
       - name: Check out my other private repo
         uses: actions/checkout@master

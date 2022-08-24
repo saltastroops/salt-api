@@ -18,7 +18,7 @@ jobs:
       - name: Clone test data repository
         env:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress
+        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/salt-testdata
 
       - name: Run Angular Tests
         run: npm test -- --watch=false --browsers=ChromeHeadless

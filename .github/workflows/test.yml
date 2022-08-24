@@ -23,23 +23,20 @@ jobs:
       - name: Run Angular Tests
         run: npm test -- --watch=false --browsers=ChromeHeadless
 
+        # Install NPM dependencies, cache them correctly
+        # and run all Cypress tests
       - name: Run Cypress Tests
-        run: cypress run --env recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
+        uses: cypress-io/github-action@v4
+        with:
+          start: npm start
+
+        env:
+          recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
+          # Recommended: pass the GitHub token lets this action correctly
+          # determine the unique run id necessary to re-run the checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
         run: |
           npx eslint -c .eslintrc.json
           npx prettier --check .
-
-        # Install NPM dependencies, cache them correctly
-        # and run all Cypress tests
-#      - name: Cypress run
-#        uses: cypress-io/github-action@v4
-#        with:
-#          start: npm start
-#
-#        env:
-#          recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
-#          # Recommended: pass the GitHub token lets this action correctly
-#          # determine the unique run id necessary to re-run the checks
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

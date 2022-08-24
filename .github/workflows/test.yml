@@ -8,38 +8,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
 
-      - name: Change directory
-        run: cd cypress
+      - name: Install packages
+        run: npm install
 
       - name: Clone test data repository
         env:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata
-
-#      - name: Clone test data repository
-#        run: git clone https://github.com/saltastroops/salt-testdata.git
-
-      - name: Change directory
-        run: cd ../
-
-        # Install NPM dependencies, cache them correctly
-        # and run all Cypress tests
-      - name: Run Cypress Test
-        uses: cypress-io/github-action@v4
-        with:
-          start: npm start
-
-        env:
-          recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
-          # Recommended: pass the GitHub token lets this action correctly
-          # determine the unique run id necessary to re-run the checks
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress
 
       - name: Run Angular Tests
         run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Run Cypress Tests
+        run: cypress run --env recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
 
       - name: Lint
         run: |
           npx eslint -c .eslintrc.json
           npx prettier --check .
+
+        # Install NPM dependencies, cache them correctly
+        # and run all Cypress tests
+#      - name: Cypress run
+#        uses: cypress-io/github-action@v4
+#        with:
+#          start: npm start
+#
+#        env:
+#          recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
+#          # Recommended: pass the GitHub token lets this action correctly
+#          # determine the unique run id necessary to re-run the checks
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

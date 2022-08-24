@@ -12,6 +12,9 @@ jobs:
         with:
           node-version: 12
 
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necess
+
       - name: Install packages
         run: npm install
 
@@ -26,15 +29,13 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Set up MySQL
-        env:
-          DB_DATABASE: test_db
-          DB_USER: root
-          DB_PASSWORD: root
+        uses: shogo82148/actions-setup-mysql@v1
+        with:
+            mysql-version: '8.0'
         run: |
-          sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+          mysql -uroot -proot -h127.0.0.1 -e 'SELECT version()'
           touch .env
-          echo TEST_DATABASE=mysql://${{ env.DB_USER }}:{{ env.DB_PASSWORD }}@localhost:3306/${{ env.DB_DATABASE }} >> .env
+          echo TEST_DATABASE=mysql+pymysql://root:root@127.0.0.1:3306/test >> .env
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4

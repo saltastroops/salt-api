@@ -7,17 +7,28 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check out my other private repo
+        run: cd ../../cypress/
+        uses: actions/checkout@master
         with:
-          node-version: 12
-      - name: Install packages
-        run: npm install
-
-      - name: Run tests
-        run: npm test -- --watch=false --browsers=ChromeHeadless
-
-      - name: Linting and formatting
-        run: |
+          repository: saltastroops/salt-testdata
+          token: ${{ secrets.ACCESS_TOKEN }}
+        # Install NPM dependencies, cache them correctly
+        # and run all Cypress tests
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          test: npm test -- --watch=false --browsers=ChromeHeadless
+          run: |
           npx eslint -c .eslintrc.json
           npx prettier --check .
+          start: npm start
+
+        env:
+          recordHttpConfig=: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
+          # Recommended: pass the GitHub token lets this action correctly
+          # determine the unique run id necessary to re-run the checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

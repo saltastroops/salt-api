@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Dict
 
 import freezegun
 import pytest
@@ -6,63 +6,94 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from tests.conftest import find_username
 from tests.markers import nodatabase
 
-TEST_DATA = "repository/proposal_repository.yaml"
-
-USER_TEST_DATA = "users.yaml"
-
 
 @nodatabase
+@pytest.mark.parametrize(
+    "semester,proposal_code",
+    [("2020-1", "2020-1-DDT-008"), ("2020-2", "2018-2-LSP-001")],
+)
 def test_list_returns_correct_content(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    semester: str, proposal_code: str, db_connection: Connection, check_data: Any
 ) -> None:
-    salt_astronomer = testdata(USER_TEST_DATA)["salt_astronomer"]
-    data = testdata(TEST_DATA)["proposal_list_content"]
-    for d in data:
-        semester = d["semester"]
-        expected_proposal = d["proposal"]
-        proposal_repository = ProposalRepository(db_connection)
-        proposals = proposal_repository.list(salt_astronomer, semester, semester)
-        proposal = [
-            p
-            for p in proposals
-            if p["proposal_code"] == expected_proposal["proposal_code"]
-        ][0]
-
-        assert proposal == expected_proposal
+    salt_astronomer = find_username("SALT Astronomer")
+    proposal_repository = ProposalRepository(db_connection)
+    proposals = proposal_repository.list(salt_astronomer, semester, semester)
+    proposal = [p for p in proposals if p["proposal_code"] == proposal_code][0]
+    check_data(proposal)
 
 
 @nodatabase
+@pytest.mark.parametrize(
+    "from_semester,to_semester,user_args",
+    [
+        # TAC chair for South Africa
+        ("2020-1", "2020-1", {"user_type": "TAC Chair", "partner_code": "RSA"}),
+        # TAC chair for RU
+        # Proposal 2020-1-MLT-005 has an investigator from RU, but isn't requesting time
+        # from RU for 2021-1 (although it is requesting time from UW)
+        ("2021-1", "2021-1", {"user_type": "TAC Chair", "partner_code": "RU"}),
+        # TAC member for UW
+        ("2021-1", "2021-1", {"user_type": "TAC member", "partner_code": "UW"}),
+        # User without a proposal in the semester
+        (
+            "2020-2",
+            "2020-2",
+            {"user_type": "Principal Investigator", "proposal_code": "2014-2-SCI-078"},
+        ),
+        # User over multiple semesters
+        (
+            "2017-2",
+            "2021-1",
+            {"user_type": "Principal Investigator", "proposal_code": "2018-2-LSP-001"},
+        ),
+        # SALT Astronomer
+        # There are 82 proposals for 2020-2, one of which has been deleted
+        ("2020-2", "2020-2", {"user_type": "SALT Astronomer"}),
+        # Administrator
+        # There are 81 proposals for 2018-2, two of which have been deleted
+        ("2018-2", "2018-2", {"user_type": "administrator"}),
+        # Gravitational wave event proposals can be viewed by a user affiliated with a
+        # SALT partner
+        (
+            "2018-2",
+            "2019-1",
+            {"user_type": "Principal Investigator", "proposal_code": "2014-2-SCI-078"},
+        ),
+        # Gravitational wave event proposals cannot be viewed by a user affiliated who
+        # is not affiliated to a SALT partner
+        (
+            "2018-2",
+            "2019-1",
+            {"user_type": "Principal Contact", "proposal_code": "2021-1-SCI-014"},
+        ),
+    ],
+)
 def test_list_returns_correct_proposal_codes(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    from_semester: str,
+    to_semester: str,
+    user_args: Dict[str, Any],
+    db_connection: Connection,
+    check_data: Any,
 ) -> None:
-    data = testdata(TEST_DATA)["proposal_list"]
     proposal_repository = ProposalRepository(db_connection)
-    for d in data:
-        from_semester = d["from_semester"]
-        to_semester = d["to_semester"]
-        username = d["username"]
-        expected_proposal_codes = sorted(d["proposal_codes"])
-        expected_proposal_count = d["proposal_count"]
-
-        proposals = proposal_repository.list(
-            username=username, from_semester=from_semester, to_semester=to_semester
-        )
-        proposal_codes = sorted(p["proposal_code"] for p in proposals)
-
-        assert len(proposal_codes) == expected_proposal_count
-        if expected_proposal_codes != ["many"]:
-            assert proposal_codes == expected_proposal_codes
+    username = find_username(**user_args)
+    proposals = proposal_repository.list(
+        username=username, from_semester=from_semester, to_semester=to_semester
+    )
+    proposal_codes = sorted(p["proposal_code"] for p in proposals)
+    check_data(
+        {"proposal_count": len(proposal_codes), "proposal_codes": proposal_codes}
+    )
 
 
 @nodatabase
-def test_list_handles_omitted_semester_limits(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
+def test_list_handles_omitted_semester_limits(db_connection: Connection) -> None:
     proposal_repository = ProposalRepository(db_connection)
 
-    salt_astronomer = testdata(USER_TEST_DATA)["salt_astronomer"]
+    salt_astronomer = find_username("SALT Astronomer")
     assert len(
         proposal_repository.list(username=salt_astronomer, to_semester="2015-1")
     ) == len(
@@ -81,24 +112,19 @@ def test_list_handles_omitted_semester_limits(
 
 
 @nodatabase
+@pytest.mark.parametrize("semester,limit", [("2019-1", 4), ("2020-2", 0)])
 def test_list_results_can_be_limited(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    semester: str, limit: int, db_connection: Connection, check_data: Any
 ) -> None:
-    salt_astronomer = testdata(USER_TEST_DATA)["salt_astronomer"]
-    data = testdata(TEST_DATA)["proposal_list_limit"]
-    for d in data:
-        semester = d["semester"]
-        expected_proposal_codes = d["proposal_codes"]
-        limit = len(expected_proposal_codes)
-        proposal_repository = ProposalRepository(db_connection)
-        proposals = proposal_repository.list(
-            username=salt_astronomer,
-            from_semester=semester,
-            to_semester=semester,
-            limit=limit,
-        )
-
-        assert [p["proposal_code"] for p in proposals] == expected_proposal_codes
+    salt_astronomer = find_username("SALT Astronomer")
+    proposal_repository = ProposalRepository(db_connection)
+    proposals = proposal_repository.list(
+        username=salt_astronomer,
+        from_semester=semester,
+        to_semester=semester,
+        limit=limit,
+    )
+    check_data([p["proposal_code"] for p in proposals])
 
 
 @nodatabase
@@ -139,12 +165,10 @@ def test_list_raises_error_for_wrong_semester_format(
 
 
 @nodatabase
-def test_list_raises_error_for_wrong_semester_order(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
+def test_list_raises_error_for_wrong_semester_order(db_connection: Connection) -> None:
     proposal_repository = ProposalRepository(db_connection)
     with pytest.raises(ValueError) as excinfo:
-        username = testdata(USER_TEST_DATA)["salt_astronomer"]
+        username = find_username("SALT Astronomer")
         proposal_repository.list(
             username=username, from_semester="2021-2", to_semester="2021-1"
         )
@@ -159,57 +183,40 @@ def test_get_raises_error_for_wrong_proposal_code(db_connection: Connection) -> 
 
 
 @nodatabase
-def test_get_returns_general_info(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["get"]
-    proposal_code = data["proposal_code"]
+def test_get_returns_general_info(db_connection: Connection, check_data: Any) -> None:
+    proposal_code = "2019-2-DDT-006"
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
-    expected_general_info = data["general_info"]
     general_info = proposal["general_info"]
-    assert (general_info.keys()) == (expected_general_info.keys())
-    for key in expected_general_info:
-        assert key in general_info
-        if key == "summary_for_salt_astronomer":
-            assert expected_general_info[key] in general_info[key]
-        else:
-            assert general_info[key] == expected_general_info[key]
+    check_data(general_info)
 
 
+@pytest.mark.parametrize(
+    "proposal_code,expected_self_activatable",
+    [("2018-1-SCI-041", False), ("2018-2-LSP-001", True)],
+)
 def test_get_returns_correct_value_for_is_self_activatable(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    proposal_code: str, expected_self_activatable: bool, db_connection: Connection
 ) -> None:
-    data = testdata(TEST_DATA)["is_self_activatable"]
     proposal_repository = ProposalRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-        expected_may_activate = d["self_activatable"]
-        proposal = proposal_repository.get(proposal_code)
+    proposal = proposal_repository.get(proposal_code)
 
-        assert proposal["general_info"]["is_self_activatable"] == expected_may_activate
+    assert proposal["general_info"]["is_self_activatable"] == expected_self_activatable
 
 
 @nodatabase
-def test_get_returns_investigators(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["get"]
-    proposal_code = data["proposal_code"]
-    expected_investigators = data["investigators"]
+def test_get_returns_investigators(db_connection: Connection, check_data: Any) -> None:
+    proposal_code = "2019-2-DDT-006"
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
     investigators = proposal["investigators"]
-    assert len(investigators) == len(expected_investigators)
-    for i in range(len(investigators)):
-        assert investigators[i] == expected_investigators[i]
+    check_data(investigators)
 
 
 def test_get_returns_correct_proposal_approval(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["proposal_approval"]
-    proposal_code = data["proposal_code"]
+    proposal_code = "2018-2-LSP-001"
 
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
@@ -225,182 +232,114 @@ def test_get_returns_correct_proposal_approval(
         i for i in investigators if i["has_approved_proposal"] is None
     ]
 
-    assert len(approved_investigators) == data["approved_count"]
-    assert len(rejected_investigators) == data["rejected_count"]
-    assert len(undecided_investigators) == data["undecided_count"]
-
-    assert data["approved_investigator"] in [
-        i["family_name"] for i in approved_investigators
-    ]
-    assert data["rejected_investigator"] in [
-        i["family_name"] for i in rejected_investigators
-    ]
-
-
-@nodatabase
-def test_get_returns_blocks(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["get"]
-    proposal_code = data["proposal_code"]
-    expected_blocks = data["blocks"]
-    proposal_repository = ProposalRepository(db_connection)
-    proposal = proposal_repository.get(proposal_code)
-    blocks = proposal["blocks"]
-    for expected_block in expected_blocks:
-        block = next(b for b in blocks if b["id"] == expected_block["id"])
-        for key in expected_block:
-            assert key in block
-            if key == "targets":
-                assert set(block["targets"]) == set(expected_block["targets"])
-            elif key == "instruments":
-                expected_instruments = expected_block["instruments"]
-                instruments = block["instruments"]
-                assert len(instruments) == len(expected_instruments)
-                for expected_instrument in expected_instruments:
-                    instrument = next(
-                        i
-                        for i in instruments
-                        if i["name"] == expected_instrument["name"]
-                    )
-                    assert set(instrument["modes"]) == set(expected_instrument["modes"])
-            else:
-                assert block[key] == expected_block[key]
-
-
-@nodatabase
-def test_get_returns_block_visits(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["get"]
-    proposal_code = data["proposal_code"]
-    expected_observations = data["block_visits"]
-    proposal_repository = ProposalRepository(db_connection)
-    proposal = proposal_repository.get(proposal_code)
-    observations = proposal["block_visits"]
-
-    assert len(observations) == len(expected_observations)
-    for i in range(len(observations)):
-        assert observations[i] == expected_observations[i]
+    check_data(
+        {
+            "approved": approved_investigators,
+            "rejected": rejected_investigators,
+            "undecided": undecided_investigators,
+        }
+    )
 
 
 @nodatabase
 def test_get_returns_time_allocations(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["get_allocations"]
-    proposal_code = data["proposal_code"]
-    semester = data["semester"]
+    proposal_code = "2018-2-LSP-001"
+    semester = "2021-1"
 
-    expected_allocations = data["time_allocations"]
-    expected_allocations.sort(key=lambda v: v["partner_code"])
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code, semester)
     allocations = proposal["time_allocations"]
     allocations.sort(key=lambda v: v["partner_code"])
-
-    assert len(expected_allocations) == len(allocations)
-    for i in range(len(allocations)):
-        allocation = allocations[i]
-        ea = expected_allocations[i]
-        expected_allocation = {
-            "partner_name": ea["partner_name"],
-            "partner_code": ea["partner_code"],
-            "priority_0": ea["allocations"][0],
-            "priority_1": ea["allocations"][1],
-            "priority_2": ea["allocations"][2],
-            "priority_3": ea["allocations"][3],
-            "priority_4": ea["allocations"][4],
-            "tac_comment": ea["tac_comment"],
-        }
-
-        # The test data contains a substring of the comment only
-        if expected_allocation["tac_comment"]:
-            assert expected_allocation["tac_comment"] in allocation["tac_comment"]
-            allocation["tac_comment"] = expected_allocation["tac_comment"]
-        assert allocation == expected_allocation
+    check_data(allocations)
 
 
 @nodatabase
-def test_get_returns_charged_time(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["get_charged_time"]
-    proposal_code = data["proposal_code"]
-    semester = data["semester"]
+def test_get_returns_charged_time(db_connection: Connection, check_data: Any) -> None:
+    proposal_code = "2018-2-LSP-001"
+    semester = "2020-2"
 
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code, semester)
     charged_time = proposal["charged_time"]
 
-    assert data["priority_0"] == charged_time["priority_0"]
-    assert data["priority_1"] == charged_time["priority_1"]
-    assert data["priority_2"] == charged_time["priority_2"]
-    assert data["priority_3"] == charged_time["priority_3"]
-    assert data["priority_4"] == charged_time["priority_4"]
+    check_data(charged_time)
 
 
+@pytest.mark.parametrize(
+    "proposal_code",
+    ["2016-2-SCI-008", "2020-1-DDT-008", "2019-2-DDT-002", "2021-2-MLT-002"],
+)
 def test_get_returns_data_release_date(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    proposal_code: str, db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["data_release_date"]
     proposal_repository = ProposalRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-        expected_release_date = d["release_date"]
-        proposal = proposal_repository.get(proposal_code)
-        release_date = proposal["general_info"]["data_release_date"]
-        assert release_date == expected_release_date
+    proposal = proposal_repository.get(proposal_code)
+    release_date = proposal["general_info"]["data_release_date"]
+    check_data(release_date)
 
 
+@pytest.mark.parametrize(
+    "now",
+    [
+        "2021-07-21T11:59:59Z",  # just before the (Julian) day changes,
+        "2021-07-21T12:00:01Z",  # just after the (Julian) day changes
+    ],
+)
 def test_get_returns_block_observability(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    now: str, db_connection: Connection, check_data: Any
 ) -> None:
-    for data in testdata(TEST_DATA)["observabilities"]:
-        proposal_code = data["proposal_code"]
-        semester = data["semester"]
-        now = data["now"]
-        expected_observabilities = data["observabilities"]
+    proposal_code = "2018-2-LSP-001"
+    semester = "2021-1"
 
-        with freezegun.freeze_time(now):
-            proposal_repository = ProposalRepository(db_connection)
-            proposal = proposal_repository.get(proposal_code, semester)
-            blocks = proposal["blocks"]
-            for o in expected_observabilities:
-                block_id = o["block_id"]
-                block = next(b for b in blocks if b["id"] == block_id)
-                assert block["is_observable_tonight"] == o["is_observable_tonight"]
-                assert block["remaining_nights"] == o["remaining_nights"]
+    with freezegun.freeze_time(now):
+        proposal_repository = ProposalRepository(db_connection)
+        proposal = proposal_repository.get(proposal_code, semester)
+        blocks = proposal["blocks"]
+        block_ids = [89205, 89301, 89177, 89392]
+        observabilities = []
+        for block_id in block_ids:
+            block = next(b for b in blocks if b["id"] == block_id)
+            observabilities.append(
+                {
+                    "block_id": block_id,
+                    "is_observable_tonight": block["is_observable_tonight"],
+                    "remaining_nights": block["remaining_nights"],
+                }
+            )
 
 
 def test_get_returns_observation_comments(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["observation_comments"]
-    proposal_code = data["proposal_code"]
-    expected_comments = data["comments"]
+    proposal_code = "2020-2-DDT-001"
 
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
     comments = proposal["observation_comments"]
 
-    assert len(comments) == len(expected_comments)
-    for i in range(len(comments)):
-        assert comments[i]["comment_date"] == expected_comments[i]["comment_date"]
-        assert comments[i]["author"] == expected_comments[i]["author"]
-        assert expected_comments[i]["comment"] in comments[i]["comment"]
+    check_data(comments)
 
 
+@pytest.mark.parametrize(
+    "proposal_code,expected_proposal_type",
+    [
+        ("2020-2-SCI-043", "Science"),
+        ("2021-1-MLT-003", "Science - Long Term"),
+        ("2018-2-LSP-001", "Large Science Proposal"),
+        ("2016-1-COM-001", "Commissioning"),
+        ("2016-1-SVP-001", "Science Verification"),
+        ("2019-1-GWE-005", "Gravitational Wave Event"),
+        ("2020-2-DDT-005", "Director's Discretionary Time"),
+    ],
+)
 def test_get_proposal_type_returns_the_correct_proposal_type(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    proposal_code: str, expected_proposal_type: str, db_connection: Connection
 ) -> None:
-    data = testdata(TEST_DATA)["get_proposal_type"]
     proposal_repository = ProposalRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-        expected_proposal_type = d["proposal_type"]
-        proposal_type = proposal_repository.get_proposal_type(proposal_code)
-        assert proposal_type == expected_proposal_type
+    proposal_type = proposal_repository.get_proposal_type(proposal_code)
+    assert proposal_type == expected_proposal_type
 
 
 def test_get_proposal_type_raises_not_found_error(db_connection: Connection) -> None:
@@ -409,17 +348,21 @@ def test_get_proposal_type_raises_not_found_error(db_connection: Connection) -> 
         proposal_repository.get_proposal_type("idontexist")
 
 
+@pytest.mark.parametrize(
+    "proposal_code,expected_status,expected_reason",
+    [("2021-2-MLT-002", "Deleted", "Other"), ("2019-1-SCI-010", "Completed", "Other")],
+)
 def test_get_proposal_status(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    proposal_code: str,
+    expected_status: str,
+    expected_reason: str,
+    db_connection: Connection,
 ) -> None:
-    data = testdata(TEST_DATA)["get_proposal_status"]
-    for d in data:
-        proposal_code = d["proposal_code"]
-        expected_status = d["status"]
-        proposal_repository = ProposalRepository(db_connection)
-        status = proposal_repository.get_proposal_status(proposal_code)
+    proposal_repository = ProposalRepository(db_connection)
+    status = proposal_repository.get_proposal_status(proposal_code)
 
-        assert expected_status == status
+    assert status["value"] == expected_status
+    assert status["reason"] == expected_reason
 
 
 def test_get_proposal_status_raises_error_for_wrong_proposal_code(
@@ -483,45 +426,33 @@ def test_update_proposal_status_raises_error_for_wrong_status(
     assert "proposal status" in str(excinfo)
 
 
+@pytest.mark.parametrize(
+    "proposal_code,expected_self_activatable",
+    [("2018-1-SCI-041", False), ("2018-2-LSP-001", True)],
+)
 def test_is_self_activatable(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    proposal_code: str, expected_self_activatable: bool, db_connection: Connection
 ) -> None:
-    data = testdata(TEST_DATA)["is_self_activatable"]
     proposal_repository = ProposalRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-        expected_self_activatable = d["self_activatable"]
-
-        assert (
-            proposal_repository.is_self_activatable(proposal_code)
-            == expected_self_activatable
-        )
+    assert (
+        proposal_repository.is_self_activatable(proposal_code)
+        == expected_self_activatable
+    )
 
 
 @nodatabase
+@pytest.mark.parametrize("proposal_code", ["2019-2-SCI-046", "2021-1-MLT-007"])
 def test_get_returns_additional_instrument_details(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    proposal_code: str, db_connection: Connection, check_data: Any
 ) -> None:
-    data = testdata(TEST_DATA)["get_instrument_additional_configurations"]
-    for d in data:
-        proposal_code = d["proposal_code"]
-        expected_blocks = d["blocks"]
-        proposal_repository = ProposalRepository(db_connection)
-        proposal = proposal_repository.get(proposal_code)
-        blocks = proposal["blocks"]
-        for expected_block in expected_blocks:
-            block = next(b for b in blocks if b["id"] == expected_block["block_id"])
-            expected_instruments = expected_block["instruments"]
-            instruments = block["instruments"]
-            for expected_instrument in expected_instruments:
-                instrument = next(
-                    i for i in instruments if i["name"] == expected_instrument["name"]
-                )
-                assert set(instrument["modes"]) == set(expected_instrument["modes"])
-                assert set(instrument["gratings"]) == set(
-                    expected_instrument["gratings"]
-                )
-                assert set(instrument["filters"]) == set(expected_instrument["filters"])
+    proposal_repository = ProposalRepository(db_connection)
+    proposal = proposal_repository.get(proposal_code)
+    blocks = proposal["blocks"]
+    instruments = [
+        {"block_id": block["id"], "instruments": block["instruments"]}
+        for block in blocks
+    ]
+    check_data(instruments)
 
 
 @pytest.mark.parametrize(

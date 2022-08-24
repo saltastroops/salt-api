@@ -96,19 +96,6 @@ def check_data(data_regression: Any, request: pytest.FixtureRequest) -> None:
     yield f
 
 
-def read_testdata(path: str) -> Any:
-    if Path(path).is_absolute():
-        raise ValueError("The file path must be a relative path.")
-
-    root_dir = Path(os.environ["TEST_DATA_DIR"])
-    datafile = root_dir / path
-    if not datafile.exists():
-        raise FileNotFoundError(f"File does not exist: {datafile}")
-
-    with open(datafile, "r") as f:
-        return yaml.safe_load(f)
-
-
 @pytest.fixture()
 def client() -> Generator[TestClient, None, None]:
     yield TestClient(app)
@@ -127,7 +114,12 @@ def find_username(
     normalized_user_type = user_type.lower()
     normalized_user_type = normalized_user_type.replace(" ", "_").replace("-", "_")
 
-    users = read_testdata(TEST_DATA)
+    if "TEST_DATA_DIR" not in os.environ:
+        pytest.fail("Environment variable not set: TEST_DATA_DIR")
+    test_data_dir = Path(os.environ["TEST_DATA_DIR"])
+    users_file = test_data_dir / "users.yml"
+    with open(users_file) as f:
+        users = yaml.safe_load(f)
 
     if normalized_user_type in [
         "investigator",

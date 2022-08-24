@@ -23,8 +23,8 @@ jobs:
         with:
           test: npm test -- --watch=false --browsers=ChromeHeadless
           run: |
-          npx eslint -c .eslintrc.json
-          npx prettier --check .
+            npx eslint -c .eslintrc.json
+            npx prettier --check .
           start: npm start
 
         env:

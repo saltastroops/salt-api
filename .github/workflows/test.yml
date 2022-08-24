@@ -34,7 +34,7 @@ jobs:
           sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
           touch .env
-          echo TEST_DATABASE=mysql+pymysql://${{ env.DB_USER }}:{{ env.DB_PASSWORD }}@localhost:3306/${{ env.DB_DATABASE }} >> .env
+          echo TEST_DATABASE=mysql://${{ env.DB_USER }}:{{ env.DB_PASSWORD }}@localhost:3306/${{ env.DB_DATABASE }} >> .env
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4

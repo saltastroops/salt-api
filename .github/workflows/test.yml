@@ -28,7 +28,7 @@ jobs:
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         with:
-          start: npm start:ci
+          start: npm start
           wait-on: 'http://localhost:4200'
         env:
           CYPRESS_apiUrl: "http://127.0.0.1:8001"

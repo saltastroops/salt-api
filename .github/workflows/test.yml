@@ -7,8 +7,21 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
+
+      - name: Install packages
+        run: npm install
+
+      - name: Run Tests
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Lint
+        run: |
+          npx eslint -c .eslintrc.json
+          npx prettier --check .
 
       - name: Change directory
         run: cd cypress
@@ -23,10 +36,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
-          test: npm test -- --watch=false --browsers=ChromeHeadless
-          run: |
-            npx eslint -c .eslintrc.json
-            npx prettier --check .
           start: npm start
 
         env:

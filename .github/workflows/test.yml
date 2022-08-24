@@ -9,19 +9,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Change directory
+        run: cd cypress
+
       - name: Clone test data repository
         env:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/
-
-#      - name: Change directory
-#        run: cd cypress
+        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata
 
 #      - name: Clone test data repository
 #        run: git clone https://github.com/saltastroops/salt-testdata.git
 
-#      - name: Change directory
-#        run: cd ../
+      - name: Change directory
+        run: cd ../
 
         # Install NPM dependencies, cache them correctly
         # and run all Cypress tests

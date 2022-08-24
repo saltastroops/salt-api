@@ -35,7 +35,7 @@ jobs:
             user: 'root'
             password: 'secret'
       - run: |
-          mysql -uroot -psecret -h127.0.0.1 -e 'SELECT version()'
+          mysql -uroot -h127.0.0.1 -e 'SELECT version()'
           touch .env
           echo TEST_DATABASE=mysql+pymysql://root:root@127.0.0.1:3306/test >> .env
 

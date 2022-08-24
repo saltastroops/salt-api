@@ -101,8 +101,8 @@ ORDER BY Rss_Id DESC;
             "configuration": self._configuration(row),
             "detector": self._detector(row),
             "procedure": self._procedure(row),
-            "observation_time": row.observation_time,
-            "overhead_time": row.overhead_time,
+            "observation_time": float(row.observation_time),
+            "overhead_time": float(row.overhead_time),
             "arc_bible_entries": self._arc_bible_entries(row),
         }
         return rss
@@ -115,7 +115,7 @@ ORDER BY Rss_Id DESC;
         camera_station, camera_angle = row.articulation_station.split("_")
         spectroscopy = {
             "grating": row.grating,
-            "grating_angle": row.grating_angle,
+            "grating_angle": float(row.grating_angle),
             "camera_station": int(camera_station),
             "camera_angle": float(camera_angle),
         }
@@ -156,7 +156,7 @@ ORDER BY Rss_Id DESC;
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,
-                "equinox": row.mos_equinox,
+                "equinox": float(row.mos_equinox),
                 "cut_by": row.mos_cut_by,
                 "cut_date": row.mos_cut_date,
                 "comment": row.mos_comment,
@@ -203,7 +203,7 @@ ORDER BY Rss_Id DESC;
             "post_shuffled_rows": row.post_shuffle,
             "pre_binned_rows": row.pre_binned_rows,
             "pre_binned_columns": row.pre_binned_cols,
-            "exposure_time": row.exposure_time,
+            "exposure_time": float(row.exposure_time),
             "iterations": row.detector_iterations,
             "exposure_type": row.exposure_type,
             "gain": row.gain,
@@ -249,7 +249,7 @@ ORDER BY REPD.RssEtalonPattern_Order
         )
         result = self.connection.execute(stmt, {"pattern_id": etalon_pattern_id})
 
-        return [row.wavelength for row in result]
+        return [float(row.wavelength) for row in result]
 
     def _half_wave_plate_angles(self, polarimetry_pattern_id: int) -> Dict[int, float]:
         """
@@ -396,8 +396,8 @@ ORDER BY is_preferred_lamp DESC
             {
                 "lamp": row.lamp,
                 "is_preferred_lamp": True if row.is_preferred_lamp else False,
-                "original_exposure_time": row.original_exposure_time,
-                "preferred_exposure_time": row.preferred_exposure_time,
+                "original_exposure_time": float(row.original_exposure_time),
+                "preferred_exposure_time": float(row.preferred_exposure_time),
             }
             for row in result
         ]

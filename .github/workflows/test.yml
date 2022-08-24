@@ -25,6 +25,15 @@ jobs:
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
+      - name: Set up MySQL
+        env:
+          DB_DATABASE: test_db
+          DB_USER: root
+          DB_PASSWORD: secret
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         with:
@@ -33,6 +42,7 @@ jobs:
         env:
           CYPRESS_apiUrl: "http://127.0.0.1:8001"
           CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
+          CYPRESS_grepTags: -@skip
           # Recommended: pass the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

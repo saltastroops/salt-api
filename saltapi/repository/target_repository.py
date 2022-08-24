@@ -86,7 +86,11 @@ WHERE T.Target_Id = :target_id;
         if ra == 0 and dec == 0:
             return None
 
-        return {"right_ascension": ra, "declination": dec, "equinox": row.equinox}
+        return {
+            "right_ascension": float(ra),
+            "declination": float(dec),
+            "equinox": float(row.equinox),
+        }
 
     @staticmethod
     def _magnitude(row: Any) -> Optional[Dict[str, Any]]:
@@ -94,8 +98,8 @@ WHERE T.Target_Id = :target_id;
             return None
 
         return {
-            "minimum_magnitude": row.min_mag,
-            "maximum_magnitude": row.max_mag,
+            "minimum_magnitude": float(row.min_mag),
+            "maximum_magnitude": float(row.max_mag),
             "bandpass": row.bandpass,
         }
 
@@ -105,8 +109,8 @@ WHERE T.Target_Id = :target_id;
             return None
 
         return {
-            "right_ascension_speed": row.ra_dot,
-            "declination_speed": row.dec_dot,
+            "right_ascension_speed": float(row.ra_dot),
+            "declination_speed": float(row.dec_dot),
             "epoch": pytz.utc.localize(row.epoch),
         }
 
@@ -126,8 +130,8 @@ WHERE T.Target_Id = :target_id;
             return None
 
         return {
-            "zero_point": row.period_zero_point,
-            "period": row.period,
-            "period_change_rate": row.period_change_rate,
+            "zero_point": float(row.period_zero_point),
+            "period": float(row.period),
+            "period_change_rate": float(row.period_change_rate),
             "time_base": row.period_time_base,
         }

@@ -9,14 +9,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Configure git
+        env:
+          TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: git config --global url."https://${TOKEN}:x-oauth-basic@github.com/"
+
       - name: Change directory
         run: cd cypress
 
-      - name: Check out my other private repo
-        uses: actions/checkout@master
-        with:
-          repository: saltastroops/salt-testdata
-          token: ${{ secrets.ACCESS_TOKEN }}
+      - name: Clone test data repository
+        run: git clone https://github.com/saltastroops/salt-testdata.git
 
       - name: Change directory
         run: cd ../

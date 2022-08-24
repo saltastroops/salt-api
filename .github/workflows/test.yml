@@ -32,8 +32,10 @@ jobs:
         uses: shogo82148/actions-setup-mysql@v1
         with:
             mysql-version: '8.0'
+            mysql-user: 'root'
+            mysql-password: 'secret'
       - run: |
-          mysql -uroot -proot -h127.0.0.1 -e 'SELECT version()'
+          mysql -uroot -psecret -h127.0.0.1 -e 'SELECT version()'
           touch .env
           echo TEST_DATABASE=mysql+pymysql://root:root@127.0.0.1:3306/test >> .env
 

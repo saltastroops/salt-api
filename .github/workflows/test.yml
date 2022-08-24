@@ -8,20 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 12
-
-      - name: Install packages
-        run: npm install
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: 12
+#
+#      - name: Install packages
+#        run: npm install
 
       - name: Clone test data repository
         env:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/salt-testdata
 
-      - name: Run Angular Tests
-        run: npm test -- --watch=false --browsers=ChromeHeadless
+#      - name: Run Angular Tests
+#        run: npm test -- --watch=false --browsers=ChromeHeadless
 
         # Install NPM dependencies, cache them correctly
         # and run all Cypress tests
@@ -29,7 +29,6 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           start: npm start
-
         env:
           recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
           # Recommended: pass the GitHub token lets this action correctly

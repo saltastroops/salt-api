@@ -8,6 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
+
+      - name: Install packages
+        run: npm install
+
       - name: Change directory
         run: cd cypress
 
@@ -17,23 +24,13 @@ jobs:
           repository: saltastroops/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
 
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress run
-        uses: cypress-io/github-action@v4
-        with:
-          start: npm start
-
-        env:
-          recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
-          # Recommended: pass the GitHub token lets this action correctly
-          # determine the unique run id necessary to re-run the checks
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-      - name: Run Tests
+      - name: Run Angular Tests
         run: |
           npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Run Cypress Tests
+        run: |
+          cypress run --env recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}',GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
         run: |

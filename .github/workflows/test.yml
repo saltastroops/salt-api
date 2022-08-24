@@ -15,14 +15,6 @@ jobs:
       - name: Install packages
         run: npm install
 
-      - name: Run Tests
-        run: npm test -- --watch=false --browsers=ChromeHeadless
-
-      - name: Lint
-        run: |
-          npx eslint -c .eslintrc.json
-          npx prettier --check .
-
       - name: Change directory
         run: cd cypress
 
@@ -31,15 +23,13 @@ jobs:
         with:
           repository: saltastroops/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
-        # Install NPM dependencies, cache them correctly
-        # and run all Cypress tests
-      - name: Cypress run
-        uses: cypress-io/github-action@v4
-        with:
-          start: npm start
 
-        env:
-          recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
-          # Recommended: pass the GitHub token lets this action correctly
-          # determine the unique run id necessary to re-run the checks
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Tests
+        run: |
+          npm test -- --watch=false --browsers=ChromeHeadless
+          cypress run --env recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/", "mockIntercepts":true}'
+
+      - name: Lint
+        run: |
+          npx eslint -c .eslintrc.json
+          npx prettier --check .

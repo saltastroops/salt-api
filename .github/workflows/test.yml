@@ -30,7 +30,7 @@ jobs:
         with:
           start: npm start
         env:
-          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/"}'
+          CYPRESS_recordHttpConfig: '{"apiUrl":"http://127.0.0.1:8001", "mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
           # Recommended: pass the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

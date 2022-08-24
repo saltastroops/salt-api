@@ -20,17 +20,17 @@ jobs:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/salt-testdata
 
-#      - name: Run Angular Tests
-#        run: npm test -- --watch=false --browsers=ChromeHeadless
+      #      - name: Run Angular Tests
+      #        run: npm test -- --watch=false --browsers=ChromeHeadless
 
-        # Install NPM dependencies, cache them correctly
-        # and run all Cypress tests
+      # Install NPM dependencies, cache them correctly
+      # and run all Cypress tests
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         with:
           start: npm start
         env:
-          CYPRESS_apiUrl: 'http://127.0.0.1:8001'
+          CYPRESS_apiUrl: "http://127.0.0.1:8001"
           CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
           # Recommended: pass the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks

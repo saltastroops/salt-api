@@ -41,7 +41,9 @@ export default (on): void => {
     });
   });
   console.log(process.env.CYPRESS_recordHttpConfig);
-  const recordHttpConfig = process.env.CYPRESS_recordHttpConfig || {};
+  const recordHttpConfig = JSON.parse(
+    process.env.CYPRESS_recordHttpConfig || "{}",
+  );
   const mockIntercepts = recordHttpConfig["mockIntercepts"] || false;
 
   on("task", {

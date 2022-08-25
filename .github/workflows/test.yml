@@ -30,7 +30,7 @@ jobs:
       #      - name: Run Angular Tests
       #        run: npm test -- --watch=false --browsers=ChromeHeadless
       - name: Run Cypress Tests
-        run: npm cy:run --env apiUrl='http://localhost:4200',grepTags=-@skip,recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}',
+        run: npm cy:run -- --env apiUrl='http://localhost:4200',grepTags=-@skip,recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}',
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests

@@ -12,8 +12,8 @@ jobs:
         with:
           node-version: 12
 
-      - name: Shutdown Ubuntu MySQL (SUDO)
-        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necess
+#      - name: Shutdown Ubuntu MySQL (SUDO)
+#        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necess
 
       - name: Install packages
         run: npm install
@@ -28,20 +28,20 @@ jobs:
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
-      - name: Set up MySQL
-        uses: shogo82148/actions-setup-mysql@v1
-        with:
-            mysql-version: '8.0'
-      - run: |
-          mysql -uroot -h127.0.0.1 -e "SELECT version(); ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'"
-          touch .env
-          echo TEST_DATABASE=mysql+pymysql://root:password@127.0.0.1:3306/test >> .env
+      #      - name: Set up MySQL
+      #        uses: shogo82148/actions-setup-mysql@v1
+      #        with:
+      #            mysql-version: '8.0'
+      #      - run: |
+      #          mysql -uroot -h127.0.0.1 -e "SELECT version(); ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'"
+      #          touch .env
+      #          echo TEST_DATABASE=mysql+pymysql://root:password@127.0.0.1:3306/test >> .env
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         with:
           start: npm start
-          wait-on: 'http://localhost:4200'
+          wait-on: "http://localhost:4200"
         env:
           CYPRESS_apiUrl: "http://127.0.0.1:8001"
           CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'

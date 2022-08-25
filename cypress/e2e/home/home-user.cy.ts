@@ -349,7 +349,9 @@ describe("Home User - PI", () => {
     HomePage.visit();
   });
 
-  it("should show my proposals", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it("should show my proposals", { tags: "skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -376,12 +378,20 @@ describe("Home User - PC", () => {
     HomePage.visit();
   });
 
-  it("should show only proposals requiring principal contact's attention", () => {
-    HomeUser.clickRequiringAttentionCheckbox();
-    HomeUser.filteredProposalsRequiringAttention(USERNAME);
-  });
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it(
+    "should show only proposals requiring principal contact's attention",
+    { tags: "skip" },
+    () => {
+      HomeUser.clickRequiringAttentionCheckbox();
+      HomeUser.filteredProposalsRequiringAttention(USERNAME);
+    },
+  );
 
-  it("should show principal contact's proposals", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it("should show principal contact's proposals", { tags: "skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -408,12 +418,20 @@ describe("Home User - SALT Astronomer", () => {
     HomePage.visit();
   });
 
-  it("should show only proposals requiring astronomer's attention", () => {
-    HomeUser.clickRequiringAttentionCheckbox();
-    HomeUser.filteredProposalsRequiringAttention(USERNAME);
-  });
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it(
+    "should show only proposals requiring astronomer's attention",
+    { tags: "skip" },
+    () => {
+      HomeUser.clickRequiringAttentionCheckbox();
+      HomeUser.filteredProposalsRequiringAttention(USERNAME);
+    },
+  );
 
-  it("should show astronomer's proposals", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it("should show astronomer's proposals", { tags: "skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });

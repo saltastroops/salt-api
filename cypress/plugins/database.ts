@@ -18,7 +18,7 @@ export function updateUserPassword(username: string): Promise<string> {
       Math.random().toString(36).substring(2, 15);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    console.log(recordHttpConfig.mockIntercepts);
+    console.log(JSON.parse(recordHttpConfig)["mockIntercepts"]);
 
     if (mockIntercepts) {
       resolve(password)

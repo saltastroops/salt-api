@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 import freezegun
 import pytest
@@ -16,7 +16,10 @@ from tests.markers import nodatabase
     [("2020-1", "2020-1-DDT-008"), ("2020-2", "2018-2-LSP-001")],
 )
 def test_list_returns_correct_content(
-    semester: str, proposal_code: str, db_connection: Connection, check_data: Any
+    semester: str,
+    proposal_code: str,
+    db_connection: Connection,
+    check_data: Callable[[Any], None],
 ) -> None:
     salt_astronomer = find_username("SALT Astronomer")
     proposal_repository = ProposalRepository(db_connection)
@@ -76,7 +79,7 @@ def test_list_returns_correct_proposal_codes(
     to_semester: str,
     user_args: Dict[str, Any],
     db_connection: Connection,
-    check_data: Any,
+    check_data: Callable[[Any], None],
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
     username = find_username(**user_args)
@@ -114,7 +117,10 @@ def test_list_handles_omitted_semester_limits(db_connection: Connection) -> None
 @nodatabase
 @pytest.mark.parametrize("semester,limit", [("2019-1", 4), ("2020-2", 0)])
 def test_list_results_can_be_limited(
-    semester: str, limit: int, db_connection: Connection, check_data: Any
+    semester: str,
+    limit: int,
+    db_connection: Connection,
+    check_data: Callable[[Any], None],
 ) -> None:
     salt_astronomer = find_username("SALT Astronomer")
     proposal_repository = ProposalRepository(db_connection)
@@ -183,7 +189,9 @@ def test_get_raises_error_for_wrong_proposal_code(db_connection: Connection) -> 
 
 
 @nodatabase
-def test_get_returns_general_info(db_connection: Connection, check_data: Any) -> None:
+def test_get_returns_general_info(
+    db_connection: Connection, check_data: Callable[[Any], None]
+) -> None:
     proposal_code = "2019-2-DDT-006"
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
@@ -205,7 +213,9 @@ def test_get_returns_correct_value_for_is_self_activatable(
 
 
 @nodatabase
-def test_get_returns_investigators(db_connection: Connection, check_data: Any) -> None:
+def test_get_returns_investigators(
+    db_connection: Connection, check_data: Callable[[Any], None]
+) -> None:
     proposal_code = "2019-2-DDT-006"
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
@@ -214,7 +224,7 @@ def test_get_returns_investigators(db_connection: Connection, check_data: Any) -
 
 
 def test_get_returns_correct_proposal_approval(
-    db_connection: Connection, check_data: Any
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_code = "2018-2-LSP-001"
 
@@ -243,7 +253,7 @@ def test_get_returns_correct_proposal_approval(
 
 @nodatabase
 def test_get_returns_time_allocations(
-    db_connection: Connection, check_data: Any
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_code = "2018-2-LSP-001"
     semester = "2021-1"
@@ -256,7 +266,9 @@ def test_get_returns_time_allocations(
 
 
 @nodatabase
-def test_get_returns_charged_time(db_connection: Connection, check_data: Any) -> None:
+def test_get_returns_charged_time(
+    db_connection: Connection, check_data: Callable[[Any], None]
+) -> None:
     proposal_code = "2018-2-LSP-001"
     semester = "2020-2"
 
@@ -272,7 +284,7 @@ def test_get_returns_charged_time(db_connection: Connection, check_data: Any) ->
     ["2016-2-SCI-008", "2020-1-DDT-008", "2019-2-DDT-002", "2021-2-MLT-002"],
 )
 def test_get_returns_data_release_date(
-    proposal_code: str, db_connection: Connection, check_data: Any
+    proposal_code: str, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
@@ -288,7 +300,7 @@ def test_get_returns_data_release_date(
     ],
 )
 def test_get_returns_block_observability(
-    now: str, db_connection: Connection, check_data: Any
+    now: str, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_code = "2018-2-LSP-001"
     semester = "2021-1"
@@ -311,7 +323,7 @@ def test_get_returns_block_observability(
 
 
 def test_get_returns_observation_comments(
-    db_connection: Connection, check_data: Any
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_code = "2020-2-DDT-001"
 
@@ -443,7 +455,7 @@ def test_is_self_activatable(
 @nodatabase
 @pytest.mark.parametrize("proposal_code", ["2019-2-SCI-046", "2021-1-MLT-007"])
 def test_get_returns_additional_instrument_details(
-    proposal_code: str, db_connection: Connection, check_data: Any
+    proposal_code: str, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)

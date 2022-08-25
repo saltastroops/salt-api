@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import asdict
-from typing import Any, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 import pytest
 from pydantic import EmailStr
@@ -15,7 +15,7 @@ from tests.markers import nodatabase
 
 
 @nodatabase
-def test_get_user(db_connection: Connection, check_data: Any) -> None:
+def test_get_user(db_connection: Connection, check_data: Callable[[Any], None]) -> None:
     usernames = find_usernames("any", True)
     users = []
     for username in usernames:
@@ -37,7 +37,7 @@ def test_get_user_raises_error_for_non_existing_user(db_connection: Connection) 
 
 @nodatabase
 def test_get_user_by_id_returns_correct_user(
-    db_connection: Connection, check_data: Any
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = asdict(user_repository.get(3))
@@ -46,7 +46,7 @@ def test_get_user_by_id_returns_correct_user(
 
 @nodatabase
 def test_get_user_by_email_returns_correct_user(
-    db_connection: Connection, check_data: Any
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = asdict(user_repository.get_by_email("hettlage@saao.ac.za"))
@@ -320,7 +320,9 @@ def test_role_checks_return_false_for_non_existing_proposal(
 
 @nodatabase
 def test_find_by_username_and_password_returns_correct_user(
-    db_connection: Connection, check_data: Any, monkeypatch: MonkeyPatch
+    db_connection: Connection,
+    check_data: Callable[[Any], None],
+    monkeypatch: MonkeyPatch,
 ) -> None:
     user_repository = UserRepository(db_connection)
 

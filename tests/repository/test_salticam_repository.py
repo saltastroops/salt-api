@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 from sqlalchemy.engine import Connection
@@ -19,7 +19,9 @@ from saltapi.repository.salticam_repository import SalticamRepository
         1215,  # multiple filters; used in block with id 89445
     ],
 )
-def test_salticam(salticam_id: int, db_connection: Connection, check_data: Any) -> None:
+def test_salticam(
+    salticam_id: int, db_connection: Connection, check_data: Callable[[Any], None]
+) -> None:
     salticam_repository = SalticamRepository(db_connection)
     salticam = salticam_repository.get(salticam_id)
     check_data(salticam)

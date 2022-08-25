@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any, Callable, cast
 
 import pytest
 from sqlalchemy.engine import Connection
@@ -69,7 +69,9 @@ def create_block_repository(connection: Connection) -> BlockRepository:
         # instrument setups in payload configuration; Salticam
     ],
 )
-def test_get_block(block_id: int, db_connection: Connection, check_data: Any) -> None:
+def test_get_block(
+    block_id: int, db_connection: Connection, check_data: Callable[[Any], None]
+) -> None:
     block_repository = create_block_repository(db_connection)
     block = block_repository.get(block_id)
     check_data(block)
@@ -111,7 +113,7 @@ def test_get_raises_error_for_non_existing_block(db_connection: Connection) -> N
     ],
 )
 def test_get_block_status(
-    block_id: int, db_connection: Connection, check_data: Any
+    block_id: int, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     block_repository = create_block_repository(db_connection)
     status = block_repository.get_block_status(block_id)
@@ -174,7 +176,7 @@ def test_update_block_status_raises_error_for_wrong_status(
     ],
 )
 def test_get_block_visit(
-    block_visit_id: int, db_connection: Connection, check_data: Any
+    block_visit_id: int, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     block_repository = create_block_repository(db_connection)
     block_visit = block_repository.get_block_visit(block_visit_id)

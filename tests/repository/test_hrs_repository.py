@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 from sqlalchemy.engine import Connection
@@ -29,7 +29,9 @@ from saltapi.repository.hrs_repository import HrsRepository
         385,  # used in block with id 33293
     ],
 )
-def test_hrs(db_connection: Connection, check_data: Any, hrs_id) -> None:
+def test_hrs(
+    db_connection: Connection, check_data: Callable[[Any], None], hrs_id
+) -> None:
     hrs_repository = HrsRepository(db_connection)
     hrs = hrs_repository.get(hrs_id)
     check_data(hrs)

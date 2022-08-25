@@ -86,7 +86,9 @@ def _data_file(data_type: str, request: pytest.FixtureRequest) -> Path:
 
 
 @pytest.fixture(scope="function")
-def check_data(data_regression: Any, request: pytest.FixtureRequest) -> None:
+def check_data(
+    data_regression: Any, request: pytest.FixtureRequest
+) -> Generator[Callable[[Any], None], None, None]:
     # Figure out the file path for the data file
     data_file = _data_file("regression", request)
 

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 from sqlalchemy.engine import Connection
@@ -34,7 +34,7 @@ from tests.markers import nodatabase
     ],
 )
 def test_coordinates(
-    target_id: int, db_connection: Connection, check_data: Any
+    target_id: int, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     target_repository = TargetRepository(db_connection)
     target = target_repository.get(target_id)

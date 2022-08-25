@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 from sqlalchemy.engine import Connection
@@ -34,7 +34,9 @@ from tests.markers import nodatabase
     ],
 )
 @nodatabase
-def test_rss(rss_id: int, db_connection: Connection, check_data: Any) -> None:
+def test_rss(
+    rss_id: int, db_connection: Connection, check_data: Callable[[Any], None]
+) -> None:
     rss_repository = RssRepository(db_connection)
     rss = rss_repository.get(rss_id)
     check_data(rss)

@@ -41,7 +41,7 @@ export default (on): void => {
     });
   });
 
-  const recordHttpConfig = process.env["recordHttpConfig"] || {};
+  const recordHttpConfig = process.env.CYPRESS_recordHttpConfig || {};
   const mockFilesDirectory = recordHttpConfig["mockFilesDirectory"] || null;
 
   on("task", {

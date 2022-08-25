@@ -41,10 +41,6 @@ export default (on): void => {
     });
   });
 
-  const recordHttpConfig = process.env.CYPRESS_recordHttpConfig || {};
-  console.log(recordHttpConfig);
-  const mockFilesDirectory = recordHttpConfig["mockFilesDirectory"] || null;
-
   on("task", {
     /**
      * Return an array with all the sent emails.
@@ -74,9 +70,6 @@ export default (on): void => {
      * Return a promise with user details
      */
     getUser(username) {
-      if (mockFilesDirectory) {
-        return username;
-      }
       return getUser(username);
     },
 
@@ -84,10 +77,6 @@ export default (on): void => {
      * Update a user's password and return a promise with the new password.
      */
     updateUserPassword(username) {
-      if (mockFilesDirectory) {
-        console.log(username)
-        return username;
-      }
       return updateUserPassword(username);
     },
 
@@ -95,9 +84,6 @@ export default (on): void => {
      * Delete all observation comments for a proposal.
      */
     clearObservationComments(proposalCode: string) {
-      if (mockFilesDirectory) {
-        return true;
-      }
       return clearObservationComments(proposalCode);
     },
 

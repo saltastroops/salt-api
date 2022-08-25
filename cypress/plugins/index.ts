@@ -41,6 +41,11 @@ export default (on): void => {
     });
   });
 
+  const recordHttpConfig = JSON.parse(
+    process.env.CYPRESS_recordHttpConfig || "{}",
+  );
+  const mockIntercepts = recordHttpConfig["mockIntercepts"] || false;
+
   on("task", {
     /**
      * Return an array with all the sent emails.
@@ -70,6 +75,9 @@ export default (on): void => {
      * Return a promise with user details
      */
     getUser(username) {
+      if (mockIntercepts) {
+        return username;
+      }
       return getUser(username);
     },
 
@@ -77,6 +85,12 @@ export default (on): void => {
      * Update a user's password and return a promise with the new password.
      */
     updateUserPassword(username) {
+      if (mockIntercepts) {
+        return (
+          Math.random().toString(36).substring(2, 15) +
+          Math.random().toString(36).substring(2, 15)
+        );
+      }
       return updateUserPassword(username);
     },
 
@@ -84,6 +98,9 @@ export default (on): void => {
      * Delete all observation comments for a proposal.
      */
     clearObservationComments(proposalCode: string) {
+      if (mockIntercepts) {
+        return true;
+      }
       return clearObservationComments(proposalCode);
     },
 

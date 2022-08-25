@@ -378,10 +378,10 @@ describe("Home User - PC", () => {
     HomePage.visit();
   });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   it(
     "should show only proposals requiring principal contact's attention",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     { tags: "skip" },
     () => {
       HomeUser.clickRequiringAttentionCheckbox();
@@ -418,10 +418,10 @@ describe("Home User - SALT Astronomer", () => {
     HomePage.visit();
   });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   it(
     "should show only proposals requiring astronomer's attention",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     { tags: "skip" },
     () => {
       HomeUser.clickRequiringAttentionCheckbox();

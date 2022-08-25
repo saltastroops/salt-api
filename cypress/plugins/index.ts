@@ -49,7 +49,10 @@ export default (on, config): void => {
   );
   const mockIntercepts = recordHttpConfig["mockIntercepts"] || false;
 
-  console.log(usernames);
+  for (const key in Object.keys(usernames)) {
+    console.log(usernames[key]);
+    config.env[key] = usernames[key];
+  }
 
   on("task", {
     /**

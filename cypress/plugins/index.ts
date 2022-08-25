@@ -15,6 +15,9 @@ const ms = require("smtp-tester");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require("fs");
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const usernames = require("../salt-testdata/usernames.json");
+
 /**
  * @type {Cypress.PluginConfig}
  */
@@ -45,11 +48,10 @@ export default (on, config): void => {
     process.env.CYPRESS_recordHttpConfig || "{}",
   );
   const mockIntercepts = recordHttpConfig["mockIntercepts"] || false;
-
-  const usernames = JSON.parse(fs.readFileSync("../salt-testdata/usernames.json"));
-  console.log(usernames);
-  for (const key in Object.keys(usernames)) {
-    config.env[key] = usernames[key];
+console.log(Object.keys(usernames));
+  for (const key in Object.keys(JSON.parse(usernames))) {
+    // console.log(JSON.parse(usernames)[key]);
+    config.env[key] = JSON.parse(usernames)[key];
   }
 
   on("task", {

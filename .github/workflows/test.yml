@@ -23,8 +23,14 @@ jobs:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/salt-testdata
 
+      - name: Export Cypress env variables
+        run: |
+          export CYPRESS_recordHttpConfig="{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}"
+
       #      - name: Run Angular Tests
       #        run: npm test -- --watch=false --browsers=ChromeHeadless
+      - name: Run Cypress Tests
+        run: npm cy:run --env apiUrl='http://localhost:4200',grepTags=-@skip,recordHttpConfig='{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}',
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
@@ -37,22 +43,19 @@ jobs:
       #          touch .env
       #          echo TEST_DATABASE=mysql+pymysql://root:password@127.0.0.1:3306/test >> .env
 
-      - name: Export Cypress env variables
-        run: |
-          export CYPRESS_recordHttpConfig="{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}"
 
-      - name: Run Cypress Tests
-        uses: cypress-io/github-action@v4
-        with:
-          start: npm start
-          wait-on: "http://localhost:4200"
-        env:
-          CYPRESS_apiUrl: "http://127.0.0.1:8001"
-          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
-          CYPRESS_grepTags: -@skip
-          # Recommended: pass the GitHub token lets this action correctly
-          # determine the unique run id necessary to re-run the checks
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Run Cypress Tests
+#        uses: cypress-io/github-action@v4
+#        with:
+#          start: npm start
+#          wait-on: "http://localhost:4200"
+#        env:
+#          CYPRESS_apiUrl: "http://127.0.0.1:8001"
+#          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
+#          CYPRESS_grepTags: -@skip
+#          # Recommended: pass the GitHub token lets this action correctly
+#          # determine the unique run id necessary to re-run the checks
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
         run: |

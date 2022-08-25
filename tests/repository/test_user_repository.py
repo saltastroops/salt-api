@@ -1,5 +1,6 @@
 import uuid
-from typing import Any, Callable, Optional, cast
+from dataclasses import asdict
+from typing import Any, Optional, cast
 
 import pytest
 from pydantic import EmailStr
@@ -9,23 +10,22 @@ from sqlalchemy.engine import Connection
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import NewUserDetails, UserUpdate
+from tests.conftest import find_usernames
 from tests.markers import nodatabase
-
-TEST_DATA_PATH = "repository/user_repository.yaml"
 
 
 @nodatabase
-def test_get_user_returns_correct_user(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    expected_user = testdata(TEST_DATA_PATH)["get_user"]
-    user_repository = UserRepository(db_connection)
-    user = user_repository.get_by_username(expected_user["username"])
-
-    assert user.id == expected_user["id"]
-    assert user.username == expected_user["username"]
-    assert user.given_name == expected_user["given_name"]
-    assert user.email is not None
+def test_get_user(db_connection: Connection, check_data: Any) -> None:
+    usernames = find_usernames("any", True)
+    users = []
+    for username in usernames:
+        user_repository = UserRepository(db_connection)
+        user = asdict(user_repository.get_by_username(username))
+        user["roles"] = [
+            str(role) for role in user["roles"]
+        ]  # allow YAML representation
+        users.append(user)
+    check_data(users)
 
 
 @nodatabase
@@ -37,36 +37,21 @@ def test_get_user_raises_error_for_non_existing_user(db_connection: Connection) 
 
 @nodatabase
 def test_get_user_by_id_returns_correct_user(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    db_connection: Connection, check_data: Any
 ) -> None:
-    expected_user = testdata(TEST_DATA_PATH)["get_user_by_id"]
     user_repository = UserRepository(db_connection)
-    user = user_repository.get(expected_user["id"])
-
-    assert user.id == expected_user["id"]
-    assert user.username == expected_user["username"]
-    assert user.email == expected_user["email"]
-    assert user.given_name == expected_user["given_name"]
-    assert user.family_name == expected_user["family_name"]
-    assert user.password_hash is not None
-    assert user.roles == expected_user["roles"]
+    user = asdict(user_repository.get(3))
+    check_data(user)
 
 
 @nodatabase
 def test_get_user_by_email_returns_correct_user(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    db_connection: Connection, check_data: Any
 ) -> None:
-    expected_user = testdata(TEST_DATA_PATH)["get_user_by_email"]
     user_repository = UserRepository(db_connection)
-    user = user_repository.get_by_email(expected_user["email"])
-
-    assert user.id == expected_user["id"]
-    assert user.username == expected_user["username"]
-    assert user.email == expected_user["email"]
-    assert user.given_name == expected_user["given_name"]
-    assert user.family_name == expected_user["family_name"]
-    assert user.password_hash is not None
-    assert user.roles == expected_user["roles"]
+    user = asdict(user_repository.get_by_email("hettlage@saao.ac.za"))
+    user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
+    check_data(user)
 
 
 def _random_string() -> str:
@@ -196,262 +181,118 @@ def test_patch_cannot_use_existing_username(db_connection: Connection) -> None:
         )
 
 
-@nodatabase
-def test_is_investigator_returns_true_for_investigator(
-    db_connection: Connection, testdata: Callable[[str], Any]
+def _check_user_has_role(
+    role: str, method: str, proposal_code: Optional[str], db_connection: Connection
 ) -> None:
-    data = testdata(TEST_DATA_PATH)["is_investigator"]
-    proposal_code = data["proposal_code"]
-    investigators = data["investigators"]
-    assert proposal_code
-    assert len(investigators)
     user_repository = UserRepository(db_connection)
-    for investigator in investigators:
-        assert user_repository.is_investigator(investigator, proposal_code), (
-            f"Should be true for investigator username '{investigator}, "
-            f"proposal_code {proposal_code}"
-        )
+    for username in find_usernames(role, True, proposal_code):
+        error_message = f"{method} should be True for username {username}, "
+        f"proposal_code {proposal_code}"
+        if proposal_code is not None:
+            has_role = getattr(user_repository, method)(username, proposal_code)
+        else:
+            has_role = getattr(user_repository, method)(username)
+        assert has_role, error_message
 
 
-@nodatabase
-def test_is_investigator_returns_false_for_non_investigator(
-    db_connection: Connection, testdata: Callable[[str], Any]
+def _check_user_does_not_have_role(
+    role: str, method: str, proposal_code: Optional[str], db_connection: Connection
 ) -> None:
-    data = testdata(TEST_DATA_PATH)["is_investigator"]
-    proposal_code = data["proposal_code"]
-    non_investigators = data["non_investigators"]
-    assert proposal_code
-    assert len(non_investigators)
     user_repository = UserRepository(db_connection)
-    for non_investigator in non_investigators:
-        assert not user_repository.is_investigator(non_investigator, proposal_code), (
-            f"Should be false for non-investigator username '{non_investigator}, "
-            f"proposal_code {proposal_code}"
-        )
+    for username in find_usernames(role, False, proposal_code):
+        error_message = f"{method} should be False for username {username}, "
+        f"proposal_code {proposal_code}"
+        if proposal_code is not None:
+            has_role = getattr(user_repository, method)(username, proposal_code)
+        else:
+            has_role = getattr(user_repository, method)(username)
+        assert not has_role, error_message
 
 
-@nodatabase
-def test_is_principal_investigator_returns_true_for_pi(
-    db_connection: Connection, testdata: Callable[[str], Any]
+def _check_user_role(
+    role: str, method: str, proposal_code: Optional[str], db_connection: Connection
 ) -> None:
-    data = testdata(TEST_DATA_PATH)["is_principal_investigator"]
-    proposal_code = data["proposal_code"]
-    pi = data["principal_investigator"]
-    assert proposal_code
-    assert pi
-    user_repository = UserRepository(db_connection)
-    assert user_repository.is_principal_investigator(
-        pi, proposal_code
-    ), f"Should be true for PI username '{pi}', proposal code {proposal_code}"
+    _check_user_has_role(role, method, proposal_code, db_connection)
 
 
 @nodatabase
-def test_is_principal_investigator_returns_false_for_non_pi(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_principal_investigator"]
-    proposal_code = data["proposal_code"]
-    non_pis = data["non_principal_investigators"]
-    assert proposal_code
-    assert len(non_pis)
-    user_repository = UserRepository(db_connection)
-    for non_pi in non_pis:
-        assert not user_repository.is_principal_investigator(non_pi, proposal_code), (
-            f"Should be false for non-PI username '{non_pi}', proposal code "
-            f"{proposal_code}"
-        )
+def test_is_investigator(db_connection: Connection) -> None:
+    _check_user_role("investigator", "is_investigator", "2020-2-SCI-018", db_connection)
 
 
 @nodatabase
-def test_is_principal_contact_returns_true_for_pc(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_principal_contact"]
-    proposal_code = data["proposal_code"]
-    pc = data["principal_contact"]
-    assert proposal_code
-    assert pc
-    user_repository = UserRepository(db_connection)
-    assert (
-        user_repository.is_principal_contact(pc, proposal_code) is True
-    ), f"Should be true for PC username '{pc}', proposal code {proposal_code}"
+def test_is_principal_investigator(db_connection: Connection) -> None:
+    _check_user_role(
+        "principal_investigator",
+        "is_principal_investigator",
+        "2018-2-LSP-001",
+        db_connection,
+    )
 
 
 @nodatabase
-def test_is_principal_contact_returns_false_for_non_pc(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_principal_contact"]
-    proposal_code = data["proposal_code"]
-    non_pcs = data["non_principal_contacts"]
-    assert proposal_code
-    assert len(non_pcs)
-    user_repository = UserRepository(db_connection)
-    for non_pc in non_pcs:
-        assert user_repository.is_principal_contact(non_pc, proposal_code) is False, (
-            f"Should be false for non-PC username '{non_pc}', proposal code "
-            f"{proposal_code}"
-        )
+def test_is_principal_contact(db_connection: Connection) -> None:
+    _check_user_role(
+        "principal_contact", "is_principal_contact", "2018-2-LSP-001", db_connection
+    )
 
 
 @nodatabase
-def test_is_salt_astronomer_returns_true_for_salt_astronomer(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_salt_astronomer"]
-    salt_astronomers = data["salt_astronomers"]
-    user_repository = UserRepository(db_connection)
-    for astronomer in salt_astronomers:
-        assert user_repository.is_salt_astronomer(
-            astronomer
-        ), f"Should be true for {astronomer}"
+def test_is_salt_astronomer(db_connection: Connection) -> None:
+    _check_user_role("salt_astronomer", "is_salt_astronomer", None, db_connection)
 
 
 @nodatabase
-def test_is_salt_astronomer_returns_false_for_salt_astronomer(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_salt_astronomer"]
-    non_salt_astronomers = data["non_salt_astronomers"]
-    user_repository = UserRepository(db_connection)
-    for astronomer in non_salt_astronomers:
-        assert not user_repository.is_salt_astronomer(
-            astronomer
-        ), f"Should be true for {astronomer}"
+@pytest.mark.parametrize(
+    "proposal_code",
+    [
+        "2021-2-LSP-001",
+        "2019-2-SCI-027",
+        "2021-2-MLT-004",
+        "2021-1-DDT-002",
+        "2016-1-SVP-001",
+        "2021-1-DDT-002",
+    ],
+)
+def test_is_tac_member(proposal_code: str, db_connection: Connection) -> None:
+    _check_user_role(
+        "tac_member", "is_tac_member_for_proposal", proposal_code, db_connection
+    )
 
 
 @nodatabase
-def test_is_tac_member_returns_true_for_tac_member(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_tac_member"]
-    user_repository = UserRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-
-        for username in d["tac_members"]:
-            assert user_repository.is_tac_member_for_proposal(
-                username, proposal_code
-            ), f"Should be true for {username} and {proposal_code}"
-
-
-@nodatabase
-def test_is_tac_member_returns_false_for_non_tac_member(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_tac_member"]
-    user_repository = UserRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-
-        for username in d["non_tac_members"]:
-            assert not user_repository.is_tac_member_for_proposal(
-                username, proposal_code
-            ), f"Should be false for {username} and {proposal_code}"
+@pytest.mark.parametrize(
+    "proposal_code",
+    [
+        "2021-2-LSP-001",
+        "2019-2-SCI-027",
+        "2021-2-MLT-004",
+        "2021-1-DDT-002",
+        "2016-1-SVP-001",
+        "2021-1-DDT-002",
+    ],
+)
+def test_is_tac_chair(proposal_code: str, db_connection: Connection) -> None:
+    _check_user_role(
+        "tac_chair", "is_tac_chair_for_proposal", proposal_code, db_connection
+    )
 
 
 @nodatabase
-def test_is_tac_chair_returns_true_for_tac_chair(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_tac_chair"]
-    user_repository = UserRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-
-        for username in d["tac_chairs"]:
-            assert user_repository.is_tac_chair_for_proposal(
-                username, proposal_code
-            ), f"Should be true for {username} and {proposal_code}"
+def test_is_board_member(db_connection: Connection) -> None:
+    _check_user_role("board_member", "is_board_member", None, db_connection)
 
 
 @nodatabase
-def test_is_tac_chair_returns_false_for_non_tac_chair(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_tac_chair"]
-    user_repository = UserRepository(db_connection)
-    for d in data:
-        proposal_code = d["proposal_code"]
-
-        for username in d["non_tac_chairs"]:
-            assert not user_repository.is_tac_chair_for_proposal(
-                username, proposal_code
-            ), f"Should be false for {username} and {proposal_code}"
+def test_is_partner_affiliated_user(db_connection: Connection) -> None:
+    _check_user_role(
+        "partner_affiliated_user", "is_partner_affiliated_user", None, db_connection
+    )
 
 
 @nodatabase
-def test_is_board_member_returns_true_for_board_member(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_board_member"]
-    user_repository = UserRepository(db_connection)
-    for username in data["board_members"]:
-        assert user_repository.is_board_member(
-            username
-        ), f"Should be true for {username}"
-
-
-@nodatabase
-def test_is_board_member_returns_false_for_non_board_member(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_board_member"]
-    user_repository = UserRepository(db_connection)
-    for username in data["non_board_members"]:
-        assert not user_repository.is_board_member(
-            username
-        ), f"Should be false for {username}"
-
-
-@nodatabase
-def test_is_partner_affiliated_user_returns_true_for_affiliated_user(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_partner_affiliated_user"]
-    user_repository = UserRepository(db_connection)
-    for username in data["affiliated_users"]:
-        assert user_repository.is_partner_affiliated_user(
-            username
-        ), f"Should be true for {username}"
-
-
-@nodatabase
-def test_is_partner_affiliated_user_returns_false_for_non_affiliated_user(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_partner_affiliated_user"]
-    user_repository = UserRepository(db_connection)
-    for username in data["non_affiliated_users"]:
-        assert not user_repository.is_partner_affiliated_user(
-            username
-        ), f"Should be false for {username}"
-
-
-@nodatabase
-def test_is_administrator_returns_true_for_administrator(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_administrator"]
-    administrators = data["administrators"]
-    user_repository = UserRepository(db_connection)
-    for astronomer in administrators:
-        assert user_repository.is_administrator(
-            astronomer
-        ), f"Should be true for {astronomer}"
-
-
-@nodatabase
-def test_is_administrator_returns_false_for_administrator(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["is_administrator"]
-    non_administrators = data["non_administrators"]
-    user_repository = UserRepository(db_connection)
-    for astronomer in non_administrators:
-        assert not user_repository.is_administrator(
-            astronomer
-        ), f"Should be true for {astronomer}"
+def test_is_administrator(db_connection: Connection) -> None:
+    _check_user_role("administrator", "is_administrator", None, db_connection)
 
 
 @nodatabase
@@ -479,9 +320,8 @@ def test_role_checks_return_false_for_non_existing_proposal(
 
 @nodatabase
 def test_find_by_username_and_password_returns_correct_user(
-    db_connection: Connection, testdata: Callable[[str], Any], monkeypatch: MonkeyPatch
+    db_connection: Connection, check_data: Any, monkeypatch: MonkeyPatch
 ) -> None:
-    data = testdata(TEST_DATA_PATH)["find_user"]
     user_repository = UserRepository(db_connection)
 
     # Allow any password
@@ -489,17 +329,14 @@ def test_find_by_username_and_password_returns_correct_user(
         user_repository, "verify_password", lambda password, hashed_password: True
     )
 
-    for expected_user in data:
-        username = expected_user["username"]
-        user = user_repository.find_user_with_username_and_password(
-            username, "some_password"
-        )
+    username = "hettlage"
+    user = asdict(
+        user_repository.find_user_with_username_and_password(username, "some_password")
+    )
+    user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
 
-        assert user.id == expected_user["id"]
-        assert user.username == username
-        assert user.given_name == expected_user["given_name"]
-        assert user.family_name == expected_user["family_name"]
-        assert user.email == expected_user["email"]
+    assert user["username"] == username
+    check_data(user)
 
 
 @nodatabase
@@ -522,11 +359,10 @@ def test_find_by_username_and_password_raises_error_for_wrong_username(
 
 @nodatabase
 def test_find_by_username_and_password_raises_error_for_wrong_password(
-    db_connection: Connection, testdata: Callable[[str], Any]
+    db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
-    data = testdata(TEST_DATA_PATH)["find_user_with_wrong_password"]
-    username = data["username"]
+    username = "hettlage"
 
     # Make sure the user exists
     assert user_repository.get_by_username(username)
@@ -540,19 +376,3 @@ def test_find_by_username_and_password_raises_error_for_wrong_password(
     # None may raise an exception other than NotFoundError
     with pytest.raises(Exception):
         user_repository.find_user_with_username_and_password(username, cast(str, None))
-
-
-@nodatabase
-def test_get_user_roles_returns_correct_roles(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA_PATH)["get_user_roles"]
-    user_repository = UserRepository(db_connection)
-    for d in data:
-        username = d["username"]
-        expected_roles = set(d["roles"])
-        roles = set(role.value for role in user_repository.get_user_roles(username))
-
-        assert (
-            expected_roles == roles
-        ), f"Expected roles for {username}: {expected_roles}; found: {roles}"

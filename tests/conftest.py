@@ -12,7 +12,7 @@ dotenv.load_dotenv(os.environ["DOTENV_FILE"])
 
 
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, Optional, cast
+from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
 import pytest
 import yaml
@@ -139,6 +139,40 @@ def find_username(
         return cast(str, users[normalized_user_type])
 
     raise ValueError(f"Unknown user type: {user_type}")
+
+
+def find_usernames(role: str, has_role: bool, proposal_code: str = None) -> List[str]:
+    normalized_role = role.lower()
+    normalized_role = normalized_role.replace(" ", "_").replace("-", "_")
+
+    if "TEST_DATA_DIR" not in os.environ:
+        pytest.fail("Environment variable not set: TEST_DATA_DIR")
+    test_data_dir = Path(os.environ["TEST_DATA_DIR"])
+    users_file = test_data_dir / "user_roles.yml"
+    with open(users_file) as f:
+        users = yaml.safe_load(f)
+
+    if normalized_role in [
+        "administrator",
+        "any",
+        "board_member",
+        "partner_affiliated_user",
+        "salt_astronomer",
+    ]:
+        return (
+            users[normalized_role]["with_role"]
+            if has_role
+            else users[normalized_role]["without_role"]
+        )
+
+    if normalized_role in users:
+        return (
+            users[normalized_role][proposal_code]["with_role"]
+            if has_role
+            else users[normalized_role][proposal_code]["without_role"]
+        )
+
+    raise ValueError(f"Unknown user role: {role}")
 
 
 def authenticate(username: str, client: TestClient) -> None:

@@ -85,6 +85,7 @@ export default (on): void => {
      */
     updateUserPassword(username) {
       if (mockFilesDirectory) {
+        console.log(username)
         return username;
       }
       return updateUserPassword(username);

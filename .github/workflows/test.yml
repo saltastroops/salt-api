@@ -2,6 +2,9 @@ name: Test
 
 on: ["push", "pull_request"]
 
+env:
+  testdata-dir: cypress/salt-testdata
+
 jobs:
   build:
     name: Test
@@ -12,29 +15,22 @@ jobs:
         with:
           node-version: 12
 
-      #      - name: Shutdown Ubuntu MySQL (SUDO)
-      #        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necess
-
       - name: Install packages
         run: npm install
 
       - name: Clone test data repository
         env:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/salt-testdata
+        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata $testdata-dir
 
       - name: Run Angular Tests
         run: npm test -- --watch=false --browsers=ChromeHeadless
-
-#      - name: Export Cypress env variables
-#        run: |
-#          export CYPRESS_recordHttpConfig="{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}"
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         env:
           CYPRESS_apiUrl: "http://127.0.0.1:8001"
-          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
+          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"${testdata-dir}/web-manager/","mockIntercepts":true}'
           CYPRESS_grepTags: -@skip
           # Recommended: pass the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks

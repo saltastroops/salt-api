@@ -18,10 +18,12 @@ export default defineConfig({
       for (const key in { ...usernames }) {
         config.env[key] = usernames[key];
       }
+
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require("cypress-grep/src/plugin")(config);
+
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-var-requires

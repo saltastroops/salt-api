@@ -16,7 +16,7 @@ export function updateUserPassword(username: string): Promise<string> {
     const password =
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);
-    console.log(mockIntercepts);
+    console.log(recordHttpConfig["mockIntercepts"]);
 
     if (mockIntercepts) {
       resolve(password)

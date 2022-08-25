@@ -15,9 +15,6 @@ const ms = require("smtp-tester");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require("fs");
 
-const recordHttpConfig = Cypress.env("recordHttpConfig") || {};
-const mockFilesDirectory = recordHttpConfig.mockFilesDirectory || null;
-
 /**
  * @type {Cypress.PluginConfig}
  */
@@ -43,6 +40,9 @@ export default (on): void => {
       html: email.html,
     });
   });
+
+  const recordHttpConfig = Cypress.env("recordHttpConfig") || {};
+  const mockFilesDirectory = recordHttpConfig.mockFilesDirectory || null;
 
   on("task", {
     /**

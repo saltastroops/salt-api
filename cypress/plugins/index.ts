@@ -15,6 +15,9 @@ const ms = require("smtp-tester");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require("fs");
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const usernames = require("../salt-testdata/usernames.json")
+
 /**
  * @type {Cypress.PluginConfig}
  */
@@ -24,7 +27,7 @@ const fs = require("fs");
 // https://www.cypress.io/blog/2021/05/11/testing-html-emails-using-cypress/
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export default (on): void => {
+export default (on, config): void => {
   // Start the SMTP server on port 7777
   const port = 7777;
   const mailServer = ms.init(port);
@@ -45,6 +48,9 @@ export default (on): void => {
     process.env.CYPRESS_recordHttpConfig || "{}",
   );
   const mockIntercepts = recordHttpConfig["mockIntercepts"] || false;
+  for (const key in Object.keys(usernames)) {
+    config.env[key] = usernames[key];
+  }
 
   on("task", {
     /**

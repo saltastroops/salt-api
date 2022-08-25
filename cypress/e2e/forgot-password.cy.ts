@@ -71,10 +71,10 @@ describe("Forgot password page", () => {
     ForgotPasswordPage.hasUsernameOrEmail(USERNAME);
   });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   it(
     "should send an email with the correct password reset link",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     { tags: "@skip" },
     () => {
       // When I request a password reset email

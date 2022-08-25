@@ -351,7 +351,7 @@ describe("Home User - PI", () => {
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  it("should show my proposals", { tags: "skip" }, () => {
+  it("should show my proposals", { tags: "@skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -382,7 +382,7 @@ describe("Home User - PC", () => {
     "should show only proposals requiring principal contact's attention",
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    { tags: "skip" },
+    { tags: "@skip" },
     () => {
       HomeUser.clickRequiringAttentionCheckbox();
       HomeUser.filteredProposalsRequiringAttention(USERNAME);
@@ -391,7 +391,7 @@ describe("Home User - PC", () => {
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  it("should show principal contact's proposals", { tags: "skip" }, () => {
+  it("should show principal contact's proposals", { tags: "@skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -422,7 +422,7 @@ describe("Home User - SALT Astronomer", () => {
     "should show only proposals requiring astronomer's attention",
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    { tags: "skip" },
+    { tags: "@skip" },
     () => {
       HomeUser.clickRequiringAttentionCheckbox();
       HomeUser.filteredProposalsRequiringAttention(USERNAME);
@@ -431,7 +431,7 @@ describe("Home User - SALT Astronomer", () => {
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  it("should show astronomer's proposals", { tags: "skip" }, () => {
+  it("should show astronomer's proposals", { tags: "@skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });

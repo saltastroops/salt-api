@@ -24,7 +24,7 @@ const fs = require("fs");
 // https://www.cypress.io/blog/2021/05/11/testing-html-emails-using-cypress/
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export default (on, config): void => {
+export default (on): void => {
   // Start the SMTP server on port 7777
   const port = 7777;
   const mailServer = ms.init(port);

@@ -15,9 +15,7 @@ export default defineConfig({
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const usernames = require("./cypress/salt-testdata/usernames.json");
-      console.log(usernames)
-      for (const key in {...usernames}) {
-        console.log(key);
+      for (const key in { ...usernames }) {
         config.env[key] = usernames[key];
       }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

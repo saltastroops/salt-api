@@ -15,6 +15,9 @@ const ms = require("smtp-tester");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require("fs");
 
+const recordHttpConfig = Cypress.env("recordHttpConfig") || {};
+const mockFilesDirectory = recordHttpConfig.mockFilesDirectory || null;
+
 /**
  * @type {Cypress.PluginConfig}
  */
@@ -70,6 +73,9 @@ export default (on): void => {
      * Return a promise with user details
      */
     getUser(username) {
+      if (mockFilesDirectory) {
+        return username;
+      }
       return getUser(username);
     },
 
@@ -77,6 +83,9 @@ export default (on): void => {
      * Update a user's password and return a promise with the new password.
      */
     updateUserPassword(username) {
+      if (mockFilesDirectory) {
+        return username;
+      }
       return updateUserPassword(username);
     },
 
@@ -84,6 +93,9 @@ export default (on): void => {
      * Delete all observation comments for a proposal.
      */
     clearObservationComments(proposalCode: string) {
+      if (mockFilesDirectory) {
+        return true;
+      }
       return clearObservationComments(proposalCode);
     },
 

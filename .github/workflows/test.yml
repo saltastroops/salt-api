@@ -12,8 +12,8 @@ jobs:
         with:
           node-version: 12
 
-#      - name: Shutdown Ubuntu MySQL (SUDO)
-#        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necess
+      #      - name: Shutdown Ubuntu MySQL (SUDO)
+      #        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necess
 
       - name: Install packages
         run: npm install

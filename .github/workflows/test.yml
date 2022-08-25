@@ -23,21 +23,8 @@ jobs:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata cypress/salt-testdata
 
-      #      - name: Run Angular Tests
-      #        run: npm test -- --watch=false --browsers=ChromeHeadless
-      #      - name: Run Angular Tests
-      #        run: npm test -- --watch=false --browsers=ChromeHeadless
-
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      #      - name: Set up MySQL
-      #        uses: shogo82148/actions-setup-mysql@v1
-      #        with:
-      #            mysql-version: '8.0'
-      #      - run: |
-      #          mysql -uroot -h127.0.0.1 -e "SELECT version(); ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'"
-      #          touch .env
-      #          echo TEST_DATABASE=mysql+pymysql://root:password@127.0.0.1:3306/test >> .env
+      - name: Run Angular Tests
+        run: npm test -- --watch=false --browsers=ChromeHeadless
 
       - name: Export Cypress env variables
         run: |

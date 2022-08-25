@@ -17,6 +17,12 @@ const INVESTIGATOR = getEnvVariable("investigator");
 const SALT_ASTRONOMER = getEnvVariable("saltAstronomerUsername");
 const TAC_MEMBER = getEnvVariable("tacMember");
 
+// load and register the grep feature using "require" function
+// https://github.com/cypress-io/cypress-grep
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const registerCypressGrep = require("cypress-grep");
+registerCypressGrep();
+
 describe("Inline login form", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size

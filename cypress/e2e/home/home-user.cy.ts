@@ -13,6 +13,12 @@ const apiUrl = getApiUrl();
 
 let USERNAME = getEnvVariable("defaultUsername");
 
+// load and register the grep feature using "require" function
+// https://github.com/cypress-io/cypress-grep
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const registerCypressGrep = require("cypress-grep");
+registerCypressGrep();
+
 describe("Home User", () => {
   beforeEach(() => {
     freezeDate(2020, 6);

@@ -34,7 +34,6 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           install: false
-          build: npm run build
           start: npm start
           wait-on: "http://localhost:4200"
         env:

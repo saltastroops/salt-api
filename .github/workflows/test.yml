@@ -37,15 +37,21 @@ jobs:
       #          touch .env
       #          echo TEST_DATABASE=mysql+pymysql://root:password@127.0.0.1:3306/test >> .env
 
+      - name: Export Cypress env variables
+        run: |
+          export CYPRESS_apiUrl="http://127.0.0.1:8001"
+          export CYPRESS_recordHttpConfig="{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}"
+          export CYPRESS_grepTags="-@skip"
+
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         with:
           start: npm start
           wait-on: "http://localhost:4200"
         env:
-          CYPRESS_apiUrl: "http://127.0.0.1:8001"
-          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
-          CYPRESS_grepTags: -@skip
+#          CYPRESS_apiUrl: "http://127.0.0.1:8001"
+#          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/","mockIntercepts":true}'
+#          CYPRESS_grepTags: -@skip
           # Recommended: pass the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

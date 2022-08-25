@@ -42,6 +42,7 @@ export default (on): void => {
   });
 
   const recordHttpConfig = process.env.CYPRESS_recordHttpConfig || {};
+  console.log(recordHttpConfig);
   const mockFilesDirectory = recordHttpConfig["mockFilesDirectory"] || null;
 
   on("task", {

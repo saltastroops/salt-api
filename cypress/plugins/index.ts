@@ -40,7 +40,6 @@ export default (on): void => {
       html: email.html,
     });
   });
-  console.log(process.env.CYPRESS_recordHttpConfig);
   const recordHttpConfig = JSON.parse(
     process.env.CYPRESS_recordHttpConfig || "{}",
   );

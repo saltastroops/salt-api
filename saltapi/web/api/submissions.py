@@ -62,7 +62,7 @@ async def create_submission(
     proposal must be the same as that passed as a query parameter.
     """
     # Submissions don't use database transactions. As such no unit of work is used.
-    submission_repository = SubmissionRepository(engine.connect())
+    submission_repository = SubmissionRepository(engine().connect())
     submission_service = services.submission_service(submission_repository)
     submission_identifier = await submission_service.submit_proposal(
         user, proposal, proposal_code

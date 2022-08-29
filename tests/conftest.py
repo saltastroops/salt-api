@@ -72,6 +72,8 @@ def _create_engine():
 @pytest.fixture(autouse=True)
 def mock_engine(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(saltapi.repository.unit_of_work, "engine", _create_engine)
+    monkeypatch.setattr(saltapi.web.api.submissions, "engine", _create_engine)
+    monkeypatch.setattr(saltapi.service.submission_service, "engine", _create_engine)
 
 
 @pytest.fixture(scope="function")

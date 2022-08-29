@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 import pytest
 from fastapi.testclient import TestClient
+from pytest_pymysql_snapshot_mock.util import DatabaseMock
 from starlette import status
 
 from tests.conftest import (
@@ -80,9 +81,9 @@ def test_patch_user_should_keep_existing_values_by_default(client: TestClient) -
     assert updated_user_details == current_user_details
 
 
-def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
+def test_patch_user_should_update_with_new_values(database_mock: DatabaseMock, client: TestClient) -> None:
     user = create_user(client)
-    new_username = str(uuid.uuid4())[:8]
+    new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(user["username"], client)
 
     user_update = {"username": new_username, "password": "very_very_secret"}
@@ -100,9 +101,9 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     assert updated_user_details == expected_updated_user_details
 
 
-def test_patch_user_should_be_idempotent(client: TestClient) -> None:
+def test_patch_user_should_be_idempotent(database_mock: DatabaseMock, client: TestClient) -> None:
     user = create_user(client)
-    new_username = str(uuid.uuid4())[:8]
+    new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(user["username"], client)
 
     user_update = {"username": new_username, "password": "very_very_secret"}
@@ -117,9 +118,9 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     assert updated_user_details == expected_updated_user_details
 
 
-def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) -> None:
+def test_patch_user_should_allow_admin_to_update_other_user(database_mock: DatabaseMock, client: TestClient) -> None:
     user = create_user(client)
-    new_username = str(uuid.uuid4())[:8]
+    new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(find_username("Administrator"), client)
 
     user_update = {"username": new_username, "password": "very_very_secret"}

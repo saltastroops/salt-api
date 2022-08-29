@@ -69,6 +69,11 @@ def _create_engine():
         raise ValueError("No SDB_DSN environment variable set")
 
 
+@pytest.fixture(autouse=True)
+def mock_engine(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(saltapi.repository.unit_of_work, "engine", _create_engine)
+
+
 @pytest.fixture(scope="function")
 def db_connection() -> Generator[Connection, None, None]:
     with _create_engine().connect() as connection:

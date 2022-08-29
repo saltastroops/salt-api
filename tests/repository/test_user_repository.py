@@ -80,15 +80,15 @@ def test_create_user_raisers_error_if_username_exists_already(
 
 
 @nodatabase
-def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
-    username = _random_string()
+def test_create_user_creates_a_new_user(database_mock: Any, db_connection: Connection) -> None:
+    username = database_mock.user_value(_random_string())
     new_user_details = NewUserDetails(
         username=username,
         password=_random_string(),
         email=EmailStr(f"{username}@example.com"),
         alternative_emails=[],
-        given_name=_random_string(),
-        family_name=_random_string(),
+        given_name=database_mock.user_value(_random_string()),
+        family_name=database_mock.user_value(_random_string()),
         institution_id=5,
     )
 

@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_pymysql_snapshot_mock.util import DatabaseMock
+from pytest_pymysql_autorecord.util import DatabaseMock
 from starlette import status
 
 from tests.conftest import (

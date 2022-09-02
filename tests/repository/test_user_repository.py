@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional, cast
 import pytest
 from pydantic import EmailStr
 from pytest import MonkeyPatch
-from pytest_pymysql_snapshot_mock.util import DatabaseMock
+from pytest_pymysql_autorecord.util import DatabaseMock
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError

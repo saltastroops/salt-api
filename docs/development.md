@@ -180,12 +180,19 @@ Given the size of the database, it is unrealistic to populate it with dummy cont
 
 One solution would be to create a test database with fake content. However, this approach is arduous and brittle, and definitely violates the principle that testing should be easy.
 
-Instead, a fixture `testdata` for accessing test data is used. This fixture returns a function. This function is called with a filepath, which must be relative to the `testdata` folder and must denote a YAML file. The function then uses PyYAML to return the file content as a Python object.
-
-The folder `testdata` is not under version control; you will have to create it (and the data files) yourself. It must be at root level in the project.
+Instead, the responses fron the database can be stored in files, using the `pytest-pymysql-snapshot-mock`. See the plugin's documentation for details. The bottom line is that you have to use the `--store-db-data` command line option for storing data, and the `--mock-db-data` option for using the stored data instead of making real database requests. The plugin also offers a command line option for setting the base directory for the data files. You should *not* use this, though, as `conftest.py` sets the directory to be a subdirectory `database` in the directory specified by the `TEST_DATA_DIR` environment variable.
 
 !!! warning
-    The reason that the folder is not under version control is of course that the test data should not end up in a public repository. But you should not rely on it. If you have highly sensitive data (such as, say, a password hash), you should not use it as test data. The bottom line is: If the data being public on the web gave you sleepless nights, don't use it.
+    The reason that the plugin does not store the data in the tests directory is of course that the test data should not end up in a public repository. But you should not rely on it. If you have highly sensitive data (such as, say, a password hash), you should not use it as test data. The bottom line is: If the data being public on the web gave you sleepless nights, don't use it.
+
+If you store random data in the database, you might have to use the `user_value` method of the `pytest-pymymysql-snapshot-mock` plugin. If you cannot store database data for a test (for example because its database access is not deterministic or you are concerned about confidentiality), you can skip the test by calling the plugin's `skip_for_db_mocking` function.
+
+Regression testing is used with the `pytest-regressions` plugin. As for the database mocking, the data files aren't stored in the tests directory (as `pytest-regressions` would do by default). You instead have to specify a directory with the `TEST_DATA_DIR` environment variable, and the data is stored in a subdirectory `regression` of that directory.
+
+!!! note
+   The directory specified by the `TEST_DATA_DIR` environment variable must contain two files `users.yml` and `user_roles.yml`, which define usernames to be used by the tests. More specifically, they are needed by the functions `find_username` and `find_usernames` in `tests/conftest.py`.
+
+### Viewing executed SQL statements
 
 If you want to see the executed SQL statements, you have to set the `ECHO_SQL` environment variable to a non-empty value. Note that pytest will only output them for failing tests.
 

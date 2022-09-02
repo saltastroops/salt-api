@@ -1,4 +1,5 @@
 import os
+import pathlib
 import re
 import uuid
 
@@ -9,6 +10,8 @@ import dotenv
 
 os.environ["DOTENV_FILE"] = ".env.test"
 dotenv.load_dotenv(os.environ["DOTENV_FILE"])
+
+os.environ["PMSM_DATA_DIR"] = str(pathlib.Path(os.environ["TEST_DATA_DIR"]) / "database")
 
 
 from pathlib import Path
@@ -88,8 +91,9 @@ def _data_file(data_type: str, request: pytest.FixtureRequest) -> Path:
     root_dir = Path(os.environ["TEST_DATA_DIR"]) / data_type
 
     test_file = request.path.relative_to(request.config.rootpath)
-    parent_dir = root_dir / test_file.stem
-    return parent_dir / (re.sub(r"\W", "_", request.node.name) + ".yml")
+    parent_dir = (root_dir / test_file).parent
+    node_dir = test_file.stem
+    return parent_dir / node_dir / (re.sub(r"\W", "_", request.node.name) + ".yml")
 
 
 @pytest.fixture(scope="function")

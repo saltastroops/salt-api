@@ -199,7 +199,7 @@ WHERE B.Block_Id = :block_id;
         )
 
         try:
-            return result.scalar_one()
+            return str(result.scalar_one())
         except NoResultFound:
             raise NotFoundError()
 

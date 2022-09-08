@@ -1,18 +1,27 @@
 import pathlib
-from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
-import pytz
+from fastapi import APIRouter, Request
+from pydantic.networks import AnyUrl
+from starlette.routing import URLPath
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.util import next_semester, semester_of_datetime, semester_start
+from saltapi.util import next_semester, semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 
 proposals_dir = pathlib.Path(get_settings().proposals_dir)
+
+
+def generate_route_url(request: Request, router: URLPath) -> AnyUrl:
+
+    url = "{}://{}:{}{}".format(
+        request.url.scheme, request.client.host, request.client.port, router
+    )
+    return cast(AnyUrl, url)
 
 
 class ProposalService:
@@ -117,20 +126,32 @@ class ProposalService:
             ],
         )
 
-    def list_of_progress_report_pdfs(self, proposal_code: ProposalCode) -> List[str]:
-        progress_report_semester_list = self.repository.list_of_progress_report_pdfs(
-            proposal_code
-        )
+    def list_of_semesters(
+        self, proposal_code: ProposalCode, request: Request, router: APIRouter
+    ) -> Dict[str, Dict[str, AnyUrl]]:
+        progress_report_semester_list = self.repository.list_of_semesters(proposal_code)
 
-        current_semester = semester_of_datetime(datetime.now(tz=pytz.utc))
+        progress_report_path_list = dict()
+        for semester in progress_report_semester_list:
+            progress_report_pdf_url = router.url_path_for(
+                "get_proposal_progress_report_pdf",
+                proposal_code=proposal_code,
+                semester=semester,
+            )
+            progress_report_path_list[semester] = {
+                "proposal_progress_pdf": generate_route_url(
+                    request, progress_report_pdf_url
+                ),
+            }
 
-        if current_semester in progress_report_semester_list:
-            progress_report_semester_list.remove(current_semester)
-
-        return progress_report_semester_list
+        return progress_report_path_list
 
     def get_progress_report(
-        self, proposal_code: ProposalCode, semester: Semester
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
+        request: Request,
+        router: APIRouter,
     ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
@@ -159,8 +180,26 @@ class ProposalService:
             else None
         )
 
-        progress_report["proposal_progress_pdf"] = progress_report_pdf_path
+        progress_pdf_url = router.url_path_for(
+            "get_proposal_progress_report_pdf",
+            proposal_code=proposal_code,
+            semester=semester,
+        )
+        progress_report["proposal_progress_pdf"] = (
+            generate_route_url(request, progress_pdf_url)
+            if progress_report_pdf_path
+            else None
+        )
 
-        progress_report["additional_pdf"] = additional_progress_report_pdf_path
+        additional_progress_pdf_url = router.url_path_for(
+            "get_supplementary_proposal_progress_report_pdf",
+            proposal_code=proposal_code,
+            semester=semester,
+        )
+        progress_report["additional_pdf"] = (
+            generate_route_url(request, additional_progress_pdf_url)
+            if additional_progress_report_pdf_path
+            else None
+        )
 
         return progress_report

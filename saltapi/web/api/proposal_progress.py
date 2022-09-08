@@ -1,6 +1,6 @@
 import pathlib
 import urllib.parse
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from fastapi import (
     APIRouter,
@@ -14,6 +14,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from pydantic.networks import AnyUrl
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
@@ -31,6 +32,7 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
 @router.get(
     "/{proposal_code}/",
     summary="Get a list proposal progress reports pdfs",
+    response_model=Dict[str, Dict[str, AnyUrl]],
 )
 def get_list_of_proposal_progress_report_pdfs(
     request: Request,
@@ -40,9 +42,9 @@ def get_list_of_proposal_progress_report_pdfs(
         description="Proposal code of the proposal whose progress reports pdfs are requested.",
     ),
     user: User = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> Dict[str, Dict[str, AnyUrl]]:
     """
-    Returns a list of progress reports pdf for a proposal.
+    Return the list of URLs of the progress report pdfs for a proposal.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
@@ -50,40 +52,17 @@ def get_list_of_proposal_progress_report_pdfs(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
 
-        progress_reports_semester_list = proposal_service.list_of_progress_report_pdfs(
-            proposal_code
+        progress_reports_semester_list = proposal_service.list_of_semesters(
+            proposal_code, request, router
         )
 
-        progress_report_path_list = dict()
-        for semester in progress_reports_semester_list:
-
-            progress_report_path_list[semester] = {
-                "proposal_progress_pdf": "http://{}:{}{}".format(
-                    request.client.host,
-                    request.client.port,
-                    router.url_path_for(
-                        "get_proposal_progress_report_pdf",
-                        proposal_code=proposal_code,
-                        semester=semester,
-                    ),
-                ),
-                "additional_pdf": "http://{}:{}{}".format(
-                    request.client.host,
-                    request.client.port,
-                    router.url_path_for(
-                        "get_supplementary_proposal_progress_report_pdf",
-                        proposal_code=proposal_code,
-                        semester=semester,
-                    ),
-                ),
-            }
-
-        return progress_report_path_list
+        return progress_reports_semester_list
 
 
 @router.get(
     "/{proposal_code}/{semester}",
     summary="Get a proposal progress report",
+    response_model=ProposalProgress,
 )
 def get_proposal_progress_report(
     request: Request,
@@ -94,7 +73,7 @@ def get_proposal_progress_report(
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     user: User = Depends(get_current_user),
-) -> Any:
+) -> ProposalProgress:
     """
     Returns the progress report for a proposal and semester. The semester is the
     semester for which the progress is reported. For example, if the semester is
@@ -111,34 +90,8 @@ def get_proposal_progress_report(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report = proposal_service.get_progress_report(proposal_code, semester)
-
-        progress_report["proposal_progress_pdf"] = (
-            "http://{}:{}{}".format(
-                request.client.host,
-                request.client.port,
-                router.url_path_for(
-                    "get_proposal_progress_report_pdf",
-                    proposal_code=proposal_code,
-                    semester=semester,
-                ),
-            )
-            if progress_report["proposal_progress_pdf"]
-            else None
-        )
-
-        progress_report["additional_pdf"] = (
-            "http://{}:{}{}".format(
-                request.client.host,
-                request.client.port,
-                router.url_path_for(
-                    "get_supplementary_proposal_progress_report_pdf",
-                    proposal_code=proposal_code,
-                    semester=semester,
-                ),
-            )
-            if progress_report["additional_pdf"]
-            else None
+        progress_report = proposal_service.get_progress_report(
+            proposal_code, semester, request, router
         )
 
         return ProposalProgress(**progress_report)
@@ -181,8 +134,10 @@ def put_progress_report(
 @router.get(
     "/{proposal_code}/{semester}/report.pdf",
     summary="Get a proposal progress report pdf",
+    responses={200: {"content": {"application/pdf": {}}}},
 )
 def get_proposal_progress_report_pdf(
+    request: Request,
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -199,7 +154,9 @@ def get_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report = proposal_service.get_progress_report(proposal_code, semester)
+        progress_report = proposal_service.get_progress_report(
+            proposal_code, semester, request, router
+        )
 
         pdf_path = urllib.parse.urlparse(progress_report["proposal_progress_pdf"]).path
 
@@ -211,8 +168,10 @@ def get_proposal_progress_report_pdf(
 @router.get(
     "/{proposal_code}/{semester}/supplementary-file.pdf",
     summary="Get a proposal progress report pdf",
+    responses={200: {"content": {"application/pdf": {}}}},
 )
 def get_supplementary_proposal_progress_report_pdf(
+    request: Request,
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -229,10 +188,12 @@ def get_supplementary_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report = proposal_service.get_progress_report(proposal_code, semester)
+        progress_report = proposal_service.get_progress_report(
+            proposal_code, semester, request, router
+        )
 
         pdf_path = urllib.parse.urlparse(progress_report["additional_pdf"]).path
 
-        filename = "SupplementaryProgressReport_{}.pdf".format(semester)
+        filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
         return FileResponse(pdf_path, media_type="application/pdf", filename=filename)

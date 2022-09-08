@@ -45,6 +45,27 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.parametrize(
+    "proposal_code,semester",
+    [
+        ("2022-1-COM-002", "2022-2"),
+        ("2018-2-GWE-002", "2018-2"),
+        ("2017-2-COM-001", "2017-2"),
+        ("2019-2-DDT-006", "2019-2"),
+    ],
+)
+def test_get_progress_report_returns_404_for_nonexisting_progress_report(
+    proposal_code: str, semester: str, client: TestClient
+) -> None:
+
+    authenticate(USERNAME, client)
+
+    response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+# TODO: Use regression testing
 def test_get_returns_progress_report_for_authorised_user(
     client: TestClient,
 ) -> None:
@@ -77,7 +98,10 @@ def test_get_returns_progress_report_for_authorised_user(
 
 
 # TODO: Properly handle getting pdf files
-def test_get_returns_progress_report_and_pdf_files_for_authorised_user(
+@pytest.mark.skip(
+    reason="This will be tested once the pdf files are handled correctly."
+)
+def test_get_returns_correct_file_urls(
     client: TestClient,
 ) -> None:
     semester = "2018-2"
@@ -114,7 +138,7 @@ def test_get_returns_progress_report_and_pdf_files_for_authorised_user(
     assert additional_pdf_response.headers[
         "content-disposition"
     ] == 'attachment; filename="{}"'.format(
-        "SupplementaryProgressReport_{}.pdf".format(semester)
+        "ProgressReportSupplement_{}.pdf".format(semester)
     )
     assert additional_pdf_response.headers["content-type"] == "application/pdf"
 
@@ -127,7 +151,7 @@ def test_get_returns_progress_report_and_pdf_files_for_authorised_user(
         ("2020-2-SCI-035", "2020-2"),
     ],
 )
-def test_get_returns_progress_report_and_no_pdf_files_for_authorised_user(
+def test_get_returns_progress_report(
     proposal_code: str,
     semester: str,
     client: TestClient,

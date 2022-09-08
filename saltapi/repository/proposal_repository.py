@@ -5,6 +5,7 @@ from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
 from dateutil.relativedelta import relativedelta
+from pydantic import ValidationError
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
@@ -1579,7 +1580,7 @@ WHERE PC.Proposal_Code = :proposal_code
             prp.append(tmp[pc])
         return prp
 
-    def list_of_progress_report_pdfs(self, proposal_code: str) -> List[str]:
+    def list_of_semesters(self, proposal_code: str) -> List[str]:
         stmt = text(
             """
 SELECT DISTINCT
@@ -1599,11 +1600,7 @@ ORDER BY S.`Year` DESC, S.Semester
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
 
-        semesters = []
-        for row in result:
-            semesters.append(row["semester"])
-
-        return semesters
+        return [row["semester"] for row in result]
 
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
@@ -1642,48 +1639,53 @@ WHERE PC.Proposal_Code = :proposal_code
         for t in time_statistics:
             if semester == t["semester"]:
                 requested_time = t["requested_time"]
-        if result.rowcount > 0:
-            progress_report = {}
-            for row in result:
-                progress_report["requested_time"] = requested_time
-                progress_report["semester"] = row.semester
-                progress_report["maximum_seeing"] = row.maximum_seeing
-                progress_report["transparency"] = row.transparency
-                progress_report["additional_pdf"] = row.additional_pdf
-                progress_report["proposal_progress_pdf"] = row.proposal_progress_pdf
+        try:
+            if result.rowcount > 0:
+                progress_report = {}
+                for row in result:
+                    progress_report["requested_time"] = requested_time
+                    progress_report["semester"] = row.semester
+                    progress_report["maximum_seeing"] = row.maximum_seeing
+                    progress_report["transparency"] = row.transparency
+                    progress_report["additional_pdf"] = row.additional_pdf
+                    progress_report["proposal_progress_pdf"] = row.proposal_progress_pdf
+                    progress_report[
+                        "description_of_observing_constraints"
+                    ] = row.description_of_observing_constraints
+                    progress_report["change_reason"] = row.change_reason
+                    progress_report[
+                        "summary_of_proposal_status"
+                    ] = row.summary_of_proposal_status
+                    progress_report["strategy_changes"] = row.strategy_changes
+                progress_report["previous_time_requests"] = time_statistics
                 progress_report[
-                    "description_of_observing_constraints"
-                ] = row.description_of_observing_constraints
-                progress_report["change_reason"] = row.change_reason
+                    "last_observing_constraints"
+                ] = self._get_latest_observing_conditions(proposal_code, semester)
                 progress_report[
-                    "summary_of_proposal_status"
-                ] = row.summary_of_proposal_status
-                progress_report["strategy_changes"] = row.strategy_changes
-            progress_report["previous_time_requests"] = time_statistics
-            progress_report[
-                "last_observing_constraints"
-            ] = self._get_latest_observing_conditions(proposal_code, semester)
-            progress_report[
-                "partner_requested_percentages"
-            ] = self._get_partner_requested_percentages(proposal_code, semester)
-            return progress_report
-        else:
-            return {
-                "requested_time": requested_time,
-                "semester": None,
-                "maximum_seeing": None,
-                "transparency": None,
-                "additional_pdf": None,
-                "proposal_progress_pdf": None,
-                "description_of_observing_constraints": None,
-                "change_reason": None,
-                "summary_of_proposal_status": None,
-                "strategy_changes": None,
-                "partner_requested_percentages": self._get_partner_requested_percentages(
-                    proposal_code, semester
-                ),
-                "previous_time_requests": time_statistics,
-                "last_observing_constraints": self._get_latest_observing_conditions(
-                    proposal_code, semester
-                ),
-            }
+                    "partner_requested_percentages"
+                ] = self._get_partner_requested_percentages(proposal_code, semester)
+                return progress_report
+            else:
+                return {
+                    "requested_time": requested_time,
+                    "semester": None,
+                    "maximum_seeing": None,
+                    "transparency": None,
+                    "additional_pdf": None,
+                    "proposal_progress_pdf": None,
+                    "description_of_observing_constraints": None,
+                    "change_reason": None,
+                    "summary_of_proposal_status": None,
+                    "strategy_changes": None,
+                    "partner_requested_percentages": self._get_partner_requested_percentages(
+                        proposal_code, semester
+                    ),
+                    "previous_time_requests": time_statistics,
+                    "last_observing_constraints": self._get_latest_observing_conditions(
+                        proposal_code, semester
+                    ),
+                }
+        except (ValidationError, AttributeError):
+            raise NotFoundError(
+                "No progress report for proposal {}".format(proposal_code)
+            )

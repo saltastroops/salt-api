@@ -282,6 +282,14 @@ ORDER BY S.Year, S.Semester;
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return list(result.scalars())
 
+    def list_of_semesters(self, proposal_code: str) -> List[str]:
+
+        result = self._semesters(proposal_code)
+
+        semesters = sorted(result, reverse=True)
+
+        return semesters
+
     def get_proposal_type(self, proposal_code: str) -> str:
         stmt = text(
             """
@@ -1579,28 +1587,6 @@ WHERE PC.Proposal_Code = :proposal_code
             tmp[pc].setdefault("requested_percentage", 0)
             prp.append(tmp[pc])
         return prp
-
-    def list_of_semesters(self, proposal_code: str) -> List[str]:
-        stmt = text(
-            """
-SELECT DISTINCT
-    CONCAT(S.`Year`, '-', S.Semester) AS semester,
-    ReportPath AS proposal_progress_pdf,
-    SupplementaryPath AS additional_pdf
-FROM P1ObservingConditions OC
-         JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
-         JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-         LEFT JOIN ProposalProgress PP ON (
-            OC.ProposalCode_Id = PP.ProposalCode_Id
-        AND OC.Semester_Id = PP.Semester_Id
-    )
-WHERE PC.Proposal_Code = :proposal_code
-ORDER BY S.`Year` DESC, S.Semester
-            """
-        )
-        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-
-        return [row["semester"] for row in result]
 
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(

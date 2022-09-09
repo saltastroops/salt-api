@@ -16,10 +16,10 @@ from saltapi.web.schema.common import ProposalCode, Semester
 proposals_dir = pathlib.Path(get_settings().proposals_dir)
 
 
-def generate_route_url(request: Request, router: URLPath) -> AnyUrl:
+def generate_route_url(request: Request, router_path: URLPath) -> AnyUrl:
 
     url = "{}://{}:{}{}".format(
-        request.url.scheme, request.client.host, request.client.port, router
+        request.url.scheme, request.client.host, request.client.port, router_path
     )
     return cast(AnyUrl, url)
 
@@ -126,13 +126,13 @@ class ProposalService:
             ],
         )
 
-    def list_of_semesters(
+    def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
     ) -> Dict[str, Dict[str, AnyUrl]]:
-        progress_report_semester_list = self.repository.list_of_semesters(proposal_code)
+        semesters = self.repository.list_of_semesters(proposal_code)
 
         progress_report_path_list = dict()
-        for semester in progress_report_semester_list:
+        for semester in semesters:
             progress_report_pdf_url = router.url_path_for(
                 "get_proposal_progress_report_pdf",
                 proposal_code=proposal_code,

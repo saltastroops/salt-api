@@ -31,10 +31,10 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
 
 @router.get(
     "/{proposal_code}/",
-    summary="Get a list proposal progress reports pdfs",
+    summary="Get URLs for all proposal progress report pdfs",
     response_model=Dict[str, Dict[str, AnyUrl]],
 )
-def get_list_of_proposal_progress_report_pdfs(
+def get_urls_for_proposal_progress_report_pdfs(
     request: Request,
     proposal_code: ProposalCode = Path(
         ...,
@@ -44,7 +44,7 @@ def get_list_of_proposal_progress_report_pdfs(
     user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:
     """
-    Return the list of URLs of the progress report pdfs for a proposal.
+    Return URLs for all proposal progress report pdfs of a given proposal.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
@@ -52,8 +52,10 @@ def get_list_of_proposal_progress_report_pdfs(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
 
-        progress_reports_semester_list = proposal_service.list_of_semesters(
-            proposal_code, request, router
+        progress_reports_semester_list = (
+            proposal_service.get_urls_for_proposal_progress_report_pdfs(
+                proposal_code, request, router
+            )
         )
 
         return progress_reports_semester_list

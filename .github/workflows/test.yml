@@ -64,9 +64,11 @@ jobs:
       #              run test suite
       #----------------------------------------------
       - name: Run tests
+        env:
+          TEST_DATA_DIR: ${testdata_dir}/salt-api
         run: |
           source .venv/bin/activate
-          pytest --mock-db-data --db-data-dir $testdata_dir
+          pytest --mock-db-data
           coverage report
       #----------------------------------------------
       #              lint

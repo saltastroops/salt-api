@@ -59,7 +59,7 @@ jobs:
       - name: Clone test data repository
         env:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata $testdata_dir
+        run: git clone https://saltastroops:${TOKEN}@github.com/salt-testdata $testdata_dir
       #----------------------------------------------
       #              run test suite
       #----------------------------------------------

@@ -33,8 +33,8 @@ WHERE B.Bvit_Id = :bvit_id;
             "mode": row.mode,
             "filter": row.filter,
             "neutral_density": row.neutral_density,
-            "iris_size": row.iris_size,
-            "shutter_open_time": row.shutter_open_time,
+            "iris_size": float(row.iris_size),
+            "shutter_open_time": float(row.shutter_open_time),
         }
 
         return bvit

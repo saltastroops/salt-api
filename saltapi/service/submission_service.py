@@ -119,7 +119,7 @@ class SubmissionService:
 
         # As this command is running in a separate thread, it needs its own database
         # connection.
-        connection = engine.connect()
+        connection = engine().connect()
         submission_repository = SubmissionRepository(connection)
         submission = submission_repository.get(submission_identifier)
 

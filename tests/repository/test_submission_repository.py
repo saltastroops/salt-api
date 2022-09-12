@@ -3,6 +3,7 @@ from typing import Any, List, Optional
 
 import pytest
 import pytz
+from freezegun import freeze_time
 from sqlalchemy.engine import Connection
 
 # TODO: Add more tests
@@ -10,6 +11,9 @@ from saltapi.exceptions import NotFoundError
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.service.submission import SubmissionMessageType, SubmissionStatus
 from saltapi.service.user import User
+
+
+FROZEN_NOW = "2022-08-26T21:23:55"
 
 
 def _dummy_user() -> User:
@@ -98,6 +102,7 @@ def test_get_log_entries_from_entry_number(db_connection: Connection) -> None:
 
 
 @pytest.mark.parametrize("from_entry_number", [1, 2, 3])
+@freeze_time(FROZEN_NOW)
 def test_get_progress(from_entry_number: int, db_connection: Connection) -> None:
     """Test that the correct progress details are returned."""
     submission_repository = SubmissionRepository(db_connection)
@@ -140,6 +145,7 @@ def test_get_progress(from_entry_number: int, db_connection: Connection) -> None
 
 
 @pytest.mark.parametrize("proposal_code", [None, "2021-2-SCI-004"])
+@freeze_time(FROZEN_NOW)
 def test_create_submission(
     proposal_code: Optional[str], db_connection: Connection
 ) -> None:
@@ -215,6 +221,7 @@ def test_create_log_entry_fails_for_non_existing_submission_identifier(
         SubmissionStatus.SUCCESSFUL,
     ],
 )
+@freeze_time(FROZEN_NOW)
 def test_finish_submission(status: SubmissionStatus, db_connection: Connection) -> None:
     """Test finishing a submission."""
     submission_repository = SubmissionRepository(db_connection)

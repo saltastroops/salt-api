@@ -141,7 +141,7 @@ WHERE SFPD.SalticamFilterPattern_Id = :pattern_id;
                     "name": row.filter_name,
                     "description": row.filter_description,
                 },
-                "exposure_time": row.exposure_time,
+                "exposure_time": float(row.exposure_time),
             }
             for row in result
         ]

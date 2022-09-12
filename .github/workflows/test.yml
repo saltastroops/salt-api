@@ -6,7 +6,7 @@ name: Test
 on: ["push", "pull_request"]
 
 env:
-  testdata_dir: cypress/salt-testdata
+  testdata_dir: tests/salt-testdata
 
 jobs:
   build:

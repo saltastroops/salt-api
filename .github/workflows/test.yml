@@ -61,9 +61,51 @@ jobs:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata.git $testdata_dir
       #----------------------------------------------
+      #        start server
+      #----------------------------------------------
+      - name: Start server
+        id: start_server
+        env:
+          TEST_DATA_DIR: tests/salt-testdata/salt-api/
+          PROPOSALS_DIR: tests/
+          SDB_DSN: ${{ secrets.SDB_DSN }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          FRONTEND_URI: ''
+          SMTP_SERVER: localhost:7777
+          FROM_EMAIL: salthelp@example.com
+          MAPPING_TOOL_DIR: tests/
+          MAPPING_TOOL_JAR: saltapi/util.py
+          MAPPING_TOOL_DATABASE_ACCESS_CONFIG: saltapi/util.py
+          MAPPING_TOOL_LOG_DIR: tests/
+          MAPPING_TOOL_PROPOSALS_DIR: tests/
+          MAPPING_TOOL_API_KEY: ''
+          MAPPING_TOOL_PIPT_DIR: ''
+          MAPPING_TOOL_WEB_MANAGER_URL: https://www.salt.ac.za/wm/
+          MAPPING_TOOL_EPHEMERIS_URL: http://pysalt.salt.ac.za/finder_chart/ephemerides.cgi
+          MAPPING_TOOL_JAVA_COMMAND: ''
+          MAPPING_TOOL_PYTHON_INTERPRETER: ''
+          MAPPING_TOOL_FINDER_CHART_TOOL: ''
+          MAPPING_TOOL_IMAGE_CONVERSION_COMMAND: ''
+          MAPPING_TOOL_MAILCHIMP_API_KEY: ''
+          MAPPING_TOOL_MAILCHIMP_LIST_ID: ''
+          MAPPING_TOOL_NO_REPLY_EMAIL: user@example.com
+          MAPPING_TOOL_SUBMIT_EMAIL: user@example.com
+          MAPPING_TOOL_SSDA_URL: ''
+          MAPPING_TOOL_SSDA_PASSWORD: ''
+          MAPPING_TOOL_SSDA_USERNAME: ''
+          MAPPING_TOOL_SDB_URL: ''
+          MAPPING_TOOL_SDB_PASSWORD: ''
+          MAPPING_TOOL_SDB_USERNAME: ''
+          FINDING_CHARTS_DIR: tests/
+        run: |
+          poetry run make start
+          echo ::set-output name=exit_code::$?
+      #----------------------------------------------
       #        start server and run test suite
       #----------------------------------------------
       - name: Run tests
+        if: steps.start_server.outputs.exit_code == 0
         env:
           TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/

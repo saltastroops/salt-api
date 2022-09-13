@@ -57,9 +57,11 @@ jobs:
       #           clone test (mock) data
       #----------------------------------------------
       - name: Clone test data repository
-        env:
-          TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata.git $testdata_dir
+        uses: actions/checkout@master
+        with:
+          repository: saltastroops/salt-testdata
+          path: $testdata_dir
+          token: ${{ secrets.ACCESS_TOKEN }}
       #----------------------------------------------
       #        run test suite
       #----------------------------------------------

@@ -73,7 +73,7 @@ jobs:
           FRONTEND_URI: ''
           SMTP_SERVER: localhost:7777
           FROM_EMAIL: salthelp@example.com
-          MAPPING_TOOL_DIR: $testdata_dir
+          MAPPING_TOOL_DIR: tests/
           MAPPING_TOOL_JAR: saltapi/util.py
           MAPPING_TOOL_DATABASE_ACCESS_CONFIG: saltapi/util.py
           MAPPING_TOOL_LOG_DIR: tests/

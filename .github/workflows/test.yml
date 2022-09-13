@@ -100,12 +100,10 @@ jobs:
           FINDING_CHARTS_DIR: tests/
         run: |
           poetry run make start
-          echo ::set-output name=exit_code::$?
       #----------------------------------------------
       #        start server and run test suite
       #----------------------------------------------
       - name: Run tests
-        if: steps.start_server.outputs.exit_code == 0
         env:
           TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/
@@ -140,7 +138,7 @@ jobs:
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
         run: |
-          poetry run make start
+          sleep 10 &&
           pytest --mock-db-data
           coverage report
       #----------------------------------------------

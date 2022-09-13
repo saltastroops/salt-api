@@ -61,6 +61,11 @@ jobs:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata.git $testdata_dir
       #----------------------------------------------
+      #                run server
+      #----------------------------------------------
+      - name: Run the server
+        run: poetry run make start
+      #----------------------------------------------
       #              run test suite
       #----------------------------------------------
       - name: Run tests

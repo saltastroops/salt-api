@@ -99,4 +99,10 @@ jobs:
           FINDING_CHARTS_DIR: tests/
         run: |
           poetry run pytest --mock-db-data -W ignore::pytest.PytestUnraisableExceptionWarning
-          poetry run coverage report
+      #----------------------------------------------
+      #        linting
+      #----------------------------------------------
+      - name: Linting
+        run: |
+          source .venv/bin/activate
+          ./lint.sh

@@ -1,5 +1,6 @@
 """pytest markers."""
 import os
+import sys
 from typing import Any, Callable
 
 import pytest
@@ -13,5 +14,10 @@ string. This is the variable used by the db fixture to create a database connect
 """
 nodatabase: Callable[..., Any] = pytest.mark.skipif(
     not os.getenv("SDB_DSN"),
+    reason="No test database defined. See the tests.markers package for details.",
+)
+
+noserver: Callable[..., Any] = pytest.mark.skipif(
+    "--mock-db-data" in sys.argv[1:],
     reason="No test database defined. See the tests.markers package for details.",
 )

@@ -137,7 +137,6 @@ jobs:
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
         run: |
-          sleep 10 &&
           pytest --mock-db-data
           coverage report
       #----------------------------------------------

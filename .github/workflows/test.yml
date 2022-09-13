@@ -100,7 +100,7 @@ jobs:
           FINDING_CHARTS_DIR: tests/
         run: poetry run make start &
       #----------------------------------------------
-      #        start server and run test suite
+      #        run test suite
       #----------------------------------------------
       - name: Run tests
         env:
@@ -137,6 +137,7 @@ jobs:
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
         run: |
+          poetry shell
           pytest --mock-db-data
           coverage report
       #----------------------------------------------

@@ -65,7 +65,7 @@ jobs:
       #----------------------------------------------
       - name: Run tests
         env:
-          TEST_DATA_DIR: ${testdata_dir}/salt-api
+          TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/
           SDB_DSN: ''
           SECRET_KEY: ${{ secrets.SECRET_KEY }}

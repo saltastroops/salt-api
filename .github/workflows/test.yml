@@ -66,18 +66,18 @@ jobs:
       - name: Run tests
         env:
           TEST_DATA_DIR: ${testdata_dir}/salt-api
-          PROPOSALS_DIR: ${testdata_dir}
+          PROPOSALS_DIR: $testdata_dir
           SDB_DSN: ''
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          FRONTEND_URI: http://127.0.0.1:4002
+          FRONTEND_URI: ''
           SMTP_SERVER: localhost:7777
           FROM_EMAIL: salthelp@example.com
-          MAPPING_TOOL_DIR: ${testdata_dir}
+          MAPPING_TOOL_DIR: $testdata_dir
           MAPPING_TOOL_JAR: saltapi/util.py
           MAPPING_TOOL_DATABASE_ACCESS_CONFIG: saltapi/util.py
-          MAPPING_TOOL_LOG_DIR: ${testdata_dir}
-          MAPPING_TOOL_PROPOSALS_DIR: ${testdata_dir}
+          MAPPING_TOOL_LOG_DIR: $testdata_dir
+          MAPPING_TOOL_PROPOSALS_DIR: $testdata_dir
           MAPPING_TOOL_API_KEY: ''
           MAPPING_TOOL_PIPT_DIR: ''
           MAPPING_TOOL_WEB_MANAGER_URL: https://www.salt.ac.za/wm/
@@ -96,7 +96,7 @@ jobs:
           MAPPING_TOOL_SDB_URL: ''
           MAPPING_TOOL_SDB_PASSWORD: ''
           MAPPING_TOOL_SDB_USERNAME: ''
-          FINDING_CHARTS_DIR: ${testdata_dir}
+          FINDING_CHARTS_DIR: $testdata_dir
         run: |
           source .venv/bin/activate
           pytest --mock-db-data

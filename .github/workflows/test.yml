@@ -98,5 +98,5 @@ jobs:
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
         run: |
-          poetry run pytest --mock-db-data
+          poetry run pytest --mock-db-data -W ignore::pytest.PytestUnraisableExceptionWarning
           poetry run coverage report

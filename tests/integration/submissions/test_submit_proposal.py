@@ -67,7 +67,6 @@ def test_submission_file_must_contain_xml(client: TestClient, tmp_path: Path) ->
     assert "Proposal.xml" in message and "Blocks.xml" in message
 
 
-@pytest.mark.filterwarnings('error::pytest.PytestUnraisableExceptionWarning')
 def test_proposal_code_must_be_consistent(client: TestClient, tmp_path: Path) -> None:
     """Test that proposal codes in form data and in the XML must be the same."""
     username = find_username("administrator")

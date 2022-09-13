@@ -61,7 +61,7 @@ jobs:
           TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git clone https://${TOKEN}@github.com/saltastroops/salt-testdata.git $testdata_dir
       #----------------------------------------------
-      #        run test suite and lint
+      #        run test suite
       #----------------------------------------------
       - name: Run tests
         env:
@@ -99,4 +99,13 @@ jobs:
           FINDING_CHARTS_DIR: tests/
         run: |
           poetry run pytest --mock-db-data -W ignore::pytest.PytestUnraisableExceptionWarning
-          ./lint.sh
+      #----------------------------------------------
+      #        linting
+      #----------------------------------------------
+      - name: Linting
+        run: |
+          source .venv/bin/activate
+          black saltapi tests
+          isort saltapi tests
+          flake8 saltapi tests
+          mypy saltapi

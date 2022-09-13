@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: saltastroops/salt-testdata
-          path: $testdata_dir
+          path: cypress/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Run Angular Tests

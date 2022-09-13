@@ -98,8 +98,7 @@ jobs:
           MAPPING_TOOL_SDB_PASSWORD: ''
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
-        run: |
-          poetry run make start
+        run: poetry run make start &
       #----------------------------------------------
       #        start server and run test suite
       #----------------------------------------------

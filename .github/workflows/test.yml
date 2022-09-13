@@ -5,9 +5,6 @@ name: Test
 
 on: ["push", "pull_request"]
 
-env:
-  testdata_dir: tests/salt-testdata
-
 jobs:
   build:
     name: Test
@@ -60,7 +57,7 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: saltastroops/salt-testdata
-          path: $testdata_dir
+          path: tests/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
       #----------------------------------------------
       #        run test suite

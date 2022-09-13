@@ -1,6 +1,6 @@
 {
   "root": true,
-  "ignorePatterns": ["projects/**/*"],
+  "ignorePatterns": ["projects/**/*", "cypress/salt-testdata/*"],
   "overrides": [
     {
       "files": ["*.ts"],

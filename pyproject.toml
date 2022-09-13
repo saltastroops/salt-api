@@ -56,3 +56,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore::PytestUnraisableExceptionWarning",
+]

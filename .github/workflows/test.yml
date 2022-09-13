@@ -67,7 +67,7 @@ jobs:
         env:
           TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/
-          SDB_DSN: ''
+          SDB_DSN: ${{ secrets.SDB_DSN }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           FRONTEND_URI: ''

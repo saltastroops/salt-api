@@ -292,3 +292,22 @@ class PermissionService:
 
         if not may_update:
             raise AuthorizationError()
+
+    def check_permission_to_update_proposal_progress(
+            self,
+            user: User,
+            proposal_code: str
+    ) -> None:
+        """
+        Check whether the user can update proposal progress.
+        """
+        may_update = (
+            self.user_repository.is_administrator(user.username)
+            or self.user_repository.is_principal_investigator(
+                username=user.username,
+                proposal_code=proposal_code
+            )
+        )
+
+        if not may_update:
+            raise AuthorizationError()

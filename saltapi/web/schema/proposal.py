@@ -4,6 +4,7 @@ from typing import List, Literal, Optional
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Field
 
+from saltapi.util import as_form
 from saltapi.web.schema.block import BlockSummary
 from saltapi.web.schema.common import (
     BlockVisit,
@@ -488,29 +489,13 @@ class TimeStatistics(BaseModel):
         }
 
 
-class ProposalProgress(BaseModel):
-    """
-    Progress report for a proposal and semester. The semester is the semester for which
-    the progress is reported. For example, if the semester is 2021-1, the report covers
-    the observations up to and including the 2021-1 semester and it requests time for
-    the 2021-2 semester.
-    """
-
+class ProgressReport(BaseModel):
     requested_time: Optional[int] = Field(
         ...,
         title="Requested time",
         description="Requested time per partner.",
     )
-    semester: Optional[str] = Field(
-        ...,
-        title="Semester",
-        description="The semester for this progress report.",
-    )
-    partner_requested_percentages: List[PartnerRequestedPercentage] = Field(
-        ...,
-        title="Partner",
-        description="The partner requesting time from.",
-    )
+
     maximum_seeing: Optional[float] = Field(
         ...,
         title="Seeing",
@@ -541,6 +526,25 @@ class ProposalProgress(BaseModel):
         title="Strategy changes",
         description="The strategy changes.",
     )
+
+
+class ProposalProgress(ProgressReport):
+    """
+    Progress report for a proposal and semester. The semester is the semester for which
+    the progress is reported. For example, if the semester is 2021-1, the report covers
+    the observations up to and including the 2021-1 semester and it requests time for
+    the 2021-2 semester.
+    """
+    semester: Optional[str] = Field(
+        ...,
+        title="Semester",
+        description="The semester for this progress report.",
+    )
+    partner_requested_percentages: List[PartnerRequestedPercentage] = Field(
+        ...,
+        title="Partner",
+        description="The partner requesting time from.",
+    )
     previous_time_requests: List[TimeStatistics] = Field(
         ...,
         title="Previous time requests",
@@ -552,14 +556,24 @@ class ProposalProgress(BaseModel):
         description="The last observing conditions.",
     )
 
-    proposal_progress_pdf: Optional[AnyUrl] = Field(
+    proposal_progress_pdf: Optional[str] = Field(
+        ...,
+        title="Proposal progress report pdf",
+        description="Proposal progress report pdf",
+    )
+    additional_pdf: Optional[str] = Field(
         ...,
         title="Proposal progress report pdf",
         description="Proposal progress report pdf",
     )
 
-    additional_pdf: Optional[AnyUrl] = Field(
+
+@as_form
+class ProposalProgressReport(ProgressReport):
+    partner_requested_percentages: str = Field(
         ...,
-        title="Proposal progress report pdf",
-        description="Proposal progress report pdf",
+        title="Partner requested percentages",
+        description="The  List of requested percentages per partner. A pair of partner and requested percentages. "
+                    "E.g 'RSA:50;POL:50;OTH:0'",
     )
+

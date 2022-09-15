@@ -1,3 +1,4 @@
+import hashlib
 import re
 from collections import defaultdict
 from datetime import date, datetime
@@ -5,6 +6,7 @@ from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
 from dateutil.relativedelta import relativedelta
+from fastapi import UploadFile
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
@@ -20,6 +22,7 @@ from saltapi.util import (
     semester_start,
     tonight,
 )
+from saltapi.web.schema.proposal import ProposalProgress
 
 
 class ProposalRepository:
@@ -1321,8 +1324,29 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return cast(int, version)
 
+    @staticmethod
+    def generate_proposal_progress_file_name(
+            proposal_code: str,
+            semester: str,
+            need_supplementary_file_name: bool = False
+    ) -> Dict[str, str]:
+        hash_md = hashlib.md5((proposal_code+semester).encode('utf-8')).hexdigest()
+        if need_supplementary_file_name:
+            return {
+                "supplementary_file_name": f"ProposalProgressSupplementary-{hash_md}.pdf",
+                "proposal_progress_file_name": f"ProposalProgressReport-{hash_md}.pdf"
+            }
+        return {
+            "supplementary_file_name": None,
+            "proposal_progress_file_name": f"ProposalProgressReport-{hash_md}.pdf"
+        }
+
     def insert_proposal_progress(
-        self, progress_report_data: Dict[str, Any], proposal_code: str, semester: str
+            self,
+            progress_report_data: Dict[str, Any],
+            proposal_code: str,
+            semester: str,
+            file: UploadFile
     ) -> None:
         """
         Insert the proposal progress information.
@@ -1342,8 +1366,8 @@ INSERT INTO ProposalProgress (
 VALUES(
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
     (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
-    :time_request_reason,
-    :status_summary,
+    :change_reason,
+    :summary_of_proposal_status,
     :strategy_changes,
     :report_path,
     :supplementary_path,
@@ -1351,31 +1375,37 @@ VALUES(
 );
         """
         )
+        file_names = self.generate_proposal_progress_file_name(
+            proposal_code,
+            semester,
+            True if file else False
+        )
         result = self.connection.execute(
             stmt,
             {
                 "proposal_code": proposal_code,
                 "semester": semester,
-                "time_request_reason": progress_report_data["time_request_reason"],
-                "status_summary": progress_report_data["status_summary"],
+                "change_reason": progress_report_data["change_reason"],
+                "summary_of_proposal_status":
+                    progress_report_data["summary_of_proposal_status"],
                 "strategy_changes": progress_report_data["strategy_changes"],
-                "report_path": progress_report_data["report_path"],
-                "supplementary_path": progress_report_data["supplementary_path"],
+                "report_path": file_names["proposal_progress_file_name"],
+                "supplementary_path": file_names["supplementary_file_name"],
             },
         )
         if not result.rowcount:
             raise NotFoundError()
 
-    @staticmethod
-    def _insert_progress_report_requested_time(
-        proposal_code: str,
-        semester: str,
-        partner_code: str,
-        requested_time_percent: int,
-        requested_time_amount: int,
+    def _insert_proposal_progress_requested_time(
+            self,
+            proposal_code: str,
+            semester: str,
+            partner_code: str,
+            requested_time_percent: float,
+            requested_time_amount: int
     ) -> None:
         """ """
-        text(
+        stmt = text(
             """
 INSERT INTO MultiPartner(
     ProposalCode_Id,
@@ -1392,6 +1422,16 @@ VALUES (
     :requested_time_amount
 )
         """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+                "partner_code": partner_code,
+                "requested_time_percent": requested_time_percent,
+                "requested_time_amount": requested_time_amount
+            }
         )
 
     def _insert_observing_conditions(
@@ -1661,3 +1701,33 @@ WHERE PC.Proposal_Code = :proposal_code
                     proposal_code, semester
                 ),
             }
+
+    def put_proposal_progress(
+            self,
+            proposal_progress: Dict[str, Any],
+            proposal_code: str,
+            semester: str,
+    ) -> None:
+        """
+        Insert the proposal progress to the database
+        """
+        for rp in proposal_progress["partner_requested_percentages"]:
+            self._insert_proposal_progress_requested_time(
+                proposal_code=proposal_code,
+                semester=semester,
+                partner_code=rp["partner_code"],
+                requested_time_percent=rp["requested_percentage"],
+                requested_time_amount=proposal_progress["requested_time"]
+            )
+        self._insert_observing_conditions(
+            proposal_code=proposal_code,
+            semester=semester,
+            seeing=proposal_progress["maximum_seeing"],
+            transparency=proposal_progress["transparency"],
+            observing_conditions_description=proposal_progress["description_of_observing_constraints"],
+        )
+        self.insert_proposal_progress(
+            progress_report_data=proposal_progress,
+            proposal_code=proposal_code,
+            semester=semester,
+        )

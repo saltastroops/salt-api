@@ -1,9 +1,12 @@
 """Utility functions."""
+import inspect
 from datetime import datetime, timedelta
-from typing import NamedTuple
+from typing import NamedTuple, Type
 
 import pytz
 from dateutil.relativedelta import relativedelta
+from fastapi import Form
+from pydantic import BaseModel
 
 from saltapi.web.schema.common import Semester
 
@@ -147,3 +150,28 @@ def next_semester() -> str:
     return Semester(
         semester_of_datetime(datetime.now(tz=pytz.utc) + relativedelta(months=+6))
     )
+
+
+def as_form(cls: Type[BaseModel]):
+    """
+    Adds an as_form class method to decorated models. The as_form class method
+    can be used with FastAPI endpoints
+    """
+    new_params = [
+        inspect.Parameter(
+            field.alias,
+            inspect.Parameter.POSITIONAL_ONLY,
+            default=(Form(field.default) if not field.required else Form(...)),
+            annotation=field.outer_type_,
+        )
+        for field in cls.__fields__.values()
+    ]
+
+    async def _as_form(**data):
+        return cls(**data)
+
+    sig = inspect.signature(_as_form)
+    sig = sig.replace(parameters=new_params)
+    _as_form.__signature__ = sig
+    setattr(cls, "as_form", _as_form)
+    return cls

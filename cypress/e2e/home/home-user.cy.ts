@@ -13,6 +13,12 @@ const apiUrl = getApiUrl();
 
 let USERNAME = getEnvVariable("defaultUsername");
 
+// load and register the grep feature using "require" function
+// https://github.com/cypress-io/cypress-grep
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const registerCypressGrep = require("cypress-grep");
+registerCypressGrep();
+
 describe("Home User", () => {
   beforeEach(() => {
     freezeDate(2020, 6);
@@ -349,7 +355,9 @@ describe("Home User - PI", () => {
     HomePage.visit();
   });
 
-  it("should show my proposals", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it("should show my proposals", { tags: "@skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -376,12 +384,20 @@ describe("Home User - PC", () => {
     HomePage.visit();
   });
 
-  it("should show only proposals requiring principal contact's attention", () => {
-    HomeUser.clickRequiringAttentionCheckbox();
-    HomeUser.filteredProposalsRequiringAttention(USERNAME);
-  });
+  it(
+    "should show only proposals requiring principal contact's attention",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    { tags: "@skip" },
+    () => {
+      HomeUser.clickRequiringAttentionCheckbox();
+      HomeUser.filteredProposalsRequiringAttention(USERNAME);
+    },
+  );
 
-  it("should show principal contact's proposals", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it("should show principal contact's proposals", { tags: "@skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });
@@ -408,12 +424,20 @@ describe("Home User - SALT Astronomer", () => {
     HomePage.visit();
   });
 
-  it("should show only proposals requiring astronomer's attention", () => {
-    HomeUser.clickRequiringAttentionCheckbox();
-    HomeUser.filteredProposalsRequiringAttention(USERNAME);
-  });
+  it(
+    "should show only proposals requiring astronomer's attention",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    { tags: "@skip" },
+    () => {
+      HomeUser.clickRequiringAttentionCheckbox();
+      HomeUser.filteredProposalsRequiringAttention(USERNAME);
+    },
+  );
 
-  it("should show astronomer's proposals", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  it("should show astronomer's proposals", { tags: "@skip" }, () => {
     HomeUser.clickMyProposalsCheckbox();
     HomeUser.filteredMyProposals(USERNAME);
   });

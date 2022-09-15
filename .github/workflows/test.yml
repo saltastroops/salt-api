@@ -2,6 +2,9 @@ name: Test
 
 on: ["push", "pull_request"]
 
+env:
+  testdata_dir: cypress/salt-testdata
+
 jobs:
   build:
     name: Test
@@ -11,13 +14,35 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12
+
       - name: Install packages
         run: npm install
 
-      - name: Run tests
+      - name: Clone test data repository
+        uses: actions/checkout@master
+        with:
+          repository: saltastroops/salt-testdata
+          path: cypress/salt-testdata
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Run Angular Tests
         run: npm test -- --watch=false --browsers=ChromeHeadless
 
-      - name: Linting and formatting
+      - name: Run Cypress Tests
+        uses: cypress-io/github-action@v4
+        env:
+          CYPRESS_apiUrl: "http://127.0.0.1:8001"
+          CYPRESS_recordHttpConfig: '{"mockFilesDirectory":"cypress/salt-testdata/web-manager/e2e/","mockIntercepts":true}'
+          CYPRESS_grepTags: -@skip
+          # Recommended: pass the GitHub token lets this action correctly
+          # determine the unique run id necessary to re-run the checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          install: false
+          start: npm start
+          wait-on: "http://localhost:4200"
+
+      - name: Lint
         run: |
           npx eslint -c .eslintrc.json
           npx prettier --check .

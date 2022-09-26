@@ -2,15 +2,17 @@ import pathlib
 from typing import Any, Dict, List, Optional
 
 from fastapi import UploadFile
+from pdfkit import pdfkit
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.service.create_proposal_progress_html import create_proposal_progress_html
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.util import next_semester, semester_start
+from saltapi.util import semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
-from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressReport
+from saltapi.web.schema.proposal import ProposalProgressReport
 
 
 class ProposalService:
@@ -92,10 +94,10 @@ class ProposalService:
 
     def put_proposal_progress(
         self,
-            proposal_progress_report: ProposalProgressReport,
-            proposal_code: str,
-            semester: str,
-            additional_pdf: Optional[UploadFile]
+        proposal_progress_report: ProposalProgressReport,
+        proposal_code: str,
+        semester: str,
+        additional_pdf: Optional[UploadFile]
     ) -> None:
         partner_requested_percentages = []
         for p in proposal_progress_report.partner_requested_percentages.split(";"):
@@ -105,6 +107,7 @@ class ProposalService:
                 "requested_percentage": prp[1]
             })
         proposal_progress = {
+            "semester": semester,
             "requested_time": proposal_progress_report.requested_time,
             "maximum_seeing": proposal_progress_report.maximum_seeing,
             "transparency": proposal_progress_report.transparency,
@@ -114,7 +117,49 @@ class ProposalService:
             "strategy_changes": proposal_progress_report.strategy_changes,
             "partner_requested_percentages": partner_requested_percentages
         }
-        self.repository.put_proposal_progress(
-            proposal_progress, proposal_code, semester
-        )
+        # self.repository.put_proposal_progress(
+        #     proposal_progress, proposal_code, semester
+        # )
         # TODO Generate the File
+        self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
+
+    def create_progress_report_pdf(
+        self,
+        proposal_code: str,
+        semester: str,
+        new_request: Dict[str, Any],
+        additional_pdf: Optional[UploadFile]
+    ):
+
+        previous_allocated_requested = self.repository.get_allocated_and_requested_time(proposal_code)
+        previous_observed_time = self.repository.get_observed_time(proposal_code)
+
+        previous_requests = []
+        for ar in previous_allocated_requested:
+            for ot in previous_observed_time:
+                if ot["semester"] == ar["semester"]:
+                    previous_requests.append({
+                        "semester": ar["semester"],
+                        "requested_time": ar["requested_time"],
+                        "allocated_time": ar["allocated_time"],
+                        "observed_time": ot["observed_time"]
+                    })
+        create_proposal_progress_html(
+            proposal_code=proposal_code,
+            semester=semester,
+            previous_requests=previous_requests,
+            previous_conditions=self.repository.get_latest_observing_conditions(proposal_code, semester),
+            new_request=new_request
+        )
+        output_file = "ProposalProgressReport.pdf"
+        with open('./pdf_report.html') as f:
+            options = {
+                'page-size': 'A4',
+                'margin-top': '20mm',
+                'margin-right': '20mm',
+                'margin-bottom': '20mm',
+                'margin-left': '20mm',
+                'encoding': "UTF-8",
+                'no-outline': None
+            }
+            pdfkit.from_file(f, output_file, options=options)

@@ -1483,13 +1483,13 @@ VALUES
         if not result.rowcount:
             raise NotFoundError()
 
-    def _get_latest_observing_conditions(
+    def get_latest_observing_conditions(
         self, proposal_code: str, semester: str
     ) -> Dict[str, Any]:
         stmt = text(
             """
 SELECT
-    CONCAT(S.`Year`, "-", S.Semester)   AS semester,
+    CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     MaxSeeing						    AS seeing,
     Transparency					    AS transparency,
     ObservingConditionsDescription	    AS description
@@ -1513,7 +1513,7 @@ ORDER BY semester DESC;
             "description": last.description,
         }
 
-    def _get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1539,7 +1539,7 @@ WHERE BlockVisitStatus = 'Accepted'
         except NoResultFound:
             raise NotFoundError()
 
-    def _get_allocated_and_requested_time(
+    def get_allocated_and_requested_time(
         self, proposal_code: str
     ) -> List[Dict[str, Any]]:
         # ReqTimeAmount is the total amount of time requested by a proposal per semester
@@ -1572,8 +1572,8 @@ WHERE Proposal_Code=:proposal_code
             raise NotFoundError()
 
     def _get_time_statistics(self, proposal_code: str) -> List[Dict[str, Any]]:
-        allocated_requested = self._get_allocated_and_requested_time(proposal_code)
-        observed_time = self._get_observed_time(proposal_code)
+        allocated_requested = self.get_allocated_and_requested_time(proposal_code)
+        observed_time = self.get_observed_time(proposal_code)
         time_statistics = []
         for ar in allocated_requested:
             tmp = {
@@ -1683,7 +1683,7 @@ WHERE PC.Proposal_Code = :proposal_code
             progress_report["previous_time_requests"] = time_statistics
             progress_report[
                 "last_observing_constraints"
-            ] = self._get_latest_observing_conditions(proposal_code, semester)
+            ] = self.get_latest_observing_conditions(proposal_code, semester)
             progress_report[
                 "partner_requested_percentages"
             ] = self._get_partner_requested_percentages(proposal_code, semester)
@@ -1704,7 +1704,7 @@ WHERE PC.Proposal_Code = :proposal_code
                     proposal_code, semester
                 ),
                 "previous_time_requests": time_statistics,
-                "last_observing_constraints": self._get_latest_observing_conditions(
+                "last_observing_constraints": self.get_latest_observing_conditions(
                     proposal_code, semester
                 ),
             }

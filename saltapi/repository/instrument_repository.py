@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from sqlalchemy.engine import Connection
 
@@ -7,6 +7,7 @@ from saltapi.repository.hrs_repository import HrsRepository
 from saltapi.repository.rss_repository import RssRepository
 from saltapi.repository.salticam_repository import SalticamRepository
 from saltapi.service.instrument import BVIT, HRS, RSS, Salticam
+from saltapi.web.schema.rss import RssMaskType
 
 
 class InstrumentRepository:
@@ -32,9 +33,9 @@ class InstrumentRepository:
         """Return a BVIT setup."""
         return self.bvit_repository.get(bvit_id)
 
-    def get_rss_masks_in_magazine(self, mask_type: Optional[str]) -> List[str]:
+    def get_rss_masks_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
         """The list of masks in the magazine."""
-        return self.rss_repository.get_mask_in_magazine(mask_type)
+        return self.rss_repository.get_mask_in_magazine(mask_types)
 
     def get_mos_masks_metadata(
         self, from_semester: str, to_semester: str
@@ -48,6 +49,6 @@ class InstrumentRepository:
         """Update MOS mask metadata"""
         return self.rss_repository.update_mos_mask_metadata(mos_mask_metadata)
 
-    def get_obsolete_rss_masks_in_magazine(self, mask_type: Optional[str]) -> List[str]:
+    def get_obsolete_rss_masks_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
         """The list of obsolete RSS masks."""
-        return self.rss_repository.get_obsolete_rss_masks_in_magazine(mask_type)
+        return self.rss_repository.get_obsolete_rss_masks_in_magazine(mask_types)

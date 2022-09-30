@@ -3,7 +3,7 @@
     <tr class="secondary-header">
       <th colspan="4" class="has-text-centered">Spectroscopy</th>
     </tr>
-    <tr *ngIf="filter!=='EMPTY'">
+    <tr *ngIf="filter !== 'EMPTY'">
       <th>Filter</th>
       <td colspan="3">{{ filter }}</td>
     </tr>

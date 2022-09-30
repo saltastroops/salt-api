@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { NirSpectroscopyComponent } from './nir-spectroscopy.component';
+import { NirSpectroscopyComponent } from "./nir-spectroscopy.component";
 
-describe('NirSpectroscopyComponent', () => {
+describe("NirSpectroscopyComponent", () => {
   let component: NirSpectroscopyComponent;
   let fixture: ComponentFixture<NirSpectroscopyComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NirSpectroscopyComponent ]
-    })
-    .compileComponents();
+      declarations: [NirSpectroscopyComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('NirSpectroscopyComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

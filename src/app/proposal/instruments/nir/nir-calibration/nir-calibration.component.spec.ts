@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { NirCalibrationComponent } from './nir-calibration.component';
+import { NirCalibrationComponent } from "./nir-calibration.component";
 
-describe('NirCalibrationComponent', () => {
+describe("NirCalibrationComponent", () => {
   let component: NirCalibrationComponent;
   let fixture: ComponentFixture<NirCalibrationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NirCalibrationComponent ]
-    })
-    .compileComponents();
+      declarations: [NirCalibrationComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('NirCalibrationComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,41 +1,41 @@
 <div>
   <table class="table">
     <thead>
-    <tr class="secondary-header">
-      <th colspan="5" class="has-text-centered">Detector</th>
-    </tr>
-    <tr>
-      <th>Iterations</th>
-      <th>Resets</th>
-      <th>Ramps</th>
-      <th>Reads per sample</th>
-      <th>Gain</th>
-    </tr>
+      <tr class="secondary-header">
+        <th colspan="5" class="has-text-centered">Detector</th>
+      </tr>
+      <tr>
+        <th>Iterations</th>
+        <th>Resets</th>
+        <th>Ramps</th>
+        <th>Reads per sample</th>
+        <th>Gain</th>
+      </tr>
     </thead>
     <tbody>
-    <tr>
-      <td>{{ nirDetector.iterations }}</td>
-      <td>{{ nirDetector.resets }}</td>
-      <td>{{ nirDetector.ramps }}</td>
-      <td>{{ nirDetector.readsPerSample }}</td>
-      <td>{{ nirDetector.gain }}</td>
-    </tr>
+      <tr>
+        <td>{{ nirDetector.iterations }}</td>
+        <td>{{ nirDetector.resets }}</td>
+        <td>{{ nirDetector.ramps }}</td>
+        <td>{{ nirDetector.readsPerSample }}</td>
+        <td>{{ nirDetector.gain }}</td>
+      </tr>
     </tbody>
     <thead>
-    <tr>
-      <th>Mode</th>
-      <th>Exp. type</th>
-      <th>Exp. time</th>
-      <th colspan="2">URG groups</th>
-    </tr>
+      <tr>
+        <th>Mode</th>
+        <th>Exp. type</th>
+        <th>Exp. time</th>
+        <th colspan="2">URG groups</th>
+      </tr>
     </thead>
     <tbody>
-    <tr>
-      <td>{{ nirDetector.mode }}</td>
-      <td>{{ nirDetector.exposureType }}</td>
-      <td>{{ nirDetector.exposureTime | number: "1.2-2" }} sec</td>
-      <td colspan="2">{{ nirDetector.urgGroups }}</td>
-    </tr>
+      <tr>
+        <td>{{ nirDetector.mode }}</td>
+        <td>{{ nirDetector.exposureType }}</td>
+        <td>{{ nirDetector.exposureTime | number: "1.2-2" }} sec</td>
+        <td colspan="2">{{ nirDetector.urgGroups }}</td>
+      </tr>
     </tbody>
   </table>
 </div>

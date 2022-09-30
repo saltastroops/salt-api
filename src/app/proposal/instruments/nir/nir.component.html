@@ -6,13 +6,15 @@
   <div class="inline-view">
     <wm-nir-general-info [nir]="nir"></wm-nir-general-info>
     <wm-nir-detector [nirDetector]="nir.detector"></wm-nir-detector>
-    <wm-nir-spectroscopy *ngIf="nir.configuration.spectroscopy"
-                         [nirSpectroscopy]="nir.configuration.spectroscopy"
-                         [filter]="nir.configuration.filter"
+    <wm-nir-spectroscopy
+      *ngIf="nir.configuration.spectroscopy"
+      [nirSpectroscopy]="nir.configuration.spectroscopy"
+      [filter]="nir.configuration.filter"
     ></wm-nir-spectroscopy>
-    <wm-nir-calibration *ngIf="payloadConfiguration.lamp"
-                        [filter]="payloadConfiguration.calibrationFilter"
-                        [lamp]="payloadConfiguration.lamp"
+    <wm-nir-calibration
+      *ngIf="payloadConfiguration.lamp"
+      [filter]="payloadConfiguration.calibrationFilter"
+      [lamp]="payloadConfiguration.lamp"
     ></wm-nir-calibration>
   </div>
 </div>

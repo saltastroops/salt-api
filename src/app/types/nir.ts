@@ -13,7 +13,6 @@ export interface NirConfiguration {
   filter: string;
 }
 
-
 export interface NirDetector {
   mode: NirSamplingMode;
   resets: number;
@@ -25,7 +24,6 @@ export interface NirDetector {
   exposureType: string;
   gain: number;
 }
-
 
 export interface NirSpectroscopy {
   grating: string;

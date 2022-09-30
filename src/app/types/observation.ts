@@ -1,10 +1,10 @@
 import { Bvit } from "./bvit";
 import { Lamp, TargetCoordinates, TimeInterval } from "./common";
 import { Hrs } from "./hrs";
+import { Nir } from "./nir";
 import { Rss } from "./rss";
 import { Salticam } from "./salticam";
 import { Target } from "./target";
-import {Nir} from "./nir";
 
 export type CalibrationFilter =
   | "Blue and Red"

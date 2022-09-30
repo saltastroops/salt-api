@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { NirGeneralInfoComponent } from './nir-general-info.component';
+import { NirGeneralInfoComponent } from "./nir-general-info.component";
 
-describe('NirGeneralInfoComponent', () => {
+describe("NirGeneralInfoComponent", () => {
   let component: NirGeneralInfoComponent;
   let fixture: ComponentFixture<NirGeneralInfoComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NirGeneralInfoComponent ]
-    })
-    .compileComponents();
+      declarations: [NirGeneralInfoComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('NirGeneralInfoComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

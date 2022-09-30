@@ -56,6 +56,11 @@ import { HrsDetectorComponent } from "./proposal/instruments/hrs/hrs-detector/hr
 import { HrsGeneralInfoComponent } from "./proposal/instruments/hrs/hrs-general-info/hrs-general-info.component";
 import { HrsObservingTimesComponent } from "./proposal/instruments/hrs/hrs-observing-times/hrs-observing-times.component";
 import { HrsComponent } from "./proposal/instruments/hrs/hrs.component";
+import { NirCalibrationComponent } from "./proposal/instruments/nir/nir-calibration/nir-calibration.component";
+import { NirDetectorComponent } from "./proposal/instruments/nir/nir-detector/nir-detector.component";
+import { NirGeneralInfoComponent } from "./proposal/instruments/nir/nir-general-info/nir-general-info.component";
+import { NirSpectroscopyComponent } from "./proposal/instruments/nir/nir-spectroscopy/nir-spectroscopy.component";
+import { NirComponent } from "./proposal/instruments/nir/nir.component";
 import { ArcBibleComponent } from "./proposal/instruments/rss/arc-bible/arc-bible.component";
 import { EtalonWavelengthsComponent } from "./proposal/instruments/rss/etalon-wavelengths/etalon-wavelengths.component";
 import { FabryPerotComponent } from "./proposal/instruments/rss/fabry-perot/fabry-perot.component";
@@ -88,11 +93,6 @@ import { RealProposalService } from "./service/real/real-proposal.service";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
-import { NirComponent } from './proposal/instruments/nir/nir.component';
-import { NirGeneralInfoComponent } from './proposal/instruments/nir/nir-general-info/nir-general-info.component';
-import { NirDetectorComponent } from './proposal/instruments/nir/nir-detector/nir-detector.component';
-import { NirSpectroscopyComponent } from './proposal/instruments/nir/nir-spectroscopy/nir-spectroscopy.component';
-import { NirCalibrationComponent } from './proposal/instruments/nir/nir-calibration/nir-calibration.component';
 
 @NgModule({
   declarations: [

@@ -61,4 +61,12 @@
       [payloadConfiguration]="payloadConfiguration"
     ></wm-bvit>
   </div>
+
+  <div *ngIf="payloadConfiguration.instruments.nir">
+    <wm-nir
+      *ngFor="let nir of payloadConfiguration.instruments.nir"
+      [nir]="nir"
+      [payloadConfiguration]="payloadConfiguration"
+    ></wm-nir>
+  </div>
 </div>

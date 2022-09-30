@@ -4,6 +4,7 @@ import { Hrs } from "./hrs";
 import { Rss } from "./rss";
 import { Salticam } from "./salticam";
 import { Target } from "./target";
+import {Nir} from "./nir";
 
 export type CalibrationFilter =
   | "Blue and Red"
@@ -47,6 +48,7 @@ export interface Instruments {
   rss: Rss[] | null;
   hrs: Hrs[] | null;
   bvit: Bvit[] | null;
+  nir: Nir[] | null;
 }
 
 export interface Observation {

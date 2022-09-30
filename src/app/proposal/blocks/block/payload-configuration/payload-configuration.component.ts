@@ -34,6 +34,8 @@ export class PayloadConfigurationComponent implements OnChanges {
       this.instrument = "HRS";
     } else if (instruments.bvit) {
       this.instrument = "BVIT";
+    } else {
+      this.instrument = "NIR";
     }
 
     this.headerLine = this.instrument.toLowerCase() + "-";

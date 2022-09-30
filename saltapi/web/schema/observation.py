@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from saltapi.web.schema.bvit import Bvit
 from saltapi.web.schema.common import Lamp, TargetCoordinates, TimeInterval
 from saltapi.web.schema.hrs import Hrs
+from saltapi.web.schema.nir import Nir
 from saltapi.web.schema.rss import Rss
 from saltapi.web.schema.salticam import Salticam
 from saltapi.web.schema.target import Target
@@ -90,8 +91,9 @@ class Instruments(BaseModel):
     rss: Optional[List[Rss]] = Field(..., title="RSS setups", description="RSS setups")
     hrs: Optional[List[Hrs]] = Field(..., title="HRS setups", description="HRS setups")
     bvit: Optional[List[Bvit]] = Field(
-        ..., title="BVIT setups", description="HRS setups"
+        ..., title="BVIT setups", description="BVIT setups"
     )
+    nir: Optional[List[Nir]] = Field(..., title="NIR setups", description="NIR setups")
 
 
 class PayloadConfigurationType(str, Enum):

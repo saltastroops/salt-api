@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 
 from saltapi.settings import get_settings
 
-
 _engine: Any = None
 
 

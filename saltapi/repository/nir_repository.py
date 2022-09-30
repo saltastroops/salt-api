@@ -1,0 +1,116 @@
+from typing import Any, Dict, Optional
+
+from sqlalchemy import text
+from sqlalchemy.engine import Connection
+
+from saltapi.service.instrument import NIR
+
+
+class NirRepository:
+    def __init__(self, connection: Connection) -> None:
+        self.connection = connection
+
+    def get(self, nir_id: int) -> NIR:
+        stmt = text(
+            """
+SELECT N.Nir_Id                                          AS nir_id,
+       N.Cycles                                          AS cycles,
+       N.TotalExposureTime / 1000                        AS observation_time,
+       N.OverheadTime / 1000                             AS overhead_time,
+       NG.Grating                                        AS grating,
+       NC.GratingAngle / 1000                            AS grating_angle,
+       NAS.Location                                      AS articulation_station,
+       NF.NirFilter                                      AS filter,
+       NS.NirSampling                                    AS detector_sampling_mode,
+       ND.Resets                                         AS resets,
+       ND.Ramps                                          AS ramps,
+       ND.URG_Groups                                     AS urg_groups,
+       ND.ReadsPerSample                                 AS reads_per_sample,
+       ND.ExposureTime / 1000                            AS exposure_time,
+       ND.Iterations                                     AS detector_iterations,
+       NET.NirExposureType                               AS exposure_type,
+       NG1.NirGain                                       AS gain,
+       NPT.NirProcedureType                              AS procedure_type
+FROM Nir N
+         JOIN NirConfig NC ON N.NirConfig_Id = NC.NirConfig_Id
+         LEFT JOIN NirGrating NG ON NC.NirGrating_Id = NG.NirGrating_Id
+         LEFT JOIN NirArtStation NAS
+                   ON NC.NirArtStation_Number = NAS.NirArtStation_Number
+         JOIN NirFilter NF ON NC.NirFilter_Id = NF.NirFilter_Id
+         JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
+         JOIN NirProcedureType NPT ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
+         JOIN NirDitherPatternStep NDPS ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
+         JOIN NirDetector ND ON NDPS.NirDetector_Id = ND.NirDetector_Id
+         JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
+         JOIN NirGain NG1 ON ND.NirGain_Id = NG1.NirGain_Id
+         JOIN NirSampling NS ON ND.NirSampling_Id = NS.NirSampling_Id
+WHERE N.Nir_Id = :nir_id
+ORDER BY Nir_Id DESC;
+        """
+        )
+        results = self.connection.execute(stmt, {"nir_id": nir_id})
+        row = results.fetchone()
+        nir = {
+            "id": row.nir_id,
+            "configuration": self._configuration(row),
+            "detector": self._detector(row),
+            "procedure": self._procedure(row),
+            "observation_time": float(row.observation_time),
+            "overhead_time": float(row.overhead_time),
+        }
+        return nir
+
+    def _spectroscopy(self, row: Any) -> Optional[Dict[str, Any]]:
+        """Return an NIR spectroscopy setup."""
+        camera_station, camera_angle = row.articulation_station.split("_")
+        spectroscopy = {
+            "grating": row.grating,
+            "grating_angle": float(row.grating_angle),
+            "camera_station": int(camera_station),
+            "camera_angle": float(camera_angle),
+        }
+        return spectroscopy
+
+    def _configuration(self, row: Any) -> Dict[str, Any]:
+        """Return an NIR configuration."""
+
+        config = {
+            "mode": row.detector_sampling_mode,
+            "spectroscopy": self._spectroscopy(row),
+            "filter": row.filter,
+        }
+        return config
+
+    def _detector(self, row: Any) -> Dict[str, Any]:
+        """Return an NIR detector setup."""
+
+        detector = {
+            "mode": row.detector_sampling_mode.title(),
+            "resets": row.resets,
+            "ramps": row.ramps,
+            "urg_groups": row.urg_groups,
+            "reads_per_sample": row.reads_per_sample,
+            "exposure_time": float(row.exposure_time),
+            "iterations": row.detector_iterations,
+            "exposure_type": row.exposure_type,
+            "gain": row.gain,
+        }
+
+        return detector
+
+    def _procedure_type(self, row: Any) -> str:
+        """Return the procedure type."""
+
+        procedure_types = {
+            "NORMAL": "Normal",
+            "FOCUS": "Focus",
+        }
+        return procedure_types[row.procedure_type]
+
+    def _procedure(self, row: Any) -> Dict[str, Any]:
+        """Return an NIR procedure."""
+
+        return {
+            "procedure_type": row.procedure_type,
+            "cycles": row.cycles,
+        }

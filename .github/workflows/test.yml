@@ -79,8 +79,8 @@ jobs:
           MAPPING_TOOL_PROPOSALS_DIR: tests/
           MAPPING_TOOL_API_KEY: ''
           MAPPING_TOOL_PIPT_DIR: ''
-          MAPPING_TOOL_WEB_MANAGER_URL: https://www.salt.ac.za/wm/
-          MAPPING_TOOL_EPHEMERIS_URL: http://pysalt.salt.ac.za/finder_chart/ephemerides.cgi
+          MAPPING_TOOL_WEB_MANAGER_URL: ''
+          MAPPING_TOOL_EPHEMERIS_URL: ''
           MAPPING_TOOL_JAVA_COMMAND: ''
           MAPPING_TOOL_PYTHON_INTERPRETER: ''
           MAPPING_TOOL_FINDER_CHART_TOOL: ''

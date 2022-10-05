@@ -1,24 +1,18 @@
-from typing import Optional, List, Type, Dict
-import inspect
-
+from typing import Optional
 from fastapi import (
     APIRouter,
-    Body,
     Depends,
     File,
-    HTTPException,
     Path,
-    UploadFile,
-    status, Form,
+    UploadFile
 )
-from pydantic import BaseModel
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
-from saltapi.web.schema.proposal import ProposalProgress, ProgressReport, ProposalProgressReport
+from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressReport
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
 
@@ -66,7 +60,7 @@ def get_proposal_progress_report(
     response_model=ProposalProgress,
     responses={200: {"content": {"application/pdf": {}}}}
 )
-def put_proposal_progress_report(
+async def put_proposal_progress_report(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -92,7 +86,7 @@ def put_proposal_progress_report(
         # permission_service.check_permission_to_update_proposal_progress(
         #     user, proposal_code)
         proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal_service.put_proposal_progress(
+        await proposal_service.put_proposal_progress(
             proposal_progress,
             proposal_code,
             semester,

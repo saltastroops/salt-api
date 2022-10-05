@@ -6,7 +6,6 @@ from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
 from dateutil.relativedelta import relativedelta
-from fastapi import UploadFile
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
@@ -22,7 +21,6 @@ from saltapi.util import (
     semester_start,
     tonight,
 )
-from saltapi.web.schema.proposal import ProposalProgress
 
 
 class ProposalRepository:
@@ -1332,28 +1330,22 @@ WHERE PC.Proposal_Code = :proposal_code
         return cast(int, version)
 
     @staticmethod
-    def generate_proposal_progress_file_name(
-            proposal_code: str,
-            semester: str,
-            need_supplementary_file_name: bool = False
-    ) -> Dict[str, str]:
-        hash_md = hashlib.md5((proposal_code+semester).encode('utf-8')).hexdigest()
-        if need_supplementary_file_name:
-            return {
-                "supplementary_file_name": f"ProposalProgressSupplementary-{hash_md}.pdf",
-                "proposal_progress_file_name": f"ProposalProgressReport-{hash_md}.pdf"
-            }
-        return {
-            "supplementary_file_name": None,
-            "proposal_progress_file_name": f"ProposalProgressReport-{hash_md}.pdf"
-        }
+    def generate_proposal_progress_filename(
+            file_content: str,
+            is_supplementary: bool = False
+    ) -> str:
+        hash_md = hashlib.md5(file_content.encode('utf-8')).hexdigest()
+        if is_supplementary:
+            return f"ProposalProgressSupplementary-{hash_md}.pdf"
+
+        return f"ProposalProgressReport-{hash_md}.pdf"
 
     def insert_proposal_progress(
             self,
             progress_report_data: Dict[str, Any],
             proposal_code: str,
             semester: str,
-            file: UploadFile
+            filenames: Dict[str, str or None]
     ) -> None:
         """
         Insert the proposal progress information.
@@ -1382,11 +1374,6 @@ VALUES(
 );
         """
         )
-        file_names = self.generate_proposal_progress_file_name(
-            proposal_code,
-            semester,
-            True if file else False
-        )
         result = self.connection.execute(
             stmt,
             {
@@ -1396,8 +1383,8 @@ VALUES(
                 "summary_of_proposal_status":
                     progress_report_data["summary_of_proposal_status"],
                 "strategy_changes": progress_report_data["strategy_changes"],
-                "report_path": file_names["proposal_progress_file_name"],
-                "supplementary_path": file_names["supplementary_file_name"],
+                "report_path": filenames["proposal_progress_filename"],
+                "supplementary_path": filenames["additional_pdf_filename"],
             },
         )
         if not result.rowcount:
@@ -1714,6 +1701,7 @@ WHERE PC.Proposal_Code = :proposal_code
             proposal_progress: Dict[str, Any],
             proposal_code: str,
             semester: str,
+            filenames: Dict[str, str or None]
     ) -> None:
         """
         Insert the proposal progress to the database
@@ -1737,4 +1725,5 @@ WHERE PC.Proposal_Code = :proposal_code
             progress_report_data=proposal_progress,
             proposal_code=proposal_code,
             semester=semester,
+            filenames=filenames
         )

@@ -1,8 +1,7 @@
 import pathlib
 from typing import Any, Dict, List, Optional
-
 from fastapi import UploadFile
-from pdfkit import pdfkit
+import pdfkit
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -92,7 +91,7 @@ class ProposalService:
     ) -> Dict[str, Any]:
         return self.repository.get_progress_report(proposal_code, semester)
 
-    def put_proposal_progress(
+    async def put_proposal_progress(
         self,
         proposal_progress_report: ProposalProgressReport,
         proposal_code: str,
@@ -117,19 +116,18 @@ class ProposalService:
             "strategy_changes": proposal_progress_report.strategy_changes,
             "partner_requested_percentages": partner_requested_percentages
         }
-        # self.repository.put_proposal_progress(
-        #     proposal_progress, proposal_code, semester
-        # )
-        # TODO Generate the File
-        self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
+        filenames = await self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
+        self.repository.put_proposal_progress(
+            proposal_progress, proposal_code, semester, filenames
+        )
 
-    def create_progress_report_pdf(
+    async def create_progress_report_pdf(
         self,
         proposal_code: str,
         semester: str,
         new_request: Dict[str, Any],
         additional_pdf: Optional[UploadFile]
-    ):
+    ) -> Dict[str, str or None]:
 
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(proposal_code)
         previous_observed_time = self.repository.get_observed_time(proposal_code)
@@ -144,22 +142,33 @@ class ProposalService:
                         "allocated_time": ar["allocated_time"],
                         "observed_time": ot["observed_time"]
                     })
-        create_proposal_progress_html(
+        cpp = create_proposal_progress_html(
             proposal_code=proposal_code,
             semester=semester,
             previous_requests=previous_requests,
             previous_conditions=self.repository.get_latest_observing_conditions(proposal_code, semester),
             new_request=new_request
         )
-        output_file = "ProposalProgressReport.pdf"
-        with open('./pdf_report.html') as f:
-            options = {
-                'page-size': 'A4',
-                'margin-top': '20mm',
-                'margin-right': '20mm',
-                'margin-bottom': '20mm',
-                'margin-left': '20mm',
-                'encoding': "UTF-8",
-                'no-outline': None
-            }
-            pdfkit.from_file(f, output_file, options=options)
+        base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
+        proposal_progress_filename = self.repository.generate_proposal_progress_filename(cpp)
+        additional_pdf_filename = None
+        options = {
+            'page-size': 'A4',
+            'margin-top': '20mm',
+            'margin-right': '20mm',
+            'margin-bottom': '20mm',
+            'margin-left': '20mm',
+            'encoding': "UTF-8",
+            'no-outline': None
+        }
+        pdfkit.from_string(cpp, base_dir + proposal_progress_filename, options=options)
+        if additional_pdf:
+            additional_pdf_filename = self.repository.generate_proposal_progress_filename(
+                str(additional_pdf.file.read()), is_supplementary=True
+            )
+            open(base_dir + additional_pdf_filename, "wb").write(additional_pdf.file.read())
+
+        return {
+            "proposal_progress_filename": proposal_progress_filename,
+            "additional_pdf_filename": additional_pdf_filename
+        }

@@ -1,8 +1,5 @@
 from typing import Dict, List, Any
 
-from saltapi.web.schema.common import Semester
-
-
 def create_proposal_progress_html(
         proposal_code: str,
         semester: str,
@@ -220,5 +217,4 @@ def create_proposal_progress_html(
 </html>  
     '''
 
-    with open('./pdf_report.html', 'w') as f:
-        f.write(html_content)
+    return html_content

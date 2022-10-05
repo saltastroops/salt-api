@@ -399,6 +399,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "glop"
+version = "0.1.1"
+description = "GLOP - the Generalized Lpeg and Ometa-inspired Parsing and printing framework."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "greenlet"
 version = "1.1.2"
 description = "Lightweight in-process concurrent programming"
@@ -808,8 +816,8 @@ python-dotenv = {version = ">=0.10.4", optional = true, markers = "extra == \"do
 typing-extensions = ">=3.7.4.3"
 
 [package.extras]
-dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
+dotenv = ["python-dotenv (>=0.10.4)"]
 
 [[package]]
 name = "pyerfa"
@@ -878,6 +886,20 @@ python-versions = ">=3.6.8"
 
 [package.extras]
 diagrams = ["railroad-diagrams", "jinja2"]
+
+[[package]]
+name = "pypdf2"
+version = "2.11.0"
+description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
+
+[package.extras]
+crypto = ["pycryptodome"]
 
 [[package]]
 name = "pytest"
@@ -1419,7 +1441,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "96375fa0e962bf0a0cda7ce2dacc087d2aea55251131c8e7aaa67e8c40a12628"
+content-hash = "8c9871d93c5e637410d296c03c9077965e0cf84cf0d06b3711fca0fef8ff4b4c"
 
 [metadata.files]
 aiofiles = [
@@ -1430,10 +1452,7 @@ anyio = []
 asgiref = []
 astropy = []
 atomicwrites = []
-attrs = [
-    {file = "attrs-21.4.0-py2.py3-none-any.whl", hash = "sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4"},
-    {file = "attrs-21.4.0.tar.gz", hash = "sha256:626ba8234211db98e869df76230a137c4c40a12d72445c45d5f5b716f076e2fd"},
-]
+attrs = []
 bandit = []
 bcrypt = []
 black = []
@@ -1442,9 +1461,7 @@ cffi = []
 charset-normalizer = []
 click = []
 colorama = []
-colored = [
-    {file = "colored-1.4.3.tar.gz", hash = "sha256:b7b48b9f40e8a65bbb54813d5d79dd008dc8b8c5638d5bbfd30fc5a82e6def7a"},
-]
+colored = []
 coverage = []
 cryptography = []
 defusedxml = [
@@ -1470,14 +1487,12 @@ flake8 = [
 flake8-print = []
 freezegun = []
 ghp-import = []
-gitdb = [
-    {file = "gitdb-4.0.9-py3-none-any.whl", hash = "sha256:8033ad4e853066ba6ca92050b9df2f89301b8fc8bf7e9324d412a63f8bf1a8fd"},
-    {file = "gitdb-4.0.9.tar.gz", hash = "sha256:bac2fd45c0a1c9cf619e63a90d62bdc63892ef92387424b855792a6cabe789aa"},
-]
+gitdb = []
 gitpython = []
 glob2 = [
     {file = "glob2-0.7.tar.gz", hash = "sha256:85c3dbd07c8aa26d63d7aacee34fa86e9a91a3873bc30bf62ec46e531f92ab8c"},
 ]
+glop = []
 greenlet = [
     {file = "greenlet-1.1.2-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:58df5c2a0e293bf665a51f8a100d3e9956febfbf1d9aaf8c0677cf70218910c6"},
     {file = "greenlet-1.1.2-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:aec52725173bd3a7b56fe91bc56eccb26fbdff1386ef123abb63c84c5b43b63a"},
@@ -1577,10 +1592,7 @@ iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
-isort = [
-    {file = "isort-5.10.1-py3-none-any.whl", hash = "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7"},
-    {file = "isort-5.10.1.tar.gz", hash = "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"},
-]
+isort = []
 jinja2 = [
     {file = "Jinja2-2.11.3-py2.py3-none-any.whl", hash = "sha256:03e47ad063331dd6a3f04a43eddca8a966a26ba0c5b7207a9a9e4e08f1b29419"},
     {file = "Jinja2-2.11.3.tar.gz", hash = "sha256:a6d58433de0ae800347cab1fa3043cebbabe8baa9d29e668f1c768cb87a333c6"},
@@ -1642,10 +1654,7 @@ mypy-extensions = [
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 numpy = []
-packaging = [
-    {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
-    {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
-]
+packaging = []
 parse = [
     {file = "parse-1.19.0.tar.gz", hash = "sha256:9ff82852bcb65d139813e2a5197627a94966245c897796760a3a2a8eb66f020b"},
 ]
@@ -1669,10 +1678,7 @@ pluggy = [
     {file = "pluggy-1.0.0-py2.py3-none-any.whl", hash = "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"},
     {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
 ]
-py = [
-    {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
-    {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
-]
+py = []
 pyasn1 = [
     {file = "pyasn1-0.4.8-py2.4.egg", hash = "sha256:fec3e9d8e36808a28efb59b489e4528c10ad0f480e57dcc32b4de5c9d8c9fdf3"},
     {file = "pyasn1-0.4.8-py2.5.egg", hash = "sha256:0458773cfe65b153891ac249bcf1b5f8f320b7c2ce462151f8fa74de8934becf"},
@@ -1692,42 +1698,9 @@ pycodestyle = [
     {file = "pycodestyle-2.7.0-py2.py3-none-any.whl", hash = "sha256:514f76d918fcc0b55c6680472f0a37970994e07bbb80725808c17089be302068"},
     {file = "pycodestyle-2.7.0.tar.gz", hash = "sha256:c389c1d06bf7904078ca03399a4816f974a1d590090fecea0c63ec26ebaf1cef"},
 ]
-pycparser = [
-    {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
-    {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
-]
+pycparser = []
 pydantic = []
-pyerfa = [
-    {file = "pyerfa-2.0.0.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:278832de7803f2fb0ef4b14263200f98dfdb3eaa78dc63835d93796fd8fc42c6"},
-    {file = "pyerfa-2.0.0.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:629248cebc8626a52e80f69d4e2f30cc6e751f57803f5ba7ec99edd09785d181"},
-    {file = "pyerfa-2.0.0.1-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:3285d95dfe398a931a633da961f6f1c0b8690f2a3b1c510a4efe639f784cd9c7"},
-    {file = "pyerfa-2.0.0.1-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:177f50f0e8354f1a7115c2d4784668b365f1cc2f2c7d1e2f4ddf354160559b32"},
-    {file = "pyerfa-2.0.0.1-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:041939a7554a98b72885904ffddd8882567191bee62358727679448480174c31"},
-    {file = "pyerfa-2.0.0.1-cp310-cp310-win32.whl", hash = "sha256:f9e149bc3d423ae891f6587c1383fd471ae07744b88152e66b5e9f64a8bc9006"},
-    {file = "pyerfa-2.0.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:f00dc4fc48a16eb39fd0121f2f06c03ee762b79a207cc5b0bc17d94191b51302"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:1ba3668e1e181a678ce788d23a4f8666aabd8518f77fdde5157ba4744bc73d4a"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b8f08f6e6d75a261bb92b707bea19eba2e46a8fcbfb499b789f3eb0d0352ea00"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:da89304d6b25ac056e470f44f85770b04c9674eced07a7f93b5eb0ce1edaabd9"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:36738ba75e7a69e0ea6a7e96a5d33a852816427e7e94e7089c188ef920b02669"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:5c077aed4ccd585c1fe2f96ada8edb66e9d27b4ae8ff13ea2783283b298ba0c6"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-win32.whl", hash = "sha256:0833f8ebba9f84a19a04ee5ca5aa90be75729abfbb8328e7a6d89ed1b04e058c"},
-    {file = "pyerfa-2.0.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:e86c08c9c0b75e448818473c6d709e3887a439c05a1aa34042d26774251422b7"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:b935fa9d10dfd7206760859236640c835aa652609c0ae8a6584593324eb6f318"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:67711a748821c5d91f7a8907b9125094dfc3e5ab6a6b7ad8e207fd6afbe6b37f"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:d2c10838241aaf17279468dcc731cb2c09bfb7dd7b340c0f527fd70c7c9e53d1"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:37249e1e2b378d1f56e9379e4bb8f2cf87645c160a8a3e92166a1b7bb7ad7ea6"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:f76fb4b64a87da2af9d0b6b79cc25e1ecc5b4143b2b3c8c9f10b221748c5db4d"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-win32.whl", hash = "sha256:486e672c52bf58eab61140968660ac7fb3b756116b53c26c334ae95dadd943ee"},
-    {file = "pyerfa-2.0.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:d603f1e8123f98a0593433aa6dad4ba03f0b0ceef4cb3e96f9a69aa7ab8d5c61"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ef5590b2075c50395b958f102988e519e339d96509dfdca0360f26dde94c47e7"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c7ca8c98842f1ae10c1fbcea0e03a41ddc13456da88da2dc9b8335a8c414d7a3"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:d3e7dedce1d7e4e044f6f81d192b1f6b373c8ad6716aa8721ec6d3cf4d36f5f3"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:690116a6026ee84ce5fec794c9e21bdc8c0ac8345d6722323810181486745068"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:da5ee24eaf5e5f841f36885ea16461800b7bea11df5b657bcff85d7a7f51d2d8"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-win32.whl", hash = "sha256:7895b7e6f3bc36442d1969bf3bda5a4c3b661be7a5a468798369cbd5d81023d8"},
-    {file = "pyerfa-2.0.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:63a83c35cea8c5d50d53c18089f1e625c0ffc59a7a5b8d44e0f1b3ec5288f183"},
-    {file = "pyerfa-2.0.0.1.tar.gz", hash = "sha256:2fd4637ffe2c1e6ede7482c13f583ba7c73119d78bef90175448ce506a0ede30"},
-]
+pyerfa = []
 pyflakes = [
     {file = "pyflakes-2.3.1-py2.py3-none-any.whl", hash = "sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3"},
     {file = "pyflakes-2.3.1.tar.gz", hash = "sha256:f5bc8ecabc05bb9d291eb5203d6810b49040f6ff446a756326104746cc00c1db"},
@@ -1739,10 +1712,8 @@ pymysql = [
     {file = "PyMySQL-1.0.2.tar.gz", hash = "sha256:816927a350f38d56072aeca5dfb10221fe1dc653745853d30a216637f5d7ad36"},
 ]
 pyparsing = []
-pytest = [
-    {file = "pytest-7.1.2-py3-none-any.whl", hash = "sha256:13d0e3ccfc2b6e26be000cb6568c832ba67ba32e719443bfe725814d3c42433c"},
-    {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
-]
+pypdf2 = []
+pytest = []
 pytest-asyncio = [
     {file = "pytest-asyncio-0.14.0.tar.gz", hash = "sha256:9882c0c6b24429449f5f969a5158b528f39bde47dc32e85b9f0403965017e700"},
     {file = "pytest_asyncio-0.14.0-py3-none-any.whl", hash = "sha256:2eae1e34f6c68fc0a9dc12d4bea190483843ff4708d24277c41568d6b6044f1d"},
@@ -1808,10 +1779,7 @@ six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
-smmap = [
-    {file = "smmap-5.0.0-py3-none-any.whl", hash = "sha256:2aba19d6a040e78d8b09de5c57e96207b09ed71d8e55ce0959eeee6c8e190d94"},
-    {file = "smmap-5.0.0.tar.gz", hash = "sha256:c840e62059cd3be204b0c9c9f74be2c09d5648eddd4580d9314c3ecde0b30936"},
-]
+smmap = []
 sniffio = [
     {file = "sniffio-1.2.0-py3-none-any.whl", hash = "sha256:471b71698eac1c2112a40ce2752bb2f4a4814c22a54a3eed3676bc0f5ca9f663"},
     {file = "sniffio-1.2.0.tar.gz", hash = "sha256:c4666eecec1d3f50960c6bdf61ab7bc350648da6c126e3cf6898d8cd4ddcd3de"},

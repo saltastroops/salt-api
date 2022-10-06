@@ -1,6 +1,6 @@
 import pathlib
 import urllib.parse
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 from fastapi import (
     APIRouter,
@@ -52,13 +52,18 @@ def get_urls_for_proposal_progress_report_pdfs(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
 
-        progress_reports_semester_list = (
+        progress_report_urls = (
             proposal_service.get_urls_for_proposal_progress_report_pdfs(
                 proposal_code, request, router
             )
         )
+        progress_report_pdfs = dict()
+        for semester in progress_report_urls:
+            progress_report_pdfs[semester] = {
+                "proposal_progress_pdf": cast(AnyUrl, progress_report_urls[semester]["proposal_progress_pdf"])
+            }
 
-        return progress_reports_semester_list
+        return progress_report_pdfs
 
 
 @router.get(
@@ -156,11 +161,10 @@ def get_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report = proposal_service.get_progress_report(
-            proposal_code, semester, request, router
+        progress_report_pdf_path = proposal_service.get_proposal_progress_report_pdf(
+            proposal_code, semester
         )
-
-        pdf_path = urllib.parse.urlparse(progress_report["proposal_progress_pdf"]).path
+        pdf_path = urllib.parse.urlparse(progress_report_pdf_path).path
 
         filename = "ProgressReport_{}.pdf".format(semester)
 
@@ -190,11 +194,11 @@ def get_supplementary_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report = proposal_service.get_progress_report(
-            proposal_code, semester, request, router
+        supplementary_progress_report_pdf_path = proposal_service.get_supplementary_proposal_progress_report_pdf(
+            proposal_code, semester
         )
 
-        pdf_path = urllib.parse.urlparse(progress_report["additional_pdf"]).path
+        pdf_path = urllib.parse.urlparse(supplementary_progress_report_pdf_path).path
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 

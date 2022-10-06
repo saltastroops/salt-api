@@ -62,7 +62,7 @@ async def create_submission(
     proposal must be the same as that passed as a query parameter.
     """
     # Submissions don't use database transactions. As such no unit of work is used.
-    submission_repository = SubmissionRepository(engine.connect())
+    submission_repository = SubmissionRepository(engine().connect())
     submission_service = services.submission_service(submission_repository)
     submission_identifier = await submission_service.submit_proposal(
         user, proposal, proposal_code
@@ -222,7 +222,8 @@ async def submission_progress(
             # Send a message with the current status, new log entries and (in case of a
             # successful submission) proposal code.
             if submission_progress["status"] != SubmissionStatus.SUCCESSFUL.value:
-                del submission_progress["proposal_code"]
+                if "proposal_code" in submission_progress:
+                    del submission_progress["proposal_code"]
             await websocket.send_json(submission_progress)
 
             if submission_progress["status"] != SubmissionStatus.IN_PROGRESS.value:

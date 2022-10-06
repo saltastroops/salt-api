@@ -32,17 +32,20 @@ poetry install
 ```
 
 !!! note
-    In theory this is all you have to do. In practice you might have to jump through various hoops and loops to get the `cryptography` package installed. The [installation instructions](https://cryptography.io/en/latest/installation.html) may be of help, but you might still have to consult Google.
+    By default, poetry creates a virtual environment and installs the packages in `{cache-dir}/virtualenvs`. To activate the virtual environment after installation run `poetry shell` (to create a new shell) or `source $(poetry env info --path)/bin/activate`. To deactivate the virtual environment, run `exit` (to exit new shell) or `deactivate`.
+
+!!! note
+    In theory this is all you have to do. In practice, you might have to jump through various hoops and loops to get the `cryptography` package installed. The [installation instructions](https://cryptography.io/en/latest/installation.html) may be of help, but you might still have to consult Google.
 
 !!! note
     If you are using an IDE such as IntelliJ, you might have to mark the `python` folder as a sources root folder, as otherwise the IDE might complain about incorrect import statements.
 
 ## Settings
 
-All settings for the Web Manager must be provided as environment variables or in a file. By default that file is the file `.env` in the server's root folder (i.e. in the `python` folder). However, you can choose another file by setting the environment variable `DOTENV_FILE`. _Remember that a file defining environment variables must **never** be put under version control._
+All settings for the Web Manager must be provided as environment variables or in a file. By default, that file is the file `.env` in the server's root folder (i.e. in the `python` folder). However, you can choose another file by setting the environment variable `DOTENV_FILE`. _Remember that a file defining environment variables must **never** be put under version control._
 
 !!! warning
-    Note that the value of the variable `SDB_DSN` must be in a format understood by SQLAlchemy. In particular, the protocol must indicate the database driver. So instead of just `mysql` it must be `mysql+pymysql` (for PyMYSQL) or `mysql+pymysql`. Otherwise you might get a puzzling error like `ModuleNotFoundError: No module named 'MySQLdb'`.
+    Note that the value of the variable `SDB_DSN` must be in a format understood by SQLAlchemy. In particular, the protocol must indicate the database driver. So instead of just `mysql` it must be `mysql+pymysql` (for PyMYSQL) or `mysql+pymysql`. Otherwise, you might get a puzzling error like `ModuleNotFoundError: No module named 'MySQLdb'`.
 
 The unit tests always use the file `.env.test` in the server's root folder, and you cannot change this file.
 
@@ -93,6 +96,8 @@ The Makefile provides various rules for formatting and testing.
 - Launching the Cypress test runner: `make cypress`
 - Running formatting and other tests: `make test`
 - Running tox: `make tox`
+
+For convenience, two simple scripts are provided in the project directory for linting (`lint.sh`) and for running checks before pushing (`check.sh`).
 
 ## Making use of the git pre-commit hook
 
@@ -178,12 +183,19 @@ Given the size of the database, it is unrealistic to populate it with dummy cont
 
 One solution would be to create a test database with fake content. However, this approach is arduous and brittle, and definitely violates the principle that testing should be easy.
 
-Instead, a fixture `testdata` for accessing test data is used. This fixture returns a function. This function is called with a filepath, which must be relative to the `testdata` folder and must denote a YAML file. The function then uses PyYAML to return the file content as a Python object.
-
-The folder `testdata` is not under version control; you will have to create it (and the data files) yourself. It must be at root level in the project.
+Instead, the responses from the database can be stored in files, using the `pytest-pymysql-autorecord`. See the plugin's documentation for details. The bottom line is that you have to use the `--store-db-data` command line option for storing data, and the `--mock-db-data` option for using the stored data instead of making real database requests. The plugin also offers a command line option for setting the base directory for the data files. You should *not* use this, though, as `conftest.py` sets the directory to be a subdirectory `database` in the directory specified by the `TEST_DATA_DIR` environment variable.
 
 !!! warning
-    The reason that the folder is not under version control is of course that the test data should not end up in a public repository. But you should not rely on it. If you have highly sensitive data (such as, say, a password hash), you should not use it as test data. The bottom line is: If the data being public on the web gave you sleepless nights, don't use it.
+    The reason that the plugin does not store the data in the tests directory is of course that the test data should not end up in a public repository. But you should not rely on it. If you have highly sensitive data (such as, say, a password hash), you should not use it as test data. The bottom line is: If the data being public on the web gave you sleepless nights, don't use it.
+
+If you store random data in the database, you might have to use the `user_value` method of the `pytest-pymymysql-autorecord` plugin. If you cannot store database data for a test (for example because its database access is not deterministic or you are concerned about confidentiality), you can skip the test by calling the plugin's `skip_for_db_mocking` function.
+
+Regression testing is used with the `pytest-regressions` plugin. As for the database mocking, the data files aren't stored in the tests directory (as `pytest-regressions` would do by default). You instead have to specify a directory with the `TEST_DATA_DIR` environment variable, and the data is stored in a subdirectory `regression` of that directory.
+
+!!! note
+   The directory specified by the `TEST_DATA_DIR` environment variable must contain two files `users.yml` and `user_roles.yml`, which define usernames to be used by the tests. More specifically, they are needed by the functions `find_username` and `find_usernames` in `tests/conftest.py`.
+
+### Viewing executed SQL statements
 
 If you want to see the executed SQL statements, you have to set the `ECHO_SQL` environment variable to a non-empty value. Note that pytest will only output them for failing tests.
 

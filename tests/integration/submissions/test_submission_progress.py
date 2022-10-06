@@ -6,6 +6,7 @@ import pytest
 import pytz
 from fastapi.testclient import TestClient
 from sqlalchemy.engine import Connection
+from starlette.websockets import WebSocketDisconnect
 
 import saltapi.web.api.submissions
 from saltapi.repository.submission_repository import SubmissionRepository
@@ -106,9 +107,10 @@ def test_submission_log_requires_authentication(
     with client.websocket_connect(
         f"/submissions/{submission_identifier}/progress/ws"
     ) as websocket:
-        websocket.send_text("abc")
-        message = websocket.receive_text()
-        assert "authenticated" in message and "/token" in message
+        with pytest.raises(WebSocketDisconnect) as excinfo:
+            websocket.send_text("abc")
+            message = websocket.receive_text()
+        assert "authenticated" in str(excinfo.value) and "/token" in str(excinfo.value)
 
 
 def test_submission_log_requires_existing_identifier(
@@ -126,9 +128,10 @@ def test_submission_log_requires_existing_identifier(
     with client.websocket_connect(
         f"/submissions/{submission_identifier}/progress/ws"
     ) as websocket:
-        websocket.send_text("secret")
-        message = websocket.receive_text()
-        assert submission_identifier in message
+        with pytest.raises(WebSocketDisconnect) as excinfo:
+            websocket.send_text("secret")
+            message = websocket.receive_text()
+        assert submission_identifier in str(excinfo.value)
 
 
 def test_submission_log_can_only_be_accessed_by_submitter(
@@ -150,9 +153,10 @@ def test_submission_log_can_only_be_accessed_by_submitter(
     with client.websocket_connect(
         f"/submissions/{submission_identifier}/progress/ws"
     ) as websocket:
-        websocket.send_text("secret")
-        message = websocket.receive_text()
-        assert "someone else" in message
+        with pytest.raises(WebSocketDisconnect) as excinfo:
+            websocket.send_text("secret")
+            websocket.receive_text()
+        assert "someone else" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(

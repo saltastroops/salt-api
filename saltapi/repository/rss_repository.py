@@ -7,6 +7,7 @@ from sqlalchemy.engine import Connection
 
 from saltapi.service.instrument import RSS
 from saltapi.util import semester_end, semester_of_datetime
+from saltapi.web.schema.rss import RssMaskType
 
 
 class RssRepository:
@@ -101,8 +102,8 @@ ORDER BY Rss_Id DESC;
             "configuration": self._configuration(row),
             "detector": self._detector(row),
             "procedure": self._procedure(row),
-            "observation_time": row.observation_time,
-            "overhead_time": row.overhead_time,
+            "observation_time": float(row.observation_time),
+            "overhead_time": float(row.overhead_time),
             "arc_bible_entries": self._arc_bible_entries(row),
         }
         return rss
@@ -115,7 +116,7 @@ ORDER BY Rss_Id DESC;
         camera_station, camera_angle = row.articulation_station.split("_")
         spectroscopy = {
             "grating": row.grating,
-            "grating_angle": row.grating_angle,
+            "grating_angle": float(row.grating_angle),
             "camera_station": int(camera_station),
             "camera_angle": float(camera_angle),
         }
@@ -156,7 +157,7 @@ ORDER BY Rss_Id DESC;
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,
-                "equinox": row.mos_equinox,
+                "equinox": float(row.mos_equinox),
                 "cut_by": row.mos_cut_by,
                 "cut_date": row.mos_cut_date,
                 "comment": row.mos_comment,
@@ -203,7 +204,7 @@ ORDER BY Rss_Id DESC;
             "post_shuffled_rows": row.post_shuffle,
             "pre_binned_rows": row.pre_binned_rows,
             "pre_binned_columns": row.pre_binned_cols,
-            "exposure_time": row.exposure_time,
+            "exposure_time": float(row.exposure_time),
             "iterations": row.detector_iterations,
             "exposure_type": row.exposure_type,
             "gain": row.gain,
@@ -249,7 +250,7 @@ ORDER BY REPD.RssEtalonPattern_Order
         )
         result = self.connection.execute(stmt, {"pattern_id": etalon_pattern_id})
 
-        return [row.wavelength for row in result]
+        return [float(row.wavelength) for row in result]
 
     def _half_wave_plate_angles(self, polarimetry_pattern_id: int) -> Dict[int, float]:
         """
@@ -396,14 +397,14 @@ ORDER BY is_preferred_lamp DESC
             {
                 "lamp": row.lamp,
                 "is_preferred_lamp": True if row.is_preferred_lamp else False,
-                "original_exposure_time": row.original_exposure_time,
-                "preferred_exposure_time": row.preferred_exposure_time,
+                "original_exposure_time": float(row.original_exposure_time),
+                "preferred_exposure_time": float(row.preferred_exposure_time),
             }
             for row in result
         ]
         return entries
 
-    def get_mask_in_magazine(self, mask_type: Optional[str] = None) -> List[str]:
+    def get_mask_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
         """
         The list of masks in the magazine, optionally filtered by a mask type.
         """
@@ -414,11 +415,10 @@ FROM RssCurrentMasks AS RCM
     JOIN RssMask AS RM ON RCM.RssMask_Id = RM.RssMask_Id
     JOIN RssMaskType AS RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
         """
-        if mask_type:
-            stmt += " WHERE RssMaskType = :mask_type"
+        if len(mask_types) > 0:
+            stmt += " WHERE RssMaskType IN :mask_type"
 
-        results = self.connection.execute(text(stmt), {"mask_type": mask_type})
-
+        results = self.connection.execute(text(stmt), {"mask_type": [m.value for m in mask_types]})
         return [row.barcode for row in results]
 
     def _get_liaison_astronomers(self, proposal_code_ids: Set[int]) -> Dict[int, str]:
@@ -612,7 +612,7 @@ WHERE RssMask_Id = ( SELECT RssMask_Id FROM RssMask WHERE Barcode = :barcode )
 
         return self.get_mos_mask_metadata(mos_mask_metadata["barcode"])
 
-    def get_obsolete_rss_masks_in_magazine(self, mask_type: Optional[str]) -> List[str]:
+    def get_obsolete_rss_masks_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
         """
         The list of obsolete RSS masks, optionally filtered by a mask type.
         """
@@ -635,21 +635,21 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
     AND (BlockStatus = "Active" OR BlockStatus = "On Hold")
     AND NVisits >= NDone
 """
-        if mask_type:
-            stmt += " AND RssMaskType = :mask_type"
+        if len(mask_types) > 0:
+            stmt += " AND RssMaskType IN :mask_type"
         needed_masks = [
             m["barcode"]
             for m in self.connection.execute(
                 text(stmt),
                 {
                     "semester": semester_of_datetime(datetime.now().astimezone()),
-                    "mask_type": mask_type,
+                    "mask_types": [m.value for m in mask_types],
                 },
             )
         ]
 
         obsolete_masks = []
-        for m in self.get_mask_in_magazine(mask_type):
+        for m in self.get_mask_in_magazine(mask_types):
             if m not in needed_masks:
                 obsolete_masks.append(m)
         return obsolete_masks

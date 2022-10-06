@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     from_email: str
 
     # SMTP server for sending emails
-    smtp_server: str
+    smtp_server: Optional[str]
 
     # Directory containing the jar file MappingService.jar for mapping proposals to the
     # database
@@ -75,6 +75,12 @@ class Settings(BaseSettings):
 
     # API key for the mapping tool
     mapping_tool_api_key: str
+
+    # No-reply email address for the mapping tool
+    mapping_tool_no_reply_email: str
+
+    # Email address for submission notifications by the mapping tool
+    mapping_tool_submit_email: str
 
     # URL for accessing Web Manager services
     mapping_tool_web_manager_url: HttpUrl

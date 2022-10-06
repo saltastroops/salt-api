@@ -5,7 +5,7 @@ from saltapi.repository.database import engine
 
 class UnitOfWork:
     def __enter__(self) -> "UnitOfWork":
-        self.connection = engine.connect()
+        self.connection = engine().connect()
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:

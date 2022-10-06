@@ -20,7 +20,7 @@ router = APIRouter(prefix="/blocks", tags=["Block"])
 )
 def get_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
     """
-
+    Get the Scheduled block.
     """
 
     with UnitOfWork() as unit_of_work:

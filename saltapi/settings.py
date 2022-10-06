@@ -94,7 +94,7 @@ class Settings(BaseSettings):
     # Command for converting images
     mapping_tool_image_conversion_command: str
 
-    # ?
+    # Telescope control system file URI
     tcs_icd: str
 
     class Config:

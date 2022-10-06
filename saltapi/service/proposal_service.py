@@ -1,8 +1,7 @@
 import pathlib
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Union
 
 from fastapi import APIRouter, Request
-from pydantic.networks import AnyUrl
 from starlette.routing import URLPath
 
 from saltapi.exceptions import NotFoundError
@@ -13,15 +12,28 @@ from saltapi.settings import get_settings
 from saltapi.util import next_semester, semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 
-proposals_dir = pathlib.Path(get_settings().proposals_dir)
+proposals_dir = get_settings().proposals_dir
 
 
-def generate_route_url(request: Request, router_path: URLPath) -> AnyUrl:
+def generate_route_url(request: Request, router_path: URLPath) -> str:
 
     url = "{}://{}:{}{}".format(
         request.url.scheme, request.client.host, request.client.port, router_path
     )
-    return cast(AnyUrl, url)
+    return url
+
+
+def generate_pdf_path(proposal_code: str, filename: str = None) -> Union[pathlib.Path, None]:
+    return (
+        pathlib.Path(
+            proposals_dir
+            / proposal_code
+            / "Included"
+            / filename
+        ).resolve().as_uri()
+        if filename
+        else None
+    )
 
 
 class ProposalService:
@@ -65,7 +77,6 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
-        proposals_dir = pathlib.Path(get_settings().proposals_dir)
         version = self.repository.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
@@ -128,23 +139,23 @@ class ProposalService:
 
     def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
-    ) -> Dict[str, Dict[str, AnyUrl]]:
+    ) -> Dict[str, Dict[str, str]]:
         semesters = self.repository.list_of_semesters(proposal_code)
 
-        progress_report_path_list = dict()
+        progress_report_urls = dict()
         for semester in semesters:
             progress_report_pdf_url = router.url_path_for(
                 "get_proposal_progress_report_pdf",
                 proposal_code=proposal_code,
                 semester=semester,
             )
-            progress_report_path_list[semester] = {
+            progress_report_urls[semester] = {
                 "proposal_progress_pdf": generate_route_url(
                     request, progress_report_pdf_url
                 ),
             }
 
-        return progress_report_path_list
+        return progress_report_urls
 
     def get_progress_report(
         self,
@@ -155,51 +166,51 @@ class ProposalService:
     ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
-        progress_report_pdf_path = (
-            pathlib.Path(
-                proposals_dir
-                / proposal_code
-                / "Included"
-                / progress_report["proposal_progress_pdf"]
+        if progress_report:
+            progress_pdf_url = router.url_path_for(
+                "get_proposal_progress_report_pdf",
+                proposal_code=proposal_code,
+                semester=semester,
             )
-            .resolve()
-            .as_uri()
-            if progress_report["proposal_progress_pdf"]
-            else None
-        )
-        additional_progress_report_pdf_path = (
-            pathlib.Path(
-                proposals_dir
-                / proposal_code
-                / "Included"
-                / progress_report["additional_pdf"]
+            # proposal_progress_pdf_path = generate_pdf_path(proposal_code, progress_report["proposal_progress_pdf"])
+            progress_report["proposal_progress_pdf"] = progress_report["additional_pdf"] = (
+                generate_route_url(request, progress_pdf_url)
+                if progress_report["additional_pdf"]
+                else None
             )
-            .resolve()
-            .as_uri()
-            if progress_report["additional_pdf"]
-            else None
-        )
 
-        progress_pdf_url = router.url_path_for(
-            "get_proposal_progress_report_pdf",
-            proposal_code=proposal_code,
-            semester=semester,
-        )
-        progress_report["proposal_progress_pdf"] = (
-            generate_route_url(request, progress_pdf_url)
-            if progress_report_pdf_path
-            else None
-        )
+            additional_progress_pdf_url = router.url_path_for(
+                "get_supplementary_proposal_progress_report_pdf",
+                proposal_code=proposal_code,
+                semester=semester,
+            )
+            progress_report["additional_pdf"] = (
+                generate_route_url(request, additional_progress_pdf_url)
+                if progress_report["additional_pdf"]
+                else None
+            )
+            return progress_report
+        else:
+            raise NotFoundError(
+                "No progress report for proposal {}".format(proposal_code)
+            )
 
-        additional_progress_pdf_url = router.url_path_for(
-            "get_supplementary_proposal_progress_report_pdf",
-            proposal_code=proposal_code,
-            semester=semester,
-        )
-        progress_report["additional_pdf"] = (
-            generate_route_url(request, additional_progress_pdf_url)
-            if additional_progress_report_pdf_path
-            else None
-        )
+    def get_proposal_progress_report_pdf(
+            self,
+            proposal_code: ProposalCode,
+            semester: Semester,
+    ) -> Union[str, None]:
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
 
-        return progress_report
+        return generate_pdf_path(proposal_code, progress_report["proposal_progress_pdf"])
+
+    def get_supplementary_proposal_progress_report_pdf(
+                self,
+                proposal_code: ProposalCode,
+                semester: Semester
+    ) -> Union[str, None]:
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
+
+        return generate_pdf_path(proposal_code, progress_report["proposal_progress_pdf"])
+
+

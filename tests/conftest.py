@@ -1,4 +1,6 @@
 import os
+import pathlib
+import re
 import uuid
 
 import dotenv
@@ -9,9 +11,11 @@ import dotenv
 os.environ["DOTENV_FILE"] = ".env.test"
 dotenv.load_dotenv(os.environ["DOTENV_FILE"])
 
+os.environ["PMSM_DATA_DIR"] = str(pathlib.Path(os.environ["TEST_DATA_DIR"]) / "database")
+
 
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, Optional, cast
+from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
 import pytest
 import yaml
@@ -26,19 +30,13 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import User
 from saltapi.service.user_service import UserService
 
-engine: Optional[Engine] = None
-sdb_dsn = os.environ.get("SDB_DSN")
-if sdb_dsn:
-    echo_sql = True if os.environ.get("ECHO_SQL") else False  # SQLAlchemy needs a bool
-    engine = create_engine(sdb_dsn, echo=echo_sql, future=True)
-
 
 def get_user_authentication_function() -> Callable[[str, str], User]:
     def authenticate_user(username: str, password: str) -> User:
         if password != USER_PASSWORD:
             raise NotFoundError("No user found for username and password")
 
-        with cast(Engine, engine).connect() as connection:
+        with cast(Engine, _create_engine()).connect() as connection:
             user_repository = UserRepository(connection)
             user_service = UserService(user_repository)
             user = user_service.get_user_by_username(username)
@@ -63,44 +61,52 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 
 
+def _create_engine():
+    sdb_dsn = os.environ.get("SDB_DSN")
+    if sdb_dsn:
+        echo_sql = (
+            True if os.environ.get("ECHO_SQL") else False
+        )  # SQLAlchemy needs a bool
+        return create_engine(sdb_dsn, echo=echo_sql, future=True)
+    else:
+        raise ValueError("No SDB_DSN environment variable set")
+
+
+@pytest.fixture(autouse=True)
+def mock_engine(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(saltapi.repository.unit_of_work, "engine", _create_engine)
+    monkeypatch.setattr(saltapi.web.api.submissions, "engine", _create_engine)
+    monkeypatch.setattr(saltapi.service.submission_service, "engine", _create_engine)
+
+
 @pytest.fixture(scope="function")
 def db_connection() -> Generator[Connection, None, None]:
-    if not engine:
-        raise ValueError(
-            "No SQLAlchemy engine set. Have you defined the SDB_DSN environment "
-            "variable?"
-        )
-    with engine.connect() as connection:
+    with _create_engine().connect() as connection:
         yield connection
 
 
-def read_testdata(path: str) -> Any:
-    if Path(path).is_absolute():
-        raise ValueError("The file path must be a relative path.")
+def _data_file(data_type: str, request: pytest.FixtureRequest) -> Path:
+    if "TEST_DATA_DIR" not in os.environ:
+        pytest.fail("Environment variable not set: TEST_DATA_DIR")
+    root_dir = Path(os.environ["TEST_DATA_DIR"]) / data_type
 
-    root_dir = Path(os.environ["TEST_DATA_DIR"])
-    datafile = root_dir / path
-    if not datafile.exists():
-        raise FileNotFoundError(f"File does not exist: {datafile}")
-
-    with open(datafile, "r") as f:
-        return yaml.safe_load(f)
+    test_file = request.path.relative_to(request.config.rootpath)
+    parent_dir = (root_dir / test_file).parent
+    node_dir = test_file.stem
+    return parent_dir / node_dir / (re.sub(r"\W", "_", request.node.name) + ".yml")
 
 
-@pytest.fixture(scope="session")
-def testdata() -> Generator[Callable[[str], Any], None, None]:
-    """
-    Load test data from a YAML file.
+@pytest.fixture(scope="function")
+def check_data(
+    data_regression: Any, request: pytest.FixtureRequest
+) -> Generator[Callable[[Any], None], None, None]:
+    # Figure out the file path for the data file
+    data_file = _data_file("regression", request)
 
-    The test data must be contained in a YAML file located in the folder tests/testdata
-    or any subfolder thereof. The file path relative to the tests/testdata folder must
-    be passed as the argument of the function returned by this fixture.
+    def f(data: Any):
+        data_regression.check(data, fullpath=data_file)
 
-    The YAML file must contain a single document only (i.e. it must contain no "---"
-    separators). Its content is returned in the way PyYAML returns YAML content.
-    """
-
-    yield read_testdata
+    yield f
 
 
 @pytest.fixture()
@@ -121,7 +127,12 @@ def find_username(
     normalized_user_type = user_type.lower()
     normalized_user_type = normalized_user_type.replace(" ", "_").replace("-", "_")
 
-    users = read_testdata(TEST_DATA)
+    if "TEST_DATA_DIR" not in os.environ:
+        pytest.fail("Environment variable not set: TEST_DATA_DIR")
+    test_data_dir = Path(os.environ["TEST_DATA_DIR"])
+    users_file = test_data_dir / "users.yml"
+    with open(users_file) as f:
+        users = yaml.safe_load(f)
 
     if normalized_user_type in [
         "investigator",
@@ -141,6 +152,40 @@ def find_username(
         return cast(str, users[normalized_user_type])
 
     raise ValueError(f"Unknown user type: {user_type}")
+
+
+def find_usernames(role: str, has_role: bool, proposal_code: str = None) -> List[str]:
+    normalized_role = role.lower()
+    normalized_role = normalized_role.replace(" ", "_").replace("-", "_")
+
+    if "TEST_DATA_DIR" not in os.environ:
+        pytest.fail("Environment variable not set: TEST_DATA_DIR")
+    test_data_dir = Path(os.environ["TEST_DATA_DIR"])
+    users_file = test_data_dir / "user_roles.yml"
+    with open(users_file) as f:
+        users = yaml.safe_load(f)
+
+    if normalized_role in [
+        "administrator",
+        "any",
+        "board_member",
+        "partner_affiliated_user",
+        "salt_astronomer",
+    ]:
+        return (
+            users[normalized_role]["with_role"]
+            if has_role
+            else users[normalized_role]["without_role"]
+        )
+
+    if normalized_role in users:
+        return (
+            users[normalized_role][proposal_code]["with_role"]
+            if has_role
+            else users[normalized_role][proposal_code]["without_role"]
+        )
+
+    raise ValueError(f"Unknown user role: {role}")
 
 
 def authenticate(username: str, client: TestClient) -> None:

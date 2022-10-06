@@ -74,18 +74,23 @@ def test_get_user_should_not_return_a_password(client: TestClient) -> None:
         assert "password" not in key.lower()
 
 
-@pytest.mark.parametrize("username", [find_username("SALT Astronomer")])
+@pytest.mark.parametrize("username", [
+    find_username("SALT Astronomer"),
+    find_username("Board Member"),
+    find_username("TAC Member", partner_code="RSA"),
+    find_username("TAC Chair", partner_code="RSA"),
+    find_username("Investigator", proposal_code="2019-2-SCI-006"),
+    find_username("Administrator")
+])
 def test_get_user_should_return_correct_user_details(
-    username: str, client: TestClient, testdata: Callable[[str], Any]
+    username: str, client: TestClient, check_data: Callable[[Any], None]
 ) -> None:
-    data = testdata(TEST_DATA)[username]
-
     authenticate(username, client)
     user_id = get_authenticated_user_id(client)
 
     response = client.get(_url(user_id))
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == data
+    check_data(response.json())
 
 
 def test_get_user_should_allow_admin_to_get_other_user(client: TestClient) -> None:

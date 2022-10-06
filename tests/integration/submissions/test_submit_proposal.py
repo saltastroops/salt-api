@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from pytest_pymysql_autorecord.util import skip_for_db_mocking
 from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
 from starlette import status
@@ -97,16 +98,20 @@ def test_submission(
     monkeypatch: MonkeyPatch,
 ) -> None:
     """
-    Test that submitting a proposal us working.
+    Test that submitting a proposal is working.
 
     This test mocks the call to the external submission tool, and this mock call does
     not mark the submission as finished in the database. This implies that the test
     does not cover the case that the submission tool properly marks the submission as
-    finished. Testing this case wouyld be hard: We would have to test that code running
+    finished. Testing this case would be hard: We would have to test that code running
     in a separate thread does *not* do something, which would mean we have to wait for
     a while to ensure nothing has happened. As this would considerably slow down the
     test execution, we ignore this case.
     """
+    # The database access is potentially non-deterministic, and hence we cannot use
+    # database mocking.
+    skip_for_db_mocking()
+
     username = find_username("administrator")
     authenticate(username, client)
     proposal = tmp_path / "proposal.zip"

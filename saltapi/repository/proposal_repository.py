@@ -1034,7 +1034,14 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
-        return [dict(row) for row in result]
+        return [
+            {
+                "partner_code": row.partner_code,
+                "priority": row.priority,
+                "time_allocation": int(row.time_allocation),
+            }
+            for row in result
+        ]
 
     def _tac_comments(self, proposal_code: str, semester: str) -> Dict[str, str]:
         """
@@ -1087,7 +1094,7 @@ GROUP BY B.Priority
 
         time: Dict[str, int] = {f"priority_{p}": 0 for p in range(5)}
         for row in result:
-            time[f"priority_{row.priority}"] = row.charged_time
+            time[f"priority_{row.priority}"] = int(row.charged_time)
 
         return time
 

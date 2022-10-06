@@ -1,9 +1,10 @@
 from typing import Any, Callable
 
+import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
-from tests.conftest import authenticate, misauthenticate
+from tests.conftest import authenticate, misauthenticate, find_username
 
 USER_URL = "/user"
 USER_DATA = "integration/user.yaml"
@@ -22,25 +23,23 @@ def test_should_return_401_if_user_uses_invalid_token(client: TestClient) -> Non
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+@pytest.mark.parametrize("username", [
+    find_username("SALT Astronomer"),
+    find_username("Board Member"),
+    find_username("TAC Member", partner_code="RSA"),
+    find_username("TAC Chair", partner_code="RSA"),
+    find_username("Investigator", proposal_code="2019-2-SCI-006"),
+    find_username("Administrator")
+])
 def test_should_return_the_correct_user_details(
+        username: str,
     client: TestClient,
-    testdata: Callable[[str], Any],
+    check_data: Callable[[Any], None],
 ) -> None:
-    data = testdata(USER_DATA)["who_am_i"]
+    authenticate(username, client)
 
-    for d in data:
-        username = d["username"]
-        expected_user_details = d
-        roles = set()
-        for role in expected_user_details["roles"]:
-            roles.add(role)
-        expected_user_details["roles"] = roles
+    response = client.get(USER_URL)
+    user_details = response.json()
+    user_details["roles"] = set(user_details["roles"])
 
-        authenticate(username, client)
-
-        response = client.get(USER_URL)
-        user_details = response.json()
-        user_details["roles"] = set(user_details["roles"])
-
-        assert response.status_code == status.HTTP_200_OK
-        assert user_details == expected_user_details
+    check_data(user_details)

@@ -1,101 +1,37 @@
 from typing import Any, Callable
 
+import pytest
 from sqlalchemy.engine import Connection
 
 from saltapi.repository.hrs_repository import HrsRepository
 
-TEST_DATA = "repository/hrs_repository.yaml"
 
-
-def test_top_level_values(
-    db_connection: Connection, testdata: Callable[[str], Any]
+@pytest.mark.parametrize(
+    "hrs_id",
+    [
+        639,  # no overhead time
+        1350,  # in block with id 87924
+        261,  # nod and shuffle; in block with id 31270
+        1615,  # ThAr lamp in; in block with id 73634
+        2319,  # high resolution
+        2298,  # high stability
+        2320,  # low resolution
+        2327,  # medium resolution
+        244,  # the sky fiber is placed on the optical axis
+        2328,  # the star fiber is placed on the optical axis
+        1829,  # the star and sky fiber are equidistant from the optical axis
+        2297,  # iodine cell in
+        2320,  # iodine cell out
+        1615,  # ThAr in sky fiber
+        2316,  # one amplifier; used in block with id 89472
+        80,  # multiple amplifiers; different pre-binned rows and columns; used in block
+        # with id 24956
+        385,  # used in block with id 33293
+    ],
+)
+def test_hrs(
+    db_connection: Connection, check_data: Callable[[Any], None], hrs_id
 ) -> None:
-    data = testdata(TEST_DATA)["top_level_values"]
-    hrs_id = data["hrs_id"]
-    expected_hrs = data["hrs"]
     hrs_repository = HrsRepository(db_connection)
     hrs = hrs_repository.get(hrs_id)
-
-    assert hrs["id"] == hrs_id
-    assert hrs["observation_time"] == expected_hrs["observation_time"]
-    assert hrs["overhead_time"] == expected_hrs["overhead_time"]
-
-
-def test_configuration(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["configuration"]
-    for d in data:
-        hrs_id = d["hrs_id"]
-        expected_configuration = d["configuration"]
-        hrs_repository = HrsRepository(db_connection)
-        hrs = hrs_repository.get(hrs_id)
-        configuration = hrs["configuration"]
-
-        assert configuration == expected_configuration
-
-
-def test_mode(db_connection: Connection, testdata: Callable[[str], Any]) -> None:
-    data = testdata(TEST_DATA)["mode"]
-    for d in data:
-        hrs_id = d["hrs_id"]
-        expected_mode = d["mode"]
-        hrs_repository = HrsRepository(db_connection)
-        hrs = hrs_repository.get(hrs_id)
-        mode = hrs["configuration"]["mode"]
-
-        assert mode == expected_mode
-
-
-def test_target_location(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["target_location"]
-    for d in data:
-        hrs_id = d["hrs_id"]
-        expected_location = d["location"]
-        hrs_repository = HrsRepository(db_connection)
-        hrs = hrs_repository.get(hrs_id)
-        location = hrs["configuration"]["target_location"]
-
-        assert location == expected_location
-
-
-def test_iodine_cell_position(
-    db_connection: Connection, testdata: Callable[[str], Any]
-) -> None:
-    data = testdata(TEST_DATA)["iodine_cell_position"]
-    for d in data:
-        hrs_id = d["hrs_id"]
-        expected_position = d["position"]
-        hrs_repository = HrsRepository(db_connection)
-        hrs = hrs_repository.get(hrs_id)
-        position = hrs["configuration"]["iodine_cell_position"]
-
-        assert position == expected_position
-
-
-def test_detectors(db_connection: Connection, testdata: Callable[[str], Any]) -> None:
-    data = testdata(TEST_DATA)["detectors"]
-    for d in data:
-        hrs_id = d["hrs_id"]
-        expected_blue_detector = d["blue_detector"]
-        expected_red_detector = d["red_detector"]
-        hrs_repository = HrsRepository(db_connection)
-        hrs = hrs_repository.get(hrs_id)
-        blue_detector = hrs["blue_detector"]
-        red_detector = hrs["red_detector"]
-
-        assert blue_detector == expected_blue_detector
-        assert red_detector == expected_red_detector
-
-
-def test_procedure(db_connection: Connection, testdata: Callable[[str], Any]) -> None:
-    data = testdata(TEST_DATA)["procedure"]
-    hrs_id = data["hrs_id"]
-    expected_procedure = data["procedure"]
-    hrs_repository = HrsRepository(db_connection)
-    hrs = hrs_repository.get(hrs_id)
-    procedure = hrs["procedure"]
-
-    assert procedure == expected_procedure
+    check_data(hrs)

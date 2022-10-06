@@ -1,11 +1,10 @@
 import re
 from collections import defaultdict
 from datetime import date, datetime
-from typing import Any, DefaultDict, Dict, List, Optional, cast
+from typing import Any, DefaultDict, Dict, List, Optional, cast, Union
 
 import pytz
 from dateutil.relativedelta import relativedelta
-from pydantic import ValidationError
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
@@ -1447,7 +1446,7 @@ VALUES
 
     def _get_latest_observing_conditions(
         self, proposal_code: str, semester: str
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], None]:
         stmt = text(
             """
 SELECT
@@ -1468,12 +1467,14 @@ ORDER BY semester DESC;
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
         last = results.first()
-
-        return {
-            "seeing": last.seeing,
-            "transparency": last.transparency,
-            "description": last.description,
-        }
+        if last:
+            return {
+                "seeing": last.seeing,
+                "transparency": last.transparency,
+                "description": last.description,
+            }
+        else:
+            return None
 
     def _get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
@@ -1573,7 +1574,18 @@ WHERE PC.Proposal_Code = :proposal_code
         # one under consideration. We therefore collect the partners for which there
         # is a time request percentage in any semester, and if a partner has a time
         # request for the semester under consideration, we store that request.
+
+        # Exclude partners (actually proposal types) which mught not have Phase 1 proposals
+        excluded_partners = [
+            "Commissioning Proposals",
+            "Director Discretionary Time Proposals",
+            "Engineering Proposals",
+            "OPTICON-Radionet Pilot",
+            "Gravitational Wave Event Proposals"
+        ]
         for row in result:
+            if row.partner_name in excluded_partners:
+                continue
             tmp[row.partner_code] = {
                 "partner_name": row.partner_name,
                 "partner_code": row.partner_code,
@@ -1625,24 +1637,23 @@ WHERE PC.Proposal_Code = :proposal_code
         for t in time_statistics:
             if semester == t["semester"]:
                 requested_time = t["requested_time"]
-        try:
-            if result.rowcount > 0:
-                progress_report = {}
-                for row in result:
-                    progress_report["requested_time"] = requested_time
-                    progress_report["semester"] = row.semester
-                    progress_report["maximum_seeing"] = row.maximum_seeing
-                    progress_report["transparency"] = row.transparency
-                    progress_report["additional_pdf"] = row.additional_pdf
-                    progress_report["proposal_progress_pdf"] = row.proposal_progress_pdf
-                    progress_report[
-                        "description_of_observing_constraints"
-                    ] = row.description_of_observing_constraints
-                    progress_report["change_reason"] = row.change_reason
-                    progress_report[
-                        "summary_of_proposal_status"
-                    ] = row.summary_of_proposal_status
-                    progress_report["strategy_changes"] = row.strategy_changes
+        if result.rowcount > 0:
+            progress_report = {}
+            for row in result:
+                progress_report["requested_time"] = requested_time
+                progress_report["semester"] = row.semester
+                progress_report["maximum_seeing"] = row.maximum_seeing
+                progress_report["transparency"] = row.transparency
+                progress_report["additional_pdf"] = row.additional_pdf
+                progress_report["proposal_progress_pdf"] = row.proposal_progress_pdf
+                progress_report[
+                    "description_of_observing_constraints"
+                ] = row.description_of_observing_constraints
+                progress_report["change_reason"] = row.change_reason
+                progress_report[
+                    "summary_of_proposal_status"
+                ] = row.summary_of_proposal_status
+                progress_report["strategy_changes"] = row.strategy_changes
                 progress_report["previous_time_requests"] = time_statistics
                 progress_report[
                     "last_observing_constraints"
@@ -1650,28 +1661,24 @@ WHERE PC.Proposal_Code = :proposal_code
                 progress_report[
                     "partner_requested_percentages"
                 ] = self._get_partner_requested_percentages(proposal_code, semester)
-                return progress_report
-            else:
-                return {
-                    "requested_time": requested_time,
-                    "semester": None,
-                    "maximum_seeing": None,
-                    "transparency": None,
-                    "additional_pdf": None,
-                    "proposal_progress_pdf": None,
-                    "description_of_observing_constraints": None,
-                    "change_reason": None,
-                    "summary_of_proposal_status": None,
-                    "strategy_changes": None,
-                    "partner_requested_percentages": self._get_partner_requested_percentages(
-                        proposal_code, semester
-                    ),
-                    "previous_time_requests": time_statistics,
-                    "last_observing_constraints": self._get_latest_observing_conditions(
-                        proposal_code, semester
-                    ),
-                }
-        except (ValidationError, AttributeError):
-            raise NotFoundError(
-                "No progress report for proposal {}".format(proposal_code)
-            )
+            return progress_report
+        else:
+            return {
+                "requested_time": requested_time,
+                "semester": None,
+                "maximum_seeing": None,
+                "transparency": None,
+                "additional_pdf": None,
+                "proposal_progress_pdf": None,
+                "description_of_observing_constraints": None,
+                "change_reason": None,
+                "summary_of_proposal_status": None,
+                "strategy_changes": None,
+                "partner_requested_percentages": self._get_partner_requested_percentages(
+                    proposal_code, semester
+                ),
+                "previous_time_requests": time_statistics,
+                "last_observing_constraints": self._get_latest_observing_conditions(
+                    proposal_code, semester
+                ),
+            }

@@ -12,7 +12,6 @@ from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.service.submission import SubmissionMessageType, SubmissionStatus
 from saltapi.service.user import User
 
-
 FROZEN_NOW = "2022-08-26T21:23:55"
 
 

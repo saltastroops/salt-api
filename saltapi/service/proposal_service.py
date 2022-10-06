@@ -23,14 +23,13 @@ def generate_route_url(request: Request, router_path: URLPath) -> str:
     return url
 
 
-def generate_pdf_path(proposal_code: str, filename: str = None) -> Union[pathlib.Path, None]:
+def generate_pdf_path(
+    proposal_code: str, filename: str = None
+) -> Union[pathlib.Path, None]:
     return (
-        pathlib.Path(
-            proposals_dir
-            / proposal_code
-            / "Included"
-            / filename
-        ).resolve().as_uri()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
+        .resolve()
+        .as_uri()
         if filename
         else None
     )
@@ -172,8 +171,10 @@ class ProposalService:
                 proposal_code=proposal_code,
                 semester=semester,
             )
-            # proposal_progress_pdf_path = generate_pdf_path(proposal_code, progress_report["proposal_progress_pdf"])
-            progress_report["proposal_progress_pdf"] = progress_report["additional_pdf"] = (
+
+            progress_report["proposal_progress_pdf"] = progress_report[
+                "additional_pdf"
+            ] = (
                 generate_route_url(request, progress_pdf_url)
                 if progress_report["additional_pdf"]
                 else None
@@ -196,21 +197,21 @@ class ProposalService:
             )
 
     def get_proposal_progress_report_pdf(
-            self,
-            proposal_code: ProposalCode,
-            semester: Semester,
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
     ) -> Union[str, None]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
-        return generate_pdf_path(proposal_code, progress_report["proposal_progress_pdf"])
+        return generate_pdf_path(
+            proposal_code, progress_report["proposal_progress_pdf"]
+        )
 
     def get_supplementary_proposal_progress_report_pdf(
-                self,
-                proposal_code: ProposalCode,
-                semester: Semester
+        self, proposal_code: ProposalCode, semester: Semester
     ) -> Union[str, None]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
-        return generate_pdf_path(proposal_code, progress_report["proposal_progress_pdf"])
-
-
+        return generate_pdf_path(
+            proposal_code, progress_report["proposal_progress_pdf"]
+        )

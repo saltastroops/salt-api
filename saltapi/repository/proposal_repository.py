@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 from datetime import date, datetime
-from typing import Any, DefaultDict, Dict, List, Optional, cast, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Union, cast
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -1588,7 +1588,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "Director Discretionary Time Proposals",
             "Engineering Proposals",
             "OPTICON-Radionet Pilot",
-            "Gravitational Wave Event Proposals"
+            "Gravitational Wave Event Proposals",
         ]
         for row in result:
             if row.partner_name in excluded_partners:

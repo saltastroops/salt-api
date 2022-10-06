@@ -1,3 +1,5 @@
+from typing import Any, Callable
+
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
@@ -45,7 +47,6 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-# TODO: Use regression testing
 @pytest.mark.parametrize(
     "proposal_code,semester",
     [
@@ -56,7 +57,10 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     ],
 )
 def test_get_progress_report_returns_none_and_empty_arrays_for_nonexisting_progress_report(
-    proposal_code: str, semester: str, client: TestClient
+    proposal_code: str,
+    semester: str,
+    client: TestClient,
+    check_data: Callable[[Any], None],
 ) -> None:
 
     authenticate(USERNAME, client)
@@ -65,21 +69,11 @@ def test_get_progress_report_returns_none_and_empty_arrays_for_nonexisting_progr
 
     proposal_progress_report = response.json()
 
-    assert response.status_code == status.HTTP_200_OK
-    assert proposal_progress_report["semester"] is None
-    assert proposal_progress_report["requested_time"] is None
-    assert proposal_progress_report["maximum_seeing"] is None
-    assert proposal_progress_report["transparency"] is None
-    assert proposal_progress_report["change_reason"] is None
-    assert proposal_progress_report["proposal_progress_pdf"] is None
-    assert proposal_progress_report["additional_pdf"] is None
-    assert len(proposal_progress_report["partner_requested_percentages"]) == 0
-    assert len(proposal_progress_report["previous_time_requests"]) == 0
+    check_data(proposal_progress_report)
 
 
-# TODO: Use regression testing
 def test_get_returns_progress_report_for_authorised_user(
-    client: TestClient,
+    client: TestClient, check_data: Callable[[Any], None]
 ) -> None:
     semester = "2020-2"
     proposal_code = "2020-2-SCI-035"
@@ -89,24 +83,7 @@ def test_get_returns_progress_report_for_authorised_user(
 
     proposal_progress_report = response.json()
 
-    assert response.status_code == status.HTTP_200_OK
-    assert proposal_progress_report["semester"] == semester
-    assert proposal_progress_report["requested_time"] == 26400
-    assert proposal_progress_report["maximum_seeing"] == 3.0
-    assert proposal_progress_report["transparency"] == "Thin cloud"
-    assert proposal_progress_report["change_reason"] is None
-    assert proposal_progress_report["proposal_progress_pdf"] is None
-    assert proposal_progress_report["additional_pdf"] is None
-    assert proposal_progress_report["previous_time_requests"][0]["semester"] == semester
-    assert (
-        proposal_progress_report["previous_time_requests"][0]["requested_time"] == 26400
-    )
-    assert (
-        proposal_progress_report["previous_time_requests"][0]["allocated_time"] == 26400
-    )
-    assert (
-        proposal_progress_report["previous_time_requests"][0]["observed_time"] == 16332
-    )
+    check_data(proposal_progress_report)
 
 
 # TODO: Properly handle getting pdf files
@@ -167,6 +144,7 @@ def test_get_returns_progress_report(
     proposal_code: str,
     semester: str,
     client: TestClient,
+    check_data: Callable[[Any], None],
 ) -> None:
     authenticate(USERNAME, client)
 
@@ -176,8 +154,4 @@ def test_get_returns_progress_report(
 
     proposal_progress_report = response.json()
 
-    assert proposal_progress_report["semester"] == semester
-
-    assert proposal_progress_report["proposal_progress_pdf"] is None
-
-    assert proposal_progress_report["additional_pdf"] is None
+    check_data(proposal_progress_report)

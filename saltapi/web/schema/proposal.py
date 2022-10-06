@@ -547,7 +547,7 @@ class ProposalProgress(BaseModel):
         title="Previous time requests",
         description="The request from previous semesters",
     )
-    last_observing_constraints: ObservingConstraints = Field(
+    last_observing_constraints: Optional[ObservingConstraints] = Field(
         ...,
         title="Last requested observing conditions",
         description="The last observing conditions.",

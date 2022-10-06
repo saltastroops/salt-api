@@ -45,6 +45,7 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
+# TODO: Use regression testing
 @pytest.mark.parametrize(
     "proposal_code,semester",
     [
@@ -54,7 +55,7 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
         ("2019-2-DDT-006", "2019-2"),
     ],
 )
-def test_get_progress_report_returns_404_for_nonexisting_progress_report(
+def test_get_progress_report_returns_none_and_empty_arrays_for_nonexisting_progress_report(
     proposal_code: str, semester: str, client: TestClient
 ) -> None:
 
@@ -62,7 +63,18 @@ def test_get_progress_report_returns_404_for_nonexisting_progress_report(
 
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    proposal_progress_report = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert proposal_progress_report["semester"] is None
+    assert proposal_progress_report["requested_time"] is None
+    assert proposal_progress_report["maximum_seeing"] is None
+    assert proposal_progress_report["transparency"] is None
+    assert proposal_progress_report["change_reason"] is None
+    assert proposal_progress_report["proposal_progress_pdf"] is None
+    assert proposal_progress_report["additional_pdf"] is None
+    assert len(proposal_progress_report["partner_requested_percentages"]) == 0
+    assert len(proposal_progress_report["previous_time_requests"]) == 0
 
 
 # TODO: Use regression testing
@@ -101,7 +113,7 @@ def test_get_returns_progress_report_for_authorised_user(
 @pytest.mark.skip(
     reason="This will be tested once the pdf files are handled correctly."
 )
-def test_get_returns_correct_file_urls(
+def test_get_returns_correct_pdf_files(
     client: TestClient,
 ) -> None:
     semester = "2018-2"

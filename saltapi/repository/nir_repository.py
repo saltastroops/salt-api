@@ -24,7 +24,7 @@ SELECT N.Nir_Id                                          AS nir_id,
        NS.NirSampling                                    AS detector_sampling_mode,
        NCFW.NirCameraFilterWheel                         AS camera_filter_wheel,
        ND.Ramps                                          AS ramps,
-       ND.URG_Groups                                     AS urg_groups,
+       ND.URG_Groups                                     AS up_the_ramp_groups,
        ND.ReadsPerSample                                 AS reads_per_sample,
        ND.ExposureTime / 1000                            AS exposure_time,
        ND.Iterations                                     AS detector_iterations,
@@ -54,45 +54,11 @@ ORDER BY Nir_Id DESC;
         nir = {
             "id": row.nir_id,
             "configuration": self._configuration(row),
-            "calibration": self._calibration(row),
-            "dither_pattern": self._dither_pattern(row),
             "procedure": self._procedure(row),
             "observation_time": float(row.observation_time),
             "overhead_time": float(row.overhead_time),
         }
         return nir
-
-    def _calibration(self, row: Any) -> List[Dict[str, Any]]:
-        """Return an NIR calibration."""
-
-        stmt = text(
-            """
-SELECT L.Lamp                  AS lamp,
-       NC.ExposureTime         AS exposure_time,
-       NC.Iterations           AS iterations
-FROM NirCalibration NC
-         JOIN Lamp L ON NC.Lamp_Id = L.Lamp_Id
-         JOIN Nir N ON NC.Nir_Id = N.Nir_Id
-WHERE N.Nir_Id = :nir_id
-        """
-        )
-        result = self.connection.execute(
-            stmt,
-            {
-                "nir_id": row.nir_id,
-            },
-        )
-
-        calibration = [
-            {
-                "lamp": row.lamp,
-                "exposure_time": float(row.exposure_time),
-                "iterations": int(row.iterations),
-            }
-            for row in result
-        ]
-
-        return calibration
 
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """Return an NIR configuration."""
@@ -114,7 +80,7 @@ WHERE N.Nir_Id = :nir_id
         detector = {
             "mode": row.detector_sampling_mode.title(),
             "ramps": row.ramps,
-            "groups": row.urg_groups,
+            "groups": row.up_the_ramp_groups,
             "reads_per_sample": row.reads_per_sample,
             "exposure_time": float(row.exposure_time),
             "iterations": row.detector_iterations,
@@ -124,8 +90,8 @@ WHERE N.Nir_Id = :nir_id
 
         return detector
 
-    def _dither_step(self, row: Any) -> List[Dict[str, Any]]:
-        """Return an NIR dither pattern step."""
+    def _dither_steps(self, row: Any) -> List[Dict[str, Any]]:
+        """Return the dither pattern steps."""
 
         stmt = text(
             """
@@ -148,7 +114,7 @@ WHERE N.Nir_Id = :nir_id
             },
         )
 
-        dither_step = [
+        dither_steps = [
             {
                 "offset": {"x": result.offset_x, "y": result.offset_y},
                 "offset_type": result.offset_type,
@@ -158,13 +124,7 @@ WHERE N.Nir_Id = :nir_id
             for result in results
         ]
 
-        return dither_step
-
-    def _dither_pattern(self, row: Any) -> Dict[str, Any]:
-        """Return an NIR dither pattern."""
-        dither_pattern = {"dither_step": self._dither_step(row)}
-
-        return dither_pattern
+        return dither_steps
 
     def _procedure_type(self, row: Any) -> str:
         """Return the procedure type."""
@@ -181,5 +141,5 @@ WHERE N.Nir_Id = :nir_id
         return {
             "procedure_type": row.procedure_type,
             "cycles": row.cycles,
-            "dither_pattern": self._dither_pattern(row),
+            "dither_pattern": self._dither_steps(row),
         }

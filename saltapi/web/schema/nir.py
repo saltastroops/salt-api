@@ -3,8 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from saltapi.web.schema.common import Lamp
-
 
 class NirSamplingMode(str, Enum):
     FOCUS = "Focus"
@@ -48,13 +46,13 @@ class NirGain(str, Enum):
 
 
 class NirDetector(BaseModel):
-    """NIR detector."""
+    """NIR detector setup."""
 
     mode: str = Field(..., title="Instrument mode", description="Instrument mode")
     groups: int = Field(
         ...,
-        title="Up-the-ramp group",
-        description="Number of samples up the ramp for Up-the-ramp Group",
+        title="Up-the-ramp groups",
+        description="The number of samples up the ramp for the Up-the-Ramp Group mode",
     )
     ramps: float = Field(
         ..., title="Ramps", description="How many exposure sequences to do?"
@@ -98,12 +96,12 @@ class NirDitherOffset(BaseModel):
     x: float = Field(
         ...,
         title="Horizontal offset",
-        description="Horizontal offset (in image coordination), in milliarcseconds",
+        description="Horizontal offset (in image coordinates), in milliarcseconds",
     )
     y: float = Field(
         ...,
         title="Vertical offset",
-        description="Vertical offset (in image coordination), in milliarcseconds",
+        description="Vertical offset (in image coordinates), in milliarcseconds",
     )
 
 
@@ -122,14 +120,6 @@ class NirDitherStep(BaseModel):
     exposure_type: str = Field(..., title="Exposure type", description="Exposure type")
 
 
-class NirDitherPattern(BaseModel):
-    """NIR dither pattern."""
-
-    dither_step: List[NirDitherStep] = Field(
-        ..., title="Dither step", description="Dither step"
-    )
-
-
 class NirProcedure(BaseModel):
     """NIR procedure."""
 
@@ -141,23 +131,8 @@ class NirProcedure(BaseModel):
     procedure_type: str = Field(
         ..., title="Procedure type", description="Procedure type"
     )
-    dither_pattern: NirDitherPattern = Field(
-        ..., title="Dither pattern", description="Dither pattern"
-    )
-
-
-class NirCalibration(BaseModel):
-    """NIR calibration."""
-
-    lamp: Lamp = Field(..., title="Lamp", description="Calibration lamp")
-    exposure_time: float = Field(
-        ...,
-        title="Exposure time",
-        description="Exposure time per exposure, in seconds",
-        ge=0,
-    )
-    iterations: int = Field(
-        ..., title="Number of exposures", description="Number of exposures", ge=1
+    dither_pattern: List[NirDitherStep] = Field(
+        ..., title="Dither step", description="Dither step"
     )
 
 
@@ -169,9 +144,6 @@ class Nir(BaseModel):
     )
     configuration: NirConfiguration = Field(
         ..., title="Instrument configuration", description="Instrument configuration"
-    )
-    calibration: List[NirCalibration] = Field(
-        ..., title="Instrument calibration", description="Instrument calibration"
     )
     procedure: Optional[NirProcedure] = Field(
         ..., title="Detector setup", description="Detector setup"

@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 from datetime import date, datetime
-from typing import Any, DefaultDict, Dict, List, Optional, Union, cast
+from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -1453,7 +1453,7 @@ VALUES
 
     def _get_latest_observing_conditions(
         self, proposal_code: str, semester: str
-    ) -> Union[Dict[str, Any], None]:
+    ) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1573,6 +1573,7 @@ FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner AS P ON (MP.Partner_Id = P.Partner_Id)
 WHERE PC.Proposal_Code = :proposal_code
+AND P.Virtual != 1
     """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
@@ -1581,18 +1582,7 @@ WHERE PC.Proposal_Code = :proposal_code
         # one under consideration. We therefore collect the partners for which there
         # is a time request percentage in any semester, and if a partner has a time
         # request for the semester under consideration, we store that request.
-
-        # Exclude partners (actually proposal types) which mught not have Phase 1 proposals
-        excluded_partners = [
-            "Commissioning Proposals",
-            "Director Discretionary Time Proposals",
-            "Engineering Proposals",
-            "OPTICON-Radionet Pilot",
-            "Gravitational Wave Event Proposals",
-        ]
         for row in result:
-            if row.partner_name in excluded_partners:
-                continue
             tmp[row.partner_code] = {
                 "partner_name": row.partner_name,
                 "partner_code": row.partner_code,

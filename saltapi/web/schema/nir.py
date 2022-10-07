@@ -1,7 +1,9 @@
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
+
+from saltapi.web.schema.common import Lamp
 
 
 class NirSamplingMode(str, Enum):
@@ -9,7 +11,19 @@ class NirSamplingMode(str, Enum):
     NORMAL = "Normal"
 
 
-class NirSpectroscopy(BaseModel):
+class NirCameraFilterWheel(str, Enum):
+    """NIR camera filter wheel."""
+
+    BLOCK = "Block"
+    CLEAR = "Clear"
+    CUTOFF = "Cutoff"
+    DIFFUSER = "Diffuser"
+    EMPTY = "Empty"
+
+
+class NirConfiguration(BaseModel):
+    """NIR configuration."""
+
     grating: str = Field(..., title="Grating", description="Grating")
     grating_angle: float = Field(
         ..., title="Grating angle", description="Grating angle, in degrees"
@@ -20,28 +34,36 @@ class NirSpectroscopy(BaseModel):
     camera_angle: float = Field(
         ..., title="Camera angle", description="Camera (articulation) angle, in degrees"
     )
-
-
-class NirConfiguration(BaseModel):
-    mode: str = Field(..., title="Instrument mode", description="Instrument mode")
-    spectroscopy: Optional[NirSpectroscopy] = Field(
-        ..., title="NIR spectroscopy", description="NIR spectroscopy"
-    )
     filter: str = Field(..., title="NIR filter", description="NIR filter")
+    camera_filter_wheel: NirCameraFilterWheel = Field(
+        ..., title="Camera filter wheel", description="Camera filter wheel"
+    )
 
 
 class NirGain(str, Enum):
-    """RSS gain."""
+    """NIR gain."""
 
     BRIGHT = "Bright"
     FAINT = "Faint"
 
 
 class NirDetector(BaseModel):
+    """NIR detector."""
+
     mode: str = Field(..., title="Instrument mode", description="Instrument mode")
-    resets: int
-    ramps: float
-    reads_per_sample: int
+    groups: int = Field(
+        ...,
+        title="Up-the-ramp group",
+        description="Number of samples up the ramp for Up-the-ramp Group",
+    )
+    ramps: float = Field(
+        ..., title="Ramps", description="How many exposure sequences to do?"
+    )
+    reads_per_sample: int = Field(
+        ...,
+        title="Reads per sample",
+        description="Number of reads done for each sample",
+    )
     exposure_time: float = Field(
         ...,
         title="Exposure time",
@@ -51,16 +73,66 @@ class NirDetector(BaseModel):
     iterations: int = Field(
         ..., title="Number of exposures", description="Number of exposures", ge=1
     )
-    exposure_type: str = Field(..., title="Exposure type", description="Exposure type")
     gain: NirGain = Field(..., title="Gain", description="Gain")
 
 
 class NirProcedureType(str, Enum):
+    """NIR procedure type."""
+
     FOWLER = "Focus"
     UP_THE_RAMP_GROUP = "Up-the-Ramp Group"
 
 
+class NirOffsetType(str, Enum):
+    """NIR offset type."""
+
+    FIF_OFFSET = "FIF Offset"
+    BUNDLE_SEPARATION_OFFSET = "Bundle Separation Offset"
+    TRACKER_GUIDER_OFFSET = "Tracker Guided Offset"
+    UNGUIDED_OFFSET = "Unguided Offset"
+
+
+class NirDitherOffset(BaseModel):
+    """NIR offset coordinates."""
+
+    x: float = Field(
+        ...,
+        title="Horizontal offset",
+        description="Horizontal offset (in image coordination), in milliarcseconds",
+    )
+    y: float = Field(
+        ...,
+        title="Vertical offset",
+        description="Vertical offset (in image coordination), in milliarcseconds",
+    )
+
+
+class NirDitherStep(BaseModel):
+    """NIR dither step."""
+
+    offset: NirDitherOffset = Field(
+        ..., title="Dither offset", description="Dither offset"
+    )
+    offset_type: NirOffsetType = Field(
+        ..., title="Dither offset type", description="Dither offset type"
+    )
+    detector: NirDetector = Field(
+        ..., title="Detector setup", description="Detector setup"
+    )
+    exposure_type: str = Field(..., title="Exposure type", description="Exposure type")
+
+
+class NirDitherPattern(BaseModel):
+    """NIR dither pattern."""
+
+    dither_step: List[NirDitherStep] = Field(
+        ..., title="Dither step", description="Dither step"
+    )
+
+
 class NirProcedure(BaseModel):
+    """NIR procedure."""
+
     cycles: int = Field(
         ...,
         title="Cycles",
@@ -69,17 +141,37 @@ class NirProcedure(BaseModel):
     procedure_type: str = Field(
         ..., title="Procedure type", description="Procedure type"
     )
+    dither_pattern: NirDitherPattern = Field(
+        ..., title="Dither pattern", description="Dither pattern"
+    )
+
+
+class NirCalibration(BaseModel):
+    """NIR calibration."""
+
+    lamp: Lamp = Field(..., title="Lamp", description="Calibration lamp")
+    exposure_time: float = Field(
+        ...,
+        title="Exposure time",
+        description="Exposure time per exposure, in seconds",
+        ge=0,
+    )
+    iterations: int = Field(
+        ..., title="Number of exposures", description="Number of exposures", ge=1
+    )
 
 
 class Nir(BaseModel):
+    """NIR setup."""
+
     id: int = Field(
         ..., title="NIR id", description="Unique identifier for the NIR setup"
     )
     configuration: NirConfiguration = Field(
         ..., title="Instrument configuration", description="Instrument configuration"
     )
-    detector: NirDetector = Field(
-        ..., title="Detector setup", description="Detector setup"
+    calibration: List[NirCalibration] = Field(
+        ..., title="Instrument calibration", description="Instrument calibration"
     )
     procedure: Optional[NirProcedure] = Field(
         ..., title="Detector setup", description="Detector setup"

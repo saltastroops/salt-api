@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
@@ -22,7 +22,7 @@ SELECT N.Nir_Id                                          AS nir_id,
        NAS.Location                                      AS articulation_station,
        NF.NirFilter                                      AS filter,
        NS.NirSampling                                    AS detector_sampling_mode,
-       ND.Resets                                         AS resets,
+       NCFW.NirCameraFilterWheel                         AS camera_filter_wheel,
        ND.Ramps                                          AS ramps,
        ND.URG_Groups                                     AS urg_groups,
        ND.ReadsPerSample                                 AS reads_per_sample,
@@ -44,6 +44,7 @@ FROM Nir N
          JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
          JOIN NirGain NG1 ON ND.NirGain_Id = NG1.NirGain_Id
          JOIN NirSampling NS ON ND.NirSampling_Id = NS.NirSampling_Id
+         JOIN NirCameraFilterWheel NCFW ON NC.NirCameraFilterWheel_Id = NCFW.NirCameraFilterWheel_Id  
 WHERE N.Nir_Id = :nir_id
 ORDER BY Nir_Id DESC;
         """
@@ -53,31 +54,57 @@ ORDER BY Nir_Id DESC;
         nir = {
             "id": row.nir_id,
             "configuration": self._configuration(row),
-            "detector": self._detector(row),
+            "calibration": self._calibration(row),
+            "dither_pattern": self._dither_pattern(row),
             "procedure": self._procedure(row),
             "observation_time": float(row.observation_time),
             "overhead_time": float(row.overhead_time),
         }
         return nir
 
-    def _spectroscopy(self, row: Any) -> Optional[Dict[str, Any]]:
-        """Return an NIR spectroscopy setup."""
-        camera_station, camera_angle = row.articulation_station.split("_")
-        spectroscopy = {
-            "grating": row.grating,
-            "grating_angle": float(row.grating_angle),
-            "camera_station": int(camera_station),
-            "camera_angle": float(camera_angle),
-        }
-        return spectroscopy
+    def _calibration(self, row: Any) -> List[Dict[str, Any]]:
+        """Return an NIR calibration."""
+
+        stmt = text(
+            """
+SELECT L.Lamp                  AS lamp,
+       NC.ExposureTime         AS exposure_time,
+       NC.Iterations           AS iterations
+FROM NirCalibration NC
+         JOIN Lamp L ON NC.Lamp_Id = L.Lamp_Id
+         JOIN Nir N ON NC.Nir_Id = N.Nir_Id
+WHERE N.Nir_Id = :nir_id
+        """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "nir_id": row.nir_id,
+            },
+        )
+
+        calibration = [
+            {
+                "lamp": row.lamp,
+                "exposure_time": float(row.exposure_time),
+                "iterations": int(row.iterations),
+            }
+            for row in result
+        ]
+
+        return calibration
 
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """Return an NIR configuration."""
 
+        camera_station, camera_angle = row.articulation_station.split("_")
         config = {
-            "mode": row.detector_sampling_mode,
-            "spectroscopy": self._spectroscopy(row),
+            "grating": row.grating,
+            "grating_angle": float(row.grating_angle),
+            "camera_station": int(camera_station),
+            "camera_angle": float(camera_angle),
             "filter": row.filter,
+            "camera_filter_wheel": row.camera_filter_wheel,
         }
         return config
 
@@ -86,9 +113,8 @@ ORDER BY Nir_Id DESC;
 
         detector = {
             "mode": row.detector_sampling_mode.title(),
-            "resets": row.resets,
             "ramps": row.ramps,
-            "urg_groups": row.urg_groups,
+            "groups": row.urg_groups,
             "reads_per_sample": row.reads_per_sample,
             "exposure_time": float(row.exposure_time),
             "iterations": row.detector_iterations,
@@ -97,6 +123,48 @@ ORDER BY Nir_Id DESC;
         }
 
         return detector
+
+    def _dither_step(self, row: Any) -> List[Dict[str, Any]]:
+        """Return an NIR dither pattern step."""
+
+        stmt = text(
+            """
+SELECT NDPS.OffsetX                 AS offset_x,
+       NDPS.OffsetX                 AS offset_y,
+       NDOT.NirDitherOffsetType     AS offset_type
+FROM Nir N
+         JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
+         JOIN NirProcedureType NPT ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
+         JOIN NirDitherPatternStep NDPS ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
+         JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
+         JOIN NirDitherOffsetType NDOT ON NDPS.NirDitherOffsetType_Id = NDOT.NirDitherOffsetType_Id
+WHERE N.Nir_Id = :nir_id
+        """
+        )
+        results = self.connection.execute(
+            stmt,
+            {
+                "nir_id": row.nir_id,
+            },
+        )
+
+        dither_step = [
+            {
+                "offset": {"x": result.offset_x, "y": result.offset_y},
+                "offset_type": result.offset_type,
+                "detector": self._detector(row),
+                "exposure_type": row.exposure_type,
+            }
+            for result in results
+        ]
+
+        return dither_step
+
+    def _dither_pattern(self, row: Any) -> Dict[str, Any]:
+        """Return an NIR dither pattern."""
+        dither_pattern = {"dither_step": self._dither_step(row)}
+
+        return dither_pattern
 
     def _procedure_type(self, row: Any) -> str:
         """Return the procedure type."""
@@ -113,4 +181,5 @@ ORDER BY Nir_Id DESC;
         return {
             "procedure_type": row.procedure_type,
             "cycles": row.cycles,
+            "dither_pattern": self._dither_pattern(row),
         }

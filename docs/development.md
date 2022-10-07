@@ -32,7 +32,16 @@ poetry install
 ```
 
 !!! note
-    By default, poetry creates a virtual environment and installs the packages in `{cache-dir}/virtualenvs`. To activate the virtual environment after installation run `poetry shell` (to create a new shell) or `source $(poetry env info --path)/bin/activate`. To deactivate the virtual environment, run `exit` (to exit new shell) or `deactivate`.
+    By default, Poetry creates a virtual environment and installs the packages in `{cache-dir}/virtualenvs`.
+
+    Alternatively, you can configure Poetry to create the virtual environment in a dictionary `.venv` in the project root folder:
+
+    `poetry config virtualenvs.in-project true`
+    
+    To activate the virtual environment after installation, run `poetry shell` (to create a new shell) or `source $(poetry env info --path)/bin/activate`. To deactivate the virtual environment, run `exit` (if you created a new shell) or `deactivate`.
+    
+    Refer to Poetry's [documentation](https://python-poetry.org/docs/) for more details.
+
 
 !!! note
     In theory this is all you have to do. In practice, you might have to jump through various hoops and loops to get the `cryptography` package installed. The [installation instructions](https://cryptography.io/en/latest/installation.html) may be of help, but you might still have to consult Google.

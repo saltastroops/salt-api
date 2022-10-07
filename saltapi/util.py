@@ -155,7 +155,10 @@ def next_semester() -> str:
 def as_form(cls: Type[BaseModel]):
     """
     Adds an as_form class method to decorated models. The as_form class method
-    can be used with FastAPI endpoints
+    can be used with FastAPI endpoints. The as_form decorator will convert the BaseModel to FormData
+
+    reference:
+     https://lightrun.com/answers/tiangolo-fastapi-multipartform-data-unable-to-parse-complex-types-in-a-request-form
     """
     new_params = [
         inspect.Parameter(

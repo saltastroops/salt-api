@@ -91,7 +91,7 @@ class ProposalService:
     ) -> Dict[str, Any]:
         return self.repository.get_progress_report(proposal_code, semester)
 
-    async def put_proposal_progress(
+    async def post_proposal_progress(
         self,
         proposal_progress_report: ProposalProgressReport,
         proposal_code: str,
@@ -117,7 +117,7 @@ class ProposalService:
             "partner_requested_percentages": partner_requested_percentages
         }
         filenames = await self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
-        self.repository.put_proposal_progress(
+        self.repository.post_proposal_progress(
             proposal_progress, proposal_code, semester, filenames
         )
 
@@ -142,7 +142,7 @@ class ProposalService:
                         "allocated_time": ar["allocated_time"],
                         "observed_time": ot["observed_time"]
                     })
-        cpp = create_proposal_progress_html(
+        html_content = create_proposal_progress_html(
             proposal_code=proposal_code,
             semester=semester,
             previous_requests=previous_requests,
@@ -150,7 +150,7 @@ class ProposalService:
             new_request=new_request
         )
         base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
-        proposal_progress_filename = self.repository.generate_proposal_progress_filename(cpp)
+        proposal_progress_filename = self.repository.generate_proposal_progress_filename(html_content)
         additional_pdf_filename = None
         options = {
             'page-size': 'A4',
@@ -161,12 +161,13 @@ class ProposalService:
             'encoding': "UTF-8",
             'no-outline': None
         }
-        pdfkit.from_string(cpp, base_dir + proposal_progress_filename, options=options)
+        pdfkit.from_string(html_content, base_dir + proposal_progress_filename, options=options)
         if additional_pdf:
             additional_pdf_filename = self.repository.generate_proposal_progress_filename(
-                str(additional_pdf.file.read()), is_supplementary=True
+                additional_pdf.file.read(), is_supplementary=True
             )
-            open(base_dir + additional_pdf_filename, "wb").write(additional_pdf.file.read())
+            with open(base_dir + additional_pdf_filename, "wb") as f:
+                f.write(additional_pdf.file.read())
 
         return {
             "proposal_progress_filename": proposal_progress_filename,

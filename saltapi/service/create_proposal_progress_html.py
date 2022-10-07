@@ -1,5 +1,6 @@
 from typing import Dict, List, Any
 
+
 def create_proposal_progress_html(
         proposal_code: str,
         semester: str,

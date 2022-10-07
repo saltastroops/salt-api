@@ -543,7 +543,7 @@ class ProposalProgress(ProgressReport):
     partner_requested_percentages: List[PartnerRequestedPercentage] = Field(
         ...,
         title="Partner",
-        description="The partner requesting time from.",
+        description="The partner from which time is requested.",
     )
     previous_time_requests: List[TimeStatistics] = Field(
         ...,

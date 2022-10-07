@@ -1331,10 +1331,10 @@ WHERE PC.Proposal_Code = :proposal_code
 
     @staticmethod
     def generate_proposal_progress_filename(
-            file_content: str,
+            file_content: bytes,
             is_supplementary: bool = False
     ) -> str:
-        hash_md = hashlib.md5(file_content.encode('utf-8')).hexdigest()
+        hash_md = hashlib.md5(file_content).hexdigest()
         if is_supplementary:
             return f"ProposalProgressSupplementary-{hash_md}.pdf"
 
@@ -1696,7 +1696,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 ),
             }
 
-    def put_proposal_progress(
+    def post_proposal_progress(
             self,
             proposal_progress: Dict[str, Any],
             proposal_code: str,
@@ -1704,7 +1704,7 @@ WHERE PC.Proposal_Code = :proposal_code
             filenames: Dict[str, str or None]
     ) -> None:
         """
-        Insert the proposal progress to the database
+        Insert the proposal progress into the database
         """
         for rp in proposal_progress["partner_requested_percentages"]:
             self._insert_proposal_progress_requested_time(

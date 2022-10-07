@@ -307,6 +307,10 @@ class PermissionService:
                 username=user.username,
                 proposal_code=proposal_code
             )
+            or self.user_repository.is_principal_contact(
+                username=user.username,
+                proposal_code=proposal_code
+            )
         )
 
         if not may_update:

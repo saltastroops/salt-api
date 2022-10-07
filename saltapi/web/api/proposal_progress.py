@@ -60,7 +60,7 @@ def get_proposal_progress_report(
     response_model=ProposalProgress,
     responses={200: {"content": {"application/pdf": {}}}}
 )
-async def put_proposal_progress_report(
+async def post_proposal_progress_report(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -70,7 +70,7 @@ async def put_proposal_progress_report(
     semester: Semester = Path(..., title="Semester", description="Semester"),
     proposal_progress: ProposalProgressReport = Depends(ProposalProgressReport.as_form),
     additional_pdf: Optional[UploadFile] = File(b''),
-    # user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ) -> ProposalProgress:
     """
     Creates or updates the progress report for a proposal and semester. The semester
@@ -82,17 +82,17 @@ async def put_proposal_progress_report(
     the proposal.
     """
     with UnitOfWork() as unit_of_work:
-        # permission_service = services.permission_service(unit_of_work.connection)
-        # permission_service.check_permission_to_update_proposal_progress(
-        #     user, proposal_code)
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_proposal_progress(
+            user, proposal_code)
         proposal_service = services.proposal_service(unit_of_work.connection)
-        await proposal_service.put_proposal_progress(
+        await proposal_service.post_proposal_progress(
             proposal_progress,
             proposal_code,
             semester,
             additional_pdf
         )
-        # TODO Commit to the database when no error is raised.
+        unit_of_work.commit()
 
         proposal_progress_report = proposal_service.get_progress_report(
             proposal_code, semester

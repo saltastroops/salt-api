@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 from fastapi import APIRouter, Request
 from starlette.routing import URLPath
@@ -165,7 +165,11 @@ class ProposalService:
     ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
-        if progress_report:
+        if not progress_report:
+            raise NotFoundError(
+                f"No progress report for proposal {proposal_code}"
+            )
+        else:
             progress_pdf_url = router.url_path_for(
                 "get_proposal_progress_report_pdf",
                 proposal_code=proposal_code,
@@ -173,10 +177,10 @@ class ProposalService:
             )
 
             progress_report["proposal_progress_pdf"] = progress_report[
-                "additional_pdf"
+                "proposal_progress_pd"
             ] = (
                 generate_route_url(request, progress_pdf_url)
-                if progress_report["additional_pdf"]
+                if progress_report["proposal_progress_pdf"]
                 else None
             )
 
@@ -191,27 +195,21 @@ class ProposalService:
                 else None
             )
             return progress_report
-        else:
-            raise NotFoundError(
-                "No progress report for proposal {}".format(proposal_code)
-            )
 
     def get_proposal_progress_report_pdf(
         self,
         proposal_code: ProposalCode,
         semester: Semester,
-    ) -> Union[str, None]:
+    ) -> Optional[Dict[str, Any]]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
-        return generate_pdf_path(
-            proposal_code, progress_report["proposal_progress_pdf"]
-        )
+        progress_report_pdfs = {
+            "proposal_progress_pdf": generate_pdf_path(
+                proposal_code, progress_report["proposal_progress_pdf"]
+            ),
+            "additional_pdf": generate_pdf_path(
+                proposal_code, progress_report["additional_pdf"]
+            )
+        }
 
-    def get_supplementary_proposal_progress_report_pdf(
-        self, proposal_code: ProposalCode, semester: Semester
-    ) -> Union[str, None]:
-        progress_report = self.repository.get_progress_report(proposal_code, semester)
-
-        return generate_pdf_path(
-            proposal_code, progress_report["proposal_progress_pdf"]
-        )
+        return progress_report_pdfs

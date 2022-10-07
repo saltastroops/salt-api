@@ -1,6 +1,5 @@
 import requests
 from fastapi import APIRouter, Body, Depends, Path
-from xml.dom import minidom
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.unit_of_work import UnitOfWork
@@ -8,7 +7,6 @@ from saltapi.service.authentication_service import get_current_user
 from saltapi.service.block import Block as _Block
 from saltapi.service.block import BlockStatus as _BlockStatus
 from saltapi.service.user import User, Role
-from saltapi.settings import get_settings
 from saltapi.web import services
 from saltapi.web.schema.block import Block, BlockStatus, BlockStatusValue
 
@@ -20,7 +18,7 @@ router = APIRouter(prefix="/blocks", tags=["Block"])
 )
 def get_current_block(user: User = Depends(get_current_user)) -> _Block:
     """
-    Get the scheduled block.
+    Get the currently observed.
     """
 
     with UnitOfWork() as unit_of_work:
@@ -29,19 +27,7 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
         if permission_service.check_user_has_role(user, Role.ADMINISTRATOR) \
                 or permission_service.check_user_has_role(user, Role.SALT_ASTRONOMER) \
                 or permission_service.check_user_has_role(user, Role.SALT_OPERATOR):
-            file = requests.get(get_settings().tcs_icd_url)
-            xml_file = minidom.parseString(file.text)
-            elements = xml_file.getElementsByTagName('String')
-            block_id = None
-            for els in elements:
-                # This will give a NodeList item
-                name = els.getElementsByTagName('Name')
-                # Which needs to be converted to a DOM Element by calling item(0)
-                if name.item(0).firstChild.data == "block id":
-                    value = els.getElementsByTagName('Val')
-                    block_id = value.item(0).firstChild.data
-            if not block_id:
-                raise FileNotFoundError()
+            block_id = block_service.get_current_block_id()
             return block_service.get_block(block_id)
         raise AuthorizationError()
 

@@ -486,7 +486,8 @@ SELECT P.Pointing_Id                                                  AS pointin
        OC.SalticamPattern_Id                                          AS salticam_pattern_id,
        OC.RssPattern_Id                                               AS rss_pattern_id,
        OC.HrsPattern_Id                                               AS hrs_pattern_id,
-       OC.BvitPattern_Id                                              AS bvit_pattern_id
+       OC.BvitPattern_Id                                              AS bvit_pattern_id,
+       OC.NirPattern_Id                                               AS nir_pattern_id
 FROM TelescopeConfigObsConfig TCOC
          JOIN Pointing P ON TCOC.Pointing_Id = P.Pointing_Id
          JOIN Block B ON P.Block_Id = B.Block_Id
@@ -674,12 +675,19 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
             )
         else:
             bvit_setups = None
+        if payload_config_row.nir_pattern_id is not None:
+            nir_setups: Optional[List[Dict[str, Any]]] = self._nir_setups(
+                payload_config_row.nir_pattern_id
+            )
+        else:
+            nir_setups = None
 
         instruments = {
             "salticam": salticam_setups,
             "rss": rss_setups,
             "hrs": hrs_setups,
             "bvit": bvit_setups,
+            "nir": nir_setups,
         }
 
         return instruments
@@ -739,6 +747,19 @@ ORDER BY BPD.BvitPattern_Order
         )
         result = self.connection.execute(stmt, {"bvit_pattern_id": bvit_pattern_id})
         return [self.instrument_repository.get_bvit(row.bvit_id) for row in result]
+
+    def _nir_setups(self, nir_pattern_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT N.Nir_Id AS nir_id
+FROM Nir N
+         JOIN NirPatternDetail NPD ON N.Nir_Id = NPD.Nir_Id
+WHERE NPD.NirPattern_Id = :nir_pattern_id
+ORDER BY NPD.NirPattern_Order
+        """
+        )
+        result = self.connection.execute(stmt, {"nir_pattern_id": nir_pattern_id})
+        return [self.instrument_repository.get_nir(row.nir_id) for row in result]
 
     def _has_subblock_or_subsubblock_iterations(self, block_id: int) -> bool:
         """

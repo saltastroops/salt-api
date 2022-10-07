@@ -1,4 +1,3 @@
-import requests
 from fastapi import APIRouter, Body, Depends, Path
 
 from saltapi.exceptions import AuthorizationError

@@ -16,10 +16,10 @@ from saltapi.service.proposal import ProposalCode
 
 class BlockRepository:
     def __init__(
-        self,
-        target_repository: TargetRepository,
-        instrument_repository: InstrumentRepository,
-        connection: Connection,
+            self,
+            target_repository: TargetRepository,
+            instrument_repository: InstrumentRepository,
+            connection: Connection,
     ) -> None:
         self.target_repository = target_repository
         self.instrument_repository = instrument_repository
@@ -154,7 +154,7 @@ WHERE B.Block_Id = :block_id
         return status
 
     def update_block_status(
-        self, block_id: int, value: str, reason: Optional[str]
+            self, block_id: int, value: str, reason: Optional[str]
     ) -> None:
         """
         Update the status of a block.
@@ -236,7 +236,7 @@ WHERE BV.BlockVisit_Id = :block_visit_id
             raise NotFoundError("Unknown block visit id")
 
     def update_block_visit_status(
-        self, block_visit_id: int, status: str, rejection_reason: Optional[str]
+            self, block_visit_id: int, status: str, rejection_reason: Optional[str]
     ) -> None:
         """
         Update the status of a block visit.
@@ -414,7 +414,7 @@ ORDER BY ValidFrom, FindingChart_Id
         ]
 
     def _time_restrictions(
-        self, pointing_id: int
+            self, pointing_id: int
     ) -> Optional[List[Dict[str, datetime]]]:
         """
         Return the time restrictions.
@@ -648,7 +648,7 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
         return payload_config
 
     def _instruments(
-        self, payload_config_row: Any
+            self, payload_config_row: Any
     ) -> Dict[str, Optional[List[Dict[str, Any]]]]:
         if payload_config_row.salticam_pattern_id is not None:
             salticam_setups: Optional[List[Dict[str, Any]]] = self._salticam_setups(
@@ -782,11 +782,7 @@ WHERE TCOC.Pointing_Id = :pointing_id
         """
         stmt = text("SELECT Block_Id FROM schedule")
         result = self.connection.execute(stmt)
-
-        try:
-            block_id = cast(int, result.scalar_one())
+        block_id = cast(int, result.one_or_none())
+        if block_id:
             return self.get(block_id)
-        except NoResultFound:
-            return FileNotFoundError()
-
-
+        return None

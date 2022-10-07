@@ -16,11 +16,11 @@ router = APIRouter(prefix="/blocks", tags=["Block"])
 
 
 @router.get(
-    "/scheduled-block", summary="Scheduled block.", response_model=Block
+    "/current-block", summary="Scheduled block.", response_model=Block
 )
-def get_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
+def get_current_block(user: User = Depends(get_current_user)) -> _Block:
     """
-    Get the Scheduled block.
+    Get the scheduled block.
     """
 
     with UnitOfWork() as unit_of_work:
@@ -29,11 +29,11 @@ def get_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
         if permission_service.check_user_has_role(user, Role.ADMINISTRATOR) \
                 or permission_service.check_user_has_role(user, Role.SALT_ASTRONOMER) \
                 or permission_service.check_user_has_role(user, Role.SALT_OPERATOR):
-            file = requests.get(get_settings().tcs_icd)
+            file = requests.get(get_settings().tcs_icd_url)
             xml_file = minidom.parseString(file.text)
-            models = xml_file.getElementsByTagName('String')
+            elements = xml_file.getElementsByTagName('String')
             block_id = None
-            for els in models:
+            for els in elements:
                 # This will give a NodeList item
                 name = els.getElementsByTagName('Name')
                 # Which needs to be converted to a DOM Element by calling item(0)
@@ -51,7 +51,7 @@ def get_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
 )
 def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
     """
-    Get next scheduled block.
+    Get the next scheduled block.
     """
 
     with UnitOfWork() as unit_of_work:

@@ -18,7 +18,7 @@ router = APIRouter(prefix="/blocks", tags=["Block"])
 )
 def get_current_block(user: User = Depends(get_current_user)) -> _Block:
     """
-    Get the currently observed.
+    Get the currently observed block.
     """
 
     with UnitOfWork() as unit_of_work:
@@ -27,8 +27,7 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
         if permission_service.check_user_has_role(user, Role.ADMINISTRATOR) \
                 or permission_service.check_user_has_role(user, Role.SALT_ASTRONOMER) \
                 or permission_service.check_user_has_role(user, Role.SALT_OPERATOR):
-            block_id = block_service.get_current_block_id()
-            return block_service.get_block(block_id)
+            return block_service.get_current_block()
         raise AuthorizationError()
 
 

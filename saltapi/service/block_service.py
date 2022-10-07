@@ -60,8 +60,10 @@ class BlockService:
         """
         return self.block_repository.get_next_scheduled_block()
 
-    @staticmethod
-    def get_current_block_id() -> int:
+    def get_current_block(self) -> Optional[Block]:
+        """
+        Get Current observed block. If block not found returns None
+        """
         file = requests.get(get_settings().tcs_icd_url)
         xml_file = minidom.parseString(file.text)
         elements = xml_file.getElementsByTagName('String')
@@ -74,5 +76,5 @@ class BlockService:
                 value = els.getElementsByTagName('Val')
                 block_id = value.item(0).firstChild.data
         if not block_id:
-            raise FileNotFoundError()
-        return block_id
+            return None
+        return self.block_repository.get(block_id)

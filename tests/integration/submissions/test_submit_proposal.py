@@ -5,8 +5,8 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_pymysql_autorecord.util import skip_for_db_mocking
 from pytest import MonkeyPatch
+from pytest_pymysql_autorecord.util import skip_for_db_mocking
 from sqlalchemy.engine import Connection
 from starlette import status
 

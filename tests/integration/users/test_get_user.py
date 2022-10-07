@@ -74,14 +74,17 @@ def test_get_user_should_not_return_a_password(client: TestClient) -> None:
         assert "password" not in key.lower()
 
 
-@pytest.mark.parametrize("username", [
-    find_username("SALT Astronomer"),
-    find_username("Board Member"),
-    find_username("TAC Member", partner_code="RSA"),
-    find_username("TAC Chair", partner_code="RSA"),
-    find_username("Investigator", proposal_code="2019-2-SCI-006"),
-    find_username("Administrator")
-])
+@pytest.mark.parametrize(
+    "username",
+    [
+        find_username("SALT Astronomer"),
+        find_username("Board Member"),
+        find_username("TAC Member", partner_code="RSA"),
+        find_username("TAC Chair", partner_code="RSA"),
+        find_username("Investigator", proposal_code="2019-2-SCI-006"),
+        find_username("Administrator"),
+    ],
+)
 def test_get_user_should_return_correct_user_details(
     username: str, client: TestClient, check_data: Callable[[Any], None]
 ) -> None:

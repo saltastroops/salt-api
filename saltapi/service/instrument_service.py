@@ -26,6 +26,8 @@ class InstrumentService:
         """Update slit mask information"""
         return self.instrument_repository.update_mos_mask_metadata(mos_mask_metadata)
 
-    def get_obsolete_rss_masks_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
+    def get_obsolete_rss_masks_in_magazine(
+        self, mask_types: List[RssMaskType]
+    ) -> List[str]:
         """The list of obsolete RSS masks."""
         return self.instrument_repository.get_obsolete_rss_masks_in_magazine(mask_types)

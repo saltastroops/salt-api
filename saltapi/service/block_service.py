@@ -62,7 +62,9 @@ class BlockService:
 
     def get_current_block(self) -> Optional[Block]:
         """
-        Get Current observed block. If block not found returns None
+        Return the currently observed block.
+
+        None is returned if there is no currently observed block.
         """
         file = requests.get(get_settings().tcs_icd_url)
         xml_file = minidom.parseString(file.text)

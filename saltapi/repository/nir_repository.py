@@ -116,7 +116,7 @@ WHERE N.Nir_Id = :nir_id
 
         dither_steps = [
             {
-                "offset": {"x": result.offset_x, "y": result.offset_y},
+                "offset": {"x": result.offset_x / 1000, "y": result.offset_y / 1000},
                 "offset_type": result.offset_type,
                 "detector": self._detector(row),
                 "exposure_type": row.exposure_type,

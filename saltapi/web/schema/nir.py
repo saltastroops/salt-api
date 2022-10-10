@@ -96,12 +96,12 @@ class NirDitherOffset(BaseModel):
     x: float = Field(
         ...,
         title="Horizontal offset",
-        description="Horizontal offset (in image coordinates), in milliarcseconds",
+        description="Horizontal offset (in image coordinates), in arcseconds",
     )
     y: float = Field(
         ...,
         title="Vertical offset",
-        description="Vertical offset (in image coordinates), in milliarcseconds",
+        description="Vertical offset (in image coordinates), in arcseconds",
     )
 
 

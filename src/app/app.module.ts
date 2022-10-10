@@ -58,6 +58,7 @@ import { HrsObservingTimesComponent } from "./proposal/instruments/hrs/hrs-obser
 import { HrsComponent } from "./proposal/instruments/hrs/hrs.component";
 import { NirCalibrationComponent } from "./proposal/instruments/nir/nir-calibration/nir-calibration.component";
 import { NirConfigurationComponent } from "./proposal/instruments/nir/nir-configuration/nir-configuration.component";
+import { NirDitherStepsComponent } from "./proposal/instruments/nir/nir-dither-steps/nir-dither-steps.component";
 import { NirGeneralInfoComponent } from "./proposal/instruments/nir/nir-general-info/nir-general-info.component";
 import { NirComponent } from "./proposal/instruments/nir/nir.component";
 import { ArcBibleComponent } from "./proposal/instruments/rss/arc-bible/arc-bible.component";
@@ -92,7 +93,6 @@ import { RealProposalService } from "./service/real/real-proposal.service";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
-import { NirDitherStepsComponent } from './proposal/instruments/nir/nir-dither-steps/nir-dither-steps.component';
 
 @NgModule({
   declarations: [

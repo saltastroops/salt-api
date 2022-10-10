@@ -1,0 +1,39 @@
+<div>
+  <table class="table">
+    <thead>
+    <tr class="has-text-centered secondary-header">
+      <th colspan="2">Offset</th>
+      <th colspan="8">Detector</th>
+    </tr>
+    <tr>
+      <th>Horizontal x Vertical</th>
+      <th>Offset type</th>
+      <th>Iterations</th>
+      <th>Groups</th>
+      <th>Ramps</th>
+      <th>Reads per sample</th>
+      <th>Gain</th>
+      <th>Mode</th>
+      <th>Exp. time</th>
+      <th>Exp. type</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let nirDitherStep of nirDitherSteps">
+      <td>
+        {{ nirDitherStep.offset.x / 1000 }} x
+        {{ nirDitherStep.offset.x / 1000 }} arcsec
+      </td>
+      <td>{{ nirDitherStep.offsetType }}</td>
+      <td>{{ nirDitherStep.detector.iterations }}</td>
+      <td>{{ nirDitherStep.detector.groups }}</td>
+      <td>{{ nirDitherStep.detector.ramps }}</td>
+      <td>{{ nirDitherStep.detector.readsPerSample }}</td>
+      <td>{{ nirDitherStep.detector.gain }}</td>
+      <td>{{ nirDitherStep.detector.mode }}</td>
+      <td>{{ nirDitherStep.detector.exposureTime | number: "1.2-2" }} sec</td>
+      <td>{{ nirDitherStep.exposureType }}</td>
+    </tr>
+    </tbody>
+  </table>
+</div>

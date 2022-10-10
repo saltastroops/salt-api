@@ -5,12 +5,15 @@
 <div>
   <div class="inline-view">
     <wm-nir-general-info [nir]="nir"></wm-nir-general-info>
-    <wm-nir-detector [nirDetector]="nir.detector"></wm-nir-detector>
-    <wm-nir-spectroscopy
-      *ngIf="nir.configuration.spectroscopy"
-      [nirSpectroscopy]="nir.configuration.spectroscopy"
-      [filter]="nir.configuration.filter"
-    ></wm-nir-spectroscopy>
+    <wm-nir-configuration
+      *ngIf="nir.configuration"
+      [nirConfiguration]="nir.configuration"
+    ></wm-nir-configuration>
+    <div *ngIf="nir.procedure">
+      <wm-nir-dither-steps
+        [nirDitherSteps]="nir.procedure.ditherPattern"
+      ></wm-nir-dither-steps>
+    </div>
     <wm-nir-calibration
       *ngIf="payloadConfiguration.lamp"
       [filter]="payloadConfiguration.calibrationFilter"

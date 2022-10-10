@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import APIRouter, Request
 from starlette.routing import URLPath
@@ -166,35 +166,31 @@ class ProposalService:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
         if not progress_report:
-            raise NotFoundError(
-                f"No progress report for proposal {proposal_code}"
-            )
-        else:
-            progress_pdf_url = router.url_path_for(
-                "get_proposal_progress_report_pdf",
-                proposal_code=proposal_code,
-                semester=semester,
-            )
+            raise NotFoundError(f"No progress report for proposal {proposal_code}")
 
-            progress_report["proposal_progress_pdf"] = progress_report[
-                "proposal_progress_pd"
-            ] = (
-                generate_route_url(request, progress_pdf_url)
-                if progress_report["proposal_progress_pdf"]
-                else None
-            )
+        progress_pdf_url = router.url_path_for(
+            "get_proposal_progress_report_pdf",
+            proposal_code=proposal_code,
+            semester=semester,
+        )
 
-            additional_progress_pdf_url = router.url_path_for(
-                "get_supplementary_proposal_progress_report_pdf",
-                proposal_code=proposal_code,
-                semester=semester,
-            )
-            progress_report["additional_pdf"] = (
-                generate_route_url(request, additional_progress_pdf_url)
-                if progress_report["additional_pdf"]
-                else None
-            )
-            return progress_report
+        progress_report["proposal_progress_pdf"] = (
+            generate_route_url(request, progress_pdf_url)
+            if progress_report["proposal_progress_pdf"]
+            else None
+        )
+
+        additional_progress_pdf_url = router.url_path_for(
+            "get_supplementary_proposal_progress_report_pdf",
+            proposal_code=proposal_code,
+            semester=semester,
+        )
+        progress_report["additional_pdf"] = (
+            generate_route_url(request, additional_progress_pdf_url)
+            if progress_report["additional_pdf"]
+            else None
+        )
+        return progress_report
 
     def get_proposal_progress_report_pdf(
         self,
@@ -209,7 +205,7 @@ class ProposalService:
             ),
             "additional_pdf": generate_pdf_path(
                 proposal_code, progress_report["additional_pdf"]
-            )
+            ),
         }
 
         return progress_report_pdfs

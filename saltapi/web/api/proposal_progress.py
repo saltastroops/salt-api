@@ -166,7 +166,9 @@ def get_proposal_progress_report_pdf(
         progress_report_pdfs = proposal_service.get_proposal_progress_report_pdf(
             proposal_code, semester
         )
-        pdf_path = urllib.parse.urlparse(progress_report_pdfs["proposal_progress_pdf"]).path
+        pdf_path = urllib.parse.urlparse(
+            progress_report_pdfs["proposal_progress_pdf"]
+        ).path
 
         filename = "ProgressReport_{}.pdf".format(semester)
 
@@ -196,10 +198,8 @@ def get_supplementary_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report_pdfs = (
-            proposal_service.get_proposal_progress_report_pdf(
-                proposal_code, semester
-            )
+        progress_report_pdfs = proposal_service.get_proposal_progress_report_pdf(
+            proposal_code, semester
         )
 
         pdf_path = urllib.parse.urlparse(progress_report_pdfs["additional_pdf"]).path

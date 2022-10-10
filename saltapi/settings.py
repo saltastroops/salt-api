@@ -100,6 +100,9 @@ class Settings(BaseSettings):
     # Command for converting images
     mapping_tool_image_conversion_command: str
 
+    # URL for getting the TCS ICD file
+    tcs_icd_url: str
+
     class Config:
         env_file = os.getenv("DOTENV_FILE", ".env")
 

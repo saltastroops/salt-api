@@ -1340,7 +1340,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return f"ProposalProgressReport-{hash_md}.pdf"
 
-    def insert_proposal_progress(
+    def insert_or_update_proposal_progress(
             self,
             progress_report_data: Dict[str, Any],
             proposal_code: str,
@@ -1348,7 +1348,7 @@ WHERE PC.Proposal_Code = :proposal_code
             filenames: Dict[str, str or None]
     ) -> None:
         """
-        Insert the proposal progress information.
+        Insert or update the proposal progress information.
         """
         stmt = text(
             """
@@ -1371,7 +1371,14 @@ VALUES(
     :report_path,
     :supplementary_path,
     NOW()
-);
+)ON DUPLICATE KEY UPDATE 
+    TimeRequestChangeReasons = :change_reason,
+    StatusSummary = :summary_of_proposal_status,
+    StrategyChanges = :strategy_changes,
+    ReportPath = :report_path,
+    SupplementaryPath = :supplementary_path,
+    SubmissionDate = NOW()
+;
         """
         )
         result = self.connection.execute(
@@ -1390,7 +1397,7 @@ VALUES(
         if not result.rowcount:
             raise NotFoundError()
 
-    def _insert_proposal_progress_requested_time(
+    def _insert_or_update_proposal_progress_requested_time(
             self,
             proposal_code: str,
             semester: str,
@@ -1398,7 +1405,9 @@ VALUES(
             requested_time_percent: float,
             requested_time_amount: int
     ) -> None:
-        """ """
+        """
+        Insert or update proposal progress requested time.
+        """
         stmt = text(
             """
 INSERT INTO MultiPartner(
@@ -1414,7 +1423,9 @@ VALUES (
     (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
     :requested_time_percent,
     :requested_time_amount
-)
+) ON DUPLICATE KEY UPDATE
+    ReqTimePercent = :requested_time_percent,
+    ReqTimeAmount = :requested_time_amount
         """
         )
         self.connection.execute(
@@ -1428,7 +1439,7 @@ VALUES (
             }
         )
 
-    def _insert_observing_conditions(
+    def _insert_or_update_observing_conditions(
         self,
         proposal_code: str,
         semester: str,
@@ -1436,7 +1447,9 @@ VALUES (
         transparency: str,
         observing_conditions_description: str,
     ) -> None:
-        """ """
+        """
+        Insert or update the observing conditions
+        """
         stmt = text(
             """
 INSERT INTO P1ObservingConditions (
@@ -1453,7 +1466,10 @@ VALUES
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
-)
+)ON DUPLICATE KEY UPDATE 
+    MaxSeeing = :maximum_seeing,
+    Transparency_Id = (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
+    ObservingConditionsDescription = :observing_conditions_description
 
         """
         )
@@ -1696,7 +1712,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 ),
             }
 
-    def post_proposal_progress(
+    def put_proposal_progress(
             self,
             proposal_progress: Dict[str, Any],
             proposal_code: str,
@@ -1707,21 +1723,21 @@ WHERE PC.Proposal_Code = :proposal_code
         Insert the proposal progress into the database
         """
         for rp in proposal_progress["partner_requested_percentages"]:
-            self._insert_proposal_progress_requested_time(
+            self._insert_or_update_proposal_progress_requested_time(
                 proposal_code=proposal_code,
                 semester=semester,
                 partner_code=rp["partner_code"],
                 requested_time_percent=rp["requested_percentage"],
                 requested_time_amount=proposal_progress["requested_time"]
             )
-        self._insert_observing_conditions(
+        self._insert_or_update_observing_conditions(
             proposal_code=proposal_code,
             semester=semester,
             seeing=proposal_progress["maximum_seeing"],
             transparency=proposal_progress["transparency"],
             observing_conditions_description=proposal_progress["description_of_observing_constraints"],
         )
-        self.insert_proposal_progress(
+        self.insert_or_update_proposal_progress(
             progress_report_data=proposal_progress,
             proposal_code=proposal_code,
             semester=semester,

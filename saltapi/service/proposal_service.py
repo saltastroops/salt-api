@@ -1,5 +1,8 @@
 import pathlib
+from tempfile import NamedTemporaryFile
 from typing import Any, Dict, List, Optional
+
+import aiofiles
 from fastapi import UploadFile
 import pdfkit
 
@@ -91,7 +94,7 @@ class ProposalService:
     ) -> Dict[str, Any]:
         return self.repository.get_progress_report(proposal_code, semester)
 
-    async def post_proposal_progress(
+    async def put_proposal_progress(
         self,
         proposal_progress_report: ProposalProgressReport,
         proposal_code: str,
@@ -117,7 +120,7 @@ class ProposalService:
             "partner_requested_percentages": partner_requested_percentages
         }
         filenames = await self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
-        self.repository.post_proposal_progress(
+        self.repository.put_proposal_progress(
             proposal_progress, proposal_code, semester, filenames
         )
 
@@ -150,24 +153,33 @@ class ProposalService:
             new_request=new_request
         )
         base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
-        proposal_progress_filename = self.repository.generate_proposal_progress_filename(html_content)
+        base_dir = ""
+        with NamedTemporaryFile() as tmp:
+            options = {
+                'page-size': 'A4',
+                'margin-top': '20mm',
+                'margin-right': '20mm',
+                'margin-bottom': '20mm',
+                'margin-left': '20mm',
+                'encoding': "UTF-8",
+                'no-outline': None
+            }
+            tmp_filename = tmp.name
+            pdfkit.from_string(html_content, tmp_filename, options=options)
+            with open(tmp_filename, 'rb') as tf:
+                proposal_progress_filename = self.repository.generate_proposal_progress_filename(tf.read())
+                pdfkit.from_string(html_content, base_dir + proposal_progress_filename, options=options)
+
         additional_pdf_filename = None
-        options = {
-            'page-size': 'A4',
-            'margin-top': '20mm',
-            'margin-right': '20mm',
-            'margin-bottom': '20mm',
-            'margin-left': '20mm',
-            'encoding': "UTF-8",
-            'no-outline': None
-        }
-        pdfkit.from_string(html_content, base_dir + proposal_progress_filename, options=options)
         if additional_pdf:
-            additional_pdf_filename = self.repository.generate_proposal_progress_filename(
-                additional_pdf.file.read(), is_supplementary=True
-            )
-            with open(base_dir + additional_pdf_filename, "wb") as f:
-                f.write(additional_pdf.file.read())
+            with NamedTemporaryFile() as tmp:
+                async with aiofiles.open(tmp.name, 'rb'):
+                    content = await additional_pdf.read()
+                    additional_pdf_filename = self.repository.generate_proposal_progress_filename(
+                        content, is_supplementary=True
+                    )
+                    with open(base_dir + additional_pdf_filename, 'wb+') as out_file:
+                        out_file.write(content)  # async write
 
         return {
             "proposal_progress_filename": proposal_progress_filename,

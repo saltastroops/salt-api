@@ -1,7 +1,5 @@
 import pathlib
 import urllib.parse
-from typing import Dict, Optional, cast
-
 from fastapi import (
     APIRouter,
     Body,
@@ -14,12 +12,16 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from os.path import exists
 from pydantic.networks import AnyUrl
+from starlette.background import BackgroundTask
+from typing import Dict, Optional, cast
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
 from saltapi.settings import get_settings
+from saltapi.util import proposal_progress_clean_up
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgress
@@ -154,25 +156,27 @@ def get_proposal_progress_report_pdf(
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     user: User = Depends(get_current_user),
-) -> FileResponse:
+) -> Optional[FileResponse]:
     """
-    Returns the progress report pdf for a proposal and semester.
+    Returns the progress report pdf for a proposal and semester, and None if Progress report doesn't exist
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report_pdfs = proposal_service.get_proposal_progress_report_pdf(
-            proposal_code, semester
-        )
-        pdf_path = urllib.parse.urlparse(
-            progress_report_pdfs["proposal_progress_pdf"]
-        ).path
-
-        filename = "ProgressReport_{}.pdf".format(semester)
-
-        return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        proposal_service.create_proposal_progress_pdf(
+                proposal_code, semester
+            )
+        filename = f"ProposalProgressReport-{semester}.pdf"
+        if exists("tmp_proposal_progress.pdf"):
+            return FileResponse(
+                "tmp_proposal_progress.pdf",
+                media_type="application/pdf",
+                filename=filename,
+                background=BackgroundTask(proposal_progress_clean_up)
+            )
+        return None
 
 
 @router.get(
@@ -189,7 +193,7 @@ def get_supplementary_proposal_progress_report_pdf(
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     user: User = Depends(get_current_user),
-) -> FileResponse:
+) -> Optional[FileResponse]:
     """
     Returns the supplementary progress report pdf for a proposal and semester.
     """
@@ -206,4 +210,6 @@ def get_supplementary_proposal_progress_report_pdf(
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
-        return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        if exists(pdf_path):
+            return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        return None

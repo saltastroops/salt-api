@@ -1,8 +1,9 @@
 import pathlib
-from typing import Any, Dict, List, Optional, Union
 
 from fastapi import APIRouter, Request
+from PyPDF2 import PdfFileMerger
 from starlette.routing import URLPath
+from typing import Any, Dict, List, Optional, Union
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -28,8 +29,6 @@ def generate_pdf_path(
 ) -> Union[pathlib.Path, None]:
     return (
         pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
-        .resolve()
-        .as_uri()
         if filename
         else None
     )
@@ -209,3 +208,28 @@ class ProposalService:
         }
 
         return progress_report_pdfs
+
+    def create_proposal_progress_pdf(
+            self,
+            proposal_code: ProposalCode,
+            semester: Semester,
+    ) -> None:
+        """
+        Create the proposal progress PDF by joining proposal progress PDF and the supplementary files.
+        """
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
+
+        progress_report_pdfs = {
+            "proposal_progress_pdf": generate_pdf_path(
+                proposal_code, progress_report["proposal_progress_pdf"]
+            ),
+            "additional_pdf": generate_pdf_path(
+                proposal_code, progress_report["additional_pdf"]
+            ),
+        }
+        with PdfFileMerger(strict=False) as merger:
+            if progress_report_pdfs["proposal_progress_pdf"]:
+                merger.append(progress_report_pdfs["proposal_progress_pdf"])
+                if progress_report_pdfs["additional_pdf"]:
+                    merger.append(progress_report_pdfs["additional_pdf"])
+                merger.write("tmp_proposal_progress.pdf")

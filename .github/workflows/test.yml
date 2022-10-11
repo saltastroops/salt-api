@@ -96,6 +96,7 @@ jobs:
           MAPPING_TOOL_SDB_PASSWORD: ''
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
+          TCS_ICD_URL: https://example.com
         run: |
           poetry run pytest --mock-db-data -W ignore::pytest.PytestUnraisableExceptionWarning
       #----------------------------------------------

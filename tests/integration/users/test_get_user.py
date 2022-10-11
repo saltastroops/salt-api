@@ -24,6 +24,10 @@ def _url(user_id: int) -> str:
 def test_get_user_should_return_401_for_unauthenticated_user(
     client: TestClient,
 ) -> None:
+    # As the user is not authenticated, the unit-of-work block in the endpoint function
+    # is never reached, and the database is closed only after the test has finished.
+    # This may lead to a warning when mocking with the pytest-pymysql-autorecord plugin,
+    # which may be ignored.
     not_authenticated(client)
     user_id = 1
     response = client.get(_url(user_id))

@@ -12,7 +12,7 @@ from saltapi.settings import get_settings
 from saltapi.util import next_semester, semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 
-proposals_dir = get_settings().proposals_dir
+
 
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
@@ -26,6 +26,7 @@ def generate_route_url(request: Request, router_path: URLPath) -> str:
 def generate_pdf_path(
     proposal_code: str, filename: str = None
 ) -> Union[pathlib.Path, None]:
+    proposals_dir = get_settings().proposals_dir
     return (
         pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
         .resolve()
@@ -76,6 +77,7 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
+        proposals_dir = get_settings().proposals_dir
         version = self.repository.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():

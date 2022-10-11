@@ -573,7 +573,7 @@ class ProposalProgressInput(BaseProgressReport):
     partner_requested_percentages: str = Field(
         ...,
         title="Partner requested percentages",
-        description="The  List of requested percentages per partner. A pair of partner and requested percentages. "
-                    "E.g 'RSA:50;POL:50;OTH:0'",
+        description="The list of requested percentages per partner, as pairs of "
+                    "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'.",
     )
 

@@ -3,7 +3,8 @@ from tempfile import NamedTemporaryFile
 from typing import Any, Dict, List, Optional
 
 import aiofiles
-from fastapi import UploadFile
+from fastapi import APIRouter, Request, UploadFile
+from starlette.routing import URLPath
 import pdfkit
 
 from saltapi.exceptions import NotFoundError
@@ -15,6 +16,27 @@ from saltapi.settings import get_settings
 from saltapi.util import semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgressInput
+
+
+def generate_route_url(request: Request, router_path: URLPath) -> str:
+
+    url = "{}://{}:{}{}".format(
+        request.url.scheme, request.client.host, request.client.port, router_path
+    )
+    return url
+
+
+def generate_pdf_path(
+        proposal_code: str, filename: str = None
+) -> Optional[pathlib.Path]:
+    proposals_dir = get_settings().proposals_dir
+    return (
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
+            .resolve()
+            .as_uri()
+        if filename
+        else None
+    )
 
 
 class ProposalService:
@@ -88,6 +110,26 @@ class ProposalService:
         self, proposal_code: str, comment: str, user: User
     ) -> Dict[str, str]:
         return self.repository.add_observation_comment(proposal_code, comment, user)
+
+    def get_urls_for_proposal_progress_report_pdfs(
+            self, proposal_code: ProposalCode, request: Request, router: APIRouter
+    ) -> Dict[str, Dict[str, str]]:
+        semesters = self.repository.list_of_semesters(proposal_code)
+
+        progress_report_urls = dict()
+        for semester in semesters:
+            progress_report_pdf_url = router.url_path_for(
+                "get_proposal_progress_report_pdf",
+                proposal_code=proposal_code,
+                semester=semester,
+            )
+            progress_report_urls[semester] = {
+                "proposal_progress_pdf": generate_route_url(
+                    request, progress_report_pdf_url
+                ),
+            }
+
+        return progress_report_urls
 
     def get_progress_report(
         self, proposal_code: ProposalCode, semester: Semester

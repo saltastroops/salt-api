@@ -1,12 +1,14 @@
-from typing import Optional
+from typing import Optional, Dict, cast
 from fastapi import (
     APIRouter,
     Depends,
     File,
     Path,
+    Request,
     UploadFile
 )
 
+from pydantic import AnyUrl
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
@@ -15,6 +17,45 @@ from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressInput
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
+
+
+@router.get(
+    "/{proposal_code}/",
+    summary="Get URLs for all proposal progress report pdfs",
+    response_model=Dict[str, Dict[str, AnyUrl]],
+)
+def get_urls_for_proposal_progress_report_pdfs(
+        request: Request,
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description="Proposal code of the proposal whose progress reports pdfs are requested.",
+        ),
+        user: User = Depends(get_current_user),
+) -> Dict[str, Dict[str, AnyUrl]]:
+    """
+    Return URLs for all proposal progress report pdfs of a given proposal.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+
+        progress_report_urls = (
+            proposal_service.get_urls_for_proposal_progress_report_pdfs(
+                proposal_code, request, router
+            )
+        )
+        progress_report_pdfs = dict()
+        for semester in progress_report_urls:
+            progress_report_pdfs[semester] = {
+                "proposal_progress_pdf": cast(
+                    AnyUrl, progress_report_urls[semester]["proposal_progress_pdf"]
+                )
+            }
+
+        return progress_report_pdfs
 
 
 @router.get(

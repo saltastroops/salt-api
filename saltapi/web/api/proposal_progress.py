@@ -12,7 +12,7 @@ from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
-from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressReport
+from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressInput
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
 
@@ -54,7 +54,7 @@ def get_proposal_progress_report(
         return ProposalProgress(**proposal_progress_report)
 
 
-@router.put(
+@router.post(
     "/{proposal_code}/{semester}",
     summary="Create or update a progress report",
     response_model=ProposalProgress,
@@ -68,7 +68,7 @@ async def put_proposal_progress_report(
         " updated.",
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
-    proposal_progress: ProposalProgressReport = Depends(ProposalProgressReport.as_form),
+    proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),
     additional_pdf: Optional[UploadFile] = File(b''),
     user: User = Depends(get_current_user),
 ) -> ProposalProgress:

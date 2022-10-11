@@ -2,7 +2,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import AnyUrl, BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.util import as_form
 from saltapi.web.schema.block import BlockSummary
@@ -489,7 +489,7 @@ class TimeStatistics(BaseModel):
         }
 
 
-class ProgressReport(BaseModel):
+class BaseProgressReport(BaseModel):
     requested_time: Optional[int] = Field(
         ...,
         title="Requested time",
@@ -528,7 +528,7 @@ class ProgressReport(BaseModel):
     )
 
 
-class ProposalProgress(ProgressReport):
+class ProposalProgress(BaseProgressReport):
     """
     Progress report for a proposal and semester. The semester is the semester for which
     the progress is reported. For example, if the semester is 2021-1, the report covers
@@ -569,7 +569,7 @@ class ProposalProgress(ProgressReport):
 
 
 @as_form
-class ProposalProgressReport(ProgressReport):
+class ProposalProgressInput(BaseProgressReport):
     partner_requested_percentages: str = Field(
         ...,
         title="Partner requested percentages",

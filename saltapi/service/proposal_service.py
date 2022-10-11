@@ -14,7 +14,7 @@ from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.util import semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
-from saltapi.web.schema.proposal import ProposalProgressReport
+from saltapi.web.schema.proposal import ProposalProgressInput
 
 
 class ProposalService:
@@ -96,7 +96,7 @@ class ProposalService:
 
     async def put_proposal_progress(
         self,
-        proposal_progress_report: ProposalProgressReport,
+        proposal_progress_report: ProposalProgressInput,
         proposal_code: str,
         semester: str,
         additional_pdf: Optional[UploadFile]
@@ -153,7 +153,6 @@ class ProposalService:
             new_request=new_request
         )
         base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
-        base_dir = ""
         with NamedTemporaryFile() as tmp:
             options = {
                 'page-size': 'A4',
@@ -165,7 +164,7 @@ class ProposalService:
                 'no-outline': None
             }
             tmp_filename = tmp.name
-            pdfkit.from_string(html_content, tmp_filename, options=options)
+            open(tmp_filename, "w").write(html_content)
             with open(tmp_filename, 'rb') as tf:
                 proposal_progress_filename = self.repository.generate_proposal_progress_filename(tf.read())
                 pdfkit.from_string(html_content, base_dir + proposal_progress_filename, options=options)

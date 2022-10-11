@@ -16,10 +16,10 @@ from saltapi.service.proposal import ProposalCode
 
 class BlockRepository:
     def __init__(
-        self,
-        target_repository: TargetRepository,
-        instrument_repository: InstrumentRepository,
-        connection: Connection,
+            self,
+            target_repository: TargetRepository,
+            instrument_repository: InstrumentRepository,
+            connection: Connection,
     ) -> None:
         self.target_repository = target_repository
         self.instrument_repository = instrument_repository
@@ -154,7 +154,7 @@ WHERE B.Block_Id = :block_id
         return status
 
     def update_block_status(
-        self, block_id: int, value: str, reason: Optional[str]
+            self, block_id: int, value: str, reason: Optional[str]
     ) -> None:
         """
         Update the status of a block.
@@ -236,7 +236,7 @@ WHERE BV.BlockVisit_Id = :block_visit_id
             raise NotFoundError("Unknown block visit id")
 
     def update_block_visit_status(
-        self, block_visit_id: int, status: str, rejection_reason: Optional[str]
+            self, block_visit_id: int, status: str, rejection_reason: Optional[str]
     ) -> None:
         """
         Update the status of a block visit.
@@ -414,7 +414,7 @@ ORDER BY ValidFrom, FindingChart_Id
         ]
 
     def _time_restrictions(
-        self, pointing_id: int
+            self, pointing_id: int
     ) -> Optional[List[Dict[str, datetime]]]:
         """
         Return the time restrictions.
@@ -486,7 +486,8 @@ SELECT P.Pointing_Id                                                  AS pointin
        OC.SalticamPattern_Id                                          AS salticam_pattern_id,
        OC.RssPattern_Id                                               AS rss_pattern_id,
        OC.HrsPattern_Id                                               AS hrs_pattern_id,
-       OC.BvitPattern_Id                                              AS bvit_pattern_id
+       OC.BvitPattern_Id                                              AS bvit_pattern_id,
+       OC.NirPattern_Id                                               AS nir_pattern_id
 FROM TelescopeConfigObsConfig TCOC
          JOIN Pointing P ON TCOC.Pointing_Id = P.Pointing_Id
          JOIN Block B ON P.Block_Id = B.Block_Id
@@ -648,7 +649,7 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
         return payload_config
 
     def _instruments(
-        self, payload_config_row: Any
+            self, payload_config_row: Any
     ) -> Dict[str, Optional[List[Dict[str, Any]]]]:
         if payload_config_row.salticam_pattern_id is not None:
             salticam_setups: Optional[List[Dict[str, Any]]] = self._salticam_setups(
@@ -674,12 +675,19 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
             )
         else:
             bvit_setups = None
+        if payload_config_row.nir_pattern_id is not None:
+            nir_setups: Optional[List[Dict[str, Any]]] = self._nir_setups(
+                payload_config_row.nir_pattern_id
+            )
+        else:
+            nir_setups = None
 
         instruments = {
             "salticam": salticam_setups,
             "rss": rss_setups,
             "hrs": hrs_setups,
             "bvit": bvit_setups,
+            "nir": nir_setups,
         }
 
         return instruments
@@ -740,6 +748,19 @@ ORDER BY BPD.BvitPattern_Order
         result = self.connection.execute(stmt, {"bvit_pattern_id": bvit_pattern_id})
         return [self.instrument_repository.get_bvit(row.bvit_id) for row in result]
 
+    def _nir_setups(self, nir_pattern_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT N.Nir_Id AS nir_id
+FROM Nir N
+         JOIN NirPatternDetail NPD ON N.Nir_Id = NPD.Nir_Id
+WHERE NPD.NirPattern_Id = :nir_pattern_id
+ORDER BY NPD.NirPattern_Order
+        """
+        )
+        result = self.connection.execute(stmt, {"nir_pattern_id": nir_pattern_id})
+        return [self.instrument_repository.get_nir(row.nir_id) for row in result]
+
     def _has_subblock_or_subsubblock_iterations(self, block_id: int) -> bool:
         """
         Check whether a block contains subblocks or subsubblocks with multiple
@@ -775,3 +796,14 @@ WHERE TCOC.Pointing_Id = :pointing_id
         )
         result = self.connection.execute(stmt, {"pointing_id": pointing_id})
         return cast(bool, result.scalar_one() > 1)
+
+    def get_next_scheduled_block(self) -> Optional[Block]:
+        """
+        Get next scheduled block.
+        """
+        stmt = text("SELECT Block_Id FROM schedule")
+        result = self.connection.execute(stmt)
+        block_id = cast(int, result.one_or_none())
+        if block_id:
+            return self.get(block_id)
+        return None

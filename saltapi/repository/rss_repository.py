@@ -418,7 +418,9 @@ FROM RssCurrentMasks AS RCM
         if len(mask_types) > 0:
             stmt += " WHERE RssMaskType IN :mask_type"
 
-        results = self.connection.execute(text(stmt), {"mask_type": [m.value for m in mask_types]})
+        results = self.connection.execute(
+            text(stmt), {"mask_type": [m.value for m in mask_types]}
+        )
         return [row.barcode for row in results]
 
     def _get_liaison_astronomers(self, proposal_code_ids: Set[int]) -> Dict[int, str]:
@@ -612,7 +614,9 @@ WHERE RssMask_Id = ( SELECT RssMask_Id FROM RssMask WHERE Barcode = :barcode )
 
         return self.get_mos_mask_metadata(mos_mask_metadata["barcode"])
 
-    def get_obsolete_rss_masks_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
+    def get_obsolete_rss_masks_in_magazine(
+        self, mask_types: List[RssMaskType]
+    ) -> List[str]:
         """
         The list of obsolete RSS masks, optionally filtered by a mask type.
         """

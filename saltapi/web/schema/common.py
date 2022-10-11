@@ -111,6 +111,7 @@ class Lamp(str, Enum):
     QTH2 = "QTH2"
     THAR = "ThAr"
     XE = "Xe"
+    KR = "Kr"
 
 
 class ObservationProbabilities(BaseModel):

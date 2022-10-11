@@ -282,6 +282,14 @@ ORDER BY S.Year, S.Semester;
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return list(result.scalars())
 
+    def list_of_semesters(self, proposal_code: str) -> List[str]:
+
+        result = self._semesters(proposal_code)
+
+        semesters = sorted(result, reverse=True)
+
+        return semesters
+
     def get_proposal_type(self, proposal_code: str) -> str:
         stmt = text(
             """
@@ -1488,7 +1496,7 @@ VALUES
 
     def get_latest_observing_conditions(
         self, proposal_code: str, semester: str
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1509,12 +1517,14 @@ ORDER BY semester DESC;
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
         last = results.first()
-
-        return {
-            "seeing": last.seeing,
-            "transparency": last.transparency,
-            "description": last.description,
-        }
+        if last:
+            return {
+                "seeing": last.seeing,
+                "transparency": last.transparency,
+                "description": last.description,
+            }
+        else:
+            return None
 
     def get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
@@ -1606,6 +1616,7 @@ FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner AS P ON (MP.Partner_Id = P.Partner_Id)
 WHERE PC.Proposal_Code = :proposal_code
+AND P.Virtual != 1
     """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})

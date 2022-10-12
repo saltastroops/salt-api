@@ -104,8 +104,7 @@ jobs:
       #----------------------------------------------
       - name: Linting
         run: |
-          source .venv/bin/activate
-          black saltapi tests
-          isort saltapi tests
-          flake8 saltapi tests
-          mypy saltapi
+          poetry run black saltapi tests
+          poetry run isort saltapi tests
+          poetry run flake8 saltapi tests
+          poetry run mypy saltapi

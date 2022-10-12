@@ -13,8 +13,6 @@ from saltapi.util import next_semester, semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 
 
-
-
 def generate_route_url(request: Request, router_path: URLPath) -> str:
 
     url = "{}://{}:{}{}".format(

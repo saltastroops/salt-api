@@ -1,7 +1,7 @@
-import requests
-
 from typing import Any, Dict, Optional
 from xml.dom import minidom
+
+import requests
 
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockVisit
@@ -68,14 +68,14 @@ class BlockService:
         """
         file = requests.get(get_settings().tcs_icd_url)
         xml_file = minidom.parseString(file.text)
-        elements = xml_file.getElementsByTagName('String')
+        elements = xml_file.getElementsByTagName("String")
         block_id = None
         for els in elements:
             # This will give a NodeList item
-            name = els.getElementsByTagName('Name')
+            name = els.getElementsByTagName("Name")
             # Which needs to be converted to a DOM Element by calling item(0)
             if name.item(0).firstChild.data == "block id":
-                value = els.getElementsByTagName('Val')
+                value = els.getElementsByTagName("Val")
                 block_id = value.item(0).firstChild.data
         if not block_id:
             return None

@@ -99,8 +99,10 @@ SELECT NDPS.OffsetX                 AS offset_x,
        NDPS.OffsetX                 AS offset_y,
        NDOT.NirDitherOffsetType     AS offset_type
 FROM Nir N
-         JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
-         JOIN NirProcedureType NPT ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
+         JOIN NirProcedure NP 
+                    ON N.NirProcedure_Id = NP.NirProcedure_Id
+         JOIN NirProcedureType NPT 
+                    ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
          JOIN NirDitherPatternStep NDPS ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
          JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
          JOIN NirDitherOffsetType NDOT ON NDPS.NirDitherOffsetType_Id = NDOT.NirDitherOffsetType_Id

@@ -1,8 +1,8 @@
 import pathlib
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Request
-from starlette.routing import URLPath
+from starlette.datastructures import URLPath as URLPath
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -22,13 +22,11 @@ def generate_route_url(request: Request, router_path: URLPath) -> str:
 
 
 def generate_pdf_path(
-    proposal_code: str, filename: str = None
-) -> Union[pathlib.Path, None]:
+    proposal_code: str, filename: Optional[str]
+) -> Optional[pathlib.Path]:
     proposals_dir = get_settings().proposals_dir
     return (
-        pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
-        .resolve()
-        .as_uri()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).resolve()
         if filename
         else None
     )
@@ -196,7 +194,7 @@ class ProposalService:
         self,
         proposal_code: ProposalCode,
         semester: Semester,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
         progress_report_pdfs = {

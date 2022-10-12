@@ -21,8 +21,7 @@
     <tbody>
       <tr *ngFor="let nirDitherStep of nirDitherSteps">
         <td>
-          {{ nirDitherStep.offset.x }} x
-          {{ nirDitherStep.offset.y }} arcsec
+          {{ nirDitherStep.offset.x }} x {{ nirDitherStep.offset.y }} arcsec
         </td>
         <td>{{ nirDitherStep.offsetType }}</td>
         <td>{{ nirDitherStep.detector.iterations }}</td>

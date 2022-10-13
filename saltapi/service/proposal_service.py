@@ -1,4 +1,5 @@
 import pathlib
+import urllib.parse
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Request
@@ -15,9 +16,7 @@ from saltapi.web.schema.common import ProposalCode, Semester
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
 
-    url = "{}://{}:{}{}".format(
-        request.url.scheme, request.client.host, request.client.port, router_path
-    )
+    url = urllib.parse.urljoin(str(request.base_url), router_path)
     return url
 
 

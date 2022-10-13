@@ -3,7 +3,7 @@ import urllib.parse
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Request
-from starlette.datastructures import URLPath as URLPath
+from starlette.datastructures import URLPath
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository

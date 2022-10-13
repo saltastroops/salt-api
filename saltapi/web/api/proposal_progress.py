@@ -90,9 +90,9 @@ def get_proposal_progress_report(
     semester, and its requested time for the 2021-2 semester.
 
     The proposal progress report is returned as a JSON string, and it does include the
-    additional/supplementary file uploaded by the user when creating the report. There is another
-    endpoint for returning the report as a pdf, including the additional file and the
-    original scientific justification.
+    progress report and the supplementary files URLs uploaded by the user when creating
+    the report. There is another endpoint for returning the report as a pdf, including
+    the supplementary file and the original scientific justification.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
@@ -191,7 +191,7 @@ def get_supplementary_proposal_progress_report_pdf(
     user: User = Depends(get_current_user),
 ) -> FileResponse:
     """
-    Returns the additional/supplementary progress report pdf for a proposal and semester.
+    Returns the supplementary progress report pdf for a proposal and semester.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

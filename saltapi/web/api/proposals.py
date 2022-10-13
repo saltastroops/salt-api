@@ -332,7 +332,7 @@ def get_observation_comments(
     user: User = Depends(get_current_user),
 ) -> List[ObservationComment]:
     """
-    Lists all observations comments of a given proposal code.
+    Lists all observation comments for a given proposal code.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

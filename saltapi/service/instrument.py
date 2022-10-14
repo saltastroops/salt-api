@@ -7,3 +7,5 @@ RSS = Any
 HRS = Any
 
 BVIT = Any
+
+NIR = Any

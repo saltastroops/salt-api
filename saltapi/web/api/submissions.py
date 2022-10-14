@@ -52,7 +52,7 @@ async def create_submission(
     """
     Submit a proposal.
 
-    The proposal must be submitted as a zipfile containing the XML file defining the
+    The proposal must be submitted as a zip file containing the XML file defining the
     whole proposal or the updated/added blocks, as well as the additional files such as
     finder charts.
 

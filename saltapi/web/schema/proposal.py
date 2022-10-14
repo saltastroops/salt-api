@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
+from pydantic.networks import AnyUrl
 
 from saltapi.util import as_form
 from saltapi.web.schema.block import BlockSummary
@@ -550,7 +551,7 @@ class ProposalProgress(BaseProgressReport):
         title="Previous time requests",
         description="The request from previous semesters",
     )
-    last_observing_constraints: ObservingConstraints = Field(
+    last_observing_constraints: Optional[ObservingConstraints] = Field(
         ...,
         title="Last requested observing conditions",
         description="The last observing conditions.",

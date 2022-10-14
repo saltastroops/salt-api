@@ -21,7 +21,9 @@ def _random_string() -> str:
     return str(uuid.uuid4())[:8]
 
 
-def _new_user_details(database_mock: DatabaseMock, username: Optional[str] = None) -> Dict[str, Any]:
+def _new_user_details(
+    database_mock: DatabaseMock, username: Optional[str] = None
+) -> Dict[str, Any]:
     _username = username if username else database_mock.user_value(_random_string())
     return dict(
         username=_username,
@@ -44,7 +46,7 @@ def _new_user_details(database_mock: DatabaseMock, username: Optional[str] = Non
 
 
 def test_post_user_should_be_allowed_for_unauthenticated_user(
-        database_mock: DatabaseMock,
+    database_mock: DatabaseMock,
     client: TestClient,
 ) -> None:
     not_authenticated(client)
@@ -54,7 +56,7 @@ def test_post_user_should_be_allowed_for_unauthenticated_user(
 
 
 def test_post_user_should_be_allowed_for_misauthenticated_user(
-        database_mock: DatabaseMock,
+    database_mock: DatabaseMock,
     client: TestClient,
 ) -> None:
     misauthenticate(client)
@@ -63,8 +65,9 @@ def test_post_user_should_be_allowed_for_misauthenticated_user(
     assert response.status_code == status.HTTP_201_CREATED
 
 
-def test_post_user_should_be_allowed_for_authenticated_user(database_mock: DatabaseMock,
-                                                                    client: TestClient) -> None:
+def test_post_user_should_be_allowed_for_authenticated_user(
+    database_mock: DatabaseMock, client: TestClient
+) -> None:
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
     authenticate(username, client)
 
@@ -73,7 +76,7 @@ def test_post_user_should_be_allowed_for_authenticated_user(database_mock: Datab
 
 
 def test_post_user_should_return_400_if_username_exists_already(
-        database_mock: DatabaseMock,
+    database_mock: DatabaseMock,
     client: TestClient,
 ) -> None:
     authenticate(find_username("Administrator"), client)
@@ -86,7 +89,9 @@ def test_post_user_should_return_400_if_username_exists_already(
     assert "username" in response.json()["message"].lower()
 
 
-def test_post_user_should_create_a_new_user(database_mock: Any, client: TestClient) -> None:
+def test_post_user_should_create_a_new_user(
+    database_mock: Any, client: TestClient
+) -> None:
     new_user_details = _new_user_details(database_mock)
     expected_user = new_user_details.copy()
     del expected_user["password"]

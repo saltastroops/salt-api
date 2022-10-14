@@ -81,7 +81,9 @@ def test_patch_user_should_keep_existing_values_by_default(client: TestClient) -
     assert updated_user_details == current_user_details
 
 
-def test_patch_user_should_update_with_new_values(database_mock: DatabaseMock, client: TestClient) -> None:
+def test_patch_user_should_update_with_new_values(
+    database_mock: DatabaseMock, client: TestClient
+) -> None:
     user = create_user(client)
     new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(user["username"], client)
@@ -101,7 +103,9 @@ def test_patch_user_should_update_with_new_values(database_mock: DatabaseMock, c
     assert updated_user_details == expected_updated_user_details
 
 
-def test_patch_user_should_be_idempotent(database_mock: DatabaseMock, client: TestClient) -> None:
+def test_patch_user_should_be_idempotent(
+    database_mock: DatabaseMock, client: TestClient
+) -> None:
     user = create_user(client)
     new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(user["username"], client)
@@ -118,7 +122,9 @@ def test_patch_user_should_be_idempotent(database_mock: DatabaseMock, client: Te
     assert updated_user_details == expected_updated_user_details
 
 
-def test_patch_user_should_allow_admin_to_update_other_user(database_mock: DatabaseMock, client: TestClient) -> None:
+def test_patch_user_should_allow_admin_to_update_other_user(
+    database_mock: DatabaseMock, client: TestClient
+) -> None:
     user = create_user(client)
     new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(find_username("Administrator"), client)

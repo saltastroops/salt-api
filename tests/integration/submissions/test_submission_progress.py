@@ -13,6 +13,7 @@ from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.service.submission import SubmissionMessageType, SubmissionStatus
 from saltapi.service.user import User
 from tests.conftest import find_username
+from tests.markers import noserver
 
 
 class MockSubmissionRepository:
@@ -94,6 +95,7 @@ def _serialize_logged_at(submission_progress: Dict[str, Any]) -> Dict[str, Any]:
     return sp
 
 
+@noserver
 def test_submission_log_requires_authentication(
     db_connection: Connection, client: TestClient
 ) -> None:
@@ -109,10 +111,10 @@ def test_submission_log_requires_authentication(
     ) as websocket:
         with pytest.raises(WebSocketDisconnect) as excinfo:
             websocket.send_text("abc")
-            message = websocket.receive_text()
         assert "authenticated" in str(excinfo.value) and "/token" in str(excinfo.value)
 
 
+@noserver
 def test_submission_log_requires_existing_identifier(
     db_connection: Connection, client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -130,7 +132,6 @@ def test_submission_log_requires_existing_identifier(
     ) as websocket:
         with pytest.raises(WebSocketDisconnect) as excinfo:
             websocket.send_text("secret")
-            message = websocket.receive_text()
         assert submission_identifier in str(excinfo.value)
 
 

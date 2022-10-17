@@ -321,3 +321,4 @@ class PermissionService:
 
         if not may_update:
             raise AuthorizationError()
+

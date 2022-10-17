@@ -551,7 +551,7 @@ class ProposalProgress(BaseProgressReport):
         title="Previous time requests",
         description="The request from previous semesters",
     )
-    last_observing_constraints: Optional[ObservingConstraints] = Field(
+    last_observing_constraints: ObservingConstraints = Field(
         ...,
         title="Last requested observing conditions",
         description="The last observing conditions.",
@@ -574,7 +574,7 @@ class ProposalProgressInput(BaseProgressReport):
     partner_requested_percentages: str = Field(
         ...,
         title="Partner requested percentages",
-        description="The  List of requested percentages per partner. A pair of partner and requested percentages. "
-                    "E.g 'RSA:50;POL:50;OTH:0'",
+        description="The list of requested percentages per partner, as pairs of "
+                    "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'.",
     )
 

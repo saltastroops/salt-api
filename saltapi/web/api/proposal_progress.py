@@ -11,18 +11,14 @@ from fastapi import (
     status,
     UploadFile
 )
-from fastapi.responses import FileResponse
-from pydantic.networks import AnyUrl
 
+from pydantic import AnyUrl
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
-from saltapi.settings import get_settings
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressInput
-
-proposals_dir = pathlib.Path(get_settings().proposals_dir)
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
 
@@ -33,13 +29,13 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
     response_model=Dict[str, Dict[str, AnyUrl]],
 )
 def get_urls_for_proposal_progress_report_pdfs(
-    request: Request,
-    proposal_code: ProposalCode = Path(
-        ...,
-        title="Proposal code",
-        description="Proposal code of the proposal whose progress reports pdfs are requested.",
-    ),
-    user: User = Depends(get_current_user),
+        request: Request,
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description="Proposal code of the proposal whose progress reports pdfs are requested.",
+        ),
+        user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:
     """
     Return URLs for all proposal progress report pdfs of a given proposal.
@@ -70,9 +66,9 @@ def get_urls_for_proposal_progress_report_pdfs(
     "/{proposal_code}/{semester}",
     summary="Get a proposal progress report",
     response_model=ProposalProgress,
+    responses={200: {"content": {"application/pdf": {}}}},
 )
 def get_proposal_progress_report(
-    request: Request,
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -97,11 +93,10 @@ def get_proposal_progress_report(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report = proposal_service.get_progress_report(
-            proposal_code, semester, request, router
+        proposal_progress_report = proposal_service.get_progress_report(
+            proposal_code, semester
         )
-
-        return ProposalProgress(**progress_report)
+        return ProposalProgress(**proposal_progress_report)
 
 
 @router.put(

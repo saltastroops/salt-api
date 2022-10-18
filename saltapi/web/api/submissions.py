@@ -52,7 +52,7 @@ async def create_submission(
     """
     Submit a proposal.
 
-    The proposal must be submitted as a zipfile containing the XML file defining the
+    The proposal must be submitted as a zip file containing the XML file defining the
     whole proposal or the updated/added blocks, as well as the additional files such as
     finder charts.
 
@@ -62,6 +62,8 @@ async def create_submission(
     proposal must be the same as that passed as a query parameter.
     """
     # Submissions don't use database transactions. As such no unit of work is used.
+    # This can lead to warnings when mocking with the pytest-pymysql-autorecord plugin,
+    # which you may ignore.
     submission_repository = SubmissionRepository(engine().connect())
     submission_service = services.submission_service(submission_repository)
     submission_identifier = await submission_service.submit_proposal(

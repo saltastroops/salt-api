@@ -39,12 +39,14 @@ FROM Nir N
          JOIN NirFilter NF ON NC.NirFilter_Id = NF.NirFilter_Id
          JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
          JOIN NirProcedureType NPT ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
-         JOIN NirDitherPatternStep NDPS ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
+         JOIN NirDitherPatternStep NDPS
+                   ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
          JOIN NirDetector ND ON NDPS.NirDetector_Id = ND.NirDetector_Id
          JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
          JOIN NirGain NG1 ON ND.NirGain_Id = NG1.NirGain_Id
          JOIN NirSampling NS ON ND.NirSampling_Id = NS.NirSampling_Id
-         JOIN NirCameraFilterWheel NCFW ON NC.NirCameraFilterWheel_Id = NCFW.NirCameraFilterWheel_Id  
+         JOIN NirCameraFilterWheel NCFW
+                   ON NC.NirCameraFilterWheel_Id = NCFW.NirCameraFilterWheel_Id
 WHERE N.Nir_Id = :nir_id
 ORDER BY Nir_Id DESC;
         """
@@ -99,11 +101,15 @@ SELECT NDPS.OffsetX                 AS offset_x,
        NDPS.OffsetX                 AS offset_y,
        NDOT.NirDitherOffsetType     AS offset_type
 FROM Nir N
-         JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
-         JOIN NirProcedureType NPT ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
-         JOIN NirDitherPatternStep NDPS ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
+         JOIN NirProcedure NP
+                    ON N.NirProcedure_Id = NP.NirProcedure_Id
+         JOIN NirProcedureType NPT
+                    ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
+         JOIN NirDitherPatternStep NDPS
+                    ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
          JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
-         JOIN NirDitherOffsetType NDOT ON NDPS.NirDitherOffsetType_Id = NDOT.NirDitherOffsetType_Id
+         JOIN NirDitherOffsetType NDOT
+                    ON NDPS.NirDitherOffsetType_Id = NDOT.NirDitherOffsetType_Id
 WHERE N.Nir_Id = :nir_id
         """
         )
@@ -116,7 +122,7 @@ WHERE N.Nir_Id = :nir_id
 
         dither_steps = [
             {
-                "offset": {"x": result.offset_x, "y": result.offset_y},
+                "offset": {"x": result.offset_x / 1000, "y": result.offset_y / 1000},
                 "offset_type": result.offset_type,
                 "detector": self._detector(row),
                 "exposure_type": row.exposure_type,

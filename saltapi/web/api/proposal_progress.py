@@ -87,12 +87,12 @@ def get_proposal_progress_report(
     Returns the progress report for a proposal and semester. The semester is the
     semester for which the progress is reported. For example, if the semester is
     2021-1, the report covers the observations up to and including the 2021-1
-    semester, and it requests time for the 2021-2 semester.
+    semester, and its requested time for the 2021-2 semester.
 
-    The proposal progress report is returned as a JSON string, and it does not include the
-    additional file uploaded by the user when creating the report. There is another
-    endpoint for returning the report as a pdf, including the additional file and the
-    original scientific justification.
+    The proposal progress report is returned as a JSON string, and it does include the
+    progress report and the supplementary files URLs uploaded by the user when creating
+    the report. There is another endpoint for returning the report as a pdf, including
+    the supplementary file and the original scientific justification.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
@@ -179,7 +179,7 @@ def get_proposal_progress_report_pdf(
 
 @router.get(
     "/{proposal_code}/{semester}/supplementary-file.pdf",
-    summary="Get a proposal progress report pdf",
+    summary="Get an additional proposal progress report pdf",
     responses={200: {"content": {"application/pdf": {}}}},
 )
 def get_supplementary_proposal_progress_report_pdf(

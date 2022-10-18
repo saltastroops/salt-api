@@ -2,7 +2,7 @@ from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
-from saltapi.service.user import User, Role
+from saltapi.service.user import Role, User
 
 
 class PermissionService:
@@ -298,4 +298,3 @@ class PermissionService:
         if role in user.roles:
             return True
         return False
-

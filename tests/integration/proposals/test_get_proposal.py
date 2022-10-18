@@ -270,10 +270,10 @@ def test_should_return_proposal_file(
     proposal_file.write_bytes(proposal_content)
 
     class MockSettings(NamedTuple):
-        proposals_dir: str
+        proposals_dir: pathlib.Path
 
     def mock_get_settings() -> Any:
-        return MockSettings(str(tmp_path))
+        return MockSettings(tmp_path)
 
     # Request the proposal file
     monkeypatch.setattr(

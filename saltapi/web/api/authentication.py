@@ -15,7 +15,7 @@ router = APIRouter(tags=["Authentication"])
 
 def get_user_authentication_function() -> Callable[[str, str], User]:
     """
-    Return the function for authenticating a user by username and password.
+    Returns the function for authenticating a user by username and password.
     """
 
     def authenticate_user(username: str, password: str) -> User:

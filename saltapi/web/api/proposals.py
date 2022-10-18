@@ -171,8 +171,8 @@ def submit_new_proposal(
     calling the `/submissions/{submission_id}` endpoint).
 
     You can only use this endpoint to submit a new proposal. If you try to resubmit an
-    existing proposal, the request fails with an error. Use the endpoint
-    `/proposals/{proposal_code}` for resubmissions.
+    existing proposal, the request fails with an error. Use the
+    `/proposals/{proposal_code}` endpoint for resubmissions.
     """
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
 
@@ -305,7 +305,7 @@ def update_proposal_status(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose status is requested.",
+        description="Proposal code of the proposal whose status is updated.",
     ),
     proposal_status: ProposalStatusContent = Body(
         ..., alias="status", title="Proposal status", description="New proposal status."
@@ -331,6 +331,9 @@ def get_observation_comments(
     ),
     user: User = Depends(get_current_user),
 ) -> List[ObservationComment]:
+    """
+    Lists all observation comments for a given proposal code.
+    """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_observation_comments(

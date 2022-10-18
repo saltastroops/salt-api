@@ -1,5 +1,6 @@
 import pathlib
 
+from io import BytesIO
 from fastapi import APIRouter, Request
 from PyPDF2 import PdfFileMerger
 from starlette.routing import URLPath
@@ -213,9 +214,10 @@ class ProposalService:
             self,
             proposal_code: ProposalCode,
             semester: Semester,
-    ) -> None:
+    ) -> BytesIO:
         """
-        Create the proposal progress PDF by joining proposal progress PDF and the supplementary files.
+        Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.
+        Will raise an error if the file doesn't exist.
         """
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
@@ -227,9 +229,14 @@ class ProposalService:
                 proposal_code, progress_report["additional_pdf"]
             ),
         }
-        with PdfFileMerger(strict=False) as merger:
-            if progress_report_pdfs["proposal_progress_pdf"]:
+        if progress_report_pdfs["proposal_progress_pdf"]:
+            b = BytesIO()
+            with PdfFileMerger(strict=False) as merger:
                 merger.append(progress_report_pdfs["proposal_progress_pdf"])
                 if progress_report_pdfs["additional_pdf"]:
                     merger.append(progress_report_pdfs["additional_pdf"])
-                merger.write("tmp_proposal_progress.pdf")
+                merger.write(b)
+            b.seek(0)
+            return b
+        else:
+            raise FileNotFoundError("There is no proposal progress file.")

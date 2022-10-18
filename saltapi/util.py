@@ -1,5 +1,4 @@
 """Utility functions."""
-import os
 from datetime import datetime, timedelta
 from typing import NamedTuple
 
@@ -148,15 +147,3 @@ def next_semester() -> str:
     return Semester(
         semester_of_datetime(datetime.now(tz=pytz.utc) + relativedelta(months=+6))
     )
-
-
-def proposal_progress_clean_up():
-    """
-    Remove the proposal progress temporally file.
-
-    Method is needed because the python's build in tempfile, cleans out files before fastApi return the file.
-    """
-    try:
-        os.remove("tmp_proposal_progress.pdf")
-    except FileNotFoundError:
-        pass

@@ -1,8 +1,9 @@
 import pathlib
-from typing import Any, Dict, List, Optional, Union
+import urllib.parse
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Request
-from starlette.routing import URLPath
+from starlette.datastructures import URLPath
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -12,24 +13,19 @@ from saltapi.settings import get_settings
 from saltapi.util import next_semester, semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 
-proposals_dir = get_settings().proposals_dir
-
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
 
-    url = "{}://{}:{}{}".format(
-        request.url.scheme, request.client.host, request.client.port, router_path
-    )
+    url = urllib.parse.urljoin(str(request.base_url), router_path)
     return url
 
 
 def generate_pdf_path(
-    proposal_code: str, filename: str = None
-) -> Union[pathlib.Path, None]:
+    proposal_code: str, filename: Optional[str]
+) -> Optional[pathlib.Path]:
+    proposals_dir = get_settings().proposals_dir
     return (
-        pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
-        .resolve()
-        .as_uri()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).resolve()
         if filename
         else None
     )
@@ -76,6 +72,7 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
+        proposals_dir = get_settings().proposals_dir
         version = self.repository.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
@@ -196,7 +193,7 @@ class ProposalService:
         self,
         proposal_code: ProposalCode,
         semester: Semester,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
         progress_report_pdfs = {

@@ -56,7 +56,7 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
         ("2019-2-DDT-006", "2019-2"),
     ],
 )
-def test_get_progress_report_returns_none_and_empty_arrays_for_nonexisting_progress_report(
+def test_get_progress_report_returns_empty_report_for_nonexisting_progress_report(
     proposal_code: str,
     semester: str,
     client: TestClient,

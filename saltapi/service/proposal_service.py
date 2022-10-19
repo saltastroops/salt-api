@@ -7,9 +7,14 @@ from fastapi import APIRouter, Request, UploadFile
 from starlette.routing import URLPath
 import pdfkit
 from typing import Any, Dict, List, Optional, Union
+import urllib.parse
 
+from io import BytesIO
 from fastapi import APIRouter, Request
+from PyPDF2 import PdfFileMerger
 from starlette.routing import URLPath
+from typing import Any, Dict, List, Optional, Union
+from starlette.datastructures import URLPath
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -24,20 +29,16 @@ from saltapi.web.schema.proposal import ProposalProgressInput
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
 
-    url = "{}://{}:{}{}".format(
-        request.url.scheme, request.client.host, request.client.port, router_path
-    )
+    url = urllib.parse.urljoin(str(request.base_url), router_path)
     return url
 
 
 def generate_pdf_path(
-        proposal_code: str, filename: str = None
+    proposal_code: str, filename: Optional[str]
 ) -> Optional[pathlib.Path]:
     proposals_dir = get_settings().proposals_dir
     return (
-        pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
-            .resolve()
-            .as_uri()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).resolve()
         if filename
         else None
     )
@@ -84,7 +85,7 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
-        proposals_dir = pathlib.Path(get_settings().proposals_dir)
+        proposals_dir = get_settings().proposals_dir
         version = self.repository.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
@@ -236,7 +237,7 @@ class ProposalService:
         self,
         proposal_code: ProposalCode,
         semester: Semester,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
         progress_report_pdfs = {
@@ -340,3 +341,34 @@ class ProposalService:
             "proposal_progress_filename": proposal_progress_filename,
             "additional_pdf_filename": additional_pdf_filename
         }
+
+    def create_proposal_progress_pdf(
+            self,
+            proposal_code: ProposalCode,
+            semester: Semester,
+    ) -> BytesIO:
+        """
+        Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.
+        Will raise an error if the file doesn't exist.
+        """
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
+
+        progress_report_pdfs = {
+            "proposal_progress_pdf": generate_pdf_path(
+                proposal_code, progress_report["proposal_progress_pdf"]
+            ),
+            "additional_pdf": generate_pdf_path(
+                proposal_code, progress_report["additional_pdf"]
+            ),
+        }
+        if progress_report_pdfs["proposal_progress_pdf"]:
+            b = BytesIO()
+            with PdfFileMerger(strict=False) as merger:
+                merger.append(progress_report_pdfs["proposal_progress_pdf"])
+                if progress_report_pdfs["additional_pdf"]:
+                    merger.append(progress_report_pdfs["additional_pdf"])
+                merger.write(b)
+            b.seek(0)
+            return b
+        else:
+            raise FileNotFoundError("There is no proposal progress file.")

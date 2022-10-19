@@ -1,7 +1,5 @@
 import pathlib
 import urllib.parse
-from typing import Dict, Optional, cast
-
 from fastapi import (
     APIRouter,
     Depends,
@@ -11,6 +9,10 @@ from fastapi import (
     status,
     UploadFile
 )
+from fastapi.responses import FileResponse, StreamingResponse
+from os.path import exists
+from pydantic.networks import AnyUrl
+from typing import Dict, Optional, cast
 
 from pydantic import AnyUrl
 from saltapi.repository.unit_of_work import UnitOfWork
@@ -151,7 +153,6 @@ async def put_proposal_progress_report(
     responses={200: {"content": {"application/pdf": {}}}},
 )
 def get_proposal_progress_report_pdf(
-    request: Request,
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -159,7 +160,7 @@ def get_proposal_progress_report_pdf(
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     user: User = Depends(get_current_user),
-) -> FileResponse:
+) -> StreamingResponse:
     """
     Returns the progress report pdf for a proposal and semester.
     """
@@ -168,16 +169,19 @@ def get_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report_pdfs = proposal_service.get_proposal_progress_report_pdf(
-            proposal_code, semester
-        )
-        pdf_path = urllib.parse.urlparse(
-            progress_report_pdfs["proposal_progress_pdf"]
-        ).path
-
-        filename = "ProgressReport_{}.pdf".format(semester)
-
-        return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        proposal_progress_byte_io = proposal_service.create_proposal_progress_pdf(
+                proposal_code, semester
+            )
+        try:
+            return StreamingResponse(
+                proposal_progress_byte_io,
+                headers={
+                    'Content-Disposition': f'attachment; filename=ProposalProgressReport-{semester}.pdf'
+                },
+                media_type="application/pdf",
+            )
+        except FileNotFoundError:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.get(
@@ -186,7 +190,6 @@ def get_proposal_progress_report_pdf(
     responses={200: {"content": {"application/pdf": {}}}},
 )
 def get_supplementary_proposal_progress_report_pdf(
-    request: Request,
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -211,4 +214,6 @@ def get_supplementary_proposal_progress_report_pdf(
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
-        return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        if exists(pdf_path):
+            return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

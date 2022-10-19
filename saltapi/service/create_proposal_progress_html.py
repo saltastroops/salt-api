@@ -7,7 +7,7 @@ def create_proposal_progress_html(
     previous_requests: List[Dict[str, Any]],
     previous_conditions: Dict[str, Any],
     new_request: Dict[str, Any],
-):
+) -> str:
     html_content = """
 <!DOCTYPE html>
 <html lang="en">

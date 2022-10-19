@@ -327,7 +327,8 @@ def get_observation_comments(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose observation comments are requested.",
+        description="Proposal code of the proposal whose observation comments are "
+                    "requested.",
     ),
     user: User = Depends(get_current_user),
 ) -> List[ObservationComment]:
@@ -357,7 +358,8 @@ def post_observation_comment(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal for which an observation comment is added.",
+        description="Proposal code of the proposal for which an observation comment is "
+                    "added.",
     ),
     comment: Comment = Body(..., title="Comment", description="Text of the comment."),
     user: User = Depends(get_current_user),
@@ -389,7 +391,8 @@ def get_data_release_date(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose data release date is requested.",
+        description="Proposal code of the proposal whose data release date is "
+                    "requested.",
     ),
     from_date: Optional[date] = Query(
         date(2000, 1, 1),
@@ -421,7 +424,8 @@ def update_data_release_date(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal for which a new data release date is requested.",
+        description="Proposal code of the proposal for which a new data release date "
+                    "is requested.",
     ),
 ) -> DataReleaseDate:
     """

@@ -824,19 +824,21 @@ WHERE C.Proposal_Code = :proposal_code
         self, proposal_code: str
     ) -> Dict[int, Dict[str, List[str]]]:
         """
-        Return the dictionary of block ids and a dictionary of RSS configurations contained in the
-        blocks.
+        Return the dictionary of block ids and a dictionary of RSS configurations
+        contained in the blocks.
 
-        A block is only included in the dictionary if it is using RSS. The configurations are
-        ordered alphabetically for every block.
+        A block is only included in the dictionary if it is using RSS. The
+        configurations are ordered alphabetically for every block.
         """
         separator = "::::"
         stmt = text(
             """
 SELECT B.Block_Id AS block_id,
        GROUP_CONCAT(DISTINCT RM.Mode ORDER BY RM.Mode SEPARATOR :separator) AS modes,
-       GROUP_CONCAT(DISTINCT RG.Grating ORDER BY RG.Grating SEPARATOR :separator) AS gratings,
-       GROUP_CONCAT(DISTINCT RF.Barcode  ORDER BY RF.Barcode  SEPARATOR :separator) AS filters
+       GROUP_CONCAT(DISTINCT RG.Grating ORDER BY RG.Grating SEPARATOR :separator)
+           AS gratings,
+       GROUP_CONCAT(DISTINCT RF.Barcode  ORDER BY RF.Barcode  SEPARATOR :separator)
+           AS filters
 FROM RssMode RM
          JOIN RssConfig RC ON RM.RssMode_Id = RC.RssMode_Id
          JOIN Rss R ON RC.RssConfig_Id = R.RssConfig_Id
@@ -875,8 +877,8 @@ GROUP BY B.Block_Id
         self, proposal_code: str
     ) -> Dict[int, Dict[str, List[str]]]:
         """
-        Return the dictionary of block ids and a dictionary of HRS configurations contained in the
-        blocks.
+        Return the dictionary of block ids and a dictionary of HRS configurations
+        contained in the blocks.
 
         A block is only included in the dictionary if it is using HRS. The modes are
         ordered alphabetically for every block.
@@ -922,8 +924,8 @@ GROUP BY B.Block_Id
         self, proposal_code: str
     ) -> Dict[int, Dict[str, List[str]]]:
         """
-        Return the dictionary of block ids and a dictionary of BVIT configurations contained in the
-        blocks.
+        Return the dictionary of block ids and a dictionary of BVIT configurations
+        contained in the blocks.
 
         A block is only included in the dictionary if it is using BVIT. There is only
         one mode, which is an empty string.
@@ -952,7 +954,7 @@ WHERE C.Proposal_Code = :proposal_code
 
     def _block_instruments(self, proposal_code: str) -> Dict[int, List[Dict[str, Any]]]:
         """
-        Return the dictionary of block ids and dictionaries of instruments configurations.
+        Return the dictionary of block ids and instrument configuration dictionaries.
         """
         salticam_configurations = self._block_salticam_configurations(proposal_code)
         rss_configurations = self._block_rss_configurations(proposal_code)
@@ -1229,7 +1231,8 @@ SELECT PS.Status AS status, PIR.InactiveReason AS reason
 FROM ProposalStatus PS
          JOIN ProposalGeneralInfo PGI ON PS.ProposalStatus_Id = PGI.ProposalStatus_Id
          JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
-         LEFT JOIN ProposalInactiveReason PIR ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
+         LEFT JOIN ProposalInactiveReason PIR
+                     ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
 WHERE PC.Proposal_Code = :proposal_code
         """
         )
@@ -1671,7 +1674,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 "change_reason": None,
                 "summary_of_proposal_status": None,
                 "strategy_changes": None,
-                "partner_requested_percentages": self._get_partner_requested_percentages(
+                "partner_requested_percentages": self._get_partner_requested_percentages(  # noqa
                     proposal_code, semester
                 ),
                 "previous_time_requests": time_statistics,

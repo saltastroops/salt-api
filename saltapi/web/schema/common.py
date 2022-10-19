@@ -35,7 +35,8 @@ class BaseBlockVisit(BaseModel):
     night: date = Field(
         ...,
         title="Observation night",
-        description="Start date of the night when the observation was made (or the block visit was queued).",
+        description="Start date of the night when the observation was made (or the "
+                    "block visit was queued).",
     )
     status: BlockVisitStatusValue = Field(
         ...,
@@ -85,12 +86,14 @@ class BlockVisit(BaseBlockVisit):
     targets: List[str] = Field(
         ...,
         title="Targets",
-        description="List of the names of the observed targets. With the exception of a few legacy observations, the list contains a single target",
+        description="List of the names of the observed targets. With the exception of "
+                    "a few legacy observations, the list contains a single target",
     )
     maximum_lunar_phase: float = Field(
         ...,
         title="Maximum lunar phase",
-        description="Maximum lunar phase which was allowed for the observation, as the percentage of lunar illumination",
+        description="Maximum lunar phase which was allowed for the observation, as the "
+                    "percentage of lunar illumination",
         ge=0,
         le=100,
     )
@@ -120,26 +123,37 @@ class ObservationProbabilities(BaseModel):
     moon: Optional[float] = Field(
         ...,
         title="Moon probability",
-        description="Moon probability, which is derived from the lunar phase cumulative distribution function during the semester. The moon probability is not used in the total probability calculation since the moon constraints are already incorporated in the visibility window calculations",
+        description="Moon probability, which is derived from the lunar phase "
+                    "cumulative distribution function during the semester. The moon "
+                    "probability is not used in the total probability calculation "
+                    "since the moon constraints are already incorporated in the "
+                    "visibility window calculations",
     )
     competition: Optional[float] = Field(
         ...,
         title="Competition probability",
-        description="Competition probability, which is determined as P_comp(x) = 1 / (C + 1) where C is the number of targets that overlap with target x",
+        description="Competition probability, which is determined as "
+                    "P_comp(x) = 1 / (C + 1) where C is the number of targets that "
+                    "overlap with target x",
         ge=0,
         le=1,
     )
     observability: Optional[float] = Field(
         ...,
         title="Observability probability",
-        description="Probability representing the likelihood of pointing to a target given the length of its visibility window and the time requested on target. The probability is represented by the ratio of the length of the observing window and the length of the visibility window",
+        description="Probability representing the likelihood of pointing to a target "
+                    "given the length of its visibility window and the time requested "
+                    "on target. The probability is represented by the ratio of the "
+                    "length of the observing window and the length of the visibility "
+                    "window",
         ge=0,
         le=1,
     )
     seeing: Optional[float] = Field(
         ...,
         title="Seeing probability",
-        description="Seeing probability, whivh is derived from the cumulative distribution function of seeing measurements taken in Sutherland",
+        description="Seeing probability, whivh is derived from the cumulative "
+                    "distribution function of seeing measurements taken in Sutherland",
         ge=0,
         le=1,
     )
@@ -149,7 +163,11 @@ class ObservationProbabilities(BaseModel):
     total: Optional[float] = Field(
         ...,
         title="Total probability",
-        description="Total probability, which is derived using the binomial theorem, where the number of trials are the number of tracks available to observe a target, the number of successes is the number of visits requested and the probability per trial is the total probability per track",
+        description="Total probability, which is derived using the binomial theorem, "
+                    "where the number of trials are the number of tracks available to "
+                    "observe a target, the number of successes is the number of visits "
+                    "requested and the probability per trial is the total probability "
+                    "per track",
         ge=0,
         le=1,
     )

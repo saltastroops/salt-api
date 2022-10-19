@@ -119,7 +119,8 @@ class GeneralProposalInfo(BaseModel):
     summary_for_salt_astronomer: str = Field(
         ...,
         title="Summary for the SALT Astronomer",
-        description="Brief summary with the essential information for the SALT Astronomer",
+        description="Brief summary with the essential information for the SALT "
+                    "Astronomer",
     )
     summary_for_night_log: str = Field(
         ...,
@@ -129,7 +130,8 @@ class GeneralProposalInfo(BaseModel):
     is_self_activatable: bool = Field(
         ...,
         title="Can the proposal be self-activated?",
-        description="Can the proposal be activated by the Principal Investigator or Principal Contact?",
+        description="Can the proposal be activated by the Principal Investigator or "
+                    "Principal Contact?",
     )
 
 
@@ -152,7 +154,9 @@ class Investigator(ProposalUser):
     has_approved_proposal: Optional[bool] = Field(
         ...,
         title="Has approved proposal?",
-        description="Whether the investigator has approved the proposal. The value is null if the investigator has neither approved nor rejected the proposal yet",
+        description="Whether the investigator has approved the proposal. The value is "
+                    "null if the investigator has neither approved nor rejected the "
+                    "proposal yet",
     )
 
 
@@ -263,7 +267,8 @@ class RequestedTime(BaseModel):
     minimum_useful_time: Optional[int] = Field(
         ...,
         title="Minimum useful time",
-        description="Minimum time needed to produce meaningful science from the proposal, in seconds.",
+        description="Minimum time needed to produce meaningful science from the "
+                    "proposal, in seconds.",
     )
     comment: Optional[str] = Field(
         None, title="Comment", description="Comment on the time requirements"
@@ -284,12 +289,14 @@ class TimeAllocation(BaseModel):
     partner_name: PartnerName = Field(
         ...,
         title="SALT partner name",
-        description="Name of the SALT partner whose Time Allocation Committee is allocating the time",
+        description="Name of the SALT partner whose Time Allocation Committee is "
+                    "allocating the time",
     )
     partner_code: PartnerCode = Field(
         ...,
         title="SALT partner code",
-        description="Code of the SALT partner whose Time Allocation Committee is allocating the time",
+        description="Code of the SALT partner whose Time Allocation Committee is "
+                    "allocating the time",
     )
     tac_comment: Optional[str] = Field(
         ...,

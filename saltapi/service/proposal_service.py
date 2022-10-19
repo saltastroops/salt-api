@@ -173,12 +173,9 @@ class ProposalService:
             "requested_time": proposal_progress_report.requested_time,
             "maximum_seeing": proposal_progress_report.maximum_seeing,
             "transparency": proposal_progress_report.transparency,
-            "description_of_observing_constraints":
-                proposal_progress_report.description_of_observing_constraints,
-            "change_reason":
-                proposal_progress_report.change_reason,
-            "summary_of_proposal_status":
-                proposal_progress_report.summary_of_proposal_status,
+            "description_of_observing_constraints": proposal_progress_report.description_of_observing_constraints,
+            "change_reason": proposal_progress_report.change_reason,
+            "summary_of_proposal_status": proposal_progress_report.summary_of_proposal_status,
             "strategy_changes": proposal_progress_report.strategy_changes,
             "partner_requested_percentages": partner_requested_percentages,
         }

@@ -1699,13 +1699,13 @@ WHERE PC.Proposal_Code = :proposal_code
                     "summary_of_proposal_status"
                 ] = row.summary_of_proposal_status
                 progress_report["strategy_changes"] = row.strategy_changes
-            progress_report["previous_time_requests"] = time_statistics
-            progress_report[
-                "last_observing_constraints"
-            ] = self.get_latest_observing_conditions(proposal_code, semester)
-            progress_report[
-                "partner_requested_percentages"
-            ] = self._get_partner_requested_percentages(proposal_code, semester)
+                progress_report["previous_time_requests"] = time_statistics
+                progress_report[
+                    "last_observing_constraints"
+                ] = self.get_latest_observing_conditions(proposal_code, semester)
+                progress_report[
+                    "partner_requested_percentages"
+                ] = self._get_partner_requested_percentages(proposal_code, semester)
             return progress_report
         else:
             return {

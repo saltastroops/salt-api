@@ -3,7 +3,6 @@ from enum import Enum
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
-from pydantic.networks import AnyUrl
 
 from saltapi.util import as_form
 from saltapi.web.schema.block import BlockSummary

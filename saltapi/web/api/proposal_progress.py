@@ -1,4 +1,3 @@
-from os.path import exists
 from typing import Dict, Optional, cast
 
 from fastapi import (
@@ -116,7 +115,7 @@ async def put_proposal_progress_report(
         " updated.",
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
-    proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),
+    proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),  # type: ignore
     additional_pdf: Optional[UploadFile] = File(b""),
     user: User = Depends(get_current_user),
 ) -> ProposalProgress:

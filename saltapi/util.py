@@ -152,7 +152,7 @@ def next_semester() -> str:
     )
 
 
-def as_form(cls: Type[BaseModel]):
+def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:
     """
     Adds an as_form class method to decorated models. The as_form class method can be
     used with FastAPI endpoints. The as_form decorator will convert the BaseModel to
@@ -171,11 +171,11 @@ def as_form(cls: Type[BaseModel]):
         for field in cls.__fields__.values()
     ]
 
-    async def _as_form(**data):
+    async def _as_form(**data) -> BaseModel:  # type: ignore
         return cls(**data)
 
     sig = inspect.signature(_as_form)
     sig = sig.replace(parameters=new_params)
-    _as_form.__signature__ = sig
+    _as_form.__signature__ = sig  # type: ignore
     setattr(cls, "as_form", _as_form)
     return cls

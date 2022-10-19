@@ -1,11 +1,11 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def create_proposal_progress_html(
     proposal_code: str,
     semester: str,
     previous_requests: List[Dict[str, Any]],
-    previous_conditions: Dict[str, Any],
+    previous_conditions: Optional[Dict[str, Any]],
     new_request: Dict[str, Any],
 ) -> str:
     html_content = """
@@ -94,7 +94,7 @@ def create_proposal_progress_html(
                         <th>Completion</th>
                       </tr>
 """
-    for p in sorted(previous_requests, key=lambda i: i["semester"]):
+    for p in sorted(previous_requests, key=lambda i: i["semester"]):  # type: ignore
         html_content += f"""
                       <tr>
                         <td>{p['semester']}</td>
@@ -104,7 +104,8 @@ def create_proposal_progress_html(
                         <td>{round((p['observed_time']/p['allocated_time'])*100, 1)} %</td>
                       </tr>
         """
-    html_content += f"""
+    if previous_conditions:
+        html_content += f"""
                     </table>
                     <h4>Previously requested observing conditions</h4>
                     <div>
@@ -131,6 +132,8 @@ def create_proposal_progress_html(
                     </div>
                 </div>
             </div>
+    """
+    html_content += f"""
             <div class="section">
                 <div class="numbering">
                     <div><h3>2.</h3></div>

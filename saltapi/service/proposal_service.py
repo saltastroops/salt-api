@@ -3,7 +3,7 @@ import urllib.parse
 from io import BytesIO
 from typing import Any, Dict, List, Optional
 
-import pdfkit
+import pdfkit  # type: ignore
 from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfFileMerger
 from starlette.datastructures import URLPath

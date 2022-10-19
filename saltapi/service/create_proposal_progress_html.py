@@ -215,7 +215,7 @@ def create_proposal_progress_html(
             </div>
         </div>
     </body>
-</html> 
+</html>
     """
 
     return html_content

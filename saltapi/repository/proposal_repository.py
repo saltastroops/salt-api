@@ -1427,8 +1427,8 @@ INSERT INTO MultiPartner(
 )
 VALUES (
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Partner_Id FROM Partner WHERE PartnerCode = :partner_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Partner_Id FROM Partner WHERE Partner_Code = :partner_code),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :requested_time_percent,
     :requested_time_amount
 ) ON DUPLICATE KEY UPDATE
@@ -1451,7 +1451,7 @@ VALUES (
         self,
         proposal_code: str,
         semester: str,
-        seeing: float,
+        maximum_seeing: float,
         transparency: str,
         observing_conditions_description: str,
     ) -> None:
@@ -1470,7 +1470,7 @@ INSERT INTO P1ObservingConditions (
 VALUES
 (
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
@@ -1486,7 +1486,7 @@ VALUES
             {
                 "proposal_code": proposal_code,
                 "semester": semester,
-                "seeing": seeing,
+                "maximum_seeing": maximum_seeing,
                 "transparency": transparency,
                 "observing_conditions_description": observing_conditions_description,
             },
@@ -1744,7 +1744,7 @@ WHERE PC.Proposal_Code = :proposal_code
         self._insert_or_update_observing_conditions(
             proposal_code=proposal_code,
             semester=semester,
-            seeing=proposal_progress["maximum_seeing"],
+            maximum_seeing=proposal_progress["maximum_seeing"],
             transparency=proposal_progress["transparency"],
             observing_conditions_description=proposal_progress["description_of_observing_constraints"],
         )

@@ -1,5 +1,8 @@
 import pathlib
 import urllib.parse
+from os.path import exists
+from typing import Dict, Optional, cast
+
 from fastapi import (
     APIRouter,
     Body,
@@ -12,9 +15,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse, StreamingResponse
-from os.path import exists
 from pydantic.networks import AnyUrl
-from typing import Dict, Optional, cast
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user

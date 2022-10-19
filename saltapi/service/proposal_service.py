@@ -1,10 +1,10 @@
 import pathlib
 import urllib.parse
-
 from io import BytesIO
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Request
 from PyPDF2 import PdfFileMerger
-from typing import Any, Dict, List, Optional
 from starlette.datastructures import URLPath
 
 from saltapi.exceptions import NotFoundError

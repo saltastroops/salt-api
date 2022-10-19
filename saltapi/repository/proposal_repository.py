@@ -1344,7 +1344,7 @@ WHERE PC.Proposal_Code = :proposal_code
     def generate_proposal_progress_filename(
         file_content: bytes, is_supplementary: bool = False
     ) -> str:
-        hash_md = hashlib.md5(file_content).hexdigest()
+        hash_md = hashlib.md5(file_content).hexdigest()  # nosec
         if is_supplementary:
             return f"ProposalProgressSupplementary-{hash_md}.pdf"
 

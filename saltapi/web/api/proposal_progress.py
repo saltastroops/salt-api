@@ -1,22 +1,22 @@
-import pathlib
-import urllib.parse
 from fastapi import (
     APIRouter,
     Depends,
     File,
     Path,
     Request,
-    status,
-    UploadFile
+    UploadFile,
+    HTTPException
 )
 from fastapi.responses import FileResponse, StreamingResponse
 from os.path import exists
 from pydantic.networks import AnyUrl
+from pydantic import AnyUrl
+from starlette import status
 from typing import Dict, Optional, cast
 
-from pydantic import AnyUrl
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
+from saltapi.service.proposal_service import generate_pdf_path
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
@@ -35,7 +35,7 @@ def get_urls_for_proposal_progress_report_pdfs(
         proposal_code: ProposalCode = Path(
             ...,
             title="Proposal code",
-            description="Proposal code of the proposal whose progress reports pdfs are requested.",
+            description="Proposal code of the proposal whose progress report pdf URLs are requested.",
         ),
         user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:
@@ -142,7 +142,7 @@ async def put_proposal_progress_report(
         unit_of_work.commit()
 
         proposal_progress_report = proposal_service.get_progress_report(
-            proposal_code, semester
+            proposal_code, semester,
         )
         return ProposalProgress(**proposal_progress_report)
 
@@ -206,14 +206,18 @@ def get_supplementary_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        progress_report_pdfs = proposal_service.get_proposal_progress_report_pdf(
+        progress_report_pdfs = proposal_service.get_progress_report(
             proposal_code, semester
         )
 
-        pdf_path = urllib.parse.urlparse(progress_report_pdfs["additional_pdf"]).path
+        additional_pdf_path = generate_pdf_path(
+            proposal_code,
+            progress_report_pdfs["additional_pdf"]
+        )
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
+        print("CCC: ", additional_pdf_path)
 
-        if exists(pdf_path):
-            return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        if exists(additional_pdf_path):
+            return FileResponse(additional_pdf_path, media_type="application/pdf", filename=filename)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

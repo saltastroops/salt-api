@@ -1379,7 +1379,7 @@ VALUES(
     :report_path,
     :supplementary_path,
     NOW()
-)ON DUPLICATE KEY UPDATE 
+) ON DUPLICATE KEY UPDATE 
     TimeRequestChangeReasons = :change_reason,
     StatusSummary = :summary_of_proposal_status,
     StrategyChanges = :strategy_changes,
@@ -1474,7 +1474,7 @@ VALUES
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
-)ON DUPLICATE KEY UPDATE 
+) ON DUPLICATE KEY UPDATE 
     MaxSeeing = :maximum_seeing,
     Transparency_Id = (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     ObservingConditionsDescription = :observing_conditions_description
@@ -1731,7 +1731,7 @@ WHERE PC.Proposal_Code = :proposal_code
             filenames: Dict[str, str or None]
     ) -> None:
         """
-        Insert the proposal progress into the database
+        Insert the proposal progress into the database, or update the existing one.
         """
         for rp in proposal_progress["partner_requested_percentages"]:
             self._insert_or_update_proposal_progress_requested_time(

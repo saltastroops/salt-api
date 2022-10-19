@@ -44,7 +44,7 @@ class PeriodEphemeris(BaseModel):
         ...,
         title="Zero point for the ephemeris",
         description="Zero point for the target ephemeris. The target phase is 0 at "
-                    "this time",
+        "this time",
     )
     period: Decimal = Field(
         ...,
@@ -113,7 +113,7 @@ class Target(BaseModel):
         ...,
         title="Horizons identifier",
         description="Identifier for the target in the JPL-Horizons database of "
-                    "solar-system targets",
+        "solar-system targets",
     )
 
     non_sidereal: bool = Field(
@@ -130,7 +130,7 @@ class Phase1Target(Target):
         ...,
         title="Optional?",
         description="Whether the target is optional, i.e. whether it is part of a pool "
-                    "of targets from which only a subset needs to be observed.",
+        "of targets from which only a subset needs to be observed.",
     )
     requested_observations: int = Field(
         ...,
@@ -141,7 +141,7 @@ class Phase1Target(Target):
         ...,
         title="Maximum lunar phase",
         description="Maximum lunar phase which was allowed for the observation, as the "
-                    "percentage of lunar illumination",
+        "percentage of lunar illumination",
         ge=0,
         le=100,
     )
@@ -149,14 +149,14 @@ class Phase1Target(Target):
         ...,
         title="Ranking",
         description="Importance attributed by the Principal Investigator to "
-                    "observations of this target relative to other observations for "
-                    "the same proposal.",
+        "observations of this target relative to other observations for "
+        "the same proposal.",
     )
     night_count: int = Field(
         ...,
         title="Number of nights",
         description="Number of nights for which the target is observable, given the "
-                    "requested observation time and observation constraints.",
+        "requested observation time and observation constraints.",
     )
     observing_probabilities: ObservationProbabilities = Field(
         ...,

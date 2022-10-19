@@ -85,7 +85,7 @@ async def submission_progress(
         alias="from-entry-number",
         title="Minimum entry number",
         description="Minimum entry number from which onwards log entries are "
-                    "considered",
+        "considered",
     ),
 ) -> None:
     """

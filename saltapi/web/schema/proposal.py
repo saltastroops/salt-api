@@ -120,7 +120,7 @@ class GeneralProposalInfo(BaseModel):
         ...,
         title="Summary for the SALT Astronomer",
         description="Brief summary with the essential information for the SALT "
-                    "Astronomer",
+        "Astronomer",
     )
     summary_for_night_log: str = Field(
         ...,
@@ -131,7 +131,7 @@ class GeneralProposalInfo(BaseModel):
         ...,
         title="Can the proposal be self-activated?",
         description="Can the proposal be activated by the Principal Investigator or "
-                    "Principal Contact?",
+        "Principal Contact?",
     )
 
 
@@ -155,8 +155,8 @@ class Investigator(ProposalUser):
         ...,
         title="Has approved proposal?",
         description="Whether the investigator has approved the proposal. The value is "
-                    "null if the investigator has neither approved nor rejected the "
-                    "proposal yet",
+        "null if the investigator has neither approved nor rejected the "
+        "proposal yet",
     )
 
 
@@ -268,7 +268,7 @@ class RequestedTime(BaseModel):
         ...,
         title="Minimum useful time",
         description="Minimum time needed to produce meaningful science from the "
-                    "proposal, in seconds.",
+        "proposal, in seconds.",
     )
     comment: Optional[str] = Field(
         None, title="Comment", description="Comment on the time requirements"
@@ -290,13 +290,13 @@ class TimeAllocation(BaseModel):
         ...,
         title="SALT partner name",
         description="Name of the SALT partner whose Time Allocation Committee is "
-                    "allocating the time",
+        "allocating the time",
     )
     partner_code: PartnerCode = Field(
         ...,
         title="SALT partner code",
         description="Code of the SALT partner whose Time Allocation Committee is "
-                    "allocating the time",
+        "allocating the time",
     )
     tac_comment: Optional[str] = Field(
         ...,

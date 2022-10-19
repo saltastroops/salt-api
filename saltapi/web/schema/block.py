@@ -71,7 +71,7 @@ class ObservingConditions(BaseModel):
         ...,
         title="Maximum lunar phase",
         description="Maximum lunar phase which was allowed for the observation, as the "
-                    "percentage of lunar illumination",
+        "percentage of lunar illumination",
         ge=0,
         le=100,
     )
@@ -79,7 +79,7 @@ class ObservingConditions(BaseModel):
         ...,
         title="Minimum lunar distance",
         description="Minimum required angular distance between the Moon and the "
-                    "target, in degrees",
+        "target, in degrees",
     )
 
 
@@ -101,7 +101,7 @@ class Block(BaseModel):
         ...,
         title="Ranking",
         description="Ranking by the Principal Investigator relative to other blocks "
-                    "in the proposal",
+        "in the proposal",
     )
     wait_period: int = Field(
         ...,
@@ -132,7 +132,7 @@ class Block(BaseModel):
         ...,
         title="Observation time",
         description="Time required for an observation of the block, including the "
-                    "overhead time, in seconds",
+        "overhead time, in seconds",
         gt=0,
     )
     overhead_time: Optional[int] = Field(
@@ -152,8 +152,8 @@ class Block(BaseModel):
         ...,
         title="Observations",
         description="List of observations in the block. With the exception of some "
-                    "legacy proposals, there is always a single observation in the "
-                    "block",
+        "legacy proposals, there is always a single observation in the "
+        "block",
     )
 
 
@@ -194,13 +194,13 @@ class BlockSummary(BaseModel):
         ...,
         title="Observable tonight?",
         description="Whether the block can be observed tonight (i.e. during the "
-                    "current Julian day)",
+        "current Julian day)",
     )
     remaining_nights: int = Field(
         ...,
         title="Remaining nights",
         description="Number of nights (Julian days), excluding the current one, during "
-                    "which the block still can be observed",
+        "which the block still can be observed",
     )
     observing_conditions: ObservingConditions = Field(
         ...,

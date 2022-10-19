@@ -70,7 +70,7 @@ class NewUserDetails(FullName):
         ...,
         title="Institution id",
         description="Unique identifier of the institution to which the user is "
-                    "affiliated.",
+        "affiliated.",
     )
 
 
@@ -96,5 +96,5 @@ class PasswordResetRequest(BaseModel):
         ...,
         title="Username or email",
         description="Username or email address of the user whose password should be "
-                    "reset",
+        "reset",
     )

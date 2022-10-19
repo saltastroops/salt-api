@@ -41,7 +41,7 @@ def get_urls_for_proposal_progress_report_pdfs(
         ...,
         title="Proposal code",
         description="Proposal code of the proposal whose progress reports pdfs are "
-                    "requested.",
+        "requested.",
     ),
     user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:

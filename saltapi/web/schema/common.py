@@ -36,7 +36,7 @@ class BaseBlockVisit(BaseModel):
         ...,
         title="Observation night",
         description="Start date of the night when the observation was made (or the "
-                    "block visit was queued).",
+        "block visit was queued).",
     )
     status: BlockVisitStatusValue = Field(
         ...,
@@ -87,13 +87,13 @@ class BlockVisit(BaseBlockVisit):
         ...,
         title="Targets",
         description="List of the names of the observed targets. With the exception of "
-                    "a few legacy observations, the list contains a single target",
+        "a few legacy observations, the list contains a single target",
     )
     maximum_lunar_phase: float = Field(
         ...,
         title="Maximum lunar phase",
         description="Maximum lunar phase which was allowed for the observation, as the "
-                    "percentage of lunar illumination",
+        "percentage of lunar illumination",
         ge=0,
         le=100,
     )
@@ -124,17 +124,17 @@ class ObservationProbabilities(BaseModel):
         ...,
         title="Moon probability",
         description="Moon probability, which is derived from the lunar phase "
-                    "cumulative distribution function during the semester. The moon "
-                    "probability is not used in the total probability calculation "
-                    "since the moon constraints are already incorporated in the "
-                    "visibility window calculations",
+        "cumulative distribution function during the semester. The moon "
+        "probability is not used in the total probability calculation "
+        "since the moon constraints are already incorporated in the "
+        "visibility window calculations",
     )
     competition: Optional[float] = Field(
         ...,
         title="Competition probability",
         description="Competition probability, which is determined as "
-                    "P_comp(x) = 1 / (C + 1) where C is the number of targets that "
-                    "overlap with target x",
+        "P_comp(x) = 1 / (C + 1) where C is the number of targets that "
+        "overlap with target x",
         ge=0,
         le=1,
     )
@@ -142,10 +142,10 @@ class ObservationProbabilities(BaseModel):
         ...,
         title="Observability probability",
         description="Probability representing the likelihood of pointing to a target "
-                    "given the length of its visibility window and the time requested "
-                    "on target. The probability is represented by the ratio of the "
-                    "length of the observing window and the length of the visibility "
-                    "window",
+        "given the length of its visibility window and the time requested "
+        "on target. The probability is represented by the ratio of the "
+        "length of the observing window and the length of the visibility "
+        "window",
         ge=0,
         le=1,
     )
@@ -153,7 +153,7 @@ class ObservationProbabilities(BaseModel):
         ...,
         title="Seeing probability",
         description="Seeing probability, whivh is derived from the cumulative "
-                    "distribution function of seeing measurements taken in Sutherland",
+        "distribution function of seeing measurements taken in Sutherland",
         ge=0,
         le=1,
     )
@@ -164,10 +164,10 @@ class ObservationProbabilities(BaseModel):
         ...,
         title="Total probability",
         description="Total probability, which is derived using the binomial theorem, "
-                    "where the number of trials are the number of tracks available to "
-                    "observe a target, the number of successes is the number of visits "
-                    "requested and the probability per trial is the total probability "
-                    "per track",
+        "where the number of trials are the number of tracks available to "
+        "observe a target, the number of successes is the number of visits "
+        "requested and the probability per trial is the total probability "
+        "per track",
         ge=0,
         le=1,
     )

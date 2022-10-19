@@ -62,9 +62,9 @@ jobs:
           path: tests/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
       #----------------------------------------------
-      #        run test suite
+      #        lint code and run test suite
       #----------------------------------------------
-      - name: Run tests
+      - name: Lint code and run tests
         env:
           TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/

@@ -1,16 +1,18 @@
 import pathlib
 import urllib.parse
-import pdfkit
-
-from fastapi import APIRouter, Request, UploadFile
 from io import BytesIO
+from typing import Any, Dict, List, Optional
+
+import pdfkit
+from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfFileMerger
 from starlette.datastructures import URLPath
-from typing import Any, Dict, List, Optional
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
-from saltapi.service.create_proposal_progress_html import create_proposal_progress_html
+from saltapi.service.create_proposal_progress_html import (
+    create_proposal_progress_html,
+)
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings

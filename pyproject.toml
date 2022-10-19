@@ -27,6 +27,8 @@ bcrypt = "^3.2.0"
 defusedxml = "^0.7.1"
 fastapi = "^0.76.0"
 pdfkit = "^1.0.0"
+PyPDF2 = "^2.11.0"
+
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
 flake8 = "^3.8.4"

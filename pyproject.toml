@@ -27,9 +27,14 @@ bcrypt = "^3.2.0"
 defusedxml = "^0.7.1"
 fastapi = "^0.76.0"
 pdfkit = "^1.0.0"
+requests = "^2.25.1"
+pydantic = {extras = ["dotenv"], version = "^1.8.1"}
+pytest-asyncio = "^0.14.0"
+PyPDF2 = "^2.11.1"
+
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
-flake8 = "^3.8.4"
+flake8 = "^5.0.4"
 flake8-print = "^4.0.0"
 tox = "^3.21.4"
 isort = "^5.7.0"
@@ -37,16 +42,12 @@ mypy = "^0.800"
 pytest-cov = "^2.11.1"
 bandit = "^1.7.0"
 mkdocs-material = "^6.2.7"
-requests = "^2.25.1"
-pydantic = {extras = ["dotenv"], version = "^1.8.1"}
-pytest-asyncio = "^0.14.0"
 mkdocs-macros-plugin = "^0.5.0"
 syrupy = "^1.2.2"
 PyYAML = "^5.4.1"
 pytest-bdd = "^4.1.0"
 pytest-regressions = "^2.3.1"
 pytest-pymysql-autorecord = "^0.1.0"
-PyPDF2 = "^2.11.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -210,9 +210,9 @@ class ProposalService:
         return progress_report_pdfs
 
     def create_proposal_progress_pdf(
-            self,
-            proposal_code: ProposalCode,
-            semester: Semester,
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
     ) -> BytesIO:
         """
         Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.

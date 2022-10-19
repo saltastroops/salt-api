@@ -164,13 +164,13 @@ def get_proposal_progress_report_pdf(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_progress_byte_io = proposal_service.create_proposal_progress_pdf(
-                proposal_code, semester
-            )
+            proposal_code, semester
+        )
         try:
             return StreamingResponse(
                 proposal_progress_byte_io,
                 headers={
-                    'Content-Disposition': f'attachment; filename=ProposalProgressReport-{semester}.pdf'
+                    "Content-Disposition": f"attachment; filename=ProposalProgressReport-{semester}.pdf"
                 },
                 media_type="application/pdf",
             )
@@ -209,5 +209,7 @@ def get_supplementary_proposal_progress_report_pdf(
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
         if exists(pdf_path):
-            return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+            return FileResponse(
+                pdf_path, media_type="application/pdf", filename=filename
+            )
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

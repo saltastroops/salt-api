@@ -217,8 +217,9 @@ def get_supplementary_proposal_progress_report_pdf(
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
-        if exists(additional_pdf_path):
-            return FileResponse(
-                additional_pdf_path, media_type="application/pdf", filename=filename
-            )
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if not additional_pdf_path:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+        return FileResponse(
+            additional_pdf_path, media_type="application/pdf", filename=filename
+        )

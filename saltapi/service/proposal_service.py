@@ -135,7 +135,7 @@ class ProposalService:
     ) -> Dict[str, Any]:
         return self.repository.get_progress_report(proposal_code, semester)
 
-    def get_proposal_progress_report_pdf(
+    def get_proposal_progress_report_pdfs(
         self,
         proposal_code: ProposalCode,
         semester: Semester,

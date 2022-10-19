@@ -216,7 +216,6 @@ def get_supplementary_proposal_progress_report_pdf(
         )
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
-        print("CCC: ", additional_pdf_path)
 
         if exists(additional_pdf_path):
             return FileResponse(additional_pdf_path, media_type="application/pdf", filename=filename)

@@ -35,7 +35,8 @@ def get_urls_for_proposal_progress_report_pdfs(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose progress report pdf URLs are requested.",
+        description="Proposal code of the proposal whose progress report pdf URLs are "
+                    "requested.",
     ),
     user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:
@@ -175,7 +176,8 @@ def get_proposal_progress_report_pdf(
             return StreamingResponse(
                 proposal_progress_byte_io,
                 headers={
-                    "Content-Disposition": f"attachment; filename=ProposalProgressReport-{semester}.pdf"
+                    "Content-Disposition":
+                        f"attachment; filename=ProposalProgressReport-{semester}.pdf"
                 },
                 media_type="application/pdf",
             )

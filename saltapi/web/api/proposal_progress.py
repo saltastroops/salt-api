@@ -1,12 +1,4 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    Path,
-    Request,
-    UploadFile,
-    HTTPException
-)
+from fastapi import APIRouter, Depends, File, Path, Request, UploadFile, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from os.path import exists
 from pydantic.networks import AnyUrl
@@ -31,13 +23,13 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
     response_model=Dict[str, Dict[str, AnyUrl]],
 )
 def get_urls_for_proposal_progress_report_pdfs(
-        request: Request,
-        proposal_code: ProposalCode = Path(
-            ...,
-            title="Proposal code",
-            description="Proposal code of the proposal whose progress report pdf URLs are requested.",
-        ),
-        user: User = Depends(get_current_user),
+    request: Request,
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description="Proposal code of the proposal whose progress report pdf URLs are requested.",
+    ),
+    user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:
     """
     Return URLs for all proposal progress report pdfs of a given proposal.
@@ -105,7 +97,7 @@ def get_proposal_progress_report(
     "/{proposal_code}/{semester}",
     summary="Create or update a progress report",
     response_model=ProposalProgress,
-    responses={200: {"content": {"application/pdf": {}}}}
+    responses={200: {"content": {"application/pdf": {}}}},
 )
 async def put_proposal_progress_report(
     proposal_code: ProposalCode = Path(
@@ -116,7 +108,7 @@ async def put_proposal_progress_report(
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),
-    additional_pdf: Optional[UploadFile] = File(b''),
+    additional_pdf: Optional[UploadFile] = File(b""),
     user: User = Depends(get_current_user),
 ) -> ProposalProgress:
     """
@@ -131,18 +123,17 @@ async def put_proposal_progress_report(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proposal_progress(
-            user, proposal_code)
+            user, proposal_code
+        )
         proposal_service = services.proposal_service(unit_of_work.connection)
         await proposal_service.put_proposal_progress(
-            proposal_progress,
-            proposal_code,
-            semester,
-            additional_pdf
+            proposal_progress, proposal_code, semester, additional_pdf
         )
         unit_of_work.commit()
 
         proposal_progress_report = proposal_service.get_progress_report(
-            proposal_code, semester,
+            proposal_code,
+            semester,
         )
         return ProposalProgress(**proposal_progress_report)
 
@@ -170,13 +161,13 @@ def get_proposal_progress_report_pdf(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_progress_byte_io = proposal_service.create_proposal_progress_pdf(
-                proposal_code, semester
-            )
+            proposal_code, semester
+        )
         try:
             return StreamingResponse(
                 proposal_progress_byte_io,
                 headers={
-                    'Content-Disposition': f'attachment; filename=ProposalProgressReport-{semester}.pdf'
+                    "Content-Disposition": f"attachment; filename=ProposalProgressReport-{semester}.pdf"
                 },
                 media_type="application/pdf",
             )
@@ -211,12 +202,13 @@ def get_supplementary_proposal_progress_report_pdf(
         )
 
         additional_pdf_path = generate_pdf_path(
-            proposal_code,
-            progress_report_pdfs["additional_pdf"]
+            proposal_code, progress_report_pdfs["additional_pdf"]
         )
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
         if exists(additional_pdf_path):
-            return FileResponse(additional_pdf_path, media_type="application/pdf", filename=filename)
+            return FileResponse(
+                additional_pdf_path, media_type="application/pdf", filename=filename
+            )
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

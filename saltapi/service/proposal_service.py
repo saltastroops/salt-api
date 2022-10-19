@@ -158,15 +158,14 @@ class ProposalService:
         proposal_progress_report: ProposalProgressInput,
         proposal_code: str,
         semester: str,
-        additional_pdf: Optional[UploadFile]
+        additional_pdf: Optional[UploadFile],
     ) -> None:
         partner_requested_percentages = []
         for p in proposal_progress_report.partner_requested_percentages.split(";"):
             prp = p.split(":")
-            partner_requested_percentages.append({
-                "partner_code": prp[0],
-                "requested_percentage": prp[1]
-            })
+            partner_requested_percentages.append(
+                {"partner_code": prp[0], "requested_percentage": prp[1]}
+            )
         proposal_progress = {
             "semester": semester,
             "requested_time": proposal_progress_report.requested_time,
@@ -176,9 +175,11 @@ class ProposalService:
             "change_reason": proposal_progress_report.change_reason,
             "summary_of_proposal_status": proposal_progress_report.summary_of_proposal_status,
             "strategy_changes": proposal_progress_report.strategy_changes,
-            "partner_requested_percentages": partner_requested_percentages
+            "partner_requested_percentages": partner_requested_percentages,
         }
-        filenames = await self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
+        filenames = await self.create_progress_report_pdf(
+            proposal_code, semester, proposal_progress, additional_pdf
+        )
         self.repository.put_proposal_progress(
             proposal_progress, proposal_code, semester, filenames
         )
@@ -188,60 +189,74 @@ class ProposalService:
         proposal_code: str,
         semester: str,
         new_request: Dict[str, Any],
-        additional_pdf: Optional[UploadFile]
+        additional_pdf: Optional[UploadFile],
     ) -> Dict[str, str or None]:
 
-        previous_allocated_requested = self.repository.get_allocated_and_requested_time(proposal_code)
+        previous_allocated_requested = self.repository.get_allocated_and_requested_time(
+            proposal_code
+        )
         previous_observed_time = self.repository.get_observed_time(proposal_code)
 
         previous_requests = []
         for ar in previous_allocated_requested:
             for ot in previous_observed_time:
                 if ot["semester"] == ar["semester"]:
-                    previous_requests.append({
-                        "semester": ar["semester"],
-                        "requested_time": ar["requested_time"],
-                        "allocated_time": ar["allocated_time"],
-                        "observed_time": ot["observed_time"]
-                    })
+                    previous_requests.append(
+                        {
+                            "semester": ar["semester"],
+                            "requested_time": ar["requested_time"],
+                            "allocated_time": ar["allocated_time"],
+                            "observed_time": ot["observed_time"],
+                        }
+                    )
         html_content = create_proposal_progress_html(
             proposal_code=proposal_code,
             semester=semester,
             previous_requests=previous_requests,
-            previous_conditions=self.repository.get_latest_observing_conditions(proposal_code, semester),
-            new_request=new_request
+            previous_conditions=self.repository.get_latest_observing_conditions(
+                proposal_code, semester
+            ),
+            new_request=new_request,
         )
         base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
         options = {
-            'page-size': 'A4',
-            'margin-top': '20mm',
-            'margin-right': '20mm',
-            'margin-bottom': '20mm',
-            'margin-left': '20mm',
-            'encoding': "UTF-8",
-            'no-outline': None
+            "page-size": "A4",
+            "margin-top": "20mm",
+            "margin-right": "20mm",
+            "margin-bottom": "20mm",
+            "margin-left": "20mm",
+            "encoding": "UTF-8",
+            "no-outline": None,
         }
-        proposal_progress_filename = self.repository.generate_proposal_progress_filename(html_content.encode('utf-8'))
-        pdfkit.from_string(html_content, base_dir + proposal_progress_filename, options=options)
+        proposal_progress_filename = (
+            self.repository.generate_proposal_progress_filename(
+                html_content.encode("utf-8")
+            )
+        )
+        pdfkit.from_string(
+            html_content, base_dir + proposal_progress_filename, options=options
+        )
 
         additional_pdf_filename = None
         if additional_pdf:
             content = await additional_pdf.read()
-            additional_pdf_filename = self.repository.generate_proposal_progress_filename(
-                content, is_supplementary=True
+            additional_pdf_filename = (
+                self.repository.generate_proposal_progress_filename(
+                    content, is_supplementary=True
+                )
             )
-            with open(base_dir + additional_pdf_filename, 'wb+') as out_file:
+            with open(base_dir + additional_pdf_filename, "wb+") as out_file:
                 out_file.write(content)
 
         return {
             "proposal_progress_filename": proposal_progress_filename,
-            "additional_pdf_filename": additional_pdf_filename
+            "additional_pdf_filename": additional_pdf_filename,
         }
 
     def create_proposal_progress_pdf(
-            self,
-            proposal_code: ProposalCode,
-            semester: Semester,
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
     ) -> BytesIO:
         """
         Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.

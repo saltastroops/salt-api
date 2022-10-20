@@ -1,0 +1,25 @@
+<div *ngIf="nirConfiguration">
+  <table class="table">
+    <tr class="secondary-header">
+      <th colspan="4" class="has-text-centered">Configuration</th>
+    </tr>
+    <tr>
+      <th>Filter</th>
+      <td>{{ nirConfiguration.filter }}</td>
+      <th>Camera filter wheel</th>
+      <td>{{ nirConfiguration.cameraFilterWheel }}</td>
+    </tr>
+    <tr class="double-boarder">
+      <th>Grating</th>
+      <td>{{ nirConfiguration.grating }}</td>
+      <th>Grating angle</th>
+      <td>{{ nirConfiguration.gratingAngle | number: "1.2-2" }}&#176;</td>
+    </tr>
+    <tr class="double-boarder">
+      <th>Camera station</th>
+      <td>{{ nirConfiguration.cameraStation }}</td>
+      <th>Camera angle</th>
+      <td>{{ nirConfiguration.cameraAngle | number: "1.2-2" }}&#176;</td>
+    </tr>
+  </table>
+</div>

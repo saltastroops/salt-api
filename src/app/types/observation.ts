@@ -1,6 +1,7 @@
 import { Bvit } from "./bvit";
 import { Lamp, TargetCoordinates, TimeInterval } from "./common";
 import { Hrs } from "./hrs";
+import { Nir } from "./nir";
 import { Rss } from "./rss";
 import { Salticam } from "./salticam";
 import { Target } from "./target";
@@ -47,6 +48,7 @@ export interface Instruments {
   rss: Rss[] | null;
   hrs: Hrs[] | null;
   bvit: Bvit[] | null;
+  nir: Nir[] | null;
 }
 
 export interface Observation {

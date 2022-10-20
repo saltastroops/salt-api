@@ -56,6 +56,11 @@ import { HrsDetectorComponent } from "./proposal/instruments/hrs/hrs-detector/hr
 import { HrsGeneralInfoComponent } from "./proposal/instruments/hrs/hrs-general-info/hrs-general-info.component";
 import { HrsObservingTimesComponent } from "./proposal/instruments/hrs/hrs-observing-times/hrs-observing-times.component";
 import { HrsComponent } from "./proposal/instruments/hrs/hrs.component";
+import { NirCalibrationComponent } from "./proposal/instruments/nir/nir-calibration/nir-calibration.component";
+import { NirConfigurationComponent } from "./proposal/instruments/nir/nir-configuration/nir-configuration.component";
+import { NirDitherStepsComponent } from "./proposal/instruments/nir/nir-dither-steps/nir-dither-steps.component";
+import { NirGeneralInfoComponent } from "./proposal/instruments/nir/nir-general-info/nir-general-info.component";
+import { NirComponent } from "./proposal/instruments/nir/nir.component";
 import { ArcBibleComponent } from "./proposal/instruments/rss/arc-bible/arc-bible.component";
 import { EtalonWavelengthsComponent } from "./proposal/instruments/rss/etalon-wavelengths/etalon-wavelengths.component";
 import { FabryPerotComponent } from "./proposal/instruments/rss/fabry-perot/fabry-perot.component";
@@ -163,6 +168,11 @@ import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/sma
     RequestedObservingConditionsComponent,
     SubmittedTimeRequestsComponent,
     ProgressRequestFormComponent,
+    NirComponent,
+    NirGeneralInfoComponent,
+    NirCalibrationComponent,
+    NirConfigurationComponent,
+    NirDitherStepsComponent,
   ],
   imports: [
     BrowserModule,

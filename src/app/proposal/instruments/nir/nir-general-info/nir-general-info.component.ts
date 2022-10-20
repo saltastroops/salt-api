@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { Nir, NirProcedure } from "../../../../types/nir";
+import { Nir } from "../../../../types/nir";
 
 @Component({
   selector: "wm-nir-general-info",

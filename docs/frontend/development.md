@@ -6,7 +6,7 @@ This page outlines how to develop the Web Manager frontend.
 
 You need to have the following installed on your machine.
 
-* [NodeJS](https://nodejs.org/en/) 12 or higher
+* [NodeJS](https://nodejs.org/en/) 14 or higher
 
 ## Installation
 
@@ -19,10 +19,10 @@ git clone git@github.com:saltastroops/web-manager-2021.git web-manager
 !!! tip
 You may call the created directory whatever you want. However, the following instructions assume it is called `web-manager`.
 
-Go to the directory `web-manager/frontend` and install the required packages.
+Go to the directory `web-manager` and install the required packages.
 
 ```bash
-cd web-manager/frontend
+cd web-manager
 npm install
 ```
 

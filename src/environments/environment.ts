@@ -1,9 +1,9 @@
 // This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
+// `ng build --production` replaces `environment.ts` with `environment.production.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  apiUrl: "http://127.0.0.1:8001",
+  apiUrl: "",
   production: false,
   sentryDSN: "",
   sentryTracesSampleRate: 1.0,

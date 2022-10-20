@@ -4,6 +4,8 @@ services:
     container_name: web-manager-container # Container name
     build:
       context: . # Location of our Dockerfile
+      args:
+        RUN_MODE: "${RUN_MODE}"
     env_file:
       - .env
     ports:

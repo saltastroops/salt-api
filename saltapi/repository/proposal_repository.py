@@ -14,6 +14,7 @@ from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import (
+    next_semester,
     TimeInterval,
     partner_name,
     semester_end,
@@ -1405,7 +1406,7 @@ VALUES(
         if not result.rowcount:
             raise NotFoundError()
 
-    def _insert_or_update_proposal_progress_requested_time(
+    def _insert_or_update_requested_time(
             self,
             proposal_code: str,
             semester: str,
@@ -1670,8 +1671,9 @@ WHERE PC.Proposal_Code = :proposal_code
         )
         time_statistics = self._get_time_statistics(proposal_code)
         requested_time = None
+        _next_semester = next_semester()
         for t in time_statistics:
-            if semester == t["semester"]:
+            if _next_semester == t["semester"]:
                 requested_time = t["requested_time"]
         if result.rowcount > 0:
             progress_report = {}
@@ -1696,7 +1698,7 @@ WHERE PC.Proposal_Code = :proposal_code
             ] = self.get_latest_observing_conditions(proposal_code, semester)
             progress_report[
                 "partner_requested_percentages"
-            ] = self._get_partner_requested_percentages(proposal_code, semester)
+            ] = self._get_partner_requested_percentages(proposal_code, _next_semester)
             return progress_report
         else:
             return {
@@ -1729,17 +1731,18 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Insert the proposal progress into the database, or update the existing one.
         """
+        _next_semester = next_semester()
         for rp in proposal_progress["partner_requested_percentages"]:
-            self._insert_or_update_proposal_progress_requested_time(
+            self._insert_or_update_requested_time(
                 proposal_code=proposal_code,
-                semester=semester,
+                semester=_next_semester,
                 partner_code=rp["partner_code"],
                 requested_time_percent=rp["requested_percentage"],
                 requested_time_amount=proposal_progress["requested_time"]
             )
         self._insert_or_update_observing_conditions(
             proposal_code=proposal_code,
-            semester=semester,
+            semester=_next_semester,
             maximum_seeing=proposal_progress["maximum_seeing"],
             transparency=proposal_progress["transparency"],
             observing_conditions_description=proposal_progress["description_of_observing_constraints"],

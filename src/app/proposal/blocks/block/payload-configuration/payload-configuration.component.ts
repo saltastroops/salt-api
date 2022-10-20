@@ -34,7 +34,7 @@ export class PayloadConfigurationComponent implements OnChanges {
       this.instrument = "HRS";
     } else if (instruments.bvit) {
       this.instrument = "BVIT";
-    } else {
+    } else if (instruments.nir) {
       this.instrument = "NIR";
     }
 

@@ -1427,8 +1427,8 @@ INSERT INTO MultiPartner(
 )
 VALUES (
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Partner_Id FROM Partner WHERE PartnerCode = :partner_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Partner_Id FROM Partner WHERE Partner_Code = :partner_code),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :requested_time_percent,
     :requested_time_amount
 ) ON DUPLICATE KEY UPDATE
@@ -1451,7 +1451,7 @@ VALUES (
         self,
         proposal_code: str,
         semester: str,
-        seeing: float,
+        maximum_seeing: float,
         transparency: str,
         observing_conditions_description: str,
     ) -> None:
@@ -1470,7 +1470,7 @@ INSERT INTO P1ObservingConditions (
 VALUES
 (
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
@@ -1486,7 +1486,7 @@ VALUES
             {
                 "proposal_code": proposal_code,
                 "semester": semester,
-                "seeing": seeing,
+                "maximum_seeing": maximum_seeing,
                 "transparency": transparency,
                 "observing_conditions_description": observing_conditions_description,
             },
@@ -1562,9 +1562,9 @@ WHERE BlockVisitStatus = 'Accepted'
 SELECT
     CONCAT(S.`Year`, '-', S.Semester) AS semester,
     ReqTimeAmount 	AS requested_time,
-    SUM(TimeAlloc) 	AS allocated_time
+    SUM(IF(TimeAlloc IS NULL, 0, TimeAlloc)) 	AS allocated_time
 FROM MultiPartner 	AS MP
-    JOIN PriorityAlloc 	AS PA ON (MP.MultiPartner_Id = PA.MultiPartner_Id)
+    LEFT JOIN PriorityAlloc 	AS PA ON (MP.MultiPartner_Id = PA.MultiPartner_Id)
     JOIN ProposalCode 	AS PC ON (MP.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester 		AS S ON (MP.Semester_Id = S.Semester_Id)
 WHERE Proposal_Code=:proposal_code
@@ -1577,7 +1577,7 @@ WHERE Proposal_Code=:proposal_code
                 {
                     "semester": row.semester,
                     "requested_time": row.requested_time,
-                    "allocated_time": row.allocated_time,
+                    "allocated_time": row.allocated_time or 0,
                 }
                 for row in result
             ]
@@ -1657,10 +1657,6 @@ FROM P1ObservingConditions OC
     JOIN Transparency T ON (OC.Transparency_Id = T.Transparency_Id)
     JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-    JOIN P1MinTime MT ON (
-        OC.ProposalCode_Id = MT.ProposalCode_Id
-        AND OC.Semester_Id = MT.Semester_Id
-    )
     LEFT JOIN ProposalProgress PP ON (
         OC.ProposalCode_Id = PP.ProposalCode_Id
         AND OC.Semester_Id = PP.Semester_Id
@@ -1744,7 +1740,7 @@ WHERE PC.Proposal_Code = :proposal_code
         self._insert_or_update_observing_conditions(
             proposal_code=proposal_code,
             semester=semester,
-            seeing=proposal_progress["maximum_seeing"],
+            maximum_seeing=proposal_progress["maximum_seeing"],
             transparency=proposal_progress["transparency"],
             observing_conditions_description=proposal_progress["description_of_observing_constraints"],
         )

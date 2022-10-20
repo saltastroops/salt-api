@@ -1562,9 +1562,9 @@ WHERE BlockVisitStatus = 'Accepted'
 SELECT
     CONCAT(S.`Year`, '-', S.Semester) AS semester,
     ReqTimeAmount 	AS requested_time,
-    SUM(TimeAlloc) 	AS allocated_time
+    SUM(IF(TimeAlloc IS NULL, 0, TimeAlloc)) 	AS allocated_time
 FROM MultiPartner 	AS MP
-    JOIN PriorityAlloc 	AS PA ON (MP.MultiPartner_Id = PA.MultiPartner_Id)
+    LEFT JOIN PriorityAlloc 	AS PA ON (MP.MultiPartner_Id = PA.MultiPartner_Id)
     JOIN ProposalCode 	AS PC ON (MP.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester 		AS S ON (MP.Semester_Id = S.Semester_Id)
 WHERE Proposal_Code=:proposal_code
@@ -1577,7 +1577,7 @@ WHERE Proposal_Code=:proposal_code
                 {
                     "semester": row.semester,
                     "requested_time": row.requested_time,
-                    "allocated_time": row.allocated_time,
+                    "allocated_time": row.allocated_time or 0,
                 }
                 for row in result
             ]
@@ -1657,10 +1657,6 @@ FROM P1ObservingConditions OC
     JOIN Transparency T ON (OC.Transparency_Id = T.Transparency_Id)
     JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-    JOIN P1MinTime MT ON (
-        OC.ProposalCode_Id = MT.ProposalCode_Id
-        AND OC.Semester_Id = MT.Semester_Id
-    )
     LEFT JOIN ProposalProgress PP ON (
         OC.ProposalCode_Id = PP.ProposalCode_Id
         AND OC.Semester_Id = PP.Semester_Id

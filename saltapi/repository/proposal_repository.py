@@ -14,8 +14,8 @@ from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import (
-    next_semester,
     TimeInterval,
+    next_semester,
     partner_name,
     semester_end,
     semester_of_datetime,

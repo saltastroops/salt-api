@@ -82,8 +82,8 @@ jobs:
           MAPPING_TOOL_PROPOSALS_DIR: tests/
           MAPPING_TOOL_API_KEY: ''
           MAPPING_TOOL_PIPT_DIR: ''
-          MAPPING_TOOL_WEB_MANAGER_URL: 'https://www.example.com/web_manager/'
-          MAPPING_TOOL_EPHEMERIS_URL: 'https://www.example.com/ephemerides.cgi'
+          MAPPING_TOOL_WEB_MANAGER_URL: https://www.example.com/web_manager/
+          MAPPING_TOOL_EPHEMERIS_URL: https://www.example.com/ephemerides.cgi
           MAPPING_TOOL_JAVA_COMMAND: ''
           MAPPING_TOOL_PYTHON_INTERPRETER: ''
           MAPPING_TOOL_FINDER_CHART_TOOL: ''
@@ -99,7 +99,7 @@ jobs:
           MAPPING_TOOL_SDB_PASSWORD: ''
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
-          TCS_ICD_URL: 'https://www.example.com/salt-tcs-icd:xml'
+          TCS_ICD_URL: https://www.example.com/
         run: |
           poetry run pytest --mock-db-data --db-data-dir tests/salt-testdata/salt-api/ -W ignore::pytest.PytestUnraisableExceptionWarning
       #----------------------------------------------

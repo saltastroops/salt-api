@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 from xml.dom import minidom
 
 import requests
+from defusedxml import minidom
 
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockVisit

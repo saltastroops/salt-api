@@ -11,7 +11,6 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import AnyUrl
 from pydantic.networks import AnyUrl
 from starlette import status
 

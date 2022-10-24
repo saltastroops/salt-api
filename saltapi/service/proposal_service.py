@@ -3,7 +3,7 @@ import urllib.parse
 from io import BytesIO
 from typing import Any, Dict, List, Optional
 
-import pdfkit
+import pdfkit   # type: ignore
 from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfFileMerger
 from starlette.datastructures import URLPath
@@ -31,7 +31,7 @@ def generate_pdf_path(
 ) -> Optional[pathlib.Path]:
     proposals_dir = get_settings().proposals_dir
     return (
-        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).resolve()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).absolute()
         if filename
         else None
     )

@@ -135,6 +135,19 @@ def create_proposal_progress_html(
                 </div>
             </div>
         """
+    else:
+        html_content += f"""
+                    </table>
+                    <h4>Previously requested observing conditions</h4>
+                    <div>
+                        <p>
+                            There is no Phase 1 proposal and hence there are 
+                            no previously requested observing conditions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        """
 
     html_content += f"""
             <div class="section">

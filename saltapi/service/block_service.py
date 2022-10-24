@@ -1,5 +1,4 @@
 from typing import Any, Dict, Optional
-from xml.dom import minidom
 
 import requests
 from defusedxml import minidom

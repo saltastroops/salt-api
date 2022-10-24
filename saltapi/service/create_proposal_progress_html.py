@@ -61,7 +61,7 @@ def create_proposal_progress_html(
     <body>
         <div>
             <h2>
-                Multisemester Proposal Progress Report: 
+                Multisemester Proposal Progress Report:
             </h2>
     """
     html_content += f"""
@@ -77,7 +77,7 @@ def create_proposal_progress_html(
                     <div>
                       <i>
                         This section lists the originally requested times, as well as
-                         the allocated times and the completion. It also gives the 
+                         the allocated times and the completion. It also gives the
                          originally requested observing conditions.
                       </i>
                     </div>
@@ -98,9 +98,9 @@ def create_proposal_progress_html(
         html_content += f"""
                       <tr>
                         <td>{p['semester']}</td>
-                        <td>{p['requested_time']} seconds</td> 
-                        <td>{p['allocated_time']} seconds</td> 
-                        <td>{p['observed_time']} seconds</td> 
+                        <td>{p['requested_time']} seconds</td>
+                        <td>{p['allocated_time']} seconds</td>
+                        <td>{p['observed_time']} seconds</td>
                         <td>{round((p['observed_time']/p['allocated_time'])*100, 1)} %</td>
                       </tr>
         """
@@ -119,7 +119,7 @@ def create_proposal_progress_html(
                             <div class="right">
                                 {previous_conditions['transparency']}
                             </div>
-                        </div>    
+                        </div>
                         <div>
                             <b>Brief description of observing conditions:</b>
                         </div>
@@ -166,7 +166,7 @@ def create_proposal_progress_html(
                     <br>
                     <div>
                         <b>
-                            The following reasons are given for changes from the 
+                            The following reasons are given for changes from the
                             original requests.
                         </b>
                     </div>
@@ -215,7 +215,7 @@ def create_proposal_progress_html(
             </div>
         </div>
     </body>
-</html>  
+</html>
     """
 
     return html_content

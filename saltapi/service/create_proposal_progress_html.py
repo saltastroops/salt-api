@@ -141,7 +141,7 @@ def create_proposal_progress_html(
                     <h4>Previously requested observing conditions</h4>
                     <div>
                         <p>
-                            There is no Phase 1 proposal and hence there are 
+                            There is no Phase 1 proposal and hence there are
                             no previously requested observing conditions.
                         </p>
                     </div>

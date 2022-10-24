@@ -136,7 +136,7 @@ def create_proposal_progress_html(
             </div>
         """
     else:
-        html_content += f"""
+        html_content += """
                     </table>
                     <h4>Previously requested observing conditions</h4>
                     <div>

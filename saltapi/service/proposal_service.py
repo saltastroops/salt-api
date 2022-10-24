@@ -263,8 +263,8 @@ class ProposalService:
         semester: Semester,
     ) -> BytesIO:
         """
-        Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.
-        Will raise an error if the file doesn't exist.
+        Create the proposal progress PDF by joining proposal progress PDF and
+        the supplementary file. Will raise an error if the file doesn't exist.
         """
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 

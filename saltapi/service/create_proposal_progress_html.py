@@ -101,7 +101,9 @@ def create_proposal_progress_html(
                         <td>{p['requested_time']} seconds</td>
                         <td>{p['allocated_time']} seconds</td>
                         <td>{p['observed_time']} seconds</td>
-                        <td>{round((p['observed_time']/p['allocated_time'])*100, 1)} %</td>
+                        <td>
+                            {round((p['observed_time']/p['allocated_time'])*100, 1)} %
+                        </td>
                       </tr>
         """
     html_content += f"""
@@ -152,15 +154,23 @@ def create_proposal_progress_html(
                         </div>
                         <div class="has-two-columns">
                             <div class="left"><b>Maximum seeing:</b></div>
-                            <div class="right">{new_request['maximum_seeing']} arcseconds</div>
+                            <div class="right">
+                                {new_request['maximum_seeing']} arcseconds
+                            </div>
                         </div>
                         <div class="has-two-columns">
                             <div class="left"><b>Transparency:</b></div>
                             <div class="right">{new_request['transparency']}</div>
                         </div>
-                        <div><b>Brief description of observing conditions:</b></div>
                         <div>
-                            <div class="left-shifted">{new_request['description_of_observing_constraints']}</div>
+                            <b>
+                                Brief description of observing conditions:
+                            </b>
+                        </div>
+                        <div>
+                            <div class="left-shifted">
+                                {new_request['description_of_observing_constraints']}
+                            </div>
                         </div>
                     </div>
                     <br>
@@ -170,9 +180,17 @@ def create_proposal_progress_html(
                             original requests.
                         </b>
                     </div>
-                    <div class="left-shifted">Please see the attached document. -- TODO Double Check this content --</div>
+                    <div class="left-shifted">
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </div>
                     <br>
-                    <div><b>A supplementary pdf is attached to this report -- TODO: this needs to be a boolean to show --</b></div>
+                    <div>
+                        <b>
+                            A supplementary pdf is attached to this report
+                            -- TODO: this needs to be a boolean to show --
+                        </b>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -180,11 +198,18 @@ def create_proposal_progress_html(
                     <div><h3>3.</h3></div>
                     <div><h3>STATUS SUMMARY</h3></div>
                     <div></div>
-                    <div><i>This section gives a summary of the proposal status.</i></div>
+                    <div>
+                        <i>
+                            This section gives a summary of the proposal status.
+                        </i>
+                    </div>
                 </div>
                 <hr>
                 <div>
-                    <p>Please see the attached document.-- TODO Double Check this content --</p>
+                    <p>
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </p>
                 </div>
             </div>
             <div class="section">
@@ -192,11 +217,19 @@ def create_proposal_progress_html(
                     <div><h3>4.</h3></div>
                     <div><h3>STRATEGY CHANGES</h3></div>
                     <div></div>
-                    <div><i>This section outlines how the TAC suggestions regarding a change of strategy will be addressed.</i></div>
+                    <div>
+                        <i>
+                            This section outlines how the TAC suggestions
+                            regarding a change of strategy will be addressed.
+                        </i>
+                    </div>
                 </div>
                 <hr>
                 <div>
-                    <p>Please see the attached document.-- TODO Double Check this content --</p>
+                    <p>
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </p>
                 </div>
             </div>
         </div>

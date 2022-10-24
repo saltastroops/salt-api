@@ -49,11 +49,6 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
       #----------------------------------------------
-      # install your root project, if required
-      #----------------------------------------------
-      - name: Install library
-        run: poetry install --no-interaction
-      #----------------------------------------------
       #           clone test (mock) data
       #----------------------------------------------
       - name: Clone test data repository
@@ -107,7 +102,4 @@ jobs:
       #----------------------------------------------
       - name: Linting
         run: |
-          poetry run black saltapi tests
-          poetry run isort saltapi tests
-          poetry run flake8 saltapi tests
-          poetry run mypy saltapi
+          poetry run tox

@@ -58,7 +58,7 @@ jobs:
           path: tests/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
       #----------------------------------------------
-      #        run test suite
+      #        run tox
       #----------------------------------------------
       - name: Run tests
         env:
@@ -95,11 +95,5 @@ jobs:
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
           TCS_ICD_URL: https://www.example.com/
-        run: |
-          poetry run pytest --mock-db-data --db-data-dir tests/salt-testdata/salt-api/ -W ignore::pytest.PytestUnraisableExceptionWarning
-      #----------------------------------------------
-      #        linting
-      #----------------------------------------------
-      - name: Linting
         run: |
           poetry run tox

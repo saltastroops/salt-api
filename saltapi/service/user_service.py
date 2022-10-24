@@ -85,7 +85,8 @@ SALT Team
 
     def get_user(self, user_id: int) -> User:
         user = self.repository.get(user_id)
-        user.password_hash = "***"  # Just in case the password hash ends up somewhere
+        # Just in case the password hash ends up somewhere
+        user.password_hash = "***"  # nosec
         return user
 
     def get_users(self) -> List[Dict[str, Any]]:
@@ -94,12 +95,14 @@ SALT Team
 
     def get_user_by_email(self, email: str) -> User:
         user = self.repository.get_by_email(email)
-        user.password_hash = "***"  # Just in case the password hash ends up somewhere
+        # Just in case the password hash ends up somewhere
+        user.password_hash = "***"  # nosec
         return user
 
     def get_user_by_username(self, username: str) -> User:
         user = self.repository.get_by_username(username)
-        user.password_hash = "***"  # Just in case the password hash ends up somewhere
+        # Just in case the password hash ends up somewhere
+        user.password_hash = "***"  # nosec
         return user
 
     def update_user(self, user_id: int, user: UserUpdate) -> None:

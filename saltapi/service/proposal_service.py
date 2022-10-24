@@ -195,7 +195,7 @@ class ProposalService:
         semester: str,
         new_request: Dict[str, Any],
         additional_pdf: Optional[UploadFile],
-    ) -> Dict[str, str or None]:
+    ) -> Dict[str, Optional[str]]:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )

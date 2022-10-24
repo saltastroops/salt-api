@@ -1352,7 +1352,7 @@ WHERE PC.Proposal_Code = :proposal_code
         progress_report_data: Dict[str, Any],
         proposal_code: str,
         semester: str,
-        filenames: Dict[str, str or None],
+        filenames: Dict[str, Optional[str]],
     ) -> None:
         """
         Insert or update the proposal progress information.
@@ -1725,7 +1725,7 @@ WHERE PC.Proposal_Code = :proposal_code
         proposal_progress: Dict[str, Any],
         proposal_code: str,
         semester: str,
-        filenames: Dict[str, str or None],
+        filenames: Dict[str, Optional[str]],
     ) -> None:
         """
         Insert the proposal progress into the database, or update the existing one.

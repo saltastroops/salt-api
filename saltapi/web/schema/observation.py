@@ -178,7 +178,10 @@ class Observation(BaseModel):
     observation_time: int = Field(
         ...,
         title="Observation time",
-        description="Time required for executing the observation, including the overhead time, in seconds",
+        description=(
+            "Time required for executing the observation, including the overhead time,"
+            " in seconds"
+        ),
         gt=0,
     )
     overhead_time: Optional[int] = Field(
@@ -191,12 +194,17 @@ class Observation(BaseModel):
     time_restrictions: Optional[List[TimeInterval]] = Field(
         ...,
         title="Time restrictions",
-        description="List of time intervals outside which the observation should not be made",
+        description=(
+            "List of time intervals outside which the observation should not be made"
+        ),
     )
     phase_constraints: Optional[List[PhaseInterval]] = Field(
         ...,
         title="Phase constraints",
-        description="List of phase constraints. An observation should only be made when the phase of the (periodic) target is one of these intervals",
+        description=(
+            "List of phase constraints. An observation should only be made when the"
+            " phase of the (periodic) target is one of these intervals"
+        ),
     )
     telescope_configurations: List[TelescopeConfiguration] = Field(
         ..., title="Telescope configurations", description="Telescope configurations"

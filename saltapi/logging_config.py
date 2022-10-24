@@ -18,7 +18,6 @@ class InterceptHandler(logging.Handler):
     """
 
     def emit(self, record: logging.LogRecord) -> None:
-
         # Get corresponding Loguru level if it exists
         try:
             level: Union[str, int] = logger.level(record.levelname).name

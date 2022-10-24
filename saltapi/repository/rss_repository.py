@@ -471,7 +471,6 @@ WHERE EncodedContent IN :encoded_contents
         return ec
 
     def _get_blocks_remaining_nights(self, block_ids: Set[int]) -> Dict[str, int]:
-
         stmt = text(
             """
 SELECT B.Block_Id                                                         AS block_id,
@@ -499,7 +498,6 @@ GROUP BY B.Block_Id
     def get_mos_masks_metadata(
         self, from_semester: str, to_semester: str
     ) -> List[Dict[str, Any]]:
-
         stmt = text(
             """
 SELECT DISTINCT

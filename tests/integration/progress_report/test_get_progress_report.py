@@ -62,7 +62,6 @@ def test_get_progress_report_returns_empty_report_for_nonexisting_progress_repor
     client: TestClient,
     check_data: Callable[[Any], None],
 ) -> None:
-
     authenticate(USERNAME, client)
 
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)

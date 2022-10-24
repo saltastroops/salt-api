@@ -96,8 +96,9 @@ WHERE H.Hrs_Id = :hrs_id
     def _target_location(self, row: Any) -> str:
         locations = {
             "-1 ALPHA (STAR)": "The star fiber is placed on the optical axis",
-            "0 (BISECT)": "The star and sky fiber are equidistant from the optical "
-            "axis",
+            "0 (BISECT)": (
+                "The star and sky fiber are equidistant from the optical axis"
+            ),
             "+1 ALPHA (SKY)": "The sky fiber is placed on the optical axis",
         }
 

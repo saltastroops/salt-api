@@ -22,7 +22,6 @@ from saltapi.web.schema.proposal import ProposalProgressInput
 
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
-
     url = urllib.parse.urljoin(str(request.base_url), router_path)
     return url
 
@@ -193,7 +192,6 @@ class ProposalService:
         new_request: Dict[str, Any],
         additional_pdf: Optional[UploadFile],
     ) -> Dict[str, str or None]:
-
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )

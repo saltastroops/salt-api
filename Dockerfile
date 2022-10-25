@@ -6,16 +6,6 @@
 
 FROM python:3.9 as requirements-stage
 
-WORKDIR /tmp
-
-RUN pip install poetry
-
-COPY ./pyproject.toml ./poetry.lock* /tmp/
-
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
-
-FROM ubuntu:20.04
-
 # LABEL specifies the File Author / Organization
 LABEL author="SALT Software Team <saltsoftware@saao.ac.za>"
 
@@ -32,11 +22,17 @@ RUN apt-get install -y imagemagick
 # Give ImageMagick access to pdf files
 RUN sed -i "s@<policy domain=\"coder\" rights=\"none\" pattern=\"PDF\" />@<policy domain=\"coder\" rights=\"read|write\" pattern=\"PDF\" />@g" /etc/ImageMagick-6/policy.xml
 
-COPY --from=requirements-stage /tmp/requirements.txt /app/requirements.txt
+RUN pip install wheel
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock* ./
+
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+RUN pip uninstall -y poetry
 
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
-RUN pip install wheel
-RUN pip install salt_finder_charts
 
 COPY ./saltapi /app/saltapi
 

@@ -13,7 +13,6 @@ Jinja2 = "^2.11.3"
 aiofiles = "^0.6.0"
 dsnparse = "^0.1.15"
 astropy = "^5.1"
-xmltodict = "^0.12.0"
 passlib = "^1.7.4"
 pydantic = {extras = ["email"], version = "^1.8.2"}
 PyMySQL = "^1.0.2"
@@ -28,6 +27,7 @@ bcrypt = "^3.2.0"
 defusedxml = "^0.7.1"
 fastapi = "^0.76.0"
 pdfkit = "^1.0.0"
+PyPDF2 = "^2.11.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"

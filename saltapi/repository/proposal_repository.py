@@ -13,6 +13,7 @@ from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import (
+    next_semester,
     TimeInterval,
     partner_name,
     semester_end,
@@ -1336,11 +1337,26 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return cast(int, version)
 
-    def insert_proposal_progress(
-        self, progress_report_data: Dict[str, Any], proposal_code: str, semester: str
+    @staticmethod
+    def generate_proposal_progress_filename(
+            file_content: bytes,
+            is_supplementary: bool = False
+    ) -> str:
+        hash_md = hashlib.md5(file_content).hexdigest()
+        if is_supplementary:
+            return f"ProposalProgressSupplementary-{hash_md}.pdf"
+
+        return f"ProposalProgressReport-{hash_md}.pdf"
+
+    def insert_or_update_proposal_progress(
+            self,
+            progress_report_data: Dict[str, Any],
+            proposal_code: str,
+            semester: str,
+            filenames: Dict[str, str or None]
     ) -> None:
         """
-        Insert the proposal progress information.
+        Insert or update the proposal progress information.
         """
         stmt = text(
             """
@@ -1357,13 +1373,20 @@ INSERT INTO ProposalProgress (
 VALUES(
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
     (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
-    :time_request_reason,
-    :status_summary,
+    :change_reason,
+    :summary_of_proposal_status,
     :strategy_changes,
     :report_path,
     :supplementary_path,
     NOW()
-);
+) ON DUPLICATE KEY UPDATE 
+    TimeRequestChangeReasons = :change_reason,
+    StatusSummary = :summary_of_proposal_status,
+    StrategyChanges = :strategy_changes,
+    ReportPath = :report_path,
+    SupplementaryPath = :supplementary_path,
+    SubmissionDate = NOW()
+;
         """
         )
         result = self.connection.execute(
@@ -1371,26 +1394,29 @@ VALUES(
             {
                 "proposal_code": proposal_code,
                 "semester": semester,
-                "time_request_reason": progress_report_data["time_request_reason"],
-                "status_summary": progress_report_data["status_summary"],
+                "change_reason": progress_report_data["change_reason"],
+                "summary_of_proposal_status":
+                    progress_report_data["summary_of_proposal_status"],
                 "strategy_changes": progress_report_data["strategy_changes"],
-                "report_path": progress_report_data["report_path"],
-                "supplementary_path": progress_report_data["supplementary_path"],
+                "report_path": filenames["proposal_progress_filename"],
+                "supplementary_path": filenames["additional_pdf_filename"],
             },
         )
         if not result.rowcount:
             raise NotFoundError()
 
-    @staticmethod
-    def _insert_progress_report_requested_time(
-        proposal_code: str,
-        semester: str,
-        partner_code: str,
-        requested_time_percent: int,
-        requested_time_amount: int,
+    def _insert_or_update_requested_time(
+            self,
+            proposal_code: str,
+            semester: str,
+            partner_code: str,
+            requested_time_percent: float,
+            requested_time_amount: int
     ) -> None:
-        """ """
-        text(
+        """
+        Insert or update proposal progress requested time.
+        """
+        stmt = text(
             """
 INSERT INTO MultiPartner(
     ProposalCode_Id,
@@ -1401,23 +1427,37 @@ INSERT INTO MultiPartner(
 )
 VALUES (
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Partner_Id FROM Partner WHERE PartnerCode = :partner_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Partner_Id FROM Partner WHERE Partner_Code = :partner_code),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :requested_time_percent,
     :requested_time_amount
-)
+) ON DUPLICATE KEY UPDATE
+    ReqTimePercent = :requested_time_percent,
+    ReqTimeAmount = :requested_time_amount
         """
         )
+        self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+                "partner_code": partner_code,
+                "requested_time_percent": requested_time_percent,
+                "requested_time_amount": requested_time_amount
+            }
+        )
 
-    def _insert_observing_conditions(
+    def _insert_or_update_observing_conditions(
         self,
         proposal_code: str,
         semester: str,
-        seeing: float,
+        maximum_seeing: float,
         transparency: str,
         observing_conditions_description: str,
     ) -> None:
-        """ """
+        """
+        Insert or update the observing conditions
+        """
         stmt = text(
             """
 INSERT INTO P1ObservingConditions (
@@ -1430,11 +1470,14 @@ INSERT INTO P1ObservingConditions (
 VALUES
 (
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
-)
+) ON DUPLICATE KEY UPDATE 
+    MaxSeeing = :maximum_seeing,
+    Transparency_Id = (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
+    ObservingConditionsDescription = :observing_conditions_description
 
         """
         )
@@ -1443,7 +1486,7 @@ VALUES
             {
                 "proposal_code": proposal_code,
                 "semester": semester,
-                "seeing": seeing,
+                "maximum_seeing": maximum_seeing,
                 "transparency": transparency,
                 "observing_conditions_description": observing_conditions_description,
             },
@@ -1451,13 +1494,13 @@ VALUES
         if not result.rowcount:
             raise NotFoundError()
 
-    def _get_latest_observing_conditions(
+    def get_latest_observing_conditions(
         self, proposal_code: str, semester: str
     ) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
-    CONCAT(S.`Year`, "-", S.Semester)   AS semester,
+    CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     MaxSeeing						    AS seeing,
     Transparency					    AS transparency,
     ObservingConditionsDescription	    AS description
@@ -1483,7 +1526,7 @@ ORDER BY semester DESC;
         else:
             return None
 
-    def _get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1509,7 +1552,7 @@ WHERE BlockVisitStatus = 'Accepted'
         except NoResultFound:
             raise NotFoundError()
 
-    def _get_allocated_and_requested_time(
+    def get_allocated_and_requested_time(
         self, proposal_code: str
     ) -> List[Dict[str, Any]]:
         # ReqTimeAmount is the total amount of time requested by a proposal per semester
@@ -1519,9 +1562,9 @@ WHERE BlockVisitStatus = 'Accepted'
 SELECT
     CONCAT(S.`Year`, '-', S.Semester) AS semester,
     ReqTimeAmount 	AS requested_time,
-    SUM(TimeAlloc) 	AS allocated_time
+    SUM(IF(TimeAlloc IS NULL, 0, TimeAlloc)) 	AS allocated_time
 FROM MultiPartner 	AS MP
-    JOIN PriorityAlloc 	AS PA ON (MP.MultiPartner_Id = PA.MultiPartner_Id)
+    LEFT JOIN PriorityAlloc 	AS PA ON (MP.MultiPartner_Id = PA.MultiPartner_Id)
     JOIN ProposalCode 	AS PC ON (MP.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester 		AS S ON (MP.Semester_Id = S.Semester_Id)
 WHERE Proposal_Code=:proposal_code
@@ -1534,7 +1577,7 @@ WHERE Proposal_Code=:proposal_code
                 {
                     "semester": row.semester,
                     "requested_time": row.requested_time,
-                    "allocated_time": row.allocated_time,
+                    "allocated_time": row.allocated_time or 0,
                 }
                 for row in result
             ]
@@ -1542,8 +1585,8 @@ WHERE Proposal_Code=:proposal_code
             raise NotFoundError()
 
     def _get_time_statistics(self, proposal_code: str) -> List[Dict[str, Any]]:
-        allocated_requested = self._get_allocated_and_requested_time(proposal_code)
-        observed_time = self._get_observed_time(proposal_code)
+        allocated_requested = self.get_allocated_and_requested_time(proposal_code)
+        observed_time = self.get_observed_time(proposal_code)
         time_statistics = []
         for ar in allocated_requested:
             tmp = {
@@ -1614,10 +1657,6 @@ FROM P1ObservingConditions OC
     JOIN Transparency T ON (OC.Transparency_Id = T.Transparency_Id)
     JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-    JOIN P1MinTime MT ON (
-        OC.ProposalCode_Id = MT.ProposalCode_Id
-        AND OC.Semester_Id = MT.Semester_Id
-    )
     LEFT JOIN ProposalProgress PP ON (
         OC.ProposalCode_Id = PP.ProposalCode_Id
         AND OC.Semester_Id = PP.Semester_Id
@@ -1631,8 +1670,9 @@ WHERE PC.Proposal_Code = :proposal_code
         )
         time_statistics = self._get_time_statistics(proposal_code)
         requested_time = None
+        _next_semester = next_semester()
         for t in time_statistics:
-            if semester == t["semester"]:
+            if _next_semester == t["semester"]:
                 requested_time = t["requested_time"]
         if result.rowcount > 0:
             progress_report = {}
@@ -1675,7 +1715,40 @@ WHERE PC.Proposal_Code = :proposal_code
                     proposal_code, semester
                 ),
                 "previous_time_requests": time_statistics,
-                "last_observing_constraints": self._get_latest_observing_conditions(
+                "last_observing_constraints": self.get_latest_observing_conditions(
                     proposal_code, semester
                 ),
             }
+
+    def put_proposal_progress(
+            self,
+            proposal_progress: Dict[str, Any],
+            proposal_code: str,
+            semester: str,
+            filenames: Dict[str, str or None]
+    ) -> None:
+        """
+        Insert the proposal progress into the database, or update the existing one.
+        """
+        _next_semester = next_semester()
+        for rp in proposal_progress["partner_requested_percentages"]:
+            self._insert_or_update_requested_time(
+                proposal_code=proposal_code,
+                semester=_next_semester,
+                partner_code=rp["partner_code"],
+                requested_time_percent=rp["requested_percentage"],
+                requested_time_amount=proposal_progress["requested_time"]
+            )
+        self._insert_or_update_observing_conditions(
+            proposal_code=proposal_code,
+            semester=_next_semester,
+            maximum_seeing=proposal_progress["maximum_seeing"],
+            transparency=proposal_progress["transparency"],
+            observing_conditions_description=proposal_progress["description_of_observing_constraints"],
+        )
+        self.insert_or_update_proposal_progress(
+            progress_report_data=proposal_progress,
+            proposal_code=proposal_code,
+            semester=semester,
+            filenames=filenames
+        )

@@ -111,6 +111,7 @@ def test_submission_log_requires_authentication(
     ) as websocket:
         with pytest.raises(WebSocketDisconnect) as excinfo:
             websocket.send_text("abc")
+            websocket.receive_text()
         assert "authenticated" in str(excinfo.value) and "/token" in str(excinfo.value)
 
 
@@ -132,6 +133,7 @@ def test_submission_log_requires_existing_identifier(
     ) as websocket:
         with pytest.raises(WebSocketDisconnect) as excinfo:
             websocket.send_text("secret")
+            websocket.receive_text()
         assert submission_identifier in str(excinfo.value)
 
 

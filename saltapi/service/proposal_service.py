@@ -1,35 +1,36 @@
 import pathlib
-from typing import Any, Dict, List, Optional, Union
+import urllib.parse
+import pdfkit
 
-from fastapi import APIRouter, Request
-from starlette.routing import URLPath
+from fastapi import APIRouter, Request, UploadFile
+from io import BytesIO
+from PyPDF2 import PdfFileMerger
+from starlette.datastructures import URLPath
+from typing import Any, Dict, List, Optional
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.service.create_proposal_progress_html import create_proposal_progress_html
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.util import next_semester, semester_start
+from saltapi.util import semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
-
-proposals_dir = get_settings().proposals_dir
+from saltapi.web.schema.proposal import ProposalProgressInput
 
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
 
-    url = "{}://{}:{}{}".format(
-        request.url.scheme, request.client.host, request.client.port, router_path
-    )
+    url = urllib.parse.urljoin(str(request.base_url), router_path)
     return url
 
 
 def generate_pdf_path(
-    proposal_code: str, filename: str = None
-) -> Union[pathlib.Path, None]:
+    proposal_code: str, filename: Optional[str]
+) -> Optional[pathlib.Path]:
+    proposals_dir = get_settings().proposals_dir
     return (
-        pathlib.Path(proposals_dir / proposal_code / "Included" / filename)
-        .resolve()
-        .as_uri()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).resolve()
         if filename
         else None
     )
@@ -76,6 +77,7 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
+        proposals_dir = get_settings().proposals_dir
         version = self.repository.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
@@ -106,36 +108,6 @@ class ProposalService:
     ) -> Dict[str, str]:
         return self.repository.add_observation_comment(proposal_code, comment, user)
 
-    def insert_proposal_progress(
-        self, proposal_code: ProposalCode, progress_report_data: Dict[str, Any]
-    ) -> None:
-        semester = next_semester()
-        self.repository.insert_proposal_progress(
-            progress_report_data, proposal_code, semester
-        )
-
-        requested_time = progress_report_data["requested_time"]
-        for rp in progress_report_data["requested_percentages"]:
-            partner_code = rp["partner_code"]
-            partner_percentage = rp["partner_percentage"]
-            time_requested_per_partner = requested_time * (partner_percentage / 100)
-            self.repository._insert_progress_report_requested_time(
-                proposal_code=proposal_code,
-                semester=semester,
-                partner_code=partner_code,
-                requested_time_percent=partner_percentage,
-                requested_time_amount=time_requested_per_partner,
-            )
-        self.repository._insert_observing_conditions(
-            proposal_code=proposal_code,
-            semester=semester,
-            seeing=progress_report_data["maximum_seeing"],
-            transparency=progress_report_data["transparency"],
-            observing_conditions_description=progress_report_data[
-                "observing_constraints"
-            ],
-        )
-
     def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
     ) -> Dict[str, Dict[str, str]]:
@@ -160,43 +132,14 @@ class ProposalService:
         self,
         proposal_code: ProposalCode,
         semester: Semester,
-        request: Request,
-        router: APIRouter,
     ) -> Dict[str, Any]:
-        progress_report = self.repository.get_progress_report(proposal_code, semester)
+        return self.repository.get_progress_report(proposal_code, semester)
 
-        if not progress_report:
-            raise NotFoundError(f"No progress report for proposal {proposal_code}")
-
-        progress_pdf_url = router.url_path_for(
-            "get_proposal_progress_report_pdf",
-            proposal_code=proposal_code,
-            semester=semester,
-        )
-
-        progress_report["proposal_progress_pdf"] = (
-            generate_route_url(request, progress_pdf_url)
-            if progress_report["proposal_progress_pdf"]
-            else None
-        )
-
-        additional_progress_pdf_url = router.url_path_for(
-            "get_supplementary_proposal_progress_report_pdf",
-            proposal_code=proposal_code,
-            semester=semester,
-        )
-        progress_report["additional_pdf"] = (
-            generate_route_url(request, additional_progress_pdf_url)
-            if progress_report["additional_pdf"]
-            else None
-        )
-        return progress_report
-
-    def get_proposal_progress_report_pdf(
+    def get_proposal_progress_report_pdfs(
         self,
         proposal_code: ProposalCode,
         semester: Semester,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
         progress_report_pdfs = {
@@ -209,3 +152,119 @@ class ProposalService:
         }
 
         return progress_report_pdfs
+
+    async def put_proposal_progress(
+        self,
+        proposal_progress_report: ProposalProgressInput,
+        proposal_code: str,
+        semester: str,
+        additional_pdf: Optional[UploadFile]
+    ) -> None:
+        partner_requested_percentages = []
+        for p in proposal_progress_report.partner_requested_percentages.split(";"):
+            prp = p.split(":")
+            partner_requested_percentages.append({
+                "partner_code": prp[0],
+                "requested_percentage": prp[1]
+            })
+        proposal_progress = {
+            "semester": semester,
+            "requested_time": proposal_progress_report.requested_time,
+            "maximum_seeing": proposal_progress_report.maximum_seeing,
+            "transparency": proposal_progress_report.transparency,
+            "description_of_observing_constraints": proposal_progress_report.description_of_observing_constraints,
+            "change_reason": proposal_progress_report.change_reason,
+            "summary_of_proposal_status": proposal_progress_report.summary_of_proposal_status,
+            "strategy_changes": proposal_progress_report.strategy_changes,
+            "partner_requested_percentages": partner_requested_percentages
+        }
+        filenames = await self.create_progress_report_pdf(proposal_code, semester, proposal_progress, additional_pdf)
+        self.repository.put_proposal_progress(
+            proposal_progress, proposal_code, semester, filenames
+        )
+
+    async def create_progress_report_pdf(
+        self,
+        proposal_code: str,
+        semester: str,
+        new_request: Dict[str, Any],
+        additional_pdf: Optional[UploadFile]
+    ) -> Dict[str, str or None]:
+
+        previous_allocated_requested = self.repository.get_allocated_and_requested_time(proposal_code)
+        previous_observed_time = self.repository.get_observed_time(proposal_code)
+
+        previous_requests = []
+        for ar in previous_allocated_requested:
+            for ot in previous_observed_time:
+                if ot["semester"] == ar["semester"]:
+                    previous_requests.append({
+                        "semester": ar["semester"],
+                        "requested_time": ar["requested_time"],
+                        "allocated_time": ar["allocated_time"],
+                        "observed_time": ot["observed_time"]
+                    })
+        html_content = create_proposal_progress_html(
+            proposal_code=proposal_code,
+            semester=semester,
+            previous_requests=previous_requests,
+            previous_conditions=self.repository.get_latest_observing_conditions(proposal_code, semester),
+            new_request=new_request
+        )
+        base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
+        options = {
+            'page-size': 'A4',
+            'margin-top': '20mm',
+            'margin-right': '20mm',
+            'margin-bottom': '20mm',
+            'margin-left': '20mm',
+            'encoding': "UTF-8",
+            'no-outline': None
+        }
+        proposal_progress_filename = self.repository.generate_proposal_progress_filename(html_content.encode('utf-8'))
+        pdfkit.from_string(html_content, base_dir + proposal_progress_filename, options=options)
+
+        additional_pdf_filename = None
+        if additional_pdf:
+            content = await additional_pdf.read()
+            additional_pdf_filename = self.repository.generate_proposal_progress_filename(
+                content, is_supplementary=True
+            )
+            with open(base_dir + additional_pdf_filename, 'wb+') as out_file:
+                out_file.write(content)
+
+        return {
+            "proposal_progress_filename": proposal_progress_filename,
+            "additional_pdf_filename": additional_pdf_filename
+        }
+
+    def create_proposal_progress_pdf(
+            self,
+            proposal_code: ProposalCode,
+            semester: Semester,
+    ) -> BytesIO:
+        """
+        Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.
+        Will raise an error if the file doesn't exist.
+        """
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
+
+        progress_report_pdfs = {
+            "proposal_progress_pdf": generate_pdf_path(
+                proposal_code, progress_report["proposal_progress_pdf"]
+            ),
+            "additional_pdf": generate_pdf_path(
+                proposal_code, progress_report["additional_pdf"]
+            ),
+        }
+        if progress_report_pdfs["proposal_progress_pdf"]:
+            b = BytesIO()
+            with PdfFileMerger(strict=False) as merger:
+                merger.append(progress_report_pdfs["proposal_progress_pdf"])
+                if progress_report_pdfs["additional_pdf"]:
+                    merger.append(progress_report_pdfs["additional_pdf"])
+                merger.write(b)
+            b.seek(0)
+            return b
+        else:
+            raise FileNotFoundError("There is no proposal progress file.")

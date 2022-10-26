@@ -15,7 +15,7 @@ PROPOSALS_DIR = get_settings().proposals_dir
 
 
 def test_get_progress_report_returns_401_for_non_authenticated_user(
-    client: TestClient,
+        client: TestClient,
 ) -> None:
     semester = "2018-2"
     proposal_code = "2018-2-LSP-001"
@@ -26,7 +26,7 @@ def test_get_progress_report_returns_401_for_non_authenticated_user(
 
 
 def test_get_progress_report_returns_403_for_non_authorised_user(
-    client: TestClient,
+        client: TestClient,
 ) -> None:
     semester = "2018-2"
     proposal_code = "2018-2-LSP-001"
@@ -37,7 +37,7 @@ def test_get_progress_report_returns_403_for_non_authorised_user(
 
 
 def test_get_progress_report_returns_404_for_wrong_proposal_code(
-    client: TestClient,
+        client: TestClient,
 ) -> None:
     semester = "2022-1"
     proposal_code = "2099-1-SCI-001"
@@ -57,12 +57,11 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     ],
 )
 def test_get_progress_report_returns_empty_report_for_nonexisting_progress_report(
-    proposal_code: str,
-    semester: str,
-    client: TestClient,
-    check_data: Callable[[Any], None],
+        proposal_code: str,
+        semester: str,
+        client: TestClient,
+        check_data: Callable[[Any], None],
 ) -> None:
-
     authenticate(USERNAME, client)
 
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
@@ -73,7 +72,7 @@ def test_get_progress_report_returns_empty_report_for_nonexisting_progress_repor
 
 
 def test_get_returns_progress_report_for_authorised_user(
-    client: TestClient, check_data: Callable[[Any], None]
+        client: TestClient, check_data: Callable[[Any], None]
 ) -> None:
     semester = "2020-2"
     proposal_code = "2020-2-SCI-035"
@@ -86,50 +85,39 @@ def test_get_returns_progress_report_for_authorised_user(
     check_data(proposal_progress_report)
 
 
-# TODO: Properly handle getting pdf files
-@pytest.mark.skip(
-    reason="This will be tested once the pdf files are handled correctly."
-)
-def test_get_returns_correct_pdf_files(
-    client: TestClient,
+def test_get_returns_correct_pdf_file(
+        client: TestClient,
 ) -> None:
-    semester = "2018-2"
-    proposal_code = "2018-2-LSP-001"
-
     authenticate(USERNAME, client)
 
-    response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
+    proposal_code = "2022-1-ORP-001"
+    semester = "2021-1"
 
-    proposal_progress_report = response.json()
+    progress_report_update = {
+        "requested_time": 3000,
+        "maximum_seeing": 2,
+        "transparency": "Thin cloud",
+        "description_of_observing_constraints": "Lunar contamination is not a concern during the observing windows.",
+        "change_reason": "Too faint for science",
+        "summary_of_proposal_status": "Good",
+        "strategy_changes": "N/A",
+        "partner_requested_percentages": "RSA:50;POL:50;OTH:0",
+        "additional_pdf": None,
+    }
+
+    progress_update = client.put(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,
+                                 data=progress_report_update,)
+
+    assert progress_update.status_code == status.HTTP_200_OK
+
+    response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester + "/report.pdf")
 
     assert response.status_code == status.HTTP_200_OK
-    assert proposal_progress_report["semester"] == semester
-    assert proposal_progress_report["proposal_progress_pdf"] is not None
 
-    assert (
-        proposal_code + "/" + semester + "/" + "report.pdf"
-    ) in proposal_progress_report["proposal_progress_pdf"]
-    assert (
-        proposal_code + "/" + semester + "/" + "supplementary-file.pdf"
-    ) in proposal_progress_report["additional_pdf"]
-
-    progress_pdf_response = client.get(
-        proposal_progress_report["proposal_progress_pdf"]
-    )
-
-    assert progress_pdf_response.headers[
-        "content-disposition"
-    ] == 'attachment; filename="{}"'.format("ProgressReport_{}.pdf".format(semester))
-    assert progress_pdf_response.headers["content-type"] == "application/pdf"
-
-    additional_pdf_response = client.get(proposal_progress_report["additional_pdf"])
-
-    assert additional_pdf_response.headers[
-        "content-disposition"
-    ] == 'attachment; filename="{}"'.format(
-        "ProgressReportSupplement_{}.pdf".format(semester)
-    )
-    assert additional_pdf_response.headers["content-type"] == "application/pdf"
+    assert "attachment; filename=ProposalProgressReport-" in response.headers[
+               "content-disposition"
+           ]
+    assert response.headers["content-type"] == "application/pdf"
 
 
 @pytest.mark.parametrize(
@@ -141,10 +129,10 @@ def test_get_returns_correct_pdf_files(
     ],
 )
 def test_get_returns_progress_report(
-    proposal_code: str,
-    semester: str,
-    client: TestClient,
-    check_data: Callable[[Any], None],
+        proposal_code: str,
+        semester: str,
+        client: TestClient,
+        check_data: Callable[[Any], None],
 ) -> None:
     authenticate(USERNAME, client)
 

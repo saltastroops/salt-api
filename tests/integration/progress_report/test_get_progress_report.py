@@ -15,7 +15,7 @@ PROPOSALS_DIR = get_settings().proposals_dir
 
 
 def test_get_progress_report_returns_401_for_non_authenticated_user(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     semester = "2018-2"
     proposal_code = "2018-2-LSP-001"
@@ -26,7 +26,7 @@ def test_get_progress_report_returns_401_for_non_authenticated_user(
 
 
 def test_get_progress_report_returns_403_for_non_authorised_user(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     semester = "2018-2"
     proposal_code = "2018-2-LSP-001"
@@ -37,7 +37,7 @@ def test_get_progress_report_returns_403_for_non_authorised_user(
 
 
 def test_get_progress_report_returns_404_for_wrong_proposal_code(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     semester = "2022-1"
     proposal_code = "2099-1-SCI-001"
@@ -57,10 +57,10 @@ def test_get_progress_report_returns_404_for_wrong_proposal_code(
     ],
 )
 def test_get_progress_report_returns_empty_report_for_nonexisting_progress_report(
-        proposal_code: str,
-        semester: str,
-        client: TestClient,
-        check_data: Callable[[Any], None],
+    proposal_code: str,
+    semester: str,
+    client: TestClient,
+    check_data: Callable[[Any], None],
 ) -> None:
     authenticate(USERNAME, client)
 
@@ -72,7 +72,7 @@ def test_get_progress_report_returns_empty_report_for_nonexisting_progress_repor
 
 
 def test_get_returns_progress_report_for_authorised_user(
-        client: TestClient, check_data: Callable[[Any], None]
+    client: TestClient, check_data: Callable[[Any], None]
 ) -> None:
     semester = "2020-2"
     proposal_code = "2020-2-SCI-035"
@@ -86,7 +86,7 @@ def test_get_returns_progress_report_for_authorised_user(
 
 
 def test_get_returns_correct_pdf_file(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     authenticate(USERNAME, client)
 
@@ -105,18 +105,23 @@ def test_get_returns_correct_pdf_file(
         "additional_pdf": None,
     }
 
-    progress_update = client.put(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,
-                                 data=progress_report_update,)
+    progress_update = client.put(
+        PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,
+        data=progress_report_update,
+    )
 
     assert progress_update.status_code == status.HTTP_200_OK
 
-    response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester + "/report.pdf")
+    response = client.get(
+        PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester + "/report.pdf"
+    )
 
     assert response.status_code == status.HTTP_200_OK
 
-    assert "attachment; filename=ProposalProgressReport-" in response.headers[
-               "content-disposition"
-           ]
+    assert (
+        "attachment; filename=ProposalProgressReport-"
+        in response.headers["content-disposition"]
+    )
     assert response.headers["content-type"] == "application/pdf"
 
 
@@ -129,10 +134,10 @@ def test_get_returns_correct_pdf_file(
     ],
 )
 def test_get_returns_progress_report(
-        proposal_code: str,
-        semester: str,
-        client: TestClient,
-        check_data: Callable[[Any], None],
+    proposal_code: str,
+    semester: str,
+    client: TestClient,
+    check_data: Callable[[Any], None],
 ) -> None:
     authenticate(USERNAME, client)
 

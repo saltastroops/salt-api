@@ -116,7 +116,7 @@ async def put_proposal_progress_report(
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),
-    additional_pdf: Optional[UploadFile] = File(b''),
+    additional_pdf: Optional[UploadFile] = File(default=None),
     user: User = Depends(get_current_user),
 ) -> ProposalProgress:
     """
@@ -152,7 +152,7 @@ async def put_proposal_progress_report(
     summary="Get a proposal progress report pdf",
     responses={200: {"content": {"application/pdf": {}}}},
 )
-def get_proposal_progress_report_pdf(
+async def get_proposal_progress_report_pdf(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
@@ -169,9 +169,9 @@ def get_proposal_progress_report_pdf(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal_progress_byte_io = proposal_service.create_proposal_progress_pdf(
+        proposal_progress_byte_io = await proposal_service.create_proposal_progress_pdf(
                 proposal_code, semester
-            )
+        )
         try:
             return StreamingResponse(
                 proposal_progress_byte_io,

@@ -4,7 +4,7 @@
 
 # Based on https://fastapi.tiangolo.com/deployment/docker/
 
-FROM python:3 as requirements-stage
+FROM python:3.10 as requirements-stage
 
 # LABEL specifies the File Author / Organization
 LABEL author="SALT Software Team <saltsoftware@saao.ac.za>"
@@ -13,11 +13,7 @@ EXPOSE 80
 
 WORKDIR /app
 
-RUN apt-get update -\
-  && apt-get install --assume-yes --no-install-recommends --quiet \
-        python3 \
-        python3-pip \
-  && apt-get clean all
+RUN apt-get update -y
 RUN apt-get install -y default-jre
 RUN apt-get install -y imagemagick
 

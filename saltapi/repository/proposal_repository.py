@@ -1,3 +1,4 @@
+import hashlib
 import re
 from collections import defaultdict
 from datetime import date, datetime
@@ -1694,7 +1695,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 progress_report["previous_time_requests"] = time_statistics
                 progress_report[
                     "last_observing_constraints"
-                ] = self._get_latest_observing_conditions(proposal_code, semester)
+                ] = self.get_latest_observing_conditions(proposal_code, semester)
                 progress_report[
                     "partner_requested_percentages"
                 ] = self._get_partner_requested_percentages(proposal_code, semester)
@@ -1725,7 +1726,7 @@ WHERE PC.Proposal_Code = :proposal_code
             proposal_progress: Dict[str, Any],
             proposal_code: str,
             semester: str,
-            filenames: Dict[str, str or None]
+            filenames: Dict[str, Optional[str]]
     ) -> None:
         """
         Insert the proposal progress into the database, or update the existing one.

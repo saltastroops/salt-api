@@ -33,8 +33,7 @@ class BlockRepository:
         # Avoid blocks with subblocks or subsubblocks.
         if self._has_subblock_or_subsubblock_iterations(block_id):
             error = (
-                "Blocks which have subblock or subsubblock iterations are not "
-                "supported"
+                "Blocks which have subblock or subsubblock iterations are not supported"
             )
             raise ValueError(error)
 

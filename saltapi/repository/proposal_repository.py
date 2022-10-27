@@ -14,8 +14,8 @@ from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import (
-    next_semester,
     TimeInterval,
+    next_semester,
     partner_name,
     semester_end,
     semester_of_datetime,
@@ -196,7 +196,7 @@ LIMIT :limit;
 
         if semester_start(from_semester) > semester_start(to_semester):
             raise ValueError(
-                "The from semester must not be later than the to " "semester."
+                "The from semester must not be later than the to semester."
             )
 
         if limit < 0:
@@ -284,7 +284,6 @@ ORDER BY S.Year, S.Semester;
         return list(result.scalars())
 
     def list_of_semesters(self, proposal_code: str) -> List[str]:
-
         result = self._semesters(proposal_code)
 
         semesters = sorted(result, reverse=True)
@@ -1340,21 +1339,20 @@ WHERE PC.Proposal_Code = :proposal_code
 
     @staticmethod
     def generate_proposal_progress_filename(
-            file_content: bytes,
-            is_supplementary: bool = False
+        file_content: bytes, is_supplementary: bool = False
     ) -> str:
-        hash_md = hashlib.md5(file_content).hexdigest()
+        hash_md = hashlib.md5(file_content).hexdigest()  # nosec
         if is_supplementary:
             return f"ProposalProgressSupplementary-{hash_md}.pdf"
 
         return f"ProposalProgressReport-{hash_md}.pdf"
 
     def insert_or_update_proposal_progress(
-            self,
-            progress_report_data: Dict[str, Any],
-            proposal_code: str,
-            semester: str,
-            filenames: Dict[str, str or None]
+        self,
+        progress_report_data: Dict[str, Any],
+        proposal_code: str,
+        semester: str,
+        filenames: Dict[str, Optional[str]],
     ) -> None:
         """
         Insert or update the proposal progress information.
@@ -1380,7 +1378,7 @@ VALUES(
     :report_path,
     :supplementary_path,
     NOW()
-) ON DUPLICATE KEY UPDATE 
+) ON DUPLICATE KEY UPDATE
     TimeRequestChangeReasons = :change_reason,
     StatusSummary = :summary_of_proposal_status,
     StrategyChanges = :strategy_changes,
@@ -1396,8 +1394,9 @@ VALUES(
                 "proposal_code": proposal_code,
                 "semester": semester,
                 "change_reason": progress_report_data["change_reason"],
-                "summary_of_proposal_status":
-                    progress_report_data["summary_of_proposal_status"],
+                "summary_of_proposal_status": progress_report_data[
+                    "summary_of_proposal_status"
+                ],
                 "strategy_changes": progress_report_data["strategy_changes"],
                 "report_path": filenames["proposal_progress_filename"],
                 "supplementary_path": filenames["additional_pdf_filename"],
@@ -1407,12 +1406,12 @@ VALUES(
             raise NotFoundError()
 
     def _insert_or_update_requested_time(
-            self,
-            proposal_code: str,
-            semester: str,
-            partner_code: str,
-            requested_time_percent: float,
-            requested_time_amount: int
+        self,
+        proposal_code: str,
+        semester: str,
+        partner_code: str,
+        requested_time_percent: float,
+        requested_time_amount: int,
     ) -> None:
         """
         Insert or update proposal progress requested time.
@@ -1444,8 +1443,8 @@ VALUES (
                 "semester": semester,
                 "partner_code": partner_code,
                 "requested_time_percent": requested_time_percent,
-                "requested_time_amount": requested_time_amount
-            }
+                "requested_time_amount": requested_time_amount,
+            },
         )
 
     def _insert_or_update_observing_conditions(
@@ -1475,7 +1474,7 @@ VALUES
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
-) ON DUPLICATE KEY UPDATE 
+) ON DUPLICATE KEY UPDATE
     MaxSeeing = :maximum_seeing,
     Transparency_Id = (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     ObservingConditionsDescription = :observing_conditions_description
@@ -1692,13 +1691,15 @@ WHERE PC.Proposal_Code = :proposal_code
                     "summary_of_proposal_status"
                 ] = row.summary_of_proposal_status
                 progress_report["strategy_changes"] = row.strategy_changes
-            progress_report["previous_time_requests"] = time_statistics
-            progress_report[
-                "last_observing_constraints"
-            ] = self.get_latest_observing_conditions(proposal_code, semester)
-            progress_report[
-                "partner_requested_percentages"
-            ] = self._get_partner_requested_percentages(proposal_code, _next_semester)
+                progress_report["previous_time_requests"] = time_statistics
+                progress_report[
+                    "last_observing_constraints"
+                ] = self.get_latest_observing_conditions(proposal_code, semester)
+                progress_report[
+                    "partner_requested_percentages"
+                ] = self._get_partner_requested_percentages(
+                    proposal_code, _next_semester
+                )
             return progress_report
         else:
             return {
@@ -1722,11 +1723,11 @@ WHERE PC.Proposal_Code = :proposal_code
             }
 
     def put_proposal_progress(
-            self,
-            proposal_progress: Dict[str, Any],
-            proposal_code: str,
-            semester: str,
-            filenames: Dict[str, str or None]
+        self,
+        proposal_progress: Dict[str, Any],
+        proposal_code: str,
+        semester: str,
+        filenames: Dict[str, Optional[str]],
     ) -> None:
         """
         Insert the proposal progress into the database, or update the existing one.
@@ -1738,18 +1739,20 @@ WHERE PC.Proposal_Code = :proposal_code
                 semester=_next_semester,
                 partner_code=rp["partner_code"],
                 requested_time_percent=rp["requested_percentage"],
-                requested_time_amount=proposal_progress["requested_time"]
+                requested_time_amount=proposal_progress["requested_time"],
             )
         self._insert_or_update_observing_conditions(
             proposal_code=proposal_code,
             semester=_next_semester,
             maximum_seeing=proposal_progress["maximum_seeing"],
             transparency=proposal_progress["transparency"],
-            observing_conditions_description=proposal_progress["description_of_observing_constraints"],
+            observing_conditions_description=proposal_progress[
+                "description_of_observing_constraints"
+            ],
         )
         self.insert_or_update_proposal_progress(
             progress_report_data=proposal_progress,
             proposal_code=proposal_code,
             semester=semester,
-            filenames=filenames
+            filenames=filenames,
         )

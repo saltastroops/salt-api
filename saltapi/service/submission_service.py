@@ -52,9 +52,9 @@ class SubmissionService:
             xml_proposal_code = SubmissionService._extract_proposal_code(xml)
             if proposal_code != xml_proposal_code:
                 raise ValidationError(
-                    f"The proposal code passed as query parameter "
+                    "The proposal code passed as query parameter "
                     f"({proposal_code}) is not the same as that "
-                    f"given in the proposal file "
+                    "given in the proposal file "
                     f"({xml_proposal_code})."
                 )
 
@@ -90,8 +90,7 @@ class SubmissionService:
                 return z.read("Blocks.xml").decode("UTF-8")
             else:
                 raise ValidationError(
-                    "The zipfile must contain a file Proposal.xml "
-                    "or a file Blocks.xml."
+                    "The zipfile must contain a file Proposal.xml or a file Blocks.xml."
                 )
 
     @staticmethod
@@ -138,8 +137,10 @@ class SubmissionService:
                 submission_repository.create_log_entry(
                     submission_identifier=submission_identifier,
                     message_type=SubmissionMessageType.ERROR,
-                    message="It is unclear whether the submission request bas been "
-                    "successful.",
+                    message=(
+                        "It is unclear whether the submission request bas been "
+                        "successful."
+                    ),
                 )
                 submission_repository.finish(
                     submission_identifier, SubmissionStatus.FAILED
@@ -201,11 +202,11 @@ class SubmissionService:
         # Ensure the proposal code and username are safe.
         if proposal_code and not re.match(r"^[\w-]+$", proposal_code):
             raise ValueError(
-                "The proposal code must only contain word characters and " "dashes."
+                "The proposal code must only contain word characters and dashes."
             )
         if not re.match(r"^[\w-]+$", submitter.username):
             raise ValueError(
-                "The username must only contain word characters and " "dashes."
+                "The username must only contain word characters and dashes."
             )
 
         settings = get_settings()

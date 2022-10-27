@@ -70,14 +70,20 @@ class ObservingConditions(BaseModel):
     maximum_lunar_phase: float = Field(
         ...,
         title="Maximum lunar phase",
-        description="Maximum lunar phase which was allowed for the observation, as the percentage of lunar illumination",
+        description=(
+            "Maximum lunar phase which was allowed for the observation, as the"
+            " percentage of lunar illumination"
+        ),
         ge=0,
         le=100,
     )
     minimum_lunar_distance: float = Field(
         ...,
         title="Minimum lunar distance",
-        description="Minimum required angular distance between the Moon and the target, in degrees",
+        description=(
+            "Minimum required angular distance between the Moon and the target, in"
+            " degrees"
+        ),
     )
 
 
@@ -98,7 +104,10 @@ class Block(BaseModel):
     ranking: Optional[Ranking] = Field(
         ...,
         title="Ranking",
-        description="Ranking by the Principal Investigator relative to other blocks in the proposal",
+        description=(
+            "Ranking by the Principal Investigator relative to other blocks in the"
+            " proposal"
+        ),
     )
     wait_period: int = Field(
         ...,
@@ -128,7 +137,10 @@ class Block(BaseModel):
     observation_time: int = Field(
         ...,
         title="Observation time",
-        description="Time required for an observation of the block, including the overhead time, in seconds",
+        description=(
+            "Time required for an observation of the block, including the overhead"
+            " time, in seconds"
+        ),
         gt=0,
     )
     overhead_time: Optional[int] = Field(
@@ -147,7 +159,10 @@ class Block(BaseModel):
     observations: List[Observation] = Field(
         ...,
         title="Observations",
-        description="List of observations in the block. With the exception of some legacy proposals, there is always a single observation in the block",
+        description=(
+            "List of observations in the block. With the exception of some legacy"
+            " proposals, there is always a single observation in the block"
+        ),
     )
 
 
@@ -187,12 +202,18 @@ class BlockSummary(BaseModel):
     is_observable_tonight: bool = Field(
         ...,
         title="Observable tonight?",
-        description="Whether the block can be observed tonight (i.e. during the current Julian day)",
+        description=(
+            "Whether the block can be observed tonight (i.e. during the current Julian"
+            " day)"
+        ),
     )
     remaining_nights: int = Field(
         ...,
         title="Remaining nights",
-        description="Number of nights (Julian days), excluding the current one, during which the block still can be observed",
+        description=(
+            "Number of nights (Julian days), excluding the current one, during which"
+            " the block still can be observed"
+        ),
     )
     observing_conditions: ObservingConditions = Field(
         ...,

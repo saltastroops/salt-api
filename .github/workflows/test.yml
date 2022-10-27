@@ -5,6 +5,9 @@ name: Test
 
 on: ["push", "pull_request"]
 
+env:
+  PYTHON_VERSION: 3.9
+
 jobs:
   build:
     name: Test
@@ -14,12 +17,12 @@ jobs:
       #       check-out repo and set-up python
       #----------------------------------------------
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up python
         id: setup-python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: ${{ env.PYTHON_VERSION }}
       #----------------------------------------------
       #  -----  install & configure poetry  -----
       #----------------------------------------------
@@ -35,21 +38,16 @@ jobs:
       #----------------------------------------------
       - name: Load cached venv
         id: cached-poetry-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
       #----------------------------------------------
       # install dependencies if cache does not exist
       #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
-      #----------------------------------------------
-      # install your root project, if required
-      #----------------------------------------------
-      - name: Install library
-        run: poetry install --no-interaction
       #----------------------------------------------
       #           clone test (mock) data
       #----------------------------------------------
@@ -60,7 +58,7 @@ jobs:
           path: tests/salt-testdata
           token: ${{ secrets.ACCESS_TOKEN }}
       #----------------------------------------------
-      #        run test suite
+      #        run tox
       #----------------------------------------------
       - name: Run tests
         env:
@@ -79,8 +77,8 @@ jobs:
           MAPPING_TOOL_PROPOSALS_DIR: tests/
           MAPPING_TOOL_API_KEY: ''
           MAPPING_TOOL_PIPT_DIR: ''
-          MAPPING_TOOL_WEB_MANAGER_URL: 'https://www.example.com/web_manager/'
-          MAPPING_TOOL_EPHEMERIS_URL: 'https://www.example.com/ephemerides.cgi'
+          MAPPING_TOOL_WEB_MANAGER_URL: https://www.example.com/web_manager/
+          MAPPING_TOOL_EPHEMERIS_URL: https://www.example.com/ephemerides.cgi
           MAPPING_TOOL_JAVA_COMMAND: ''
           MAPPING_TOOL_PYTHON_INTERPRETER: ''
           MAPPING_TOOL_FINDER_CHART_TOOL: ''
@@ -96,15 +94,6 @@ jobs:
           MAPPING_TOOL_SDB_PASSWORD: ''
           MAPPING_TOOL_SDB_USERNAME: ''
           FINDING_CHARTS_DIR: tests/
-          TCS_ICD_URL: 'https://www.example.com/salt-tcs-icd:xml'
+          TCS_ICD_URL: https://www.example.com/
         run: |
-          poetry run pytest --mock-db-data --db-data-dir tests/salt-testdata/salt-api/ -W ignore::pytest.PytestUnraisableExceptionWarning
-      #----------------------------------------------
-      #        linting
-      #----------------------------------------------
-      - name: Linting
-        run: |
-          poetry run black saltapi tests
-          poetry run isort saltapi tests
-          poetry run flake8 saltapi tests
-          poetry run mypy saltapi
+          poetry run tox

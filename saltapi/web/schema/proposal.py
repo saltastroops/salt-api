@@ -3,7 +3,6 @@ from enum import Enum
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
-from pydantic.networks import AnyUrl
 
 from saltapi.util import as_form
 from saltapi.web.schema.block import BlockSummary
@@ -120,7 +119,9 @@ class GeneralProposalInfo(BaseModel):
     summary_for_salt_astronomer: str = Field(
         ...,
         title="Summary for the SALT Astronomer",
-        description="Brief summary with the essential information for the SALT Astronomer",
+        description=(
+            "Brief summary with the essential information for the SALT Astronomer"
+        ),
     )
     summary_for_night_log: str = Field(
         ...,
@@ -130,7 +131,10 @@ class GeneralProposalInfo(BaseModel):
     is_self_activatable: bool = Field(
         ...,
         title="Can the proposal be self-activated?",
-        description="Can the proposal be activated by the Principal Investigator or Principal Contact?",
+        description=(
+            "Can the proposal be activated by the Principal Investigator or Principal"
+            " Contact?"
+        ),
     )
 
 
@@ -153,7 +157,10 @@ class Investigator(ProposalUser):
     has_approved_proposal: Optional[bool] = Field(
         ...,
         title="Has approved proposal?",
-        description="Whether the investigator has approved the proposal. The value is null if the investigator has neither approved nor rejected the proposal yet",
+        description=(
+            "Whether the investigator has approved the proposal. The value is null if"
+            " the investigator has neither approved nor rejected the proposal yet"
+        ),
     )
 
 
@@ -264,7 +271,10 @@ class RequestedTime(BaseModel):
     minimum_useful_time: Optional[int] = Field(
         ...,
         title="Minimum useful time",
-        description="Minimum time needed to produce meaningful science from the proposal, in seconds.",
+        description=(
+            "Minimum time needed to produce meaningful science from the proposal, in"
+            " seconds."
+        ),
     )
     comment: Optional[str] = Field(
         None, title="Comment", description="Comment on the time requirements"
@@ -285,12 +295,18 @@ class TimeAllocation(BaseModel):
     partner_name: PartnerName = Field(
         ...,
         title="SALT partner name",
-        description="Name of the SALT partner whose Time Allocation Committee is allocating the time",
+        description=(
+            "Name of the SALT partner whose Time Allocation Committee is allocating the"
+            " time"
+        ),
     )
     partner_code: PartnerCode = Field(
         ...,
         title="SALT partner code",
-        description="Code of the SALT partner whose Time Allocation Committee is allocating the time",
+        description=(
+            "Code of the SALT partner whose Time Allocation Committee is allocating the"
+            " time"
+        ),
     )
     tac_comment: Optional[str] = Field(
         ...,
@@ -341,14 +357,18 @@ class Proposal(BaseModel):
     targets: Optional[List[Phase1Target]] = Field(
         ...,
         title="Targets",
-        description="Targets for which observations are requested. These are only "
-        "included for phase 1 proposals.",
+        description=(
+            "Targets for which observations are requested. These are only "
+            "included for phase 1 proposals."
+        ),
     )
     requested_times: Optional[List[RequestedTime]] = Field(
         ...,
         title="Requested times",
-        description="Requested times for all semesters in the proposal. These are only "
-        "included for a phase 1 proposal.",
+        description=(
+            "Requested times for all semesters in the proposal. These are only "
+            "included for a phase 1 proposal."
+        ),
     )
     blocks: List[BlockSummary] = Field(
         ..., title="Blocks", description="Blocks for the semester"
@@ -536,6 +556,7 @@ class ProposalProgress(BaseProgressReport):
     the observations up to and including the 2021-1 semester and it requests time for
     the 2021-2 semester.
     """
+
     semester: Optional[str] = Field(
         ...,
         title="Semester",
@@ -551,7 +572,7 @@ class ProposalProgress(BaseProgressReport):
         title="Previous time requests",
         description="The request from previous semesters",
     )
-    last_observing_constraints: ObservingConstraints = Field(
+    last_observing_constraints: Optional[ObservingConstraints] = Field(
         ...,
         title="Last requested observing conditions",
         description="The last observing conditions.",
@@ -574,7 +595,8 @@ class ProposalProgressInput(BaseProgressReport):
     partner_requested_percentages: str = Field(
         ...,
         title="Partner requested percentages",
-        description="The list of requested percentages per partner, as pairs of "
-                    "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'.",
+        description=(
+            "The list of requested percentages per partner, as pairs of "
+            "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'."
+        ),
     )
-

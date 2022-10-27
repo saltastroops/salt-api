@@ -44,7 +44,6 @@ def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
             or permission_service.check_user_has_role(user, Role.SALT_ASTRONOMER)
             or permission_service.check_user_has_role(user, Role.SALT_OPERATOR)
         ):
-
             return block_service.get_next_scheduled_block()
         raise AuthorizationError()
 

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { FormControl } from "@angular/forms";
+import { UntypedFormControl } from "@angular/forms";
 
 import { parseISO } from "date-fns";
 
@@ -15,7 +15,7 @@ export class GeneralProposalInfoComponent implements OnInit {
   @Input() currentSemester!: string;
   @Input() phase!: number;
   @Input() proposalCode!: string;
-  semesterControl = new FormControl();
+  semesterControl = new UntypedFormControl();
   currentSubmission!: Date;
   firstSubmission!: Date;
   statusDescription = "";

@@ -1,3 +1,5 @@
+// @ts-ignore
+
 import { AccessToken } from "./types/authentication";
 import { User, UserRole } from "./types/user";
 
@@ -27,8 +29,10 @@ export function currentSemester(): string {
 }
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
+// @ts-ignore
 type NestedKeyOf<T extends Record<string, any>> = {
   [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
+// @ts-ignore
     ? `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
     : `${Key}`;
 }[keyof T & (string | number)];

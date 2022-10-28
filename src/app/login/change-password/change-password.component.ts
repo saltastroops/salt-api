@@ -1,8 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
-  FormBuilder,
-  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormGroup,
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -15,14 +15,14 @@ import { AuthenticationService } from "../../service/authentication.service";
   styleUrls: ["./change-password.component.scss"],
 })
 export class ChangePasswordComponent implements OnInit {
-  changePasswordForm!: FormGroup;
+  changePasswordForm!: UntypedFormGroup;
   token!: string;
   loading = false;
   submitted = false;
   error: string | undefined = undefined;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthenticationService,

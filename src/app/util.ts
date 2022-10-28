@@ -11,7 +11,7 @@ export function semesterOfDatetime(t: Date): string {
   let semester = 2;
   let year = t.getUTCFullYear();
 
-  if (t.getMonth() >= 4 && t.getMonth() < 9) {
+  if (t.getMonth() >= 4 && t.getMonth() < 10) {
     semester = 1;
   }
   if (t.getMonth() < 4) {

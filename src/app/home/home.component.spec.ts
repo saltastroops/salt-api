@@ -1,6 +1,6 @@
 import { HttpClient, HttpHandler } from "@angular/common/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { FormBuilder } from "@angular/forms";
+import { UntypedFormBuilder } from "@angular/forms";
 
 import { AuthenticationService } from "../service/authentication.service";
 import { RealAuthenticationService } from "../service/real/real-authentication.service";
@@ -14,7 +14,7 @@ describe("HomeComponent", () => {
     await TestBed.configureTestingModule({
       declarations: [HomeComponent],
       providers: [
-        FormBuilder,
+        UntypedFormBuilder,
         HttpClient,
         HttpHandler,
         { provide: AuthenticationService, useClass: RealAuthenticationService },

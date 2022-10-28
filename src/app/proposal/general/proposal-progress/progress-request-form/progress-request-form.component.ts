@@ -1,14 +1,16 @@
 import { Component, Input, OnInit } from "@angular/core";
 import {
   AbstractControl,
-  FormArray,
-  FormBuilder,
-  FormGroup,
+  UntypedFormArray,
+  UntypedFormBuilder,
+  UntypedFormGroup,
   Validators,
 } from "@angular/forms";
 
-import { ProposalProgress } from "../../../../types/proposal";
+import {Proposal, ProposalProgress} from "../../../../types/proposal";
 import { getNextSemester } from "../../../../util";
+import {ProposalService} from "../../../../service/proposal.service";
+import {GENERIC_ERROR_MESSAGE} from "../../../../utils";
 
 @Component({
   selector: "wm-progress-request-form",
@@ -17,8 +19,9 @@ import { getNextSemester } from "../../../../util";
 })
 export class ProgressRequestFormComponent implements OnInit {
   @Input() progressReport!: ProposalProgress;
+  @Input() proposal!: Proposal;
 
-  proposalProgressForm!: FormGroup;
+  proposalProgressForm!: UntypedFormGroup;
   loading = false;
   submitted = false;
   error: string | undefined = undefined;
@@ -27,10 +30,13 @@ export class ProgressRequestFormComponent implements OnInit {
   file: File | null = null;
   wrongFileType = false;
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(
+    private formBuilder: UntypedFormBuilder,
+    private proposalService: ProposalService
+  ) {}
 
   ngOnInit(): void {
-    const requestedPercentageGroups: FormGroup[] =
+    const requestedPercentageGroups: UntypedFormGroup[] =
       this.progressReport.partnerRequestedPercentages.map((p) =>
         this.createPartnerRequestedPercentages(
           p.partnerCode,
@@ -38,6 +44,7 @@ export class ProgressRequestFormComponent implements OnInit {
         ),
       );
     this.proposalProgressForm = this.formBuilder.group({
+      additionalPdf: [""],
       requestedTime: ["", Validators.required],
       maximumSeeing: ["", Validators.required],
       transparency: ["", Validators.required],
@@ -81,9 +88,40 @@ export class ProgressRequestFormComponent implements OnInit {
       return;
     }
     this.error = undefined;
+    const proposalProgressFormValues = this.proposalProgressForm.value
+    const partnerRequestedPercentages = proposalProgressFormValues.partnerRequestedPercentages.map(
+      (rp: {requestedPercentage: string, partnerCode: string}) => rp.partnerCode + ":" + rp.requestedPercentage
+    ).join(";")
 
-    this.loading = false;
-    //TODO under development do not submit the form. Error for network will be added
+
+    const formData: FormData = new FormData();
+
+    formData.append("requested_time", proposalProgressFormValues.requestedTime)
+    formData.append("maximum_seeing", proposalProgressFormValues.maximumSeeing)
+    formData.append("transparency", proposalProgressFormValues.transparency)
+    formData.append("description_of_observing_constraints", proposalProgressFormValues.descriptionOfObservingConstraints)
+    formData.append("change_reason", proposalProgressFormValues.changeReason)
+    formData.append("summary_of_proposal_status", proposalProgressFormValues.summaryOfProposalStatus)
+    formData.append("strategy_changes", proposalProgressFormValues.strategyChanges)
+    formData.append("partner_requested_percentages", partnerRequestedPercentages)
+
+
+    this.proposalService.putProgressReport(
+      this.proposal.proposalCode,
+      this.nextSemester,
+      formData,
+      this.file
+    ).subscribe(
+        (data) => {
+          this.progressReport = { ...data }
+          this.loading = false;
+        },
+        () => {
+          this.error = GENERIC_ERROR_MESSAGE;
+          this.loading = false;
+        },
+      );
+
     return;
   }
 
@@ -98,21 +136,27 @@ export class ProgressRequestFormComponent implements OnInit {
   }
 
   onFileInput(files: FileList | null): void {
+    this.validateAttachedFile(files)
     if (files) {
       this.file = files.item(0);
+      this.proposalProgressForm.patchValue({
+        additionalPdf: files.item(0)
+      })
     }
-    this.wrongFileType = this.file?.type !== "application/pdf";
   }
 
   removeFile(): void {
     this.file = null;
-    this.wrongFileType = false;
+    this.proposalProgressForm.patchValue({
+      additionalPdf: null
+    })
+    this.f.additionalPdf.setErrors(null);
   }
 
   validatePartnerRequestedPercentagesControls(): void {
     let totalRequestedPercentage = 0;
     this.partnerRequestedPercentages?.controls.forEach((p) => {
-      totalRequestedPercentage += Number(p.value.requestedPercentages) || 0;
+      totalRequestedPercentage += Number(p.value.requestedPercentage) || 0;
     });
     if (
       totalRequestedPercentage > 100.0001 ||
@@ -143,28 +187,36 @@ export class ProgressRequestFormComponent implements OnInit {
   validatePercentageValue(value: string, partnerCode: string, i: number): void {
     if (isNaN(Number(value)) || Number(value) < 0 || Number(value) > 100) {
       this.partnerRequestedPercentages?.controls[i]
-        ?.get("requestedPercentages")
+        ?.get("requestedPercentage")
         ?.setErrors({
           message: `The requested percentage for the partner ${partnerCode} should be between 0 and 100`,
         });
     }
   }
 
+  validateAttachedFile(files: FileList | null): void {
+    if (files?.item(0)?.type != "application/pdf") {
+      this.f.additionalPdf.setErrors({
+        message: "The additional PDF can only be of type PDF.",
+      });
+    }
+  }
+
   createPartnerRequestedPercentages(
     partnerCode: string,
     requestedPercentage: number,
-  ): FormGroup {
+  ): UntypedFormGroup {
     return this.formBuilder.group({
       partnerCode: [partnerCode, Validators.required],
-      requestedPercentages: [
+      requestedPercentage: [
         { value: `${requestedPercentage}`, disabled: partnerCode === "OTH" },
         Validators.required,
       ],
     });
   }
 
-  get partnerRequestedPercentages(): FormArray {
-    return <FormArray>(
+  get partnerRequestedPercentages(): UntypedFormArray {
+    return <UntypedFormArray>(
       this.proposalProgressForm.get("partnerRequestedPercentages")
     );
   }

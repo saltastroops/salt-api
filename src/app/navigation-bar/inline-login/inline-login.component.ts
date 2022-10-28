@@ -1,8 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
-  FormBuilder,
-  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormGroup,
   Validators,
 } from "@angular/forms";
 import { Router } from "@angular/router";
@@ -16,12 +16,12 @@ import { GENERIC_ERROR_MESSAGE } from "../../utils";
   styleUrls: ["./inline-login.component.scss"],
 })
 export class InlineLoginComponent implements OnInit {
-  loginForm!: FormGroup;
+  loginForm!: UntypedFormGroup;
   loading = false;
   error: string | null = null;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private authService: AuthenticationService,
     private router: Router,
   ) {}

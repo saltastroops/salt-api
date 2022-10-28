@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from "@angular/core";
 import {
   AbstractControl,
-  FormBuilder,
-  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormGroup,
   Validators,
 } from "@angular/forms";
 
@@ -20,14 +20,14 @@ export class ObservationCommentsComponent implements OnInit {
   @Input() observationComments!: ObservationComment[];
   @Input() proposalCode!: string;
   parseDate = parseISO;
-  commentForm!: FormGroup;
+  commentForm!: UntypedFormGroup;
   submitted = false;
   isCommentInputOpen = false;
   loading = false;
   error: string | undefined = undefined;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private proposalService: ProposalService,
   ) {}
 

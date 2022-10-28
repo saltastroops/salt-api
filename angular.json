@@ -133,8 +133,8 @@
       }
     }
   },
-  "defaultProject": "Web manager",
   "cli": {
-    "defaultCollection": "@angular-eslint/schematics"
+    "analytics": "0695e3aa-f777-42e2-ba88-d825cfa1619f",
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }

@@ -1,8 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
-  FormBuilder,
-  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormGroup,
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -18,7 +18,7 @@ import { GENERIC_ERROR_MESSAGE } from "../../utils";
   styleUrls: ["./forgot-password.component.scss"],
 })
 export class ForgotPasswordComponent implements OnInit {
-  forgotPasswordForm!: FormGroup;
+  forgotPasswordForm!: UntypedFormGroup;
   submitted = false;
   loading = false;
   error: string | undefined = undefined;
@@ -26,7 +26,7 @@ export class ForgotPasswordComponent implements OnInit {
   private authSubscription!: Subscription;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthenticationService,

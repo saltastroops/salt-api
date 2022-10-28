@@ -93,7 +93,7 @@ export class RealProposalService implements ProposalService {
       map((comments: any) => camelcaseKeys(comments, { deep: true })),
     );
   }
-  getProgressReport(
+  public getProgressReport(
     proposalCode: string,
     semester: string,
   ): Observable<ProposalProgress> {
@@ -102,6 +102,28 @@ export class RealProposalService implements ProposalService {
       map((progressReport: ProposalProgress) =>
         camelcaseKeys(progressReport, { deep: true }),
       ),
+      catchError(() => {
+        return throwError("Oops. Something is wrong.");
+      }),
+    );
+  }
+
+  public putProgressReport(
+    proposalCode: string,
+    semester: string,
+    proposalProgressFormData: FormData,
+    additionalPdf: File
+  ): Observable<ProposalProgress> {
+    const uri = environment.apiUrl + `/progress/${proposalCode}/${semester}`;
+    if (additionalPdf){
+      proposalProgressFormData.append("additional_pdf", additionalPdf)
+    }
+    return this.http.put<ProposalProgress>(uri, proposalProgressFormData)
+      .pipe(
+        map((progressReport: ProposalProgress) => {
+          return camelcaseKeys(progressReport, { deep: true })
+          },
+        ),
       catchError(() => {
         return throwError("Oops. Something is wrong.");
       }),

@@ -57,7 +57,7 @@
             <td>
               <input
                 #partnerPercentage
-                formControlName="requestedPercentages"
+                formControlName="requestedPercentage"
                 id="{{ 'name' + i }}"
                 type="text"
                 class="input"
@@ -71,11 +71,11 @@
                 [ngClass]="{
                   'is-danger':
                     (partnerRequestedPercentages.controls[i]?.get(
-                      'requestedPercentages'
+                      'requestedPercentage'
                     )?.dirty ||
                       submitted) &&
                     partnerRequestedPercentages.controls[i]?.get(
-                      'requestedPercentages'
+                      'requestedPercentage'
                     )?.errors &&
                     t.value.partnerCode !== 'OTH'
                 }"
@@ -83,11 +83,11 @@
               <p
                 *ngIf="
                   (partnerRequestedPercentages.controls[i]?.get(
-                    'requestedPercentages'
+                    'requestedPercentage'
                   )?.dirty ||
                     submitted) &&
                   partnerRequestedPercentages.controls[i]?.get(
-                    'requestedPercentages'
+                    'requestedPercentage'
                   )?.errors
                 "
                 class="invalid-feedback"
@@ -95,7 +95,7 @@
                 <label
                   *ngIf="
                     partnerRequestedPercentages.controls[i]?.get(
-                      'requestedPercentages'
+                      'requestedPercentage'
                     )?.errors?.required
                   "
                   class="has-text-danger"
@@ -108,13 +108,13 @@
                   class="has-text-danger"
                   *ngIf="
                     partnerRequestedPercentages.controls[i]?.get(
-                      'requestedPercentages'
+                      'requestedPercentage'
                     )?.errors?.message
                   "
                 >
                   {{
                     partnerRequestedPercentages.controls[i]?.get(
-                      "requestedPercentages"
+                      "requestedPercentage"
                     )?.errors?.message
                   }}
                 </label>
@@ -185,11 +185,11 @@
                 (change)="changeTransparency($event)"
                 formControlName="transparency"
               >
-                <option [ngValue]="''" disabled>Select</option>
-                <option [ngValue]="'Any'">Any</option>
-                <option [ngValue]="'Clear'">Clear</option>
-                <option [ngValue]="'Thick cloud'">Thick cloud</option>
-                <option [ngValue]="'Thin cloud'">Thin cloud</option>
+                <option value="" disabled>Select</option>
+                <option value="Any">Any</option>
+                <option value="Clear">Clear</option>
+                <option value="Thick cloud">Thick cloud</option>
+                <option value="Thin cloud">Thin cloud</option>
               </select>
             </label>
             <p
@@ -353,9 +353,10 @@
               [ngClass]="{ 'has-text-danger': wrongFileType }"
             >
               <input
+                formControlName="additionalPdf"
                 class="file-input is-danger"
                 type="file"
-                name="supplementary-pdf"
+                name="additionalPdf"
                 accept=".pdf"
                 #fileInput
                 (change)="onFileInput(fileInput.files)"
@@ -367,7 +368,13 @@
                 {{ file ? file.name : "No file selected." }}
               </span>
             </label>
-            <p *ngIf="wrongFileType" class="has-text-danger" data-test="error">
+            <p
+              *ngIf="
+                (f.additionalPdf.dirty || submitted) && f.additionalPdf.errors
+              "
+              class="has-text-danger"
+              data-test="error"
+            >
               You can only submit a PDF file.
             </p>
           </td>

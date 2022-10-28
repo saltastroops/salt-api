@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder } from "@angular/forms";
+import { UntypedFormBuilder } from "@angular/forms";
 
 import { AuthenticationService } from "./service/authentication.service";
 
@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
   title = "Web Manager";
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private authService: AuthenticationService,
   ) {}
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 
 import { Observable, Subject, of } from "rxjs";
 import { catchError, debounceTime, switchMap, take, tap } from "rxjs/operators";
@@ -25,7 +25,7 @@ export class ManageUserProfileComponent implements OnInit {
   partners!: Array<keyof typeof Partner>;
   partnerInstitutions!: Institution[];
   institutionsMapping = new Map();
-  userProfile!: FormGroup;
+  userProfile!: UntypedFormGroup;
   isLoadingForm = false;
   showForm = true;
   error?: string;
@@ -34,7 +34,7 @@ export class ManageUserProfileComponent implements OnInit {
     private authService: AuthenticationService,
     private userService: UserService,
     private institutionService: InstitutionService,
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
   ) {}
 
   ngOnInit(): void {

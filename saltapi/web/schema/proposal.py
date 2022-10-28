@@ -556,6 +556,7 @@ class ProposalProgress(BaseProgressReport):
     the observations up to and including the 2021-1 semester and it requests time for
     the 2021-2 semester.
     """
+
     semester: Optional[str] = Field(
         ...,
         title="Semester",
@@ -599,4 +600,3 @@ class ProposalProgressInput(BaseProgressReport):
             "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'."
         ),
     )
-

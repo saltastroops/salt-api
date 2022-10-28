@@ -119,7 +119,7 @@ async def put_proposal_progress_report(
         ),
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
-    proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),
+    proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput),
     additional_pdf: Optional[UploadFile] = File(default=None),
     user: User = Depends(get_current_user),
 ) -> ProposalProgress:

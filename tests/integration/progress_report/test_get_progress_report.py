@@ -1,4 +1,3 @@
-import os
 import pathlib
 import tempfile
 from typing import Any, Callable, NamedTuple

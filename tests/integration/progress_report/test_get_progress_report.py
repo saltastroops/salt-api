@@ -1,6 +1,8 @@
+import os
 from typing import Any, Callable
 
 import pytest
+import tempfile
 from fastapi.testclient import TestClient
 from starlette import status
 
@@ -93,6 +95,8 @@ def test_get_returns_correct_pdf_file(
     proposal_code = "2022-1-ORP-001"
     semester = "2021-1"
 
+    # proposal_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
+
     progress_report_update = {
         "requested_time": 3000,
         "maximum_seeing": 2,
@@ -107,24 +111,26 @@ def test_get_returns_correct_pdf_file(
         "additional_pdf": None,
     }
 
-    progress_update = client.put(
-        PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,
-        data=progress_report_update,
-    )
+    with tempfile.TemporaryDirectory() as dirpath:
+        os.environ["PROPOSALS_DIR"] = dirpath
+        progress_update = client.put(
+            PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,
+            data=progress_report_update,
+        )
 
-    assert progress_update.status_code == status.HTTP_200_OK
+        assert progress_update.status_code == status.HTTP_200_OK
 
-    response = client.get(
-        PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester + "/report.pdf"
-    )
+        response = client.get(
+            PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester + "/report.pdf"
+        )
 
-    assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
-    assert (
-        "attachment; filename=ProposalProgressReport-"
-        in response.headers["content-disposition"]
-    )
-    assert response.headers["content-type"] == "application/pdf"
+        assert (
+            "attachment; filename=ProposalProgressReport-"
+            in response.headers["content-disposition"]
+        )
+        assert response.headers["content-type"] == "application/pdf"
 
 
 @pytest.mark.parametrize(

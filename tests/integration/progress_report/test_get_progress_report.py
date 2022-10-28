@@ -1,12 +1,13 @@
+import os
 import pathlib
 import tempfile
 from typing import Any, Callable, NamedTuple
 
 import pytest
 from fastapi.testclient import TestClient
+from pytest import MonkeyPatch
 from starlette import status
 
-import saltapi.settings
 from saltapi.settings import get_settings
 from tests.conftest import authenticate, not_authenticated
 
@@ -89,15 +90,12 @@ def test_get_returns_progress_report_for_authorised_user(
 
 
 def test_get_returns_correct_pdf_file(
-    client: TestClient, monkeypatch: pytest.MonkeyPatch
+    client: TestClient, monkeypatch: MonkeyPatch
 ) -> None:
     authenticate(USERNAME, client)
 
     proposal_code = "2022-1-ORP-001"
     semester = "2021-1"
-
-    class MockSettings(NamedTuple):
-        proposals_dir: pathlib.Path
 
     progress_report_update = {
         "requested_time": 3000,
@@ -115,10 +113,15 @@ def test_get_returns_correct_pdf_file(
 
     with tempfile.TemporaryDirectory() as tmp_path:
 
+        class MockSettings(NamedTuple):
+            proposals_dir: pathlib.Path
+
         def mock_get_settings() -> Any:
             return MockSettings(tmp_path)
 
-        monkeypatch.setattr(saltapi.settings, "get_settings", mock_get_settings)
+        monkeypatch.setattr("saltapi.service.proposal_service.get_settings", mock_get_settings)
+        pathlib.Path(mock_get_settings().proposals_dir).joinpath(proposal_code).mkdir()
+        pathlib.Path(mock_get_settings().proposals_dir).joinpath(proposal_code, "Included").mkdir()
 
         progress_update = client.put(
             PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,

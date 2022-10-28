@@ -114,12 +114,11 @@ def test_get_returns_correct_pdf_file(
     }
 
     with tempfile.TemporaryDirectory() as tmp_path:
+
         def mock_get_settings() -> Any:
             return MockSettings(tmp_path)
 
-        monkeypatch.setattr(
-            saltapi.settings, "get_settings", mock_get_settings
-        )
+        monkeypatch.setattr(saltapi.settings, "get_settings", mock_get_settings)
 
         progress_update = client.put(
             PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,

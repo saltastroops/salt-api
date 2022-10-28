@@ -121,7 +121,7 @@ def test_get_returns_correct_pdf_file(
         monkeypatch.setattr(
             "saltapi.service.proposal_service.get_settings", mock_get_settings
         )
-        proposals_dir = f"{mock_get_settings().proposals_dir}/{proposal_code}/Included/"
+        proposals_dir = f"{mock_get_settings().proposals_dir}/{proposal_code}/Included"
         pathlib.Path(proposals_dir).mkdir(parents=True)
 
         progress_update = client.put(

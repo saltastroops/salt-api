@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 import pdfkit  # type: ignore
 from fastapi import APIRouter, Request, UploadFile
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
 from saltapi.exceptions import NotFoundError
@@ -274,13 +274,13 @@ class ProposalService:
         )
         if progress_report_pdfs["proposal_progress_filename"]:
             b = BytesIO()
-            with PdfFileMerger(strict=False) as merger:
+            with PdfMerger(strict=False) as merger:
                 merger.append(
-                    base_dir + progress_report_pdfs["proposal_progress_filename"]  # noqa: E501 # type: ignore
+                    base_dir + progress_report_pdfs["proposal_progress_filename"]  # type: ignore # noqa: E501
                 )
                 if progress_report_pdfs["additional_pdf_filename"]:
                     merger.append(
-                        base_dir + progress_report_pdfs["additional_pdf_filename"]  # noqa: E501 # type: ignore
+                        base_dir + progress_report_pdfs["additional_pdf_filename"]  # type: ignore # noqa: E501
                     )
                 merger.write(b)
             b.seek(0)

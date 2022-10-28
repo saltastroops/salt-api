@@ -1698,7 +1698,9 @@ WHERE PC.Proposal_Code = :proposal_code
                 ] = self.get_latest_observing_conditions(proposal_code, semester)
                 progress_report[
                     "partner_requested_percentages"
-                ] = self._get_partner_requested_percentages(proposal_code, _next_semester)
+                ] = self._get_partner_requested_percentages(
+                    proposal_code, _next_semester
+                )
             return progress_report
         else:
             return {

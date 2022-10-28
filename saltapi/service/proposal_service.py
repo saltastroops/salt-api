@@ -3,7 +3,7 @@ import urllib.parse
 from io import BytesIO
 from typing import Any, Dict, List, Optional
 
-import pdfkit
+import pdfkit  # type: ignore
 from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfFileMerger
 from starlette.datastructures import URLPath
@@ -22,7 +22,6 @@ from saltapi.web.schema.proposal import ProposalProgressInput
 
 
 def generate_route_url(request: Request, router_path: URLPath) -> str:
-
     url = urllib.parse.urljoin(str(request.base_url), router_path)
     return url
 
@@ -32,7 +31,7 @@ def generate_pdf_path(
 ) -> Optional[pathlib.Path]:
     proposals_dir = get_settings().proposals_dir
     return (
-        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).resolve()
+        pathlib.Path(proposals_dir / proposal_code / "Included" / filename).absolute()
         if filename
         else None
     )
@@ -173,9 +172,13 @@ class ProposalService:
             "requested_time": proposal_progress_report.requested_time,
             "maximum_seeing": proposal_progress_report.maximum_seeing,
             "transparency": proposal_progress_report.transparency,
-            "description_of_observing_constraints": proposal_progress_report.description_of_observing_constraints,
+            # fmt: off
+            "description_of_observing_constraints":
+                proposal_progress_report.description_of_observing_constraints,
             "change_reason": proposal_progress_report.change_reason,
-            "summary_of_proposal_status": proposal_progress_report.summary_of_proposal_status,
+            # fmt: off
+            "summary_of_proposal_status":
+                proposal_progress_report.summary_of_proposal_status,
             "strategy_changes": proposal_progress_report.strategy_changes,
             "partner_requested_percentages": partner_requested_percentages,
         }
@@ -192,8 +195,7 @@ class ProposalService:
         semester: str,
         new_request: Dict[str, Any],
         additional_pdf: Optional[UploadFile],
-    ) -> Dict[str, str or None]:
-
+    ) -> Dict[str, Optional[str]]:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )
@@ -261,8 +263,8 @@ class ProposalService:
         semester: Semester,
     ) -> BytesIO:
         """
-        Create the proposal progress PDF by joining proposal progress PDF and the supplementary file.
-        Will raise an error if the file doesn't exist.
+        Create the proposal progress PDF by joining proposal progress PDF and
+        the supplementary file. Will raise an error if the file doesn't exist.
         """
         base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
 

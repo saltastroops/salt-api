@@ -43,7 +43,9 @@ class PeriodEphemeris(BaseModel):
     zero_point: Decimal = Field(
         ...,
         title="Zero point for the ephemeris",
-        description="Zero point for the target ephemeris. The target phase is 0 at this time",
+        description=(
+            "Zero point for the target ephemeris. The target phase is 0 at this time"
+        ),
     )
     period: Decimal = Field(
         ...,
@@ -111,7 +113,10 @@ class Target(BaseModel):
     horizons_identifier: Optional[str] = Field(
         ...,
         title="Horizons identifier",
-        description="Identifier for the target in the JPL-Horizons database of solar-system targets",
+        description=(
+            "Identifier for the target in the JPL-Horizons database of solar-system"
+            " targets"
+        ),
     )
 
     non_sidereal: bool = Field(
@@ -127,7 +132,10 @@ class Phase1Target(Target):
     is_optional: bool = Field(
         ...,
         title="Optional?",
-        description="Whether the target is optional, i.e. whether it is part of a pool of targets from which only a subset needs to be observed.",
+        description=(
+            "Whether the target is optional, i.e. whether it is part of a pool of"
+            " targets from which only a subset needs to be observed."
+        ),
     )
     requested_observations: int = Field(
         ...,
@@ -137,19 +145,28 @@ class Phase1Target(Target):
     max_lunar_phase: float = Field(
         ...,
         title="Maximum lunar phase",
-        description="Maximum lunar phase which was allowed for the observation, as the percentage of lunar illumination",
+        description=(
+            "Maximum lunar phase which was allowed for the observation, as the"
+            " percentage of lunar illumination"
+        ),
         ge=0,
         le=100,
     )
     ranking: Ranking = Field(
         ...,
         title="Ranking",
-        description="Importance attributed by the Principal Investigator to observations of this target relative to other observations for the same proposal.",
+        description=(
+            "Importance attributed by the Principal Investigator to observations of"
+            " this target relative to other observations for the same proposal."
+        ),
     )
     night_count: int = Field(
         ...,
         title="Number of nights",
-        description="Number of nights for which the target is observable, given the requested observation time and observation constraints.",
+        description=(
+            "Number of nights for which the target is observable, given the requested"
+            " observation time and observation constraints."
+        ),
     )
     observing_probabilities: ObservationProbabilities = Field(
         ...,

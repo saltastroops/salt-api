@@ -1,13 +1,13 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def create_proposal_progress_html(
     proposal_code: str,
     semester: str,
     previous_requests: List[Dict[str, Any]],
-    previous_conditions: Dict[str, Any],
-    new_request: Dict[str, any],
-):
+    previous_conditions: Optional[Dict[str, Any]],
+    new_request: Dict[str, Any],
+) -> str:
     html_content = """
 <!DOCTYPE html>
 <html lang="en">
@@ -61,7 +61,7 @@ def create_proposal_progress_html(
     <body>
         <div>
             <h2>
-                Multisemester Proposal Progress Report: 
+                Multisemester Proposal Progress Report:
             </h2>
     """
     html_content += f"""
@@ -77,7 +77,7 @@ def create_proposal_progress_html(
                     <div>
                       <i>
                         This section lists the originally requested times, as well as
-                         the allocated times and the completion. It also gives the 
+                         the allocated times and the completion. It also gives the
                          originally requested observing conditions.
                       </i>
                     </div>
@@ -94,17 +94,20 @@ def create_proposal_progress_html(
                         <th>Completion</th>
                       </tr>
 """
-    for p in sorted(previous_requests, key=lambda i: i["semester"]):
+    for p in sorted(previous_requests, key=lambda i: i["semester"]):  # type: ignore
         html_content += f"""
                       <tr>
                         <td>{p['semester']}</td>
-                        <td>{p['requested_time']} seconds</td> 
-                        <td>{p['allocated_time']} seconds</td> 
-                        <td>{p['observed_time']} seconds</td> 
-                        <td>{round((p['observed_time']/p['allocated_time'])*100, 1)} %</td>
+                        <td>{p['requested_time']} seconds</td>
+                        <td>{p['allocated_time']} seconds</td>
+                        <td>{p['observed_time']} seconds</td>
+                        <td>
+                            {round((p['observed_time']/p['allocated_time'])*100, 1)} %
+                        </td>
                       </tr>
         """
-    html_content += f"""
+    if previous_conditions:
+        html_content += f"""
                     </table>
                     <h4>Previously requested observing conditions</h4>
                     <div>
@@ -119,7 +122,7 @@ def create_proposal_progress_html(
                             <div class="right">
                                 {previous_conditions['transparency']}
                             </div>
-                        </div>    
+                        </div>
                         <div>
                             <b>Brief description of observing conditions:</b>
                         </div>
@@ -131,6 +134,22 @@ def create_proposal_progress_html(
                     </div>
                 </div>
             </div>
+        """
+    else:
+        html_content += """
+                    </table>
+                    <h4>Previously requested observing conditions</h4>
+                    <div>
+                        <p>
+                            There is no Phase 1 proposal and hence there are
+                            no previously requested observing conditions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        """
+
+    html_content += f"""
             <div class="section">
                 <div class="numbering">
                     <div><h3>2.</h3></div>
@@ -152,27 +171,43 @@ def create_proposal_progress_html(
                         </div>
                         <div class="has-two-columns">
                             <div class="left"><b>Maximum seeing:</b></div>
-                            <div class="right">{new_request['maximum_seeing']} arcseconds</div>
+                            <div class="right">
+                                {new_request['maximum_seeing']} arcseconds
+                            </div>
                         </div>
                         <div class="has-two-columns">
                             <div class="left"><b>Transparency:</b></div>
                             <div class="right">{new_request['transparency']}</div>
                         </div>
-                        <div><b>Brief description of observing conditions:</b></div>
                         <div>
-                            <div class="left-shifted">{new_request['description_of_observing_constraints']}</div>
+                            <b>
+                                Brief description of observing conditions:
+                            </b>
+                        </div>
+                        <div>
+                            <div class="left-shifted">
+                                {new_request['description_of_observing_constraints']}
+                            </div>
                         </div>
                     </div>
                     <br>
                     <div>
                         <b>
-                            The following reasons are given for changes from the 
+                            The following reasons are given for changes from the
                             original requests.
                         </b>
                     </div>
-                    <div class="left-shifted">Please see the attached document. -- TODO Double Check this content --</div>
+                    <div class="left-shifted">
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </div>
                     <br>
-                    <div><b>A supplementary pdf is attached to this report -- TODO: this needs to be a boolean to show --</b></div>
+                    <div>
+                        <b>
+                            A supplementary pdf is attached to this report
+                            -- TODO: this needs to be a boolean to show --
+                        </b>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -180,11 +215,18 @@ def create_proposal_progress_html(
                     <div><h3>3.</h3></div>
                     <div><h3>STATUS SUMMARY</h3></div>
                     <div></div>
-                    <div><i>This section gives a summary of the proposal status.</i></div>
+                    <div>
+                        <i>
+                            This section gives a summary of the proposal status.
+                        </i>
+                    </div>
                 </div>
                 <hr>
                 <div>
-                    <p>Please see the attached document.-- TODO Double Check this content --</p>
+                    <p>
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </p>
                 </div>
             </div>
             <div class="section">
@@ -192,11 +234,19 @@ def create_proposal_progress_html(
                     <div><h3>4.</h3></div>
                     <div><h3>STRATEGY CHANGES</h3></div>
                     <div></div>
-                    <div><i>This section outlines how the TAC suggestions regarding a change of strategy will be addressed.</i></div>
+                    <div>
+                        <i>
+                            This section outlines how the TAC suggestions
+                            regarding a change of strategy will be addressed.
+                        </i>
+                    </div>
                 </div>
                 <hr>
                 <div>
-                    <p>Please see the attached document.-- TODO Double Check this content --</p>
+                    <p>
+                        Please see the attached document.
+                        -- TODO Double Check this content --
+                    </p>
                 </div>
             </div>
         </div>
@@ -215,7 +265,7 @@ def create_proposal_progress_html(
             </div>
         </div>
     </body>
-</html>  
+</html>
     """
 
     return html_content

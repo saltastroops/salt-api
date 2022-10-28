@@ -11,7 +11,6 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import AnyUrl
 from pydantic.networks import AnyUrl
 from starlette import status
 
@@ -36,7 +35,10 @@ def get_urls_for_proposal_progress_report_pdfs(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose progress report pdf URLs are requested.",
+        description=(
+            "Proposal code of the proposal whose progress report pdf URLs are"
+            " requested."
+        ),
     ),
     user: User = Depends(get_current_user),
 ) -> Dict[str, Dict[str, AnyUrl]]:
@@ -112,8 +114,9 @@ async def put_proposal_progress_report(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose progress report is created or"
-        " updated.",
+        description=(
+            "Proposal code of the proposal whose progress report is created or updated."
+        ),
     ),
     semester: Semester = Path(..., title="Semester", description="Semester"),
     proposal_progress: ProposalProgressInput = Depends(ProposalProgressInput.as_form),
@@ -176,7 +179,9 @@ async def get_proposal_progress_report_pdf(
             return StreamingResponse(
                 proposal_progress_byte_io,
                 headers={
-                    "Content-Disposition": f"attachment; filename=ProposalProgressReport-{semester}.pdf"
+                    "Content-Disposition": (
+                        f"attachment; filename=ProposalProgressReport-{semester}.pdf"
+                    )
                 },
                 media_type="application/pdf",
             )
@@ -216,8 +221,12 @@ def get_supplementary_proposal_progress_report_pdf(
 
         filename = "ProgressReportSupplement_{}.pdf".format(semester)
 
+        if not additional_pdf_path:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
         if exists(additional_pdf_path):
             return FileResponse(
                 additional_pdf_path, media_type="application/pdf", filename=filename
             )
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

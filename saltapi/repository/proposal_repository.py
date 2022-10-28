@@ -196,7 +196,7 @@ LIMIT :limit;
 
         if semester_start(from_semester) > semester_start(to_semester):
             raise ValueError(
-                "The from semester must not be later than the to " "semester."
+                "The from semester must not be later than the to semester."
             )
 
         if limit < 0:
@@ -284,7 +284,6 @@ ORDER BY S.Year, S.Semester;
         return list(result.scalars())
 
     def list_of_semesters(self, proposal_code: str) -> List[str]:
-
         result = self._semesters(proposal_code)
 
         semesters = sorted(result, reverse=True)
@@ -1342,7 +1341,7 @@ WHERE PC.Proposal_Code = :proposal_code
     def generate_proposal_progress_filename(
         file_content: bytes, is_supplementary: bool = False
     ) -> str:
-        hash_md = hashlib.md5(file_content).hexdigest()
+        hash_md = hashlib.md5(file_content).hexdigest()  # nosec
         if is_supplementary:
             return f"ProposalProgressSupplementary-{hash_md}.pdf"
 
@@ -1353,7 +1352,7 @@ WHERE PC.Proposal_Code = :proposal_code
         progress_report_data: Dict[str, Any],
         proposal_code: str,
         semester: str,
-        filenames: Dict[str, str or None],
+        filenames: Dict[str, Optional[str]],
     ) -> None:
         """
         Insert or update the proposal progress information.
@@ -1379,7 +1378,7 @@ VALUES(
     :report_path,
     :supplementary_path,
     NOW()
-) ON DUPLICATE KEY UPDATE 
+) ON DUPLICATE KEY UPDATE
     TimeRequestChangeReasons = :change_reason,
     StatusSummary = :summary_of_proposal_status,
     StrategyChanges = :strategy_changes,
@@ -1475,7 +1474,7 @@ VALUES
     :maximum_seeing,
     (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     :observing_conditions_description
-) ON DUPLICATE KEY UPDATE 
+) ON DUPLICATE KEY UPDATE
     MaxSeeing = :maximum_seeing,
     Transparency_Id = (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     ObservingConditionsDescription = :observing_conditions_description

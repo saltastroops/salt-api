@@ -10,7 +10,6 @@ class FinderChartService:
         self.finder_chart_repository = finder_chart_repository
 
     def get_finder_chart(self, finder_chart_id: int) -> Tuple[str, Path]:
-
         """
         Return the proposal code and path of a finder chart with a given id.
         """

@@ -69,7 +69,9 @@ class NewUserDetails(FullName):
     institution_id: int = Field(
         ...,
         title="Institution id",
-        description="Unique identifier of the institution to which the user is affiliated.",
+        description=(
+            "Unique identifier of the institution to which the user is affiliated."
+        ),
     )
 
 
@@ -94,5 +96,7 @@ class PasswordResetRequest(BaseModel):
     username_email: str = Field(
         ...,
         title="Username or email",
-        description="Username or email address of the user whose password should be reset",
+        description=(
+            "Username or email address of the user whose password should be reset"
+        ),
     )

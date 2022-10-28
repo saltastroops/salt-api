@@ -119,9 +119,13 @@ def test_get_returns_correct_pdf_file(
         def mock_get_settings() -> Any:
             return MockSettings(tmp_path)
 
-        monkeypatch.setattr("saltapi.service.proposal_service.get_settings", mock_get_settings)
+        monkeypatch.setattr(
+            "saltapi.service.proposal_service.get_settings", mock_get_settings
+        )
         pathlib.Path(mock_get_settings().proposals_dir).joinpath(proposal_code).mkdir()
-        pathlib.Path(mock_get_settings().proposals_dir).joinpath(proposal_code, "Included").mkdir()
+        pathlib.Path(mock_get_settings().proposals_dir).joinpath(
+            proposal_code, "Included"
+        ).mkdir()
 
         progress_update = client.put(
             PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,

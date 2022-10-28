@@ -97,7 +97,9 @@ def test_get_returns_correct_pdf_file(
         "requested_time": 3000,
         "maximum_seeing": 2,
         "transparency": "Thin cloud",
-        "description_of_observing_constraints": "Lunar contamination is not a concern during the observing windows.",
+        # fmt: off
+        "description_of_observing_constraints":
+            "Lunar contamination is not a concern during the observing windows.",
         "change_reason": "Too faint for science",
         "summary_of_proposal_status": "Good",
         "strategy_changes": "N/A",

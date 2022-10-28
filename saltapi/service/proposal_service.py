@@ -276,11 +276,11 @@ class ProposalService:
             b = BytesIO()
             with PdfFileMerger(strict=False) as merger:
                 merger.append(
-                    base_dir + progress_report_pdfs["proposal_progress_filename"]
+                    base_dir + progress_report_pdfs["proposal_progress_filename"]  # noqa: E501 # type: ignore
                 )
                 if progress_report_pdfs["additional_pdf_filename"]:
                     merger.append(
-                        base_dir + progress_report_pdfs["additional_pdf_filename"]
+                        base_dir + progress_report_pdfs["additional_pdf_filename"]  # noqa: E501 # type: ignore
                     )
                 merger.write(b)
             b.seek(0)

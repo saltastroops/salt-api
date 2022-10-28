@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -276,11 +276,11 @@ class ProposalService:
             b = BytesIO()
             with PdfMerger(strict=False) as merger:
                 merger.append(
-                    base_dir + progress_report_pdfs["proposal_progress_filename"]  # type: ignore # noqa: E501
+                    base_dir + cast(str, progress_report_pdfs["proposal_progress_filename"])  # noqa: E501
                 )
                 if progress_report_pdfs["additional_pdf_filename"]:
                     merger.append(
-                        base_dir + progress_report_pdfs["additional_pdf_filename"]  # type: ignore # noqa: E501
+                        base_dir + cast(str, progress_report_pdfs["additional_pdf_filename"])  # noqa: E501
                     )
                 merger.write(b)
             b.seek(0)

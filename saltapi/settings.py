@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Should be generated with openssl: openssl rand -hex 32
     secret_key: str
 
+    # Lifetime of an authentication token, in hours
+    auth_token_lifetime_hours: int = 7 * 24
+
     # URI which is allowed to connect to the API
     frontend_uri: str
 

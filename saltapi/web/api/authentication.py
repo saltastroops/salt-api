@@ -1,6 +1,6 @@
 from typing import Callable
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
@@ -63,3 +63,40 @@ def token(
             detail="Could not validate credentials.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@router.post("/login", summary="Log in.", status_code=status.HTTP_204_NO_CONTENT)
+def login(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    authenticate_user: Callable[[str, str], User] = Depends(
+        get_user_authentication_function
+    ),
+) -> None:
+    """
+    Log in.
+
+    Logging in means that the user id is added to the session cookie. The key for this
+    id in the session is "user_id".
+    """
+    try:
+        user = authenticate_user(form_data.username, form_data.password)
+        request.session["user_id"] = user.id
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@router.post("/logout", summary="Log out.", status_code=status.HTTP_204_NO_CONTENT)
+def logout(request: Request) -> None:
+    """
+    Log out.
+
+    Logging out means that the user id is removed from the session cookie. If there is
+    no user id in the session, nothing is done (and no error is raised).
+    """
+    if "user_id" in request.session:
+        del request.session["user_id"]

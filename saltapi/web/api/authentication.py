@@ -13,6 +13,9 @@ from saltapi.web import services
 router = APIRouter(tags=["Authentication"])
 
 
+_USER_ID = "user_id"
+
+
 def get_user_authentication_function() -> Callable[[str, str], User]:
     """
     Returns the function for authenticating a user by username and password.
@@ -81,7 +84,7 @@ def login(
     """
     try:
         user = authenticate_user(form_data.username, form_data.password)
-        request.session["user_id"] = user.id
+        request.session[_USER_ID] = user.id
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,4 +102,4 @@ def logout(request: Request) -> None:
     no user id in the session, nothing is done (and no error is raised).
     """
     if "user_id" in request.session:
-        del request.session["user_id"]
+        del request.session[_USER_ID]

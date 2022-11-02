@@ -62,6 +62,7 @@ jobs:
       #----------------------------------------------
       - name: Run tests
         env:
+          TMPDIR: ${{ runner.temp }}/
           TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/
           SDB_DSN: ${{ secrets.SDB_DSN }}

@@ -62,7 +62,6 @@ jobs:
       #----------------------------------------------
       - name: Run tests
         env:
-          TMPDIR: ${{ runner.temp }}/
           TEST_DATA_DIR: tests/salt-testdata/salt-api/
           PROPOSALS_DIR: tests/
           SDB_DSN: ${{ secrets.SDB_DSN }}
@@ -97,4 +96,5 @@ jobs:
           FINDING_CHARTS_DIR: tests/
           TCS_ICD_URL: https://www.example.com/
         run: |
+          sudo apt-get install xvfb libfontconfig wkhtmltopdf
           poetry run tox

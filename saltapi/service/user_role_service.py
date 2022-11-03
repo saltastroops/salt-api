@@ -1,7 +1,6 @@
 from typing import List, Optional
 
 from saltapi.repository.user_repository import UserRepository
-
 from saltapi.service.user import Role
 
 

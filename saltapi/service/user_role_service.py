@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role
@@ -40,7 +40,7 @@ class UserRoleService:
             roles.append(Role.TAC_MEMBER)
 
         if self.user_repository.is_tac_member_for_proposal(
-            self.username, self.proposal_code
+            self.username, cast(str, self.proposal_code)
         ):
             roles.append(Role.PROPOSAL_TAC_MEMBER)
 
@@ -48,14 +48,14 @@ class UserRoleService:
             roles.append(Role.PARTNER_AFFILIATED)
 
         if self.user_repository.is_principal_investigator(
-            self.username, self.proposal_code
+            self.username, cast(str, self.proposal_code)
         ):
             roles.append(Role.PRINCIPAL_INVESTIGATOR)
 
-        if self.user_repository.is_principal_contact(self.username, self.proposal_code):
+        if self.user_repository.is_principal_contact(self.username, cast(str, self.proposal_code)):
             roles.append(Role.PRINCIPAL_CONTACT)
 
-        if self.user_repository.is_investigator(self.username, self.proposal_code):
+        if self.user_repository.is_investigator(self.username, cast(str, self.proposal_code)):
             roles.append(Role.INVESTIGATOR)
 
         if self.user_repository.is_engineer():

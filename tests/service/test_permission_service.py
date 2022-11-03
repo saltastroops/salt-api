@@ -27,7 +27,7 @@ class FakeUserRepository:
         is_self_activatable: bool = False,
         is_tac_chair_in_general: bool = False,
         is_tac_member_in_general: bool = False,
-        is_engineer: bool = False
+        is_engineer: bool = False,
     ) -> None:
         self._is_investigator = is_investigator
         self._is_principal_investigator = is_principal_investigator

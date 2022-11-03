@@ -46,7 +46,7 @@ class PermissionService:
                 Role.SALT_ASTRONOMER,
                 Role.INVESTIGATOR,
                 Role.PROPOSAL_TAC_MEMBER,
-                Role.ADMINISTRATOR
+                Role.ADMINISTRATOR,
             ]
             has_permissions(user_roles, permitted_roles)
         else:
@@ -55,7 +55,7 @@ class PermissionService:
             permitted_roles = [
                 Role.SALT_ASTRONOMER,
                 Role.PARTNER_AFFILIATED,
-                Role.ADMINISTRATOR
+                Role.ADMINISTRATOR,
             ]
 
             has_permissions(user_roles, permitted_roles)
@@ -83,14 +83,11 @@ class PermissionService:
                 Role.PRINCIPAL_INVESTIGATOR,
                 Role.PRINCIPAL_CONTACT,
                 Role.SALT_ASTRONOMER,
-                Role.ADMINISTRATOR
+                Role.ADMINISTRATOR,
             ]
             has_permissions(user_roles, permitted_roles)
         else:
-            permitted_roles = [
-                Role.SALT_ASTRONOMER,
-                Role.ADMINISTRATOR
-            ]
+            permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
             has_permissions(user_roles, permitted_roles)
 
     def check_permission_to_deactivate_proposal(
@@ -115,7 +112,7 @@ class PermissionService:
             Role.PRINCIPAL_INVESTIGATOR,
             Role.PRINCIPAL_CONTACT,
             Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR
+            Role.ADMINISTRATOR,
         ]
 
         has_permissions(user_roles, permitted_roles)
@@ -131,13 +128,12 @@ class PermissionService:
         """
         username = user.username
 
-        role_service = UserRoleService(self.user_repository, username, proposal_code=None)
+        role_service = UserRoleService(
+            self.user_repository, username, proposal_code=None
+        )
         user_roles = role_service.get_user_roles()
 
-        permitted_roles = [
-            Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR
-        ]
+        permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
         has_permissions(user_roles, permitted_roles)
 
@@ -163,7 +159,7 @@ class PermissionService:
             Role.PRINCIPAL_INVESTIGATOR,
             Role.PRINCIPAL_CONTACT,
             Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR
+            Role.ADMINISTRATOR,
         ]
 
         has_permissions(user_roles, permitted_roles)
@@ -245,12 +241,12 @@ class PermissionService:
         details.
         """
         if not user.id == updated_user_id:
-            role_service = UserRoleService(self.user_repository, user.username, proposal_code=None)
+            role_service = UserRoleService(
+                self.user_repository, user.username, proposal_code=None
+            )
             user_roles = role_service.get_user_roles()
 
-            permitted_roles = [
-                Role.ADMINISTRATOR
-            ]
+            permitted_roles = [Role.ADMINISTRATOR]
 
             has_permissions(user_roles, permitted_roles)
 
@@ -273,13 +269,12 @@ class PermissionService:
 
         username = user.username
 
-        role_service = UserRoleService(self.user_repository, username, proposal_code=None)
+        role_service = UserRoleService(
+            self.user_repository, username, proposal_code=None
+        )
         user_roles = role_service.get_user_roles()
 
-        permitted_roles = [
-            Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR
-        ]
+        permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
         has_permissions(user_roles, permitted_roles)
 
@@ -289,14 +284,12 @@ class PermissionService:
         """
         username = user.username
 
-        role_service = UserRoleService(self.user_repository, username, proposal_code=None)
+        role_service = UserRoleService(
+            self.user_repository, username, proposal_code=None
+        )
         user_roles = role_service.get_user_roles()
 
-        permitted_roles = [
-            Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR,
-            Role.ENGINEER
-        ]
+        permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
         has_permissions(user_roles, permitted_roles)
 
@@ -320,7 +313,7 @@ class PermissionService:
         permitted_roles = [
             Role.PRINCIPAL_INVESTIGATOR,
             Role.PRINCIPAL_CONTACT,
-            Role.ADMINISTRATOR
+            Role.ADMINISTRATOR,
         ]
 
         has_permissions(user_roles, permitted_roles)

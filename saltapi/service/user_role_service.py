@@ -52,10 +52,14 @@ class UserRoleService:
         ):
             roles.append(Role.PRINCIPAL_INVESTIGATOR)
 
-        if self.user_repository.is_principal_contact(self.username, cast(str, self.proposal_code)):
+        if self.user_repository.is_principal_contact(
+            self.username, cast(str, self.proposal_code)
+        ):
             roles.append(Role.PRINCIPAL_CONTACT)
 
-        if self.user_repository.is_investigator(self.username, cast(str, self.proposal_code)):
+        if self.user_repository.is_investigator(
+            self.username, cast(str, self.proposal_code)
+        ):
             roles.append(Role.INVESTIGATOR)
 
         if self.user_repository.is_engineer():

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 
 def create_proposal_progress_html(
@@ -94,7 +94,7 @@ def create_proposal_progress_html(
                         <th>Completion</th>
                       </tr>
 """
-    for p in sorted(previous_requests, key=lambda i: i["semester"]):  # type: ignore
+    for p in sorted(previous_requests, key=lambda i: cast(str, i["semester"])):
         html_content += f"""
                       <tr>
                         <td>{p['semester']}</td>

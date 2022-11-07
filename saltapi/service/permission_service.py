@@ -35,13 +35,17 @@ class PermissionService:
             return self.user_repository.is_engineer()
 
         elif role == Role.INVESTIGATOR:
-            return self.user_repository.is_investigator(username, cast(str, proposal_code))
+            return self.user_repository.is_investigator(
+                username, cast(str, proposal_code)
+            )
 
         elif role == Role.PARTNER_AFFILIATED:
             return self.user_repository.is_partner_affiliated_user(username)
 
         elif role == Role.PRINCIPAL_CONTACT:
-            return self.user_repository.is_principal_contact(username, cast(str, proposal_code))
+            return self.user_repository.is_principal_contact(
+                username, cast(str, proposal_code)
+            )
 
         elif role == Role.PRINCIPAL_INVESTIGATOR:
             return self.user_repository.is_principal_investigator(

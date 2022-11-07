@@ -20,11 +20,10 @@ export function currentSemester(): string {
   }
 }
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-// @ts-ignore
+// @ts-ignore: very generic, so any should be fine
 type NestedKeyOf<T extends Record<string, any>> = {
   [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
-    ? // @ts-ignore
+    ? // @ts-ignore: very generic, so any should be fine
       `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
     : `${Key}`;
 }[keyof T & (string | number)];
@@ -266,8 +265,8 @@ export function previousSemesterOf(semester: string): string {
 // 5. Use Decorator to automate Unsubscription
 // This decorator can only work when there is a subscription property.
 export function AutoUnsubcribe() {
+  // @ts-ignore: very generic, so any should be fine
   return function (constructor: any): void {
-    // eslint-disable-line
     const orig = constructor.prototype.ngOnDestroy;
     constructor.prototype.ngOnDestroy = function () {
       for (const prop in this) {

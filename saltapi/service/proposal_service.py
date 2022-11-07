@@ -1,11 +1,11 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
-import pdfkit  # type: ignore
+import pdfkit
 from fastapi import APIRouter, Request, UploadFile
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
 from saltapi.exceptions import NotFoundError
@@ -257,7 +257,7 @@ class ProposalService:
             "additional_pdf_filename": additional_pdf_filename,
         }
 
-    def create_proposal_progress_pdf(
+    async def create_proposal_progress_pdf(
         self,
         proposal_code: ProposalCode,
         semester: Semester,
@@ -266,22 +266,24 @@ class ProposalService:
         Create the proposal progress PDF by joining proposal progress PDF and
         the supplementary file. Will raise an error if the file doesn't exist.
         """
-        progress_report = self.repository.get_progress_report(proposal_code, semester)
+        base_dir = f"{get_settings().proposals_dir}/{proposal_code}/Included/"
 
-        progress_report_pdfs = {
-            "proposal_progress_pdf": generate_pdf_path(
-                proposal_code, progress_report["proposal_progress_pdf"]
-            ),
-            "additional_pdf": generate_pdf_path(
-                proposal_code, progress_report["additional_pdf"]
-            ),
-        }
-        if progress_report_pdfs["proposal_progress_pdf"]:
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
+        progress_report_pdfs = await self.create_progress_report_pdf(
+            proposal_code, semester, progress_report, None
+        )
+        if progress_report_pdfs["proposal_progress_filename"]:
             b = BytesIO()
-            with PdfFileMerger(strict=False) as merger:
-                merger.append(progress_report_pdfs["proposal_progress_pdf"])
-                if progress_report_pdfs["additional_pdf"]:
-                    merger.append(progress_report_pdfs["additional_pdf"])
+            with PdfMerger(strict=False) as merger:
+                merger.append(
+                    base_dir
+                    + cast(str, progress_report_pdfs["proposal_progress_filename"])
+                )
+                if progress_report_pdfs["additional_pdf_filename"]:
+                    merger.append(
+                        base_dir
+                        + cast(str, progress_report_pdfs["additional_pdf_filename"])
+                    )
                 merger.write(b)
             b.seek(0)
             return b

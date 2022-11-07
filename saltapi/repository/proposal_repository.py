@@ -1714,7 +1714,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 "summary_of_proposal_status": None,
                 "strategy_changes": None,
                 "partner_requested_percentages": self._get_partner_requested_percentages(
-                    proposal_code, semester
+                    proposal_code, _next_semester
                 ),
                 "previous_time_requests": time_statistics,
                 "last_observing_constraints": self.get_latest_observing_conditions(

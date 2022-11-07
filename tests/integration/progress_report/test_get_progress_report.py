@@ -1,7 +1,10 @@
-from typing import Any, Callable
+import pathlib
+import tempfile
+from typing import Any, Callable, NamedTuple
 
 import pytest
 from fastapi.testclient import TestClient
+from pytest import MonkeyPatch
 from starlette import status
 
 from saltapi.settings import get_settings
@@ -85,50 +88,60 @@ def test_get_returns_progress_report_for_authorised_user(
     check_data(proposal_progress_report)
 
 
-# TODO: Properly handle getting pdf files
-@pytest.mark.skip(
-    reason="This will be tested once the pdf files are handled correctly."
-)
-def test_get_returns_correct_pdf_files(
-    client: TestClient,
+def test_get_returns_correct_pdf_file(
+    client: TestClient, monkeypatch: MonkeyPatch
 ) -> None:
-    semester = "2018-2"
-    proposal_code = "2018-2-LSP-001"
-
     authenticate(USERNAME, client)
 
-    response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
+    proposal_code = "2022-1-ORP-001"
+    semester = "2021-1"
 
-    proposal_progress_report = response.json()
+    progress_report_update = {
+        "requested_time": 3000,
+        "maximum_seeing": 2,
+        "transparency": "Thin cloud",
+        # fmt: off
+        "description_of_observing_constraints":
+            "Lunar contamination is not a concern during the observing windows.",
+        "change_reason": "Too faint for science",
+        "summary_of_proposal_status": "Good",
+        "strategy_changes": "N/A",
+        "partner_requested_percentages": "RSA:50;POL:50;OTH:0",
+        "additional_pdf": None,
+    }
 
-    assert response.status_code == status.HTTP_200_OK
-    assert proposal_progress_report["semester"] == semester
-    assert proposal_progress_report["proposal_progress_pdf"] is not None
+    with tempfile.TemporaryDirectory() as tmp_path:
 
-    assert (
-        proposal_code + "/" + semester + "/" + "report.pdf"
-    ) in proposal_progress_report["proposal_progress_pdf"]
-    assert (
-        proposal_code + "/" + semester + "/" + "supplementary-file.pdf"
-    ) in proposal_progress_report["additional_pdf"]
+        class MockSettings(NamedTuple):
+            proposals_dir: pathlib.Path
 
-    progress_pdf_response = client.get(
-        proposal_progress_report["proposal_progress_pdf"]
-    )
+        def mock_get_settings() -> Any:
+            return MockSettings(pathlib.Path(tmp_path))
 
-    assert progress_pdf_response.headers[
-        "content-disposition"
-    ] == 'attachment; filename="{}"'.format("ProgressReport_{}.pdf".format(semester))
-    assert progress_pdf_response.headers["content-type"] == "application/pdf"
+        monkeypatch.setattr(
+            "saltapi.service.proposal_service.get_settings", mock_get_settings
+        )
+        proposals_dir = mock_get_settings().proposals_dir / proposal_code / "Included"
+        proposals_dir.mkdir(parents=True)
 
-    additional_pdf_response = client.get(proposal_progress_report["additional_pdf"])
+        progress_update = client.put(
+            PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester,
+            data=progress_report_update,
+        )
 
-    assert additional_pdf_response.headers[
-        "content-disposition"
-    ] == 'attachment; filename="{}"'.format(
-        "ProgressReportSupplement_{}.pdf".format(semester)
-    )
-    assert additional_pdf_response.headers["content-type"] == "application/pdf"
+        assert progress_update.status_code == status.HTTP_200_OK
+
+        response = client.get(
+            PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester + "/report.pdf"
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert (
+            "attachment; filename=ProposalProgressReport-"
+            in response.headers["content-disposition"]
+        )
+        assert response.headers["content-type"] == "application/pdf"
 
 
 @pytest.mark.parametrize(

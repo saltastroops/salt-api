@@ -1,6 +1,3 @@
-// @ts-ignore
-
-import { AccessToken } from "./types/authentication";
 import { User, UserRole } from "./types/user";
 
 export const GENERIC_ERROR_MESSAGE =
@@ -9,11 +6,6 @@ export const GENERIC_ERROR_MESSAGE =
 export const NOT_LOGGED_IN_MESSAGE = "You are not logged in.";
 
 export const FORBIDDEN_MESSAGE = "You are not allowed to perform this action.";
-
-export function storeAccessToken(tokenData: AccessToken): void {
-  localStorage.setItem("accessToken", tokenData.accessToken);
-  localStorage.setItem("accessTokenExpiresAt", tokenData.expiresAt);
-}
 
 export function currentSemester(): string {
   const now = new Date();
@@ -32,8 +24,8 @@ export function currentSemester(): string {
 // @ts-ignore
 type NestedKeyOf<T extends Record<string, any>> = {
   [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
-// @ts-ignore
-    ? `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
+    ? // @ts-ignore
+      `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
     : `${Key}`;
 }[keyof T & (string | number)];
 

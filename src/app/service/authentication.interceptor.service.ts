@@ -40,18 +40,12 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     ) {
       return next.handle(request);
     }
-    const token = this.authenticationService.getAccessToken();
-    if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    }
     return next.handle(request).pipe(
       catchError((err: HttpErrorResponse) => {
         if (err.status === 401) {
-          this.authenticationService.logout();
+          this.authenticationService.logout().subscribe(() => {
+            /* do nothing */
+          });
         }
         return httpErrorObservable(err);
       }),

@@ -1,19 +1,21 @@
+import uuid
 from typing import Callable
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
-from saltapi.service.authentication_service import AuthenticationService
+from saltapi.service.authentication_service import (
+    SECONDARY_AUTH_TOKEN_KEY,
+    USER_ID_KEY,
+    AuthenticationService,
+)
 from saltapi.service.user import User
 from saltapi.web import services
 
 router = APIRouter(tags=["Authentication"])
-
-
-_USER_ID = "user_id"
 
 
 def get_user_authentication_function() -> Callable[[str, str], User]:
@@ -71,6 +73,7 @@ def token(
 @router.post("/login", summary="Log in.", status_code=status.HTTP_204_NO_CONTENT)
 def login(
     request: Request,
+    response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
     authenticate_user: Callable[[str, str], User] = Depends(
         get_user_authentication_function
@@ -79,13 +82,31 @@ def login(
     """
     Log in.
 
-    Logging in means that the user id is added to the session cookie. The key for this
-    id in the session is "user_id".
+    Logging in means that two properties are added to he sessions cookie:
+
+    * The user id (with key "user_id").
+    * A secondary authentication token (with key "secondary_auth_token").
+
+    In addition, the secondary authentication token is stored in a cookie with the key
+    "secondary_auth_token". This cookie is *not* HTTP-only. Both cookies must bw present
+    for authenticating a user, and their secondary authentication tokens must match.
+
+    When logging out a client should call the /logout endpoint and in addition delete
+    the secondary authentication token cookie. The latter ensures that the user is
+    logged out even if the call to the /logout endpoint fails.
+
+    This approach was taken from
+    https://medium.com/@thbrown/logging-out-with-http-only-session-ad09898876ba.
     """
     try:
         user = authenticate_user(form_data.username, form_data.password)
-        request.session[_USER_ID] = user.id
-    except Exception as e:
+        secondary_auth_token = str(uuid.uuid4())
+        request.session[USER_ID_KEY] = user.id
+        request.session[SECONDARY_AUTH_TOKEN_KEY] = secondary_auth_token
+        response.set_cookie(
+            key=SECONDARY_AUTH_TOKEN_KEY, value=secondary_auth_token, httponly=False
+        )
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials.",
@@ -94,12 +115,19 @@ def login(
 
 
 @router.post("/logout", summary="Log out.", status_code=status.HTTP_204_NO_CONTENT)
-def logout(request: Request) -> None:
+def logout(request: Request, response: Response) -> None:
     """
     Log out.
 
-    Logging out means that the user id is removed from the session cookie. If there is
-    no user id in the session, nothing is done (and no error is raised).
+    Logging out means that the user id and the secondary authentication are removed from
+    the session cookie (if they exist) and that the secondary authentication token
+    cookie is deleted (if it exists).
+
+    No error is raised if any of the cookie details don't exist.
     """
-    if "user_id" in request.session:
-        del request.session[_USER_ID]
+    if USER_ID_KEY in request.session:
+        del request.session[USER_ID_KEY]
+    if SECONDARY_AUTH_TOKEN_KEY in request.session:
+        del request.session[SECONDARY_AUTH_TOKEN_KEY]
+    if SECONDARY_AUTH_TOKEN_KEY in request.cookies:
+        response.delete_cookie(SECONDARY_AUTH_TOKEN_KEY)

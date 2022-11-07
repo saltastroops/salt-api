@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, cast
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import HTTPException, Request
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
@@ -16,6 +16,8 @@ from saltapi.settings import get_settings
 ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = get_settings().auth_token_lifetime_hours
 SECRET_KEY = get_settings().secret_key
+USER_ID_KEY = "user_id"
+SECONDARY_AUTH_TOKEN_KEY = "secondary_auth_token"
 
 
 class AuthenticationService:
@@ -104,8 +106,14 @@ def _user_from_auth_header(authorization: str) -> User:
 
 
 def _user_from_session(request: Request) -> User:
-    user_id = request.session.get("user_id")
-    if not user_id:
+    user_id = request.session.get(USER_ID_KEY)
+    secondary_auth_token = request.cookies.get(SECONDARY_AUTH_TOKEN_KEY)
+    secondary_auth_token_from_session = request.session.get(SECONDARY_AUTH_TOKEN_KEY)
+    if (
+        not user_id
+        or not secondary_auth_token
+        or secondary_auth_token != secondary_auth_token_from_session
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",

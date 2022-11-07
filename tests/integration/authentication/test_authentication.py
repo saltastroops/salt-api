@@ -68,10 +68,60 @@ def test_login_should_log_user_in(client: TestClient) -> None:
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_logout_should_log_user_out(client: TestClient) -> None:
+def test_login_should_return_secondary_auth_token(client: TestClient) -> None:
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
     response = client.post(
         LOGIN_URL, data={"username": "hettlage", "password": "secret"}
     )
+    assert (
+        "secondary_auth_token" in response.cookies
+        and len(response.cookies["secondary_auth_token"]) > 0
+    )
+
+
+def test_cookie_auth_requires_session_cookie(client: TestClient) -> None:
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    client.post(LOGIN_URL, data={"username": "hettlage", "password": "secret"})
+    del client.cookies["session"]
+
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_cookie_auth_requires_secondary_auth_token_cookie(client: TestClient) -> None:
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    client.post(LOGIN_URL, data={"username": "hettlage", "password": "secret"})
+    del client.cookies["secondary_auth_token"]
+
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_cookie_auth_requires_consistent_cookies(client: TestClient) -> None:
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    client.post(LOGIN_URL, data={"username": "hettlage", "password": "secret"})
+
+    # Update the secondary authentication token cookie.
+    # The cookie must be deleted first, as otherwise there will be two cookies with the
+    # same key but different domains, and the existing value will still be ysed by the
+    # backend.
+    del client.cookies["secondary_auth_token"]
+    client.cookies["secondary_auth_token"] = "some-other-value"
+
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_logout_should_log_user_out(client: TestClient) -> None:
+    client.post(LOGIN_URL, data={"username": "hettlage", "password": "secret"})
 
     response = client.get("/proposals/")
     assert response.status_code == status.HTTP_200_OK
@@ -80,6 +130,19 @@ def test_logout_should_log_user_out(client: TestClient) -> None:
 
     response = client.get("/proposals/")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_logout_should_remove_cookies(client: TestClient) -> None:
+    response = client.get("/proposals/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    client.post(LOGIN_URL, data={"username": "hettlage", "password": "secret"})
+    assert "session" in client.cookies
+    assert "secondary_auth_token" in client.cookies
+
+    client.post(LOGOUT_URL)
+    assert "session" not in client.cookies
+    assert "secondary_auth_token" not in client.cookies
 
 
 def test_logout_should_work_if_you_are_not_logged_in(client: TestClient) -> None:

@@ -18,7 +18,9 @@ class PermissionService:
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
 
-    def user_has_role(self, username: str, proposal_code: Optional[str], role: Role) -> bool:
+    def user_has_role(
+        self, username: str, proposal_code: Optional[str], role: Role
+    ) -> bool:
         """
         Check whether the user has a role required to perform a specific action on a given proposal.
         """
@@ -41,13 +43,19 @@ class PermissionService:
             return self.user_repository.is_principal_contact(username, proposal_code)
 
         elif role == Role.PRINCIPAL_INVESTIGATOR:
-            return self.user_repository.is_principal_investigator(username, proposal_code)
+            return self.user_repository.is_principal_investigator(
+                username, proposal_code
+            )
 
         elif role == Role.PROPOSAL_TAC_CHAIR:
-            return self.user_repository.is_tac_chair_for_proposal(username, proposal_code)
+            return self.user_repository.is_tac_chair_for_proposal(
+                username, proposal_code
+            )
 
         elif role == Role.PROPOSAL_TAC_MEMBER:
-            return self.user_repository.is_tac_member_for_proposal(username, proposal_code)
+            return self.user_repository.is_tac_member_for_proposal(
+                username, proposal_code
+            )
 
         elif role == Role.SALT_ASTRONOMER:
             return self.user_repository.is_salt_astronomer(username)
@@ -61,7 +69,12 @@ class PermissionService:
         elif role == Role.TAC_MEMBER:
             return self.user_repository.is_tac_member_in_general(username)
 
-    def check_permissions(self, username: str, proposal_code: Optional[str], permitted_user_roles: List[Role]) -> None:
+    def check_permissions(
+        self,
+        username: str,
+        proposal_code: Optional[str],
+        permitted_user_roles: List[Role],
+    ) -> None:
         """
         Check whether the user has permissions to perform a specific action on a given proposal.
         """
@@ -169,7 +182,9 @@ class PermissionService:
 
         permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
-        self.check_permissions(username=username, proposal_code=None, permitted_user_roles=permitted_roles)
+        self.check_permissions(
+            username=username, proposal_code=None, permitted_user_roles=permitted_roles
+        )
 
     def check_permission_to_add_observation_comment(
         self, user: User, proposal_code: str
@@ -225,9 +240,7 @@ class PermissionService:
         """
         self.check_permission_to_view_block(user, block_id)
 
-    def check_permission_to_update_block_status(
-        self, user: User
-    ) -> None:
+    def check_permission_to_update_block_status(self, user: User) -> None:
         """
         Check whether the user may view a block status.
 
@@ -266,10 +279,13 @@ class PermissionService:
         details.
         """
         if not user.id == updated_user_id:
-
             permitted_roles = [Role.ADMINISTRATOR]
 
-            self.check_permissions(username=user.username, proposal_code=None, permitted_user_roles=permitted_roles)
+            self.check_permissions(
+                username=user.username,
+                proposal_code=None,
+                permitted_user_roles=permitted_roles,
+            )
 
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
@@ -291,7 +307,9 @@ class PermissionService:
 
         permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
-        self.check_permissions(username=username, proposal_code=None, permitted_user_roles=permitted_roles)
+        self.check_permissions(
+            username=username, proposal_code=None, permitted_user_roles=permitted_roles
+        )
 
     def check_permission_to_update_mos_mask_metadata(self, user: User) -> None:
         """
@@ -301,7 +319,9 @@ class PermissionService:
 
         permitted_roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
-        self.check_permissions(username=username, proposal_code=None, permitted_user_roles=permitted_roles)
+        self.check_permissions(
+            username=username, proposal_code=None, permitted_user_roles=permitted_roles
+        )
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:

@@ -22,7 +22,8 @@ class PermissionService:
         self, username: str, proposal_code: Optional[str], role: Role
     ) -> bool:
         """
-        Check whether the user has a role required to perform a specific action on a given proposal.
+        Check whether the user has a role required to perform a specific
+        action on a given proposal.
         """
         if role == Role.ADMINISTRATOR:
             return self.user_repository.is_administrator(username)
@@ -76,7 +77,8 @@ class PermissionService:
         permitted_user_roles: List[Role],
     ) -> None:
         """
-        Check whether the user has permissions to perform a specific action on a given proposal.
+        Check whether the user has permissions to perform a specific action
+        on a given proposal.
         """
         has_permissions = []
         for role in permitted_user_roles:

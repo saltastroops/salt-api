@@ -70,7 +70,7 @@ def get_mos_mask_metadata(
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_view_mos_metadata(user)
+        permission_service.check_permission_to_view_mos_mask_metadata(user)
 
         instrument_service = services.instrument_service(unit_of_work.connection)
         mos_blocks = instrument_service.get_mos_mask_metadata(

@@ -226,15 +226,12 @@ class PermissionService:
         self.check_permission_to_view_block(user, block_id)
 
     def check_permission_to_update_block_status(
-        self, user: User, block_id: int
+        self, user: User
     ) -> None:
         """
         Check whether the user may view a block status.
 
-        This is the case if the user is any of the following:
-
-        * a SALT Astronomer
-        * an administrator
+        This is the case if the user may update a proposal status.
         """
         self.check_permission_to_update_proposal_status(user)
 
@@ -257,16 +254,13 @@ class PermissionService:
         """
         Check whether the user may update a block visit status.
 
-        This is the case if the user is any of the following:
-
-        * a SALT Astronomer
-        * an administrator
+        This is the case if the user may update a proposal status.
         """
         self.check_permission_to_update_proposal_status(user)
 
     def check_permission_to_view_user(self, user: User, updated_user_id: int) -> None:
         """
-        Check whether the user may update a user.
+        Check whether the user may view a user.
 
         Administrators may view any users. Other users may only view their own user
         details.
@@ -281,14 +275,13 @@ class PermissionService:
         """
         Check whether the user may update a user.
 
-        Administrators may update any users. Other users may only update their own user
-        details.
+        This is the case if the user may update a user.
         """
         self.check_permission_to_view_user(user, updated_user_id)
 
-    def check_permission_to_view_mos_metadata(self, user: User) -> None:
+    def check_permission_to_view_mos_mask_metadata(self, user: User) -> None:
         """
-        Check whether the user may view MOS data.
+        Check whether the user may view MOS mask data.
 
         Administrators and SALT Astronomers may view MOS data.
         details.
@@ -302,7 +295,7 @@ class PermissionService:
 
     def check_permission_to_update_mos_mask_metadata(self, user: User) -> None:
         """
-        Check whether the user can update a slit mask.
+        Check whether the user can update a MOS mask metadata.
         """
         username = user.username
 
@@ -320,7 +313,7 @@ class PermissionService:
         self, user: User, proposal_code: str
     ) -> None:
         """
-        Check whether the user can update proposal progress.
+        Check whether the user can update proposal progress details.
         """
         username = user.username
 

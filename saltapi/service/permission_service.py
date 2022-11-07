@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
@@ -35,27 +35,27 @@ class PermissionService:
             return self.user_repository.is_engineer()
 
         elif role == Role.INVESTIGATOR:
-            return self.user_repository.is_investigator(username, proposal_code)
+            return self.user_repository.is_investigator(username, cast(str, proposal_code))
 
         elif role == Role.PARTNER_AFFILIATED:
             return self.user_repository.is_partner_affiliated_user(username)
 
         elif role == Role.PRINCIPAL_CONTACT:
-            return self.user_repository.is_principal_contact(username, proposal_code)
+            return self.user_repository.is_principal_contact(username, cast(str, proposal_code))
 
         elif role == Role.PRINCIPAL_INVESTIGATOR:
             return self.user_repository.is_principal_investigator(
-                username, proposal_code
+                username, cast(str, proposal_code)
             )
 
         elif role == Role.PROPOSAL_TAC_CHAIR:
             return self.user_repository.is_tac_chair_for_proposal(
-                username, proposal_code
+                username, cast(str, proposal_code)
             )
 
         elif role == Role.PROPOSAL_TAC_MEMBER:
             return self.user_repository.is_tac_member_for_proposal(
-                username, proposal_code
+                username, cast(str, proposal_code)
             )
 
         elif role == Role.SALT_ASTRONOMER:
@@ -69,6 +69,8 @@ class PermissionService:
 
         elif role == Role.TAC_MEMBER:
             return self.user_repository.is_tac_member_in_general(username)
+        else:
+            return False
 
     def check_permissions(
         self,

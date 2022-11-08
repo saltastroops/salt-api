@@ -82,16 +82,16 @@ def login(
     """
     Log in.
 
-    Logging in means that two properties are added to he sessions cookie:
+    Logging in means that two properties are added to the sessions cookie:
 
     * The user id (with key "user_id").
     * A secondary authentication token (with key "secondary_auth_token").
 
     In addition, the secondary authentication token is stored in a cookie with the key
-    "secondary_auth_token". This cookie is *not* HTTP-only. Both cookies must bw present
+    "secondary_auth_token". This cookie is *not* HTTP-only. Both cookies must be present
     for authenticating a user, and their secondary authentication tokens must match.
 
-    When logging out a client should call the /logout endpoint and in addition delete
+    When logging out, a client should call the /logout endpoint and in addition delete
     the secondary authentication token cookie. The latter ensures that the user is
     logged out even if the call to the /logout endpoint fails.
 

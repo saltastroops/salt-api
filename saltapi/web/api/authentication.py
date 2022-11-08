@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
+from saltapi.settings import get_settings
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
 from saltapi.service.authentication_service import (
@@ -73,12 +74,11 @@ def token(
 @router.post("/login", summary="Log in.", status_code=status.HTTP_204_NO_CONTENT)
 def login(
     request: Request,
-    response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
     authenticate_user: Callable[[str, str], User] = Depends(
         get_user_authentication_function
     ),
-) -> None:
+) -> Response:
     """
     Log in.
 
@@ -100,18 +100,24 @@ def login(
     """
     try:
         user = authenticate_user(form_data.username, form_data.password)
-        secondary_auth_token = str(uuid.uuid4())
-        request.session[USER_ID_KEY] = user.id
-        request.session[SECONDARY_AUTH_TOKEN_KEY] = secondary_auth_token
-        response.set_cookie(
-            key=SECONDARY_AUTH_TOKEN_KEY, value=secondary_auth_token, httponly=False
-        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    secondary_auth_token = str(uuid.uuid4())
+    request.session[USER_ID_KEY] = user.id
+    request.session[SECONDARY_AUTH_TOKEN_KEY] = secondary_auth_token
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
+    response.set_cookie(
+        key=SECONDARY_AUTH_TOKEN_KEY,
+        value=secondary_auth_token,
+        httponly=False,
+        max_age=3600 * get_settings().auth_token_lifetime_hours,
+    )
+    return response
 
 
 @router.post("/logout", summary="Log out.", status_code=status.HTTP_204_NO_CONTENT)

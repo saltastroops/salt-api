@@ -82,7 +82,7 @@ def login(
     """
     Log in.
 
-    Logging in means that two properties are added to the sessions cookie:
+    Logging in means that two properties are added to the session's cookie:
 
     * The user id (with key "user_id").
     * A secondary authentication token (with key "secondary_auth_token").

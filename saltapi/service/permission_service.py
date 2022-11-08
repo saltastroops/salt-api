@@ -86,16 +86,14 @@ class PermissionService:
         proposal_code: Optional[str] = None,
     ) -> None:
         """
-        Check whether the user has a role.
+        Check whether the user has at least one of a given list of roles.
         """
-        has_role = []
+        has_role = False
         for role in roles:
             if self.user_has_role(username, role, proposal_code):
-                has_role.append(True)
+                has_role = True
                 break
-            else:
-                has_role.append(False)
-        if not any(has_role):
+        if not has_role:
             raise AuthorizationError()
 
     def check_permission_to_view_proposal(self, user: User, proposal_code: str) -> None:

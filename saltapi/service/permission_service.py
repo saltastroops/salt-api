@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, cast
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
@@ -9,17 +9,17 @@ from saltapi.service.user import Role, User
 
 class PermissionService:
     def __init__(
-        self,
-        user_repository: UserRepository,
-        proposal_repository: ProposalRepository,
-        block_repository: BlockRepository,
+            self,
+            user_repository: UserRepository,
+            proposal_repository: ProposalRepository,
+            block_repository: BlockRepository,
     ) -> None:
         self.user_repository = user_repository
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
 
     def user_has_role(
-        self, username: str, proposal_code: str = None, role: Role = None
+            self, username: str, role: Optional[Role] = None, proposal_code: Optional[str] = None
     ) -> bool:
         """
         Check whether the user has a role required to perform a specific
@@ -35,27 +35,31 @@ class PermissionService:
             return self.user_repository.is_engineer()
 
         elif role == Role.INVESTIGATOR:
-            return self.user_repository.is_investigator(username, proposal_code)
+            return self.user_repository.is_investigator(
+                username, cast(str, proposal_code)
+            )
 
         elif role == Role.PARTNER_AFFILIATED:
             return self.user_repository.is_partner_affiliated_user(username)
 
         elif role == Role.PRINCIPAL_CONTACT:
-            return self.user_repository.is_principal_contact(username, proposal_code)
+            return self.user_repository.is_principal_contact(
+                username, cast(str, proposal_code)
+            )
 
         elif role == Role.PRINCIPAL_INVESTIGATOR:
             return self.user_repository.is_principal_investigator(
-                username, proposal_code
+                username, cast(str, proposal_code)
             )
 
         elif role == Role.PROPOSAL_TAC_CHAIR:
             return self.user_repository.is_tac_chair_for_proposal(
-                username, proposal_code
+                username, cast(str, proposal_code)
             )
 
         elif role == Role.PROPOSAL_TAC_MEMBER:
             return self.user_repository.is_tac_member_for_proposal(
-                username, proposal_code
+                username, cast(str, proposal_code)
             )
 
         elif role == Role.SALT_ASTRONOMER:
@@ -73,17 +77,17 @@ class PermissionService:
             return False
 
     def check_role(
-        self,
-        username: str,
-        proposal_code: str = None,
-        roles: List[Role] = None,
+            self,
+            username: str,
+            roles: List[Role],
+            proposal_code: Optional[str] = None,
     ) -> None:
         """
         Check whether the user has a role.
         """
         has_role = []
         for role in roles:
-            if self.user_has_role(username, proposal_code, role):
+            if self.user_has_role(username, role, proposal_code):
                 has_role.append(True)
                 break
             else:
@@ -112,7 +116,7 @@ class PermissionService:
                 Role.PROPOSAL_TAC_MEMBER,
                 Role.ADMINISTRATOR,
             ]
-            self.check_role(username, proposal_code, roles)
+            self.check_role(username, roles, proposal_code)
         else:
             # Gravitational wave event proposals are a special case; they can be viewed
             # by anyone who belongs to a SALT partner.
@@ -122,10 +126,10 @@ class PermissionService:
                 Role.ADMINISTRATOR,
             ]
 
-            self.check_role(username, proposal_code, roles)
+            self.check_role(username, roles, proposal_code)
 
     def check_permission_to_activate_proposal(
-        self, user: User, proposal_code: str
+            self, user: User, proposal_code: str
     ) -> None:
         """
         Check whether the user may activate a proposal.
@@ -146,13 +150,13 @@ class PermissionService:
                 Role.SALT_ASTRONOMER,
                 Role.ADMINISTRATOR,
             ]
-            self.check_role(username, proposal_code, roles)
+            self.check_role(username, roles, proposal_code)
         else:
             roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
-            self.check_role(username, proposal_code, roles)
+            self.check_role(username, roles, proposal_code)
 
     def check_permission_to_deactivate_proposal(
-        self, user: User, proposal_code: str
+            self, user: User, proposal_code: str
     ) -> None:
         """
         Check whether the user may deactivate a proposal.
@@ -173,7 +177,7 @@ class PermissionService:
             Role.ADMINISTRATOR,
         ]
 
-        self.check_role(username, proposal_code, roles)
+        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_update_proposal_status(self, user: User) -> None:
         """
@@ -188,10 +192,10 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
-        self.check_role(username=username, roles=roles)
+        self.check_role(username, roles)
 
     def check_permission_to_add_observation_comment(
-        self, user: User, proposal_code: str
+            self, user: User, proposal_code: str
     ) -> None:
         """
         Checks if the user can add an observation comment
@@ -212,10 +216,10 @@ class PermissionService:
             Role.ADMINISTRATOR,
         ]
 
-        self.check_role(username, proposal_code, roles)
+        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_view_observation_comments(
-        self, user: User, proposal_code: str
+            self, user: User, proposal_code: str
     ) -> None:
         """
         Checks if the user may view the observation comments
@@ -245,7 +249,7 @@ class PermissionService:
         self.check_permission_to_view_block(user, block_id)
 
     def check_permission_to_update_block_status(
-        self, user: User, block_id: int
+            self, user: User, block_id: int
     ) -> None:
         """
         Check whether the user may view a block status.
@@ -270,10 +274,10 @@ class PermissionService:
             Role.ADMINISTRATOR,
         ]
 
-        self.check_role(username, proposal_code, roles)
+        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_view_block_visit(
-        self, user: User, block_visit_id: int
+            self, user: User, block_visit_id: int
     ) -> None:
         """
         Check whether the user may view a block visit.
@@ -300,7 +304,7 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
-        self.check_role(username=username, roles=roles)
+        self.check_role(username, roles)
 
     def check_permission_to_view_user(self, user: User, updated_user_id: int) -> None:
         """
@@ -340,7 +344,7 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
-        self.check_role(username=username, roles=roles)
+        self.check_role(username, roles)
 
     def check_permission_to_update_mos_mask_metadata(self, user: User) -> None:
         """
@@ -350,7 +354,7 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
-        self.check_role(username=username, roles=roles)
+        self.check_role(username, roles)
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:
@@ -359,7 +363,7 @@ class PermissionService:
         return False
 
     def check_permission_to_update_proposal_progress(
-        self, user: User, proposal_code: str
+            self, user: User, proposal_code: str
     ) -> None:
         """
         Check whether the user can update proposal progress details.
@@ -372,4 +376,4 @@ class PermissionService:
             Role.ADMINISTRATOR,
         ]
 
-        self.check_role(username, proposal_code, roles)
+        self.check_role(username, roles, proposal_code)

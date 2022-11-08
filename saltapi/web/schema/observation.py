@@ -1,8 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional, Literal
+from typing import List, Literal, Optional
 
-from pydantic import HttpUrl, BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from saltapi.web.schema.bvit import Bvit
 from saltapi.web.schema.common import Lamp, TargetCoordinates, TimeInterval

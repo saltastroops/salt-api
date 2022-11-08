@@ -44,7 +44,6 @@ def setup_finder_chart_files(
             )
             finder_chart = included_dir / f"{prefix}{finder_chart_name}.{suffix}"
             shutil.copy(finder_chart_template, finder_chart)
-            print(finder_chart)
         else:
             pytest.fail(f"Unsupported file suffix in test setup: {suffix}")
 

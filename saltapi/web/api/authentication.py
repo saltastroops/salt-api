@@ -71,7 +71,7 @@ def token(
         )
 
 
-@router.post("/login", summary="Log in.", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/login", summary="Log in", status_code=status.HTTP_204_NO_CONTENT)
 def login(
     request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -120,7 +120,7 @@ def login(
     return response
 
 
-@router.post("/logout", summary="Log out.", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/logout", summary="Log out", status_code=status.HTTP_204_NO_CONTENT)
 def logout(request: Request, response: Response) -> Response:
     """
     Log out.

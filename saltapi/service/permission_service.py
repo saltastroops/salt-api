@@ -9,17 +9,20 @@ from saltapi.service.user import Role, User
 
 class PermissionService:
     def __init__(
-            self,
-            user_repository: UserRepository,
-            proposal_repository: ProposalRepository,
-            block_repository: BlockRepository,
+        self,
+        user_repository: UserRepository,
+        proposal_repository: ProposalRepository,
+        block_repository: BlockRepository,
     ) -> None:
         self.user_repository = user_repository
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
 
     def user_has_role(
-            self, username: str, role: Optional[Role] = None, proposal_code: Optional[str] = None
+        self,
+        username: str,
+        role: Optional[Role] = None,
+        proposal_code: Optional[str] = None,
     ) -> bool:
         """
         Check whether the user has a role required to perform a specific
@@ -77,10 +80,10 @@ class PermissionService:
             return False
 
     def check_role(
-            self,
-            username: str,
-            roles: List[Role],
-            proposal_code: Optional[str] = None,
+        self,
+        username: str,
+        roles: List[Role],
+        proposal_code: Optional[str] = None,
     ) -> None:
         """
         Check whether the user has a role.
@@ -129,7 +132,7 @@ class PermissionService:
             self.check_role(username, roles, proposal_code)
 
     def check_permission_to_activate_proposal(
-            self, user: User, proposal_code: str
+        self, user: User, proposal_code: str
     ) -> None:
         """
         Check whether the user may activate a proposal.
@@ -156,7 +159,7 @@ class PermissionService:
             self.check_role(username, roles, proposal_code)
 
     def check_permission_to_deactivate_proposal(
-            self, user: User, proposal_code: str
+        self, user: User, proposal_code: str
     ) -> None:
         """
         Check whether the user may deactivate a proposal.
@@ -195,7 +198,7 @@ class PermissionService:
         self.check_role(username, roles)
 
     def check_permission_to_add_observation_comment(
-            self, user: User, proposal_code: str
+        self, user: User, proposal_code: str
     ) -> None:
         """
         Checks if the user can add an observation comment
@@ -219,7 +222,7 @@ class PermissionService:
         self.check_role(username, roles, proposal_code)
 
     def check_permission_to_view_observation_comments(
-            self, user: User, proposal_code: str
+        self, user: User, proposal_code: str
     ) -> None:
         """
         Checks if the user may view the observation comments
@@ -249,7 +252,7 @@ class PermissionService:
         self.check_permission_to_view_block(user, block_id)
 
     def check_permission_to_update_block_status(
-            self, user: User, block_id: int
+        self, user: User, block_id: int
     ) -> None:
         """
         Check whether the user may view a block status.
@@ -277,7 +280,7 @@ class PermissionService:
         self.check_role(username, roles, proposal_code)
 
     def check_permission_to_view_block_visit(
-            self, user: User, block_visit_id: int
+        self, user: User, block_visit_id: int
     ) -> None:
         """
         Check whether the user may view a block visit.
@@ -363,7 +366,7 @@ class PermissionService:
         return False
 
     def check_permission_to_update_proposal_progress(
-            self, user: User, proposal_code: str
+        self, user: User, proposal_code: str
     ) -> None:
         """
         Check whether the user can update proposal progress details.

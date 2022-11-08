@@ -19,7 +19,7 @@ class PermissionService:
         self.block_repository = block_repository
 
     def user_has_role(
-        self, username: str, proposal_code: Optional[str], role: Role
+        self, username: str, proposal_code: str = None, role: Role = None
     ) -> bool:
         """
         Check whether the user has a role required to perform a specific
@@ -79,8 +79,8 @@ class PermissionService:
     def check_permissions(
         self,
         username: str,
-        proposal_code: Optional[str],
-        permitted_user_roles: List[Role],
+        proposal_code: str = None,
+        roles: List[Role] = None,
     ) -> None:
         """
         Check whether the user has permissions to perform a specific action

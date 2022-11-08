@@ -16,8 +16,8 @@ from saltapi.settings import get_settings
 ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = get_settings().auth_token_lifetime_hours
 SECRET_KEY = get_settings().secret_key
-USER_ID_KEY = "user_id"     # nosec
-SECONDARY_AUTH_TOKEN_KEY = "secondary_auth_token"   # nosec
+USER_ID_KEY = "user_id"  # nosec
+SECONDARY_AUTH_TOKEN_KEY = "secondary_auth_token"  # nosec
 
 
 class AuthenticationService:

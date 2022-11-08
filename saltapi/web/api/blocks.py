@@ -126,7 +126,7 @@ def update_block_status(
 
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_update_block_status(user)
+        permission_service.check_permission_to_update_block_status(user, block_id)
 
         block_service = services.block_service(unit_of_work.connection)
         block_service.update_block_status(block_id, block_status, status_reason)

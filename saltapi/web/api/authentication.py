@@ -123,7 +123,7 @@ def login(
 @router.post("/logout", summary="Log out", status_code=status.HTTP_204_NO_CONTENT)
 def logout(request: Request) -> Response:
     """
-    Log out
+    Log out.
 
     Logging out means that the user id and the secondary authentication are removed from
     the session cookie (if they exist) and that the secondary authentication token

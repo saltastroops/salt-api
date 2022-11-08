@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from saltapi.settings import get_settings
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
 from saltapi.service.authentication_service import (
@@ -14,6 +13,7 @@ from saltapi.service.authentication_service import (
     AuthenticationService,
 )
 from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.web import services
 
 router = APIRouter(tags=["Authentication"])
@@ -71,7 +71,7 @@ def token(
         )
 
 
-@router.post("/login", summary="Log in.", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/login", summary="Log in", status_code=status.HTTP_204_NO_CONTENT)
 def login(
     request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -82,7 +82,7 @@ def login(
     """
     Log in.
 
-    Logging in means that two properties are added to the sessions cookie:
+    Logging in means that two properties are added to the session's cookie:
 
     * The user id (with key "user_id").
     * A secondary authentication token (with key "secondary_auth_token").
@@ -120,8 +120,8 @@ def login(
     return response
 
 
-@router.post("/logout", summary="Log out.", status_code=status.HTTP_204_NO_CONTENT)
-def logout(request: Request, response: Response) -> Response:
+@router.post("/logout", summary="Log out", status_code=status.HTTP_204_NO_CONTENT)
+def logout(request: Request) -> Response:
     """
     Log out.
 

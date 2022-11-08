@@ -121,7 +121,7 @@ def login(
 
 
 @router.post("/logout", summary="Log out.", status_code=status.HTTP_204_NO_CONTENT)
-def logout(request: Request, response: Response) -> None:
+def logout(request: Request, response: Response) -> Response:
     """
     Log out.
 
@@ -131,9 +131,11 @@ def logout(request: Request, response: Response) -> None:
 
     No error is raised if any of the cookie details don't exist.
     """
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
     if USER_ID_KEY in request.session:
         del request.session[USER_ID_KEY]
     if SECONDARY_AUTH_TOKEN_KEY in request.session:
         del request.session[SECONDARY_AUTH_TOKEN_KEY]
     if SECONDARY_AUTH_TOKEN_KEY in request.cookies:
         response.delete_cookie(SECONDARY_AUTH_TOKEN_KEY)
+    return response

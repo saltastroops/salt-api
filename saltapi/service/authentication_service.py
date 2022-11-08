@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, cast
 
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, Request
+from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
 
@@ -14,9 +14,10 @@ from saltapi.service.user import User
 from saltapi.settings import get_settings
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
+ACCESS_TOKEN_LIFETIME_HOURS = get_settings().auth_token_lifetime_hours
 SECRET_KEY = get_settings().secret_key
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+USER_ID_KEY = "user_id"
+SECONDARY_AUTH_TOKEN_KEY = "secondary_auth_token"
 
 
 class AuthenticationService:
@@ -76,15 +77,52 @@ class AuthenticationService:
         return user
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+def get_current_user(request: Request) -> User:
     try:
-        return find_user_from_token(token)
+        authorization: str = request.headers.get("Authorization")
+        if authorization:
+            return _user_from_auth_header(authorization)
+        else:
+            return _user_from_session(request)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def _user_from_auth_header(authorization: str) -> User:
+    # Based on FastAPI's OAuth2PasswordBearer class
+    scheme, token = get_authorization_scheme_param(authorization)
+    if scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return find_user_from_token(token)
+
+
+def _user_from_session(request: Request) -> User:
+    user_id = request.session.get(USER_ID_KEY)
+    secondary_auth_token = request.cookies.get(SECONDARY_AUTH_TOKEN_KEY)
+    secondary_auth_token_from_session = request.session.get(SECONDARY_AUTH_TOKEN_KEY)
+    if (
+        not user_id
+        or not secondary_auth_token
+        or secondary_auth_token != secondary_auth_token_from_session
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    with UnitOfWork() as unit_of_work:
+        user_repository = UserRepository(unit_of_work.connection)
+        return user_repository.get(user_id)
 
 
 def find_user_from_token(token: str) -> User:

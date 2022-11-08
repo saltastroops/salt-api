@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import requests
 from defusedxml import minidom
 
+from saltapi.exceptions import NotFoundError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockVisit
 from saltapi.settings import get_settings
@@ -31,6 +32,11 @@ class BlockService:
         Set the block status for a block id.
         """
 
+        allowed_status_list = ["Active", "On Hold"]
+        if status == "On hold":
+            status = "On Hold"
+        if status not in allowed_status_list:
+            raise NotFoundError(f"Unknown block status: {status}")
         return self.block_repository.update_block_status(block_id, status, reason)
 
     def get_block_visit(self, block_visit_id: int) -> BlockVisit:

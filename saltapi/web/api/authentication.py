@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from saltapi.settings import get_settings
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
 from saltapi.service.authentication_service import (
@@ -14,6 +13,7 @@ from saltapi.service.authentication_service import (
     AuthenticationService,
 )
 from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.web import services
 
 router = APIRouter(tags=["Authentication"])

@@ -248,7 +248,9 @@ class PermissionService:
         """
         self.check_permission_to_view_block(user, block_id)
 
-    def check_permission_to_update_block_status(self, user: User, block_id: int) -> None:
+    def check_permission_to_update_block_status(
+        self, user: User, block_id: int
+    ) -> None:
         """
         Check whether the user may view a block status.
 
@@ -342,9 +344,7 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
-        self.check_role(
-            username=username, roles=roles
-        )
+        self.check_role(username=username, roles=roles)
 
     def check_permission_to_update_mos_mask_metadata(self, user: User) -> None:
         """
@@ -354,9 +354,7 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
-        self.check_role(
-            username=username, roles=roles
-        )
+        self.check_role(username=username, roles=roles)
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:

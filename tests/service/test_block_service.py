@@ -39,6 +39,8 @@ class FakeBlockRepository:
 
     def get_block_status(self, block_id: int) -> BlockStatus:
         if block_id == VALID_BLOCK_ID:
+            if self.block_status["value"] == "On hold":
+                self.block_status["value"] = "On Hold"
             return self.block_status
         raise NotFoundError()
 
@@ -46,6 +48,8 @@ class FakeBlockRepository:
         self, block_id: int, value: str, reason: Optional[str]
     ) -> None:
         if block_id == VALID_BLOCK_ID:
+            if value == "On hold":
+                value = "On Hold"
             self.block_status = {"value": value, "reason": reason}
         else:
             raise NotFoundError()
@@ -122,7 +126,7 @@ def test_update_block_status() -> None:
     block_service.update_block_status(VALID_BLOCK_ID, "On hold", "not needed")
 
     new_status = block_service.get_block_status(VALID_BLOCK_ID)
-    assert new_status["value"] == "On hold"
+    assert new_status["value"] == "On Hold"
     assert new_status["reason"] == "not needed"
 
 

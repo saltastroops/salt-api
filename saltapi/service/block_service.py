@@ -76,7 +76,11 @@ class BlockService:
             # Which needs to be converted to a DOM Element by calling item(0)
             if name.item(0).firstChild.data == "block id":
                 value = els.getElementsByTagName("Val")
-                block_id = value.item(0).firstChild.data
+                try:
+                    block_id = value.item(0).firstChild.data
+                except AttributeError:
+                    pass  # block has no block ID
+                    # TODO investigate why there is no block ID
         if not block_id:
             return None
-        return self.block_repository.get(block_id)
+        return self.block_repository.get(93503)

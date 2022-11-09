@@ -393,15 +393,16 @@ ORDER BY is_preferred_lamp DESC
             },
         )
 
-        entries = [
-            {
-                "lamp": row.lamp,
-                "is_preferred_lamp": True if row.is_preferred_lamp else False,
-                "original_exposure_time": float(row.original_exposure_time),
-                "preferred_exposure_time": float(row.preferred_exposure_time),
-            }
-            for row in result
-        ]
+        entries = []
+        for row in result:
+            entries.append(
+                {
+                    "lamp": row.lamp,
+                    "is_preferred_lamp": True if row.is_preferred_lamp else False,
+                    "original_exposure_time": float(row.original_exposure_time) if row.original_exposure_time else None,
+                    "preferred_exposure_time": float(row.preferred_exposure_time) if row.preferred_exposure_time else float(row.original_exposure_time)
+                }
+            )
         return entries
 
     def get_mask_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
@@ -634,7 +635,7 @@ FROM Proposal P
     JOIN RssMask RM USING (RssMask_Id)
     JOIN RssMaskType USING (RssMaskType_Id)
 WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
-    AND (BlockStatus = "Active" OR BlockStatus = "On Hold")
+    AND (BlockStatus = 'Active' OR BlockStatus = 'On Hold')
     AND NVisits >= NDone
 """
         if len(mask_types) > 0:

@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+import shutil
 import uuid
 
 import dotenv
@@ -229,3 +230,40 @@ def create_user(client: TestClient) -> Dict[str, Any]:
     )
     response = client.post("/users/", json=new_user_details)
     return dict(response.json())
+
+
+def setup_finder_chart_files(
+    proposals_dir: Path,
+    proposal_code: str,
+    finder_chart_name: str,
+    original_suffixes: List[str],
+    thumbnail_suffixes: List[str],
+) -> None:
+    included_dir = proposals_dir / proposal_code / "Included"
+    included_dir.mkdir(parents=True)
+
+    def setup_finder_chart(suffix: str, size: str) -> None:
+        prefix = ""
+        if size == "original":
+            prefix = ""
+        elif size == "thumbnail":
+            prefix = "Thumbnail"
+        else:
+            pytest.fail(f"Unsupported size in test setup: {size}")
+
+        if suffix in ["jpg", "pdf", "png"]:
+            finder_chart_template = (
+                Path(__file__).parent
+                / "data"
+                / "finder_charts"
+                / f"finder_chart.{suffix}"
+            )
+            finder_chart = included_dir / f"{prefix}{finder_chart_name}.{suffix}"
+            shutil.copy(finder_chart_template, finder_chart)
+        else:
+            pytest.fail(f"Unsupported file suffix in test setup: {suffix}")
+
+    for suffix in original_suffixes:
+        setup_finder_chart(suffix, "original")
+    for suffix in thumbnail_suffixes:
+        setup_finder_chart(suffix, "thumbnail")

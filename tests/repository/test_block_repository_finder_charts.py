@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from typing import List, Tuple
 
@@ -7,6 +6,7 @@ from sqlalchemy.engine import Connection
 
 import saltapi.repository.block_repository
 from saltapi.settings import Settings, get_settings
+from tests.conftest import setup_finder_chart_files
 from tests.repository.test_block_repository import create_block_repository
 
 
@@ -14,43 +14,6 @@ def mocked_settings(original_settings: Settings, proposals_dir: Path) -> Setting
     settings = original_settings.copy()
     settings.proposals_dir = proposals_dir
     return settings
-
-
-def setup_finder_chart_files(
-    proposals_dir: Path,
-    proposal_code: str,
-    finder_chart_name: str,
-    original_suffixes: List[str],
-    thumbnail_suffixes: List[str],
-) -> None:
-    included_dir = proposals_dir / proposal_code / "Included"
-    included_dir.mkdir(parents=True)
-
-    def setup_finder_chart(suffix: str, size: str) -> None:
-        prefix = ""
-        if size == "original":
-            prefix = ""
-        elif size == "thumbnail":
-            prefix = "Thumbnail"
-        else:
-            pytest.fail(f"Unsupported size in test setup: {size}")
-
-        if suffix in ["jpg", "pdf", "png"]:
-            finder_chart_template = (
-                Path(__file__).parent.parent
-                / "integration"
-                / "finder_charts"
-                / f"finder_chart.{suffix}"
-            )
-            finder_chart = included_dir / f"{prefix}{finder_chart_name}.{suffix}"
-            shutil.copy(finder_chart_template, finder_chart)
-        else:
-            pytest.fail(f"Unsupported file suffix in test setup: {suffix}")
-
-    for suffix in original_suffixes:
-        setup_finder_chart(suffix, "original")
-    for suffix in thumbnail_suffixes:
-        setup_finder_chart(suffix, "thumbnail")
 
 
 @pytest.mark.parametrize(

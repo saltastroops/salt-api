@@ -158,7 +158,8 @@ WHERE B.Block_Id = :block_id
         """
         Update the status of a block.
         """
-
+        if value == "On hold":
+            value = "On Hold"
         stmt = text(
             """
 UPDATE Block B

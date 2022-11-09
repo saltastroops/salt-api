@@ -32,9 +32,7 @@ class BlockService:
         Set the block status for a block id.
         """
 
-        allowed_status_list = ["Active", "On Hold"]
-        if status == "On hold":
-            status = "On Hold"
+        allowed_status_list = ["Active", "On hold"]
         if status not in allowed_status_list:
             raise NotFoundError(f"Unknown block status: {status}")
         return self.block_repository.update_block_status(block_id, status, reason)

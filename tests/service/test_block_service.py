@@ -133,6 +133,12 @@ def test_update_block_status() -> None:
     assert new_status["reason"] == "not needed"
 
 
+def test_update_block_status_raises_error_for_wrong_block_status() -> None:
+    block_service = create_block_service()
+    with pytest.raises(AuthorizationError):
+        block_service.update_block_status(0, "Superseded", "")
+
+
 def test_update_block_status_raises_error_for_wrong_block_id() -> None:
     block_service = create_block_service()
     with pytest.raises(NotFoundError):

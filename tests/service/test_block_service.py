@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional, cast
 
 import pytest
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockStatus
 from saltapi.service.block_service import BlockService
@@ -48,6 +48,9 @@ class FakeBlockRepository:
         self, block_id: int, value: str, reason: Optional[str]
     ) -> None:
         if block_id == VALID_BLOCK_ID:
+            allowed_status_list = ["Active", "On hold"]
+            if value not in allowed_status_list:
+                raise AuthorizationError()
             if value == "On hold":
                 value = "On Hold"
             self.block_status = {"value": value, "reason": reason}

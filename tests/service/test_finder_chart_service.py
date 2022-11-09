@@ -14,7 +14,9 @@ def test_get_finder_chart(db_connection: Connection) -> None:
     repository = FinderChartRepository(db_connection)
     service = FinderChartService(repository)
 
-    proposal_code, finding_chart_path = service.get_finder_chart(finding_chart_id)
+    proposal_code, finding_chart_path = service.get_finder_chart(
+        f"{finding_chart_id}.pdf"
+    )
 
     assert expected_proposal_code == proposal_code
     assert expected_finder_chart_path in str(finding_chart_path)

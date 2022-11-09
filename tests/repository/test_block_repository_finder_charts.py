@@ -48,6 +48,7 @@ def test_should_return_correct_finder_charts(
     setup_finder_chart_files(
         proposals_dir=proposals_dir,
         proposal_code="2022-1-DDT-005",
+        parent_dirs=["Included"],
         finder_chart_name=finder_chart_name,
         original_suffixes=original_suffixes,
         thumbnail_suffixes=thumbnail_suffixes,

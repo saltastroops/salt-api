@@ -14,7 +14,8 @@ export default defineConfig({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const usernames = require("./cypress/salt-testdata/web-manager/e2e/usernames.json");
+      const usernames = require(process.env["TEST_DATA_DIR"] +
+        "/e2e/usernames.json");
       for (const key in { ...usernames }) {
         config.env[key] = usernames[key];
       }

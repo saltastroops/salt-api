@@ -112,18 +112,16 @@ export class RealProposalService implements ProposalService {
     proposalCode: string,
     semester: string,
     proposalProgressFormData: FormData,
-    additionalPdf: File
+    additionalPdf: File,
   ): Observable<ProposalProgress> {
     const uri = environment.apiUrl + `/progress/${proposalCode}/${semester}`;
-    if (additionalPdf){
-      proposalProgressFormData.append("additional_pdf", additionalPdf)
+    if (additionalPdf) {
+      proposalProgressFormData.append("additional_pdf", additionalPdf);
     }
-    return this.http.put<ProposalProgress>(uri, proposalProgressFormData)
-      .pipe(
-        map((progressReport: ProposalProgress) => {
-          return camelcaseKeys(progressReport, { deep: true })
-          },
-        ),
+    return this.http.put<ProposalProgress>(uri, proposalProgressFormData).pipe(
+      map((progressReport: ProposalProgress) => {
+        return camelcaseKeys(progressReport, { deep: true });
+      }),
       catchError(() => {
         return throwError("Oops. Something is wrong.");
       }),

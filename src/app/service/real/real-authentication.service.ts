@@ -3,14 +3,13 @@ import { Injectable } from "@angular/core";
 
 import * as camelcaseKeys from "camelcase-keys";
 import { parseISO } from "date-fns";
+import { CookieService } from "ngx-cookie-service";
 import { BehaviorSubject, Observable, Subject, of } from "rxjs";
 import { map, switchMap, tap } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
-import { AccessToken } from "../../types/authentication";
 import { Message } from "../../types/common";
 import { User } from "../../types/user";
-import { storeAccessToken } from "../../utils";
 import { AuthenticationService, Redirection } from "../authentication.service";
 
 const user$ = new BehaviorSubject<User | null>(null);
@@ -23,7 +22,9 @@ let whoAmITrigger$: Subject<null> | null;
 export class RealAuthenticationService implements AuthenticationService {
   private redirection: Redirection | null = null;
 
-  constructor(private http: HttpClient) {}
+  private SECONDARY_AUTH_TOKEN_KEY = "secondary_auth_token";
+
+  constructor(private http: HttpClient, private cookieService: CookieService) {}
 
   /**
    * Get an authentication token.
@@ -31,8 +32,8 @@ export class RealAuthenticationService implements AuthenticationService {
    * @param username Username.
    * @param password Password.
    */
-  login(username: string, password: string): Observable<AccessToken> {
-    const uri = environment.apiUrl + "/token";
+  login(username: string, password: string): Observable<void> {
+    const uri = environment.apiUrl + "/login";
     const headers = new HttpHeaders({
       "Content-type": "application/x-www-form-urlencoded",
     });
@@ -41,32 +42,26 @@ export class RealAuthenticationService implements AuthenticationService {
       .set("username", username)
       .set("password", password);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.http.post<any>(uri, body, { headers }).pipe(
-      map((accessToken) => camelcaseKeys(accessToken, { deep: true })),
-      tap((tokenData) => {
-        this.setAccessToken(tokenData);
+    return this.http.post<void>(uri, body, { headers }).pipe(
+      tap(() => {
         this.updateUser();
       }),
     );
   }
 
-  logout(): void {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("accessTokenExpiresAt");
+  logout(): Observable<void> {
     sessionStorage.removeItem("user");
-    this.updateUser();
+    this.cookieService.delete(this.SECONDARY_AUTH_TOKEN_KEY);
+    const uri = environment.apiUrl + "/logout";
+    return this.http.post<void>(uri, {}).pipe(
+      tap(() => {
+        this.updateUser();
+      }),
+    );
   }
 
   isAuthenticated(): boolean {
-    return this.isTokenValid();
-  }
-
-  setAccessToken(tokenData: AccessToken): void {
-    storeAccessToken(tokenData);
-  }
-
-  getAccessToken(): string | null {
-    return localStorage.getItem("accessToken");
+    return this.cookieService.check(this.SECONDARY_AUTH_TOKEN_KEY);
   }
 
   _user(): Observable<User> {
@@ -128,16 +123,6 @@ export class RealAuthenticationService implements AuthenticationService {
     this.redirection = redirection;
   }
 
-  private isTokenValid(): boolean {
-    const expiresAt = RealAuthenticationService.getExpiry();
-    const accessToken = this.getAccessToken();
-    const now = new Date();
-    if (!expiresAt || !accessToken) {
-      return false;
-    }
-    return expiresAt >= now;
-  }
-
   private static getExpiry(): Date | null {
     const expiresAt = localStorage.getItem("accessTokenExpiresAt");
     if (expiresAt) {
@@ -170,7 +155,9 @@ export class RealAuthenticationService implements AuthenticationService {
    */
   changePassword(password: string, token: string): Observable<Message> {
     // Make sure that we don't use another token for changing the password
-    this.logout();
+    this.logout().subscribe(() => {
+      /* do nothing */
+    });
 
     const options = {
       headers: {

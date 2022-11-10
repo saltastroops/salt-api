@@ -12,8 +12,6 @@ const USERNAME = "hettlage";
 
 describe("Authentication", () => {
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/token").as("token");
-
     cy.recordHttp(apiUrl + "/user").as("user");
 
     cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
@@ -21,7 +19,7 @@ describe("Authentication", () => {
     cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
   });
 
-  it("should handle HTTP requests with a missing authentication token", () => {
+  it("should handle HTTP requests with a missing authentication cookie", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -35,8 +33,8 @@ describe("Authentication", () => {
 
       cy.url().should("contain", PROPOSAL_BASE_URL);
 
-      // And when I then delete the authentication token
-      cy.window().its("localStorage").invoke("removeItem", "accessToken");
+      // And when I then delete the authentication cookie
+      cy.clearCookie("secondary_auth_token");
 
       // And try to add an observation comment
       ObservationComments.addComment("This is a test comment.");
@@ -52,17 +50,12 @@ describe("Authentication", () => {
     });
   });
 
-  it("should handle HTTP requests with an invalid authentication token", () => {
+  it("should handle HTTP requests with an invalid authentication cookie", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
-      // Then the authentication token and user details are stored
-      cy.window()
-        .its("localStorage")
-        .invoke("getItem", "accessToken")
-        .should("not.be.null");
       // Then user details are stored
       userDetailsAreStored();
 
@@ -70,9 +63,7 @@ describe("Authentication", () => {
       ProposalPage.visit("2020-2-SCI-043");
 
       // And when I then tamper with the authentication token
-      cy.window()
-        .its("localStorage")
-        .invoke("setItem", "accessToken", "invalid");
+      cy.setCookie("secondary_auth_token", "asdf");
 
       // And try to add an observation comment
       ObservationComments.addComment("This is a test comment.");
@@ -81,10 +72,6 @@ describe("Authentication", () => {
       ObservationComments.hasSubmissionError("logged in");
 
       // And the authentication token and user details are removed
-      cy.window()
-        .its("localStorage")
-        .invoke("getItem", "accessToken")
-        .should("be.null");
       cy.window()
         .its("sessionStorage")
         .invoke("getItem", "user")
@@ -98,11 +85,6 @@ describe("Authentication", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
-      // Then the authentication token and user details are stored
-      cy.window()
-        .its("localStorage")
-        .invoke("getItem", "accessToken")
-        .should("not.be.null");
       // Then user details are stored
       userDetailsAreStored();
     });
@@ -132,7 +114,7 @@ describe("Authentication", () => {
     });
   });
 
-  it("should remove the authentication token and user details when the user logs out", () => {
+  it("should remove the authentication cookie and user details when the user logs out", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // Ensure the logout link is not hidden because of the screen size
       cy.viewport(1500, 2000);
@@ -141,22 +123,15 @@ describe("Authentication", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
-      // Then the authentication token and user details are stored
-      cy.window()
-        .its("localStorage")
-        .invoke("getItem", "accessToken")
-        .should("not.be.null");
-      // user details are stored
+      // Then the authentication vookie and user details are stored
+      cy.getCookie("secondary_auth_token").should("not.be.null");
       userDetailsAreStored();
 
       // And when I logout again
       cy.get('[data-test="logout"]').click();
 
       // Then the authentication token and user details are removed
-      cy.window()
-        .its("localStorage")
-        .invoke("getItem", "accessToken")
-        .should("be.null");
+      cy.getCookie("secondary_auth_token").should("be.null");
       cy.window()
         .its("sessionStorage")
         .invoke("getItem", "user")

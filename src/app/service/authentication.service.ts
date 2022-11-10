@@ -2,7 +2,6 @@ import { Params } from "@angular/router";
 
 import { Observable } from "rxjs";
 
-import { AccessToken } from "../types/authentication";
 import { Message } from "../types/common";
 import { User } from "../types/user";
 
@@ -12,18 +11,11 @@ export interface Redirection {
 }
 
 export abstract class AuthenticationService {
-  public abstract login(
-    username: string,
-    password: string,
-  ): Observable<AccessToken>;
+  public abstract login(username: string, password: string): Observable<void>;
 
-  public abstract logout(): void;
+  public abstract logout(): Observable<void>;
 
   public abstract isAuthenticated(): boolean;
-
-  public abstract setAccessToken(tokenData: AccessToken): void;
-
-  public abstract getAccessToken(): string | null;
 
   /**
    * Update the user.

@@ -2,3 +2,4 @@ python/**/*.html
 docs/**/*
 src/test.ts
 cypress/salt-testdata/*
+.angular/*

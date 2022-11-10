@@ -1,6 +1,3 @@
-// @ts-ignore
-
-import { AccessToken } from "./types/authentication";
 import { User, UserRole } from "./types/user";
 
 export const GENERIC_ERROR_MESSAGE =
@@ -9,11 +6,6 @@ export const GENERIC_ERROR_MESSAGE =
 export const NOT_LOGGED_IN_MESSAGE = "You are not logged in.";
 
 export const FORBIDDEN_MESSAGE = "You are not allowed to perform this action.";
-
-export function storeAccessToken(tokenData: AccessToken): void {
-  localStorage.setItem("accessToken", tokenData.accessToken);
-  localStorage.setItem("accessTokenExpiresAt", tokenData.expiresAt);
-}
 
 export function currentSemester(): string {
   const now = new Date();
@@ -28,12 +20,11 @@ export function currentSemester(): string {
   }
 }
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-// @ts-ignore
+// @ts-ignore: very generic, so any should be fine
 type NestedKeyOf<T extends Record<string, any>> = {
   [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
-// @ts-ignore
-    ? `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
+    ? // @ts-ignore: very generic, so any should be fine
+      `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
     : `${Key}`;
 }[keyof T & (string | number)];
 
@@ -274,8 +265,8 @@ export function previousSemesterOf(semester: string): string {
 // 5. Use Decorator to automate Unsubscription
 // This decorator can only work when there is a subscription property.
 export function AutoUnsubcribe() {
+  // @ts-ignore: very generic, so any should be fine
   return function (constructor: any): void {
-    // eslint-disable-line
     const orig = constructor.prototype.ngOnDestroy;
     constructor.prototype.ngOnDestroy = function () {
       for (const prop in this) {

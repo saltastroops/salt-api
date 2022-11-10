@@ -19,7 +19,9 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     // Make sure that invalid tokens are removed
     if (!this.authService.isAuthenticated()) {
-      this.authService.logout();
+      this.authService.logout().subscribe(() => {
+        /* do nothing */
+      });
     }
 
     // Load the user details

@@ -7,6 +7,7 @@ import { Router } from "@angular/router";
 
 import * as Sentry from "@sentry/angular";
 import { TooltipModule } from "ng2-tooltip-directive";
+import { CookieService } from "ngx-cookie-service";
 import { DateFnsModule } from "ngx-date-fns";
 
 import { AppRoutingModule } from "./app-routing.module";
@@ -185,6 +186,7 @@ import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/sma
     DateFnsModule.forRoot(),
   ],
   providers: [
+    CookieService,
     {
       provide: ErrorHandler,
       useValue: Sentry.createErrorHandler({ showDialog: true }),

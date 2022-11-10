@@ -7,16 +7,12 @@ import {
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { Observable } from "rxjs";
-
 import { AuthenticationService } from "../service/authentication.service";
-import { AccessToken } from "../types/authentication";
 import { GENERIC_ERROR_MESSAGE } from "../utils";
 
 @Component({ templateUrl: "login.component.html" })
 export class LoginComponent implements OnInit {
   loginForm!: UntypedFormGroup;
-  accessToken!: Observable<AccessToken>;
   loading = false;
   submitted = false;
   error: string | undefined = undefined;

@@ -7,10 +7,10 @@ import {
   Validators,
 } from "@angular/forms";
 
-import {Proposal, ProposalProgress} from "../../../../types/proposal";
+import { ProposalService } from "../../../../service/proposal.service";
+import { Proposal, ProposalProgress } from "../../../../types/proposal";
 import { getNextSemester } from "../../../../util";
-import {ProposalService} from "../../../../service/proposal.service";
-import {GENERIC_ERROR_MESSAGE} from "../../../../utils";
+import { GENERIC_ERROR_MESSAGE } from "../../../../utils";
 
 @Component({
   selector: "wm-progress-request-form",
@@ -32,7 +32,7 @@ export class ProgressRequestFormComponent implements OnInit {
 
   constructor(
     private formBuilder: UntypedFormBuilder,
-    private proposalService: ProposalService
+    private proposalService: ProposalService,
   ) {}
 
   ngOnInit(): void {
@@ -88,32 +88,48 @@ export class ProgressRequestFormComponent implements OnInit {
       return;
     }
     this.error = undefined;
-    const proposalProgressFormValues = this.proposalProgressForm.value
-    const partnerRequestedPercentages = proposalProgressFormValues.partnerRequestedPercentages.map(
-      (rp: {requestedPercentage: string, partnerCode: string}) => rp.partnerCode + ":" + rp.requestedPercentage
-    ).join(";")
-
+    const proposalProgressFormValues = this.proposalProgressForm.value;
+    const partnerRequestedPercentages =
+      proposalProgressFormValues.partnerRequestedPercentages
+        .map(
+          (rp: { requestedPercentage: string; partnerCode: string }) =>
+            rp.partnerCode + ":" + rp.requestedPercentage,
+        )
+        .join(";");
 
     const formData: FormData = new FormData();
 
-    formData.append("requested_time", proposalProgressFormValues.requestedTime)
-    formData.append("maximum_seeing", proposalProgressFormValues.maximumSeeing)
-    formData.append("transparency", proposalProgressFormValues.transparency)
-    formData.append("description_of_observing_constraints", proposalProgressFormValues.descriptionOfObservingConstraints)
-    formData.append("change_reason", proposalProgressFormValues.changeReason)
-    formData.append("summary_of_proposal_status", proposalProgressFormValues.summaryOfProposalStatus)
-    formData.append("strategy_changes", proposalProgressFormValues.strategyChanges)
-    formData.append("partner_requested_percentages", partnerRequestedPercentages)
+    formData.append("requested_time", proposalProgressFormValues.requestedTime);
+    formData.append("maximum_seeing", proposalProgressFormValues.maximumSeeing);
+    formData.append("transparency", proposalProgressFormValues.transparency);
+    formData.append(
+      "description_of_observing_constraints",
+      proposalProgressFormValues.descriptionOfObservingConstraints,
+    );
+    formData.append("change_reason", proposalProgressFormValues.changeReason);
+    formData.append(
+      "summary_of_proposal_status",
+      proposalProgressFormValues.summaryOfProposalStatus,
+    );
+    formData.append(
+      "strategy_changes",
+      proposalProgressFormValues.strategyChanges,
+    );
+    formData.append(
+      "partner_requested_percentages",
+      partnerRequestedPercentages,
+    );
 
-
-    this.proposalService.putProgressReport(
-      this.proposal.proposalCode,
-      this.nextSemester,
-      formData,
-      this.file
-    ).subscribe(
+    this.proposalService
+      .putProgressReport(
+        this.proposal.proposalCode,
+        this.nextSemester,
+        formData,
+        this.file,
+      )
+      .subscribe(
         (data) => {
-          this.progressReport = { ...data }
+          this.progressReport = { ...data };
           this.loading = false;
         },
         () => {
@@ -136,20 +152,20 @@ export class ProgressRequestFormComponent implements OnInit {
   }
 
   onFileInput(files: FileList | null): void {
-    this.validateAttachedFile(files)
+    this.validateAttachedFile(files);
     if (files) {
       this.file = files.item(0);
       this.proposalProgressForm.patchValue({
-        additionalPdf: files.item(0)
-      })
+        additionalPdf: files.item(0),
+      });
     }
   }
 
   removeFile(): void {
     this.file = null;
     this.proposalProgressForm.patchValue({
-      additionalPdf: null
-    })
+      additionalPdf: null,
+    });
     this.f.additionalPdf.setErrors(null);
   }
 

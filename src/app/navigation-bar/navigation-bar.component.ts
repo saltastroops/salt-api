@@ -28,7 +28,9 @@ export class NavigationBarComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout();
+    this.authService.logout().subscribe(() => {
+      /* do nothing */
+    });
     this.router.navigate(["/"]);
   }
 

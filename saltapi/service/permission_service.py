@@ -392,3 +392,32 @@ class PermissionService:
         ]
 
         self.check_role(username, roles, proposal_code)
+
+    def check_permission_to_view_currently_observed_block(self, user: User) -> None:
+        """
+        Check whether the user may view the currently observed block.
+
+        This is the case if the user is any of the following:
+
+        * a SALT Astronomer
+        * a SALT Operator
+        * an administrator
+        """
+        username = user.username
+
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.ADMINISTRATOR,
+        ]
+
+        self.check_role(username, roles)
+
+    def check_permission_to_view_scheduled_block(self, user: User) -> None:
+        """
+        Check whether the user may view the next scheduled block.
+
+        This is the case if the user may view the currently observed block.
+        """
+
+        self.check_permission_to_view_currently_observed_block(user)

@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 
 from saltapi.web.schema.bvit import Bvit
 from saltapi.web.schema.common import Lamp, TargetCoordinates, TimeInterval

@@ -426,7 +426,7 @@ def get_data_release_date(
 
 @router.put(
     "/{proposal_code}/data-release-date",
-    summary="Request a new data release date.",
+    summary="Request a new data release date",
     response_model=DataReleaseDateUpdate,
     status_code=status.HTTP_202_ACCEPTED,
 )

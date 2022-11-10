@@ -28,9 +28,10 @@ defusedxml = "^0.7.1"
 fastapi = "^0.76.0"
 pdfkit = "^1.0.0"
 PyPDF2 = "^2.11.0"
+itsdangerous = "^2.1.2"
 
 [tool.poetry.dev-dependencies]
-black = "^22.6.0"
+black = {extras = ["d"], version = "^22.10.0"}
 flake8 = "^3.8.4"
 flake8-print = "^4.0.0"
 tox = "^3.21.4"

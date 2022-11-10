@@ -52,7 +52,7 @@ class FinderChartFile(BaseModel):
     size: Literal["original", "thumbnail"] = Field(
         ..., title="Size", description="Geometrical size of this finder chart file"
     )
-    url: HttpUrl = Field(
+    url: str = Field(
         ...,
         title="URL",
         description="URL at which this finder chart file is available",

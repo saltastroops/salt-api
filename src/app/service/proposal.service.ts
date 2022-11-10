@@ -48,12 +48,12 @@ export abstract class ProposalService {
   public abstract getProgressReport(
     proposalCode: string,
     semester: string,
-  ): Observable<ProposalProgress>
+  ): Observable<ProposalProgress>;
 
   public abstract putProgressReport(
     proposalCode: string,
     semester: string,
     proposalProgressFormData: FormData,
-    additional_pdf: File | null
+    additional_pdf: File | null,
   ): Observable<ProposalProgress>;
 }

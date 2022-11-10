@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional, cast
 
 import pytest
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockStatus
 from saltapi.service.block_service import BlockService
@@ -39,6 +39,8 @@ class FakeBlockRepository:
 
     def get_block_status(self, block_id: int) -> BlockStatus:
         if block_id == VALID_BLOCK_ID:
+            if self.block_status["value"] == "On Hold":
+                self.block_status["value"] = "On hold"
             return self.block_status
         raise NotFoundError()
 
@@ -46,6 +48,11 @@ class FakeBlockRepository:
         self, block_id: int, value: str, reason: Optional[str]
     ) -> None:
         if block_id == VALID_BLOCK_ID:
+            allowed_status_list = ["Active", "On hold"]
+            if value not in allowed_status_list:
+                raise AuthorizationError()
+            if value == "On hold":
+                value = "On Hold"
             self.block_status = {"value": value, "reason": reason}
         else:
             raise NotFoundError()
@@ -124,6 +131,12 @@ def test_update_block_status() -> None:
     new_status = block_service.get_block_status(VALID_BLOCK_ID)
     assert new_status["value"] == "On hold"
     assert new_status["reason"] == "not needed"
+
+
+def test_update_block_status_raises_error_for_wrong_block_status() -> None:
+    block_service = create_block_service()
+    with pytest.raises(AuthorizationError):
+        block_service.update_block_status(0, "Superseded", "")
 
 
 def test_update_block_status_raises_error_for_wrong_block_id() -> None:

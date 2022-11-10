@@ -322,6 +322,20 @@ class PermissionService:
                 roles=roles,
             )
 
+    def check_permission_to_view_users(self, user: User) -> None:
+        """
+        Check whether the user may view a list of users.
+
+        Administrators may view any users. Other users may only view their own user
+        details.
+        """
+        roles = [Role.ADMINISTRATOR]
+
+        self.check_role(
+            username=user.username,
+            roles=roles,
+        )
+
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
         Check whether the user may update a user.

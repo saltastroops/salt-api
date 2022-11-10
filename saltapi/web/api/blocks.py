@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Body, Depends, Path
 
-from saltapi.exceptions import AuthorizationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.block import Block as _Block
 from saltapi.service.block import BlockStatus as _BlockStatus
-from saltapi.service.user import Role, User
+from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.block import Block, BlockStatus, BlockStatusValue
 
@@ -20,14 +19,10 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
 
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_currently_observed_block(user)
+
         block_service = services.block_service(unit_of_work.connection)
-        if (
-            permission_service.check_user_has_role(user, Role.ADMINISTRATOR)
-            or permission_service.check_user_has_role(user, Role.SALT_ASTRONOMER)
-            or permission_service.check_user_has_role(user, Role.SALT_OPERATOR)
-        ):
-            return block_service.get_current_block()
-        raise AuthorizationError()
+        return block_service.get_current_block()
 
 
 @router.get("/next-scheduled-block", summary="Scheduled block.", response_model=Block)
@@ -38,14 +33,10 @@ def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
 
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_scheduled_block(user)
+
         block_service = services.block_service(unit_of_work.connection)
-        if (
-            permission_service.check_user_has_role(user, Role.ADMINISTRATOR)
-            or permission_service.check_user_has_role(user, Role.SALT_ASTRONOMER)
-            or permission_service.check_user_has_role(user, Role.SALT_OPERATOR)
-        ):
-            return block_service.get_next_scheduled_block()
-        raise AuthorizationError()
+        return block_service.get_next_scheduled_block()
 
 
 @router.get("/{block_id}", summary="Get a block", response_model=Block)

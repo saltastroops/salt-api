@@ -93,6 +93,10 @@ def get_users(
 ) -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
+
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_users(user)
+
         return user_service.get_users()
 
 

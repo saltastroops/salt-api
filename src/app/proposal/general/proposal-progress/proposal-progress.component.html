@@ -7,6 +7,20 @@
       [progressReport]="proposalProgress"
     ></wm-proposal-progress-table>
   </div>
+  <div>
+    <a class="has-text-link"
+       href="{{apiUrl + '/progress/' + proposal.proposalCode + '/' + currentSemester + '/report.pdf'}}"
+    >
+      View the progress report as pdf.
+    </a>
+  </div>
+  <div>
+    <a class="has-text-link"
+       href="{{apiUrl + '/progress/' + proposal.proposalCode + '/' + currentSemester + '/supplementary-file.pdf'}}"
+    >
+      View the progress report supplementary file only
+    </a>
+  </div>
   <div class="edit-button">
     <button *ngIf="showForm" class="button" (click)="closeForm()">
       Close Edit

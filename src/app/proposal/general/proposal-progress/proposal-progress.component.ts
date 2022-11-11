@@ -7,6 +7,7 @@ import {
   GENERIC_ERROR_MESSAGE,
   currentSemester,
 } from "../../../utils";
+import {environment} from "../../../../environments/environment";
 
 @AutoUnsubcribe()
 @Component({
@@ -20,12 +21,13 @@ export class ProposalProgressComponent {
   showForm = false;
   error: string | undefined;
   loading = false;
+  apiUrl = environment.apiUrl
+  currentSemester = currentSemester()
 
   constructor(private proposalService: ProposalService) {}
 
   showProgressReportForm(): void {
     this.loading = true;
-
     this.proposalService
       .getProgressReport(this.proposal.proposalCode, currentSemester())
       .subscribe(

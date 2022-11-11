@@ -85,16 +85,27 @@ def test_block_status_update(
     username = find_username("salt_astronomer")
     authenticate(username, client)
 
-    block_status = "Active"
-    status_reason = ""
+    block_status_value = "Active"
+    block_status_reason = ""
+
+    r = client.get(BLOCKS_URL + "/" + str(block_id) + "/status")
+    print(r.json())
 
     response = client.put(
         BLOCKS_URL + "/" + str(block_id) + "/status",
-        json={"status": block_status, "reason": status_reason},
+        json={"status": block_status_value, "reason": block_status_reason},
     )
     assert response.status_code == status.HTTP_200_OK
 
-    new_block_status = response.json()
+    block_status = response.json()
 
-    assert new_block_status["value"] == block_status
-    assert new_block_status["reason"] == ""
+    assert block_status["value"] == block_status_value
+    assert block_status["reason"] == block_status_reason
+
+    resp = client.get(BLOCKS_URL + "/" + str(block_id) + "/status")
+    assert resp.status_code == status.HTTP_200_OK
+
+    new_block_status = resp.json()
+
+    assert new_block_status["value"] == block_status_value
+    assert new_block_status["reason"] == block_status_reason

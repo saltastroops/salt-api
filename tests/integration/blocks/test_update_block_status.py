@@ -8,7 +8,7 @@ BLOCKS_URL = "/blocks"
 
 
 def test_block_status_update_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_id = 1
     block_status_value = "On hold"
@@ -17,16 +17,13 @@ def test_block_status_update_requires_authentication(
     not_authenticated(client)
     response = client.put(
         BLOCKS_URL + "/" + str(block_id) + "/status",
-        json={
-            "status": block_status_value,
-            "reason": block_status_reason
-        },
+        json={"status": block_status_value, "reason": block_status_reason},
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_block_status_update_requires_block_status(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_id = 2
     username = find_username("administrator")
@@ -39,7 +36,7 @@ def test_block_status_update_requires_block_status(
 
 
 def test_block_status_update_requires_valid_block_status_value(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_id = 100
     username = find_username("administrator")
@@ -50,10 +47,7 @@ def test_block_status_update_requires_valid_block_status_value(
 
     response = client.put(
         BLOCKS_URL + "/" + str(block_id) + "/status",
-        json={
-            "block_status": block_status_value,
-            "status_reason": block_status_reason
-        },
+        json={"block_status": block_status_value, "status_reason": block_status_reason},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -69,7 +63,9 @@ def test_block_status_update_requires_valid_block_status_value(
     ],
 )
 def test_block_status_update_requires_valid_and_allowed_block_status_value(
-        block_status: str, status_reason: str, client: TestClient,
+    block_status: str,
+    status_reason: str,
+    client: TestClient,
 ) -> None:
     block_id = 2
     username = find_username("administrator")
@@ -77,16 +73,13 @@ def test_block_status_update_requires_valid_and_allowed_block_status_value(
 
     response = client.put(
         BLOCKS_URL + "/" + str(block_id) + "/status",
-        json={
-            "status": block_status,
-            "reason": status_reason
-        },
+        json={"status": block_status, "reason": status_reason},
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_block_status_update(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_id = 3
     username = find_username("salt_astronomer")
@@ -97,10 +90,7 @@ def test_block_status_update(
 
     response = client.put(
         BLOCKS_URL + "/" + str(block_id) + "/status",
-        json={
-            "status": block_status,
-            "reason": status_reason
-        },
+        json={"status": block_status, "reason": status_reason},
     )
     assert response.status_code == status.HTTP_200_OK
 
@@ -108,4 +98,3 @@ def test_block_status_update(
 
     assert new_block_status["value"] == block_status
     assert new_block_status["reason"] == ""
-

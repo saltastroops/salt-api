@@ -133,10 +133,20 @@ def test_update_block_status() -> None:
     assert new_status["reason"] == "not needed"
 
 
-def test_update_block_status_raises_error_for_wrong_block_status() -> None:
+@pytest.mark.parametrize(
+    "status",
+    [
+        "Completed",
+        "Deleted",
+        "Expired",
+        "Not set",
+        "Superseded",
+    ],
+)
+def test_update_block_status_raises_error_for_wrong_block_status(status: str) -> None:
     block_service = create_block_service()
     with pytest.raises(AuthorizationError):
-        block_service.update_block_status(0, "Superseded", "")
+        block_service.update_block_status(0, status, "")
 
 
 def test_update_block_status_raises_error_for_wrong_block_id() -> None:

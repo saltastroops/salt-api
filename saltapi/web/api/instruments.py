@@ -116,10 +116,14 @@ def get_obsolete_rss_masks_in_magazine(
     mask_types: List[RssMaskType] = Query(
         [], title="Mask types", description="The mask to types to include."
     ),
+    user: User = Depends(get_current_user),
 ) -> List[str]:
     """
     Returns the list of obsolete RSS masks.
     """
     with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_obsolete_masks_in_magazine(user)
+
         instrument_service = services.instrument_service(unit_of_work.connection)
         return instrument_service.get_obsolete_rss_masks_in_magazine(mask_types)

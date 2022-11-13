@@ -109,3 +109,27 @@ def test_get_user_should_allow_admin_to_get_other_user(client: TestClient) -> No
     response = client.get(_url(other_user_id))
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["username"] != username
+
+
+@pytest.mark.parametrize(
+    "username",
+    [
+        find_username("SALT Astronomer"),
+        find_username("Board Member"),
+        find_username("TAC Member", partner_code="RSA"),
+        find_username("TAC Chair", partner_code="RSA"),
+        find_username("Investigator", proposal_code="2019-2-SCI-006"),
+    ],
+)
+def test_non_admins_may_not_view_list_of_users(
+    username: str, client: TestClient
+) -> None:
+    authenticate(username, client)
+    response = client.get("/users")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_admins_may_view_list_of_users(client: TestClient) -> None:
+    authenticate(find_username("Administrator"), client)
+    response = client.get("/users")
+    assert response.status_code == status.HTTP_200_OK

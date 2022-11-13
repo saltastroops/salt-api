@@ -322,6 +322,16 @@ class PermissionService:
                 roles=roles,
             )
 
+    def check_permission_to_view_users(self, user: User) -> None:
+        """
+        Check whether the user may update a user.
+
+        Administrators may update any users. Other users may only update their own user
+        details.
+        """
+        if not self.user_repository.is_administrator(user.username):
+            raise AuthorizationError()
+
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
         Check whether the user may update a user.
@@ -356,6 +366,17 @@ class PermissionService:
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
         self.check_role(username, roles)
+
+    def check_permission_to_view_obsolete_masks_in_magazine(self, user: User) -> None:
+        """
+        Check whether the user can view the obsolete masks in the magazine.
+        """
+        may_update = self.user_repository.is_administrator(
+            user.username
+        ) or self.user_repository.is_salt_astronomer(user.username)
+
+        if not may_update:
+            raise AuthorizationError()
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:

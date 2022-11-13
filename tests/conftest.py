@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+import shutil
 import uuid
 
 import dotenv
@@ -229,3 +230,73 @@ def create_user(client: TestClient) -> Dict[str, Any]:
     )
     response = client.post("/users/", json=new_user_details)
     return dict(response.json())
+
+
+def setup_finder_chart_files(
+    proposals_dir: Path,
+    proposal_code: str,
+    parent_dirs: List[str],
+    finder_chart_name: str,
+    original_suffixes: List[str],
+    thumbnail_suffixes: List[str],
+) -> List[Path]:
+    """
+    Setup dummy finder charts.
+
+    Parameters
+    ----------
+    proposals_dir: `~Path`
+        Base directory for the proposals content.
+    proposal_code: str
+        Proposal code to which the finder belongs.
+    parent_dirs: list of `str`
+        Parent directories below the proposal code directory. This will be a list like
+        ["Included"] or ["4", "Included"].
+    finder_chart_name: str
+        Filename of the finder chart, without a suffix.
+    original_suffixes: list of `str`
+        List of file suffixes (without leading dot, such as "png" rather than ".png")
+        for which an original size finder chart file should exist
+    thumbnail_suffixes: list of `str`
+        List of file suffixes (without leading dot, such as "png" rather than ".png")
+        for which an original size finder chart file should exist
+
+    Returns
+    -------
+    list of `~Path`
+        The created finder chart files.
+    """
+    created_files = []
+    parent_dir = proposals_dir / proposal_code
+    for d in parent_dirs:
+        parent_dir /= d
+    parent_dir.mkdir(parents=True)
+
+    def setup_finder_chart(suffix: str, size: str) -> None:
+        prefix = ""
+        if size == "original":
+            prefix = ""
+        elif size == "thumbnail":
+            prefix = "Thumbnail"
+        else:
+            pytest.fail(f"Unsupported size in test setup: {size}")
+
+        if suffix in ["jpg", "pdf", "png"]:
+            finder_chart_template = (
+                Path(__file__).parent
+                / "data"
+                / "finder_charts"
+                / f"finder_chart.{suffix}"
+            )
+            finder_chart = parent_dir / f"{prefix}{finder_chart_name}.{suffix}"
+            shutil.copy(finder_chart_template, finder_chart)
+            created_files.append(finder_chart)
+        else:
+            pytest.fail(f"Unsupported file suffix in test setup: {suffix}")
+
+    for suffix in original_suffixes:
+        setup_finder_chart(suffix, "original")
+    for suffix in thumbnail_suffixes:
+        setup_finder_chart(suffix, "thumbnail")
+
+    return created_files

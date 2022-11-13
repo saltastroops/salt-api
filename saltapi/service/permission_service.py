@@ -1,3 +1,5 @@
+from typing import List, Optional, cast
+
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -16,6 +18,84 @@ class PermissionService:
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
 
+    def user_has_role(
+        self,
+        username: str,
+        role: Optional[Role] = None,
+        proposal_code: Optional[str] = None,
+    ) -> bool:
+        """
+        Check whether the user has a role required to perform a specific
+        action on a given proposal.
+        """
+        if role == Role.ADMINISTRATOR:
+            return self.user_repository.is_administrator(username)
+
+        elif role == Role.BOARD_MEMBER:
+            return self.user_repository.is_board_member(username)
+
+        elif role == Role.ENGINEER:
+            return self.user_repository.is_engineer()
+
+        elif role == Role.INVESTIGATOR:
+            return self.user_repository.is_investigator(
+                username, cast(str, proposal_code)
+            )
+
+        elif role == Role.PARTNER_AFFILIATED:
+            return self.user_repository.is_partner_affiliated_user(username)
+
+        elif role == Role.PRINCIPAL_CONTACT:
+            return self.user_repository.is_principal_contact(
+                username, cast(str, proposal_code)
+            )
+
+        elif role == Role.PRINCIPAL_INVESTIGATOR:
+            return self.user_repository.is_principal_investigator(
+                username, cast(str, proposal_code)
+            )
+
+        elif role == Role.PROPOSAL_TAC_CHAIR:
+            return self.user_repository.is_tac_chair_for_proposal(
+                username, cast(str, proposal_code)
+            )
+
+        elif role == Role.PROPOSAL_TAC_MEMBER:
+            return self.user_repository.is_tac_member_for_proposal(
+                username, cast(str, proposal_code)
+            )
+
+        elif role == Role.SALT_ASTRONOMER:
+            return self.user_repository.is_salt_astronomer(username)
+
+        elif role == Role.SALT_OPERATOR:
+            return self.user_repository.is_salt_astronomer(username)
+
+        elif role == Role.TAC_CHAIR:
+            return self.user_repository.is_tac_chair_in_general(username)
+
+        elif role == Role.TAC_MEMBER:
+            return self.user_repository.is_tac_member_in_general(username)
+        else:
+            return False
+
+    def check_role(
+        self,
+        username: str,
+        roles: List[Role],
+        proposal_code: Optional[str] = None,
+    ) -> None:
+        """
+        Check whether the user has at least one of a given list of roles.
+        """
+        has_role = False
+        for role in roles:
+            if self.user_has_role(username, role, proposal_code):
+                has_role = True
+                break
+        if not has_role:
+            raise AuthorizationError()
+
     def check_permission_to_view_proposal(self, user: User, proposal_code: str) -> None:
         """
         Check whether the user may view a proposal.
@@ -31,25 +111,23 @@ class PermissionService:
         proposal_type = self.proposal_repository.get_proposal_type(proposal_code)
 
         if proposal_type != "Gravitational Wave Event":
-            may_view = (
-                self.user_repository.is_salt_astronomer(username)
-                or self.user_repository.is_investigator(username, proposal_code)
-                or self.user_repository.is_tac_member_for_proposal(
-                    username, proposal_code
-                )
-                or self.user_repository.is_administrator(username)
-            )
+            roles = [
+                Role.SALT_ASTRONOMER,
+                Role.INVESTIGATOR,
+                Role.PROPOSAL_TAC_MEMBER,
+                Role.ADMINISTRATOR,
+            ]
+            self.check_role(username, roles, proposal_code)
         else:
             # Gravitational wave event proposals are a special case; they can be viewed
             # by anyone who belongs to a SALT partner.
-            may_view = (
-                self.user_repository.is_salt_astronomer(username)
-                or self.user_repository.is_partner_affiliated_user(username)
-                or self.user_repository.is_administrator(username)
-            )
+            roles = [
+                Role.SALT_ASTRONOMER,
+                Role.PARTNER_AFFILIATED,
+                Role.ADMINISTRATOR,
+            ]
 
-        if not may_view:
-            raise AuthorizationError()
+            self.check_role(username, roles, proposal_code)
 
     def check_permission_to_activate_proposal(
         self, user: User, proposal_code: str
@@ -66,24 +144,17 @@ class PermissionService:
         """
         username = user.username
 
-        may_activate = (
-            (
-                self.proposal_repository.is_self_activatable(proposal_code)
-                and (
-                    self.user_repository.is_principal_investigator(
-                        username, proposal_code
-                    )
-                    or self.user_repository.is_principal_contact(
-                        username, proposal_code
-                    )
-                )
-            )
-            or self.user_repository.is_salt_astronomer(username)
-            or self.user_repository.is_administrator(username)
-        )
-
-        if not may_activate:
-            raise AuthorizationError()
+        if self.proposal_repository.is_self_activatable(proposal_code):
+            roles = [
+                Role.PRINCIPAL_INVESTIGATOR,
+                Role.PRINCIPAL_CONTACT,
+                Role.SALT_ASTRONOMER,
+                Role.ADMINISTRATOR,
+            ]
+            self.check_role(username, roles, proposal_code)
+        else:
+            roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+            self.check_role(username, roles, proposal_code)
 
     def check_permission_to_deactivate_proposal(
         self, user: User, proposal_code: str
@@ -100,15 +171,14 @@ class PermissionService:
         """
         username = user.username
 
-        may_deactivate = (
-            self.user_repository.is_principal_investigator(username, proposal_code)
-            or self.user_repository.is_principal_contact(username, proposal_code)
-            or self.user_repository.is_salt_astronomer(username)
-            or self.user_repository.is_administrator(username)
-        )
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+        ]
 
-        if not may_deactivate:
-            raise AuthorizationError()
+        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_update_proposal_status(self, user: User) -> None:
         """
@@ -121,12 +191,9 @@ class PermissionService:
         """
         username = user.username
 
-        may_update = self.user_repository.is_salt_astronomer(
-            username
-        ) or self.user_repository.is_administrator(username)
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
-        if not may_update:
-            raise AuthorizationError()
+        self.check_role(username, roles)
 
     def check_permission_to_add_observation_comment(
         self, user: User, proposal_code: str
@@ -142,15 +209,15 @@ class PermissionService:
         * an administrator
         """
         username = user.username
-        may_add = (
-            self.user_repository.is_principal_investigator(username, proposal_code)
-            or self.user_repository.is_principal_contact(username, proposal_code)
-            or self.user_repository.is_salt_astronomer(username)
-            or self.user_repository.is_administrator(username)
-        )
 
-        if not may_add:
-            raise AuthorizationError()
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+        ]
+
+        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_view_observation_comments(
         self, user: User, proposal_code: str
@@ -191,15 +258,24 @@ class PermissionService:
         This is the case if the user is any of the following:
 
         * a SALT Astronomer
+        * a Principal Investigator
+        * a Principal Contact
         * an administrator
         """
         username = user.username
-        may_update = self.user_repository.is_salt_astronomer(
-            username
-        ) or self.user_repository.is_administrator(username)
 
-        if not may_update:
-            raise AuthorizationError()
+        proposal_code: str = self.block_repository.get_proposal_code_for_block_id(
+            block_id
+        )
+
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+        ]
+
+        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_view_block_visit(
         self, user: User, block_visit_id: int
@@ -227,71 +303,59 @@ class PermissionService:
         """
         username = user.username
 
-        may_update = self.user_repository.is_salt_astronomer(
-            username
-        ) or self.user_repository.is_administrator(username)
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
 
-        if not may_update:
-            raise AuthorizationError()
+        self.check_role(username, roles)
 
     def check_permission_to_view_user(self, user: User, updated_user_id: int) -> None:
         """
-        Check whether the user may update a user.
+        Check whether the user may view a user.
 
         Administrators may view any users. Other users may only view their own user
         details.
         """
+        if not user.id == updated_user_id:
+            roles = [Role.ADMINISTRATOR]
 
-        if self.user_repository.is_administrator(user.username):
-            may_view = True
-        else:
-            may_view = user.id == updated_user_id
-
-        if not may_view:
-            raise AuthorizationError()
+            self.check_role(
+                username=user.username,
+                roles=roles,
+            )
 
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
         Check whether the user may update a user.
 
-        Administrators may update any users. Other users may only update their own user
-        details.
+        This is the case if the user may update a user.
         """
-        if self.user_repository.is_administrator(user.username):
-            may_update = True
-        else:
-            may_update = user.id == updated_user_id
+        self.check_permission_to_view_user(user, updated_user_id)
 
-        if not may_update:
-            raise AuthorizationError()
-
-    def check_permission_to_view_mos_metadata(self, user: User) -> None:
+    def check_permission_to_view_mos_mask_metadata(self, user: User) -> None:
         """
-        Check whether the user may view MOS data.
+        Check whether the user may view MOS mask data.
 
-        Administrators and SALT Astronomers may view MOS data.
-        details.
+        This is the case if the user is any of the following:
+
+        * a SALT Astronomer
+        * an administrator
+        * an engineer
         """
 
-        may_view = self.user_repository.is_administrator(
-            user.username
-        ) or self.user_repository.is_salt_astronomer(user.username)
+        username = user.username
 
-        if not may_view:
-            raise AuthorizationError()
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+
+        self.check_role(username, roles)
 
     def check_permission_to_update_mos_mask_metadata(self, user: User) -> None:
         """
-        Check whether the user can update a slit mask.
+        Check whether the user can update MOS mask metadata.
         """
-        may_update = (
-            self.user_repository.is_administrator(user.username)
-            or self.user_repository.is_salt_astronomer(user.username)
-            or self.user_repository.is_engineer()
-        )
+        username = user.username
 
-        if not may_update:
-            raise AuthorizationError()
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+
+        self.check_role(username, roles)
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:
@@ -303,17 +367,14 @@ class PermissionService:
         self, user: User, proposal_code: str
     ) -> None:
         """
-        Check whether the user can update proposal progress.
+        Check whether the user can update proposal progress details.
         """
-        may_update = (
-            self.user_repository.is_administrator(user.username)
-            or self.user_repository.is_principal_investigator(
-                username=user.username, proposal_code=proposal_code
-            )
-            or self.user_repository.is_principal_contact(
-                username=user.username, proposal_code=proposal_code
-            )
-        )
+        username = user.username
 
-        if not may_update:
-            raise AuthorizationError()
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.ADMINISTRATOR,
+        ]
+
+        self.check_role(username, roles, proposal_code)

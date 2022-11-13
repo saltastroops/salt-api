@@ -10,6 +10,13 @@ class Role(str, Enum):
     TAC_MEMBER = "TAC Member"
     TAC_CHAIR = "TAC Chair"
     BOARD_MEMBER = "Board Member"
+    ENGINEER = "Engineer"
+    PRINCIPAL_CONTACT = "Principal Contact"
+    PRINCIPAL_INVESTIGATOR = "Principal Investigator"
+    INVESTIGATOR = "Investigator"
+    PROPOSAL_TAC_MEMBER = "Proposal TAC Member"
+    PROPOSAL_TAC_CHAIR = "Proposal TAC Chair"
+    PARTNER_AFFILIATED = "Partner Affiliated"
 
 
 @dataclass()

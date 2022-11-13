@@ -46,6 +46,7 @@ class RssGrating(str, Enum):
 
     OPEN = "Open"
     PG0300 = "pg0300"
+    PG0700 = "pg0700"
     PG0900 = "pg0900"
     PG1300 = "pg1300"
     PG1800 = "pg1800"

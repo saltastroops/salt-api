@@ -23,7 +23,7 @@ describe("Home User", () => {
   beforeEach(() => {
     freezeDate(2020, 6);
 
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 
@@ -337,7 +337,7 @@ describe("Home User", () => {
 describe("Home User - PI", () => {
   beforeEach(() => {
     USERNAME = getEnvVariable("piUsername");
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 
@@ -366,7 +366,7 @@ describe("Home User - PI", () => {
 describe("Home User - PC", () => {
   beforeEach(() => {
     USERNAME = getEnvVariable("pcUsername");
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 
@@ -406,7 +406,7 @@ describe("Home User - PC", () => {
 describe("Home User - SALT Astronomer", () => {
   beforeEach(() => {
     USERNAME = getEnvVariable("saltAstronomerUsername");
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 

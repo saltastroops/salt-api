@@ -34,10 +34,7 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
-    if (
-      request.url.split("/").slice(-1)[0] === "token" ||
-      request.url.split("/").slice(-1)[0] === "send-password-reset-email"
-    ) {
+    if (request.url.split("/").slice(-1)[0] === "login") {
       return next.handle(request);
     }
     return next.handle(request).pipe(

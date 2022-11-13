@@ -28,7 +28,7 @@ describe("Inline login form", () => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
 
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 
@@ -99,7 +99,7 @@ describe("Inline login form", () => {
 
   it("should indicate a loading state until a successful login request finishes", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
-      const interception = interceptIndefinitely("token");
+      const interception = interceptIndefinitely("login");
       HomePage.visit();
       NavigationBar.typeUsername(USERNAME);
       NavigationBar.typePassword(password);
@@ -113,7 +113,7 @@ describe("Inline login form", () => {
 
   it("should indicate a loading state until an unsuccessful login request finishes", () => {
     cy.task("updateUserPassword", USERNAME).then(() => {
-      const interception = interceptIndefinitely("token");
+      const interception = interceptIndefinitely("login");
       HomePage.visit();
       NavigationBar.typeUsername(USERNAME);
       NavigationBar.typePassword("incorrect");
@@ -132,7 +132,7 @@ describe("Navigation bar", () => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
 
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 

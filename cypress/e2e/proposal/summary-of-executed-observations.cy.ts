@@ -11,7 +11,7 @@ describe("Block summaries", () => {
   const PROPOSAL_CODE = "2021-2-LSP-001";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 

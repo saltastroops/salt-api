@@ -27,6 +27,7 @@ export interface FinderChart {
   comment: string | null;
   validFrom: string | null;
   validUntil: string | null;
+  files: FinderChartFile[];
 }
 
 export type GuideMethod =
@@ -88,4 +89,13 @@ export interface TelescopeConfiguration {
   ditherPattern: DitherPattern | null;
   guideStar: GuideStar | null;
   payloadConfigurations: PayloadConfiguration[];
+}
+
+export type FinderChartFileType = "jpg" | "pdf" | "png";
+
+export type FinderChartSize = "original" | "thumbnail";
+
+export interface FinderChartFile {
+  size: FinderChartSize;
+  url: string;
 }

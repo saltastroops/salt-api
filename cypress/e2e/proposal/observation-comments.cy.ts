@@ -23,7 +23,7 @@ describe("Observation comments", () => {
   const PROPOSAL_CODE = "2020-1-SCI-007";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 

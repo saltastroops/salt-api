@@ -69,8 +69,8 @@ export class InlineLoginComponent implements OnInit {
           this.loading = false;
         },
         (error: { status: number; error: string }) => {
-          // The HTTP request for a token is not intercepted, and hence there may be an
-          // error response with status code 401.
+          // The HTTP request for logging in is not intercepted, and hence there may be
+          // an error response with status code 401.
           if (error.status === 401) {
             this.error = "Username or password is incorrect.";
           } else {

@@ -72,17 +72,6 @@ describe("ChargedTimeTableComponent", () => {
     expect(component).toBeTruthy();
   });
 
-  it("should display the correct absolute completion", async () => {
-    const component = await render(ChargedTimeComponent, {
-      componentProperties: {
-        chargedTime: charged_time,
-        timeAllocations: time_allocations,
-      },
-    });
-    const completion = component.getByTestId("absolute-completion");
-    expect(completion.innerText).toContain("3700/278400");
-  });
-
   it("should display the correct relative completion", async () => {
     const component = await render(ChargedTimeComponent, {
       componentProperties: {

@@ -38,7 +38,7 @@ export class ForgotPasswordPage {
 
   static hasUnknownUsernameOrEmailError() {
     cy.get("[data-test='error']")
-      .contains(/unknown/i)
+      .contains(/didn't match/i)
       .should("be.visible");
   }
 

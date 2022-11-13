@@ -20,6 +20,7 @@ export function currentSemester(): string {
   }
 }
 
+/* eslint-disable */
 // @ts-ignore: very generic, so any should be fine
 type NestedKeyOf<T extends Record<string, any>> = {
   [Key in keyof T & (string | number)]: T[Key] extends Record<string, any>
@@ -27,6 +28,7 @@ type NestedKeyOf<T extends Record<string, any>> = {
       `${Key}` | `${Key}.${NestedKeyOf<T[Key]>}`
     : `${Key}`;
 }[keyof T & (string | number)];
+/* eslint-enable */
 
 export type sortArg<T> =
   | keyof T
@@ -35,6 +37,7 @@ export type sortArg<T> =
   | `+${string & keyof T}`
   | `-${string & NestedKeyOf<T>}`
   | `+${string & NestedKeyOf<T>}`;
+
 /**
  * Returns a comparator for objects of type T that can be used by sort
  * functions, where T objects are compared by the specified T properties.
@@ -261,6 +264,7 @@ export function previousSemesterOf(semester: string): string {
   return `${year}-${sem}`;
 }
 
+/* eslint-disable */
 // reference https://blog.bitsrc.io/6-ways-to-unsubscribe-from-observables-in-angular-ab912819a78f
 // 5. Use Decorator to automate Unsubscription
 // This decorator can only work when there is a subscription property.
@@ -279,6 +283,7 @@ export function AutoUnsubcribe() {
     };
   };
 }
+/* eslint-enable */
 
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {
   if (user.roles.includes("Administrator")) {

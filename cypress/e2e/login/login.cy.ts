@@ -16,7 +16,7 @@ const USERNAME = "hettlage";
 
 describe("Login page", () => {
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/token").as("token");
+    cy.recordHttp(apiUrl + "/login").as("login");
 
     cy.recordHttp(apiUrl + "/user").as("user");
 

@@ -66,11 +66,13 @@
     <tbody>
       <tr *ngFor="let c of observation.finderCharts">
         <td>
-          <img
-            src="/assets/noun_Night_771441.png"
-            alt="Finding chart"
-            class="image is-128x128"
-          />
+          <a href="{{ originalFinderChartURL(c) }}">
+            <img
+              src="{{ thumbnailFinderChartURL(c) }}"
+              alt="Finding chart"
+              class="image is-128x128"
+            />
+          </a>
         </td>
         <td>
           <p

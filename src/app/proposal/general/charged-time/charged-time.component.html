@@ -22,7 +22,7 @@
         <td>{{ chargedTime.priority2 }}</td>
         <td>{{ chargedTime.priority3 }}</td>
         <td>{{ chargedTime.priority4 }}</td>
-        <td data-testid="absolute-completion">
+        <td data-testid="relative-completion">
           {{
             (chargedTimeP0ToP3 / allocatedP0ToP3Time) * 100 | number: "1.0-1"
           }}%

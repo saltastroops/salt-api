@@ -1,3 +1,9 @@
+import {
+  FinderChart,
+  FinderChartFileType,
+  FinderChartSize,
+} from "./types/observation";
+
 export function semesterOfDatetime(t: Date): string {
   /**
    Return the semester in which a datetime lies.
@@ -31,4 +37,30 @@ export function getNextSemester(): string {
     year = `${parseInt(year) + 1}`;
   }
   return `${year}-${semester}`;
+}
+
+export function finderChartURL(
+  finderChart: FinderChart,
+  acceptableSizes: FinderChartSize[],
+  acceptableFileTypes: FinderChartFileType[],
+  baseURL: string,
+): string | null {
+  /*
+  Return the URL for a finder chart.
+
+  The lists of acceptable file types must be ordered hy preference, the most preferred
+  option being the first list item.
+   */
+  for (const size of acceptableSizes) {
+    for (const fileType of acceptableFileTypes) {
+      const file = finderChart.files.find(
+        (f) => f.size === size && f.url.endsWith("." + fileType),
+      );
+      if (file) {
+        return baseURL + file.url;
+      }
+    }
+  }
+
+  return null;
 }

@@ -10,7 +10,6 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Subscription } from "rxjs";
 
 import { AuthenticationService } from "../../service/authentication.service";
-import { GENERIC_ERROR_MESSAGE } from "../../utils";
 
 @Component({
   selector: "wm-forgot-password",
@@ -52,12 +51,8 @@ export class ForgotPasswordComponent implements OnInit {
           // Switch form
           this.showSuccessMessage = true;
         },
-        (error: { status: number; error: string }) => {
-          if (error.status === 404) {
-            this.error = "Unknown username or email.";
-          } else {
-            this.error = GENERIC_ERROR_MESSAGE;
-          }
+        (error: string) => {
+          this.error = error;
           this.loading = false;
         },
       );

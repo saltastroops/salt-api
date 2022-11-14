@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import requests
 from defusedxml import minidom
 
+from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockVisit
 from saltapi.settings import get_settings
@@ -31,6 +32,9 @@ class BlockService:
         Set the block status for a block id.
         """
 
+        allowed_status_list = ["Active", "On hold"]
+        if status not in allowed_status_list:
+            raise AuthorizationError()
         return self.block_repository.update_block_status(block_id, status, reason)
 
     def get_block_visit(self, block_visit_id: int) -> BlockVisit:
@@ -76,7 +80,10 @@ class BlockService:
             # Which needs to be converted to a DOM Element by calling item(0)
             if name.item(0).firstChild.data == "block id":
                 value = els.getElementsByTagName("Val")
-                block_id = value.item(0).firstChild.data
+                try:
+                    block_id = value.item(0).firstChild.data
+                except AttributeError:
+                    pass  # block has no block ID
         if not block_id:
             return None
         return self.block_repository.get(block_id)

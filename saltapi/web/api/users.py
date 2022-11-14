@@ -92,6 +92,8 @@ def get_users(
     user: _User = Depends(get_current_user),
 ) -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_users(user)
         user_service = services.user_service(unit_of_work.connection)
         return user_service.get_users()
 

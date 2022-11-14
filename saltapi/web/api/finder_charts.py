@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi import APIRouter, Depends, Path
 from fastapi.responses import FileResponse
 
@@ -11,19 +9,24 @@ from saltapi.web import services
 router = APIRouter(prefix="/finder-charts", tags=["Finding charts"])
 
 
-@router.get("/{finder_chart_id}", summary="Get a finding chart")
+@router.get("/{finder_chart_file}", summary="Get a finding chart")
 def get_finding_charts(
-    finder_chart_id: int = Path(
-        ..., title="Finder chart id", description="Unique identifier for a finder chart"
+    finder_chart_file: str = Path(
+        ...,
+        title="Finder chart file",
+        description=(
+            "Name of the finder chart file, as a unique identifier and a "
+            "suffix, such as 1234.png."
+        ),
     ),
     user: _User = Depends(get_current_user),
-) -> Any:
+) -> FileResponse:
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         finding_chart_service = services.finder_chart_service(unit_of_work.connection)
 
         proposal_code, finder_chart_path = finding_chart_service.get_finder_chart(
-            finder_chart_id
+            finder_chart_file
         )
 
         permission_service.check_permission_to_view_proposal(user, proposal_code)

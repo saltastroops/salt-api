@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -48,6 +48,17 @@ class DitherPattern(BaseModel):
     steps: int = Field(..., title="Number of steps", description="Number of steps")
 
 
+class FinderChartFile(BaseModel):
+    size: Literal["original", "thumbnail"] = Field(
+        ..., title="Size", description="Geometrical size of this finder chart file"
+    )
+    url: str = Field(
+        ...,
+        title="URL",
+        description="URL at which this finder chart file is available",
+    )
+
+
 class FinderChart(BaseModel):
     id: int = Field(
         ..., title="Finder chart", description="Unique identifier for the finder chart"
@@ -60,6 +71,9 @@ class FinderChart(BaseModel):
     )
     valid_until: Optional[datetime] = Field(
         ..., title="Time until when the finder chart may be used"
+    )
+    files: List[FinderChartFile] = Field(
+        ..., title="Available files for this finder chart"
     )
 
 

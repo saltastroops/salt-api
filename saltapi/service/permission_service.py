@@ -371,13 +371,10 @@ class PermissionService:
         """
         Check whether the user can view the obsolete masks in the magazine.
         """
-        may_update = self.user_repository.is_administrator(
-            user.username
-        ) or self.user_repository.is_salt_astronomer(user.username)
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 
-        self.check_role(username, roles)
+        self.check_role(user.username, roles)
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:

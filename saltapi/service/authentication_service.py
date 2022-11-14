@@ -79,7 +79,7 @@ class AuthenticationService:
 
 def get_current_user(request: Request) -> User:
     try:
-        authorization: str = request.headers.get("Authorization")
+        authorization: Optional[str] = request.headers.get("Authorization")
         if authorization:
             return _user_from_auth_header(authorization)
         else:

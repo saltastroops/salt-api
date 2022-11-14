@@ -5,12 +5,10 @@ from fastapi import (
     APIRouter,
     Body,
     Depends,
-    File,
     HTTPException,
     Path,
     Query,
     Response,
-    UploadFile,
     status,
 )
 from fastapi.responses import FileResponse
@@ -31,7 +29,6 @@ from saltapi.web.schema.proposal import (
     Proposal,
     ProposalListItem,
     ProposalStatusContent,
-    SubmissionAcknowledgment,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])

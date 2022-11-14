@@ -15,6 +15,7 @@ WORKDIR /app
 
 RUN apt-get update -y
 RUN apt-get install -y default-jre
+RUN apt-get install -y ghostscript
 RUN apt-get install -y imagemagick
 
 # Give ImageMagick access to pdf files

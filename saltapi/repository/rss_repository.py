@@ -399,8 +399,12 @@ ORDER BY is_preferred_lamp DESC
                 {
                     "lamp": row.lamp,
                     "is_preferred_lamp": True if row.is_preferred_lamp else False,
-                    "original_exposure_time": float(row.original_exposure_time) if row.original_exposure_time else None,
-                    "preferred_exposure_time": float(row.preferred_exposure_time) if row.preferred_exposure_time else float(row.original_exposure_time)
+                    "original_exposure_time": float(row.original_exposure_time)
+                    if row.original_exposure_time
+                    else None,
+                    "preferred_exposure_time": float(row.preferred_exposure_time)
+                    if row.preferred_exposure_time
+                    else float(row.original_exposure_time),
                 }
             )
         return entries

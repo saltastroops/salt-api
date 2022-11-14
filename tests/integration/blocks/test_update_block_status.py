@@ -88,7 +88,7 @@ def test_block_status_update(
     block_status_value = "Active"
     block_status_reason = ""
 
-    r = client.get(BLOCKS_URL + "/" + str(block_id) + "/status")
+    client.get(BLOCKS_URL + "/" + str(block_id) + "/status")
 
     response = client.put(
         BLOCKS_URL + "/" + str(block_id) + "/status",

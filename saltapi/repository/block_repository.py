@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, cast
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args
 
 import pytz
 from astropy.coordinates import Angle
@@ -12,6 +13,7 @@ from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
 from saltapi.service.proposal import ProposalCode
+from saltapi.settings import get_settings
 
 
 class BlockRepository:
@@ -383,13 +385,14 @@ ORDER BY BVW.VisibilityStart;
             for row in result
         ]
 
-    def _finder_charts(self, pointing_id: int) -> List[Dict[str, Any]]:
+    def _finder_charts(self, block_id: int, pointing_id: int) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT FC.FindingChart_Id AS finding_chart_id,
        FC.Comments        AS comments,
        FC.ValidFrom       AS valid_from,
-       FC.ValidUntil      AS valid_until
+       FC.ValidUntil      AS valid_until,
+       FC.Path            AS path
 FROM FindingChart FC
 WHERE FC.Pointing_Id = :pointing_id
 ORDER BY ValidFrom, FindingChart_Id
@@ -397,7 +400,7 @@ ORDER BY ValidFrom, FindingChart_Id
         )
         result = self.connection.execute(stmt, {"pointing_id": pointing_id})
 
-        return [
+        finder_charts = [
             {
                 "id": row.finding_chart_id,
                 "comment": row.comments,
@@ -407,8 +410,63 @@ ORDER BY ValidFrom, FindingChart_Id
                 "valid_until": pytz.utc.localize(row.valid_until)
                 if row.valid_until
                 else None,
+                "path": row.path,
             }
             for row in result
+        ]
+
+        # Get the finder chart file sizes and URLs
+        proposal_code = self.get_proposal_code_for_block_id(block_id)
+        SizeType = Literal["original", "thumbnail"]
+        for fc in finder_charts:
+            files = []
+            for size in get_args(SizeType):
+                files.extend(
+                    [
+                        {
+                            "size": size,
+                            "url": url,
+                        }
+                        for url in self._finder_chart_urls(
+                            finder_chart_id=fc["id"],
+                            path_from_db=fc["path"],
+                            proposal_code=proposal_code,
+                            size=size,
+                        )
+                    ]
+                )
+            fc["files"] = files
+            del fc["path"]
+
+        return finder_charts
+
+    def _finder_chart_urls(
+        self,
+        finder_chart_id: int,
+        path_from_db: str,
+        proposal_code: str,
+        size: Literal["original", "thumbnail"],
+    ) -> List[str]:
+        included_dir = get_settings().proposals_dir / proposal_code / "Included"
+        prefix = ""
+        size_identifier = ""
+        if size == "original":
+            pass
+        elif size == "thumbnail":
+            prefix = "Thumbnail"
+            size_identifier = "-thumbnail"
+        else:
+            raise ValueError(f"Unsupported finder chart size: {size}")
+
+        # Collect all the finder chart files with the correct size
+        name = Path(path_from_db).stem
+        files = list(included_dir.glob(f"{prefix}{name}.*"))
+
+        # Return the URLs for the files
+        return [
+            f"/finder-charts/{finder_chart_id}{size_identifier}{suffix}"
+            for suffix in (".jpg", ".pdf", ".png")
+            if any(file.suffix.lower() == suffix for file in files)
         ]
 
     def _time_restrictions(
@@ -529,7 +587,9 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
         for pointing_rows in pointing_groups:
             pointing = {
                 "target": self.target_repository.get(pointing_rows[0].target_id),
-                "finder_charts": self._finder_charts(pointing_rows[0].pointing_id),
+                "finder_charts": self._finder_charts(
+                    block_id, pointing_rows[0].pointing_id
+                ),
                 "time_restrictions": self._time_restrictions(
                     pointing_rows[0].pointing_id
                 ),

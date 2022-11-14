@@ -324,17 +324,13 @@ class PermissionService:
 
     def check_permission_to_view_users(self, user: User) -> None:
         """
-        Check whether the user may view a list of users.
+        Check whether the user may update a user.
 
-        Administrators may view any users. Other users may only view their own user
-        details.
+        This is the case if the user may update a user.
         """
         roles = [Role.ADMINISTRATOR]
 
-        self.check_role(
-            username=user.username,
-            roles=roles,
-        )
+        self.check_role(user.username, roles)
 
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
@@ -366,6 +362,18 @@ class PermissionService:
         Check whether the user can update MOS mask metadata.
         """
         username = user.username
+
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+
+        self.check_role(username, roles)
+
+    def check_permission_to_view_obsolete_masks_in_magazine(self, user: User) -> None:
+        """
+        Check whether the user can view the obsolete masks in the magazine.
+        """
+        may_update = self.user_repository.is_administrator(
+            user.username
+        ) or self.user_repository.is_salt_astronomer(user.username)
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
 

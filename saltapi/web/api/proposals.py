@@ -5,12 +5,10 @@ from fastapi import (
     APIRouter,
     Body,
     Depends,
-    File,
     HTTPException,
     Path,
     Query,
     Response,
-    UploadFile,
     status,
 )
 from fastapi.responses import FileResponse
@@ -31,7 +29,6 @@ from saltapi.web.schema.proposal import (
     Proposal,
     ProposalListItem,
     ProposalStatusContent,
-    SubmissionAcknowledgment,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -144,91 +141,6 @@ def get_proposal(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         return proposal_service.get_proposal(proposal_code)
-
-
-@router.post(
-    "/",
-    summary="Submit a new proposal",
-    response_model=SubmissionAcknowledgment,
-    status_code=status.HTTP_202_ACCEPTED,
-)
-def submit_new_proposal(
-    proposal: UploadFile = File(
-        ...,
-        title="Proposal file",
-        description=(
-            "Zip file containing the whole proposal content, including all "
-            "required file attachments."
-        ),
-    )
-) -> SubmissionAcknowledgment:
-    """
-    Submits a new proposal. The proposal must be submitted as a zip file containing the
-    proposal as well as any attachments such as the scientific justification and finder
-    charts. You can generate such a file by exporting a proposal as zip file from the
-    SALT's Principal Investigator Proposal Tool (PIPT).
-
-    The request does not wait for the submission to finish. Instead it returns an
-    acknowledgment with a submission id, which you can use to track the submission (by
-    calling the `/submissions/{submission_id}` endpoint).
-
-    You can only use this endpoint to submit a new proposal. If you try to resubmit an
-    existing proposal, the request fails with an error. Use the
-    `/proposals/{proposal_code}` endpoint for resubmissions.
-    """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
-
-
-@router.patch(
-    "/{proposal_code}",
-    summary="Resubmit a proposal",
-    response_model=SubmissionAcknowledgment,
-    status_code=status.HTTP_202_ACCEPTED,
-)
-def resubmit_proposal(
-    proposal_code: ProposalCode = Path(
-        ...,
-        title="Proposal code",
-        description="Proposal code of the resubmitted proposal.",
-    ),
-    proposal: UploadFile = File(
-        ...,
-        title="Proposal file",
-        description=(
-            "File containing the whole proposal content, including all "
-            "required file attachments."
-        ),
-    ),
-) -> SubmissionAcknowledgment:
-    """
-    Resubmits an existing proposal. The proposal must be submitted as a file in either
-    of the following forms.
-
-    * As zip file containing the whole proposal, including all required file attachments
-    such as the scientific justification and finder charts. In this case the whole
-    proposal is replaced.
-    * As a zip file containing one or multiple blocks, including all required file
-    attachments such as finder charts. In this case the submitted blocks will be added
-    (if they don't exist yet), or they will replace their existing version (if they
-    exist already). All blocks not contained in the file (and all the other proposal
-    content) will remain unchanged.
-    * As an XML file containing one or multiple blocks. In this case the submitted
-    blocks will be added (if they don't exist yet), or they will replace their existing
-    version (if they exist already). All blocks not contained in the file (and all the
-    other proposal content) will remain unchanged. The blocks in the submitted file must
-    not reference any other files. In practical terms this means that all finder charts
-    must be auto-generated on the server and that there may be no MOS masks. Submit a
-    zip file if these conditions aren't met for your resubmission.
-
-    If you resubmit a whole proposal (rather than just blocks), the proposal must
-    contain the same proposal code as the one specified as path parameter. Otherwise,
-    the request will fail with an error.
-
-    The request does not wait for the submission to finish. Instead it returns an
-    acknowledgment with a submission id, which you can use to track the submission (
-    by calling the `/submissions/{submission_id}` endpoint).
-    """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
 
 
 @router.get(

@@ -122,4 +122,6 @@ def update_block_status(
         block_service = services.block_service(unit_of_work.connection)
         block_service.update_block_status(block_id, block_status, status_reason)
 
+        unit_of_work.commit()
+
         return block_service.get_block_status(block_id)

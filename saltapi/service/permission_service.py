@@ -411,8 +411,8 @@ class PermissionService:
         username = user.username
 
         roles = [
-            Role.PRINCIPAL_INVESTIGATOR,
-            Role.PRINCIPAL_CONTACT,
+            Role.SALT_ASTRONOMER,
+            Role.SALT_OPERATOR,
             Role.ADMINISTRATOR,
         ]
 

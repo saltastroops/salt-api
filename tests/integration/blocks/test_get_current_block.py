@@ -1,12 +1,12 @@
-from typing import Callable, Any
+from typing import Any, Callable
 
 import pytest
-import saltapi.service.block_service
 from fastapi.testclient import TestClient
+from sqlalchemy.engine import Connection
 from starlette import status
 
+import saltapi.service.block_service
 from saltapi.service.block import Block
-from sqlalchemy.engine import Connection
 from tests.conftest import authenticate, find_username, not_authenticated
 
 BLOCKS_URL = "/blocks"

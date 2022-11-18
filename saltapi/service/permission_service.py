@@ -69,7 +69,7 @@ class PermissionService:
             return self.user_repository.is_salt_astronomer(username)
 
         elif role == Role.SALT_OPERATOR:
-            return self.user_repository.is_salt_astronomer(username)
+            return self.user_repository.is_salt_operator(username)
 
         elif role == Role.TAC_CHAIR:
             return self.user_repository.is_tac_chair_in_general(username)
@@ -113,6 +113,7 @@ class PermissionService:
         if proposal_type != "Gravitational Wave Event":
             roles = [
                 Role.SALT_ASTRONOMER,
+                Role.SALT_OPERATOR,
                 Role.INVESTIGATOR,
                 Role.PROPOSAL_TAC_MEMBER,
                 Role.ADMINISTRATOR,
@@ -123,6 +124,7 @@ class PermissionService:
             # by anyone who belongs to a SALT partner.
             roles = [
                 Role.SALT_ASTRONOMER,
+                Role.SALT_OPERATOR,
                 Role.PARTNER_AFFILIATED,
                 Role.ADMINISTRATOR,
             ]

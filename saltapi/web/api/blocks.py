@@ -11,7 +11,7 @@ from saltapi.web.schema.block import Block, BlockStatus, BlockStatusValue
 router = APIRouter(prefix="/blocks", tags=["Block"])
 
 
-@router.get("/current-block", summary="Scheduled block.", response_model=Block)
+@router.get("/current-block", summary="Current block", response_model=Block)
 def get_current_block(user: User = Depends(get_current_user)) -> _Block:
     """
     Get the currently observed block.
@@ -25,7 +25,7 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
         return block_service.get_current_block()
 
 
-@router.get("/next-scheduled-block", summary="Scheduled block.", response_model=Block)
+@router.get("/next-scheduled-block", summary="Scheduled block", response_model=Block)
 def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
     """
     Get the next scheduled block.

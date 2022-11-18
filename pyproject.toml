@@ -9,7 +9,6 @@ python = "^3.9"
 uvicorn = {extras = ["standard"], version = "^0.17.6"}
 python-jose = {extras = ["cryptography"], version = "^3.2.0"}
 python-multipart = "^0.0.5"
-Jinja2 = "^2.11.3"
 aiofiles = "^0.6.0"
 dsnparse = "^0.1.15"
 astropy = "^5.1"
@@ -31,7 +30,7 @@ PyPDF2 = "^2.11.0"
 itsdangerous = "^2.1.2"
 starlette = "^0.21.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = {extras = ["d"], version = "^22.10.0"}
 flake8 = "^3.8.4"
 flake8-print = "^4.0.0"
@@ -40,7 +39,6 @@ isort = "^5.7.0"
 mypy = "^0.800"
 pytest-cov = "^2.11.1"
 bandit = "^1.7.0"
-mkdocs-material = "^6.2.7"
 requests = "^2.25.1"
 pydantic = {extras = ["dotenv"], version = "^1.8.1"}
 pytest-asyncio = "^0.14.0"
@@ -51,6 +49,8 @@ pytest-bdd = "^4.1.0"
 pytest-regressions = "^2.3.1"
 pytest-pymysql-autorecord = "^0.1.0"
 httpx = "^0.23.0"
+safety = "^2.3.1"
+mkdocs-material = "^8.5.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

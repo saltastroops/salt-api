@@ -46,8 +46,7 @@ BLOCK = {
                 "target_type": None,
                 "period_ephemeris": None,
                 "horizons_identifier": None,
-                "non_sidereal": False
-
+                "non_sidereal": False,
             },
             "telescope_configurations": [
                 {
@@ -64,18 +63,18 @@ BLOCK = {
                                 "hrs": None,
                                 "rss": None,
                                 "nir": None,
-                                "salticam": None
+                                "salticam": None,
                             },
                             "lamp": None,
                             "payload_configuration_type": "Acquisition",
-                            "use_calibration_screen": False
+                            "use_calibration_screen": False,
                         }
                     ],
                     "position_angle": None,
-                    "grating_angle": 0
+                    "grating_angle": 0,
                 }
             ],
-            "time_restrictions": None
+            "time_restrictions": None,
         }
     ],
     "observing_conditions": {
@@ -83,7 +82,7 @@ BLOCK = {
         "maximum_seeing": 2.5,
         "minimum_lunar_distance": 0.0,
         "minimum_seeing": 0.6,
-        "transparency": "Clear"
+        "transparency": "Clear",
     },
     "observing_windows": [],
     "overhead_time": 912,
@@ -101,18 +100,19 @@ BLOCK = {
         "value": "Active",
         "reason": None,
     },
-    "wait_period": 3
+    "wait_period": 3,
 }
 
 
 def _mock_get_current_block(db_connection: Connection) -> Callable[[str], Block]:
     def f(*args: Any, **kwargs: Any) -> Block:
         return BLOCK
+
     return f
 
 
 def test_get_currently_observed_block_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     not_authenticated(client)
     response = client.get(BLOCKS_URL + "/current-block")
@@ -131,7 +131,7 @@ def test_get_currently_observed_block_requires_authentication(
     ],
 )
 def test_get_currently_observed_block_requires_permissions(
-        username: str, client: TestClient
+    username: str, client: TestClient
 ) -> None:
     authenticate(username, client)
     response = client.get(BLOCKS_URL + "/current-block")
@@ -147,11 +147,11 @@ def test_get_currently_observed_block_requires_permissions(
     ],
 )
 def test_get_currently_observed_block(
-        db_connection: Connection,
-        username: str,
-        client: TestClient,
-        monkeypatch: pytest.MonkeyPatch,
-        check_data: Callable[[Any], None]
+    db_connection: Connection,
+    username: str,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    check_data: Callable[[Any], None],
 ) -> None:
     authenticate(username, client)
 

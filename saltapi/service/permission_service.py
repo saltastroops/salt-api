@@ -324,7 +324,7 @@ class PermissionService:
 
     def check_permission_to_view_users(self, user: User) -> None:
         """
-        Check whether the user may view a list of users.
+        Check whether the user may view the list of users.
 
         This is the case if the user is an administrator.
         """

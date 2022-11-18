@@ -146,7 +146,7 @@ def test_get_next_scheduled_block_requires_permissions(
         find_username("Administrator"),
     ],
 )
-def test_get_currently_observed_block(
+def test_get_next_scheduled_block(
         db_connection: Connection,
         username: str,
         client: TestClient,

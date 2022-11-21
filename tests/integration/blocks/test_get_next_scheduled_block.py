@@ -71,3 +71,33 @@ def test_get_next_scheduled_block(
 
     assert response.status_code == status.HTTP_200_OK
     check_data(response.json())
+
+
+@pytest.mark.parametrize(
+    "username",
+    [
+        find_username("SALT Astronomer"),
+        find_username("SALT Operator"),
+        find_username("Administrator"),
+    ],
+)
+def test_get_returns_no_scheduled_block(
+        username: str,
+        client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authenticate(username, client)
+
+    def mock_get_scheduled_block_id(*args: Any, **kwargs: Any) -> Optional[Block]:
+        return None
+
+    monkeypatch.setattr(
+        saltapi.repository.block_repository.BlockRepository,
+        "get_scheduled_block_id",
+        mock_get_scheduled_block_id,
+    )
+
+    response = client.get(BLOCKS_URL + "/next-scheduled-block")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() is None

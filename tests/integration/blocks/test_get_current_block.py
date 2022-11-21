@@ -1,7 +1,7 @@
 from typing import Any, Callable
 
 import pytest
-import requests
+import responses
 from fastapi.testclient import TestClient
 from starlette import status
 
@@ -46,45 +46,29 @@ def test_get_currently_observed_block_requires_permissions(
     ],
 )
 def test_get_currently_observed_block(
-    username: str,
     client: TestClient,
-    monkeypatch: pytest.MonkeyPatch,
     check_data: Callable[[Any], None],
 ) -> None:
     authenticate(username, client)
 
-    def mock_tcs_call(url: str):
-        class MockResponse:
-            text = """
-<Cluster>
-<Name>salt-tcs-icd.xml</Name>
-<NumElts>1</NumElts>
-<Cluster>
-<Name>tcs obs target info</Name>
-<NumElts>1</NumElts>
+    with responses.RequestsMock() as rsp:
+        text = """
 <String>
 <Name>block id</Name>
 <Val>1</Val>
 </String>
-</Cluster>
-</Cluster>
 """
+        rsp.add(
+            responses.GET,
+            get_settings().tcs_icd_url,
+            body=text,
+            status=200,
+            content_type="application/json",
+        )
+        response = client.get(BLOCKS_URL + "/current-block")
 
-            def __init__(self):
-                self.status_code = 200
-
-        return MockResponse
-
-    monkeypatch.setattr(
-        requests,
-        "get",
-        mock_tcs_call,
-    )
-
-    response = client.get(BLOCKS_URL + "/current-block")
-
-    assert response.status_code == status.HTTP_200_OK
-    check_data(response.json())
+        assert response.status_code == status.HTTP_200_OK
+        check_data(response.json())
 
 
 @pytest.mark.parametrize(
@@ -96,37 +80,21 @@ def test_get_currently_observed_block(
     ],
 )
 def test_get_returns_no_currently_observed_block(
-    username: str,
     client: TestClient,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     authenticate(username, client)
 
-    def mock_tcs_call(url: str):
-        class MockResponse:
-            text = """
-<Cluster>
-<Name>salt-tcs-icd.xml</Name>
-<NumElts>1</NumElts>
-<Cluster>
+    with responses.RequestsMock() as rsp:
+        text = """
 <Name>tcs obs target info</Name>
-<NumElts>0</NumElts>
-</Cluster>
-</Cluster>
 """
+        rsp.add(
+            responses.GET,
+            get_settings().tcs_icd_url,
+            body=text,
+            status=404,
+            content_type="application/json",
+        )
+        response = client.get(BLOCKS_URL + "/current-block")
 
-            def __init__(self):
-                self.status_code = 200
-
-        return MockResponse
-
-    monkeypatch.setattr(
-        requests,
-        "get",
-        mock_tcs_call,
-    )
-
-    response = client.get(BLOCKS_URL + "/current-block")
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() is None
+        assert response.status_code == status.HTTP_404_NOT_FOUND

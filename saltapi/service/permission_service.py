@@ -69,7 +69,7 @@ class PermissionService:
             return self.user_repository.is_salt_astronomer(username)
 
         elif role == Role.SALT_OPERATOR:
-            return self.user_repository.is_salt_astronomer(username)
+            return self.user_repository.is_salt_operator(username)
 
         elif role == Role.TAC_CHAIR:
             return self.user_repository.is_tac_chair_in_general(username)
@@ -113,6 +113,7 @@ class PermissionService:
         if proposal_type != "Gravitational Wave Event":
             roles = [
                 Role.SALT_ASTRONOMER,
+                Role.SALT_OPERATOR,
                 Role.INVESTIGATOR,
                 Role.PROPOSAL_TAC_MEMBER,
                 Role.ADMINISTRATOR,
@@ -123,6 +124,7 @@ class PermissionService:
             # by anyone who belongs to a SALT partner.
             roles = [
                 Role.SALT_ASTRONOMER,
+                Role.SALT_OPERATOR,
                 Role.PARTNER_AFFILIATED,
                 Role.ADMINISTRATOR,
             ]
@@ -324,13 +326,13 @@ class PermissionService:
 
     def check_permission_to_view_users(self, user: User) -> None:
         """
-        Check whether the user may update a user.
+        Check whether the user may view the list of users.
 
-        Administrators may update any users. Other users may only update their own user
-        details.
+        This is the case if the user is an administrator.
         """
-        if not self.user_repository.is_administrator(user.username):
-            raise AuthorizationError()
+        roles = [Role.ADMINISTRATOR]
+
+        self.check_role(user.username, roles)
 
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
@@ -371,12 +373,10 @@ class PermissionService:
         """
         Check whether the user can view the obsolete masks in the magazine.
         """
-        may_update = self.user_repository.is_administrator(
-            user.username
-        ) or self.user_repository.is_salt_astronomer(user.username)
 
-        if not may_update:
-            raise AuthorizationError()
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+
+        self.check_role(user.username, roles)
 
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:
@@ -399,3 +399,32 @@ class PermissionService:
         ]
 
         self.check_role(username, roles, proposal_code)
+
+    def check_permission_to_view_currently_observed_block(self, user: User) -> None:
+        """
+        Check whether the user may view the currently observed block.
+
+        This is the case if the user is any of the following:
+
+        * a SALT Astronomer
+        * a SALT Operator
+        * an administrator
+        """
+        username = user.username
+
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.SALT_OPERATOR,
+            Role.ADMINISTRATOR,
+        ]
+
+        self.check_role(username, roles)
+
+    def check_permission_to_view_scheduled_block(self, user: User) -> None:
+        """
+        Check whether the user may view the next scheduled block.
+
+        This is the case if the user may view the currently observed block.
+        """
+
+        self.check_permission_to_view_currently_observed_block(user)

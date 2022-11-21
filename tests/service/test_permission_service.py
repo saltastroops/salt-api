@@ -28,6 +28,7 @@ class FakeUserRepository:
         is_tac_chair_in_general: bool = False,
         is_tac_member_in_general: bool = False,
         is_engineer: bool = False,
+        is_salt_operator: bool = False,
     ) -> None:
         self._is_investigator = is_investigator
         self._is_principal_investigator = is_principal_investigator
@@ -42,6 +43,7 @@ class FakeUserRepository:
         self._is_tac_chair_in_general = is_tac_chair_in_general
         self._is_tac_member_in_general = is_tac_member_in_general
         self._is_engineer = is_engineer
+        self._is_salt_operator = is_salt_operator
 
     def is_investigator(self, username: str, proposal_code: ProposalCode) -> bool:
         # A Principal Investigator or Contact is an investigator as well
@@ -90,6 +92,9 @@ class FakeUserRepository:
 
     def is_engineer(self) -> bool:
         return self._is_engineer
+
+    def is_salt_operator(self, username: str) -> bool:
+        return self._is_salt_operator
 
 
 class FakeProposalRepository:

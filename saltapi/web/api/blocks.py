@@ -1,6 +1,4 @@
-from typing import Optional
-
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, HTTPException
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
@@ -9,11 +7,12 @@ from saltapi.service.block import BlockStatus as _BlockStatus
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.block import Block, BlockStatus, BlockStatusValue
+from starlette import status
 
 router = APIRouter(prefix="/blocks", tags=["Block"])
 
 
-@router.get("/current-block", summary="Current block", response_model=Optional[Block])
+@router.get("/current-block", summary="Current block", response_model=Block)
 def get_current_block(user: User = Depends(get_current_user)) -> _Block:
     """
     Get the currently observed block.
@@ -24,11 +23,14 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
         permission_service.check_permission_to_view_currently_observed_block(user)
 
         block_service = services.block_service(unit_of_work.connection)
-        return block_service.get_current_block()
+        block = block_service.get_current_block()
+        if not block:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return block
 
 
 @router.get(
-    "/next-scheduled-block", summary="Scheduled block", response_model=Optional[Block]
+    "/next-scheduled-block", summary="Scheduled block", response_model=Block
 )
 def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
     """
@@ -40,7 +42,10 @@ def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
         permission_service.check_permission_to_view_scheduled_block(user)
 
         block_service = services.block_service(unit_of_work.connection)
-        return block_service.get_next_scheduled_block()
+        block = block_service.get_next_scheduled_block()
+        if not block:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return block
 
 
 @router.get("/{block_id}", summary="Get a block", response_model=Block)

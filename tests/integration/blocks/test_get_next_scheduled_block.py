@@ -41,20 +41,12 @@ def test_get_next_scheduled_block_requires_permissions(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@pytest.mark.parametrize(
-    "username",
-    [
-        find_username("SALT Astronomer"),
-        find_username("SALT Operator"),
-        find_username("Administrator"),
-    ],
-)
 def test_get_next_scheduled_block(
-    username: str,
     client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
     check_data: Callable[[Any], None],
 ) -> None:
+    username = find_username("SALT Operator")
     authenticate(username, client)
 
     def mock_get_scheduled_block_id(*args: Any, **kwargs: Any) -> Optional[Block]:
@@ -73,19 +65,11 @@ def test_get_next_scheduled_block(
     check_data(response.json())
 
 
-@pytest.mark.parametrize(
-    "username",
-    [
-        find_username("SALT Astronomer"),
-        find_username("SALT Operator"),
-        find_username("Administrator"),
-    ],
-)
 def test_get_returns_no_scheduled_block(
-    username: str,
     client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    username = find_username("SALT Astronomer")
     authenticate(username, client)
 
     def mock_get_scheduled_block_id(*args: Any, **kwargs: Any) -> Optional[Block]:

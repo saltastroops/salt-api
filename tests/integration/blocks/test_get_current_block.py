@@ -38,11 +38,19 @@ def test_get_currently_observed_block_requires_permissions(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+@pytest.mark.parametrize(
+    "username",
+    [
+        find_username("SALT Operator"),
+        find_username("SALT Astronomer"),
+        find_username("Administrator"),
+    ],
+)
 def test_get_currently_observed_block(
+    username: str,
     client: TestClient,
     check_data: Callable[[Any], None],
 ) -> None:
-    username = find_username("Administrator")
     authenticate(username, client)
 
     with responses.RequestsMock() as rsp:
@@ -57,7 +65,7 @@ def test_get_currently_observed_block(
             get_settings().tcs_icd_url,
             body=text,
             status=200,
-            content_type="application/json",
+            content_type="application/xml",
         )
         response = client.get(BLOCKS_URL + "/current-block")
 
@@ -80,7 +88,7 @@ def test_get_returns_no_currently_observed_block(
             get_settings().tcs_icd_url,
             body=text,
             status=404,
-            content_type="application/json",
+            content_type="application/xml",
         )
         response = client.get(BLOCKS_URL + "/current-block")
 

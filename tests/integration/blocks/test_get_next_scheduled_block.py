@@ -55,7 +55,7 @@ def test_get_next_scheduled_block(
 
     monkeypatch.setattr(
         saltapi.repository.block_repository.BlockRepository,
-        "get_scheduled_block_id",
+        "_get_scheduled_block_id",
         mock_get_scheduled_block_id,
     )
 
@@ -77,7 +77,7 @@ def test_get_returns_no_scheduled_block(
 
     monkeypatch.setattr(
         saltapi.repository.block_repository.BlockRepository,
-        "get_scheduled_block_id",
+        "_get_scheduled_block_id",
         mock_get_scheduled_block_id,
     )
 

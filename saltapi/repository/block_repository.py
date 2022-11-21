@@ -855,13 +855,19 @@ WHERE TCOC.Pointing_Id = :pointing_id
         result = self.connection.execute(stmt, {"pointing_id": pointing_id})
         return cast(bool, result.scalar_one() > 1)
 
+    def get_scheduled_block_id(self) -> Optional[int]:
+        """
+        Get next scheduled block id.
+        """
+        stmt = text("SELECT Block_Id FROM schedule")
+        result = self.connection.execute(stmt)
+        return cast(int, result.one_or_none())
+
     def get_next_scheduled_block(self) -> Optional[Block]:
         """
         Get next scheduled block.
         """
-        stmt = text("SELECT Block_Id FROM schedule")
-        result = self.connection.execute(stmt)
-        block_id = cast(int, result.one_or_none())
+        block_id = self.get_scheduled_block_id()
         if block_id:
             return self.get(block_id)
         return None

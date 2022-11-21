@@ -29,6 +29,7 @@ pdfkit = "^1.0.0"
 PyPDF2 = "^2.11.0"
 itsdangerous = "^2.1.2"
 starlette = "^0.21.0"
+responses = "^0.22.0"
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["d"], version = "^22.10.0"}

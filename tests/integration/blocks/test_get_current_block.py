@@ -147,18 +147,40 @@ def test_get_currently_observed_block_requires_permissions(
     ],
 )
 def test_get_currently_observed_block(
-    db_connection: Connection,
-    username: str,
-    client: TestClient,
-    monkeypatch: pytest.MonkeyPatch,
-    check_data: Callable[[Any], None],
+        username: str,
+        client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        check_data: Callable[[Any], None],
 ) -> None:
     authenticate(username, client)
 
+    def mock_tcs_call(url: str):
+        class MockResponse:
+
+            text = """
+<Cluster>
+<Name>salt-tcs-icd.xml</Name>
+<NumElts>1</NumElts>
+<Cluster>
+<Name>tcs obs target info</Name>
+<NumElts>1</NumElts>
+<String>
+<Name>block id</Name>
+<Val>1</Val>
+</String>
+</Cluster>
+</Cluster>
+"""
+
+            def __init__(self):
+                self.status_code = 200
+
+        return MockResponse
+
     monkeypatch.setattr(
-        saltapi.service.block_service.BlockService,
-        "get_current_block",
-        _mock_get_current_block(db_connection),
+        requests,
+        "get",
+        mock_tcs_call,
     )
 
     response = client.get(BLOCKS_URL + "/current-block")

@@ -5,6 +5,7 @@ import responses
 from fastapi.testclient import TestClient
 from starlette import status
 
+from saltapi.settings import get_settings
 from tests.conftest import authenticate, find_username, not_authenticated
 
 BLOCKS_URL = "/blocks"
@@ -37,18 +38,11 @@ def test_get_currently_observed_block_requires_permissions(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@pytest.mark.parametrize(
-    "username",
-    [
-        find_username("SALT Astronomer"),
-        find_username("SALT Operator"),
-        find_username("Administrator"),
-    ],
-)
 def test_get_currently_observed_block(
     client: TestClient,
     check_data: Callable[[Any], None],
 ) -> None:
+    username = find_username("Administrator")
     authenticate(username, client)
 
     with responses.RequestsMock() as rsp:
@@ -71,17 +65,10 @@ def test_get_currently_observed_block(
         check_data(response.json())
 
 
-@pytest.mark.parametrize(
-    "username",
-    [
-        find_username("SALT Astronomer"),
-        find_username("SALT Operator"),
-        find_username("Administrator"),
-    ],
-)
 def test_get_returns_no_currently_observed_block(
     client: TestClient,
 ) -> None:
+    username = find_username("SALT Astronomer")
     authenticate(username, client)
 
     with responses.RequestsMock() as rsp:

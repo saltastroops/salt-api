@@ -83,5 +83,4 @@ def test_get_returns_no_scheduled_block(
 
     response = client.get(BLOCKS_URL + "/next-scheduled-block")
 
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() is None
+    assert response.status_code == status.HTTP_404_NOT_FOUND

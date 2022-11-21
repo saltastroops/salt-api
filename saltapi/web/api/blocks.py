@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Body, Depends, Path, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Path
+from starlette import status
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
@@ -7,7 +8,6 @@ from saltapi.service.block import BlockStatus as _BlockStatus
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.block import Block, BlockStatus, BlockStatusValue
-from starlette import status
 
 router = APIRouter(prefix="/blocks", tags=["Block"])
 

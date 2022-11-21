@@ -82,9 +82,9 @@ def test_get_next_scheduled_block(
     ],
 )
 def test_get_returns_no_scheduled_block(
-        username: str,
-        client: TestClient,
-        monkeypatch: pytest.MonkeyPatch,
+    username: str,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     authenticate(username, client)
 

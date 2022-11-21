@@ -11,7 +11,7 @@ BLOCKS_URL = "/blocks"
 
 
 def test_get_currently_observed_block_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     not_authenticated(client)
     response = client.get(BLOCKS_URL + "/current-block")
@@ -30,7 +30,7 @@ def test_get_currently_observed_block_requires_authentication(
     ],
 )
 def test_get_currently_observed_block_requires_permissions(
-        username: str, client: TestClient
+    username: str, client: TestClient
 ) -> None:
     authenticate(username, client)
     response = client.get(BLOCKS_URL + "/current-block")
@@ -46,16 +46,15 @@ def test_get_currently_observed_block_requires_permissions(
     ],
 )
 def test_get_currently_observed_block(
-        username: str,
-        client: TestClient,
-        monkeypatch: pytest.MonkeyPatch,
-        check_data: Callable[[Any], None],
+    username: str,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    check_data: Callable[[Any], None],
 ) -> None:
     authenticate(username, client)
 
     def mock_tcs_call(url: str):
         class MockResponse:
-
             text = """
 <Cluster>
 <Name>salt-tcs-icd.xml</Name>
@@ -97,15 +96,14 @@ def test_get_currently_observed_block(
     ],
 )
 def test_get_returns_no_currently_observed_block(
-        username: str,
-        client: TestClient,
-        monkeypatch: pytest.MonkeyPatch,
+    username: str,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     authenticate(username, client)
 
     def mock_tcs_call(url: str):
         class MockResponse:
-
             text = """
 <Cluster>
 <Name>salt-tcs-icd.xml</Name>

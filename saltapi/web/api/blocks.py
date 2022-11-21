@@ -27,7 +27,9 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
         return block_service.get_current_block()
 
 
-@router.get("/next-scheduled-block", summary="Scheduled block", response_model=Optional[Block])
+@router.get(
+    "/next-scheduled-block", summary="Scheduled block", response_model=Optional[Block]
+)
 def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
     """
     Get the next scheduled block.

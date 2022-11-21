@@ -857,15 +857,15 @@ WHERE TCOC.Pointing_Id = :pointing_id
 
     def _get_scheduled_block_id(self) -> Optional[int]:
         """
-        Get next scheduled block id.
+        Get the id of the block scheduled next.
         """
         stmt = text("SELECT Block_Id FROM schedule")
         result = self.connection.execute(stmt)
-        return cast(int, result.one_or_none())
+        return result.one_or_none()
 
     def get_next_scheduled_block(self) -> Optional[Block]:
         """
-        Get next scheduled block.
+        Get the block scheduled next.
         """
         block_id = self._get_scheduled_block_id()
         if block_id:

@@ -29,9 +29,7 @@ def get_current_block(user: User = Depends(get_current_user)) -> _Block:
         return block
 
 
-@router.get(
-    "/next-scheduled-block", summary="Scheduled block", response_model=Block
-)
+@router.get("/next-scheduled-block", summary="Scheduled block", response_model=Block)
 def get_next_scheduled_block(user: User = Depends(get_current_user)) -> _Block:
     """
     Get the next scheduled block.

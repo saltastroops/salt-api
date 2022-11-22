@@ -34,7 +34,7 @@
         <td colspan="2">{{ detector.exposureTime | number: "1.2-2" }} sec</td>
         <td>
           <span *ngIf="detector.detectorWindow">{{
-            detector.detectorWindow?.height
+            detector.detectorWindow.height
           }}</span>
           <span
             *ngIf="

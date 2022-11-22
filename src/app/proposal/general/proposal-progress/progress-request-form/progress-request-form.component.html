@@ -70,11 +70,11 @@
                 "
                 [ngClass]="{
                   'is-danger':
-                    (partnerRequestedPercentages.controls[i]?.get(
+                    (partnerRequestedPercentages.controls[i].get(
                       'requestedPercentage'
                     )?.dirty ||
                       submitted) &&
-                    partnerRequestedPercentages.controls[i]?.get(
+                    partnerRequestedPercentages.controls[i].get(
                       'requestedPercentage'
                     )?.errors &&
                     t.value.partnerCode !== 'OTH'
@@ -113,7 +113,7 @@
                   "
                 >
                   {{
-                    partnerRequestedPercentages.controls[i]?.get(
+                    partnerRequestedPercentages.controls[i].get(
                       "requestedPercentage"
                     )?.errors?.message
                   }}
@@ -128,7 +128,7 @@
             <td colspan="3">
               <p>
                 <label class="has-text-danger">{{
-                  partnerRequestedPercentages?.errors?.message
+                  partnerRequestedPercentages.errors.message
                 }}</label>
               </p>
             </td>

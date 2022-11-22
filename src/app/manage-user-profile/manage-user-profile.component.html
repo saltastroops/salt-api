@@ -26,8 +26,8 @@
     <div *ngIf="selectedUserId">
       <hr class="section-line" />
       <h2 class="title is-4">
-        Edit contacts for '{{ selectedUser?.givenName }}
-        {{ selectedUser?.familyName }}'
+        Edit contacts for '{{ selectedUser.givenName }}
+        {{ selectedUser.familyName }}'
       </h2>
       <div id="username">
         <table>
@@ -39,7 +39,7 @@
             </td>
             <td>
               <p>
-                {{ selectedUser?.username }}
+                {{ selectedUser.username }}
               </p>
             </td>
           </tr>

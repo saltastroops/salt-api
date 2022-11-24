@@ -1,6 +1,14 @@
 name: Test
 
-on: ["push", "pull_request"]
+on:
+  push:
+    branches:
+      - development
+      - main
+  pull_request:
+    branches:
+      - devcelopment
+      - main
 
 env:
   testdata_dir: cypress/salt-testdata

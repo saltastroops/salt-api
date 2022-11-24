@@ -1,12 +1,8 @@
 version: "3.5"
 services:
-  web-manager-frontend:
-    container_name: web-manager-container # Container name
+  web-manager:
+    container_name: web-manager # Container name
     build:
       context: . # Location of our Dockerfile
-      args:
-        RUN_MODE: "${RUN_MODE}"
-    env_file:
-      - .env
     ports:
-      - ${PORT}:80 # Port mapping
+      - 4200:80 # Port mapping

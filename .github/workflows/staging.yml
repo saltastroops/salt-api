@@ -1,0 +1,78 @@
+name: Staging
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  docker-image:
+    # Adapted from the local cache example on https://docs.docker.com/build/ci/github-actions/examples/#cache
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Authenticate against the container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build and push the Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          build-args: RUN_MODE=staging
+          push: true
+          tags: ${{ secrets.REGISTRY }}/saltastroops/web-manager:staging
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  deployment:
+    needs: docker-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Copy Docker Compose file locally
+        run: cp docker-compose.staging.yml docker-compose.staging.new.yml
+      - name: Copy Docker Compose file to the deployment server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USERNAME }}
+          key: ${{ secrets.BASTION_KEY }}
+          proxy_host: ${{ secrets.BASTION_HOST }}
+          proxy_username: ${{ secrets.BASTION_USERNAME }}
+          proxy_key: ${{ secrets.BASTION_KEY }}
+          source: docker-compose.staging.new.yml
+          target: web-manager
+      - name: Deploy the Web Manager
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USERNAME }}
+          key: ${{ secrets.BASTION_KEY }}
+          proxy_host: ${{ secrets.BASTION_HOST }}
+          proxy_username: ${{ secrets.BASTION_USERNAME }}
+          proxy_key: ${{ secrets.BASTION_KEY }}
+          script: |
+            cd web-manager
+            docker login --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.REGISTRY }}
+            docker compose -f docker-compose.staging.yml stop
+            mv docker-compose.staging.new.yml docker-compose.staging.yml
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d

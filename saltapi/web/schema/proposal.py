@@ -65,11 +65,19 @@ class ProposalType(str, Enum):
     SCIENCE_VERIFICATION = "Science Verification"
 
 
+class UpdateStatus(str, Enum):
+    SUCCESSFUL = "Successful"
+    PENDING = "Pending"
+    Failed = "Failed"
+
+
 class ProprietaryPeriod(BaseModel):
     """Proprietary period."""
 
     current: int = Field(
-        ..., title="Current proprietary period", description="Proprietary period in months."
+        ...,
+        title="Current proprietary period",
+        description="Proprietary period in months.",
     )
     maximum: Optional[int] = Field(
         ...,
@@ -80,6 +88,19 @@ class ProprietaryPeriod(BaseModel):
         ...,
         title="start date",
         description="Start date for counting the proprietary period.",
+    )
+
+
+class NewProprietaryPeriod(ProprietaryPeriod):
+    status: UpdateStatus = Field(
+        ...,
+        title="Update status",
+        description="The status of updating the proprietary period.",
+    )
+    message: Optional[str] = Field(
+        ...,
+        title="Message",
+        description="The message.",
     )
 
 
@@ -219,7 +240,7 @@ class DataReleaseDateUpdate(BaseModel):
         ...,
         title="The proprietary period",
         description="The number of months when the proposal data should become public after the last date of the "
-                    "semester of the last observation.",
+        "semester of the last observation.",
     )
     motivation: Optional[str] = Field(
         ...,

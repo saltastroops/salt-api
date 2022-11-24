@@ -223,7 +223,7 @@ LIMIT :limit;
         if phase is None:
             phase = self._latest_submission_phase(proposal_code)
 
-        general_info = self. _general_info(proposal_code, semester)
+        general_info = self._general_info(proposal_code, semester)
 
         # Replace the proprietary period with the data release date
         block_visits = self._block_visits(proposal_code)
@@ -231,9 +231,9 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "current": proprietary_period,
             "maximum": self._maximum_proprietary_period(proposal_code, semester),
-            "start_date": semester_end(semester_of_datetime(
-                self._latest_observation_datetime(proposal_code))
-            )
+            "start_date": semester_end(
+                semester_of_datetime(self._latest_observation_datetime(proposal_code))
+            ),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
 
@@ -1743,11 +1743,11 @@ WHERE PC.Proposal_Code = :proposal_code
         )
 
     def insert_proprietary_period_extension_request(
-            self,
-            proposal_code: str,
-            proprietary_period: int,
-            motivation: str,
-            username: str
+        self,
+        proposal_code: str,
+        proprietary_period: int,
+        motivation: str,
+        username: str,
     ):
         istmt = text(
             """
@@ -1775,15 +1775,11 @@ VALUES (
                 "username": username,
                 "reason": motivation,
                 "date": made_at_date,
-                "requested_period": proprietary_period
+                "requested_period": proprietary_period,
             },
         )
 
-    def update_proprietary_period(
-        self,
-        proposal_code: str,
-        proprietary_period: int
-    ):
+    def update_proprietary_period(self, proposal_code: str, proprietary_period: int):
         istmt = text(
             """
 UPDATE ProposalGeneralInfo
@@ -1791,11 +1787,8 @@ SET ProprietaryPeriod = :proprietary_period, ReleaseDate = :release_date
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code)
-)
     """
         )
-        block_visits = self._block_visits(proposal_code)
-        first_submission_date = self._first_submission_date(proposal_code)
         self.connection.execute(
             istmt,
             {
@@ -1803,7 +1796,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                 "release_date": self._data_release_date(
                     proposal_code, proprietary_period
                 ),
-                "requested_period": proprietary_period
+                "proprietary_period": proprietary_period,
             },
         )
 
@@ -1829,7 +1822,9 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             tzinfo=pytz.utc,
         )
 
-    def _maximum_proprietary_period(self, proposal_code: str, semester: str) -> Optional[int]:
+    def _maximum_proprietary_period(
+        self, proposal_code: str, semester: str
+    ) -> Optional[int]:
 
         for ta in self.time_allocations(proposal_code, semester):
             if ta["partner_code"] == "RSA":

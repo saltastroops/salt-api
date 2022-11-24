@@ -1,11 +1,11 @@
-from typing import List, Optional, cast
+from typing import Dict, List, Optional, cast
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
-from saltapi.web.schema.proposal import Proposal
+from saltapi.web.schema.proposal import DataReleaseDateUpdate
 
 
 class PermissionService:
@@ -430,7 +430,9 @@ class PermissionService:
 
         self.check_permission_to_view_currently_observed_block(user)
 
-    def check_permission_to_check_permission_to_update_proprietary_period(self, user: User, proposal_code: str):
+    def check_permission_to_check_permission_to_update_proprietary_period(
+        self, user: User, proposal_code: str
+    ):
 
         username = user.username
         roles = [
@@ -441,9 +443,17 @@ class PermissionService:
         self.check_role(username, roles, proposal_code)
 
     @staticmethod
-    def does_proposal_need_motivation_to_update_proprietary_period(proposal: Proposal):
-        for ta in proposal.time_allocations:
-            if ta.partner_code == "RSA":
-                if any(ss in proposal.proposal_code for ss in ["SCI", "MLT", "ORP"]):
-                    return True
+    def does_proposal_need_motivation_to_update_proprietary_period(
+        proposal: Dict[str, any], proprietary_period_update: DataReleaseDateUpdate
+    ):
+        for ta in proposal["time_allocations"]:
+            if ta["partner_code"] == "RSA":  # Only RSA needs motivation
+                # RSA need motivation for this proposal codes only
+                if any(ss in proposal["proposal_code"] for ss in ["SCI", "MLT", "ORP"]):
+                    # And requesting more than the maximum proprietary period
+                    if (
+                        proposal["general_info"]["proprietary_period"]["maximum"]
+                        < proprietary_period_update.proprietary_period
+                    ):
+                        return True
         return False

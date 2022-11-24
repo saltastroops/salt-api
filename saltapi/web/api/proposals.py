@@ -25,6 +25,7 @@ from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     DataReleaseDateUpdate,
+    NewProprietaryPeriod,
     ObservationComment,
     Proposal,
     ProposalListItem,
@@ -215,6 +216,78 @@ def get_proposal_status(
 
 
 @router.put(
+    "/{proposal_code}/data-release-date",
+    summary="Request a new data release date",
+    response_model=NewProprietaryPeriod,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def update_data_release_date(
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description=(
+            "Proposal code of the proposal for which a new data release date is"
+            " requested."
+        ),
+    ),
+    release_date_update: DataReleaseDateUpdate = Body(
+        ...,
+        title="The data release date",
+        description="The proprietary period in months and, Optional motivation.",
+    ),
+    user: User = Depends(get_current_user),
+) -> NewProprietaryPeriod:
+    """
+    Requests a new date when the observation data can become public. It depends on
+    the requested date and the proposal whether the request is granted immediately.
+    Otherwise, the request needs to be approved based on the requested date and the
+    submitted motivation.
+
+    As data is released at the beginning of a month, the updated release date may be
+    later than the requested date.
+
+    The request returns the new release date. This is the same as the previous date
+    if the request needs to be approved.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_check_permission_to_update_proprietary_period(
+            user, proposal_code
+        )
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal = proposal_service.get_proposal(proposal_code)
+        if permission_service.does_proposal_need_motivation_to_update_proprietary_period(
+            proposal, release_date_update
+        ):
+            if not release_date_update.motivation:
+                raise ValueError("Motivation is required.")
+            proposal_service.update_proprietary_period_extension_request(
+                proposal_code=proposal_code,
+                proprietary_period=release_date_update.proprietary_period,
+                motivation=release_date_update.motivation,
+                username=user.username,
+            )
+            new_proprietary_period = NewProprietaryPeriod(
+                **proposal["general_info"]["proprietary_period"],
+                status="Pending",
+                message="Waiting for approval.",
+            )
+        else:
+            proposal_service.update_proprietary_period(
+                proposal_code=proposal_code,
+                proprietary_period=release_date_update.proprietary_period,
+            )
+            proposal = proposal_service.get_proposal(proposal_code)
+            new_proprietary_period = NewProprietaryPeriod(
+                **proposal["general_info"]["proprietary_period"],
+                status="Successful",
+                message=None,
+            )
+        unit_of_work.connection.commit()
+        return new_proprietary_period
+
+
+@router.put(
     "/{proposal_code}/status",
     summary="Update the proposal status",
     response_model=ProposalStatusContent,
@@ -334,60 +407,3 @@ def get_data_release_date(
     public.
     """
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
-
-
-@router.put(
-    "/{proposal_code}/data-release-date",
-    summary="Request a new data release date",
-    response_model=DataReleaseDateUpdate,
-    status_code=status.HTTP_202_ACCEPTED,
-)
-def update_data_release_date(
-    proposal_code: ProposalCode = Path(
-        ...,
-        title="Proposal code",
-        description=(
-            "Proposal code of the proposal for which a new data release date is"
-            " requested."
-        ),
-    ),
-    release_date_update: DataReleaseDateUpdate = Body(
-        ...,
-        title="The data release date",
-        description="The proprietary period in months and, Optional motivation."
-    ),
-    user: User = Depends(get_current_user),
-) -> DataReleaseDate:
-    """
-    Requests a new date when the observation data can become public. It depends on
-    the requested date and the proposal whether the request is granted immediately.
-    Otherwise, the request needs to be approved based on the requested date and the
-    submitted motivation.
-
-    As data is released at the beginning of a month, the updated release date may be
-    later than the requested date.
-
-    The request returns the new release date. This is the same as the previous date
-    if the request needs to be approved.
-    """
-    with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_check_permission_to_update_proprietary_period(
-            user, proposal_code
-        )
-        proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal = proposal_service.get_proposal(proposal_code)
-        if permission_service.does_proposal_need_motivation_to_update_proprietary_period(proposal):
-            proposal_service.update_proprietary_period_extension_request(
-                proposal_code=proposal_code,
-                proprietary_period=release_date_update.proprietary_period,
-                motivation=release_date_update.motivation,
-                username=user.username
-            )
-
-        proposal_service.update_proprietary_period(
-            proposal_code=proposal_code, proprietary_period=release_date_update.proprietary_period
-        )
-        unit_of_work.connection.commit()
-        # TODO get new release date
-        return DataReleaseDate(release_date="2020-01-01")

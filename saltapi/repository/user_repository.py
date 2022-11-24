@@ -361,6 +361,26 @@ WHERE PU.Username = :username
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar_one()) > 0
 
+    def is_salt_operator(self, username: str) -> bool:
+        """
+        Check whether the user is a SALT Operator.
+
+        If the user does not exist, it is assumed they are no SALT Operator.
+        """
+        stmt = text(
+            """
+SELECT COUNT(*)
+FROM PiptUser PU
+         JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+         JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+WHERE PU.Username = :username
+  AND PS.PiptSetting_Name = 'RightOperator'
+  AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return cast(int, result.scalar_one()) > 0
+
     def is_tac_member_for_proposal(self, username: str, proposal_code: str) -> bool:
         """
         Check whether the user is member of a TAC from which a proposal requests time.

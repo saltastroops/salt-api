@@ -5,6 +5,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
+from saltapi.web.schema.proposal import Proposal
 
 
 class PermissionService:
@@ -399,3 +400,21 @@ class PermissionService:
         ]
 
         self.check_role(username, roles, proposal_code)
+
+    def check_permission_to_check_permission_to_update_proprietary_period(self, user: User, proposal_code: str):
+
+        username = user.username
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.ADMINISTRATOR,
+        ]
+        self.check_role(username, roles, proposal_code)
+
+    @staticmethod
+    def does_proposal_need_motivation_to_update_proprietary_period(proposal: Proposal):
+        for ta in proposal.time_allocations:
+            if ta.partner_code == "RSA":
+                if any(ss in proposal.proposal_code for ss in ["SCI", "MLT", "ORP"]):
+                    return True
+        return False

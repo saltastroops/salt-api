@@ -1,7 +1,7 @@
 import hashlib
 import re
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
@@ -223,17 +223,18 @@ LIMIT :limit;
         if phase is None:
             phase = self._latest_submission_phase(proposal_code)
 
-        general_info = self._general_info(proposal_code, semester)
+        general_info = self. _general_info(proposal_code, semester)
 
         # Replace the proprietary period with the data release date
         block_visits = self._block_visits(proposal_code)
         proprietary_period = general_info["proprietary_period"]
-        first_submission_date = self._first_submission_date(proposal_code)
-        general_info["data_release_date"] = self._data_release_date(
-            block_visits, proprietary_period, first_submission_date.date()
-        )
-        del general_info["proprietary_period"]
-
+        general_info["proprietary_period"] = {
+            "current": proprietary_period,
+            "maximum": self._maximum_proprietary_period(proposal_code, semester),
+            "start_date": semester_end(semester_of_datetime(
+                self._latest_observation_datetime(proposal_code))
+            )
+        }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
 
         proposal: Dict[str, Any] = {
@@ -397,34 +398,18 @@ LIMIT 1
 
         return db_proposal_type
 
-    @staticmethod
     def _data_release_date(
-        block_visits: List[Dict[str, Any]],
+        self,
+        proposal_code: str,
         proprietary_period: Optional[int],
-        first_submission: date,
     ) -> Optional[date]:
         # no proprietary period - no release date
         if proprietary_period is None:
             return None
 
-        # find the latest observation
-        latest_observation = first_submission
-        for observation in block_visits:
-            if observation["night"] > latest_observation:
-                latest_observation = observation["night"]
-
-        # find the end of the semester when the latest observation was made
-        latest_observation_datetime = datetime(
-            latest_observation.year,
-            latest_observation.month,
-            latest_observation.day,
-            12,
-            0,
-            0,
-            0,
-            tzinfo=pytz.utc,
+        latest_observation_semester = semester_of_datetime(
+            self._latest_observation_datetime(proposal_code)
         )
-        latest_observation_semester = semester_of_datetime(latest_observation_datetime)
         latest_observation_semester_end = semester_end(latest_observation_semester)
 
         # add the proprietary period to get the data release date
@@ -1756,3 +1741,98 @@ WHERE PC.Proposal_Code = :proposal_code
             semester=semester,
             filenames=filenames,
         )
+
+    def insert_proprietary_period_extension_request(
+            self,
+            proposal_code: str,
+            proprietary_period: int,
+            motivation: str,
+            username: str
+    ):
+        istmt = text(
+            """
+INSERT INTO ProprietaryPeriodExtensionRequest(
+    MadeAt,
+    ProposalCode_Id,
+    Reason,
+    RequestedBy,
+    RequestedPeriod
+)
+VALUES (
+    :date,
+    (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
+    :reason,
+    (SELECT Investigator_Id FROM PiptUser WHERE Username = :username),
+    :requested_period
+)
+    """
+        )
+        made_at_date = date.today()
+        self.connection.execute(
+            istmt,
+            {
+                "proposal_code": proposal_code,
+                "username": username,
+                "reason": motivation,
+                "date": made_at_date,
+                "requested_period": proprietary_period
+            },
+        )
+
+    def update_proprietary_period(
+        self,
+        proposal_code: str,
+        proprietary_period: int
+    ):
+        istmt = text(
+            """
+UPDATE ProposalGeneralInfo
+SET ProprietaryPeriod = :proprietary_period, ReleaseDate = :release_date
+WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
+                         FROM ProposalCode PC
+                         WHERE PC.Proposal_Code = :proposal_code)
+)
+    """
+        )
+        block_visits = self._block_visits(proposal_code)
+        first_submission_date = self._first_submission_date(proposal_code)
+        self.connection.execute(
+            istmt,
+            {
+                "proposal_code": proposal_code,
+                "release_date": self._data_release_date(
+                    proposal_code, proprietary_period
+                ),
+                "requested_period": proprietary_period
+            },
+        )
+
+    def _latest_observation_datetime(self, proposal_code: str) -> datetime:
+
+        # find the latest observation
+        latest_observation = self._first_submission_date(proposal_code)
+        for observation in self._block_visits(proposal_code):
+            if type(latest_observation) == date:
+                latest_observation = datetime.combine(latest_observation, time.min)
+            if observation["night"] > latest_observation.date():
+                latest_observation = observation["night"]
+
+        # find the end of the semester when the latest observation was made
+        return datetime(
+            latest_observation.year,
+            latest_observation.month,
+            latest_observation.day,
+            12,
+            0,
+            0,
+            0,
+            tzinfo=pytz.utc,
+        )
+
+    def _maximum_proprietary_period(self, proposal_code: str, semester: str) -> Optional[int]:
+
+        for ta in self.time_allocations(proposal_code, semester):
+            if ta["partner_code"] == "RSA":
+                if any(ss in proposal_code for ss in ["SCI", "MLT", "ORP"]):
+                    return 24
+        return None

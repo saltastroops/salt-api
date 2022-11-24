@@ -289,3 +289,26 @@ class ProposalService:
             return b
         else:
             raise FileNotFoundError("There is no proposal progress file.")
+
+    def update_proprietary_period_extension_request(
+            self, proposal_code: str,
+            proprietary_period: int,
+            motivation: str,
+            username: str
+    ):
+        self.repository.insert_proprietary_period_extension_request(
+            proposal_code,
+            proprietary_period,
+            motivation,
+            username
+        )
+
+    def update_proprietary_period(
+        self,
+        proposal_code: str,
+        proprietary_period: int
+    ):
+        self.repository.update_proprietary_period(
+            proposal_code=proposal_code,
+            proprietary_period=proprietary_period
+        )

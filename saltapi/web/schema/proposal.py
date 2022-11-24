@@ -65,6 +65,24 @@ class ProposalType(str, Enum):
     SCIENCE_VERIFICATION = "Science Verification"
 
 
+class ProprietaryPeriod(BaseModel):
+    """Proprietary period."""
+
+    current: int = Field(
+        ..., title="Current proprietary period", description="Proprietary period in months."
+    )
+    maximum: Optional[int] = Field(
+        ...,
+        title="Maximum proprietary period",
+        description="Maximum proprietary period, in months for partner partners that have it.",
+    )
+    start_date: Optional[date] = Field(
+        ...,
+        title="start date",
+        description="Start date for counting the proprietary period.",
+    )
+
+
 class GeneralProposalInfo(BaseModel):
     """General proposal information for a semester."""
 
@@ -106,10 +124,10 @@ class GeneralProposalInfo(BaseModel):
         title="Total requested time",
         description="Total requested time, in seconds",
     )
-    data_release_date: Optional[date] = Field(
+    proprietary_period: ProprietaryPeriod = Field(
         ...,
-        title="Data release date",
-        description="Date when the proposal data is scheduled to become public",
+        title="Proprietary period",
+        description="The Proprietary period.",
     )
     liaison_salt_astronomer: Optional[FullName] = Field(
         ...,
@@ -197,12 +215,13 @@ class DataReleaseDate(BaseModel):
 class DataReleaseDateUpdate(BaseModel):
     """A request to update the data release date."""
 
-    release_date: date = Field(
+    proprietary_period: int = Field(
         ...,
-        title="Data release date",
-        description="Requested date when the proposal data should become public",
+        title="The proprietary period",
+        description="The number of months when the proposal data should become public after the last date of the "
+                    "semester of the last observation.",
     )
-    motivation: date = Field(
+    motivation: Optional[str] = Field(
         ...,
         title="Motivation",
         description="Motivation why the request should be granted",
@@ -256,7 +275,7 @@ class PartnerPercentage(
         ge=0,
         le=100,
         title="Percentage",
-        description="Percentage bewtween 0 and 100 (both inclusive)",
+        description="Percentage between 0 and 100 (both inclusive)",
     )
 
 

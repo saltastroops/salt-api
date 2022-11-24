@@ -351,6 +351,12 @@ def update_data_release_date(
             " requested."
         ),
     ),
+    release_date_update: DataReleaseDateUpdate = Body(
+        ...,
+        title="The data release date",
+        description="The proprietary period in months and, Optional motivation."
+    ),
+    user: User = Depends(get_current_user),
 ) -> DataReleaseDate:
     """
     Requests a new date when the observation data can become public. It depends on
@@ -364,4 +370,24 @@ def update_data_release_date(
     The request returns the new release date. This is the same as the previous date
     if the request needs to be approved.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_check_permission_to_update_proprietary_period(
+            user, proposal_code
+        )
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal = proposal_service.get_proposal(proposal_code)
+        if permission_service.does_proposal_need_motivation_to_update_proprietary_period(proposal):
+            proposal_service.update_proprietary_period_extension_request(
+                proposal_code=proposal_code,
+                proprietary_period=release_date_update.proprietary_period,
+                motivation=release_date_update.motivation,
+                username=user.username
+            )
+
+        proposal_service.update_proprietary_period(
+            proposal_code=proposal_code, proprietary_period=release_date_update.proprietary_period
+        )
+        unit_of_work.connection.commit()
+        # TODO get new release date
+        return DataReleaseDate(release_date="2020-01-01")

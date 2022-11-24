@@ -283,12 +283,12 @@ def test_get_returns_charged_time(
     "proposal_code",
     ["2016-2-SCI-008", "2020-1-DDT-008", "2019-2-DDT-002", "2021-2-MLT-002"],
 )
-def test_get_returns_data_release_date(
+def test_get_returns_proprietary_period(
     proposal_code: str, db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
     proposal = proposal_repository.get(proposal_code)
-    release_date = proposal["general_info"]["data_release_date"]
+    release_date = proposal["general_info"]["proprietary_period"]
     check_data(release_date)
 
 

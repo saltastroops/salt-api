@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast, Any
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
@@ -432,7 +432,7 @@ class PermissionService:
 
     def check_permission_to_check_permission_to_update_proprietary_period(
         self, user: User, proposal_code: str
-    ):
+    ) -> None:
 
         username = user.username
         roles = [
@@ -444,8 +444,8 @@ class PermissionService:
 
     @staticmethod
     def does_proposal_need_motivation_to_update_proprietary_period(
-        proposal: Dict[str, any], proprietary_period_update: DataReleaseDateUpdate
-    ):
+        proposal: Dict[str, Any], proprietary_period_update: DataReleaseDateUpdate
+    ) -> bool:
         for ta in proposal["time_allocations"]:
             if ta["partner_code"] == "RSA":  # Only RSA needs motivation
                 # RSA need motivation for this proposal codes only

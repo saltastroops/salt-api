@@ -1748,7 +1748,7 @@ WHERE PC.Proposal_Code = :proposal_code
         proprietary_period: int,
         motivation: str,
         username: str,
-    ):
+    ) -> None:
         istmt = text(
             """
 INSERT INTO ProprietaryPeriodExtensionRequest(
@@ -1779,7 +1779,7 @@ VALUES (
             },
         )
 
-    def update_proprietary_period(self, proposal_code: str, proprietary_period: int):
+    def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
         istmt = text(
             """
 UPDATE ProposalGeneralInfo

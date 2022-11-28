@@ -229,8 +229,8 @@ LIMIT :limit;
         block_visits = self._block_visits(proposal_code)
         proprietary_period = general_info["proprietary_period"]
         general_info["proprietary_period"] = {
-            "current": proprietary_period,
-            "maximum": self._maximum_proprietary_period(proposal_code, semester),
+            "period": proprietary_period,
+            "maximum_period": self._maximum_proprietary_period(proposal_code, semester),
             "start_date": semester_end(
                 semester_of_datetime(self._latest_observation_datetime(proposal_code))
             ),
@@ -1749,10 +1749,9 @@ WHERE PC.Proposal_Code = :proposal_code
         motivation: str,
         username: str,
     ) -> None:
-        istmt = text(
+        stmt = text(
             """
 INSERT INTO ProprietaryPeriodExtensionRequest(
-    MadeAt,
     ProposalCode_Id,
     Reason,
     RequestedBy,
@@ -1767,20 +1766,18 @@ VALUES (
 )
     """
         )
-        made_at_date = date.today()
         self.connection.execute(
-            istmt,
+            stmt,
             {
                 "proposal_code": proposal_code,
                 "username": username,
                 "reason": motivation,
-                "date": made_at_date,
                 "requested_period": proprietary_period,
             },
         )
 
     def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
-        istmt = text(
+        stmt = text(
             """
 UPDATE ProposalGeneralInfo
 SET ProprietaryPeriod = :proprietary_period, ReleaseDate = :release_date
@@ -1790,7 +1787,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
     """
         )
         self.connection.execute(
-            istmt,
+            stmt,
             {
                 "proposal_code": proposal_code,
                 "release_date": self._data_release_date(
@@ -1822,12 +1819,44 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             tzinfo=pytz.utc,
         )
 
+    def is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
+        stmt = text("""
+SELECT P.Partner_Code    AS partner_code,
+       SUM(PA.TimeAlloc) AS time_allocation
+FROM PriorityAlloc PA
+         JOIN MultiPartner MP ON PA.MultiPartner_Id = MP.MultiPartner_Id
+         JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN Semester S ON MP.Semester_Id = S.Semester_Id
+         JOIN Partner P ON MP.Partner_Id = P.Partner_Id
+WHERE PC.Proposal_Code = :proposal_code
+GROUP BY PA.MultiPartner_Id, PA.Priority
+        """)
+        result = self.connection.execute(
+            stmt, {"proposal_code": proposal_code}
+        )
+
+        for row in result:
+            if row.partner_code == partner_code and row.time_allocation > 0:
+                return True
+        return False
+
     def _maximum_proprietary_period(
         self, proposal_code: str, semester: str
     ) -> Optional[int]:
-
-        for ta in self.time_allocations(proposal_code, semester):
-            if ta["partner_code"] == "RSA":
-                if any(ss in proposal_code for ss in ["SCI", "MLT", "ORP"]):
-                    return 24
+        proposal_type = self.get_proposal_type(proposal_code)
+        if proposal_type == "Commissioning":
+            return 36
+        if proposal_type == "Director's Discretionary Time":
+            return 6
+        if proposal_type == "Engineering":
+            return 0
+        if proposal_type == "Gravitational Wave Event":
+            return 1200
+        if proposal_type == "Science Verification":
+            return 12
+        if proposal_type == "OPTICON-Radionet Pilot":
+            return
+        if proposal_type in ["Key Science Program", "Large Science Proposal", "Science", "Science - Long Term"]:
+            if self.is_partner_allocated(proposal_code, "RSA"):
+                return 24
         return None

@@ -5,7 +5,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
-from saltapi.web.schema.proposal import DataReleaseDateUpdate
+from saltapi.web.schema.proposal import ProprietaryPeriodUpdateRequest
 
 
 class PermissionService:
@@ -430,7 +430,7 @@ class PermissionService:
 
         self.check_permission_to_view_currently_observed_block(user)
 
-    def check_permission_to_check_permission_to_update_proprietary_period(
+    def check_permission_to_update_proprietary_period(
         self, user: User, proposal_code: str
     ) -> None:
 
@@ -442,14 +442,16 @@ class PermissionService:
         ]
         self.check_role(username, roles, proposal_code)
 
-    @staticmethod
-    def does_proposal_need_motivation_to_update_proprietary_period(
-        proposal: Dict[str, Any], proprietary_period_update: DataReleaseDateUpdate
+    def need_motivation_to_update_proprietary_period(
+        self, proposal: Dict[str, Any], proprietary_period_update: ProprietaryPeriodUpdateRequest, username: str
     ) -> bool:
+        proposal_code = proposal["proposal_code"]
+        if self.check_role(username, [Role.ADMINISTRATOR], proposal_code):
+            return False
         for ta in proposal["time_allocations"]:
             if ta["partner_code"] == "RSA":  # Only RSA needs motivation
                 # RSA need motivation for this proposal codes only
-                if any(ss in proposal["proposal_code"] for ss in ["SCI", "MLT", "ORP"]):
+                if any(ss in proposal_code for ss in ["SCI", "MLT", "ORP"]):
                     # And requesting more than the maximum proprietary period
                     if (
                         proposal["general_info"]["proprietary_period"]["maximum"]

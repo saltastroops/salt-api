@@ -8,8 +8,8 @@ from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from tests.conftest import find_username
 from tests.markers import nodatabase
-
-
+#
+#
 @nodatabase
 @pytest.mark.parametrize(
     "semester,proposal_code",
@@ -482,3 +482,22 @@ def test_get_current_version_raises_not_found_error(db_connection: Connection) -
     proposal_repository = ProposalRepository(db_connection)
     with pytest.raises(NotFoundError):
         proposal_repository.get_current_version("idontexist")
+
+@pytest.mark.parametrize(
+    "proposal_code,maximum_period",
+    [
+        ("2020-1-SCI-005", 24),  # RSA allocated
+        ("2018-2-LSP-001", 24),  # RSA Allocated
+        ("2020-1-SCI-003", None),  # None RSA Allocated
+        ("2020-1-MLT-005", None),  # None RSA Allocated
+        ("2016-1-COM-001", 36),
+        ("2016-1-SVP-001", 12),
+        ("2019-1-GWE-005", 1200),
+        ("2020-2-DDT-005", 6)
+    ],
+)
+def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
+        proposal_code: str, maximum_period: int, db_connection: Connection
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    assert proposal_repository._maximum_proprietary_period(proposal_code, "2022-2") == maximum_period

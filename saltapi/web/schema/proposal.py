@@ -68,26 +68,26 @@ class ProposalType(str, Enum):
 class UpdateStatus(str, Enum):
     SUCCESSFUL = "Successful"
     PENDING = "Pending"
-    Failed = "Failed"
+    FAILED = "Failed"
 
 
 class ProprietaryPeriod(BaseModel):
     """Proprietary period."""
 
-    current: int = Field(
+    period: int = Field(
         ...,
         title="Current proprietary period",
         description="Proprietary period in months.",
     )
-    maximum: Optional[int] = Field(
+    maximum_period: Optional[int] = Field(
         ...,
-        title="Maximum proprietary period",
+        title="Maximum proprietary period, in months",
         description="Maximum proprietary period, in months for partner partners that have it.",
     )
     start_date: Optional[date] = Field(
         ...,
-        title="start date",
-        description="Start date for counting the proprietary period.",
+        title="Start date",
+        description="Start date from which the proprietary period is counted.",
     )
 
 
@@ -96,11 +96,6 @@ class NewProprietaryPeriod(ProprietaryPeriod):
         ...,
         title="Update status",
         description="The status of updating the proprietary period.",
-    )
-    message: Optional[str] = Field(
-        ...,
-        title="Message",
-        description="The message.",
     )
 
 
@@ -233,14 +228,14 @@ class DataReleaseDate(BaseModel):
     )
 
 
-class DataReleaseDateUpdate(BaseModel):
-    """A request to update the data release date."""
+class ProprietaryPeriodUpdateRequest(BaseModel):
+    """A request to update the data proprietary period."""
 
     proprietary_period: int = Field(
         ...,
         title="The proprietary period",
-        description="The number of months when the proposal data should become public after the last date of the "
-        "semester of the last observation.",
+        description="The proprietary period, in months. The proprietary period starts at the end of the semester when "
+                    "the last observation was taken.",
     )
     motivation: Optional[str] = Field(
         ...,

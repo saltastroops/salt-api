@@ -442,20 +442,16 @@ class PermissionService:
         ]
         self.check_role(username, roles, proposal_code)
 
-    def need_motivation_to_update_proprietary_period(
+    def is_motivation_needed_to_update_proprietary_period(
         self, proposal: Dict[str, Any], proprietary_period_update: ProprietaryPeriodUpdateRequest, username: str
     ) -> bool:
         proposal_code = proposal["proposal_code"]
-        if self.check_role(username, [Role.ADMINISTRATOR], proposal_code):
+        if self.check_role(username, [Role.ADMINISTRATOR], proposal_code) and\
+                not self.check_role(username, [Role.PRINCIPAL_INVESTIGATOR], proposal_code):
             return False
-        for ta in proposal["time_allocations"]:
-            if ta["partner_code"] == "RSA":  # Only RSA needs motivation
-                # RSA need motivation for this proposal codes only
-                if any(ss in proposal_code for ss in ["SCI", "MLT", "ORP"]):
-                    # And requesting more than the maximum proprietary period
-                    if (
-                        proposal["general_info"]["proprietary_period"]["maximum"]
-                        < proprietary_period_update.proprietary_period
-                    ):
-                        return True
+
+        maximum_period = self.proposal_repository.maximum_proprietary_period(proposal_code)
+        if maximum_period > proprietary_period_update.proprietary_period:
+            return True
+
         return False

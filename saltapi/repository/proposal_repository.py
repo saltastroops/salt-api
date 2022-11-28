@@ -230,7 +230,7 @@ LIMIT :limit;
         proprietary_period = general_info["proprietary_period"]
         general_info["proprietary_period"] = {
             "period": proprietary_period,
-            "maximum_period": self._maximum_proprietary_period(proposal_code, semester),
+            "maximum_period": self.maximum_proprietary_period(proposal_code),
             "start_date": semester_end(
                 semester_of_datetime(self._latest_observation_datetime(proposal_code))
             ),
@@ -1840,8 +1840,8 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
                 return True
         return False
 
-    def _maximum_proprietary_period(
-        self, proposal_code: str, semester: str
+    def maximum_proprietary_period(
+        self, proposal_code: str
     ) -> Optional[int]:
         proposal_type = self.get_proposal_type(proposal_code)
         if proposal_type == "Commissioning":
@@ -1855,8 +1855,9 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
         if proposal_type == "Science Verification":
             return 12
         if proposal_type == "OPTICON-Radionet Pilot":
-            return
+            return 24
         if proposal_type in ["Key Science Program", "Large Science Proposal", "Science", "Science - Long Term"]:
             if self.is_partner_allocated(proposal_code, "RSA"):
                 return 24
-        return None
+            return 100000
+        raise ValueError("Unknown proposal type.")

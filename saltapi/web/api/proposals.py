@@ -230,9 +230,9 @@ def update_proprietary_period(
             " requested."
         ),
     ),
-    release_date_update: ProprietaryPeriodUpdateRequest = Body(
+    proprietary_period_update_request: ProprietaryPeriodUpdateRequest = Body(
         ...,
-        title="The details for proprietary period update.",
+        title="The details for the proprietary period update.",
         description="The requested proprietary period in months and a motivation. The motivation is only required if "
                     "the requested proprietary period is longer than the maximum proprietary period for the proposal.",
     ),
@@ -253,15 +253,15 @@ def update_proprietary_period(
         )
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal = proposal_service.get_proposal(proposal_code)
-        if permission_service.need_motivation_to_update_proprietary_period(
-            proposal, release_date_update, user.username
+        if permission_service.is_motivation_needed_to_update_proprietary_period(
+            proposal, proprietary_period_update_request, user.username
         ):
-            if not release_date_update.motivation:
+            if not proprietary_period_update_request.motivation:
                 raise ValueError("A motivation is required.")
             proposal_service.create_proprietary_period_extension_request(
                 proposal_code=proposal_code,
-                proprietary_period=release_date_update.proprietary_period,
-                motivation=release_date_update.motivation,
+                proprietary_period=proprietary_period_update_request.proprietary_period,
+                motivation=proprietary_period_update_request.motivation,
                 username=user.username,
             )
             new_proprietary_period = NewProprietaryPeriod(
@@ -271,7 +271,7 @@ def update_proprietary_period(
         else:
             proposal_service.update_proprietary_period(
                 proposal_code=proposal_code,
-                proprietary_period=release_date_update.proprietary_period,
+                proprietary_period=proprietary_period_update_request.proprietary_period,
             )
             proposal = proposal_service.get_proposal(proposal_code)
             new_proprietary_period = NewProprietaryPeriod(

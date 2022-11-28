@@ -91,7 +91,12 @@ class ProprietaryPeriod(BaseModel):
     )
 
 
-class NewProprietaryPeriod(ProprietaryPeriod):
+class NewProprietaryPeriod(BaseModel):
+    period: int = Field(
+        ...,
+        title="Current proprietary period",
+        description="Proprietary period in months.",
+    )
     status: UpdateStatus = Field(
         ...,
         title="Update status",
@@ -229,7 +234,7 @@ class DataReleaseDate(BaseModel):
 
 
 class ProprietaryPeriodUpdateRequest(BaseModel):
-    """A request to update the data proprietary period."""
+    """A request to update the proprietary period."""
 
     proprietary_period: int = Field(
         ...,

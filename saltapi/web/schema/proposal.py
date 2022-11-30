@@ -94,8 +94,8 @@ class ProprietaryPeriod(BaseModel):
 class NewProprietaryPeriod(BaseModel):
     period: int = Field(
         ...,
-        title="Current proprietary period",
-        description="Proprietary period in months.",
+        title="Requested proprietary period",
+        description="The requested proprietary period in months.",
     )
     status: UpdateStatus = Field(
         ...,
@@ -238,6 +238,7 @@ class ProprietaryPeriodUpdateRequest(BaseModel):
 
     proprietary_period: int = Field(
         ...,
+        ge=0,
         title="The proprietary period",
         description="The proprietary period, in months. The proprietary period starts at the end of the semester when "
                     "the last observation was taken.",

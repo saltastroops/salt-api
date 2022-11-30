@@ -446,12 +446,12 @@ class PermissionService:
         self, proposal: Dict[str, Any], proprietary_period_update: ProprietaryPeriodUpdateRequest, username: str
     ) -> bool:
         proposal_code = proposal["proposal_code"]
-        if self.check_role(username, [Role.ADMINISTRATOR], proposal_code) and\
-                not self.check_role(username, [Role.PRINCIPAL_INVESTIGATOR], proposal_code):
+        if self.user_has_role(username, Role.ADMINISTRATOR, proposal_code) and\
+                not self.user_has_role(username, Role.INVESTIGATOR, proposal_code):
             return False
 
         maximum_period = self.proposal_repository.maximum_proprietary_period(proposal_code)
-        if maximum_period > proprietary_period_update.proprietary_period:
+        if maximum_period <= proprietary_period_update.proprietary_period:
             return True
 
         return False

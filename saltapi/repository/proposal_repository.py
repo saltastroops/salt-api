@@ -231,9 +231,7 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": semester_end(
-                semester_of_datetime(self._latest_observation_datetime(proposal_code))
-            ),
+            "start_date": self.proprietary_period_start_date(proposal_code, block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
 
@@ -356,7 +354,10 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        return cast(datetime, result.scalar_one())
+        dt = result.scalar_one()
+        if type(dt) == date:
+            dt = datetime.combine(dt, time.min)
+        return dt
 
     def _latest_submission_date(self, proposal_code: str) -> datetime:
         """Return the date and time when the latest submission was made."""
@@ -397,25 +398,6 @@ LIMIT 1
             return "Director's Discretionary Time"
 
         return db_proposal_type
-
-    def _data_release_date(
-        self,
-        proposal_code: str,
-        proprietary_period: Optional[int],
-    ) -> Optional[date]:
-        # no proprietary period - no release date
-        if proprietary_period is None:
-            return None
-
-        latest_observation_semester = semester_of_datetime(
-            self._latest_observation_datetime(proposal_code)
-        )
-        latest_observation_semester_end = semester_end(latest_observation_semester)
-
-        # add the proprietary period to get the data release date
-        return latest_observation_semester_end.date() + relativedelta(
-            months=proprietary_period
-        )
 
     def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         """
@@ -1776,47 +1758,35 @@ VALUES (
             },
         )
 
-    def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
-        stmt = text(
-            """
-UPDATE ProposalGeneralInfo
-SET ProprietaryPeriod = :proprietary_period, ReleaseDate = :release_date
-WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
-                         FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code)
-    """
-        )
-        self.connection.execute(
-            stmt,
-            {
-                "proposal_code": proposal_code,
-                "release_date": self._data_release_date(
-                    proposal_code, proprietary_period
-                ),
-                "proprietary_period": proprietary_period,
-            },
-        )
-
-    def _latest_observation_datetime(self, proposal_code: str) -> datetime:
-
+    def proprietary_period_start_date(self, proposal_code: str, block_visits: List[Dict[str, Any]]):
         # find the latest observation
-        latest_observation = self._first_submission_date(proposal_code)
-        for observation in self._block_visits(proposal_code):
-            if type(latest_observation) == date:
-                latest_observation = datetime.combine(latest_observation, time.min)
-            if observation["night"] > latest_observation.date():
-                latest_observation = observation["night"]
 
-        # find the end of the semester when the latest observation was made
-        return datetime(
-            latest_observation.year,
-            latest_observation.month,
-            latest_observation.day,
-            12,
-            0,
-            0,
-            0,
-            tzinfo=pytz.utc,
+        proprietary_period_start = semester_end(
+            semester_of_datetime(pytz.utc.localize(self._first_submission_date(proposal_code)))
+        )
+        for observation in block_visits:
+            observation_semester_end = semester_end(
+                semester_of_datetime(
+                    datetime.combine(observation["night"], time.min, tzinfo=pytz.utc)
+                )
+            )
+            if observation_semester_end > proprietary_period_start:
+                proprietary_period_start = observation_semester_end
+        return proprietary_period_start
+
+    def _data_release_date(
+            self,
+            proposal_code: str,
+            proprietary_period: Optional[int],
+            block_visits: List[dict[str, any]]
+    ) -> Optional[date]:
+        proprietary_period_start = self.proprietary_period_start_date(
+            proposal_code, block_visits
+        )
+
+        # add the proprietary period to get the data release date
+        return proprietary_period_start.date() + relativedelta(
+            months=proprietary_period
         )
 
     def is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
@@ -1859,5 +1829,27 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
         if proposal_type in ["Key Science Program", "Large Science Proposal", "Science", "Science - Long Term"]:
             if self.is_partner_allocated(proposal_code, "RSA"):
                 return 24
-            return 100000
+            return 1200
         raise ValueError("Unknown proposal type.")
+
+    def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
+        stmt = text(
+            """
+UPDATE ProposalGeneralInfo
+SET ProprietaryPeriod = :proprietary_period, ReleaseDate = :release_date
+WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
+                         FROM ProposalCode PC
+                         WHERE PC.Proposal_Code = :proposal_code)
+    """
+        )
+        block_visits = self._block_visits(proposal_code)
+        self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "release_date": self._data_release_date(
+                    proposal_code, proprietary_period, block_visits
+                ),
+                "proprietary_period": proprietary_period,
+            },
+        )

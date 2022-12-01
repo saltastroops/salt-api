@@ -196,9 +196,7 @@
         </td>
       </tr>
       <tr *ngFor="let i of b.instruments" [ngClass]="blockClass(b)">
-        <td>
-          <a href="proposal/{{ proposalCode }}/#">{{ i.name }}</a>
-        </td>
+        <td>{{ i.name }}</td>
         <td>
           <div *ngFor="let m of i.modes">
             {{ m }}

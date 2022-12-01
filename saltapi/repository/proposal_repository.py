@@ -1740,10 +1740,9 @@ INSERT INTO ProprietaryPeriodExtensionRequest(
     RequestedPeriod
 )
 VALUES (
-    :date,
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
     :reason,
-    (SELECT Investigator_Id FROM PiptUser WHERE Username = :username),
+    (SELECT PiptUser_Id FROM PiptUser WHERE Username = :username),
     :requested_period
 )
     """
@@ -1761,25 +1760,28 @@ VALUES (
     def proprietary_period_start_date(self, proposal_code: str, block_visits: List[Dict[str, Any]]):
         # find the latest observation
 
-        proprietary_period_start = semester_end(
-            semester_of_datetime(pytz.utc.localize(self._first_submission_date(proposal_code)))
-        )
+        observation_night = None
         for observation in block_visits:
-            observation_semester_end = semester_end(
-                semester_of_datetime(
-                    datetime.combine(observation["night"], time.min, tzinfo=pytz.utc)
-                )
-            )
-            if observation_semester_end > proprietary_period_start:
-                proprietary_period_start = observation_semester_end
-        return proprietary_period_start
+            if not observation_night:
+                observation_night = observation["night"]
+            if observation["night"] > observation_night:
+                observation_night = observation["night"]
+        if not observation_night:
+            observation_night = datetime.now(tz=pytz.utc)
+        if type(observation_night) == date:
+            observation_night = datetime(
+                observation_night.year,
+                observation_night.month,
+                observation_night.day,
+                12, 0, 0, 0, tzinfo=pytz.utc)
+        return semester_end(semester_of_datetime(observation_night))
 
     def _data_release_date(
             self,
             proposal_code: str,
-            proprietary_period: Optional[int],
+            proprietary_period: int,
             block_visits: List[dict[str, any]]
-    ) -> Optional[date]:
+    ) -> date:
         proprietary_period_start = self.proprietary_period_start_date(
             proposal_code, block_visits
         )

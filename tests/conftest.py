@@ -151,6 +151,10 @@ def find_username(
             raise ValueError(f"Partner code missing for user type {user_type}")
         return cast(str, users[normalized_user_type + "s"][partner_code])
 
+    if normalized_user_type == "administrator_investigator":
+        print(users)
+        return cast(str, users[normalized_user_type])
+
     if normalized_user_type in users:
         return cast(str, users[normalized_user_type])
 

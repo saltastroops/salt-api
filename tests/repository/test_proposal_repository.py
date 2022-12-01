@@ -510,13 +510,21 @@ def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
 @pytest.mark.parametrize(
     "proposal_code,block_visits,expected_date",
     [
+        ("2020-2-SCI-005", [], datetime(2023, 5, 1, 12, tzinfo=pytz.utc)),
         ("2020-2-SCI-005", [{"night": date(2021, 2, 1)}], datetime(2021, 5, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 5, 1)}], datetime(2021, 5, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 5, 2)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
+        ("2020-2-SCI-005", [{"night": date(2021, 4, 30)}], datetime(2021, 5, 1, 12, tzinfo=pytz.utc)),
+        ("2020-2-SCI-005", [{"night": date(2021, 5, 1)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
         ("2020-2-SCI-005", [{"night": date(2021, 5, 2)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
         ("2020-2-SCI-005", [{"night": date(2021, 8, 15)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 11, 1)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
+        ("2020-2-SCI-005", [{"night": date(2021, 11, 1)}], datetime(2022, 5, 1, 12, tzinfo=pytz.utc)),
+        ("2020-2-SCI-005", [{"night": date(2021, 10, 31)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
         ("2020-2-SCI-005", [{"night": date(2021, 12, 1)}], datetime(2022, 5, 1, 12, tzinfo=pytz.utc)),
+        ("2020-2-SCI-005", [
+            {"night": date(2021, 6, 1)},
+            {"night": date(2021, 6, 24)},
+            {"night": date(2021, 6, 23)},
+            {"night": date(2021, 12, 2)}
+        ], datetime(2022, 5, 1, 12, tzinfo=pytz.utc)),
     ],
 )
 def test_proprietary_period_start_date_returns_correct_start_date(
@@ -532,11 +540,30 @@ def test_proprietary_period_start_date_returns_correct_start_date(
 @pytest.mark.parametrize(
     "proposal_code,proprietary_period,block_visits,expected_date",
     [
+        ("2020-2-SCI-005", 0, [], date(2023, 5, 1)),
+        ("2020-2-SCI-005", 10, [], date(2024, 3, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 2, 1)}], date(2021, 5, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 2, 1)}], date(2022, 3, 1)),
-        ("2020-2-SCI-005", 10, [{"night": date(2021, 5, 1)}], date(2022, 3, 1)),
-        ("2020-2-SCI-005", 0, [{"night": date(2021, 5, 1)}], date(2021, 5, 1)),
-        ("2020-2-SCI-005", 10, [{"night": date(2021, 5, 2)}], date(2022, 9, 1)),
+        ("2020-2-SCI-005", 0, [{"night": date(2021, 4, 30)}], date(2021, 5, 1)),
+        ("2020-2-SCI-005", 10, [{"night": date(2021, 4, 30)}], date(2022, 3, 1)),
+        ("2020-2-SCI-005", 0, [{"night": date(2021, 5, 1)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", 10, [{"night": date(2021, 5, 1)}], date(2022, 9, 1)),
+        ("2020-2-SCI-005", 0, [{"night": date(2021, 8, 2)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", 10, [{"night": date(2021, 8, 2)}], date(2022, 9, 1)),
+        ("2020-2-SCI-005", 0, [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", 10, [{"night": date(2021, 10, 31)}], date(2022, 9, 1)),
+        ("2020-2-SCI-005", 0, [
+            {"night": date(2021, 6, 1)},
+            {"night": date(2021, 6, 24)},
+            {"night": date(2021, 6, 23)},
+            {"night": date(2021, 12, 2)}
+        ], date(2022, 5, 1)),
+        ("2020-2-SCI-005", 10, [
+            {"night": date(2021, 6, 1)},
+            {"night": date(2021, 6, 24)},
+            {"night": date(2021, 6, 23)},
+            {"night": date(2021, 12, 2)}
+        ], date(2023, 3, 1)),
     ],
 )
 def test_data_release_date_return_correct_release_date(
@@ -546,11 +573,7 @@ def test_data_release_date_return_correct_release_date(
         expected_date: datetime, db_connection: Connection
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
-    print("XXX: ", proposal_repository._data_release_date(
-        proposal_code,
-        proprietary_period,
-        block_visits
-    ), expected_date)
+
     assert proposal_repository._data_release_date(
         proposal_code,
         proprietary_period,

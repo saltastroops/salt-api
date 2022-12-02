@@ -12,6 +12,10 @@ const USERNAME = "hettlage";
 
 describe("Authentication", () => {
   beforeEach(() => {
+    cy.recordHttp(apiUrl + "/login").as("login");
+
+    cy.recordHttp(apiUrl + "/logout").as("logout");
+
     cy.recordHttp(apiUrl + "/user").as("user");
 
     cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
@@ -123,12 +127,12 @@ describe("Authentication", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
 
-      // Then the authentication vookie and user details are stored
+      // Then the authentication cookie and user details are stored
       cy.getCookie("secondary_auth_token").should("not.be.null");
       userDetailsAreStored();
 
-      // And when I logout again
-      cy.get('[data-test="logout"]').click();
+      // And when I log out again
+      LoginPage.logout();
 
       // Then the authentication token and user details are removed
       cy.getCookie("secondary_auth_token").should("be.null");

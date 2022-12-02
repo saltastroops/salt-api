@@ -3,3 +3,9 @@ export interface User {
   familyName: string;
   email: string;
 }
+
+export interface Email {
+  to: string;
+  body: string;
+  html: string;
+}

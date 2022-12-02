@@ -88,10 +88,10 @@ describe("Change password page", () => {
     ChangePasswordPage.hasGenericError();
   });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   it(
     "should show a meaningful error if the password is changed with an invalid token",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     { tags: "@skip" },
     () => {
       ChangePasswordPage.visit("invalid-token");

@@ -6,93 +6,93 @@ import {
 export const CHANGE_PASSWORD_BASE_URL = "/change-password/";
 
 export class ChangePasswordPage {
-  static visit(token: string) {
+  static visit(token: string): void {
     cy.visit(CHANGE_PASSWORD_BASE_URL + token);
   }
 
-  static typeNewPassword(password: string) {
+  static typeNewPassword(password: string): void {
     cy.get("[data-test='change-password-password']").type(password);
   }
 
-  static typeRetypedNewPassword(rePassword: string) {
+  static typeRetypedNewPassword(rePassword: string): void {
     cy.get("[data-test='change-password-retyped-password']").type(rePassword);
   }
 
-  static hasNewPassword(password: string) {
+  static hasNewPassword(password: string): void {
     cy.get("[data-test='change-password-password']").should(
       "have.value",
       password,
     );
   }
 
-  static hasRetypedNewPassword(retypedPassword: string) {
+  static hasRetypedNewPassword(retypedPassword: string): void {
     cy.get("[data-test='change-password-retyped-password']").should(
       "have.value",
       retypedPassword,
     );
   }
 
-  static clearNewPassword() {
+  static clearNewPassword(): void {
     cy.get("[data-test='change-password-password']").clear();
   }
 
-  static clearRetypedNewPassword() {
+  static clearRetypedNewPassword(): void {
     cy.get("[data-test='change-password-retyped-password']").clear();
   }
 
-  static submit() {
+  static submit(): void {
     cy.get("[data-test='submit-request']").click();
   }
 
-  static changePassword(password: string) {
+  static changePassword(password: string): void {
     ChangePasswordPage.typeNewPassword(password);
     ChangePasswordPage.typeRetypedNewPassword(password);
     ChangePasswordPage.submit();
   }
 
-  static hasMissingNewPasswordError() {
+  static hasMissingNewPasswordError(): void {
     cy.get("[data-test='password-error']")
       .contains(/cannot be empty/i)
       .should("be.visible");
   }
 
-  static hasMissingRetypedNewPassword() {
+  static hasMissingRetypedNewPassword(): void {
     cy.get("[data-test='retyped-password-error']")
       .contains(/cannot be empty/i)
       .should("be.visible");
   }
 
-  static hasPasswordMismatchError() {
+  static hasPasswordMismatchError(): void {
     cy.get("[data-test='error']")
       .contains(/mismatch/i)
       .should("be.visible");
   }
 
-  static hasUnknownUsernameOrEmailError() {
+  static hasUnknownUsernameOrEmailError(): void {
     cy.get("[data-test='error']")
       .contains(/unknown/i)
       .should("be.visible");
   }
 
-  static hasGenericError() {
+  static hasGenericError(): void {
     cy.get("[data-test='error']")
       .contains(GENERIC_ERROR_MESSAGE)
       .should("be.visible");
   }
 
-  static hasAuthenticationError() {
+  static hasAuthenticationError(): void {
     cy.get("[data-test='error']")
       .contains(NOT_LOGGED_IN_MESSAGE)
       .should("be.visible");
   }
 
-  static isLoading() {
+  static isLoading(): Cypress.Chainable {
     return cy
       .get('[data-test="submit-request"]')
       .should("have.class", "is-loading");
   }
 
-  static isNotLoading() {
+  static isNotLoading(): void {
     cy.get('[data-test="submit-request"]').should(
       "not.have.class",
       "is-loading",

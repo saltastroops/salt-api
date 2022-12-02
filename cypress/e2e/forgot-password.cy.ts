@@ -3,7 +3,7 @@ import { recurse } from "cypress-recurse";
 import { ForgotPasswordPage } from "../support/pages/forgot-password-page";
 import { ChangePasswordPage } from "../support/pages/login/change-password-page";
 import { LoginPage } from "../support/pages/login/login-page";
-import { User } from "../support/types";
+import { Email, User } from "../support/types";
 import {
   forceNetworkError,
   forceServerError,
@@ -83,7 +83,7 @@ describe("Forgot password page", () => {
       ForgotPasswordPage.submit();
       recurse(
         () => cy.task("getEmailInbox"),
-        (emails: Array<any>) => {
+        (emails: Array<Email>) => {
           // A boolean (not just a truthy value) must be returned
           return !!emails.length;
         },
@@ -95,14 +95,18 @@ describe("Forgot password page", () => {
 
       // And it is sent to the correct email address
       cy.task("getUser", USERNAME).then((user: User) => {
-        cy.get("@emails").then((emails: any) => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        cy.get("@emails").then((emails: Email[]) => {
           expect(emails[0].to).to.contain(user.email);
         });
       });
 
       // And the email contains a link both in plain text and in html
       cy.get("@emails")
-        .then((emails: any) => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        .then((emails: Email[]) => {
           const LINK_REGEX = /\bhttps?:\/\/[^\s"]+/;
           const email = emails[0];
           const linkInBody = LINK_REGEX.exec(email.body)[0];

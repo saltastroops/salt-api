@@ -47,7 +47,7 @@ before(() => {
   if (!mockFilesDirectory) {
     throw new Error(
       "No mock file directory set. \nTo set mock files directory, use environment variable ``mockFilesDirectory``. " +
-        "\ne.g. ``cypress run --env recordHttp='{'mockFilesDirectory': 'path/to/directory/'}'``",
+        "\ne.g. ``cypress run --env recordHttpConfig='{'mockFilesDirectory': 'path/to/directory/'}'``",
     );
   }
 });

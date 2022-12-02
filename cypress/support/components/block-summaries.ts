@@ -17,15 +17,15 @@ const BLOCK_LINK = '[data-test="block-name"]';
 const DISPLAYED_BLOCK_CONTENT = '[data-test="displayed-block-content"]';
 
 export class BlockSummaries {
-  static clickFilterCompleted() {
+  static clickFilterCompleted(): void {
     cy.get(FILTER_COMPLETED).click();
   }
 
-  static clickFilterUnobservable() {
+  static clickFilterUnobservable(): void {
     cy.get(FILTER_UNOBSERVABLE).click();
   }
 
-  static filterCompletedChecked(checked: boolean) {
+  static filterCompletedChecked(checked: boolean): void {
     if (checked) {
       cy.get(FILTER_COMPLETED).should("be.checked");
     } else {
@@ -33,7 +33,7 @@ export class BlockSummaries {
     }
   }
 
-  static filterUnobservableChecked(checked: boolean) {
+  static filterUnobservableChecked(checked: boolean): void {
     if (checked) {
       cy.get(FILTER_UNOBSERVABLE).should("be.checked");
     } else {
@@ -41,7 +41,7 @@ export class BlockSummaries {
     }
   }
 
-  static hasCompletedBlocks(filtered: boolean) {
+  static hasCompletedBlocks(filtered: boolean): void {
     if (filtered) {
       cy.get(COMPLETED_BLOCK);
     } else {
@@ -49,7 +49,7 @@ export class BlockSummaries {
     }
   }
 
-  static hasUnobservableBlocks(filtered: boolean) {
+  static hasUnobservableBlocks(filtered: boolean): void {
     if (filtered) {
       cy.get(UNOBSERVABLE_BLOCK);
     } else {
@@ -57,35 +57,38 @@ export class BlockSummaries {
     }
   }
 
-  static clickBlockIdColumn() {
+  static clickBlockIdColumn(): void {
     cy.get(SORT_BY_ID_COLUMN).click();
   }
 
-  static clickBlockNameColumn() {
+  static clickBlockNameColumn(): void {
     cy.get(SORT_BY_NAME_COLUMN).click();
   }
 
-  static clickBlockObservationTimeColumn() {
+  static clickBlockObservationTimeColumn(): void {
     cy.get(SORT_BY_OBSERVATION_TIME_COLUMN).click();
   }
 
-  static clickBlockPriorityColumn() {
+  static clickBlockPriorityColumn(): void {
     cy.get(SORT_BY_PRIORITY_COLUMN).click();
   }
 
-  static clickBlockMaximumSeeingColumn() {
+  static clickBlockMaximumSeeingColumn(): void {
     cy.get(SORT_BY_MAXIMUM_SEEING_COLUMN).click();
   }
 
-  static clickBlockRemainingNightsColumn() {
+  static clickBlockRemainingNightsColumn(): void {
     cy.get(SORT_BY_REMAINING_NIGHTS_COLUMN).click();
   }
 
-  static clickBlockMaximumLunarPhaseColumn() {
+  static clickBlockMaximumLunarPhaseColumn(): void {
     cy.get(SORT_BY_MAXIMUM_LUNAR_PHASE_COLUMN).click();
   }
 
-  static blocksSortedBy(column: string, order: "ascending" | "descending") {
+  static blocksSortedBy(
+    column: string,
+    order: "ascending" | "descending",
+  ): void {
     const rowElement = "[data-test=block-" + column + "]";
     const columnElement = "[data-testid=block-summary-" + column + "]";
     const sortedBlockIds = [];
@@ -110,11 +113,11 @@ export class BlockSummaries {
         });
     }
   }
-  static clickBlockNameLink(elementIndex: number) {
+  static clickBlockNameLink(elementIndex: number): void {
     cy.get(BLOCK_LINK).eq(elementIndex).click();
   }
 
-  static correctBlockLoaded(elementIndex: number) {
+  static correctBlockLoaded(elementIndex: number): void {
     cy.get(BLOCK_LINK)
       .eq(elementIndex)
       .invoke("text")

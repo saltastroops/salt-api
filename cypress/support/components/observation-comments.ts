@@ -7,41 +7,41 @@ const COMMENT_ERROR = '[data-test="observation-comment-text-error"]';
 const SUBMISSION_ERROR = '[data-test="observation-comment-submission-error"]';
 
 export class ObservationComments {
-  static startNewComment() {
+  static startNewComment(): void {
     cy.get(ADD_COMMENT_BUTTON).click();
   }
 
-  static typeComment(comment: string) {
+  static typeComment(comment: string): void {
     cy.get(ADD_COMMENT_TEXT).type(comment);
   }
 
-  static clearCommentText() {
+  static clearCommentText(): void {
     cy.get(ADD_COMMENT_TEXT).clear();
   }
 
-  static submitComment() {
+  static submitComment(): void {
     cy.get(ADD_COMMENT_SUBMIT).click();
   }
 
-  static cancel() {
+  static cancel(): void {
     cy.get(ADD_COMMENT_CANCEL).click();
   }
 
-  static addComment(comment: string) {
+  static addComment(comment: string): void {
     this.startNewComment();
     this.typeComment(comment);
     this.submitComment();
   }
 
-  static hasNoAddCommentForm() {
+  static hasNoAddCommentForm(): void {
     cy.get(ADD_COMMENT_FORM).should("not.exist");
   }
 
-  static hasNoCommentText() {
+  static hasNoCommentText(): void {
     cy.get(ADD_COMMENT_TEXT).should("have.value", "");
   }
 
-  static hasDisabledAddCommentButton(disabled: boolean) {
+  static hasDisabledAddCommentButton(disabled: boolean): void {
     if (disabled) {
       cy.get(ADD_COMMENT_BUTTON).should("be.disabled");
     } else {
@@ -49,7 +49,7 @@ export class ObservationComments {
     }
   }
 
-  static hasDisabledSubmitButton(disabled: boolean) {
+  static hasDisabledSubmitButton(disabled: boolean): void {
     if (disabled) {
       cy.get(ADD_COMMENT_SUBMIT).should("be.disabled");
     } else {
@@ -57,7 +57,7 @@ export class ObservationComments {
     }
   }
 
-  static hasDisabledCancelButton(disabled: boolean) {
+  static hasDisabledCancelButton(disabled: boolean): void {
     if (disabled) {
       cy.get(ADD_COMMENT_CANCEL).should("be.disabled");
     } else {
@@ -65,19 +65,19 @@ export class ObservationComments {
     }
   }
 
-  static hasCommentError() {
+  static hasCommentError(): void {
     cy.get(COMMENT_ERROR).should("be.visible").and("contain", "comment text");
   }
 
-  static hasNoCommentError() {
+  static hasNoCommentError(): void {
     cy.get(COMMENT_ERROR).should("not.exist");
   }
 
-  static hasSubmissionError(text: string) {
+  static hasSubmissionError(text: string): void {
     cy.get(SUBMISSION_ERROR).should("be.visible").and("contain", text);
   }
 
-  static hasNoSubmissionError() {
+  static hasNoSubmissionError(): void {
     cy.get(SUBMISSION_ERROR).should("not.exist");
   }
 }

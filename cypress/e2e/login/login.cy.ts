@@ -18,6 +18,8 @@ describe("Login page", () => {
   beforeEach(() => {
     cy.recordHttp(apiUrl + "/login").as("login");
 
+    cy.recordHttp(apiUrl + "/logout").as("logout");
+
     cy.recordHttp(apiUrl + "/user").as("user");
 
     cy.recordHttp(apiUrl + "/proposals/**").as("proposals");

@@ -14,102 +14,102 @@ const GRAVITATIONAL_WAVES_TAB = '[data-test="gravitational-waves-tab"]';
 const ADMIN_TAB = '[data-test="admin-tab"]';
 
 export class NavigationBar {
-  static typeUsername(username: string) {
+  static typeUsername(username: string): void {
     cy.get('[data-test="inline-login-username"]').type(username);
   }
 
-  static typePassword(password: string) {
+  static typePassword(password: string): void {
     cy.get('[data-test="inline-login-password"]').type(password);
   }
 
-  static submitLogin() {
+  static submitLogin(): void {
     cy.get(INLINE_LOGIN_SUBMIT).click();
   }
 
-  static hasUsernameError() {
+  static hasUsernameError(): void {
     cy.get(INLINE_LOGIN_ERROR)
       .contains(/username/i)
       .should("be.visible");
   }
 
-  static hasPasswordError() {
+  static hasPasswordError(): void {
     cy.get(INLINE_LOGIN_ERROR)
       .contains(/password/i)
       .should("be.visible");
   }
 
-  static hasUsernameOrPasswordError() {
+  static hasUsernameOrPasswordError(): void {
     cy.get(INLINE_LOGIN_ERROR)
       .contains(/username or password/i)
       .should("be.visible");
   }
 
-  static hasGenericLoginError() {
+  static hasGenericLoginError(): void {
     cy.get(INLINE_LOGIN_ERROR)
       .contains(GENERIC_ERROR_MESSAGE)
       .should("be.visible");
   }
 
-  static hasNoLoginForm() {
+  static hasNoLoginForm(): void {
     cy.get("inline-login").should("not.exist");
   }
 
-  static loginIsLoading() {
+  static loginIsLoading(): Cypress.Chainable {
     return cy
       .get(INLINE_LOGIN_SUBMIT)
       .should("have.class", "is-loading")
       .and("be.disabled");
   }
 
-  static loginIsNotLoading() {
+  static loginIsNotLoading(): Cypress.Chainable {
     return cy
       .get(INLINE_LOGIN_SUBMIT)
       .should("not.have.class", "is-loading")
       .and("not.be.disabled");
   }
 
-  static hasWelcomeMessage(text: string) {
+  static hasWelcomeMessage(text: string): void {
     cy.get(WELCOME_MESSAGE).should("be.visible").and("contain", text);
   }
 
-  static hasNoWelcomeMessage() {
-    return cy.get(WELCOME_MESSAGE).should("not.exist");
+  static hasNoWelcomeMessage(): void {
+    cy.get(WELCOME_MESSAGE).should("not.exist");
   }
 
-  static hasHomeTab() {
+  static hasHomeTab(): void {
     cy.get(HOME_TAB).should("be.visible");
   }
-  static hasNoHomeTab() {
+  static hasNoHomeTab(): void {
     cy.get(HOME_TAB).should("not.exist");
   }
-  static hasSOPageTab() {
+  static hasSOPageTab(): void {
     cy.get(SO_PAGE_TAB).should("be.visible");
   }
-  static hasNoSOPageTab() {
+  static hasNoSOPageTab(): void {
     cy.get(SO_PAGE_TAB).should("not.exist");
   }
-  static hasSAPagesTab() {
+  static hasSAPagesTab(): void {
     cy.get(SA_PAGES_TAB).should("be.visible");
   }
-  static hasNoSAPagesTab() {
+  static hasNoSAPagesTab(): void {
     cy.get(SA_PAGES_TAB).should("not.exist");
   }
-  static hasOptionsTab() {
+  static hasOptionsTab(): void {
     cy.get(OPTIONS_TAB).should("be.visible");
   }
-  static hasNoOptionsTab() {
+  static hasNoOptionsTab(): void {
     cy.get(OPTIONS_TAB).should("not.exist");
   }
-  static hasAdminTab() {
+  static hasAdminTab(): void {
     cy.get(ADMIN_TAB).should("be.visible");
   }
-  static hasNoAdminTab() {
+  static hasNoAdminTab(): void {
     cy.get(ADMIN_TAB).should("not.exist");
   }
-  static hasGravitationalWavesTab() {
+  static hasGravitationalWavesTab(): void {
     cy.get(GRAVITATIONAL_WAVES_TAB).should("be.visible");
   }
-  static hasNoGravitationalWavesTab() {
+  static hasNoGravitationalWavesTab(): void {
     cy.get(GRAVITATIONAL_WAVES_TAB).should("not.exist");
   }
 }

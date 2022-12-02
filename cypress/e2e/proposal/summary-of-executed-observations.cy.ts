@@ -8,7 +8,7 @@ const apiUrl = getApiUrl();
 const USERNAME = "hettlage";
 
 describe("Block summaries", () => {
-  const PROPOSAL_CODE = "2021-2-LSP-001";
+  const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
     cy.recordHttp(apiUrl + "/login").as("login");
@@ -32,7 +32,7 @@ describe("Block summaries", () => {
   });
 
   it("should load the correct block content when a block name link is clicked", () => {
-    SummaryOfExecutedObservations.clickBlockNameLink(8);
-    SummaryOfExecutedObservations.correctBlockLoaded(8);
+    SummaryOfExecutedObservations.clickBlockNameLink(1);
+    SummaryOfExecutedObservations.correctBlockLoaded(1);
   });
 });

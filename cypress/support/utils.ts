@@ -7,8 +7,6 @@ import {
 import { PathLike } from "fs";
 import * as path from "path";
 
-import { storeAccessToken } from "../../src/app/utils";
-
 export let recordedResponses;
 export let recordedRequestsAliases;
 
@@ -74,31 +72,6 @@ export function interceptIndefinitely(
     });
   });
   return { sendResponse };
-}
-
-/**
- * Log in as a user.
- *
- * The user password is updated first.
- */
-export function login(username: string): void {
-  cy.task("updateUserPassword", username)
-    .then((password: string) => {
-      return cy.request({
-        url: "http://127.0.0.1:8001/token",
-        method: "POST",
-        form: true,
-        body: { username, password },
-      });
-    })
-    .then((response) => {
-      const tokenData = response.body;
-      storeAccessToken({
-        accessToken: tokenData.access_token,
-        expiresAt: tokenData.expires_at,
-        tokenType: tokenData.token_type,
-      });
-    });
 }
 
 /**

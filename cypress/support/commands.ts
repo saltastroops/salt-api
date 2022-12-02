@@ -41,6 +41,24 @@ Cypress.Commands.add("recordHttp", (url) => {
       const date = new Date();
       response.headers.date = date.toString();
 
+      if ("set-cookie" in response.headers) {
+        // There can be a session and a secondary auth toke cooke.
+        // However, Cypress can handle a single cookie only.
+        // We thus discard the session cookie, which is not needed when mocking.
+        const cookies = response.headers["set-cookie"];
+        if (Object.keys(cookies).length > 1) {
+          console.warn("One or more cookies are ignored.");
+        }
+        const cookieEntries = cookies.entries();
+        delete response.headers["set-cookie"];
+        for (const [, cookie] of cookieEntries) {
+          if (cookie.includes("secondary_auth_token=")) {
+            response.headers["set-cookie"] = cookie;
+            break;
+          }
+        }
+      }
+
       request.reply(response);
     } else {
       request.continue((response) => {

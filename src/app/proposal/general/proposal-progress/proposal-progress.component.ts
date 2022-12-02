@@ -1,5 +1,6 @@
 import { Component, Input } from "@angular/core";
 
+import { environment } from "../../../../environments/environment";
 import { ProposalService } from "../../../service/proposal.service";
 import { Proposal, ProposalProgress } from "../../../types/proposal";
 import {
@@ -7,7 +8,6 @@ import {
   GENERIC_ERROR_MESSAGE,
   currentSemester,
 } from "../../../utils";
-import {environment} from "../../../../environments/environment";
 
 @AutoUnsubcribe()
 @Component({
@@ -21,8 +21,8 @@ export class ProposalProgressComponent {
   showForm = false;
   error: string | undefined;
   loading = false;
-  apiUrl = environment.apiUrl
-  currentSemester = currentSemester()
+  apiUrl = environment.apiUrl;
+  currentSemester = currentSemester();
 
   constructor(private proposalService: ProposalService) {}
 

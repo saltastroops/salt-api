@@ -20,7 +20,7 @@ from saltapi.util import (
     semester_end,
     semester_of_datetime,
     semester_start,
-    tonight,
+    tonight, now,
 )
 
 
@@ -231,7 +231,7 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": self.proprietary_period_start_date(proposal_code, block_visits),
+            "start_date": self.proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
 
@@ -1757,7 +1757,8 @@ VALUES (
             },
         )
 
-    def proprietary_period_start_date(self, proposal_code: str, block_visits: List[Dict[str, Any]]):
+    @staticmethod
+    def proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
         # find the latest observation
 
         observation_night = None
@@ -1767,27 +1768,27 @@ VALUES (
             if observation["night"] > observation_night:
                 observation_night = observation["night"]
         if not observation_night:
-            observation_night = datetime.now(tz=pytz.utc)
+            observation_night = now()
+            print(">>>: ", now(), observation_night)
         if type(observation_night) == date:
             observation_night = datetime(
                 observation_night.year,
                 observation_night.month,
                 observation_night.day,
                 12, 0, 0, 0, tzinfo=pytz.utc)
-        return semester_end(semester_of_datetime(observation_night))
+        return semester_end(semester_of_datetime(observation_night)).date()
 
     def _data_release_date(
             self,
-            proposal_code: str,
             proprietary_period: int,
             block_visits: List[dict[str, any]]
     ) -> date:
         proprietary_period_start = self.proprietary_period_start_date(
-            proposal_code, block_visits
+            block_visits
         )
 
         # add the proprietary period to get the data release date
-        return proprietary_period_start.date() + relativedelta(
+        return proprietary_period_start + relativedelta(
             months=proprietary_period
         )
 
@@ -1850,7 +1851,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             {
                 "proposal_code": proposal_code,
                 "release_date": self._data_release_date(
-                    proposal_code, proprietary_period, block_visits
+                    proprietary_period, block_visits
                 ),
                 "proprietary_period": proprietary_period,
             },

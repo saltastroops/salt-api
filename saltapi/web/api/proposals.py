@@ -12,7 +12,9 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from starlette.responses import JSONResponse
 
+from saltapi.exceptions import ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
@@ -217,9 +219,7 @@ def get_proposal_status(
 
 @router.put(
     "/{proposal_code}/proprietary_period",
-    summary="Request a new data release date",
-    response_model=NewProprietaryPeriod,
-    status_code=status.HTTP_202_ACCEPTED,
+    summary="Request a new proprietary period",
 )
 def update_proprietary_period(
     proposal_code: ProposalCode = Path(
@@ -237,7 +237,7 @@ def update_proprietary_period(
                     "the requested proprietary period is longer than the maximum proprietary period for the proposal.",
     ),
     user: User = Depends(get_current_user),
-) -> NewProprietaryPeriod:
+) -> NewProprietaryPeriod or JSONResponse:
     """
     Request an update of the propriety period after which the observation data can become public. It depends on the
     requested proprietary period and the proposal whether the request is granted immediately.
@@ -257,16 +257,21 @@ def update_proprietary_period(
             proposal, proprietary_period_update_request, user.username
         ):
             if not proprietary_period_update_request.motivation:
-                raise ValueError("A motivation is required.")
+                raise ValidationError("A motivation is required.")
             proposal_service.create_proprietary_period_extension_request(
                 proposal_code=proposal_code,
                 proprietary_period=proprietary_period_update_request.proprietary_period,
                 motivation=proprietary_period_update_request.motivation,
                 username=user.username,
             )
-            new_proprietary_period = NewProprietaryPeriod(
-                **proposal["general_info"]["proprietary_period"],
-                status=UpdateStatus.PENDING,
+            unit_of_work.connection.commit()
+            return JSONResponse(
+                status_code=status.HTTP_202_ACCEPTED,
+                content={
+                    **proposal["general_info"]["proprietary_period"],
+                    "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
+                    "status": UpdateStatus.PENDING,
+                }
             )
         else:
             proposal_service.update_proprietary_period(
@@ -274,12 +279,17 @@ def update_proprietary_period(
                 proprietary_period=proprietary_period_update_request.proprietary_period,
             )
             proposal = proposal_service.get_proposal(proposal_code)
-            new_proprietary_period = NewProprietaryPeriod(
-                **proposal["general_info"]["proprietary_period"],
-                status=UpdateStatus.SUCCESSFUL,
+            unit_of_work.connection.commit()
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    **proposal["general_info"]["proprietary_period"],
+                    "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
+                    "status": UpdateStatus.SUCCESSFUL,
+                }
             )
-        unit_of_work.connection.commit()
-        return new_proprietary_period
+
+
 
 
 @router.put(

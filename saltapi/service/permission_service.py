@@ -451,7 +451,4 @@ class PermissionService:
             return False
 
         maximum_period = self.proposal_repository.maximum_proprietary_period(proposal_code)
-        if maximum_period <= proprietary_period_update.proprietary_period:
-            return True
-
-        return False
+        return maximum_period <= proprietary_period_update.proprietary_period

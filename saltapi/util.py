@@ -121,7 +121,6 @@ def semester_of_datetime(t: datetime) -> str:
 
     The given datetime must be timezone-aware.
     """
-
     if t.tzinfo is None:
         raise ValueError("The datetime must be timezone-aware")
 
@@ -179,3 +178,7 @@ def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:
     _as_form.__signature__ = sig  # type: ignore
     setattr(cls, "as_form", _as_form)
     return cls
+
+
+def now() -> datetime:
+    return datetime.now(tz=pytz.utc)

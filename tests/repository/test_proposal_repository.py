@@ -8,9 +8,13 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi import util
 from tests.conftest import find_username
 from tests.markers import nodatabase
 
+
+def mock_now():
+    return datetime(2022, 12, 1, 16, 0, 0, 0, tzinfo=pytz.utc)
 
 @nodatabase
 @pytest.mark.parametrize(
@@ -510,29 +514,34 @@ def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
 @pytest.mark.parametrize(
     "proposal_code,block_visits,expected_date",
     [
-        ("2020-2-SCI-005", [], datetime(2023, 5, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 2, 1)}], datetime(2021, 5, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 4, 30)}], datetime(2021, 5, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 5, 1)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 5, 2)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 8, 15)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 11, 1)}], datetime(2022, 5, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 10, 31)}], datetime(2021, 11, 1, 12, tzinfo=pytz.utc)),
-        ("2020-2-SCI-005", [{"night": date(2021, 12, 1)}], datetime(2022, 5, 1, 12, tzinfo=pytz.utc)),
+        ("2020-2-SCI-005", [], date(2023, 5, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 2, 1)}], date(2021, 5, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 4, 30)}], date(2021, 5, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 5, 1)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 5, 2)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 8, 15)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 11, 1)}], date(2022, 5, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
+        ("2020-2-SCI-005", [{"night": date(2021, 12, 1)}], date(2022, 5, 1)),
         ("2020-2-SCI-005", [
+            {"night": date(2021, 12, 20)},
             {"night": date(2021, 6, 1)},
             {"night": date(2021, 6, 24)},
             {"night": date(2021, 6, 23)},
             {"night": date(2021, 12, 2)}
-        ], datetime(2022, 5, 1, 12, tzinfo=pytz.utc)),
+        ], date(2022, 5, 1)),
     ],
 )
 def test_proprietary_period_start_date_returns_correct_start_date(
-        proposal_code: str, block_visits: List[Dict[str, Any]], expected_date: datetime, db_connection: Connection
+        proposal_code: str,
+        block_visits: List[Dict[str, Any]],
+        expected_date: datetime,
+        db_connection: Connection,
+        monkeypatch
 ) -> None:
+    monkeypatch.setattr(util, 'now', mock_now())
     proposal_repository = ProposalRepository(db_connection)
     assert proposal_repository.proprietary_period_start_date(
-        proposal_code,
         block_visits
     ) == expected_date
 
@@ -553,12 +562,14 @@ def test_proprietary_period_start_date_returns_correct_start_date(
         ("2020-2-SCI-005", 0, [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 10, 31)}], date(2022, 9, 1)),
         ("2020-2-SCI-005", 0, [
+            {"night": date(2021, 12, 20)},
             {"night": date(2021, 6, 1)},
             {"night": date(2021, 6, 24)},
             {"night": date(2021, 6, 23)},
             {"night": date(2021, 12, 2)}
         ], date(2022, 5, 1)),
         ("2020-2-SCI-005", 10, [
+            {"night": date(2021, 12, 20)},
             {"night": date(2021, 6, 1)},
             {"night": date(2021, 6, 24)},
             {"night": date(2021, 6, 23)},
@@ -575,7 +586,6 @@ def test_data_release_date_return_correct_release_date(
     proposal_repository = ProposalRepository(db_connection)
 
     assert proposal_repository._data_release_date(
-        proposal_code,
         proprietary_period,
         block_visits
     ) == expected_date

@@ -2,16 +2,6 @@
 <hr class="heading-line block-header" />
 
 <div class="block">
-  <div *ngIf="block.code">
-    <table class="table">
-      <tr class="secondary-header">
-        <th colspan="1" class="has-text-centered">Block code</th>
-      </tr>
-      <tr>
-        <td>{{ block.code }}</td>
-      </tr>
-    </table>
-  </div>
   <wm-observing-conditions [block]="block"></wm-observing-conditions>
   <div class="inline-view">
     <wm-iterations [block]="block"></wm-iterations>

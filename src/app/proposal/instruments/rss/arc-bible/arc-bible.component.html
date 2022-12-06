@@ -6,9 +6,9 @@
       </tr>
       <tr>
         <th>Lamp</th>
-        <th>Base Exp. Time</th>
-        <th>Corrected Exp. Time</th>
-        <th>Preferred Exp. Time</th>
+        <th>Base Exp. Time (seconds)</th>
+        <th>Corrected Exp. Time (seconds)</th>
+        <th>Preferred Exp. Time (seconds)</th>
       </tr>
     </thead>
     <tbody>
@@ -17,11 +17,11 @@
           {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
         </td>
         <td *ngIf="ab.originalExposureTime; else elseBlock">
-          {{ ab.originalExposureTime }} sec
+          {{ ab.originalExposureTime }}
         </td>
         <ng-template #elseBlock><td>n/a</td></ng-template>
-        <td>{{ ab.originalExposureTime }} sec</td>
-        <td>{{ ab.preferredExposureTime }} sec</td>
+        <td>{{ ab.originalExposureTime }}</td>
+        <td>{{ ab.preferredExposureTime }}</td>
       </tr>
     </tbody>
   </table>

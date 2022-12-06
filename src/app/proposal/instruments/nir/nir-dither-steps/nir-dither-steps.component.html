@@ -14,7 +14,7 @@
         <th>Reads Per Sample</th>
         <th>Gain</th>
         <th>Mode</th>
-        <th>Exp. Time</th>
+        <th>Exp. Time (seconds)</th>
         <th>Exp. Type</th>
       </tr>
     </thead>
@@ -30,7 +30,7 @@
         <td>{{ nirDitherStep.detector.readsPerSample }}</td>
         <td>{{ nirDitherStep.detector.gain }}</td>
         <td>{{ nirDitherStep.detector.mode }}</td>
-        <td>{{ nirDitherStep.detector.exposureTime | number: "1.2-2" }} sec</td>
+        <td>{{ nirDitherStep.detector.exposureTime | number: "1.2-2" }}</td>
         <td>{{ nirDitherStep.exposureType }}</td>
       </tr>
     </tbody>

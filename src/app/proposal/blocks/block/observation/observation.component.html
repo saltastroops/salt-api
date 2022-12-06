@@ -20,9 +20,9 @@
         <th>Data Access Method</th>
         <th>Doc Format</th>
         <th></th>
-        <th>Shutter Open Time</th>
-        <th>Overhead</th>
-        <th>Charged</th>
+        <th>Shutter Open Time (seconds)</th>
+        <th>Overhead (seconds)</th>
+        <th>Charged (seconds)</th>
       </tr>
     </thead>
     <tbody>
@@ -40,10 +40,10 @@
           <button class="button is-small">edit</button>
         </td>
         <td class="has-text-right">
-          {{ observation.observationTime - observation.overheadTime }} sec
+          {{ observation.observationTime - observation.overheadTime }}
         </td>
-        <td class="has-text-right">{{ observation.overheadTime }} sec</td>
-        <td class="has-text-right">{{ observation.observationTime }} sec</td>
+        <td class="has-text-right">{{ observation.overheadTime }}</td>
+        <td class="has-text-right">{{ observation.observationTime }}</td>
       </tr>
     </tbody>
   </table>

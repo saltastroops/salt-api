@@ -7,14 +7,14 @@
       <tr>
         <th>Name</th>
         <th>Description</th>
-        <th>Exposure Time</th>
+        <th>Exposure Time (seconds)</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let f of salticamExposures">
         <td>{{ f.filter.name }}</td>
         <td>{{ f.filter.description }}</td>
-        <td>{{ f.exposureTime }} sec</td>
+        <td>{{ f.exposureTime }}</td>
       </tr>
       <tr>
         <td colspan="3">The filter is current unavailable</td>

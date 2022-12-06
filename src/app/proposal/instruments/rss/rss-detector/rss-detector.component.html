@@ -24,14 +24,14 @@
     <thead>
       <tr>
         <th colspan="2">Exp. Type</th>
-        <th colspan="2">Exp. Time</th>
+        <th colspan="2">Exp. Time (seconds)</th>
         <th>Window Height</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td colspan="2">{{ detector.exposureType }}</td>
-        <td colspan="2">{{ detector.exposureTime | number: "1.2-2" }} sec</td>
+        <td colspan="2">{{ detector.exposureTime | number: "1.2-2" }}</td>
         <td>
           <span *ngIf="detector.detectorWindow">{{
             detector.detectorWindow.height

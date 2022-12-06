@@ -1,13 +1,9 @@
 name: Test
 
 on:
-  push:
-    branches:
-      - development
-      - main
   pull_request:
     branches:
-      - devcelopment
+      - development
       - main
 
 env:

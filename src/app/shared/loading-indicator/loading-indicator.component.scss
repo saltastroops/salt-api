@@ -1,0 +1,34 @@
+.loading {
+  text-align: center;
+}
+
+.loading > svg {
+  margin-bottom: 3em;
+}
+
+.loading--message {
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+@keyframes loading-indicator {
+  from {
+    fill: #aaaaaa;
+    transform: scale(1);
+  }
+  50% {
+    fill: #454545;
+    transform: scale(1.03);
+  }
+  to {
+    fill: #aaaaaa;
+    transform: scale(1);
+  }
+}
+
+svg {
+  animation-name: loading-indicator;
+  animation-delay: 0s;
+  animation-duration: 6s;
+  animation-iteration-count: infinite;
+}

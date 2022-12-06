@@ -94,6 +94,7 @@ import { RealProposalService } from "./service/real/real-proposal.service";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
+import { LoadingIndicatorComponent } from './shared/loading-indicator/loading-indicator.component';
 
 @NgModule({
   declarations: [
@@ -174,6 +175,7 @@ import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/sma
     NirCalibrationComponent,
     NirConfigurationComponent,
     NirDitherStepsComponent,
+    LoadingIndicatorComponent,
   ],
   imports: [
     BrowserModule,

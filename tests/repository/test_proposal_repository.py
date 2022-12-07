@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from typing import Any, Callable, Dict, List
+from unittest.mock import patch
 
 import freezegun
 import pytest
@@ -8,13 +9,11 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
-from saltapi import util
 from tests.conftest import find_username
 from tests.markers import nodatabase
 
 
-def mock_now():
-    return datetime(2022, 12, 1, 16, 0, 0, 0, tzinfo=pytz.utc)
+mock_now = date(2022, 12, 1)
 
 @nodatabase
 @pytest.mark.parametrize(
@@ -539,11 +538,14 @@ def test_proprietary_period_start_date_returns_correct_start_date(
         db_connection: Connection,
         monkeypatch
 ) -> None:
-    monkeypatch.setattr(util, 'now', mock_now())
-    proposal_repository = ProposalRepository(db_connection)
-    assert proposal_repository.proprietary_period_start_date(
-        block_visits
-    ) == expected_date
+    with patch("saltapi.repository.proposal_repository.datetime") as mock_datetime:
+        mock_datetime.today.return_value = mock_now
+        mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+        proposal_repository = ProposalRepository(db_connection)
+        assert (
+                proposal_repository.proprietary_period_start_date(block_visits)
+                == expected_date
+        )
 
 
 @pytest.mark.parametrize(

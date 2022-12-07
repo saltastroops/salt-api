@@ -143,7 +143,7 @@ def next_semester() -> str:
     """
     Get the next semester from the current date and time.
     """
-    # Adding a month never crosses the month boundary. For example, 31 November plus 6
+    # Adding a month never crosses the month boundary. For example, 30 November plus 6
     # months is 30 April, not 1 May. The semester_of_datetime function takes care of the
     # fact that a semester starts at noon rather than at midnight.
     return Semester(
@@ -178,7 +178,3 @@ def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:
     _as_form.__signature__ = sig  # type: ignore
     setattr(cls, "as_form", _as_form)
     return cls
-
-
-def now() -> datetime:
-    return datetime.now(tz=pytz.utc)

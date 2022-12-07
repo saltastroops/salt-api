@@ -91,19 +91,6 @@ class ProprietaryPeriod(BaseModel):
     )
 
 
-class NewProprietaryPeriod(BaseModel):
-    period: int = Field(
-        ...,
-        title="Requested proprietary period",
-        description="The requested proprietary period in months.",
-    )
-    status: UpdateStatus = Field(
-        ...,
-        title="Update status",
-        description="The status of updating the proprietary period.",
-    )
-
-
 class GeneralProposalInfo(BaseModel):
     """General proposal information for a semester."""
 

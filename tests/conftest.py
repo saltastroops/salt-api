@@ -161,6 +161,11 @@ def find_username(
             raise ValueError(f"Proposal code missing for user type {user_type}")
         return cast(str, users[normalized_user_type][proposal_code])
 
+    if normalized_user_type == "principal_contact_of_other_proposals":
+        if proposal_code is None:
+            raise ValueError(f"Proposal code missing for user type {user_type}")
+        return cast(str, users[normalized_user_type][proposal_code])
+
     if normalized_user_type in users:
         return cast(str, users[normalized_user_type])
 

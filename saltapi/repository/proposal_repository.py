@@ -20,7 +20,7 @@ from saltapi.util import (
     semester_end,
     semester_of_datetime,
     semester_start,
-    tonight, now,
+    tonight,
 )
 
 
@@ -1761,22 +1761,22 @@ VALUES (
     def proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
         # find the latest observation
 
-        observation_night = None
+        observation_night: Optional[date] = None
         for observation in block_visits:
             if not observation_night:
                 observation_night = observation["night"]
             if observation["night"] > observation_night:
                 observation_night = observation["night"]
         if not observation_night:
-            observation_night = now()
-            print(">>>: ", now(), observation_night)
-        if type(observation_night) == date:
-            observation_night = datetime(
+            observation_night = datetime.today()
+
+        return semester_end(semester_of_datetime(
+            datetime(
                 observation_night.year,
                 observation_night.month,
                 observation_night.day,
-                12, 0, 0, 0, tzinfo=pytz.utc)
-        return semester_end(semester_of_datetime(observation_night)).date()
+                12, 0, 0, 1, tzinfo=pytz.utc)
+        )).date()
 
     def _data_release_date(
             self,

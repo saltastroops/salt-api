@@ -27,7 +27,6 @@ from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     ProprietaryPeriodUpdateRequest,
-    NewProprietaryPeriod,
     ObservationComment,
     Proposal,
     ProposalListItem,
@@ -237,7 +236,7 @@ def update_proprietary_period(
                     "the requested proprietary period is longer than the maximum proprietary period for the proposal.",
     ),
     user: User = Depends(get_current_user),
-) -> NewProprietaryPeriod or JSONResponse:
+) -> JSONResponse:
     """
     Request an update of the propriety period after which the observation data can become public. It depends on the
     requested proprietary period and the proposal whether the request is granted immediately.
@@ -264,30 +263,23 @@ def update_proprietary_period(
                 motivation=proprietary_period_update_request.motivation,
                 username=user.username,
             )
-            unit_of_work.connection.commit()
-            return JSONResponse(
-                status_code=status.HTTP_202_ACCEPTED,
-                content={
-                    **proposal["general_info"]["proprietary_period"],
-                    "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
-                    "status": UpdateStatus.PENDING,
-                }
-            )
+            status_code = status.HTTP_202_ACCEPTED,
         else:
             proposal_service.update_proprietary_period(
                 proposal_code=proposal_code,
                 proprietary_period=proprietary_period_update_request.proprietary_period,
             )
             proposal = proposal_service.get_proposal(proposal_code)
-            unit_of_work.connection.commit()
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
-                    **proposal["general_info"]["proprietary_period"],
-                    "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
-                    "status": UpdateStatus.SUCCESSFUL,
-                }
-            )
+            status_code = status.HTTP_200_OK
+        unit_of_work.connection.commit()
+        return JSONResponse(
+            status_code=status_code,
+            content={
+                **proposal["general_info"]["proprietary_period"],
+                "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
+                "status": UpdateStatus.SUCCESSFUL,
+            }
+        )
 
 
 

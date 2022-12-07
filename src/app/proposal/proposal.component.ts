@@ -2,7 +2,6 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
 import { Observable } from "rxjs";
-import { delay } from "rxjs/operators";
 
 import { ProposalService } from "../service/proposal.service";
 import { Proposal } from "../types/proposal";

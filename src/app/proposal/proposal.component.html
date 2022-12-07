@@ -1,9 +1,5 @@
-<div *ngIf="loading" class="loading">
-  <wm-loading-indicator message="Loading proposal..."></wm-loading-indicator>
-</div>
-<div *ngIf="loadingFailed" class="error">
-  Loading the proposal has failed.
-</div>
+<wm-loading-indicator *ngIf="loading" message="Loading proposal..."></wm-loading-indicator>
+<wm-error-indicator *ngIf="loadingFailed" message="Loading failed"></wm-error-indicator>
 <div *ngIf="proposal as p">
   <h1 class="title is-1">{{ proposalCode }}</h1>
   <hr class="heading-line proposal-header" />

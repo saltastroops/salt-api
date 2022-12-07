@@ -95,6 +95,7 @@ import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinne
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { LoadingIndicatorComponent } from './shared/loading-indicator/loading-indicator.component';
+import { ErrorIndicatorComponent } from './shared/error-indicator/error-indicator.component';
 
 @NgModule({
   declarations: [
@@ -176,6 +177,7 @@ import { LoadingIndicatorComponent } from './shared/loading-indicator/loading-in
     NirConfigurationComponent,
     NirDitherStepsComponent,
     LoadingIndicatorComponent,
+    ErrorIndicatorComponent,
   ],
   imports: [
     BrowserModule,

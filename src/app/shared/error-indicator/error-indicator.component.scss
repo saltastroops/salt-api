@@ -1,0 +1,13 @@
+.error {
+  text-align: center;
+}
+
+.error > svg {
+  fill: hsl(0deg, 0%, 29%);
+  margin-bottom: 3em;
+}
+
+.error--message {
+  font-size: 2.5em;
+  font-weight: bold;
+}

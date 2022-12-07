@@ -91,11 +91,11 @@ import { ProposalService } from "./service/proposal.service";
 import { RealAuthenticationService } from "./service/real/real-authentication.service";
 import { RealBlockService } from "./service/real/real-block.service";
 import { RealProposalService } from "./service/real/real-proposal.service";
+import { ErrorIndicatorComponent } from "./shared/error-indicator/error-indicator.component";
+import { LoadingIndicatorComponent } from "./shared/loading-indicator/loading-indicator.component";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
-import { LoadingIndicatorComponent } from './shared/loading-indicator/loading-indicator.component';
-import { ErrorIndicatorComponent } from './shared/error-indicator/error-indicator.component';
 
 @NgModule({
   declarations: [

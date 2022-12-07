@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { ErrorIndicatorComponent } from './error-indicator.component';
+import { ErrorIndicatorComponent } from "./error-indicator.component";
 
-describe('ErrorIndicatorComponent', () => {
+describe("ErrorIndicatorComponent", () => {
   let component: ErrorIndicatorComponent;
   let fixture: ComponentFixture<ErrorIndicatorComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ErrorIndicatorComponent ]
-    })
-    .compileComponents();
+      declarations: [ErrorIndicatorComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('ErrorIndicatorComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,14 +1,10 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input } from "@angular/core";
 
 @Component({
   selector: "wm-error-indicator",
   templateUrl: "./error-indicator.component.html",
   styleUrls: ["./error-indicator.component.scss"],
 })
-export class ErrorIndicatorComponent implements OnInit {
+export class ErrorIndicatorComponent {
   @Input() message = "Oops. Something is wrong.";
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

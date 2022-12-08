@@ -217,7 +217,7 @@ def get_proposal_status(
 
 
 @router.put(
-    "/{proposal_code}/proprietary_period",
+    "/{proposal_code}/proprietary-period",
     summary="Request a new proprietary period",
 )
 def update_proprietary_period(

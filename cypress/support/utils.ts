@@ -1,3 +1,5 @@
+import { Chain } from "@angular/compiler";
+
 import "cypress-network-idle";
 import {
   HttpResponseInterceptor,
@@ -6,6 +8,8 @@ import {
 } from "cypress/types/net-stubbing";
 import { PathLike } from "fs";
 import * as path from "path";
+
+import Chainable = Cypress.Chainable;
 
 export let recordedResponses;
 export let recordedRequestsAliases;
@@ -90,8 +94,8 @@ export function randomPassword(): string {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceNetworkError(): void {
-  cy.intercept("/**", { forceNetworkError: true });
+export function forceNetworkError(url = "/**"): Chainable {
+  return cy.intercept(url, { forceNetworkError: true });
 }
 
 /**
@@ -99,8 +103,8 @@ export function forceNetworkError(): void {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceServerError(): void {
-  cy.intercept("/**", {
+export function forceServerError(url = "/**"): Chainable {
+  return cy.intercept(url, {
     statusCode: 500,
     body: { detail: "This is a server error" },
   });
@@ -111,8 +115,8 @@ export function forceServerError(): void {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceAuthenticationError(): void {
-  cy.intercept("/**", {
+export function forceAuthenticationError(url = "/**"): Chainable {
+  return cy.intercept(url, {
     statusCode: 401,
     body: { detail: "Not Authorized" },
   });
@@ -123,8 +127,8 @@ export function forceAuthenticationError(): void {
  *
  * This function internally uses Cypress' intercept method.
  */
-export function forceForbiddenError(): void {
-  cy.intercept("/**", {
+export function forceForbiddenError(url = "/**"): Chainable {
+  return cy.intercept(url, {
     statusCode: 403,
     body: { detail: "Forbidden" },
   });

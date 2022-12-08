@@ -74,7 +74,7 @@ class UpdateStatus(str, Enum):
 class ProprietaryPeriod(BaseModel):
     """Proprietary period."""
 
-    period: int = Field(
+    period: Optional[int] = Field(
         ...,
         title="Current proprietary period",
         description="Proprietary period in months.",

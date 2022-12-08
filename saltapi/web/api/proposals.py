@@ -263,7 +263,8 @@ def update_proprietary_period(
                 motivation=proprietary_period_update_request.motivation,
                 username=user.username,
             )
-            status_code = status.HTTP_202_ACCEPTED,
+            status_code = status.HTTP_202_ACCEPTED
+            update_status = UpdateStatus.PENDING
         else:
             proposal_service.update_proprietary_period(
                 proposal_code=proposal_code,
@@ -271,13 +272,14 @@ def update_proprietary_period(
             )
             proposal = proposal_service.get_proposal(proposal_code)
             status_code = status.HTTP_200_OK
+            update_status = UpdateStatus.SUCCESSFUL
         unit_of_work.connection.commit()
         return JSONResponse(
             status_code=status_code,
             content={
                 **proposal["general_info"]["proprietary_period"],
                 "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
-                "status": UpdateStatus.SUCCESSFUL,
+                "status": update_status,
             }
         )
 

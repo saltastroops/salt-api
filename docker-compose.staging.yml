@@ -1,0 +1,8 @@
+version: "3.5"
+services:
+  web-manager:
+    restart: always
+    container_name: web-manager
+    image: ukulinga.com/saltastroops/web-manager:staging
+    ports:
+      - 4200:80

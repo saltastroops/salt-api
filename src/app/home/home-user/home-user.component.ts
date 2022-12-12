@@ -389,4 +389,36 @@ export class HomeUserComponent implements OnInit {
     });
     this.filteredProposals = proposals;
   }
+
+  isSA(proposal: ProposalListItem): boolean {
+    return (
+      proposal.liaisonAstronomer?.givenName === this.user.givenName &&
+      proposal.liaisonAstronomer.familyName === this.user.familyName
+    );
+  }
+
+  isPI(proposal: ProposalListItem): boolean {
+    return (
+      proposal.principalInvestigator.givenName === this.user.givenName &&
+      proposal.principalInvestigator.familyName === this.user.familyName
+    );
+  }
+
+  isPC(proposal: ProposalListItem): boolean {
+    return (
+      proposal.principalContact.givenName === this.user.givenName &&
+      proposal.principalContact.familyName === this.user.familyName
+    );
+  }
+
+  proposalRowClass(proposal: ProposalListItem): string {
+    if (this.isPI(proposal)) {
+      return "pi";
+    } else if (this.isPC(proposal)) {
+      return "pc";
+    } else if (this.isSA(proposal)) {
+      return "sa";
+    }
+    return "";
+  }
 }

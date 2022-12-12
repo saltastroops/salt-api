@@ -257,29 +257,31 @@ Show
     </tr>
   </thead>
   <tbody>
-    <tr data-test="proposal-row" *ngFor="let proposal of filteredProposals">
-      <td>{{ proposal.id }}</td>
-      <td>
-        <a [routerLink]="['/proposal', proposal.proposalCode]">
-          {{ proposal.proposalCode }}
-        </a>
-      </td>
-      <td>{{ proposal.title }}</td>
-      <td data-test="proposal-semester">{{ proposal.semester }}</td>
-      <td data-test="phase">{{ proposal.phase }}</td>
-      <td data-test="proposal-status">{{ proposal.status.value }}</td>
-      <td>{{ proposal.status.reason }}</td>
-      <td data-test="proposal-type">{{ proposal.proposalType }}</td>
-      <td data-test="principal-investigator">
-        {{ proposal.principalInvestigator.givenName }}
-        {{ proposal.principalInvestigator.familyName }}
-      </td>
-      <td data-test="liaison-astronomer">
-        <span *ngIf="proposal.liaisonAstronomer">{{
-          proposal.liaisonAstronomer.givenName
-        }}</span>
-      </td>
-    </tr>
+    <ng-container *ngFor="let proposal of filteredProposals">
+      <tr data-test="proposal-row" [ngClass]="proposalRowClass(proposal)">
+        <td>{{ proposal.id }}</td>
+        <td>
+          <a [routerLink]="['/proposal', proposal.proposalCode]">
+            {{ proposal.proposalCode }}
+          </a>
+        </td>
+        <td>{{ proposal.title }}</td>
+        <td data-test="proposal-semester">{{ proposal.semester }}</td>
+        <td data-test="phase">{{ proposal.phase }}</td>
+        <td data-test="proposal-status">{{ proposal.status.value }}</td>
+        <td>{{ proposal.status.reason }}</td>
+        <td data-test="proposal-type">{{ proposal.proposalType }}</td>
+        <td data-test="principal-investigator">
+          {{ proposal.principalInvestigator.givenName }}
+          {{ proposal.principalInvestigator.familyName }}
+        </td>
+        <td data-test="liaison-astronomer">
+          <span *ngIf="proposal.liaisonAstronomer">{{
+            proposal.liaisonAstronomer.givenName
+          }}</span>
+        </td>
+      </tr>
+    </ng-container>
   </tbody>
 </table>
 

@@ -13,7 +13,10 @@
           >
             SO Page
           </a>
-          <div class="navbar-item has-dropdown is-hoverable">
+          <div
+            class="navbar-item has-dropdown is-hoverable"
+            (click)="toggleDropdownMenu($event)"
+          >
             <a class="navbar-link" data-test="options-tab"> Options </a>
             <div class="navbar-dropdown">
               <a
@@ -41,6 +44,7 @@
           </div>
           <div
             class="navbar-item has-dropdown is-hoverable"
+            (click)="toggleDropdownMenu($event)"
             *ngIf="hasAnyRole(user, ['Administrator'])"
           >
             <a class="navbar-link" data-test="admin-tab"> Admin </a>
@@ -51,6 +55,7 @@
           </div>
           <div
             class="navbar-item has-dropdown is-hoverable"
+            (click)="toggleDropdownMenu($event)"
             *ngIf="
               hasAnyRole(user, [
                 'SALT Astronomer',

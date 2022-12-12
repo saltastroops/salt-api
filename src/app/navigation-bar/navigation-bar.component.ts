@@ -38,4 +38,11 @@ export class NavigationBarComponent implements OnInit {
     this.selectedUri = uri;
     sessionStorage.setItem("selectedUri", uri);
   }
+
+  toggleDropdownMenu(e: Event): void {
+    const dropdown = e.target as HTMLElement;
+    if (dropdown.parentElement?.classList.contains("navbar-dropdown")) {
+      dropdown.blur();
+    }
+  }
 }

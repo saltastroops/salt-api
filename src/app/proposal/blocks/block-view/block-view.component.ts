@@ -26,7 +26,7 @@ import { Block, BlockSummary } from "../../../types/block";
 })
 export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() blocks!: BlockSummary[];
-  @Input() blockName = "";
+  @Input() blockName!: string;
 
   readonly DEBOUNCE_TIME = 100;
 

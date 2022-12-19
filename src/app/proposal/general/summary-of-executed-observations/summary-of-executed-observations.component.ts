@@ -6,7 +6,7 @@ import { take } from "rxjs/operators";
 import { AuthenticationService } from "../../../service/authentication.service";
 import { BlockVisit } from "../../../types/common";
 import { User } from "../../../types/user";
-import { hasAnyRole } from "../../../utils";
+import { byPropertiesOf, hasAnyRole, sortArg } from "../../../utils";
 
 @Component({
   selector: "wm-summary-of-executed-observations",
@@ -20,6 +20,8 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   observations!: Observation[];
   user!: User;
   showEditBlockButton = false;
+  columnsSortDirections: { [columnName: string]: string } = {};
+  sortedColumn = "";
 
   constructor(private authService: AuthenticationService) {}
 
@@ -66,6 +68,25 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
 
   onClick(blockName: string): void {
     this.selectBlock.emit(blockName);
+  }
+
+  onColumnClick(event: Event, columnName: sortArg<Observation>): void {
+    this.columnsSortDirections[columnName] =
+      this.columnsSortDirections[columnName] === "asc" ? "desc" : "asc";
+
+    this.sortedColumn = columnName;
+  }
+
+  sortableColumnClass(columnName: sortArg<Observation>): {
+    [key: string]: unknown;
+  } {
+    return {
+      pointer: true,
+      active: this.sortedColumn == columnName,
+      asc: this.columnsSortDirections[columnName] === "asc",
+      desc: this.columnsSortDirections[columnName] === "desc",
+      sortable: true,
+    };
   }
 }
 

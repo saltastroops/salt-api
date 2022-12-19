@@ -351,3 +351,17 @@ $bvit-calibration-config-color: #999999;
   align-items: center;
   justify-content: center;
 }
+
+.pointer {
+  cursor: pointer;
+}
+.pointer.active.asc:after {
+  content: "\2191";
+}
+.pointer.active.desc:after {
+  content: "\2193";
+}
+
+.pointer.sortable:hover {
+  background: $primary-header;
+}

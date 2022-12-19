@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+} from "@angular/core";
 
 import { BlockSummary } from "../../../types/block";
 import { byPropertiesOf, sortArg } from "../../../utils";
@@ -8,7 +15,7 @@ import { byPropertiesOf, sortArg } from "../../../utils";
   templateUrl: "./block-summaries.component.html",
   styleUrls: ["./block-summaries.component.scss"],
 })
-export class BlockSummariesComponent implements OnInit {
+export class BlockSummariesComponent implements OnInit, OnChanges {
   @Input() blocks!: BlockSummary[];
   @Input() proposalCode!: string;
   isDesc = false;
@@ -18,13 +25,9 @@ export class BlockSummariesComponent implements OnInit {
   filteredByUnobservable!: boolean;
   filteredBlocks: BlockSummary[] = [];
   columnsSortDirections: { [columnName: string]: string | number | null } = {};
+  initialized = false;
 
   ngOnInit(): void {
-    this.filteredBlocks = this.blocks;
-    this.filteredByCompleted =
-      localStorage.getItem("filterByCompleted") == "true";
-    this.filteredByUnobservable =
-      localStorage.getItem("filterByUnobservable") == "true";
     (document.getElementById("filter-completed") as HTMLInputElement).checked =
       this.filteredByCompleted;
     (
@@ -40,6 +43,14 @@ export class BlockSummariesComponent implements OnInit {
         this.columnsSortDirections[column] = "";
       }
     });
+
+    this.initialized = true;
+  }
+
+  ngOnChanges(): void {
+    if (this.initialized) {
+      this.filterBlocks();
+    }
   }
 
   onClick(blockName: string): void {

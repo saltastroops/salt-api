@@ -84,12 +84,30 @@
           >
             Gravitational Waves
           </a>
-          <div class="navbar-item has-two-columns">
+          <form
+            class="navbar-item has-two-columns"
+            [formGroup]="gotoProposalForm"
+            (ngSubmit)="gotoProposal()"
+          >
             <div>
-              <input class="input" type="text" placeholder="Proposal code" />
+              <input
+                class="input"
+                type="text"
+                formControlName="proposalCode"
+                placeholder="Proposal code"
+                data-test="goto-proposal-code-input"
+              />
             </div>
-            <div><button class="input" type="button">Go to</button></div>
-          </div>
+            <div>
+              <button
+                class="input"
+                type="submit"
+                data-test="goto-proposal-submit"
+              >
+                Go to
+              </button>
+            </div>
+          </form>
         </ng-container>
       </div>
       <div class="navbar-end">

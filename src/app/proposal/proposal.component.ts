@@ -1,25 +1,33 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
-import { Observable } from "rxjs";
+import { Subscription, merge, of } from "rxjs";
+import {
+  catchError,
+  debounceTime,
+  map,
+  mapTo,
+  switchMap,
+} from "rxjs/operators";
 
 import { ProposalService } from "../service/proposal.service";
 import { Proposal } from "../types/proposal";
-import { AutoUnsubcribe } from "../utils";
 
 @Component({
   selector: "wm-proposal",
   templateUrl: "./proposal.component.html",
   styleUrls: ["./proposal.component.scss"],
 })
-@AutoUnsubcribe()
 export class ProposalComponent implements OnInit {
-  proposalCode = "";
+  readonly DEBOUNCE_TIME = 100;
+
   blockName = "";
-  proposal$!: Observable<Proposal>;
   proposal: Proposal | null = null;
-  loading = false;
-  loadingFailed = false;
+  isLoading = false;
+  error?: string;
+  contentSubscription!: Subscription;
+  isLoadingSubscription!: Subscription;
+  errorSubscription!: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -27,20 +35,49 @@ export class ProposalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const routeParams = this.route.snapshot.paramMap;
-    this.proposalCode = routeParams.get("proposal-code") || "";
-    this.proposal$ = this.proposalService.getProposal(this.proposalCode);
-    this.loading = true;
-    this.proposal$.subscribe(
-      (proposal) => {
-        this.loading = false;
-        this.proposal = proposal;
-      },
-      () => {
-        this.loading = false;
-        this.loadingFailed = true;
-      },
+    const trigger$ = this.route.params.pipe(debounceTime(this.DEBOUNCE_TIME));
+
+    const requestResult$ = trigger$
+      .pipe(map((params) => params["proposal-code"]))
+      .pipe(
+        switchMap((proposalCode) => {
+          return this.proposalService.getProposal(proposalCode).pipe(
+            map((b) => ({ success: true, payload: b })),
+            catchError((error) => of({ success: false, payload: error })),
+          );
+        }),
+      );
+
+    const content$ = requestResult$.pipe(
+      map((v) => (v.success ? v.payload : null)),
     );
+
+    const error$ = merge(
+      this.route.params.pipe(mapTo(null)),
+      requestResult$.pipe(map((v) => (!v.success ? v.payload : null))),
+    );
+
+    const isLoading$ = merge(
+      this.route.params.pipe(mapTo(true)),
+      requestResult$.pipe(mapTo(false)),
+    );
+
+    // If we use the async pipe in the template, at this point in time the streams just
+    // created have not been subscribed to yet. However, we are about to select a block,
+    // and hence events may be missed (most notably the isLoading one). Hence we have to
+    // explicitly subscribe ourselves.
+    this.contentSubscription = content$.subscribe((proposal) => {
+      this.proposal = proposal;
+    });
+    this.errorSubscription = error$.subscribe((error) => {
+      this.error = error;
+    });
+    this.isLoadingSubscription = isLoading$.subscribe((isLoading) => {
+      if (isLoading) {
+        this.proposal = null;
+      }
+      this.isLoading = isLoading;
+    });
   }
 
   onClick(block: string): void {

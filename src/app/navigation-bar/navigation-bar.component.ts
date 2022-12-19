@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { FormControl, FormGroup } from "@angular/forms";
 import { Router } from "@angular/router";
 
 import { Observable } from "rxjs";
@@ -16,6 +17,7 @@ export class NavigationBarComponent implements OnInit {
   user$!: Observable<User | null>;
   selectedUri!: string;
   hasAnyRole = hasAnyRole;
+  gotoProposalForm!: FormGroup;
 
   constructor(
     private authService: AuthenticationService,
@@ -23,8 +25,12 @@ export class NavigationBarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Ensure that the proposal goto button works if you are on the proposal page.
     this.selectedUri = sessionStorage.getItem("selectedUri") || "";
     this.user$ = this.authService.user();
+    this.gotoProposalForm = new FormGroup({
+      proposalCode: new FormControl(""),
+    });
   }
 
   logout(): void {
@@ -32,6 +38,12 @@ export class NavigationBarComponent implements OnInit {
       /* do nothing */
     });
     this.router.navigate(["/"]);
+  }
+
+  gotoProposal(): void {
+    const proposalCode = this.gotoProposalForm.value.proposalCode;
+    this.gotoProposalForm.patchValue({ proposalCode: "" });
+    this.router.navigate(["/proposal", proposalCode]);
   }
 
   selectUri(uri: string): void {

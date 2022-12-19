@@ -22,6 +22,14 @@ export class NavigationBar {
     cy.get('[data-test="inline-login-password"]').type(password);
   }
 
+  static typeProposalCode(proposalCode: string): void {
+    cy.get('[data-test="goto-proposal-code-input"]').type(proposalCode);
+  }
+
+  static submitGoToProposalForm(): void {
+    cy.get('[data-test="goto-proposal-submit').click();
+  }
+
   static submitLogin(): void {
     cy.get(INLINE_LOGIN_SUBMIT).click();
   }
@@ -74,6 +82,10 @@ export class NavigationBar {
 
   static hasNoWelcomeMessage(): void {
     cy.get(WELCOME_MESSAGE).should("not.exist");
+  }
+
+  static isNotShowingProposalCodeInForm(): void {
+    cy.get('[data-test="goto-proposal-code-input"]').should("have.value", "");
   }
 
   static hasHomeTab(): void {

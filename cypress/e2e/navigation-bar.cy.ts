@@ -1,5 +1,6 @@
 import { NavigationBar } from "../support/components/navigation-bar";
 import { HomePage } from "../support/pages/home-page";
+import { LoginPage } from "../support/pages/login/login-page";
 import { User } from "../support/types";
 import {
   forceNetworkError,
@@ -140,7 +141,8 @@ describe("Navigation bar", () => {
 
     cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
   });
-  it("Should show all tabs for admin", () => {
+
+  it("should show all tabs for admin", () => {
     cy.task("updateUserPassword", ADMINISTRATOR).then((password: string) => {
       cy.task("getUser", ADMINISTRATOR).then(() => {
         HomePage.visit();
@@ -159,7 +161,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("Should show only show tabs available to Investigators", () => {
+  it("should show only show tabs available to Investigators", () => {
     cy.task("updateUserPassword", INVESTIGATOR).then((password: string) => {
       cy.task("getUser", INVESTIGATOR).then(() => {
         HomePage.visit();
@@ -178,7 +180,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("Should show only show tabs available to SALT Astronomers", () => {
+  it("should show only show tabs available to SALT Astronomers", () => {
     cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
       cy.task("getUser", SALT_ASTRONOMER).then(() => {
         HomePage.visit();
@@ -197,7 +199,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("Should show only show tabs available to TAC members", () => {
+  it("should show only show tabs available to TAC members", () => {
     cy.task("updateUserPassword", TAC_MEMBER).then((password: string) => {
       cy.task("getUser", TAC_MEMBER).then(() => {
         HomePage.visit();
@@ -214,5 +216,55 @@ describe("Navigation bar", () => {
         NavigationBar.hasNoAdminTab();
       });
     });
+  });
+});
+
+describe("Go to proposal form", () => {
+  beforeEach(() => {
+    // Ensure the form is not hidden because of a small screen size
+    cy.viewport(1500, 2000);
+
+    cy.recordHttp(apiUrl + "/login").as("login");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+
+    cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(SALT_ASTRONOMER, password);
+    });
+
+    HomePage.visit();
+  });
+
+  it("should load the proposal page when you click its submit button", () => {
+    NavigationBar.typeProposalCode("2021-2-DDT-001");
+    NavigationBar.submitGoToProposalForm();
+
+    cy.get(".title").should("contain.text", "2021-2-DDT-001");
+  });
+
+  it("should load the proposal page when you hit enter", () => {
+    NavigationBar.typeProposalCode("2021-2-DDT-001{enter}");
+    cy.get(".title").should("contain.text", "2021-2-DDT-001");
+  });
+
+  it("should clear the input after loading the page", () => {
+    NavigationBar.typeProposalCode("2021-2-DDT-001{enter}");
+    cy.get(".title").should("contain.text", "2021-2-DDT-001");
+
+    NavigationBar.isNotShowingProposalCodeInForm();
+  });
+
+  it("should reload the proposal page when you are on a proposal page already", () => {
+    NavigationBar.typeProposalCode("2021-2-DDT-001{enter}");
+    cy.get(".title").should("contain.text", "2021-2-DDT-001");
+
+    NavigationBar.typeProposalCode("2022-2-SCI-017{enter}");
+    cy.get(".title").should("contain.text", "2022-2-SCI-017");
   });
 });

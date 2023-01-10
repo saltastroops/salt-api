@@ -1,11 +1,8 @@
 from typing import Any, Callable
 
-import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
-from saltapi.settings import Settings, get_settings
-from tests.conftest import authenticate, check_data, find_username
 
 INSTITUTION_URL = "/institutions"
 

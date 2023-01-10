@@ -29,11 +29,11 @@ def get_institutions() -> List[Dict[str, Any]]:
     status_code=status.HTTP_201_CREATED,
 )
 def create_institution(
-        institution: NewInstitutionDetails = Body(
-            ...,
-            title="Institution details",
-            description="Institution details for the institution to create."
-        )
+    institution: NewInstitutionDetails = Body(
+        ...,
+        title="Institution details",
+        description="Institution details for the institution to create.",
+    )
 ) -> _NewInstitutionDetails:
     with UnitOfWork() as unit_of_work:
         institution_service = services.institution_service(unit_of_work.connection)
@@ -42,4 +42,3 @@ def create_institution(
         unit_of_work.commit()
 
         return institution_service.get_institution_by_name(institution.institution_name)
-

@@ -62,9 +62,7 @@ FROM Partner P
 WHERE I.InstituteName_Name = :institution_name
             """
         )
-        result = self.connection.execute(
-            stmt, {"institution_name": institution_name}
-        )
+        result = self.connection.execute(stmt, {"institution_name": institution_name})
 
         row = result.one()
 
@@ -96,7 +94,8 @@ WHERE I.InstituteName_Name = :institution_name
         # Make sure the institution is still available
         if self._does_institution_exist(new_institution_details.institution_name):
             raise ValueError(
-                f"The institution {new_institution_details.institution_name} exists already."
+                f"The institution {new_institution_details.institution_name} exists"
+                " already."
             )
 
         institution_name_id = self._add_institution_name(new_institution_details)
@@ -117,14 +116,14 @@ VALUES (:institution_name)
         )
         result = self.connection.execute(
             stmt,
-            {
-                "institution_name": new_institution_details.institution_name
-            },
+            {"institution_name": new_institution_details.institution_name},
         )
 
         return cast(int, result.lastrowid)
 
-    def _create_institution_details(self, new_institution_details: NewInstitutionDetails, institution_name_id: int) -> None:
+    def _create_institution_details(
+        self, new_institution_details: NewInstitutionDetails, institution_name_id: int
+    ) -> None:
         # OTHER partner is used to create a new institution details
         partner_id = 4
         stmt = text(
@@ -141,6 +140,6 @@ VALUES (:partner_id, :institution_name_id, :department, :url, :address)
                 "department": new_institution_details.department,
                 "url": new_institution_details.url,
                 "address": new_institution_details.address,
-                "institution_name": new_institution_details.institution_name
+                "institution_name": new_institution_details.institution_name,
             },
         )

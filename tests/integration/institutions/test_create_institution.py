@@ -1,16 +1,11 @@
-from typing import Callable, Any
+from typing import Any, Callable
 
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
-# import saltapi.service.finder_chart_service
 from saltapi.settings import Settings, get_settings
-from tests.conftest import (
-    authenticate,
-    find_username,
-    check_data,
-)
+from tests.conftest import authenticate, check_data, find_username
 
 INSTITUTION_URL = "/institutions"
 

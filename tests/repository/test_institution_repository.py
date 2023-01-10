@@ -1,4 +1,4 @@
-from typing import Any, Callable, cast
+from typing import Any, Callable
 
 import pytest
 from sqlalchemy.engine import Connection

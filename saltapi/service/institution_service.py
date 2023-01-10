@@ -1,8 +1,7 @@
 from typing import Any, Dict, List
 
 from saltapi.repository.institution_repository import InstitutionRepository
-from saltapi.service.institution import NewInstitutionDetails
-from saltapi.service.institution import Institution
+from saltapi.service.institution import Institution, NewInstitutionDetails
 
 
 class InstitutionService:

@@ -4,8 +4,8 @@ from fastapi import APIRouter, Body
 from starlette import status
 
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.institution import NewInstitutionDetails
 from saltapi.service.institution import Institution as _NewInstitutionDetails
+from saltapi.service.institution import NewInstitutionDetails
 from saltapi.web import services
 from saltapi.web.schema.institution import Institution
 

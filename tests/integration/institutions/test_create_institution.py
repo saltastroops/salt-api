@@ -11,7 +11,7 @@ INSTITUTION_URL = "/institutions"
 
 
 def test_create_institution(
-        client: TestClient, check_data: Callable[[Any], None]
+    client: TestClient, check_data: Callable[[Any], None]
 ) -> None:
     institution = {
         "institution_name": "World University",
@@ -23,4 +23,3 @@ def test_create_institution(
 
     assert response.status_code == status.HTTP_201_CREATED
     check_data(response.json())
-

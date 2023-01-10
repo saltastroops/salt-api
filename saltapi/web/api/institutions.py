@@ -42,6 +42,8 @@ def create_institution(
 
             unit_of_work.commit()
         except ValueError:
-            return institution_service.get_institution_by_name(institution.institution_name)
+            return institution_service.get_institution_by_name(
+                institution.institution_name
+            )
 
         return institution_service.get_institution_by_name(institution.institution_name)

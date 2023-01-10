@@ -101,7 +101,7 @@ WHERE I.InstituteName_Name = :institution_name
         institution_name_id = self._add_institution_name(new_institution_details)
         self._create_institution_details(new_institution_details, institution_name_id)
 
-    def _add_institution_name(self, new_institution_details: NewInstitutionDetails):
+    def _add_institution_name(self, new_institution_details: NewInstitutionDetails) -> int:
         """
         Add institution name.
 

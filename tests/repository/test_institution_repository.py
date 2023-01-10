@@ -44,7 +44,7 @@ def test_create_an_institution(db_connection: Connection) -> None:
     institution = {
         "institution_name": "University of Example",
         "department": "Example Department",
-        "address": "1 Example StreetExample0001",
+        "address": "1 Example Street\nExample\n0001",
         "url": "www.example.com",
     }
     new_institution_details = NewInstitutionDetails(**institution)

@@ -37,8 +37,11 @@ def create_institution(
 ) -> _NewInstitutionDetails:
     with UnitOfWork() as unit_of_work:
         institution_service = services.institution_service(unit_of_work.connection)
-        institution_service.create(institution)
+        try:
+            institution_service.create(institution)
 
-        unit_of_work.commit()
+            unit_of_work.commit()
+        except ValueError:
+            return institution_service.get_institution_by_name(institution.institution_name)
 
         return institution_service.get_institution_by_name(institution.institution_name)

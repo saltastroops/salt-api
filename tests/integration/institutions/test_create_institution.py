@@ -3,7 +3,6 @@ from typing import Any, Callable
 from fastapi.testclient import TestClient
 from starlette import status
 
-
 INSTITUTION_URL = "/institutions"
 
 

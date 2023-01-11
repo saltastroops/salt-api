@@ -160,6 +160,13 @@ class Phase1Target(Target):
             " this target relative to other observations for the same proposal."
         ),
     )
+    track_count: int = Field(
+        ...,
+        title="Number of tracks",
+        description=(
+            "Number of tracks for which the target is observable."
+        ),
+    )
     night_count: int = Field(
         ...,
         title="Number of nights",

@@ -1,9 +1,10 @@
 """Utility functions."""
 import inspect
 from datetime import datetime, timedelta
-from typing import NamedTuple, Type
+from typing import NamedTuple, Type, Any, Optional, Dict
 
 import pytz
+from astropy.coordinates import Angle
 from dateutil.relativedelta import relativedelta
 from fastapi import Form
 from pydantic import BaseModel
@@ -144,7 +145,7 @@ def next_semester() -> str:
     """
     Get the next semester from the current date and time.
     """
-    # Adding a month never crosses the month boundary. For example, 31 November plus 6
+    # Adding a month never crosses the month boundary. For example, 30 November plus 6
     # months is 30 April, not 1 May. The semester_of_datetime function takes care of the
     # fact that a semester starts at noon rather than at midnight.
     return Semester(
@@ -179,3 +180,63 @@ def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:
     _as_form.__signature__ = sig  # type: ignore
     setattr(cls, "as_form", _as_form)
     return cls
+
+
+def target_coordinates(row: Any) -> Optional[Dict[str, Any]]:
+    if row.ra_h is None:
+        return None
+
+    ra = Angle(f"{row.ra_h}:{row.ra_m}:{row.ra_s} hours").degree
+    dec = Angle(f"{row.dec_sign}{row.dec_d}:{row.dec_m}:{row.dec_s} degrees").degree
+
+    if ra == 0 and dec == 0:
+        return None
+
+    return {
+        "right_ascension": float(ra),
+        "declination": float(dec),
+        "equinox": float(row.equinox),
+    }
+
+
+def target_magnitude(row: Any) -> Optional[Dict[str, Any]]:
+    if row.min_mag is None:
+        return None
+
+    return {
+        "minimum_magnitude": float(row.min_mag),
+        "maximum_magnitude": float(row.max_mag),
+        "bandpass": row.bandpass,
+    }
+
+
+def target_type(row: Any) -> Optional[str]:
+    if row.target_sub_type is None:
+        return None
+
+    if row.target_type != "Unknown":
+        return f"{row.target_type} - {row.target_sub_type}"
+    else:
+        return "Unknown"
+
+
+def target_proper_motion(row: Any) -> Optional[Dict[str, Any]]:
+    if row.ra_dot is None or (row.ra_dot == 0 and row.dec_dot == 0):
+        return None
+
+    return {
+        "right_ascension_speed": float(row.ra_dot),
+        "declination_speed": float(row.dec_dot),
+        "epoch": pytz.utc.localize(row.epoch),
+    }
+
+def target_period_ephemeris(row: Any) -> Optional[Dict[str, Any]]:
+    if row.period is None:
+        return None
+
+    return {
+        "zero_point": float(row.period_zero_point),
+        "period": float(row.period),
+        "period_change_rate": float(row.period_change_rate),
+        "time_base": row.period_time_base,
+    }

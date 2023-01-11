@@ -21,6 +21,11 @@ from saltapi.util import (
     semester_of_datetime,
     semester_start,
     tonight,
+    target_type,
+    target_magnitude,
+    target_proper_motion,
+    target_coordinates,
+    target_period_ephemeris
 )
 
 
@@ -247,8 +252,9 @@ LIMIT :limit;
             "time_allocations": self.time_allocations(proposal_code, semester),
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
-            "targets": None,
-            "requested_times": None,
+            "targets": self._get_phase_one_targets(proposal_code),
+            "requested_time": self._get_requested_times(proposal_code, semester),
+            "configurations": self._get_configurations(proposal_code)
         }
         return proposal
 
@@ -454,6 +460,10 @@ SELECT PT.Title                            AS title,
        I.FirstName                         AS astronomer_given_name,
        I.Surname                           AS astronomer_family_name,
        I.Email                             AS astronomer_email,
+       PGI.TimeRestricted                  AS is_time_restricted,
+       IF(PGI.P4 IS NOT NULL,
+          PGI.P4,
+          0)                                AS is_p4,
        IF(PSA.PiPcMayActivate IS NOT NULL,
           PSA.PiPcMayActivate,
           0)                               AS self_activatable
@@ -492,6 +502,8 @@ WHERE PC.Proposal_Code = :proposal_code
             "target_of_opportunity": row.target_of_opportunity,
             "total_requested_time": row.total_requested_time,
             "proprietary_period": row.proprietary_period,
+            "is_time_restricted": row.is_time_restricted > 0,
+            "is_p4": row.is_p4 > 0,
             "is_self_activatable": row.self_activatable > 0,
         }
 
@@ -1756,3 +1768,202 @@ WHERE PC.Proposal_Code = :proposal_code
             semester=semester,
             filenames=filenames,
         )
+
+    def _get_phase_one_targets(self, proposal_code) -> List[Dict[str, Any]]:
+        # The phase 1 targets.
+        stmt = text(
+            """
+SELECT DISTINCT T.Target_Id                                     AS id,
+                T.Target_Name                                   AS name,
+                TC.RaH                                          AS ra_h,
+                TC.RaM                                          AS ra_m,
+                TC.RaS                                          AS ra_s,
+                TC.DecSign                                      AS dec_sign,
+                TC.DecD                                         AS dec_d,
+                TC.DecM                                         AS dec_m,
+                TC.DecS                                         AS dec_s,
+                TC.Equinox                                      AS equinox,
+                TM.MinMag                                       AS min_mag,
+                TM.MaxMag                                       AS max_mag,
+                BP.FilterName                                   AS bandpass,
+                TST.TargetSubType                               AS target_sub_type,
+                TT.TargetType                                   AS target_type,
+                PPT.Optional									AS optional,
+                PPT.NVisits										AS requested_observations,
+                PPT.MaxLunarPhase								AS max_luner_phase,
+                PR.Ranking										AS ranking,
+                PPT.TrackCount									AS track_count,
+                PPT.NightCount									AS nights_count,
+                M.Moon											AS moon,
+                PTP.CompetitionProbability						AS competition_probability,
+                PTP.ObservabilityProbability					AS observability_probability,
+                PTP.SeeingProbability							AS seeing_probability,
+                PTP.TotalProbability							AS total_probability,
+                MT.RaDot                                        AS ra_dot,
+                MT.DecDot                                       AS dec_dot,
+                MT.Epoch                                        AS epoch,
+                PT.Period                                       AS period,
+                PT.Pdot                                         AS period_change_rate,
+                PT.T0                                           AS period_zero_point,
+                TB.Time_Base                                    AS period_time_base,
+                HT.Identifier                                   AS horizons_identifier,
+                IF((MT1.Target_Id IS NOT NULL
+                    OR MTF.Target_Id IS NOT NULL),
+                    1,
+                    0)                                          AS non_sidereal
+FROM P1ProposalTarget PPT
+	JOIN ProposalCode  PC ON PPT.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Target T ON PPT.Target_Id = T.Target_Id
+    JOIN TargetCoordinates TC ON T.TargetCoordinates_Id = TC.TargetCoordinates_Id
+    JOIN P1ObservingConditions POC ON PC.ProposalCode_Id = POC.ProposalCode_Id
+     LEFT JOIN TargetMagnitudes TM ON T.TargetMagnitudes_Id = TM.TargetMagnitudes_Id
+     LEFT JOIN Bandpass BP ON TM.Bandpass_Id = BP.Bandpass_Id
+         LEFT JOIN TargetSubType TST ON T.TargetSubType_Id = TST.TargetSubType_Id
+         LEFT JOIN TargetType TT ON TST.TargetType_Id = TT.TargetType_Id
+         LEFT JOIN MovingTarget MT ON T.MovingTarget_Id = MT.MovingTarget_Id
+         LEFT JOIN PeriodicTarget PT ON T.PeriodicTarget_Id = PT.PeriodicTarget_Id
+         LEFT JOIN TimeBase TB ON PT.TimeBase_Id = TB.TimeBase_Id
+         LEFT JOIN HorizonsTarget HT ON T.HorizonsTarget_Id = HT.HorizonsTarget_Id
+         LEFT JOIN MovingTable MT1 ON T.Target_Id = MT1.Target_Id
+         LEFT JOIN MovingTableFile MTF ON T.Target_Id = MTF.Target_Id
+         LEFT JOIN PiRanking PR ON PPT.PiRanking_Id = PR.PiRanking_Id
+         LEFT JOIN Moon M ON POC.Moon_Id = M.Moon_Id
+         LEFT JOIN P1TargetProbabilities PTP ON PC.ProposalCode_Id = PTP.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+    """
+        )
+        return [
+            {
+                "id": row.id,
+                "name": row.name,
+                "coordinates": target_coordinates(row),
+                "proper_motion": target_proper_motion(row),
+                "magnitude": target_magnitude(row),
+                "target_type": target_type(row),
+                "is_optional": row.optional,
+                "requested_observations": row.requested_observations,
+                "max_lunar_phase": row.max_luner_phase,
+                "ranking": row.ranking,
+                "track_count": row.track_count,
+                "night_count": row.nights_count,
+                "observing_probabilities": {
+                    "moon":  row.moon,
+                    "competition":  row.competition_probability,
+                    "observability": row.observability_probability,
+                    "seeing":  row.seeing_probability,
+                    "total": row.total_probability
+                },
+                "period_ephemeris": target_period_ephemeris(row),
+                "horizons_identifier": row.horizons_identifier,
+                "non_sidereal": row.non_sidereal == 1,
+            }
+            for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
+        ]
+
+    def _get_requested_times(self, proposal_code, semester) -> Dict[str, Any]:
+        stmt = text(
+            """
+SELECT
+	MP.ReqTimePercent					AS percentage,
+    PMT.P1MinimumUsefulTime				AS minimum_useful_time,
+    MP.ReqTimeAmount					AS total_requested_time,
+    PMT.P1TimeComment					AS `comment`,
+    P.Partner_Name						AS partner_name
+FROM MultiPartner MP
+	JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S ON MP.Semester_Id = S.Semester_Id
+    JOIN Partner P ON MP.Partner_Id = P.Partner_Id
+    JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code AND CONCAT(S.`Year`, '-', S.Semester) = :semester
+        """
+        )
+        req_time = dict()
+        dist = []
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code,
+            "semester": semester
+        }):
+            req_time["total_requested_time"] = row.total_requested_time
+            req_time["minimum_useful_time"] = row.minimum_useful_time
+            req_time["comment"] = row.comment
+            req_time["semester"] = semester
+            dist.append({
+                "partner": row.partner_name,
+                "percentage": row.percentage
+            })
+            req_time["distributions"] = dist
+        return req_time
+
+    def _get_configurations(self, proposal_code) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+	P1C.P1Config_Id				        AS observation_id,
+    P1C.P1Bvit_Id				        AS bvit,
+    P1C.P1Hrs_Id				        AS hrs,
+    P1C.P1Nir_Id				        AS nir,
+    P1C.P1Rss_Id				        AS rss,
+    P1C.P1Salticam_Id			        AS scam,
+    BF.BvitFilter_Name			        AS bvit_filter,
+    HM.ExposureMode				        AS hrs_mode,
+    NG.Grating					        AS nir_grating,
+    RM.`Mode`					        AS rss_mode,
+    SM.DetectorMode				        AS scam_detector_mode,
+    PHS.P1HrsSimulation_Name            AS hrs_simulation,
+    PNS.P1NirSimulation_Name            AS nir_simulation,
+    PRS.P1RssSimulation_Name            AS rss_simulation,
+    PSS.P1SalticamSimulation_Name       AS scam_simulation
+FROM P1Config P1C
+	JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
+    LEFT JOIN P1Bvit PB ON P1C.P1Bvit_Id = PB.P1Bvit_Id
+    LEFT JOIN BvitFilter BF ON PB.BvitFilter_Id = BF.BvitFilter_Id
+    LEFT JOIN P1Hrs PH ON P1C.P1Hrs_Id = PH.P1Hrs_Id
+    LEFT JOIN HrsMode HM ON PH.HrsMode_Id = HM.HrsMode_Id
+    LEFT JOIN P1Nir PN ON P1C.P1Nir_Id = PN.P1Nir_Id
+    LEFT JOIN NirGrating NG ON PN.NirGrating_Id = NG.NirGrating_Id
+    LEFT JOIN P1Rss PR ON P1C.P1Rss_Id = PR.P1Rss_Id
+    LEFT JOIN RssMode RM ON PR.RssMode_Id = PR.RssMode_Id
+    LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
+    LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id    
+    LEFT JOIN P1HrsSimulation PHS ON P1C.ProposalCode_Id = PHS.ProposalCode_Id
+    LEFT JOIN P1NirSimulation PNS ON P1C.ProposalCode_Id = PNS.ProposalCode_Id
+    LEFT JOIN P1RssSimulation PRS ON P1C.ProposalCode_Id = PRS.ProposalCode_Id
+    LEFT JOIN P1SalticamSimulation PSS ON P1C.ProposalCode_Id = PSS.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+        """
+        )
+        configurations = []
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code
+        }):
+            if row.bvit:
+                instrument = "BVIT"
+                mode = row.bvit_filter
+                simulations = None
+            elif row.hrs:
+                instrument = "HRS"
+                mode = row.hrs_mode
+                simulations = row.hrs_simulation
+            elif row.nir:
+                instrument = "NIR"
+                mode = row.nir_grating
+                simulations = row.nir_simulation
+            elif row.rss:
+                instrument = "RSS"
+                mode = row.rss_mode
+                simulations = row.rss_simulation
+            elif row.scam:
+                instrument = "SALTICAM"
+                mode = row.scam_detector_mode
+                simulations = row.scam_simulation
+            else:
+                raise NotFoundError(f"No instrument configuration was found for proposal: {proposal_code}")
+            configurations.append(
+                {
+                    "observation_id": row.observation_id,
+                    "instrument": instrument,
+                    "mode": mode,
+                    "simulations": simulations
+                }
+            )
+        return configurations

@@ -127,7 +127,21 @@ class GeneralProposalInfo(BaseModel):
         ...,
         title="Summary for the night log",
         description="Brief (one-line) summary to include in the observing night log",
-    )
+    ),
+    is_time_restricted: bool = Field(
+        ...,
+        title="Is the proposal time restricted?",
+        description=(
+            "Is the proposal time restricted?"
+        ),
+    ),
+    is_p4: bool = Field(
+        ...,
+        title="Is it priority 4 proposal?",
+        description=(
+            "Is the proposal only requesting a priority 4 time?"
+        ),
+    ),
     is_self_activatable: bool = Field(
         ...,
         title="Can the proposal be self-activated?",
@@ -256,7 +270,31 @@ class PartnerPercentage(
         ge=0,
         le=100,
         title="Percentage",
-        description="Percentage bewtween 0 and 100 (both inclusive)",
+        description="Percentage between 0 and 100 (both inclusive)",
+    )
+
+
+class Configuration(BaseModel):
+    observation_id: int = Field(
+        ...,
+        title="Configuration Id",
+        description="The configuration Id"
+    )
+    instrument: str = Field(
+        ...,
+        title="Instrument",
+        description="The instrument name."
+    )
+    mode: str = Field(
+        ...,
+        title="Configuration Mode",
+        description="The configuration mode, it is a filter for BVIT, an exposure mode for HRS, a grating for NIR, and "
+                    "a detector mode for SALTICAM"
+    )
+    simulations: Optional[str] = Field(
+        ...,
+        title="Simulations",
+        description="The Simulations name"
     )
 
 
@@ -282,7 +320,7 @@ class RequestedTime(BaseModel):
     semester: Semester = Field(
         ..., title="Semester", description="Semester for which the time is requested"
     )
-    distribution: List[PartnerPercentage] = Field(
+    distributions: List[PartnerPercentage] = Field(
         ...,
         title="Distribution among partners",
         description="Percentages of time requested from the different partners",
@@ -362,7 +400,7 @@ class Proposal(BaseModel):
             "included for phase 1 proposals."
         ),
     )
-    requested_times: Optional[List[RequestedTime]] = Field(
+    requested_time: RequestedTime = Field(
         ...,
         title="Requested times",
         description=(
@@ -392,6 +430,10 @@ class Proposal(BaseModel):
         ...,
         title="Observation comments",
         description="Comments related to observing the proposal",
+    )
+    configurations: List[Configuration] = Field(
+        title="Instruments configurations",
+        description="The phase 1 instruments configurations."
     )
 
 
@@ -600,3 +642,5 @@ class ProposalProgressInput(BaseProgressReport):
             "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'."
         ),
     )
+
+

@@ -23,10 +23,10 @@ def test_get_institution_by_name_and_department(
 def test_create_an_existing_institution(db_connection: Connection) -> None:
     institution_repository = InstitutionRepository(db_connection)
     institution = {
-        "institution_name": "Adam Mickiewicz University",
-        "department": "Physics",
-        "address": "1 Example StreetExample0001",
-        "url": "www.example.com",
+        "institution_name": "SKA South Africa",
+        "department": "",
+        "address": "3rd Floor,\nThe Park,\nPark Road,\nPinelands,\n7405nSouth Africa",
+        "url": "www.ska.ac.za",
     }
     new_institution_details = NewInstitutionDetails(**institution)
     with pytest.raises(ResourceExistsError) as excinfo:
@@ -39,7 +39,7 @@ def test_create_an_institution(db_connection: Connection) -> None:
     institution = {
         "institution_name": "University of Example",
         "department": "Example Department",
-        "address": "1 Example Street\nExample\n0001",
+        "address": "1 Example Street,\nExample,\n0001",
         "url": "www.example.com",
     }
     new_institution_details = NewInstitutionDetails(**institution)

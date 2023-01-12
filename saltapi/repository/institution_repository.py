@@ -69,17 +69,20 @@ AND I2.Department = :department
             stmt, {"institution_name": institution_name, "department": department}
         )
 
-        row = result.one()
+        try:
+            row = result.one()
 
-        institution = {
-            "institution_id": row.institution_id,
-            "institution_name": row.name,
-            "department": row.department,
-            "partner_code": row.partner_code,
-            "partner_name": row.partner_name,
-        }
+            institution = {
+                "institution_id": row.institution_id,
+                "institution_name": row.name,
+                "department": row.department,
+                "partner_code": row.partner_code,
+                "partner_name": row.partner_name,
+            }
 
-        return institution
+            return institution
+        except NoResultFound:
+            raise NotFoundError("Unknown institution.")
 
     def _does_institution_exist(self, institution_name: str, department: str) -> bool:
         """Check whether an institution exists already."""
@@ -87,8 +90,6 @@ AND I2.Department = :department
         try:
             self.get_institution_by_name_and_department(institution_name, department)
         except NotFoundError:
-            return False
-        except NoResultFound:
             return False
 
         return True
@@ -144,7 +145,6 @@ WHERE P.Partner_Name = 'Other'
         self.connection.execute(
             stmt,
             {
-                "partner_id": partner_id,
                 "institution_name_id": institution_name_id,
                 "department": new_institution_details.department,
                 "url": new_institution_details.url,

@@ -3,6 +3,7 @@ from typing import Any, Callable
 import pytest
 from sqlalchemy.engine import Connection
 
+from saltapi.exceptions import ResourceExistsError
 from saltapi.repository.institution_repository import InstitutionRepository
 from saltapi.service.institution import NewInstitutionDetails
 

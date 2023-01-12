@@ -38,7 +38,7 @@ def test_create_an_existing_institution(db_connection: Connection) -> None:
         "url": "www.example.com",
     }
     new_institution_details = NewInstitutionDetails(**institution)
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ResourceExistsError) as excinfo:
         institution_repository.create(new_institution_details)
     assert "exists already" in str(excinfo)
 

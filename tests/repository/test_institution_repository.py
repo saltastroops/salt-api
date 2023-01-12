@@ -20,8 +20,12 @@ from saltapi.service.institution import NewInstitutionDetails
 def test_get_institution_by_name(
     db_connection: Connection, check_data: Callable[[Any], None], institution_name
 ) -> None:
+    institution_name = "Adam Mickiewicz University"
+    department = "Astronomical Observatory"
     institution_repository = InstitutionRepository(db_connection)
-    institution = institution_repository.get_institution_by_name(institution_name)
+    institution = institution_repository.get_institution_by_name_and_department(
+        institution_name, department
+    )
     check_data(institution)
 
 
@@ -49,8 +53,8 @@ def test_create_an_institution(db_connection: Connection) -> None:
     }
     new_institution_details = NewInstitutionDetails(**institution)
     institution_repository.create(new_institution_details)
-    institution = institution_repository.get_institution_by_name(
-        new_institution_details.institution_name
+    institution = institution_repository.get_institution_by_name_and_department(
+        new_institution_details.institution_name, new_institution_details.department
     )
 
     assert new_institution_details.institution_name == institution["institution_name"]

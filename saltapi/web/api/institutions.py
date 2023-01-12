@@ -46,4 +46,6 @@ def create_institution(
                 institution.institution_name
             )
 
-        return institution_service.get_institution_by_name(institution.institution_name)
+        return institution_service.get_institution_by_name_and_department(
+            institution.institution_name, institution.department
+        )

@@ -15,6 +15,10 @@ class InstitutionService:
     def create(self, new_institution_details: NewInstitutionDetails) -> None:
         self.repository.create(new_institution_details)
 
-    def get_institution_by_name(self, institution_name: str) -> Institution:
-        institution = self.repository.get_institution_by_name(institution_name)
+    def get_institution_by_name_and_department(
+        self, institution_name: str, department: str
+    ) -> Institution:
+        institution = self.repository.get_institution_by_name_and_department(
+            institution_name, department
+        )
         return institution

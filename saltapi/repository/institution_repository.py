@@ -42,11 +42,13 @@ FROM Partner P
         ]
         return institutions
 
-    def get_institution_by_name(self, institution_name: str) -> Dict[str, Any]:
+    def get_institution_by_name_and_department(
+        self, institution_name: str, department: str
+    ) -> Dict[str, Any]:
         """
-        Returns the user with a given username.
+        Returns the institution with a given name and department.
 
-        If the username does not exist, a NotFoundError is raised.
+        If the name and department do not exist, a NotFoundError is raised.
         """
         stmt = text(
             """
@@ -60,9 +62,12 @@ FROM Partner P
     JOIN Institute I2 ON P.Partner_Id = I2.Partner_Id
     JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
 WHERE I.InstituteName_Name = :institution_name
+AND I2.Department = :department
             """
         )
-        result = self.connection.execute(stmt, {"institution_name": institution_name})
+        result = self.connection.execute(
+            stmt, {"institution_name": institution_name, "department": department}
+        )
 
         row = result.one()
 
@@ -76,11 +81,11 @@ WHERE I.InstituteName_Name = :institution_name
 
         return institution
 
-    def _does_institution_exist(self, institution_name: str) -> bool:
+    def _does_institution_exist(self, institution_name: str, department: str) -> bool:
         """Check whether an institution exists already."""
 
         try:
-            self.get_institution_by_name(institution_name)
+            self.get_institution_by_name_and_department(institution_name, department)
         except NotFoundError:
             return False
         except NoResultFound:

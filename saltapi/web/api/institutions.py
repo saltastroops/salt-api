@@ -1,8 +1,9 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 from starlette import status
 
+from saltapi.exceptions import ResourceExistsError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.institution import Institution as _NewInstitutionDetails
 from saltapi.service.institution import NewInstitutionDetails
@@ -41,9 +42,10 @@ def create_institution(
             institution_service.create(institution)
 
             unit_of_work.commit()
-        except ValueError:
-            return institution_service.get_institution_by_name(
-                institution.institution_name
+        except ResourceExistsError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The institution exists already.",
             )
 
         return institution_service.get_institution_by_name_and_department(

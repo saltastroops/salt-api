@@ -400,7 +400,7 @@ class Proposal(BaseModel):
             "included for phase 1 proposals."
         ),
     )
-    requested_time: RequestedTime = Field(
+    requested_time: Optional[RequestedTime] = Field(
         ...,
         title="Requested times",
         description=(
@@ -431,7 +431,7 @@ class Proposal(BaseModel):
         title="Observation comments",
         description="Comments related to observing the proposal",
     )
-    configurations: List[Configuration] = Field(
+    configurations: Optional[List[Configuration]] = Field(
         title="Instruments configurations",
         description="The phase 1 instruments configurations."
     )

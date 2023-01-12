@@ -239,6 +239,7 @@ def test_should_return_proposal_when_requesting_gwe_proposal_for_permitted_users
     response = client.get(
         PROPOSALS_URL + "/2019-1-GWE-005",
     )
+    print("$$$: ", response)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["proposal_code"] == "2019-1-GWE-005"
 

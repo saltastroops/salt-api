@@ -1860,7 +1860,7 @@ WHERE Proposal_Code = :proposal_code
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
 
-    def _get_requested_times(self, proposal_code, semester) -> Dict[str, Any]:
+    def _get_requested_times(self, proposal_code, semester) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1892,9 +1892,11 @@ WHERE Proposal_Code = :proposal_code AND CONCAT(S.`Year`, '-', S.Semester) = :se
                 "percentage": row.percentage
             })
             req_time["distributions"] = dist
+        if len(dist) == 0:
+            return None
         return req_time
 
-    def _get_configurations(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_configurations(self, proposal_code) -> Optional[List[Dict[str, Any]]]:
         stmt = text(
             """
 SELECT
@@ -1966,4 +1968,6 @@ WHERE PC.Proposal_Code = :proposal_code
                     "simulations": simulations
                 }
             )
+        if len(configurations) == 0:
+            return None
         return configurations

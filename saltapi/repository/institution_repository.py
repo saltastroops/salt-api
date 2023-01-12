@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.service.institution import NewInstitutionDetails
 
 
@@ -91,9 +91,11 @@ WHERE I.InstituteName_Name = :institution_name
     def create(self, new_institution_details: NewInstitutionDetails) -> None:
         """Creates a new institution."""
 
-        # Make sure the institution is still available
-        if self._does_institution_exist(new_institution_details.institution_name):
-            raise ValueError(
+        # Make sure the institution does not exist yet
+        if self._does_institution_exist(
+            new_institution_details.institution_name, new_institution_details.department
+        ):
+            raise ResourceExistsError(
                 f"The institution {new_institution_details.institution_name} exists"
                 " already."
             )

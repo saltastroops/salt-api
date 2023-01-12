@@ -17,4 +17,25 @@ def test_create_institution(client: TestClient) -> None:
     new_institution = response.json()
 
     assert response.status_code == status.HTTP_201_CREATED
-    check_data(response.json())
+    assert new_institution["institution_name"] == institution["institution_name"]
+    assert new_institution["department"] == institution["department"]
+
+
+def test_create_an_existing_institution(client: TestClient) -> None:
+    institution = {
+        "institution_name": "University of the Free State",
+        "department": "Physics department",
+        "address": (
+            "Pheneas Nkundabakura"
+            "\nUniversity of the Free State"
+            "\nPhysics department"
+            "\nP.O. Box 339"
+            "\nBloemfontein"
+            "\n9300"
+            "\nSouth Africa"
+        ),
+        "url": "www.world-university.com",
+    }
+    response = client.post(INSTITUTION_URL + "/", json=institution)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

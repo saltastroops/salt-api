@@ -8,18 +8,8 @@ from saltapi.repository.institution_repository import InstitutionRepository
 from saltapi.service.institution import NewInstitutionDetails
 
 
-@pytest.mark.parametrize(
-    "institution_name",
-    [
-        "Adam Mickiewicz University",
-        "ASTRON",
-        "Caltech-IPAC",
-        "University of Northwest Mafikeng",
-        "University of Wisconsin-Madison",
-    ],
-)
-def test_get_institution_by_name(
-    db_connection: Connection, check_data: Callable[[Any], None], institution_name
+def test_get_institution_by_name_and_department(
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     institution_name = "Adam Mickiewicz University"
     department = "Astronomical Observatory"

@@ -112,7 +112,7 @@ AND I2.Department = :department
         self, new_institution_details: NewInstitutionDetails
     ) -> int:
         """
-        Add institution name.
+        Add the institution name to the database.
 
         The primary key of the new database entry is returned.
         """

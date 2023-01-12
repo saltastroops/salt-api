@@ -133,12 +133,12 @@ VALUES (:institution_name)
     def _create_institution_details(
         self, new_institution_details: NewInstitutionDetails, institution_name_id: int
     ) -> None:
-        # OTHER partner is used to create a new institution details
-        partner_id = 4
         stmt = text(
             """
 INSERT INTO Institute (Partner_Id, InstituteName_Id, Department, Url, Address)
-VALUES (:partner_id, :institution_name_id, :department, :url, :address)
+SELECT P.Partner_Id, :institution_name_id, :department, :url, :address
+FROM Partner P
+WHERE P.Partner_Name = 'Other'
         """
         )
         self.connection.execute(

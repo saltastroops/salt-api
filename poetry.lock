@@ -373,6 +373,17 @@ python-versions = ">=3.7"
 test = ["pytest (>=6)"]
 
 [[package]]
+name = "faker"
+version = "16.3.0"
+description = "Faker is a Python package that generates fake data for you."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+python-dateutil = ">=2.4"
+
+[[package]]
 name = "fastapi"
 version = "0.87.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -1800,7 +1811,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "90c7087a7acbe769660b2f5528929dc82a77fe35e8500cceb384b30bfefc2e3d"
+content-hash = "7163116fa129f3ce337e2c8986b7086c315f8279079f45fa63d1cea414daec94"
 
 [metadata.files]
 aiofiles = [
@@ -2192,6 +2203,10 @@ email-validator = [
 exceptiongroup = [
     {file = "exceptiongroup-1.0.2-py3-none-any.whl", hash = "sha256:c22f11ec6a10d2b453871c5c5fe887436c4d1961324ce9090f2ca6ddc4180c27"},
     {file = "exceptiongroup-1.0.2.tar.gz", hash = "sha256:a31cd183c3dea02e617aab5153588d5f7258a77b51f0ef41b3815ae8a0d0f695"},
+]
+faker = [
+    {file = "Faker-16.3.0-py3-none-any.whl", hash = "sha256:084ad2fbb365ab2c82193e72abf3a6f5c70777b3706e176c37c655b40113d82e"},
+    {file = "Faker-16.3.0.tar.gz", hash = "sha256:79354c15477e7ee41067cd75e033155ec9b669adbf7bbce8b66e54893cfee1e4"},
 ]
 fastapi = [
     {file = "fastapi-0.87.0-py3-none-any.whl", hash = "sha256:254453a2e22f64e2a1b4e1d8baf67d239e55b6c8165c079d25746a5220c81bb4"},

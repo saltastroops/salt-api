@@ -20,7 +20,7 @@ export class Sort {
         if (objKeys.length > 1) {
           const key = objKeys[0];
           const subKey = objKeys[1];
-          const x = a[key] ? a[key][subKey] : undefined
+          const x = a[key] ? a[key][subKey] : undefined;
           const y = b[key] ? b[key][subKey] : undefined;
           return this.sortData(new Date(x), new Date(y));
         }
@@ -29,7 +29,7 @@ export class Sort {
         if (objKeys.length > 1) {
           const key = objKeys[0];
           const subKey = objKeys[1];
-          const x = a[key] ? a[key][subKey] : undefined
+          const x = a[key] ? a[key][subKey] : undefined;
           const y = b[key] ? b[key][subKey] : undefined;
           return this.collator.compare(x, y) * this.sortOrder;
         }

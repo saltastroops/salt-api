@@ -1,14 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
 
-from saltapi.exceptions import (
-    AuthorizationError,
-    NotFoundError,
-    ValidationError,
-)
 from saltapi.logging_config import setup_logging
 from saltapi.settings import get_settings
 from saltapi.web.api.authentication import router as authentication_router

@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from saltapi.logging_config import setup_logging
 from saltapi.settings import get_settings
+from saltapi.exceptions_handling import setup_exception_handler
 from saltapi.web.api.authentication import router as authentication_router
 from saltapi.web.api.block_visits import router as block_visits_router
 from saltapi.web.api.blocks import router as blocks_router
@@ -23,6 +24,7 @@ settings = get_settings()
 origins = [settings.frontend_uri]
 
 setup_logging(app)
+setup_exception_handler(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,24 +38,6 @@ app.add_middleware(
     secret_key=settings.secret_key,
     max_age=3600 * settings.auth_token_lifetime_hours,
 )
-
-
-@app.exception_handler(NotFoundError)
-async def not_found_error_handler(request: Request, exc: NotFoundError) -> Response:
-    return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-
-@app.exception_handler(ValidationError)
-async def validation_error_handler(request: Request, exc: ValidationError) -> Response:
-    return JSONResponse(status_code=400, content={"message": str(exc)})
-
-
-@app.exception_handler(AuthorizationError)
-async def authorization_error_handler(
-    request: Request, exc: AuthorizationError
-) -> Response:
-    return JSONResponse(status_code=403, content={"message": "Forbidden"})
-
 
 app.include_router(progress_router)
 app.include_router(blocks_router)

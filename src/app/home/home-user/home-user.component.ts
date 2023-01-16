@@ -16,8 +16,8 @@ import { availableSemesters, currentSemester } from "../../utils";
 })
 export class HomeUserComponent implements OnInit {
   user!: User;
-  proposals?: ProposalListItem[];
-  filteredProposals?: ProposalListItem[];
+  proposals!: ProposalListItem[];
+  filteredProposals!: ProposalListItem[];
 
   semesterRange$ = new Subject<[string, string]>();
 

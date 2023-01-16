@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
+from saltapi.exceptions_handling import setup_exception_handler
 from saltapi.logging_config import setup_logging
 from saltapi.settings import get_settings
-from saltapi.exceptions_handling import setup_exception_handler
 from saltapi.web.api.authentication import router as authentication_router
 from saltapi.web.api.block_visits import router as block_visits_router
 from saltapi.web.api.blocks import router as blocks_router

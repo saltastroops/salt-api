@@ -1,16 +1,15 @@
 # Taken from https://github.com/tiangolo/fastapi/issues/3361#issuecomment-1264208434
 import traceback
-from typing import Union, Any
+from typing import Any, Union
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse, Response
-from starlette.datastructures import URL
-from pydantic.error_wrappers import ValidationError
-
 from loguru import logger
+from pydantic.error_wrappers import ValidationError
+from starlette.datastructures import URL
 
-from saltapi.exceptions import NotFoundError, AuthorizationError
+from saltapi.exceptions import AuthorizationError, NotFoundError
 
 
 def log_message(method: str, url: Union[str, URL], message: Any):

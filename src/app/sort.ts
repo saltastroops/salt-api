@@ -15,9 +15,24 @@ export class Sort {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (a: any, b: any) => {
+      const objKeys = property.split(".");
       if (type === "date") {
+        if (objKeys.length > 1) {
+          const key = objKeys[0];
+          const subKey = objKeys[1];
+          const x = a[key] ? a[key][subKey] : undefined
+          const y = b[key] ? b[key][subKey] : undefined;
+          return this.sortData(new Date(x), new Date(y));
+        }
         return this.sortData(new Date(a[property]), new Date(b[property]));
       } else {
+        if (objKeys.length > 1) {
+          const key = objKeys[0];
+          const subKey = objKeys[1];
+          const x = a[key] ? a[key][subKey] : undefined
+          const y = b[key] ? b[key][subKey] : undefined;
+          return this.collator.compare(x, y) * this.sortOrder;
+        }
         return this.collator.compare(a[property], b[property]) * this.sortOrder;
       }
     };

@@ -244,16 +244,57 @@ Show
 <table class="table">
   <thead>
     <tr class="secondary-header">
-      <th>Proposal ID</th>
-      <th class="proposal-code-column">Proposal Code</th>
-      <th>Title</th>
-      <th>Semester</th>
-      <th>Phase</th>
-      <th>Proposal Status</th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="id"
+      >
+        Proposal ID
+      </th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="proposalCode"
+        class="proposal-code-column"
+      >
+        Proposal Code
+      </th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="title"
+      >
+        Title
+      </th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="semester"
+      >
+        Semester
+      </th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="phase"
+      >
+        Phase
+      </th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="status.value"
+      >
+        Proposal Status
+      </th>
       <th>Proposal Status Reason</th>
-      <th>Proposal Type</th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="proposalType"
+      >
+        Proposal Type
+      </th>
       <th>PI</th>
-      <th>Astronomer</th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="liaisonAstronomer.givenName"
+      >
+        Astronomer
+      </th>
     </tr>
   </thead>
   <tbody>

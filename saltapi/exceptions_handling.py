@@ -12,7 +12,7 @@ from starlette.datastructures import URL
 from saltapi.exceptions import AuthorizationError, NotFoundError
 
 
-def log_message(method: str, url: Union[str, URL], message: Any):
+def log_message(method: str, url: Union[str, URL], message: Any) -> None:
     """log message when catch exception"""
 
     logger.error("start error, this is".center(60, "*"))
@@ -21,9 +21,9 @@ def log_message(method: str, url: Union[str, URL], message: Any):
     logger.error("end error".center(60, "*"))
 
 
-def setup_exception_handler(app: FastAPI):
+def setup_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException):
+    async def http_exception_handler(request: Request, exc: HTTPException) -> Response:
         """catch FastAPI HTTPException"""
 
         log_message(request.method, request.url, exc.detail)
@@ -36,7 +36,7 @@ def setup_exception_handler(app: FastAPI):
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
-    ):
+    ) -> Response:
         """catch FastAPI RequestValidationError"""
 
         exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
@@ -47,7 +47,7 @@ def setup_exception_handler(app: FastAPI):
         )
 
     @app.exception_handler(Exception)
-    async def exception_handle(request: Request, exc: Exception):
+    async def exception_handle(request: Request, exc: Exception) -> Response:
         """catch other exception"""
 
         log_message(request.method, request.url, traceback.format_exc())

@@ -36,11 +36,13 @@ const PROPOSAL_ROW = '[data-test="proposal-row"]';
 const SORT_BY_PROPOSAL_ID_COLUMN = '[data-test="proposal-id-header"]';
 const SORT_BY_PROPOSAL_CODE_COLUMN = '[data-test="proposal-code-header"]';
 const SORT_BY_PROPOSAL_TITLE_COLUMN = '[data-test="proposal-title-header"]';
-const SORT_BY_PROPOSAL_SEMESTER_COLUMN = '[data-test="proposal-semester-header"]';
+const SORT_BY_PROPOSAL_SEMESTER_COLUMN =
+  '[data-test="proposal-semester-header"]';
 const SORT_BY_PROPOSAL_PHASE_COLUMN = '[data-test="proposal-phase-header"]';
 const SORT_BY_PROPOSAL_STATUS_COLUMN = '[data-test="proposal-status-header"]';
 const SORT_BY_PROPOSAL_TYPE_COLUMN = '[data-test="proposal-type-header"]';
-const SORT_BY_PROPOSAL_ASTRONOMER_COLUMN = '[data-test="proposal-astronomer-header"]';
+const SORT_BY_PROPOSAL_ASTRONOMER_COLUMN =
+  '[data-test="proposal-astronomer-header"]';
 
 export class HomeUser {
   static proposalsListEmpty(): void {
@@ -498,8 +500,7 @@ export class HomeUser {
     order: "ascending" | "descending",
   ): void {
     const valueElement = "[data-test=proposal-" + column + "]";
-    const headerElement =
-      "[data-test=proposal-" + column + "-header" + "]";
+    const headerElement = "[data-test=proposal-" + column + "-header" + "]";
     const values = [];
     if (order === "ascending") {
       cy.get(headerElement).should("have.class", "asc");

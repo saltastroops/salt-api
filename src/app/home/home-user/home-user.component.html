@@ -244,26 +244,59 @@ Show
 <table class="table">
   <thead>
     <tr class="secondary-header">
-      <th [wmSort]="filteredProposals" data-name="id">Proposal ID</th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="id"
+        data-test="proposal-id-header"
+      >
+        Proposal ID
+      </th>
       <th
         [wmSort]="filteredProposals"
         data-name="proposalCode"
         class="proposal-code-column"
+        data-test="proposal-code-header"
       >
         Proposal Code
       </th>
-      <th [wmSort]="filteredProposals" data-name="title">Title</th>
-      <th [wmSort]="filteredProposals" data-name="semester">Semester</th>
-      <th [wmSort]="filteredProposals" data-name="phase">Phase</th>
-      <th [wmSort]="filteredProposals" data-name="status.value">
+      <th
+        [wmSort]="filteredProposals"
+        data-name="title"
+        data-test="proposal-title-header"
+      >Title</th>
+      <th [wmSort]="filteredProposals"
+          data-name="semester"
+          data-test="proposal-semester-header"
+      >
+        Semester
+      </th>
+      <th [wmSort]="filteredProposals"
+          data-name="phase"
+          data-test="proposal-phase-header"
+      >
+        Phase
+      </th>
+      <th
+        [wmSort]="filteredProposals"
+        data-name="status.value"
+        data-test="proposal-status-header"
+      >
         Proposal Status
       </th>
       <th>Proposal Status Reason</th>
-      <th [wmSort]="filteredProposals" data-name="proposalType">
+      <th
+        [wmSort]="filteredProposals"
+        data-name="proposalType"
+        data-test="proposal-type-header"
+      >
         Proposal Type
       </th>
       <th>PI</th>
-      <th [wmSort]="filteredProposals" data-name="liaisonAstronomer.givenName">
+      <th
+        [wmSort]="filteredProposals"
+        data-name="liaisonAstronomer.givenName"
+        data-test="proposal-astronomer-header"
+      >
         Astronomer
       </th>
     </tr>
@@ -271,23 +304,23 @@ Show
   <tbody>
     <ng-container *ngFor="let proposal of filteredProposals">
       <tr data-test="proposal-row" [ngClass]="proposalRowClass(proposal)">
-        <td>{{ proposal.id }}</td>
-        <td>
+        <td data-test="proposal-id">{{ proposal.id }}</td>
+        <td data-test="proposal-code">
           <a [routerLink]="['/proposal', proposal.proposalCode]">
             {{ proposal.proposalCode }}
           </a>
         </td>
-        <td>{{ proposal.title }}</td>
+        <td data-test="proposal-title">{{ proposal.title }}</td>
         <td data-test="proposal-semester">{{ proposal.semester }}</td>
-        <td data-test="phase">{{ proposal.phase }}</td>
+        <td data-test="proposal-phase">{{ proposal.phase }}</td>
         <td data-test="proposal-status">{{ proposal.status.value }}</td>
         <td>{{ proposal.status.reason }}</td>
         <td data-test="proposal-type">{{ proposal.proposalType }}</td>
-        <td data-test="principal-investigator">
+        <td data-test="proposal-principal-investigator">
           {{ proposal.principalInvestigator.givenName }}
           {{ proposal.principalInvestigator.familyName }}
         </td>
-        <td data-test="liaison-astronomer">
+        <td data-test="proposal-astronomer">
           <span *ngIf="proposal.liaisonAstronomer">{{
             proposal.liaisonAstronomer.givenName
           }}</span>

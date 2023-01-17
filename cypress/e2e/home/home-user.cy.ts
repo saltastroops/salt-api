@@ -334,6 +334,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by ids when the proposal id column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalIdColumn();
     HomeUser.proposalsSortedBy("id", "ascending");
     HomeUser.clickProposalIdColumn();
@@ -341,6 +342,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by codes when the proposal code column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalCodeColumn();
     HomeUser.proposalsSortedBy("code", "ascending");
     HomeUser.clickProposalCodeColumn();
@@ -348,6 +350,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by titles when the proposal title column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalTitleColumn();
     HomeUser.proposalsSortedBy("title", "ascending");
     HomeUser.clickProposalTitleColumn();
@@ -355,6 +358,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by semesters when the proposal semester column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalSemesterColumn();
     HomeUser.proposalsSortedBy("semester", "ascending");
     HomeUser.clickProposalSemesterColumn();
@@ -362,6 +366,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by phases when the proposal phase column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalPhaseColumn();
     HomeUser.proposalsSortedBy("phase", "ascending");
     HomeUser.clickProposalPhaseColumn();
@@ -369,6 +374,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by statuses when the proposal status column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalStatusColumn();
     HomeUser.proposalsSortedBy("status", "ascending");
     HomeUser.clickProposalStatusColumn();
@@ -376,6 +382,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by types when the proposal type column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalTypeColumn();
     HomeUser.proposalsSortedBy("type", "ascending");
     HomeUser.clickProposalTypeColumn();
@@ -383,6 +390,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by astronomers when the proposal astronomer column is clicked", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalAstronomerColumn();
     HomeUser.proposalsSortedBy("astronomer", "ascending");
     HomeUser.clickProposalAstronomerColumn();
@@ -390,6 +398,7 @@ describe("Home User", () => {
   });
 
   it("should have the table correctly sorted when the proposal id column is clicked three times", () => {
+    cy.wait("@proposals");
     HomeUser.clickProposalIdColumn();
     HomeUser.proposalsSortedBy("id", "ascending");
     HomeUser.clickProposalIdColumn();

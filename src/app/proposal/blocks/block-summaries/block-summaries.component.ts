@@ -28,8 +28,10 @@ export class BlockSummariesComponent implements OnInit, OnChanges {
   initialized = false;
 
   ngOnInit(): void {
-    this.filteredByCompleted = localStorage.getItem("filterByCompleted") === "true";
-    this.filteredByUnobservable = localStorage.getItem("filterByUnobservable") === "true";
+    this.filteredByCompleted =
+      localStorage.getItem("filterByCompleted") === "true";
+    this.filteredByUnobservable =
+      localStorage.getItem("filterByUnobservable") === "true";
     (document.getElementById("filter-completed") as HTMLInputElement).checked =
       this.filteredByCompleted;
     (

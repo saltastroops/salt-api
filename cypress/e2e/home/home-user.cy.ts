@@ -336,7 +336,6 @@ describe("Home User", () => {
   it("should have the table sorted by ids when the proposal id column is clicked", () => {
     HomeUser.clickProposalIdColumn();
     HomeUser.proposalsSortedBy("id", "ascending");
-    cy.wait(500);
     HomeUser.clickProposalIdColumn();
     HomeUser.proposalsSortedBy("id", "descending");
   });

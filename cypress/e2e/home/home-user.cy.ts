@@ -332,6 +332,72 @@ describe("Home User", () => {
     HomeUser.phase2FilterCheckboxChecked(true);
     HomeUser.filteredPhase2Proposals();
   });
+
+  it("should have the table sorted by ids when the proposal id column is clicked", () => {
+    HomeUser.clickProposalIdColumn();
+    HomeUser.proposalsSortedBy("id", "ascending");
+    cy.wait(500);
+    HomeUser.clickProposalIdColumn();
+    HomeUser.proposalsSortedBy("id", "descending");
+  });
+
+  it("should have the table sorted by codes when the proposal code column is clicked", () => {
+    HomeUser.clickProposalCodeColumn();
+    HomeUser.proposalsSortedBy("code", "ascending");
+    HomeUser.clickProposalCodeColumn();
+    HomeUser.proposalsSortedBy("code", "descending");
+  });
+
+  it("should have the table sorted by titles when the proposal title column is clicked", () => {
+    HomeUser.clickProposalTitleColumn();
+    HomeUser.proposalsSortedBy("title", "ascending");
+    HomeUser.clickProposalTitleColumn();
+    HomeUser.proposalsSortedBy("title", "descending");
+  });
+
+  it("should have the table sorted by semesters when the proposal semester column is clicked", () => {
+    HomeUser.clickProposalSemesterColumn();
+    HomeUser.proposalsSortedBy("semester", "ascending");
+    HomeUser.clickProposalSemesterColumn();
+    HomeUser.proposalsSortedBy("semester", "descending");
+  });
+
+  it("should have the table sorted by phases when the proposal phase column is clicked", () => {
+    HomeUser.clickProposalPhaseColumn();
+    HomeUser.proposalsSortedBy("phase", "ascending");
+    HomeUser.clickProposalPhaseColumn();
+    HomeUser.proposalsSortedBy("phase", "descending");
+  });
+
+  it("should have the table sorted by statuses when the proposal status column is clicked", () => {
+    HomeUser.clickProposalStatusColumn();
+    HomeUser.proposalsSortedBy("status", "ascending");
+    HomeUser.clickProposalStatusColumn();
+    HomeUser.proposalsSortedBy("status", "descending");
+  });
+
+  it("should have the table sorted by types when the proposal type column is clicked", () => {
+    HomeUser.clickProposalTypeColumn();
+    HomeUser.proposalsSortedBy("type", "ascending");
+    HomeUser.clickProposalTypeColumn();
+    HomeUser.proposalsSortedBy("type", "descending");
+  });
+
+  it("should have the table sorted by astronomers when the proposal astronomer column is clicked", () => {
+    HomeUser.clickProposalAstronomerColumn();
+    HomeUser.proposalsSortedBy("astronomer", "ascending");
+    HomeUser.clickProposalAstronomerColumn();
+    HomeUser.proposalsSortedBy("astronomer", "descending");
+  });
+
+  it("should have the table correctly sorted when the proposal id column is clicked three times", () => {
+    HomeUser.clickProposalIdColumn();
+    HomeUser.proposalsSortedBy("id", "ascending");
+    HomeUser.clickProposalIdColumn();
+    HomeUser.proposalsSortedBy("id", "descending");
+    HomeUser.clickProposalIdColumn();
+    HomeUser.proposalsSortedBy("id", "ascending");
+  });
 });
 
 describe("Home User - PI", () => {

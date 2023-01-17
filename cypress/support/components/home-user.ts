@@ -27,11 +27,20 @@ const FILTER_COMMISSIONING_PROPOSALS = '[data-test="commissioning"]';
 
 const PROPOSAL_TYPES = '[data-test="proposal-type"]';
 const PROPOSAL_STATUSES = '[data-test="proposal-status"]';
-const PHASES = '[data-test="phase"]';
-const LIAISON_ASTRONOMER = '[data-test="liaison-astronomer"]';
-const PRINCIPAL_INVESTIGATOR = '[data-test="principal-investigator"]';
+const PHASES = '[data-test="proposal-phase"]';
+const LIAISON_ASTRONOMER = '[data-test="proposal-astronomer"]';
+const PRINCIPAL_INVESTIGATOR = '[data-test="proposal-principal-investigator"]';
 
 const PROPOSAL_ROW = '[data-test="proposal-row"]';
+
+const SORT_BY_PROPOSAL_ID_COLUMN = '[data-test="proposal-id-header"]';
+const SORT_BY_PROPOSAL_CODE_COLUMN = '[data-test="proposal-code-header"]';
+const SORT_BY_PROPOSAL_TITLE_COLUMN = '[data-test="proposal-title-header"]';
+const SORT_BY_PROPOSAL_SEMESTER_COLUMN = '[data-test="proposal-semester-header"]';
+const SORT_BY_PROPOSAL_PHASE_COLUMN = '[data-test="proposal-phase-header"]';
+const SORT_BY_PROPOSAL_STATUS_COLUMN = '[data-test="proposal-status-header"]';
+const SORT_BY_PROPOSAL_TYPE_COLUMN = '[data-test="proposal-type-header"]';
+const SORT_BY_PROPOSAL_ASTRONOMER_COLUMN = '[data-test="proposal-astronomer-header"]';
 
 export class HomeUser {
   static proposalsListEmpty(): void {
@@ -450,5 +459,67 @@ export class HomeUser {
           });
         });
     });
+  }
+
+  static clickProposalIdColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_ID_COLUMN).click();
+  }
+
+  static clickProposalCodeColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_CODE_COLUMN).click();
+  }
+
+  static clickProposalTitleColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_TITLE_COLUMN).click();
+  }
+
+  static clickProposalSemesterColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_SEMESTER_COLUMN).click();
+  }
+
+  static clickProposalPhaseColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_PHASE_COLUMN).click();
+  }
+
+  static clickProposalStatusColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_STATUS_COLUMN).click();
+  }
+
+  static clickProposalTypeColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_TYPE_COLUMN).click();
+  }
+
+  static clickProposalAstronomerColumn(): void {
+    cy.get(SORT_BY_PROPOSAL_ASTRONOMER_COLUMN).click();
+  }
+
+  static proposalsSortedBy(
+    column: string,
+    order: "ascending" | "descending",
+  ): void {
+    const valueElement = "[data-test=proposal-" + column + "]";
+    const headerElement =
+      "[data-test=proposal-" + column + "-header" + "]";
+    const values = [];
+    if (order === "ascending") {
+      cy.get(headerElement).should("have.class", "asc");
+      cy.get(valueElement)
+        .each(($el, index) => {
+          values[index] = $el.text();
+        })
+        .then(() => {
+          expect(values).to.deep.equal(values.sort());
+        });
+    }
+    if (order === "descending") {
+      cy.get(headerElement).should("have.class", "desc");
+      cy.get(valueElement)
+        .each(($el, index) => {
+          values[index] = $el.text();
+        })
+        .then(() => {
+          expect(values).to.deep.equal(values.reverse());
+        });
+    }
   }
 }

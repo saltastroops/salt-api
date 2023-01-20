@@ -95,17 +95,13 @@ describe("Forgot password page", () => {
 
       // And it is sent to the correct email address
       cy.task("getUser", USERNAME).then((user: User) => {
-        // eslint-disable-next-line
-        // @ts-ignore
-        cy.get("@emails").then((emails: Email[]) => {
+        cy.get<Email[]>("@emails").then((emails: Email[]) => {
           expect(emails[0].to).to.contain(user.email);
         });
       });
 
       // And the email contains a link both in plain text and in html
-      cy.get("@emails")
-        // eslint-disable-next-line
-        // @ts-ignore
+      cy.get<Email[]>("@emails")
         .then((emails: Email[]) => {
           const LINK_REGEX = /\bhttps?:\/\/[^\s"]+/;
           const email = emails[0];

@@ -28,11 +28,10 @@ export class BlockSummariesComponent implements OnInit, OnChanges {
   initialized = false;
 
   ngOnInit(): void {
-    (document.getElementById("filter-completed") as HTMLInputElement).checked =
-      this.filteredByCompleted;
-    (
-      document.getElementById("filter-unobservable") as HTMLInputElement
-    ).checked = this.filteredByUnobservable;
+    this.filteredByCompleted =
+      localStorage.getItem("filterByCompleted") == "true";
+    this.filteredByUnobservable =
+      localStorage.getItem("filterByUnobservable") == "true";
 
     this.filterBlocks();
     const sortableColumnElements =

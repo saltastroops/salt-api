@@ -161,7 +161,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("should show only show tabs available to Investigators", () => {
+  it("should show tabs only available to Investigators", () => {
     cy.task("updateUserPassword", INVESTIGATOR).then((password: string) => {
       cy.task("getUser", INVESTIGATOR).then(() => {
         HomePage.visit();
@@ -180,7 +180,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("should show only show tabs available to SALT Astronomers", () => {
+  it("should show tabs only available to SALT Astronomers", () => {
     cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
       cy.task("getUser", SALT_ASTRONOMER).then(() => {
         HomePage.visit();
@@ -199,7 +199,7 @@ describe("Navigation bar", () => {
     });
   });
 
-  it("should show only show tabs available to TAC members", () => {
+  it("should show tabs only available to TAC members", () => {
     cy.task("updateUserPassword", TAC_MEMBER).then((password: string) => {
       cy.task("getUser", TAC_MEMBER).then(() => {
         HomePage.visit();

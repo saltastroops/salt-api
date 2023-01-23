@@ -65,6 +65,32 @@ class ProposalType(str, Enum):
     SCIENCE_VERIFICATION = "Science Verification"
 
 
+class UpdateStatus(str, Enum):
+    SUCCESSFUL = "Successful"
+    PENDING = "Pending"
+    FAILED = "Failed"
+
+
+class ProprietaryPeriod(BaseModel):
+    """Proprietary period."""
+
+    period: Optional[int] = Field(
+        ...,
+        title="Current proprietary period",
+        description="Proprietary period in months.",
+    )
+    maximum_period: Optional[int] = Field(
+        ...,
+        title="Maximum proprietary period, in months",
+        description="Maximum proprietary period, in months for partner partners that have it.",
+    )
+    start_date: Optional[date] = Field(
+        ...,
+        title="Start date",
+        description="Start date from which the proprietary period is counted.",
+    )
+
+
 class GeneralProposalInfo(BaseModel):
     """General proposal information for a semester."""
 
@@ -106,10 +132,10 @@ class GeneralProposalInfo(BaseModel):
         title="Total requested time",
         description="Total requested time, in seconds",
     )
-    data_release_date: Optional[date] = Field(
+    proprietary_period: ProprietaryPeriod = Field(
         ...,
-        title="Data release date",
-        description="Date when the proposal data is scheduled to become public",
+        title="Proprietary period",
+        description="The Proprietary period.",
     )
     liaison_salt_astronomer: Optional[FullName] = Field(
         ...,
@@ -194,15 +220,17 @@ class DataReleaseDate(BaseModel):
     )
 
 
-class DataReleaseDateUpdate(BaseModel):
-    """A request to update the data release date."""
+class ProprietaryPeriodUpdateRequest(BaseModel):
+    """A request to update the proprietary period."""
 
-    release_date: date = Field(
+    proprietary_period: int = Field(
         ...,
-        title="Data release date",
-        description="Requested date when the proposal data should become public",
+        ge=0,
+        title="The proprietary period",
+        description="The proprietary period, in months. The proprietary period starts at the end of the semester when "
+                    "the last observation was taken.",
     )
-    motivation: date = Field(
+    motivation: Optional[str] = Field(
         ...,
         title="Motivation",
         description="Motivation why the request should be granted",
@@ -256,7 +284,7 @@ class PartnerPercentage(
         ge=0,
         le=100,
         title="Percentage",
-        description="Percentage bewtween 0 and 100 (both inclusive)",
+        description="Percentage between 0 and 100 (both inclusive)",
     )
 
 

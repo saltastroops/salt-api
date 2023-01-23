@@ -121,7 +121,6 @@ def semester_of_datetime(t: datetime) -> str:
 
     The given datetime must be timezone-aware.
     """
-
     if t.tzinfo is None:
         raise ValueError("The datetime must be timezone-aware")
 
@@ -144,7 +143,7 @@ def next_semester() -> str:
     """
     Get the next semester from the current date and time.
     """
-    # Adding a month never crosses the month boundary. For example, 31 November plus 6
+    # Adding a month never crosses the month boundary. For example, 30 November plus 6
     # months is 30 April, not 1 May. The semester_of_datetime function takes care of the
     # fact that a semester starts at noon rather than at midnight.
     return Semester(

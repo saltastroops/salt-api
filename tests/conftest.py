@@ -64,7 +64,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 
 
-def _create_engine():
+def _create_engine() -> Engine:
     sdb_dsn = os.environ.get("SDB_DSN")
     if sdb_dsn:
         echo_sql = (
@@ -76,7 +76,7 @@ def _create_engine():
 
 
 @pytest.fixture(autouse=True)
-def mock_engine(monkeypatch: pytest.MonkeyPatch):
+def mock_engine(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(saltapi.repository.unit_of_work, "engine", _create_engine)
     monkeypatch.setattr(saltapi.web.api.submissions, "engine", _create_engine)
     monkeypatch.setattr(saltapi.service.submission_service, "engine", _create_engine)
@@ -106,7 +106,7 @@ def check_data(
     # Figure out the file path for the data file
     data_file = _data_file("regression", request)
 
-    def f(data: Any):
+    def f(data: Any) -> Any:
         data_regression.check(data, fullpath=data_file)
 
     yield f
@@ -151,13 +151,28 @@ def find_username(
             raise ValueError(f"Partner code missing for user type {user_type}")
         return cast(str, users[normalized_user_type + "s"][partner_code])
 
+    if normalized_user_type == "administrator_and_investigator":
+        if proposal_code is None:
+            raise ValueError(f"Proposal code missing for user type {user_type}")
+        return cast(str, users[normalized_user_type][proposal_code])
+
+    if normalized_user_type == "principal_investigator_of_other_proposals":
+        if proposal_code is None:
+            raise ValueError(f"Proposal code missing for user type {user_type}")
+        return cast(str, users[normalized_user_type][proposal_code])
+
+    if normalized_user_type == "principal_contact_of_other_proposals":
+        if proposal_code is None:
+            raise ValueError(f"Proposal code missing for user type {user_type}")
+        return cast(str, users[normalized_user_type][proposal_code])
+
     if normalized_user_type in users:
         return cast(str, users[normalized_user_type])
 
     raise ValueError(f"Unknown user type: {user_type}")
 
 
-def find_usernames(role: str, has_role: bool, proposal_code: str = None) -> List[str]:
+def find_usernames(role: str, has_role: bool, proposal_code: Optional[str] = None) -> List[str]:
     normalized_role = role.lower()
     normalized_role = normalized_role.replace(" ", "_").replace("-", "_")
 

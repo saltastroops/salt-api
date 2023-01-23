@@ -1773,7 +1773,8 @@ WHERE PC.Proposal_Code = :proposal_code
         # The phase 1 targets.
         stmt = text(
             """
-SELECT DISTINCT T.Target_Id                                     AS id,
+SELECT DISTINCT RequestedTime                                   AS requested_time,
+                T.Target_Id                                     AS id,
                 T.Target_Name                                   AS name,
                 TC.RaH                                          AS ra_h,
                 TC.RaM                                          AS ra_m,
@@ -1836,6 +1837,7 @@ WHERE Proposal_Code = :proposal_code
             {
                 "id": row.id,
                 "name": row.name,
+                "requested_time": row.requested_time,
                 "coordinates": target_coordinates(row),
                 "proper_motion": target_proper_motion(row),
                 "magnitude": target_magnitude(row),

@@ -128,6 +128,11 @@ class Target(BaseModel):
 
 class Phase1Target(Target):
     """A target in a Phase 1 proposal."""
+    requested_time: int = Field(
+        ...,
+        title="The requested time",
+        description=" The total time requested to observe this target."
+    )
 
     is_optional: bool = Field(
         ...,

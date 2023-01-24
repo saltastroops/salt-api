@@ -320,7 +320,7 @@ class RequestedTime(BaseModel):
     semester: Semester = Field(
         ..., title="Semester", description="Semester for which the time is requested"
     )
-    distributions: List[PartnerPercentage] = Field(
+    distribution: List[PartnerPercentage] = Field(
         ...,
         title="Distribution among partners",
         description="Percentages of time requested from the different partners",

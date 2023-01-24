@@ -1773,7 +1773,7 @@ WHERE PC.Proposal_Code = :proposal_code
         # The phase 1 targets.
         stmt = text(
             """
-SELECT DISTINCT RequestedTime                                   AS requested_time,
+SELECT DISTINCT RequestedTime                                   AS observing_time,
                 T.Target_Id                                     AS id,
                 T.Target_Name                                   AS name,
                 TC.RaH                                          AS ra_h,
@@ -1837,7 +1837,7 @@ WHERE Proposal_Code = :proposal_code
             {
                 "id": row.id,
                 "name": row.name,
-                "requested_time": row.requested_time,
+                "observing_time": row.observing_time,
                 "coordinates": target_coordinates(row),
                 "proper_motion": target_proper_motion(row),
                 "magnitude": target_magnitude(row),
@@ -1893,7 +1893,7 @@ WHERE Proposal_Code = :proposal_code AND CONCAT(S.`Year`, '-', S.Semester) = :se
                 "partner": row.partner_name,
                 "percentage": row.percentage
             })
-            req_time["distributions"] = dist
+            req_time["distribution"] = dist
         if len(dist) == 0:
             return None
         return req_time

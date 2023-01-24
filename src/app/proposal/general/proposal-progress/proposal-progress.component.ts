@@ -45,5 +45,8 @@ export class ProposalProgressComponent {
 
   closeForm(): void {
     this.showForm = false;
+
+    const element = document.getElementById("proposal-progress");
+    element?.scrollIntoView();
   }
 }

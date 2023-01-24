@@ -16,8 +16,9 @@
   <tbody>
     <tr
       *ngFor="let i of investigators"
-      [class.is-green-background]="i.hasApprovedProposal === true"
-      [class.is-red-background]="i.hasApprovedProposal === false"
+      [class.has-background-success]="i.hasApprovedProposal === true"
+      [class.has-background-danger]="i.hasApprovedProposal === false"
+      [class.has-background-white]="i.hasApprovedProposal === null"
     >
       <td *ngIf="i.isPi">
         <div>
@@ -54,12 +55,40 @@
           <div><button class="button is-success is-small">Accept</button></div>
         </td>
       </ng-template>
-      <ng-template [ngIf]="i.hasApprovedProposal === null || undefined">
+      <ng-template [ngIf]="i.hasApprovedProposal === null">
         <td class="accept-reject">
           <div><button class="button is-success is-small">Accept</button></div>
           <div><button class="button is-danger is-small">Reject</button></div>
         </td>
       </ng-template>
+    </tr>
+  </tbody>
+  <thead>
+    <tr class="headers">
+      <th colspan="7">Legend</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="2" class="has-background-danger"></td>
+      <td colspan="5">
+        <span>Investigator has refused the submission of the proposal.</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="has-background-success"></td>
+      <td colspan="5">
+        <span>Investigator has approved the submission of the proposal.</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="has-background-white"></td>
+      <td colspan="5">
+        <span
+          >Investigator still has to approve/refuse the submission of the
+          proposal.</span
+        >
+      </td>
     </tr>
   </tbody>
 </table>

@@ -51,7 +51,7 @@ export interface Investigator extends ProposalUser {
   affiliation: Affiliation;
   isPc: boolean;
   isPi: boolean;
-  hasApprovedProposal: boolean;
+  hasApprovedProposal: boolean | null;
 }
 
 export interface ObservationComment {

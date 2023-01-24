@@ -210,6 +210,14 @@ html {
   background-color: white;
 }
 
+.is-red-background {
+  background-color: #ff8183;
+}
+
+.is-green-background {
+  background-color: #81ff83;
+}
+
 .has-two-columns {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

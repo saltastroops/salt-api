@@ -45,9 +45,9 @@ FROM Partner P
         self, institution_name: str, department: str
     ) -> Dict[str, Any]:
         """
-        Returns the institution with a given name and department.
+        Return the institution with a given name and department.
 
-        If the name and department do not exist, a NotFoundError is raised.
+        If the combination of name and department do not exist, a NotFoundError is raised.
         """
         stmt = text(
             """

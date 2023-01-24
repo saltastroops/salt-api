@@ -2,7 +2,7 @@ from typing import Any, Dict, List, cast
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.service.institution import NewInstitutionDetails
@@ -116,20 +116,37 @@ AND I2.Department = :department
         Add the institution name to the database.
 
         The primary key of the new database entry is returned.
-        """
 
-        stmt = text(
+        If the name exists already an existing id is returned.
+        """
+        try:
+            stmt = text(
+                """
+    INSERT INTO InstituteName (InstituteName_Name)
+    VALUES (:institution_name)
             """
-INSERT INTO InstituteName (InstituteName_Name)
-VALUES (:institution_name)
-        """
-        )
-        result = self.connection.execute(
-            stmt,
-            {"institution_name": new_institution_details.institution_name},
-        )
+            )
+            result = self.connection.execute(
+                stmt,
+                {"institution_name": new_institution_details["institution_name"]},
+            )
 
-        return cast(int, result.lastrowid)
+            return cast(int, result.lastrowid)
+        except IntegrityError:
+
+            stmt = text(
+                """
+    SELECT I.InstituteName_Id
+    FROM InstituteName I
+    WHERE I.InstituteName_Name = :institution_name
+            """
+            )
+            result = self.connection.execute(
+                stmt,
+                {"institution_name": new_institution_details["institution_name"]},
+            )
+
+            return cast(int, result.one())
 
     def _create_institution_details(
         self, new_institution_details: NewInstitutionDetails, institution_name_id: int

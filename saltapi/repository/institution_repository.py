@@ -98,7 +98,8 @@ AND I2.Department = :department
 
         # Make sure the institution does not exist yet
         if self._does_institution_exist(
-            new_institution_details["institution_name"], new_institution_details["department"]
+            new_institution_details["institution_name"],
+            new_institution_details["department"],
         ):
             raise ResourceExistsError(
                 f"The institution {new_institution_details['institution_name']} "
@@ -108,9 +109,7 @@ AND I2.Department = :department
         institution_name_id = self._add_institution_name(new_institution_details)
         self._create_institution_details(new_institution_details, institution_name_id)
 
-    def _add_institution_name(
-        self, new_institution_details: Dict[str, Any]
-    ) -> int:
+    def _add_institution_name(self, new_institution_details: Dict[str, Any]) -> int:
         """
         Add the institution name to the database.
 
@@ -132,7 +131,6 @@ AND I2.Department = :department
 
             return cast(int, result.lastrowid)
         except IntegrityError:
-
             stmt = text(
                 """
     SELECT I.InstituteName_Id

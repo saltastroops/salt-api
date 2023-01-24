@@ -42,8 +42,11 @@ def test_create_an_institution(db_connection: Connection) -> None:
     }
     institution_repository.create(new_institution_details)
     institution = institution_repository.get_institution_by_name_and_department(
-        new_institution_details["institution_name"], new_institution_details["department"]
+        new_institution_details["institution_name"],
+        new_institution_details["department"],
     )
 
-    assert new_institution_details["institution_name"] == institution["institution_name"]
-    assert new_institution_details["department"]== institution["department"]
+    assert (
+        new_institution_details["institution_name"] == institution["institution_name"]
+    )
+    assert new_institution_details["department"] == institution["department"]

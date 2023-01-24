@@ -13,7 +13,7 @@ from saltapi.exceptions import AuthorizationError, NotFoundError
 
 
 def log_message(method: str, url: Union[str, URL], message: Any) -> None:
-    """log message when catch exception"""
+    """Log a message together with the HTTP method and URL as an error."""
 
     logger.error("start error, this is".center(60, "*"))
     logger.error(f"{method} {url}")
@@ -24,7 +24,7 @@ def log_message(method: str, url: Union[str, URL], message: Any) -> None:
 def setup_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException) -> Response:
-        """catch FastAPI HTTPException"""
+        """Catch a FastAPI HTTPException."""
 
         log_message(request.method, request.url, exc.detail)
         return JSONResponse(
@@ -37,7 +37,7 @@ def setup_exception_handler(app: FastAPI) -> None:
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
     ) -> Response:
-        """catch FastAPI RequestValidationError"""
+        """Catch a FastAPI RequestValidationError."""
 
         exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
         log_message(request.method, request.url, exc)
@@ -48,7 +48,7 @@ def setup_exception_handler(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def exception_handle(request: Request, exc: Exception) -> Response:
-        """catch other exception"""
+        """Catch an Exception."""
 
         log_message(request.method, request.url, traceback.format_exc())
         return JSONResponse(
@@ -58,6 +58,8 @@ def setup_exception_handler(app: FastAPI) -> None:
 
     @app.exception_handler(NotFoundError)
     async def not_found_error_handler(request: Request, exc: NotFoundError) -> Response:
+        """Catch a NotFoundError."""
+
         log_message(request.method, request.url, exc)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": "Not Found"}
@@ -67,6 +69,8 @@ def setup_exception_handler(app: FastAPI) -> None:
     async def validation_error_handler(
         request: Request, exc: ValidationError
     ) -> Response:
+        """Catch a ValidationError."""
+
         log_message(request.method, request.url, exc)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": str(exc)}
@@ -76,6 +80,8 @@ def setup_exception_handler(app: FastAPI) -> None:
     async def authorization_error_handler(
         request: Request, exc: AuthorizationError
     ) -> Response:
+        """Catch an AuthorizationError."""
+
         log_message(request.method, request.url, exc)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": "Forbidden"}

@@ -26,7 +26,7 @@ def test_create_an_existing_institution(client: TestClient) -> None:
         "institution_name": "University of the Free State",
         "department": "Physics department",
         "address": (
-            "Pheneas Nkundabakura"
+            "205 Nelson Mandela Dr"
             "\nUniversity of the Free State"
             "\nPhysics department"
             "\nP.O. Box 339"

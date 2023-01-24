@@ -27,3 +27,12 @@ class Institution(BaseModel):
     department: Optional[str] = Field(
         None, title="Department", description="Department of the institution"
     )
+
+
+class NewInstitutionDetails(BaseModel):
+    """New institution details."""
+
+    institution_name: str = Field(..., title="Institution name", description="Name of the institution")
+    department: str = Field(..., title="Department", description="Department of the institution")
+    address: str = Field(..., title="Address", description="Address of the institution")
+    url: str = Field(..., title="URL", description="URL of the institution")

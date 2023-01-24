@@ -15,10 +15,7 @@ from saltapi.exceptions import AuthorizationError, NotFoundError
 def log_message(method: str, url: Union[str, URL], message: Any) -> None:
     """Log a message together with the HTTP method and URL as an error."""
 
-    logger.error("start error, this is".center(60, "*"))
-    logger.error(f"{method} {url}")
-    logger.error(message)
-    logger.error("end error".center(60, "*"))
+    logger.error(f"start error \n{method} {url} \n{message} \nend error".center(60, "*"))
 
 
 def setup_exception_handler(app: FastAPI) -> None:

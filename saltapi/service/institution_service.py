@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from saltapi.repository.institution_repository import InstitutionRepository
-from saltapi.service.institution import Institution, NewInstitutionDetails
+from saltapi.service.institution import Institution
 
 
 class InstitutionService:
@@ -12,7 +12,7 @@ class InstitutionService:
         institutions = self.repository.get_institutions()
         return institutions
 
-    def create(self, new_institution_details: NewInstitutionDetails) -> None:
+    def create(self, new_institution_details: Dict[str, Any]) -> None:
         self.repository.create(new_institution_details)
 
     def get_institution_by_name_and_department(

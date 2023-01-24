@@ -5,7 +5,6 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError
-from saltapi.service.institution import NewInstitutionDetails
 
 
 class InstitutionRepository:
@@ -94,23 +93,23 @@ AND I2.Department = :department
 
         return True
 
-    def create(self, new_institution_details: NewInstitutionDetails) -> None:
+    def create(self, new_institution_details: Dict[str, Any]) -> None:
         """Creates a new institution."""
 
         # Make sure the institution does not exist yet
         if self._does_institution_exist(
-            new_institution_details.institution_name, new_institution_details.department
+            new_institution_details["institution_name"], new_institution_details["department"]
         ):
             raise ResourceExistsError(
-                f"The institution {new_institution_details.institution_name} exists"
-                " already."
+                f"The institution {new_institution_details['institution_name']} "
+                f"({new_institution_details['department']}) exists already."
             )
 
         institution_name_id = self._add_institution_name(new_institution_details)
         self._create_institution_details(new_institution_details, institution_name_id)
 
     def _add_institution_name(
-        self, new_institution_details: NewInstitutionDetails
+        self, new_institution_details: Dict[str, Any]
     ) -> int:
         """
         Add the institution name to the database.
@@ -149,12 +148,13 @@ AND I2.Department = :department
             return cast(int, result.one())
 
     def _create_institution_details(
-        self, new_institution_details: NewInstitutionDetails, institution_name_id: int
+        self, new_institution_details: Dict[str, Any], institution_name_id: int
     ) -> None:
         stmt = text(
             """
 INSERT INTO Institute (Partner_Id, InstituteName_Id, Department, Url, Address)
-SELECT P.Partner_Id, :institution_name_id, :department, :url, :address
+VALUES ((SELECT P.Partner_Id FROM Partner P WHERE P.Partner_Name = 'Other'),
+        :institution_name_id, :department, :url, :address)
 FROM Partner P
 WHERE P.Partner_Name = 'Other'
         """
@@ -163,9 +163,9 @@ WHERE P.Partner_Name = 'Other'
             stmt,
             {
                 "institution_name_id": institution_name_id,
-                "department": new_institution_details.department,
-                "url": new_institution_details.url,
-                "address": new_institution_details.address,
-                "institution_name": new_institution_details.institution_name,
+                "department": new_institution_details["department"],
+                "url": new_institution_details["url"],
+                "address": new_institution_details["address"],
+                "institution_name": new_institution_details["institution_name"],
             },
         )

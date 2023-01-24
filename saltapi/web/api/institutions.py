@@ -6,9 +6,8 @@ from starlette import status
 from saltapi.exceptions import ResourceExistsError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.institution import Institution as _NewInstitutionDetails
-from saltapi.service.institution import NewInstitutionDetails
 from saltapi.web import services
-from saltapi.web.schema.institution import Institution
+from saltapi.web.schema.institution import Institution, NewInstitutionDetails
 
 router = APIRouter(prefix="/institutions", tags=["Institutions"])
 
@@ -39,7 +38,7 @@ def create_institution(
     with UnitOfWork() as unit_of_work:
         institution_service = services.institution_service(unit_of_work.connection)
         try:
-            institution_service.create(institution)
+            institution_service.create(institution.dict())
 
             unit_of_work.commit()
         except ResourceExistsError:

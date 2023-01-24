@@ -5,7 +5,6 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import ResourceExistsError
 from saltapi.repository.institution_repository import InstitutionRepository
-from saltapi.service.institution import NewInstitutionDetails
 
 
 def test_get_institution_by_name_and_department(
@@ -22,13 +21,12 @@ def test_get_institution_by_name_and_department(
 
 def test_create_an_existing_institution(db_connection: Connection) -> None:
     institution_repository = InstitutionRepository(db_connection)
-    institution = {
+    new_institution_details = {
         "institution_name": "SKA South Africa",
         "department": "",
         "address": "3rd Floor,\nThe Park,\nPark Road,\nPinelands,\n7405nSouth Africa",
         "url": "www.ska.ac.za",
     }
-    new_institution_details = NewInstitutionDetails(**institution)
     with pytest.raises(ResourceExistsError) as excinfo:
         institution_repository.create(new_institution_details)
     assert "exists already" in str(excinfo)
@@ -36,17 +34,16 @@ def test_create_an_existing_institution(db_connection: Connection) -> None:
 
 def test_create_an_institution(db_connection: Connection) -> None:
     institution_repository = InstitutionRepository(db_connection)
-    institution = {
+    new_institution_details = {
         "institution_name": "University of Example",
         "department": "Example Department",
         "address": "1 Example Street,\nExample,\n0001",
         "url": "www.example.com",
     }
-    new_institution_details = NewInstitutionDetails(**institution)
     institution_repository.create(new_institution_details)
     institution = institution_repository.get_institution_by_name_and_department(
-        new_institution_details.institution_name, new_institution_details.department
+        new_institution_details["institution_name"], new_institution_details["department"]
     )
 
-    assert new_institution_details.institution_name == institution["institution_name"]
-    assert new_institution_details.department == institution["department"]
+    assert new_institution_details["institution_name"] == institution["institution_name"]
+    assert new_institution_details["department"]== institution["department"]

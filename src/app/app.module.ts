@@ -97,6 +97,17 @@ import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinne
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { SortDirective } from "./sort.directive";
+import { P1DetailsComponent } from './proposal/p1-details/p1-details.component';
+import { PhaseOneTargetComponent } from './proposal/p1-details/phase-one-target/phase-one-target.component';
+import { PhaseOneProposalDetailsComponent } from './proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details.component';
+import { ProposalSummaryComponent } from './proposal/general/proposal-details/proposal-summary/proposal-summary.component';
+import { ProposalDownloadComponent } from './proposal/general/proposal-details/proposal-download/proposal-download.component';
+import { ResponsibleAstronomerComponent } from './proposal/general/proposal-details/responsible-astronomer/responsible-astronomer.component';
+import { DetailsTableComponent } from './proposal/general/proposal-details/details-table/details-table.component';
+import { PhaseOneProposalDetailsTableComponent } from './proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details-table/phase-one-proposal-details-table.component';
+import { RequestedTimeDistributionComponent } from './proposal/p1-details/requested-time-distribution/requested-time-distribution.component';
+import { PhaseOneRequestedTimeComponent } from './proposal/p1-details/phase-one-requested-time/phase-one-requested-time.component';
+import { P1ConfigurationsComponent } from './proposal/p1-details/p1-configurations/p1-configurations.component';
 
 @NgModule({
   declarations: [
@@ -180,6 +191,17 @@ import { SortDirective } from "./sort.directive";
     LoadingIndicatorComponent,
     ErrorIndicatorComponent,
     SortDirective,
+    P1DetailsComponent,
+    PhaseOneTargetComponent,
+    PhaseOneProposalDetailsComponent,
+    ProposalSummaryComponent,
+    ProposalDownloadComponent,
+    ResponsibleAstronomerComponent,
+    DetailsTableComponent,
+    PhaseOneProposalDetailsTableComponent,
+    RequestedTimeDistributionComponent,
+    PhaseOneRequestedTimeComponent,
+    P1ConfigurationsComponent,
   ],
   imports: [
     BrowserModule,

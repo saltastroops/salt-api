@@ -43,6 +43,8 @@ export interface GeneralProposalInfo {
   summaryForSaltAstronomer: string;
   summaryForNightLog: string;
   isSelfActivatable: boolean;
+  isTimeRestricted: boolean;
+  isP4: boolean;
 }
 
 export interface Investigator extends ProposalUser {
@@ -58,19 +60,27 @@ export interface ObservationComment {
   commentDate: string;
 }
 
+export interface InstrumentConfiguration {
+  observationId: number;
+  instrument: string;
+  mode: string;
+  simulations: string;
+}
+
 export interface Proposal {
   proposalCode: string;
-  phase: 1;
+  phase: 1 | 2;
   semester: string;
   generalInfo: GeneralProposalInfo;
   investigators: Investigator[];
   targets: Phase1Target[] | null;
-  requestedTimes: RequestedTime[] | null;
+  requestedTime: RequestedTime;
   blocks: BlockSummary[];
   blockVisits: BlockVisit[];
   chargedTime: ChargedTime;
   timeAllocations: TimeAllocation[];
   observationComments: ObservationComment[];
+  configurations: InstrumentConfiguration[];
 }
 
 export interface ProposalListItem {

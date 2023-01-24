@@ -1,0 +1,20 @@
+<div>
+  <table class="table">
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="2" class="has-text-centered">Requested Time Distribution</th>
+      </tr>
+      <tr class="headers">
+        <th>Partner</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of requestedTime.distribution">
+        <td>{{r.partner}}</td>
+        <td>{{r.percentage}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

@@ -14,12 +14,14 @@ export interface PeriodEphemeris {
 }
 
 export interface Phase1Target extends Target {
+  observingTime: number;
   isOptional: boolean;
   requestedObservations: number;
   maxLunarPhase: number;
   ranking: Ranking;
   nightCount: number;
   observingProbabilities: ObservationProbabilities;
+  trackCount: number;
 }
 
 export interface ProperMotion {

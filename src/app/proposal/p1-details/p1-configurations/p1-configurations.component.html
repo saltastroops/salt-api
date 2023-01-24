@@ -1,0 +1,27 @@
+<h2 class="title is-2">Science Configurations</h2>
+<hr class="heading-line observation-header" />
+<table class="table is-bordered">
+  <thead>
+  <tr class="secondary-header">
+    <th class="has-text-centered">General</th>
+    <th colspan="3" class="has-text-centered">Instrument</th>
+  </tr>
+  </thead>
+  <thead>
+  <tr class="headers">
+    <th>Observation Id</th>
+    <th>Instrument</th>
+    <th>Mode</th>
+    <th>Simulations</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <tr *ngFor="let c of configurations">
+    <td>{{c.observationId}}</td>
+    <td>{{c.instrument}}</td>
+    <td>{{c.mode}}</td>
+    <td>{{c.simulations}}</td>
+  </tr>
+  </tbody>
+</table>

@@ -169,14 +169,15 @@ class Phase1Target(Target):
         ...,
         title="Number of tracks",
         description=(
-            "Number of tracks for which the target is observable."
+            "The number of tracks in which the observation can be made, given the requested observation "
+            "time and observation constraints."
         ),
     )
     night_count: int = Field(
         ...,
         title="Number of nights",
         description=(
-            "Number of nights for which the target is observable, given the requested"
+            "The number of nights in which the observation can be made, given the requested"
             " observation time and observation constraints."
         ),
     )

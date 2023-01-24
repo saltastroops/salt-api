@@ -25,7 +25,7 @@ from saltapi.util import (
     target_magnitude,
     target_proper_motion,
     target_coordinates,
-    target_period_ephemeris
+    target_period_ephemeris, hrs_mode_name_corrector
 )
 
 
@@ -253,8 +253,8 @@ LIMIT :limit;
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
-            "requested_time": self._get_requested_times(proposal_code, semester),
-            "configurations": self._get_configurations(proposal_code)
+            "requested_times": self._get_requested_times(proposal_code, semester),
+            "instrument_configurations": self._get_instrument_configurations(proposal_code)
         }
         return proposal
 
@@ -502,9 +502,9 @@ WHERE PC.Proposal_Code = :proposal_code
             "target_of_opportunity": row.target_of_opportunity,
             "total_requested_time": row.total_requested_time,
             "proprietary_period": row.proprietary_period,
-            "is_time_restricted": row.is_time_restricted > 0,
-            "is_p4": row.is_p4 > 0,
-            "is_self_activatable": row.self_activatable > 0,
+            "is_time_restricted": row.is_time_restricted != 0,
+            "is_p4": row.is_p4 != 0,
+            "is_self_activatable": row.self_activatable != 0,
         }
 
         if info["proposal_type"] == "Director Discretionary Time (DDT)":
@@ -1809,7 +1809,8 @@ SELECT DISTINCT RequestedTime                                   AS observing_tim
                 TB.Time_Base                                    AS period_time_base,
                 HT.Identifier                                   AS horizons_identifier,
                 IF((MT1.Target_Id IS NOT NULL
-                    OR MTF.Target_Id IS NOT NULL),
+                    OR MTF.Target_Id IS NOT NULL
+                    OR HT.Identifier  IS NOT NULL),
                     1,
                     0)                                          AS non_sidereal
 FROM P1ProposalTarget PPT
@@ -1862,7 +1863,7 @@ WHERE Proposal_Code = :proposal_code
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
 
-    def _get_requested_times(self, proposal_code, semester) -> Optional[Dict[str, Any]]:
+    def _get_requested_times(self, proposal_code, semester) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1870,21 +1871,24 @@ SELECT
     PMT.P1MinimumUsefulTime				AS minimum_useful_time,
     MP.ReqTimeAmount					AS total_requested_time,
     PMT.P1TimeComment					AS `comment`,
-    P.Partner_Name						AS partner_name
+    P.Partner_Name						AS partner_name,
+    CONCAT(S.`Year`, '-', S.Semester)   AS semester
 FROM MultiPartner MP
 	JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner P ON MP.Partner_Id = P.Partner_Id
-    JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code AND CONCAT(S.`Year`, '-', S.Semester) = :semester
+    JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id AND MP.Semester_Id = PMT.Semester_Id
+WHERE Proposal_Code = :proposal_code
         """
         )
-        req_time = dict()
+        sem_req_time = []
+
         dist = []
         for row in self.connection.execute(stmt, {
             "proposal_code": proposal_code,
             "semester": semester
         }):
+            req_time = dict()
             req_time["total_requested_time"] = row.total_requested_time
             req_time["minimum_useful_time"] = row.minimum_useful_time
             req_time["comment"] = row.comment
@@ -1894,11 +1898,11 @@ WHERE Proposal_Code = :proposal_code AND CONCAT(S.`Year`, '-', S.Semester) = :se
                 "percentage": row.percentage
             })
             req_time["distribution"] = dist
-        if len(dist) == 0:
-            return None
-        return req_time
+            sem_req_time.append(req_time)
+        return sem_req_time
 
-    def _get_configurations(self, proposal_code) -> Optional[List[Dict[str, Any]]]:
+
+    def _get_instrument_configurations(self, proposal_code) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -1946,7 +1950,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 simulations = None
             elif row.hrs:
                 instrument = "HRS"
-                mode = row.hrs_mode
+                mode = hrs_mode_name_corrector(row.hrs_mode)
                 simulations = row.hrs_simulation
             elif row.nir:
                 instrument = "NIR"
@@ -1961,7 +1965,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 mode = row.scam_detector_mode
                 simulations = row.scam_simulation
             else:
-                raise NotFoundError(f"No instrument configuration was found for proposal: {proposal_code}")
+                raise NotFoundError(f"Unknown instrument configuration found for proposal: {proposal_code}")
             configurations.append(
                 {
                     "observation_id": row.observation_id,
@@ -1971,5 +1975,5 @@ WHERE PC.Proposal_Code = :proposal_code
                 }
             )
         if len(configurations) == 0:
-            return None
+            return []
         return configurations

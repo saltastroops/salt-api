@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.service.instrument import HRS
+from saltapi.util import hrs_mode_name_corrector
 
 
 class HrsRepository:
@@ -82,17 +83,6 @@ WHERE H.Hrs_Id = :hrs_id
 
         return hrs
 
-    def _mode(self, row: Any) -> str:
-        modes = {
-            "HIGH RESOLUTION": "High Resolution",
-            "HIGH STABILITY": "High Stability",
-            "INT CAL FIBRE": "Int Cal Fiber",
-            "LOW RESOLUTION": "Low Resolution",
-            "MEDIUM RESOLUTION": "Medium Resolution",
-        }
-
-        return modes[row.mode]
-
     def _target_location(self, row: Any) -> str:
         locations = {
             "-1 ALPHA (STAR)": "The star fiber is placed on the optical axis",
@@ -127,7 +117,7 @@ WHERE H.Hrs_Id = :hrs_id
             nod_and_shuffle = None
 
         configuration = {
-            "mode": self._mode(row),
+            "mode": hrs_mode_name_corrector(row.mode),
             "exposure_type": row.exposure_type,
             "target_location": self._target_location(row),
             "fiber_separation": float(row.fiber_separation),

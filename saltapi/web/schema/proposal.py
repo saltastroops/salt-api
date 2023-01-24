@@ -130,16 +130,14 @@ class GeneralProposalInfo(BaseModel):
     ),
     is_time_restricted: bool = Field(
         ...,
-        title="Is the proposal time restricted?",
-        description=(
-            "Is the proposal time restricted?"
-        ),
+        title="Are there restrictions for the observing times?",
+        description="Are there restrictions for the observing times?",
     ),
     is_p4: bool = Field(
         ...,
-        title="Is it priority 4 proposal?",
+        title="Is the proposal a priority 4 proposal?",
         description=(
-            "Is the proposal only requesting a priority 4 time?"
+            "Is the proposal only requesting priority 4 time?"
         ),
     ),
     is_self_activatable: bool = Field(
@@ -274,7 +272,7 @@ class PartnerPercentage(
     )
 
 
-class Configuration(BaseModel):
+class InstrumentConfiguration(BaseModel):
     observation_id: int = Field(
         ...,
         title="Configuration Id",
@@ -287,9 +285,9 @@ class Configuration(BaseModel):
     )
     mode: str = Field(
         ...,
-        title="Configuration Mode",
-        description="The configuration mode, it is a filter for BVIT, an exposure mode for HRS, a grating for NIR, and "
-                    "a detector mode for SALTICAM"
+        title="Configuration mode",
+        description=("The configuration mode. This is the filter for BVIT, the exposure mode for HRS,"
+                     " the grating for RSS and NIR, and the detector mode for Salticam.")
     )
     simulations: Optional[str] = Field(
         ...,
@@ -396,16 +394,14 @@ class Proposal(BaseModel):
         ...,
         title="Targets",
         description=(
-            "Targets for which observations are requested. These are only "
-            "included for phase 1 proposals."
+            "Targets for which observations are requested."
         ),
     )
-    requested_time: Optional[RequestedTime] = Field(
+    requested_times: List[RequestedTime] = Field(
         ...,
         title="Requested times",
         description=(
-            "Requested times for all semesters in the proposal. These are only "
-            "included for a phase 1 proposal."
+            "Requested times for all semesters in the proposal."
         ),
     )
     blocks: List[BlockSummary] = Field(
@@ -431,7 +427,7 @@ class Proposal(BaseModel):
         title="Observation comments",
         description="Comments related to observing the proposal",
     )
-    configurations: Optional[List[Configuration]] = Field(
+    instrument_configurations: Optional[List[InstrumentConfiguration]] = Field(
         title="Instruments configurations",
         description="The phase 1 instruments configurations."
     )

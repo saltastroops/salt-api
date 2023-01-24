@@ -240,3 +240,15 @@ def target_period_ephemeris(row: Any) -> Optional[Dict[str, Any]]:
         "period_change_rate": float(row.period_change_rate),
         "time_base": row.period_time_base,
     }
+
+
+def hrs_mode_name_corrector(mode: str) -> str:
+    modes = {
+        "HIGH RESOLUTION": "High Resolution",
+        "HIGH STABILITY": "High Stability",
+        "INT CAL FIBRE": "Int Cal Fiber",
+        "LOW RESOLUTION": "Low Resolution",
+        "MEDIUM RESOLUTION": "Medium Resolution",
+    }
+
+    return modes[mode]

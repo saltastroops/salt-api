@@ -47,7 +47,8 @@ FROM Partner P
         """
         Return the institution with a given name and department.
 
-        If the combination of name and department do not exist, a NotFoundError is raised.
+        If the combination of name and department do not exist,
+        a NotFoundError is raised.
         """
         stmt = text(
             """

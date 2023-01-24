@@ -1,17 +1,46 @@
 <h2 class="title is-2">Proposal Comments</h2>
 <hr class="heading-line comment-header" />
 <div>
-  <div *ngFor="let c of observationComments">
-    <div class="notification" data-test="observation-comment">
-      <div class="comment-author">
-        <span class="author">{{ c.author + " " }}</span>
-        <span class="made-at">
-          {{ parseDate(c.commentDate) | dfnsFormat: "d MMMM yyyy" }}
-        </span>
+  <div>
+    <span>
+      <b>
+        This area is intended for the SA at the telescope to comment on issues
+        while attempting to observe the proposal, eg. incorrect finding charts,
+        etc.
+      </b>
+      <br />
+      An email will be sent to the PI, Principal Contact and responsible SA with
+      the content of any submitted comment.
+      <br />
+      For general questions, please
+      <a href="mailto:sa@salt.ac.za">email your liaison SA.</a>
+      <br />
+      <br />
+    </span>
+  </div>
+  <div *ngIf="observationComments.length; else obsCommentsPlaceholder">
+    <div *ngFor="let c of observationComments">
+      <div class="notification" data-test="observation-comment">
+        <div class="comment-author">
+          <span class="author">{{ c.author + " " }}</span>
+          <span class="made-at">
+            {{ parseDate(c.commentDate) | dfnsFormat: "d MMMM yyyy" }}
+          </span>
+        </div>
+        <p [innerHTML]="c.comment | nl2br"></p>
       </div>
-      <p [innerHTML]="c.comment | nl2br"></p>
     </div>
   </div>
+  <ng-template #obsCommentsPlaceholder>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>No comments have been made about this proposal</th>
+        </tr>
+      </thead>
+    </table>
+  </ng-template>
+
   <div *ngIf="isCommentInputOpen" class="notification">
     <form
       [formGroup]="commentForm"

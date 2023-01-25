@@ -24,3 +24,12 @@ export interface UserListItem {
   familyName: string;
   givenName: string;
 }
+
+export interface NewUserDetails {
+  familyName: string;
+  givenName: string;
+  username: string;
+  password: string;
+  email: string;
+  institutionId: number;
+}

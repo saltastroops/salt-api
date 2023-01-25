@@ -82,6 +82,7 @@ import { SalticamComponent } from "./proposal/instruments/salticam/salticam.comp
 import { InvestigatorsComponent } from "./proposal/investigators/investigators.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { TargetComponent } from "./proposal/target/target.component";
+import { RegisterUserComponent } from "./register-user/register-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
 import { AuthenticationInterceptor } from "./service/authentication.interceptor.service";
 import { AuthenticationService } from "./service/authentication.service";
@@ -190,6 +191,7 @@ import { P1ConfigurationsComponent } from './proposal/p1-details/p1-configuratio
     NirDitherStepsComponent,
     LoadingIndicatorComponent,
     ErrorIndicatorComponent,
+    RegisterUserComponent,
     SortDirective,
     P1DetailsComponent,
     PhaseOneTargetComponent,

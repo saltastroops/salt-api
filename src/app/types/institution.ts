@@ -5,3 +5,10 @@ export interface Institution {
   name: string;
   department: string | null;
 }
+
+export interface NewInstitutionDetails {
+  institutionName: string;
+  department: string;
+  address: string;
+  url: string;
+}

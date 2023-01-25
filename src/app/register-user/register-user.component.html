@@ -1,0 +1,360 @@
+<div class="register-new-user-form register-new-user-page">
+  <h2 class="title is-3">Register new user</h2>
+  <form [formGroup]="registerNewUserForm" (ngSubmit)="registerNewUser()">
+    <div class="form-group input-section">
+      <label class="label">Username</label>
+      <input
+        (ngModelChange)="clearError()"
+        type="text"
+        formControlName="username"
+        class="input"
+        data-test="username"
+        [ngClass]="{
+          'is-danger': f.username.touched && f.username.errors
+        }"
+      />
+      <div
+        *ngIf="f.username.touched && f.username.errors"
+        class="invalid-feedback"
+      >
+        <div
+          *ngIf="f.username.errors.required"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Username is required
+        </div>
+      </div>
+    </div>
+    <div class="input-section">
+      <div class="form-group">
+        <label class="label">Password</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="password"
+          formControlName="password"
+          class="input"
+          data-test="password"
+          [ngClass]="{
+            'is-danger': f.password.touched && f.password.errors
+          }"
+        />
+        <div
+          *ngIf="f.password.touched && f.password.errors"
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="f.password.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Password is required
+          </div>
+          <div
+            *ngIf="!f.password.errors.required && f.password.errors.minlength"
+          >
+            Password must have at least 6 characters
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="input-section">
+      <div class="form-group">
+        <label class="label">Confirm password</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="password"
+          formControlName="confirmPassword"
+          class="input"
+          data-test="confirm-password"
+          [ngClass]="{
+            'is-danger': f.confirmPassword.touched && f.confirmPassword.errors
+          }"
+        />
+        <div
+          *ngIf="
+            f.confirmPassword.touched &&
+            f.confirmPassword.errors &&
+            registerNewUserForm.errors
+          "
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="f.confirmPassword.errors?.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Confirmation password is required
+          </div>
+          <div
+            *ngIf="f.confirmPassword.touched && registerNewUserForm.errors?.['notMatched']"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Password mismatch
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group input-section">
+      <label class="label">Name</label>
+      <input
+        (ngModelChange)="clearError()"
+        type="text"
+        formControlName="givenName"
+        class="input"
+        data-test="givenName"
+        [ngClass]="{
+          'is-danger': f.givenName.touched && f.givenName.errors
+        }"
+      />
+      <div
+        *ngIf="f.givenName.touched && f.givenName.errors"
+        class="invalid-feedback"
+      >
+        <div
+          *ngIf="f.givenName.errors.required"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Name is required
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group input-section">
+      <label class="label">Surname</label>
+      <input
+        (ngModelChange)="clearError()"
+        type="text"
+        formControlName="familyName"
+        class="input"
+        data-test="familyName"
+        [ngClass]="{
+          'is-danger': f.familyName.touched && f.familyName.errors
+        }"
+      />
+      <div
+        *ngIf="f.familyName.touched && f.familyName.errors"
+        class="invalid-feedback"
+      >
+        <div
+          *ngIf="f.familyName.errors.required"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Surname is required
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group input-section">
+      <label class="label">Partner</label>
+      <select
+        #partner
+        formControlName="partner"
+        (change)="onSelectPartner(partner.value)"
+      >
+        <option value="null">please select partner</option>
+        <option *ngFor="let partner of partners" [value]="partner">
+          {{ partner }}
+        </option>
+      </select>
+      <div
+        *ngIf="f.partner.touched && f.partner.errors"
+        class="invalid-feedback"
+      >
+        <div
+          *ngIf="f.partner.errors.required || f.partner.value === null"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Partner is required
+        </div>
+      </div>
+      <div *ngIf="!partners" class="partners-loading">
+        <div class="loading-spinner">
+          <wm-small-loading-spinner></wm-small-loading-spinner>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="partnerInstitutions">
+      <div class="form-group input-section">
+        <label class="label">Institute</label>
+        <select formControlName="institutionId">
+          <option value="null">please select institute</option>
+          <option
+            *ngFor="let institute of partnerInstitutions"
+            [value]="institute.institutionId"
+          >
+            {{ institutionString(institute) }}
+          </option>
+          <option *ngIf="showAddNewInstitutionControls" value="0">
+            ADD NEW INSTITUTE
+          </option>
+        </select>
+        <div
+          *ngIf="f.institutionId.touched && f.institutionId.errors"
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="
+              f.institutionId.errors.required || f.institutionId.value === null
+            "
+            class="has-text-danger"
+            data-test="error"
+          >
+            Institute is required
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="f.institutionId.value === '0'">
+      <div class="form-group input-section">
+        <label class="label">Institute Name</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="text"
+          formControlName="institutionName"
+          class="input"
+          data-test="institutionName"
+          [ngClass]="{
+            'is-danger': f.institutionName.touched && f.institutionName.errors
+          }"
+        />
+        <div
+          *ngIf="f.institutionName.touched && f.institutionName.errors"
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="f.institutionName.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Institute name is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group input-section">
+        <label class="label">Department</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="text"
+          formControlName="department"
+          class="input"
+          data-test="department"
+          [ngClass]="{
+            'is-danger': f.department.touched && f.department.errors
+          }"
+        />
+        <div
+          *ngIf="f.department.touched && f.department.errors"
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="f.department.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Department is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group input-section">
+        <label class="label">URL</label>
+        <input
+          (ngModelChange)="clearError()"
+          type="text"
+          formControlName="url"
+          class="input"
+          data-test="url"
+          [ngClass]="{
+            'is-danger': f.url.touched && f.url.errors
+          }"
+        />
+        <div *ngIf="f.url.touched && f.url.errors" class="invalid-feedback">
+          <div
+            *ngIf="f.url.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            URL is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group input-section">
+        <label class="label">Address</label>
+        <textarea
+          (ngModelChange)="clearError()"
+          formControlName="address"
+          data-test="address"
+          [ngClass]="{
+            'is-danger': f.address.touched && f.address.errors
+          }"
+        ></textarea>
+        <div
+          *ngIf="f.address.touched && f.address.errors"
+          class="invalid-feedback"
+        >
+          <div
+            *ngIf="f.address.errors.required"
+            class="has-text-danger"
+            data-test="error"
+          >
+            Address is required
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group input-section">
+      <label class="label">Email</label>
+      <input
+        (ngModelChange)="clearError()"
+        type="text"
+        formControlName="email"
+        class="input"
+        data-test="email"
+        [ngClass]="{
+          'is-danger': f.email.touched && f.email.errors
+        }"
+      />
+      <div *ngIf="f.email.touched && f.email.errors" class="invalid-feedback">
+        <div
+          *ngIf="f.email.errors.required"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Email is required
+        </div>
+        <div
+          *ngIf="f.email.errors.email"
+          class="has-text-danger"
+          data-test="error"
+        >
+          Invalid email address
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group input-section">
+      <input
+        type="submit"
+        class="button is-small"
+        [ngClass]="{ 'is-loading': loading }"
+        id="register-new-user"
+        value="Register new user"
+        data-test="register-new-user-submit"
+      />
+      <div *ngIf="error">
+        <p class="has-text-danger" data-test="error">{{ error }}</p>
+      </div>
+    </div>
+  </form>
+</div>

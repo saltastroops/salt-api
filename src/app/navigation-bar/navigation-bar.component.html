@@ -3,7 +3,14 @@
     <div class="navbar-menu">
       <div class="navbar-start">
         <a class="navbar-item" routerLink="/" data-test="home-tab"> Home </a>
-        <!--    <input type="button" id="register" value="Register new user"/>-->
+        <a
+          class="navbar-item"
+          routerLink="register"
+          data-test="register-new-user-tab"
+          *ngIf="!isLoggedIn"
+        >
+          Register new user
+        </a>
         <ng-container *ngIf="user$ | async as user">
           <a
             *ngIf="hasAnyRole(user, ['SALT Astronomer', 'SALT Operator'])"

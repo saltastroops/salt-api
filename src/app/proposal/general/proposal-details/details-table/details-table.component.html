@@ -4,53 +4,53 @@
       <th colspan="2" class="has-text-centered">Details</th>
     </tr>
     <tbody>
-    <tr>
-      <th>Status</th>
-      <td>{{ generalProposalInfo.status.value }}</td>
-    </tr>
-    <tr
-      class="row proposal-details-row"
-      *ngIf="generalProposalInfo.status.reason"
-    >
-      <th>Status reason</th>
-      <td>{{ generalProposalInfo.status.reason }}</td>
-    </tr>
-    <tr>
-      <th>Type</th>
-      <td>{{ generalProposalInfo.proposalType }}</td>
-    </tr>
-    <tr>
-      <th>Target of Opportunity</th>
-      <td *ngIf="generalProposalInfo.targetOfOpportunity">
-        <div>
-          <img
-            class="icon is-small"
-            src="/assets/icons/noun_tick_2836262-green.svg"
-            alt="Is target of opportunity"
-          />
-        </div>
-      </td>
-      <td *ngIf="!generalProposalInfo.targetOfOpportunity">
-        <div>
-          <img
-            class="icon is-small"
-            src="/assets/icons/noun_Cross_2120375.svg"
-            alt="Is not target of opportunity"
-          />
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <th>Total time</th>
-      <td>{{ generalProposalInfo.totalRequestedTime }}</td>
-    </tr>
-    <tr>
-      <th>Proprietary period</th>
-      <td class="proprietary-period">
-        <div>{{ generalProposalInfo.dataReleaseDate }}</div>
-        <div><button class="button is-small">change</button></div>
-      </td>
-    </tr>
+      <tr>
+        <th>Status</th>
+        <td>{{ generalProposalInfo.status.value }}</td>
+      </tr>
+      <tr
+        class="row proposal-details-row"
+        *ngIf="generalProposalInfo.status.reason"
+      >
+        <th>Status reason</th>
+        <td>{{ generalProposalInfo.status.reason }}</td>
+      </tr>
+      <tr>
+        <th>Type</th>
+        <td>{{ generalProposalInfo.proposalType }}</td>
+      </tr>
+      <tr>
+        <th>Target of Opportunity</th>
+        <td *ngIf="generalProposalInfo.targetOfOpportunity">
+          <div>
+            <img
+              class="icon is-small"
+              src="/assets/icons/noun_tick_2836262-green.svg"
+              alt="Is target of opportunity"
+            />
+          </div>
+        </td>
+        <td *ngIf="!generalProposalInfo.targetOfOpportunity">
+          <div>
+            <img
+              class="icon is-small"
+              src="/assets/icons/noun_Cross_2120375.svg"
+              alt="Is not target of opportunity"
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>Total time</th>
+        <td>{{ generalProposalInfo.totalRequestedTime }}</td>
+      </tr>
+      <tr>
+        <th>Proprietary period</th>
+        <td class="proprietary-period">
+          <div>{{ generalProposalInfo.dataReleaseDate }}</div>
+          <div><button class="button is-small">change</button></div>
+        </td>
+      </tr>
     </tbody>
   </table>
 </div>

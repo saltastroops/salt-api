@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { ResponsibleAstronomerComponent } from './responsible-astronomer.component';
+import { ResponsibleAstronomerComponent } from "./responsible-astronomer.component";
 
-describe('ResponsibleAstronomerComponent', () => {
+describe("ResponsibleAstronomerComponent", () => {
   let component: ResponsibleAstronomerComponent;
   let fixture: ComponentFixture<ResponsibleAstronomerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ResponsibleAstronomerComponent ]
-    })
-    .compileComponents();
+      declarations: [ResponsibleAstronomerComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('ResponsibleAstronomerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

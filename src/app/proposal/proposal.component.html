@@ -14,7 +14,7 @@
       [proposalCode]="p.proposalCode"
     ></wm-general-proposal-info>
   </div>
-  <ng-template *ngIf="p.phase === 2 then phase2; else phase1"></ng-template>
+  <ng-template *ngIf="p.phase === 2; then phase2; else phase1"></ng-template>
   <ng-template #phase2>
     <div class="block">
       <wm-proposal-details

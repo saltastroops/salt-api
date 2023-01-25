@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { RequestedTimeDistributionComponent } from './requested-time-distribution.component';
+import { RequestedTimeDistributionComponent } from "./requested-time-distribution.component";
 
-describe('RequestedTimeDistributionComponent', () => {
+describe("RequestedTimeDistributionComponent", () => {
   let component: RequestedTimeDistributionComponent;
   let fixture: ComponentFixture<RequestedTimeDistributionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ RequestedTimeDistributionComponent ]
-    })
-    .compileComponents();
+      declarations: [RequestedTimeDistributionComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('RequestedTimeDistributionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

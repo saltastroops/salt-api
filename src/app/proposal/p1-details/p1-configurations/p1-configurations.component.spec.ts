@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { P1ConfigurationsComponent } from './p1-configurations.component';
+import { P1ConfigurationsComponent } from "./p1-configurations.component";
 
-describe('PhaseOneConfigurationsComponent', () => {
+describe("PhaseOneConfigurationsComponent", () => {
   let component: P1ConfigurationsComponent;
   let fixture: ComponentFixture<P1ConfigurationsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ P1ConfigurationsComponent ]
-    })
-    .compileComponents();
+      declarations: [P1ConfigurationsComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('PhaseOneConfigurationsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

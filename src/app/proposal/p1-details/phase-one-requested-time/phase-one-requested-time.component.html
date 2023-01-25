@@ -6,11 +6,11 @@
     <tbody>
       <tr>
         <th>Requested Time</th>
-        <td>{{requestedTime.totalRequestedTime}}</td>
+        <td>{{ requestedTime.totalRequestedTime }}</td>
       </tr>
       <tr>
         <th>Minimum Useful Time</th>
-        <td>{{requestedTime.minimumUsefulTime}}</td>
+        <td>{{ requestedTime.minimumUsefulTime }}</td>
       </tr>
       <tr class="secondary-header">
         <th colspan="2">Comments</th>
@@ -22,7 +22,10 @@
             [innerHTML]="requestedTime.comment | nl2br"
           ></p>
           <ng-template #comment>
-            <p *ngIf="requestedTime.comment" [innerHTML]="requestedTime.comment | nl2br"></p>
+            <p
+              *ngIf="requestedTime.comment"
+              [innerHTML]="requestedTime.comment | nl2br"
+            ></p>
           </ng-template>
           <ng-template #noComment>
             <p>None</p>
@@ -32,4 +35,3 @@
     </tbody>
   </table>
 </div>
-

@@ -3,8 +3,12 @@
     <wm-phase-one-proposal-details
       [generalProposalInfo]="proposal.generalInfo"
     ></wm-phase-one-proposal-details>
-    <wm-requested-time-distribution [requestedTime]="proposal.requestedTime"></wm-requested-time-distribution>
-    <wm-phase-one-requested-time [requestedTime]="proposal.requestedTime"></wm-phase-one-requested-time>
+    <wm-requested-time-distribution
+      [requestedTime]="proposal.requestedTime"
+    ></wm-requested-time-distribution>
+    <wm-phase-one-requested-time
+      [requestedTime]="proposal.requestedTime"
+    ></wm-phase-one-requested-time>
   </div>
 </div>
 <div class="block">
@@ -19,5 +23,7 @@
   <wm-phase-one-target [phase1Targets]="proposal.targets"></wm-phase-one-target>
 </div>
 <div class="block">
-  <wm-p1-configurations [configurations]="proposal.configurations"></wm-p1-configurations>
+  <wm-p1-configurations
+    [configurations]="proposal.configurations"
+  ></wm-p1-configurations>
 </div>

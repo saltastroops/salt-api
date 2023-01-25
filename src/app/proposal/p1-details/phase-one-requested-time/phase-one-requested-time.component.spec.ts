@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PhaseOneRequestedTimeComponent } from './phase-one-requested-time.component';
+import { PhaseOneRequestedTimeComponent } from "./phase-one-requested-time.component";
 
-describe('PhaseOneRequestedTimeComponent', () => {
+describe("PhaseOneRequestedTimeComponent", () => {
   let component: PhaseOneRequestedTimeComponent;
   let fixture: ComponentFixture<PhaseOneRequestedTimeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PhaseOneRequestedTimeComponent ]
-    })
-    .compileComponents();
+      declarations: [PhaseOneRequestedTimeComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('PhaseOneRequestedTimeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

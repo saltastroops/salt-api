@@ -1,29 +1,44 @@
-// Taken from https://sankhadip.medium.com/how-to-sort-table-rows-according-column-in-angular-9-b04fdafb4140
+// Adapted from https://sankhadip.medium.com/how-to-sort-table-rows-according-column-in-angular-9-b04fdafb4140
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class Sort {
   private sortOrder = 1;
   private collator = new Intl.Collator(undefined, {
-    numeric: true,
     sensitivity: "base",
   });
 
-  constructor() {}
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  public startSort(property: any, order: any, type = "") {
+  public startSort(
+    property: string | ((value: any) => any),
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    order: any,
+    isString: boolean,
+  ): (a: any, b: any) => number {
     if (order === "desc") {
       this.sortOrder = -1;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (a: any, b: any) => {
-      if (type === "date") {
-        return this.sortData(new Date(a[property]), new Date(b[property]));
-      } else {
-        return this.collator.compare(a[property], b[property]) * this.sortOrder;
-      }
-    };
+    if (typeof property === "string") {
+      return (a: any, b: any) => {
+        if (isString) {
+          return (
+            this.collator.compare(a[property], b[property]) * this.sortOrder
+          );
+        } else {
+          return this.sortData(a[property], b[property]);
+        }
+      };
+    } else {
+      return (a: any, b: any) => {
+        if (isString) {
+          return (
+            this.collator.compare(property(a), property(b)) * this.sortOrder
+          );
+        } else {
+          return this.sortData(property(a), property(b));
+        }
+      };
+    }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private sortData(a: any, b: any) {
+
+  private sortData(a: any, b: any): number {
     if (a < b) {
       return -1 * this.sortOrder;
     } else if (a > b) {
@@ -33,3 +48,4 @@ export class Sort {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

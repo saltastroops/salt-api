@@ -1,72 +1,100 @@
-// Taken from https://sankhadip.medium.com/how-to-sort-table-rows-according-column-in-angular-9-b04fdafb4140
 import {
   Directive,
   ElementRef,
-  HostBinding,
   HostListener,
   Input,
   Renderer2,
 } from "@angular/core";
 
-import { Sort } from "./sort";
-
 export type SortDirection = "asc" | "desc";
 
+/**
+ * A directive for sorting table content.
+ *
+ * The directive should be added to a table element, and its value must be a function
+ * that accepts a string and a boolean as its only arguments. This function is supposed
+ * to be a sort function. Its first argument is supposed to be a sort key, and its
+ * second arguments indicates the sort direction. For example, if a component has a
+ * member function
+ *
+ * f = (key: string, direction: SortDirection) => {
+ *   // do some sorting
+ * }
+ *
+ * then you would use the directive as follows:
+ *
+ * <table [wmSort]="f">...</table>
+ *
+ * Note that f is defined via f = (...) => {...}; if it was defined via f(...) {...} the
+ * scope of this would be the directive rather than the component.
+ *
+ * The wmSort directive must be used together with wmSortBy directives on table headers.
+ * The wmSortBy directive makes the table column sortable. It is used with a string
+ * value, and the sort function of the wmSort directive is called with this value when
+ * the table header is clicked. For example, consider the following table:
+ *
+ * <table [wmSort]="f">
+ *   <tr>
+ *     <th wmSortBy="name">Name</th>
+ *     <th wmSortBy="priority">Priority</th>
+ *   </tr>
+ *  <tr>
+ *     <td>Block 1</td>
+ *     <td>2</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Block 2</td>
+ *     <td>1</td>
+ *   </tr>
+ * </table>
+ *
+ * Then if the Name column header is clicked, f will be called as f("Name", "asc"), and
+ * when the header is clicked again, f will be called as f("Name", "desc").
+ *
+ * If the table is sorted by a column, "active" and "asc" (for ascending sort direction)
+ * or "active" and "desc" (for descending sort direction) are added to the class
+ * attribute of the element with the respective wmSortBy directive value.
+ */
 @Directive({
   selector: "[wmSort]",
 })
 export class SortDirective {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Input() wmSort!: Array<any>;
-  direction!: SortDirection;
-  constructor(private renderer: Renderer2, private targetElem: ElementRef) {
+  @Input() wmSort!: (key: string, sortOrder: SortDirection) => void;
+
+  direction: SortDirection = "desc";
+
+  constructor(private renderer: Renderer2, private targetElem: ElementRef) {}
+
+  @HostListener("sortByColumn", ["$event"])
+  onSortByColumn(event: CustomEvent): void {
+    // Get the selected header...
+    const sortKey = event.detail;
     const elem = this.targetElem.nativeElement;
-    elem.classList.add("pointer");
-    elem.classList.add("sortable");
-  }
+    const selectedSortableHeader = elem.querySelector(
+      `[data-sort-key=${sortKey}]`,
+    );
 
-  @HostListener("click")
-  onClick(): void {
-    // Create Object of Sort Class
-    const sort = new Sort();
-    // Get Reference Of Current Clicked Element
-    const elem = this.targetElem.nativeElement;
-    // Remove sort direction arrows on all the elements
-    Array.from(this.renderer.parentNode(elem).children).forEach((child) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      child.classList.remove("active");
+    // ... and its current sort direction
+    const currentSortDirection = selectedSortableHeader.getAttribute(
+      "data-sort-direction",
+    );
+
+    // Flip the sort direction
+    this.direction = currentSortDirection == "asc" ? "desc" : "asc";
+
+    // Perform the sorting
+    this.wmSort(event.detail, this.direction);
+
+    // Reset all the sortable column headers
+    const sortableHeaders = elem.querySelectorAll("[data-sort-key]");
+    sortableHeaders.forEach((e: Element) => {
+      e.setAttribute("data-sort-direction", "desc");
+      e.classList.remove("active", "asc", "desc");
     });
-    // Flip the sort direction (note that the data-order attributes the current sort
-    // order)
-    this.direction = elem.getAttribute("data-order") == "asc" ? "desc" : "asc";
-    // Remove data-order attribute on all the elements
-    Array.from(this.renderer.parentNode(elem).children).forEach((child) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      child.removeAttribute("data-order");
-    });
-    // Get The Property Type specially set [data-type=date] if it is date field
-    const type = elem.getAttribute("data-type");
-    // Get The Property Name from Element Attribute
-    const property = elem.getAttribute("data-name");
 
-    this.wmSort.sort(sort.startSort(property, this.direction, type));
-    // Show sort direction arrows for current element
-    elem.classList.add("active");
-    elem.setAttribute("active", true);
-
-    // Set the data order Element attribute
-    elem.setAttribute("data-order", this.direction);
-  }
-
-  @HostBinding("class.asc")
-  get sortAscending(): boolean {
-    return this.direction === "asc";
-  }
-
-  @HostBinding("class.desc")
-  get sortDescending(): boolean {
-    return this.direction === "desc";
+    // Update the selected header
+    selectedSortableHeader.setAttribute("data-sort-direction", this.direction);
+    selectedSortableHeader.classList.add("active");
+    selectedSortableHeader.classList.add(this.direction);
   }
 }

@@ -97,15 +97,16 @@ def test_update_proprietary_period_should_allow_admins_to_make_any_requests(
 def test_update_proprietary_period_should_not_allow_admins_to_make_illegal_requests(
     client: TestClient,
 ) -> None:
-    #  Administrators that are an investigator to a proposal are not allowed to update the proprietary period
-    # beyond the maximum without a motivation.
+    # Administrators that are an investigator to a proposal are not allowed to update
+    # the proprietary period beyond the maximum without a motivation.
     proposal_code = "2022-1-MLT-003"  # RSA allocated time
     admin_investigator = find_username("Administrator and Investigator", proposal_code)
     authenticate(admin_investigator, client)
 
     proprietary_period_update = {
         "proprietary_period": 25,  # RSA proposals have maximum of 24 months
-        "motivation": None,  # They require motivation for proprietary period higher than 24 month
+        "motivation": None,  # They require motivation for proprietary period
+        # higher than 24 month
     }
 
     response = client.put(_url(proposal_code), json=proprietary_period_update)

@@ -1,13 +1,16 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
+
+import { of } from "rxjs";
+import { catchError, switchMap, tap } from "rxjs/operators";
 
 import { environment } from "../../../../environments/environment";
 import { ProposalService } from "../../../service/proposal.service";
-import { Proposal, ProposalProgress } from "../../../types/proposal";
 import {
-  AutoUnsubcribe,
-  GENERIC_ERROR_MESSAGE,
-  currentSemester,
-} from "../../../utils";
+  ProgressReportsUrls,
+  Proposal,
+  ProposalProgress,
+} from "../../../types/proposal";
+import { AutoUnsubcribe, currentSemester } from "../../../utils";
 
 @AutoUnsubcribe()
 @Component({
@@ -15,7 +18,7 @@ import {
   templateUrl: "./proposal-progress.component.html",
   styleUrls: ["./proposal-progress.component.scss"],
 })
-export class ProposalProgressComponent {
+export class ProposalProgressComponent implements OnInit {
   @Input() proposal!: Proposal;
   proposalProgress!: ProposalProgress;
   showForm = false;
@@ -23,24 +26,42 @@ export class ProposalProgressComponent {
   loading = false;
   apiUrl = environment.apiUrl;
   currentSemester = currentSemester();
+  progressReportsUrls: ProgressReportsUrls = {};
+  showReports = false;
+  reportsLinksText = "Show progress reports for other semesters";
 
   constructor(private proposalService: ProposalService) {}
 
-  showProgressReportForm(): void {
-    this.loading = true;
+  ngOnInit(): void {
     this.proposalService
       .getProgressReport(this.proposal.proposalCode, currentSemester())
-      .subscribe(
-        (data) => {
+      .pipe(
+        tap((data) => {
           this.proposalProgress = { ...data };
-          this.showForm = true;
           this.loading = false;
-        },
-        () => {
-          this.error = GENERIC_ERROR_MESSAGE;
+        }),
+        switchMap(() => {
+          return this.proposalService.getProgressReportsUrls(
+            this.proposal.proposalCode,
+          );
+        }),
+        catchError((err) => {
+          this.error = err.message;
           this.loading = false;
-        },
-      );
+          return of({});
+        }),
+      )
+      .subscribe((p: ProgressReportsUrls) => {
+        this.progressReportsUrls = p;
+        if (this.progressReportsUrls[currentSemester()]) {
+          delete this.progressReportsUrls[currentSemester()];
+        }
+      });
+  }
+
+  showProgressReportForm(): void {
+    this.loading = true;
+    this.showForm = true;
   }
 
   closeForm(): void {
@@ -48,5 +69,18 @@ export class ProposalProgressComponent {
 
     const element = document.getElementById("proposal-progress");
     element?.scrollIntoView();
+  }
+
+  progressReportsUrlsMap(
+    progressReports: ProgressReportsUrls,
+  ): Map<string, { [key: string]: string }> {
+    return new Map(Object.entries(progressReports));
+  }
+
+  onClick(): void {
+    this.showReports = !this.showReports;
+    this.reportsLinksText = this.showReports
+      ? "Hide progress reports for other semesters"
+      : "Show progress reports for other semesters";
   }
 }

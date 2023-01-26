@@ -8,6 +8,7 @@ import { catchError, map, switchMap } from "rxjs/operators";
 import { environment } from "../../../environments/environment";
 import {
   ObservationComment,
+  ProgressReportsUrls,
   Proposal,
   ProposalListItem,
   ProposalProgress,
@@ -124,6 +125,24 @@ export class RealProposalService implements ProposalService {
       }),
       catchError(() => {
         return throwError("Oops. Something is wrong.");
+      }),
+    );
+  }
+
+  /**
+   * Get all progress reports links from the API server.
+   */
+  getProgressReportsUrls(
+    proposalCode: string,
+  ): Observable<ProgressReportsUrls> {
+    const uri = environment.apiUrl + `/progress/${proposalCode}/`;
+    return this.http.get<ProgressReportsUrls>(uri).pipe(
+      map((progressReportsUrls: ProgressReportsUrls) => {
+        const reportsUrls: ProgressReportsUrls = {};
+        for (const [k, v] of Object.entries(progressReportsUrls)) {
+          reportsUrls[k] = camelcaseKeys(v, { deep: true });
+        }
+        return reportsUrls;
       }),
     );
   }

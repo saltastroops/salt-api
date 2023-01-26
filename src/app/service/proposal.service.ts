@@ -56,4 +56,9 @@ export abstract class ProposalService {
     proposalProgressFormData: FormData,
     additional_pdf: File | null,
   ): Observable<ProposalProgress>;
+
+  public abstract getProgressReportsUrls(
+    proposalCode: string,
+  ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Observable<any>;
 }

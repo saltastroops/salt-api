@@ -172,3 +172,5 @@ export interface TimeStatistics {
   allocatedTime: number;
   observedTime: number;
 }
+
+export type ProgressReportsUrls = { [key: string]: { [key: string]: string } };

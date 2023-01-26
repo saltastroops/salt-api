@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import freezegun
 import pytest
-import pytz
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError

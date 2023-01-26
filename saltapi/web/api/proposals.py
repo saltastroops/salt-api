@@ -26,11 +26,12 @@ from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
-    ProprietaryPeriodUpdateRequest,
     ObservationComment,
     Proposal,
     ProposalListItem,
-    ProposalStatusContent, UpdateStatus,
+    ProposalStatusContent,
+    ProprietaryPeriodUpdateRequest,
+    UpdateStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Any, Callable, Dict, List
 from unittest.mock import patch
 
@@ -11,7 +11,6 @@ from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from tests.conftest import find_username
 from tests.markers import nodatabase
-
 
 mock_now = date(2022, 12, 1)
 

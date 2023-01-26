@@ -1,10 +1,15 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
-from tests.conftest import not_authenticated, misauthenticate, authenticate, find_username
+from tests.conftest import (
+    authenticate,
+    find_username,
+    misauthenticate,
+    not_authenticated,
+)
 
 TEST_DATA = "integration/users/get_user.yaml"
 

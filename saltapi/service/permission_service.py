@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, cast, Any
+from typing import Any, Dict, List, Optional, cast
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository

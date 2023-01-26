@@ -5,6 +5,8 @@ import { catchError, debounceTime, switchMap } from "rxjs/operators";
 
 import { AuthenticationService } from "../../service/authentication.service";
 import { ProposalService } from "../../service/proposal.service";
+import { Sort } from "../../sort";
+import { SortDirection } from "../../sort.directive";
 import { ProposalListItem } from "../../types/proposal";
 import { User } from "../../types/user";
 import { availableSemesters, currentSemester } from "../../utils";
@@ -389,6 +391,42 @@ export class HomeUserComponent implements OnInit {
     });
     this.filteredProposals = proposals;
   }
+
+  sort = (key: string, direction: SortDirection): void => {
+    const sort = new Sort();
+    const isString = !["id", "phase"].includes(key);
+    let sortFunc;
+    switch (key) {
+      case "status":
+        sortFunc = sort.startSort(
+          (proposal) => proposal.status.value,
+          direction,
+          true,
+        );
+        break;
+      case "pi":
+        sortFunc = sort.startSort(
+          (proposal) => proposal.principalInvestigator.familyName,
+          direction,
+          true,
+        );
+        break;
+      case "astronomer":
+        sortFunc = sort.startSort(
+          (proposal) => {
+            return proposal.liaisonAstronomer
+              ? proposal.liaisonAstronomer.givenName
+              : "";
+          },
+          direction,
+          true,
+        );
+        break;
+      default:
+        sortFunc = sort.startSort(key, direction, isString);
+    }
+    this.filteredProposals.sort(sortFunc);
+  };
 
   isSA(proposal: ProposalListItem): boolean {
     return (

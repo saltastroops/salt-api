@@ -241,66 +241,29 @@ Show
 <br /><br />
 <div class="table alternate-background"></div>
 
-<table class="table">
+<table class="table" [wmSort]="sort">
   <thead>
     <tr class="secondary-header">
+      <th wmSortBy="id" data-test="proposal-id-header">Proposal ID</th>
       <th
-        [wmSort]="filteredProposals"
-        data-name="id"
-        data-test="proposal-id-header"
-      >
-        Proposal ID
-      </th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="proposalCode"
+        wmSortBy="proposalCode"
         class="proposal-code-column"
         data-test="proposal-code-header"
       >
         Proposal Code
       </th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="title"
-        data-test="proposal-title-header"
-      >
-        Title
-      </th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="semester"
-        data-test="proposal-semester-header"
-      >
-        Semester
-      </th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="phase"
-        data-test="proposal-phase-header"
-      >
-        Phase
-      </th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="status.value"
-        data-test="proposal-status-header"
-      >
+      <th wmSortBy="title" data-test="proposal-title-header">Title</th>
+      <th wmSortBy="semester" data-test="proposal-semester-header">Semester</th>
+      <th wmSortBy="phase" data-test="proposal-phase-header">Phase</th>
+      <th wmSortBy="status" data-test="proposal-status-header">
         Proposal Status
       </th>
       <th>Proposal Status Reason</th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="proposalType"
-        data-test="proposal-type-header"
-      >
+      <th wmSortBy="proposalType" data-test="proposal-type-header">
         Proposal Type
       </th>
-      <th>PI</th>
-      <th
-        [wmSort]="filteredProposals"
-        data-name="liaisonAstronomer.givenName"
-        data-test="proposal-astronomer-header"
-      >
+      <th wmSortBy="pi">PI</th>
+      <th wmSortBy="astronomer" data-test="proposal-astronomer-header">
         Astronomer
       </th>
     </tr>

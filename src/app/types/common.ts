@@ -1,5 +1,3 @@
-import { Institution } from "./institution";
-
 export type BlockVisitStatus = "Accepted" | "In queue" | "Rejected";
 
 export interface BaseBlockVisit {

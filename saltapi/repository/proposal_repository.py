@@ -25,7 +25,7 @@ from saltapi.util import (
     target_magnitude,
     target_proper_motion,
     target_coordinates,
-    target_period_ephemeris, hrs_mode_name_corrector
+    target_period_ephemeris, normalised_hrs_mode
 )
 
 
@@ -254,7 +254,7 @@ LIMIT :limit;
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
             "requested_times": self._get_requested_times(proposal_code, semester),
-            "instrument_configurations": self._get_instrument_configurations(proposal_code)
+            "science_configurations": self._get_science_configurations(proposal_code)
         }
         return proposal
 
@@ -499,11 +499,11 @@ WHERE PC.Proposal_Code = :proposal_code
             "submission_number": row.submission_number,
             "status": {"value": row.status, "reason": row.reason},
             "proposal_type": self._map_proposal_type(row.proposal_type),
-            "target_of_opportunity": row.target_of_opportunity,
+            "is_target_of_opportunity": row.target_of_opportunity,
             "total_requested_time": row.total_requested_time,
             "proprietary_period": row.proprietary_period,
             "is_time_restricted": row.is_time_restricted != 0,
-            "is_p4": row.is_p4 != 0,
+            "is_priority4": row.is_p4 != 0,
             "is_self_activatable": row.self_activatable != 0,
         }
 
@@ -521,6 +521,8 @@ WHERE PC.Proposal_Code = :proposal_code
         info["first_submission"] = self._first_submission_date(proposal_code)
         info["submission_number"] = self._latest_submission(proposal_code)
         info["semesters"] = self._semesters(proposal_code)
+        info["thesis_students"] = self._get_thesis_students(proposal_code)
+        info["target_of_opportunity_reason"] = self._get_target_of_opportunity_reason(proposal_code)
 
         return info
 
@@ -1810,7 +1812,7 @@ SELECT DISTINCT RequestedTime                                   AS observing_tim
                 HT.Identifier                                   AS horizons_identifier,
                 IF((MT1.Target_Id IS NOT NULL
                     OR MTF.Target_Id IS NOT NULL
-                    OR HT.Identifier  IS NOT NULL),
+                    OR HT.Identifier IS NOT NULL),
                     1,
                     0)                                          AS non_sidereal
 FROM P1ProposalTarget PPT
@@ -1881,7 +1883,7 @@ FROM MultiPartner MP
 WHERE Proposal_Code = :proposal_code
         """
         )
-        sem_req_time = []
+        req_times = []
 
         dist = []
         for row in self.connection.execute(stmt, {
@@ -1898,15 +1900,120 @@ WHERE Proposal_Code = :proposal_code
                 "percentage": row.percentage
             })
             req_time["distribution"] = dist
-            sem_req_time.append(req_time)
-        return sem_req_time
+            req_times.append(req_time)
+        return req_times
+
+    def _get_nir_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT 
+	P1NirSimulation_Name		AS `name`,
+    Path						AS path,
+    PiComment					AS description
+FROM P1NirSimulation P1NS
+	JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append({
+                "name": row.name,
+                "path": row.path,
+                "description": row.description
+            })
+        return simulations
 
 
-    def _get_instrument_configurations(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_hrs_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT 
+	P1HrsSimulation_Name		AS `name`,
+    Path						AS path,
+    PiComment					AS description
+FROM P1HrsSimulation P1HS
+	JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append({
+                "name": row.name,
+                "path": row.path,
+                "description": row.description
+            })
+        return simulations
+
+
+    def _get_rss_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT 
+	P1RssSimulation_Name		AS `name`,
+    Path						AS path,
+    PiComment					AS description
+FROM P1RssSimulation P1RS
+	JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append({
+                "name": row.name,
+                "path": row.path,
+                "description": row.description
+            })
+        return simulations
+
+    def _get_salticam_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT 
+	P1SalticamSimulation_Name		AS `name`,
+    Path						    AS path,
+    PiComment					    AS description
+FROM P1SalticamSimulation P1SS
+	JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append({
+                "name": row.name,
+                "path": row.path,
+                "description": row.description
+            })
+        return simulations
+
+    def _get_bvit_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT 
+	P1BvitSimulation_Name		AS `name`,
+    Path						AS path,
+    PiComment					AS description
+FROM P1BvitSimulation P1BS
+	JOIN ProposalCode PC ON	P1BS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append({
+                "name": row.name,
+                "path": row.path,
+                "description": row.description
+            })
+        return simulations
+
+    def _get_science_configurations(self, proposal_code) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
-	P1C.P1Config_Id				        AS observation_id,
     P1C.P1Bvit_Id				        AS bvit,
     P1C.P1Hrs_Id				        AS hrs,
     P1C.P1Nir_Id				        AS nir,
@@ -1916,11 +2023,7 @@ SELECT
     HM.ExposureMode				        AS hrs_mode,
     NG.Grating					        AS nir_grating,
     RM.`Mode`					        AS rss_mode,
-    SM.DetectorMode				        AS scam_detector_mode,
-    PHS.P1HrsSimulation_Name            AS hrs_simulation,
-    PNS.P1NirSimulation_Name            AS nir_simulation,
-    PRS.P1RssSimulation_Name            AS rss_simulation,
-    PSS.P1SalticamSimulation_Name       AS scam_simulation
+    SM.DetectorMode				        AS scam_detector_mode
 FROM P1Config P1C
 	JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
     LEFT JOIN P1Bvit PB ON P1C.P1Bvit_Id = PB.P1Bvit_Id
@@ -1930,45 +2033,41 @@ FROM P1Config P1C
     LEFT JOIN P1Nir PN ON P1C.P1Nir_Id = PN.P1Nir_Id
     LEFT JOIN NirGrating NG ON PN.NirGrating_Id = NG.NirGrating_Id
     LEFT JOIN P1Rss PR ON P1C.P1Rss_Id = PR.P1Rss_Id
-    LEFT JOIN RssMode RM ON PR.RssMode_Id = PR.RssMode_Id
+    LEFT JOIN RssMode RM ON PR.RssMode_Id = RM.RssMode_Id
     LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
     LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id    
-    LEFT JOIN P1HrsSimulation PHS ON P1C.ProposalCode_Id = PHS.ProposalCode_Id
-    LEFT JOIN P1NirSimulation PNS ON P1C.ProposalCode_Id = PNS.ProposalCode_Id
-    LEFT JOIN P1RssSimulation PRS ON P1C.ProposalCode_Id = PRS.ProposalCode_Id
-    LEFT JOIN P1SalticamSimulation PSS ON P1C.ProposalCode_Id = PSS.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
         """
         )
         configurations = []
+
         for row in self.connection.execute(stmt, {
             "proposal_code": proposal_code
         }):
             if row.bvit:
                 instrument = "BVIT"
                 mode = row.bvit_filter
-                simulations = None
+                simulations = self._get_bvit_simulations(proposal_code)
             elif row.hrs:
                 instrument = "HRS"
-                mode = hrs_mode_name_corrector(row.hrs_mode)
-                simulations = row.hrs_simulation
+                mode = normalised_hrs_mode(row.hrs_mode)
+                simulations = self._get_hrs_simulations(proposal_code)
             elif row.nir:
                 instrument = "NIR"
                 mode = row.nir_grating
-                simulations = row.nir_simulation
+                simulations = self._get_nir_simulations(proposal_code)
             elif row.rss:
                 instrument = "RSS"
                 mode = row.rss_mode
-                simulations = row.rss_simulation
+                simulations = self._get_rss_simulations(proposal_code)
             elif row.scam:
                 instrument = "SALTICAM"
                 mode = row.scam_detector_mode
-                simulations = row.scam_simulation
+                simulations = self._get_salticam_simulations(proposal_code)
             else:
                 raise NotFoundError(f"Unknown instrument configuration found for proposal: {proposal_code}")
             configurations.append(
                 {
-                    "observation_id": row.observation_id,
                     "instrument": instrument,
                     "mode": mode,
                     "simulations": simulations
@@ -1977,3 +2076,48 @@ WHERE PC.Proposal_Code = :proposal_code
         if len(configurations) == 0:
             return []
         return configurations
+
+    def _get_thesis_students(self, proposal_code: str) -> List[Dict[str, Any]]:
+        students = []
+        stmt = text(
+            """
+SELECT
+	FirstName		AS given_name,
+    Surname			AS family_name,
+    ThesisType		AS thesis_type,
+    ThesisDescr		AS thesis_description,
+    CompletionYear	AS completion_year
+    
+FROM P1Thesis PT
+	JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
+	JOIN Investigator I ON PT.Student_Id = I.Investigator_Id
+    JOIN ProposalCode PC ON PT.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            students.append({
+                "given_name": row.given_name,
+                "family_name": row.family_name,
+                "thesis_type": row.thesis_type,
+                "completion_year": row.completion_year,
+                "thesis_description": row.thesis_description
+            })
+        return students
+
+    def _get_target_of_opportunity_reason(self, proposal_code: str) -> Optional[str]:
+        stmt = text(
+            """
+SELECT
+	Reason				AS reason
+FROM P1ToO PT
+	JOIN ProposalCode PC ON PT.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code =  :proposal_code
+        """
+        )
+        result =  self.connection.execute(stmt, {"proposal_code": proposal_code})
+        row = result.scalar_one_or_none()
+        if not row:
+            return  None
+
+        return  row

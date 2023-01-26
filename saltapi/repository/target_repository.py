@@ -1,7 +1,5 @@
 from typing import Any, Dict, Optional
 
-import pytz
-from astropy.coordinates import Angle
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -41,7 +39,8 @@ SELECT DISTINCT T.Target_Id                                      AS id,
                 TB.Time_Base                                     AS period_time_base,
                 HT.Identifier                                    AS horizons_identifier,
                 IF((MT1.Target_Id IS NOT NULL
-                    OR MTF.Target_Id IS NOT NULL),
+                    OR MTF.Target_Id IS NOT NULL
+                    OR HT.Identifier IS NOT NULL),
                     1,
                     0)                                           AS non_sidereal
 FROM Target T

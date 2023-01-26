@@ -242,7 +242,7 @@ def target_period_ephemeris(row: Any) -> Optional[Dict[str, Any]]:
     }
 
 
-def hrs_mode_name_corrector(mode: str) -> str:
+def normalised_hrs_mode(mode: str) -> str:
     modes = {
         "HIGH RESOLUTION": "High Resolution",
         "HIGH STABILITY": "High Stability",

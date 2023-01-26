@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.service.instrument import HRS
-from saltapi.util import hrs_mode_name_corrector
+from saltapi.util import normalised_hrs_mode
 
 
 class HrsRepository:
@@ -117,7 +117,7 @@ WHERE H.Hrs_Id = :hrs_id
             nod_and_shuffle = None
 
         configuration = {
-            "mode": hrs_mode_name_corrector(row.mode),
+            "mode": normalised_hrs_mode(row.mode),
             "exposure_type": row.exposure_type,
             "target_location": self._target_location(row),
             "fiber_separation": float(row.fiber_separation),

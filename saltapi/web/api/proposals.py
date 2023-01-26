@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from fastapi import (
     APIRouter,
@@ -20,13 +20,14 @@ from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
+from saltapi.web.schema.P1Proposal import P1Proposal
+from saltapi.web.schema.P2Proposal import P2Proposal
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     DataReleaseDateUpdate,
     ObservationComment,
-    Proposal,
     ProposalListItem,
     ProposalStatusContent,
 )
@@ -116,7 +117,7 @@ def get_proposal_zip(
 @router.get(
     "/{proposal_code}",
     summary="Get a proposal",
-    response_model=Proposal,
+    response_model=Union[P1Proposal, P2Proposal],
 )
 def get_proposal(
     proposal_code: ProposalCode = Path(

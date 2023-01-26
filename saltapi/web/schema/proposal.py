@@ -15,7 +15,6 @@ from saltapi.web.schema.common import (
     Semester,
 )
 from saltapi.web.schema.institution import Institution
-from saltapi.web.schema.target import Phase1Target
 from saltapi.web.schema.user import FullName
 
 
@@ -80,23 +79,13 @@ class GeneralProposalInfo(BaseModel):
         title="First submission datetime",
         description="Datetime of the first submission for any semester",
     )
-    submission_number: int = Field(
-        ...,
-        title="Submission number",
-        description="Current submission number for any semester",
-    )
-    semesters: List[Semester] = Field(
-        ...,
-        title="Semesters",
-        description="List of semesters for which the proposal has been submitted",
-    )
     status: ProposalStatus = Field(
         ..., title="Proposal status", description="Proposal status"
     )
     proposal_type: ProposalType = Field(
         ..., title="Proposal type", description="Proposal type"
     )
-    target_of_opportunity: bool = Field(
+    is_target_of_opportunity: bool = Field(
         ...,
         title="Target of opportunity?",
         description="Whether the proposal contains targets of opportunity",
@@ -106,40 +95,13 @@ class GeneralProposalInfo(BaseModel):
         title="Total requested time",
         description="Total requested time, in seconds",
     )
-    data_release_date: Optional[date] = Field(
-        ...,
-        title="Data release date",
-        description="Date when the proposal data is scheduled to become public",
-    )
+
     liaison_salt_astronomer: Optional[FullName] = Field(
         ...,
         title="Liaison astronomer",
         description="SALT Astronomer who is the liaison astronomer for the proposal",
     )
-    summary_for_salt_astronomer: str = Field(
-        ...,
-        title="Summary for the SALT Astronomer",
-        description=(
-            "Brief summary with the essential information for the SALT Astronomer"
-        ),
-    )
-    summary_for_night_log: str = Field(
-        ...,
-        title="Summary for the night log",
-        description="Brief (one-line) summary to include in the observing night log",
-    ),
-    is_time_restricted: bool = Field(
-        ...,
-        title="Are there restrictions for the observing times?",
-        description="Are there restrictions for the observing times?",
-    ),
-    is_p4: bool = Field(
-        ...,
-        title="Is the proposal a priority 4 proposal?",
-        description=(
-            "Is the proposal only requesting priority 4 time?"
-        ),
-    ),
+
     is_self_activatable: bool = Field(
         ...,
         title="Can the proposal be self-activated?",
@@ -257,9 +219,7 @@ class Comment(BaseModel):
         }
 
 
-class PartnerPercentage(
-    BaseModel
-):  # TODO There is a similar class to this just missing a partner code
+class PartnerPercentage(BaseModel):
     """A percentage (for example of the requested time) for a partner."""
 
     partner: PartnerName = Field(..., title="SALT partner", description="SALT partner")
@@ -271,29 +231,6 @@ class PartnerPercentage(
         description="Percentage between 0 and 100 (both inclusive)",
     )
 
-
-class InstrumentConfiguration(BaseModel):
-    observation_id: int = Field(
-        ...,
-        title="Configuration Id",
-        description="The configuration Id"
-    )
-    instrument: str = Field(
-        ...,
-        title="Instrument",
-        description="The instrument name."
-    )
-    mode: str = Field(
-        ...,
-        title="Configuration mode",
-        description=("The configuration mode. This is the filter for BVIT, the exposure mode for HRS,"
-                     " the grating for RSS and NIR, and the detector mode for Salticam.")
-    )
-    simulations: Optional[str] = Field(
-        ...,
-        title="Simulations",
-        description="The Simulations name"
-    )
 
 
 class RequestedTime(BaseModel):
@@ -390,13 +327,6 @@ class Proposal(BaseModel):
     investigators: List[Investigator] = Field(
         ..., title="Investigators", description="Investigators on the proposal"
     )
-    targets: Optional[List[Phase1Target]] = Field(
-        ...,
-        title="Targets",
-        description=(
-            "Targets for which observations are requested."
-        ),
-    )
     requested_times: List[RequestedTime] = Field(
         ...,
         title="Requested times",
@@ -426,10 +356,6 @@ class Proposal(BaseModel):
         ...,
         title="Observation comments",
         description="Comments related to observing the proposal",
-    )
-    instrument_configurations: Optional[List[InstrumentConfiguration]] = Field(
-        title="Instruments configurations",
-        description="The phase 1 instruments configurations."
     )
 
 

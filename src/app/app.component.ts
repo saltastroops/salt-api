@@ -10,6 +10,7 @@ import { AuthenticationService } from "./service/authentication.service";
 })
 export class AppComponent implements OnInit {
   title = "Web Manager";
+  currentYear!: number;
 
   constructor(
     private formBuilder: UntypedFormBuilder,
@@ -19,5 +20,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     // Load the user details
     this.authService.updateUser();
+
+    this.currentYear = new Date().getFullYear();
   }
 }

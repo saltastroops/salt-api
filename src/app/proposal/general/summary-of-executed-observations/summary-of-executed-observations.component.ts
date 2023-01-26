@@ -4,9 +4,11 @@ import { parseISO } from "date-fns";
 import { take } from "rxjs/operators";
 
 import { AuthenticationService } from "../../../service/authentication.service";
+import { Sort } from "../../../sort";
+import { SortDirection } from "../../../sort.directive";
 import { BlockVisit } from "../../../types/common";
 import { User } from "../../../types/user";
-import { byPropertiesOf, hasAnyRole, sortArg } from "../../../utils";
+import { hasAnyRole } from "../../../utils";
 
 @Component({
   selector: "wm-summary-of-executed-observations",
@@ -62,31 +64,28 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
     });
   }
 
+  sort = (key: string, direction: SortDirection): void => {
+    const sort = new Sort();
+    const isString = ["blockName", "status", "targets"].includes(key);
+    let sortFunc;
+    if (key !== "targets") {
+      sortFunc = sort.startSort(key, direction, isString);
+    } else {
+      sortFunc = sort.startSort(
+        (o: Observation) => o.targets.join(" "),
+        direction,
+        isString,
+      );
+    }
+    this.observations.sort(sortFunc);
+  };
+
   observationDate(dateString: string): Date {
     return parseISO(dateString);
   }
 
   onClick(blockName: string): void {
     this.selectBlock.emit(blockName);
-  }
-
-  onColumnClick(event: Event, columnName: sortArg<Observation>): void {
-    this.columnsSortDirections[columnName] =
-      this.columnsSortDirections[columnName] === "asc" ? "desc" : "asc";
-
-    this.sortedColumn = columnName;
-  }
-
-  sortableColumnClass(columnName: sortArg<Observation>): {
-    [key: string]: unknown;
-  } {
-    return {
-      pointer: true,
-      active: this.sortedColumn == columnName,
-      asc: this.columnsSortDirections[columnName] === "asc",
-      desc: this.columnsSortDirections[columnName] === "desc",
-      sortable: true,
-    };
   }
 }
 

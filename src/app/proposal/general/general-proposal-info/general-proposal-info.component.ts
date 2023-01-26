@@ -34,47 +34,47 @@ export class GeneralProposalInfoComponent implements OnInit {
       case "Active":
         this.statusDescription =
           "This proposal has been added to the queue to be observed.";
-        this.backgroundColor = "is-green-background";
+        this.backgroundColor = "has-background-success";
         break;
 
       case "Accepted":
         this.statusDescription = "This proposal has been accepted.";
-        this.backgroundColor = "is-green-background";
+        this.backgroundColor = "has-background-success";
         break;
 
       case "Completed":
         this.statusDescription = "This proposal has been completed.";
-        this.backgroundColor = "is-green-background";
+        this.backgroundColor = "has-background-success";
         break;
 
       case "Deleted":
         this.statusDescription = "This proposal has been deleted.";
-        this.backgroundColor = "is-red-background";
+        this.backgroundColor = "has-background-danger";
         break;
 
       case "Expired":
         this.statusDescription = "This proposal has expired.";
-        this.backgroundColor = "is-red-background";
+        this.backgroundColor = "has-background-danger";
         break;
 
       case "Inactive":
         this.statusDescription = "This proposal is inactive.";
-        this.backgroundColor = "is-red-background";
+        this.backgroundColor = "has-background-danger";
         break;
 
       case "Superseded":
         this.statusDescription = "This proposal has been superseded.";
-        this.backgroundColor = "is-red-background";
+        this.backgroundColor = "has-background-danger";
         break;
 
       case "Under technical review":
         this.statusDescription = "This proposal is under technical review.";
-        this.backgroundColor = "is-red-background";
+        this.backgroundColor = "has-background-danger";
         break;
 
       case "Under scientific review":
         this.statusDescription = "This proposal is under scientific review.";
-        this.backgroundColor = "is-red-background";
+        this.backgroundColor = "has-background-danger";
         break;
     }
   }

@@ -1,4 +1,4 @@
-<div>
+<div id="proposal-progress">
   <h2 class="title is-2">Proposal Progress</h2>
   <hr class="heading-line proposal-progress-header" />
   <div *ngIf="showForm" class="progress-report-view">
@@ -7,36 +7,37 @@
       [progressReport]="proposalProgress"
     ></wm-proposal-progress-table>
   </div>
-  <div>
-    <a
-      class="has-text-link"
-      href="{{
-        apiUrl +
-          '/progress/' +
-          proposal.proposalCode +
-          '/' +
-          currentSemester +
-          '/report.pdf'
-      }}"
-    >
-      View the progress report as pdf.
-    </a>
+  <div
+    *ngIf="
+      progressReportsUrls['proposalProgressPdf'];
+      else noCurrentProgressReport
+    "
+  >
+    <div>
+      <a
+        class="has-text-link"
+        href="{{
+          apiUrl +
+            '/progress/' +
+            proposal.proposalCode +
+            '/' +
+            currentSemester +
+            '/report.pdf'
+        }}"
+      >
+        View the progress report as pdf.
+      </a>
+    </div>
   </div>
-  <div>
-    <a
-      class="has-text-link"
-      href="{{
-        apiUrl +
-          '/progress/' +
-          proposal.proposalCode +
-          '/' +
-          currentSemester +
-          '/supplementary-file.pdf'
-      }}"
-    >
-      View the progress report supplementary file only
-    </a>
-  </div>
+  <ng-template #noCurrentProgressReport>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>No progress report has been submitted yet.</th>
+        </tr>
+      </thead>
+    </table>
+  </ng-template>
   <div class="edit-button">
     <button *ngIf="showForm" class="button" (click)="closeForm()">
       Close Edit
@@ -49,5 +50,26 @@
     >
       Edit
     </button>
+  </div>
+  <div *ngIf="progressReportsUrls">
+    <a
+      data-test="other-reports-links"
+      href="javascript:void(0)"
+      (click)="onClick()"
+      >{{ reportsLinksText }}</a
+    >
+    <div *ngIf="showReports">
+      <ul>
+        <li
+          *ngFor="
+            let u of progressReportsUrlsMap(progressReportsUrls) | keyvalue
+          "
+        >
+          <a class="has-text-link" href="{{ u.value['proposalProgressPdf'] }}">
+            View the progress report for semester {{ u.key }}
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>

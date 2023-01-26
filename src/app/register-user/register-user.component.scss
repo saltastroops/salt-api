@@ -1,0 +1,25 @@
+select,
+input {
+  width: 500px;
+  background-color: white;
+}
+
+textarea {
+  width: 500px;
+  height: 150px;
+  resize: vertical;
+}
+
+.loading-spinner {
+  position: relative;
+}
+
+.partners-loading {
+  padding-bottom: 2px;
+  margin-top: -15px;
+  margin-left: -320px;
+}
+
+.form-group {
+  padding-bottom: 1.2rem;
+}

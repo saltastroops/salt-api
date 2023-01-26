@@ -1,44 +1,44 @@
-// Taken from https://sankhadip.medium.com/how-to-sort-table-rows-according-column-in-angular-9-b04fdafb4140
+// Adapted from https://sankhadip.medium.com/how-to-sort-table-rows-according-column-in-angular-9-b04fdafb4140
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class Sort {
   private sortOrder = 1;
   private collator = new Intl.Collator(undefined, {
-    numeric: true,
     sensitivity: "base",
   });
 
-  constructor() {}
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  public startSort(property: any, order: any, type = "") {
+  public startSort(
+    property: string | ((value: any) => any),
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    order: any,
+    isString: boolean,
+  ): (a: any, b: any) => number {
     if (order === "desc") {
       this.sortOrder = -1;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (a: any, b: any) => {
-      const objKeys = property.split(".");
-      if (type === "date") {
-        if (objKeys.length > 1) {
-          const key = objKeys[0];
-          const subKey = objKeys[1];
-          const x = a[key] ? a[key][subKey] : undefined;
-          const y = b[key] ? b[key][subKey] : undefined;
-          return this.sortData(new Date(x), new Date(y));
+    if (typeof property === "string") {
+      return (a: any, b: any) => {
+        if (isString) {
+          return (
+            this.collator.compare(a[property], b[property]) * this.sortOrder
+          );
+        } else {
+          return this.sortData(a[property], b[property]);
         }
-        return this.sortData(new Date(a[property]), new Date(b[property]));
-      } else {
-        if (objKeys.length > 1) {
-          const key = objKeys[0];
-          const subKey = objKeys[1];
-          const x = a[key] ? a[key][subKey] : undefined;
-          const y = b[key] ? b[key][subKey] : undefined;
-          return this.collator.compare(x, y) * this.sortOrder;
+      };
+    } else {
+      return (a: any, b: any) => {
+        if (isString) {
+          return (
+            this.collator.compare(property(a), property(b)) * this.sortOrder
+          );
+        } else {
+          return this.sortData(property(a), property(b));
         }
-        return this.collator.compare(a[property], b[property]) * this.sortOrder;
-      }
-    };
+      };
+    }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private sortData(a: any, b: any) {
+
+  private sortData(a: any, b: any): number {
     if (a < b) {
       return -1 * this.sortOrder;
     } else if (a > b) {
@@ -48,3 +48,4 @@ export class Sort {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

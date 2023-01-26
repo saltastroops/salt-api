@@ -8,12 +8,14 @@ import { LoginComponent } from "./login/login.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosComponent } from "./mos/mos.component";
 import { ProposalComponent } from "./proposal/proposal.component";
+import { RegisterUserComponent } from "./register-user/register-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
   { path: "login", component: LoginComponent },
+  { path: "register", component: RegisterUserComponent },
   {
     path: "proposal/:proposal-code",
     component: ProposalComponent,

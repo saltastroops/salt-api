@@ -1,3 +1,5 @@
+import { Institution } from "./institution";
+
 export type BlockVisitStatus = "Accepted" | "In queue" | "Rejected";
 
 export interface BaseBlockVisit {
@@ -45,23 +47,6 @@ export interface ObservationProbabilities {
   averageRanking: number;
   total: number;
 }
-
-export type PartnerCode =
-  | "AMNH"
-  | "CMU"
-  | "DC"
-  | "DUR"
-  | "GU"
-  | "HET"
-  | "IUCAA"
-  | "OTH"
-  | "POL"
-  | "RSA"
-  | "RU"
-  | "UC"
-  | "UKSC"
-  | "UNC"
-  | "UW";
 
 export type PartnerName =
   | "American Museum of Natural History"
@@ -114,3 +99,5 @@ export enum Partner {
   UNC = "University of North Carolina - Chapel Hill",
   UW = "University of Wisconsin-Madison",
 }
+
+export type PartnerCode = keyof typeof Partner;

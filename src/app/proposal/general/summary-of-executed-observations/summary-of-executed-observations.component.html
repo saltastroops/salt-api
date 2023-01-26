@@ -1,54 +1,40 @@
 <h2 class="title is-2">Summary of executed observations</h2>
 <hr class="heading-line summary-header" />
-<table class="table">
+<table class="table" [wmSort]="sort">
   <thead>
     <tr>
       <th
-        [wmSort]="observations"
-        data-name="blockName"
+        wmSortBy="blockName"
         data-test="executed-observations-block-name-header"
       >
         Block
       </th>
       <th
-        [wmSort]="observations"
-        data-name="observationTime"
+        wmSortBy="observationTime"
         data-test="executed-observations-observation-time-header"
       >
         Observation Time (seconds)
       </th>
-      <th
-        [wmSort]="observations"
-        data-name="priority"
-        data-test="executed-observations-priority-header"
-      >
+      <th wmSortBy="priority" data-test="executed-observations-priority-header">
         Priority
       </th>
       <th
-        [wmSort]="observations"
-        data-name="maximumLunarPhase"
+        wmSortBy="maximumLunarPhase"
         data-test="executed-observations-maximum-lunar-phase-header"
       >
         Max Lunar Phase
       </th>
-      <th
-        [wmSort]="observations"
-        data-name="targets"
-        data-test="executed-observations-targets-header"
-      >
+      <th wmSortBy="targets" data-test="executed-observations-targets-header">
         Target(s)
       </th>
       <th
-        [wmSort]="observations"
-        data-name="night"
-        data-type="date"
+        wmSortBy="night"
         data-test="executed-observations-observation-date-header"
       >
         Observation Date
       </th>
       <th
-        [wmSort]="observations"
-        data-name="status"
+        wmSortBy="status"
         data-test="executed-observations-observation-status-header"
       >
         Accepted?

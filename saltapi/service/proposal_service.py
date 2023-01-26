@@ -301,7 +301,9 @@ class ProposalService:
             proposal_code, proprietary_period, motivation, username
         )
 
-    def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
+    def update_proprietary_period(
+        self, proposal_code: str, proprietary_period: int
+    ) -> None:
         self.repository.update_proprietary_period(
             proposal_code=proposal_code, proprietary_period=proprietary_period
         )

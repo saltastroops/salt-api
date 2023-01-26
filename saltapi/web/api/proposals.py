@@ -233,8 +233,11 @@ def update_proprietary_period(
     proprietary_period_update_request: ProprietaryPeriodUpdateRequest = Body(
         ...,
         title="The details for the proprietary period update.",
-        description="The requested proprietary period in months and a motivation. The motivation is only required if "
-                    "the requested proprietary period is longer than the maximum proprietary period for the proposal.",
+        description=(
+            "The requested proprietary period in months and a motivation. The"
+            " motivation is only required if the requested proprietary period is longer"
+            " than the maximum proprietary period for the proposal."
+        ),
     ),
     user: User = Depends(get_current_user),
 ) -> JSONResponse:
@@ -281,10 +284,8 @@ def update_proprietary_period(
                 **proposal["general_info"]["proprietary_period"],
                 "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
                 "status": update_status,
-            }
+            },
         )
-
-
 
 
 @router.put(

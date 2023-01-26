@@ -82,7 +82,9 @@ class ProprietaryPeriod(BaseModel):
     maximum_period: Optional[int] = Field(
         ...,
         title="Maximum proprietary period, in months",
-        description="Maximum proprietary period, in months for partner partners that have it.",
+        description=(
+            "Maximum proprietary period, in months for partner partners that have it."
+        ),
     )
     start_date: Optional[date] = Field(
         ...,
@@ -227,8 +229,10 @@ class ProprietaryPeriodUpdateRequest(BaseModel):
         ...,
         ge=0,
         title="The proprietary period",
-        description="The proprietary period, in months. The proprietary period starts at the end of the semester when "
-                    "the last observation was taken.",
+        description=(
+            "The proprietary period, in months. The proprietary period starts at the"
+            " end of the semester when the last observation was taken."
+        ),
     )
     motivation: Optional[str] = Field(
         ...,

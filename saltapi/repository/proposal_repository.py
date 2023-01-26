@@ -1770,30 +1770,32 @@ VALUES (
         if not observation_night:
             observation_night = datetime.today()
 
-        return semester_end(semester_of_datetime(
-            datetime(
-                observation_night.year,
-                observation_night.month,
-                observation_night.day,
-                12, 0, 0, 1, tzinfo=pytz.utc)
-        )).date()
+        return semester_end(
+            semester_of_datetime(
+                datetime(
+                    observation_night.year,
+                    observation_night.month,
+                    observation_night.day,
+                    12,
+                    0,
+                    0,
+                    1,
+                    tzinfo=pytz.utc,
+                )
+            )
+        ).date()
 
     def _data_release_date(
-            self,
-            proprietary_period: int,
-            block_visits: List[dict[str, any]]
+        self, proprietary_period: int, block_visits: List[dict[str, any]]
     ) -> date:
-        proprietary_period_start = self.proprietary_period_start_date(
-            block_visits
-        )
+        proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
         # add the proprietary period to get the data release date
-        return proprietary_period_start + relativedelta(
-            months=proprietary_period
-        )
+        return proprietary_period_start + relativedelta(months=proprietary_period)
 
     def is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
-        stmt = text("""
+        stmt = text(
+            """
 SELECT P.Partner_Code    AS partner_code,
        SUM(PA.TimeAlloc) AS time_allocation
 FROM PriorityAlloc PA
@@ -1803,19 +1805,16 @@ FROM PriorityAlloc PA
          JOIN Partner P ON MP.Partner_Id = P.Partner_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY PA.MultiPartner_Id, PA.Priority
-        """)
-        result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code}
+        """
         )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
 
         for row in result:
             if row.partner_code == partner_code and row.time_allocation > 0:
                 return True
         return False
 
-    def maximum_proprietary_period(
-        self, proposal_code: str
-    ) -> Optional[int]:
+    def maximum_proprietary_period(self, proposal_code: str) -> Optional[int]:
         proposal_type = self.get_proposal_type(proposal_code)
         if proposal_type == "Commissioning":
             return 36
@@ -1829,13 +1828,20 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
             return 12
         if proposal_type == "OPTICON-Radionet Pilot":
             return 24
-        if proposal_type in ["Key Science Program", "Large Science Proposal", "Science", "Science - Long Term"]:
+        if proposal_type in [
+            "Key Science Program",
+            "Large Science Proposal",
+            "Science",
+            "Science - Long Term",
+        ]:
             if self.is_partner_allocated(proposal_code, "RSA"):
                 return 24
             return 1200
         raise ValueError("Unknown proposal type.")
 
-    def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
+    def update_proprietary_period(
+        self, proposal_code: str, proprietary_period: int
+    ) -> None:
         stmt = text(
             """
 UPDATE ProposalGeneralInfo

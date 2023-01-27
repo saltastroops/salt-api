@@ -67,6 +67,8 @@ describe("Block summaries", () => {
     BlockSummaries.hasUnobservableBlocks(true);
     BlockSummaries.clickFilterCompleted();
     BlockSummaries.clickFilterUnobservable();
+    BlockSummaries.filterCompletedChecked(true);
+    BlockSummaries.filterUnobservableChecked(true);
     cy.reload();
     BlockSummaries.filterCompletedChecked(true);
     BlockSummaries.filterUnobservableChecked(true);

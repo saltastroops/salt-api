@@ -241,41 +241,53 @@ Show
 <br /><br />
 <div class="table alternate-background"></div>
 
-<table class="table">
+<table class="table" [wmSort]="sort">
   <thead>
     <tr class="secondary-header">
-      <th>Proposal ID</th>
-      <th class="proposal-code-column">Proposal Code</th>
-      <th>Title</th>
-      <th>Semester</th>
-      <th>Phase</th>
-      <th>Proposal Status</th>
+      <th wmSortBy="id" data-test="proposal-id-header">Proposal ID</th>
+      <th
+        wmSortBy="proposalCode"
+        class="proposal-code-column"
+        data-test="proposal-code-header"
+      >
+        Proposal Code
+      </th>
+      <th wmSortBy="title" data-test="proposal-title-header">Title</th>
+      <th wmSortBy="semester" data-test="proposal-semester-header">Semester</th>
+      <th wmSortBy="phase" data-test="proposal-phase-header">Phase</th>
+      <th wmSortBy="status" data-test="proposal-status-header">
+        Proposal Status
+      </th>
       <th>Proposal Status Reason</th>
-      <th>Proposal Type</th>
-      <th>PI</th>
-      <th>Astronomer</th>
+      <th wmSortBy="proposalType" data-test="proposal-type-header">
+        Proposal Type
+      </th>
+      <th wmSortBy="pi">PI</th>
+      <th wmSortBy="astronomer" data-test="proposal-astronomer-header">
+        Astronomer
+      </th>
     </tr>
   </thead>
   <tbody>
     <ng-container *ngFor="let proposal of filteredProposals">
       <tr data-test="proposal-row" [ngClass]="proposalRowClass(proposal)">
-        <td>{{ proposal.id }}</td>
-        <td>
+        <td data-test="proposal-id">{{ proposal.id }}</td>
+        <td data-test="proposal-code">
           <a [routerLink]="['/proposal', proposal.proposalCode]">
             {{ proposal.proposalCode }}
           </a>
         </td>
-        <td>{{ proposal.title }}</td>
+        <td data-test="proposal-title">{{ proposal.title }}</td>
         <td data-test="proposal-semester">{{ proposal.semester }}</td>
-        <td data-test="phase">{{ proposal.phase }}</td>
+        <td data-test="proposal-phase">{{ proposal.phase }}</td>
         <td data-test="proposal-status">{{ proposal.status.value }}</td>
         <td>{{ proposal.status.reason }}</td>
         <td data-test="proposal-type">{{ proposal.proposalType }}</td>
-        <td data-test="principal-investigator">
+        <td data-test="proposal-principal-investigator">
           {{ proposal.principalInvestigator.givenName }}
           {{ proposal.principalInvestigator.familyName }}
         </td>
-        <td data-test="liaison-astronomer">
+        <td data-test="proposal-astronomer">
           <span *ngIf="proposal.liaisonAstronomer">{{
             proposal.liaisonAstronomer.givenName
           }}</span>

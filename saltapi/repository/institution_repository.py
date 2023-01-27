@@ -155,8 +155,6 @@ AND I2.Department = :department
 INSERT INTO Institute (Partner_Id, InstituteName_Id, Department, Url, Address)
 VALUES ((SELECT P.Partner_Id FROM Partner P WHERE P.Partner_Name = 'Other'),
         :institution_name_id, :department, :url, :address)
-FROM Partner P
-WHERE P.Partner_Name = 'Other'
         """
         )
         self.connection.execute(

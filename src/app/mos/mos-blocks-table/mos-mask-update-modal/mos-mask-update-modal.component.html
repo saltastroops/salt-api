@@ -17,7 +17,7 @@
               [className]="error.cutByError ? 'is-danger input' : 'input'"
               type="text"
               #cutBy
-              [value]="mosBlock.cutBy"
+              [value]="mosBlock ? mosBlock.cutBy : ''"
               (keyup)="updateMosMaskMetadata('cutBy', cutBy.value)"
             />
           </div>
@@ -31,7 +31,7 @@
             <input
               [className]="error.cutDateError ? 'is-danger input' : 'input'"
               type="text"
-              [value]="mosBlock.cutDate"
+              [value]="mosBlock ? mosBlock.cutDate : ''"
               #cutDate
               (keyup)="updateMosMaskMetadata('cutDate', cutDate.value)"
             />
@@ -51,8 +51,7 @@
           <div class="control">
             <textarea
               class="textarea"
-              type="textarea"
-              [value]="mosBlock.maskComment"
+              [value]="mosBlock ? mosBlock.maskComment : ''"
               #maskComment
               (change)="updateMosMaskMetadata('maskComment', maskComment.value)"
             ></textarea>

@@ -1,3 +1,4 @@
+import enum
 from typing import Dict, List, Optional, cast, Any
 
 from saltapi.exceptions import AuthorizationError
@@ -80,6 +81,8 @@ class PermissionService:
         else:
             return False
 
+    # def _user_
+
     def check_role(
         self,
         username: str,
@@ -107,6 +110,10 @@ class PermissionService:
         * an investigator on the proposal
         * a TAC member for the proposal
         * an administrator
+        * a user who has been granted permission
+
+        Gravitational wave proposals are a special case; they can be viewed by anyone
+        belonging to a SALT partner.
         """
         username = user.username
         proposal_type = self.proposal_repository.get_proposal_type(proposal_code)
@@ -443,12 +450,18 @@ class PermissionService:
         self.check_role(username, roles, proposal_code)
 
     def is_motivation_needed_to_update_proprietary_period(
-        self, proposal: Dict[str, Any], proprietary_period_update: ProprietaryPeriodUpdateRequest, username: str
+        self,
+        proposal: Dict[str, Any],
+        proprietary_period_update: ProprietaryPeriodUpdateRequest,
+        username: str,
     ) -> bool:
         proposal_code = proposal["proposal_code"]
-        if self.user_has_role(username, Role.ADMINISTRATOR, proposal_code) and\
-                not self.user_has_role(username, Role.INVESTIGATOR, proposal_code):
+        if self.user_has_role(
+            username, Role.ADMINISTRATOR, proposal_code
+        ) and not self.user_has_role(username, Role.INVESTIGATOR, proposal_code):
             return False
 
-        maximum_period = self.proposal_repository.maximum_proprietary_period(proposal_code)
+        maximum_period = self.proposal_repository.maximum_proprietary_period(
+            proposal_code
+        )
         return maximum_period <= proprietary_period_update.proprietary_period

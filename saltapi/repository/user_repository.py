@@ -1,3 +1,4 @@
+import enum
 import hashlib
 import secrets
 import uuid
@@ -13,6 +14,10 @@ from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
 )
+
+
+class ProposalPermission(enum.Enum):
+    VIEW = "View"
 
 
 class UserRepository:
@@ -533,6 +538,33 @@ WHERE PS.PiptSetting_Name = 'RightAdmin'
         """
         # TODO Method need to be implemented.
         return False
+
+    def has_been_granted(
+        self, permission: ProposalPermission, username: str, proposal_code: str
+    ):
+        """
+        Check whether the user has been granted a permission for a proposal.
+        """
+        stmt = text(
+            """
+SELECT COUNT(*)
+FROM ProposalPermissionGrant
+WHERE Grantee_Id = (SELECT PiptUser_Id FROM PiptUser WHERE Username = :username)
+  AND (SELECT ProposalPermission_Id
+       FROM ProposalPermission
+       WHERE ProposalPermission = :permission)
+  AND (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code)
+            """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "username": username,
+                "permission": permission.value,
+                "proposal_code": proposal_code,
+            },
+        )
+        return cast(int, result.scalar_one()) > 0
 
     @staticmethod
     def get_password_hash(password: str) -> str:

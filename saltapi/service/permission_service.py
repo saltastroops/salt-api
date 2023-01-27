@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, cast, Any
+from typing import Any, Dict, List, Optional, cast
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
@@ -433,7 +433,6 @@ class PermissionService:
     def check_permission_to_update_proprietary_period(
         self, user: User, proposal_code: str
     ) -> None:
-
         username = user.username
         roles = [
             Role.PRINCIPAL_INVESTIGATOR,
@@ -443,12 +442,18 @@ class PermissionService:
         self.check_role(username, roles, proposal_code)
 
     def is_motivation_needed_to_update_proprietary_period(
-        self, proposal: Dict[str, Any], proprietary_period_update: ProprietaryPeriodUpdateRequest, username: str
+        self,
+        proposal: Dict[str, Any],
+        proprietary_period_update: ProprietaryPeriodUpdateRequest,
+        username: str,
     ) -> bool:
         proposal_code = proposal["proposal_code"]
-        if self.user_has_role(username, Role.ADMINISTRATOR, proposal_code) and\
-                not self.user_has_role(username, Role.INVESTIGATOR, proposal_code):
+        if self.user_has_role(
+            username, Role.ADMINISTRATOR, proposal_code
+        ) and not self.user_has_role(username, Role.INVESTIGATOR, proposal_code):
             return False
 
-        maximum_period = self.proposal_repository.maximum_proprietary_period(proposal_code)
+        maximum_period = self.proposal_repository.maximum_proprietary_period(
+            proposal_code
+        )
         return maximum_period <= proprietary_period_update.proprietary_period

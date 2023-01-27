@@ -1,10 +1,9 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Any, Callable, Dict, List
 from unittest.mock import patch
 
 import freezegun
 import pytest
-import pytz
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
@@ -12,8 +11,8 @@ from saltapi.repository.proposal_repository import ProposalRepository
 from tests.conftest import find_username
 from tests.markers import nodatabase
 
-
 mock_now = date(2022, 12, 1)
+
 
 @nodatabase
 @pytest.mark.parametrize(
@@ -500,14 +499,16 @@ def test_get_current_version_raises_not_found_error(db_connection: Connection) -
         ("2016-1-SVP-001", 12),
         ("2019-1-GWE-005", 1200),
         ("2022-1-ORP-001", 24),
-        ("2020-2-DDT-005", 6)
+        ("2020-2-DDT-005", 6),
     ],
 )
 def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
-        proposal_code: str, maximum_period: int, db_connection: Connection
+    proposal_code: str, maximum_period: int, db_connection: Connection
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
-    assert proposal_repository.maximum_proprietary_period(proposal_code) == maximum_period
+    assert (
+        proposal_repository.maximum_proprietary_period(proposal_code) == maximum_period
+    )
 
 
 @pytest.mark.parametrize(
@@ -522,29 +523,33 @@ def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
         ("2020-2-SCI-005", [{"night": date(2021, 11, 1)}], date(2022, 5, 1)),
         ("2020-2-SCI-005", [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
         ("2020-2-SCI-005", [{"night": date(2021, 12, 1)}], date(2022, 5, 1)),
-        ("2020-2-SCI-005", [
-            {"night": date(2021, 12, 20)},
-            {"night": date(2021, 6, 1)},
-            {"night": date(2021, 6, 24)},
-            {"night": date(2021, 6, 23)},
-            {"night": date(2021, 12, 2)}
-        ], date(2022, 5, 1)),
+        (
+            "2020-2-SCI-005",
+            [
+                {"night": date(2021, 12, 20)},
+                {"night": date(2021, 6, 1)},
+                {"night": date(2021, 6, 24)},
+                {"night": date(2021, 6, 23)},
+                {"night": date(2021, 12, 2)},
+            ],
+            date(2022, 5, 1),
+        ),
     ],
 )
 def test_proprietary_period_start_date_returns_correct_start_date(
-        proposal_code: str,
-        block_visits: List[Dict[str, Any]],
-        expected_date: datetime,
-        db_connection: Connection,
-        monkeypatch
+    proposal_code: str,
+    block_visits: List[Dict[str, Any]],
+    expected_date: datetime,
+    db_connection: Connection,
+    monkeypatch,
 ) -> None:
     with patch("saltapi.repository.proposal_repository.datetime") as mock_datetime:
         mock_datetime.today.return_value = mock_now
         mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
         proposal_repository = ProposalRepository(db_connection)
         assert (
-                proposal_repository.proprietary_period_start_date(block_visits)
-                == expected_date
+            proposal_repository.proprietary_period_start_date(block_visits)
+            == expected_date
         )
 
 
@@ -563,31 +568,42 @@ def test_proprietary_period_start_date_returns_correct_start_date(
         ("2020-2-SCI-005", 10, [{"night": date(2021, 8, 2)}], date(2022, 9, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 10, 31)}], date(2022, 9, 1)),
-        ("2020-2-SCI-005", 0, [
-            {"night": date(2021, 12, 20)},
-            {"night": date(2021, 6, 1)},
-            {"night": date(2021, 6, 24)},
-            {"night": date(2021, 6, 23)},
-            {"night": date(2021, 12, 2)}
-        ], date(2022, 5, 1)),
-        ("2020-2-SCI-005", 10, [
-            {"night": date(2021, 12, 20)},
-            {"night": date(2021, 6, 1)},
-            {"night": date(2021, 6, 24)},
-            {"night": date(2021, 6, 23)},
-            {"night": date(2021, 12, 2)}
-        ], date(2023, 3, 1)),
+        (
+            "2020-2-SCI-005",
+            0,
+            [
+                {"night": date(2021, 12, 20)},
+                {"night": date(2021, 6, 1)},
+                {"night": date(2021, 6, 24)},
+                {"night": date(2021, 6, 23)},
+                {"night": date(2021, 12, 2)},
+            ],
+            date(2022, 5, 1),
+        ),
+        (
+            "2020-2-SCI-005",
+            10,
+            [
+                {"night": date(2021, 12, 20)},
+                {"night": date(2021, 6, 1)},
+                {"night": date(2021, 6, 24)},
+                {"night": date(2021, 6, 23)},
+                {"night": date(2021, 12, 2)},
+            ],
+            date(2023, 3, 1),
+        ),
     ],
 )
 def test_data_release_date_return_correct_release_date(
-        proposal_code: str,
-        proprietary_period: int,
-        block_visits: List[Dict[str, Any]],
-        expected_date: datetime, db_connection: Connection
+    proposal_code: str,
+    proprietary_period: int,
+    block_visits: List[Dict[str, Any]],
+    expected_date: datetime,
+    db_connection: Connection,
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
 
-    assert proposal_repository._data_release_date(
-        proprietary_period,
-        block_visits
-    ) == expected_date
+    assert (
+        proposal_repository._data_release_date(proprietary_period, block_visits)
+        == expected_date
+    )

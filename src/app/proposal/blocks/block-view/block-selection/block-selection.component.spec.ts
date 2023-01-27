@@ -104,7 +104,7 @@ describe("BlockViewNavigationComponent", () => {
     component.blocks = defaultBlocks;
     component.selectedBlock = defaultBlocks[2];
     fixture.detectChanges();
-    expect(select().options[2].selected).toBeTrue();
+    expect(select().options[3].selected).toBeTrue();
   });
 
   it("should select the block for the selected option", () => {
@@ -112,7 +112,7 @@ describe("BlockViewNavigationComponent", () => {
     component.selectedBlock = defaultBlocks[0];
     fixture.detectChanges();
     const emitSpy = spyOn(component.selectEmitter, "emit");
-    select().value = select().options[1].value;
+    select().value = select().options[2].value;
     select().dispatchEvent(new Event("change"));
     expect(emitSpy).toHaveBeenCalledWith(defaultBlocks[1]);
   });

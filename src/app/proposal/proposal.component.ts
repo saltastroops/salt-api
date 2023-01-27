@@ -21,7 +21,7 @@ import { Proposal } from "../types/proposal";
 export class ProposalComponent implements OnInit {
   readonly DEBOUNCE_TIME = 100;
 
-  blockName = "";
+  blockId!: number;
   proposal: Proposal | null = null;
   isLoading = false;
   error?: string;
@@ -80,8 +80,8 @@ export class ProposalComponent implements OnInit {
     });
   }
 
-  onClick(block: string): void {
-    this.blockName = block;
+  onClick(blockId: number): void {
+    this.blockId = blockId;
     const element = document.querySelector(
       '[data-test="block-selection"]',
     ) as HTMLElement;

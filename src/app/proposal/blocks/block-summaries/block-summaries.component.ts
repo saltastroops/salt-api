@@ -20,7 +20,7 @@ export class BlockSummariesComponent implements OnInit, OnChanges {
   @Input() proposalCode!: string;
   isDesc = false;
   column = "";
-  @Output() selectBlock = new EventEmitter<string>();
+  @Output() selectBlock = new EventEmitter<number>();
   filteredByCompleted!: boolean;
   filteredByUnobservable!: boolean;
   filteredBlocks: BlockSummary[] = [];
@@ -52,8 +52,8 @@ export class BlockSummariesComponent implements OnInit, OnChanges {
     }
   }
 
-  onClick(blockName: string): void {
-    this.selectBlock.emit(blockName);
+  onClick(blockId: number): void {
+    this.selectBlock.emit(blockId);
   }
 
   filterByCompleted(): void {

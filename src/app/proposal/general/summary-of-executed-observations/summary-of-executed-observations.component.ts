@@ -18,7 +18,7 @@ import { hasAnyRole } from "../../../utils";
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;
   @Input() blockVisits!: BlockVisit[];
-  @Output() selectBlock = new EventEmitter<string>();
+  @Output() selectBlock = new EventEmitter<number>();
   observations!: Observation[];
   user!: User;
   showEditBlockButton = false;
@@ -84,8 +84,8 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
     return parseISO(dateString);
   }
 
-  onClick(blockName: string): void {
-    this.selectBlock.emit(blockName);
+  onClick(blockId: number): void {
+    this.selectBlock.emit(blockId);
   }
 }
 

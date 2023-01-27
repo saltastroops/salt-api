@@ -26,13 +26,13 @@ import { Block, BlockSummary } from "../../../types/block";
 })
 export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() blocks!: BlockSummary[];
-  @Input() blockName!: string;
+  @Input() blockId!: number;
 
   readonly DEBOUNCE_TIME = 100;
 
-  selectedBlock!: BlockSummary;
+  selectedBlock!: BlockSummary | null;
 
-  selectedBlocks$: Subject<BlockSummary> = new Subject();
+  selectedBlockId$: Subject<number> = new Subject();
 
   displayedBlock?: Block;
 
@@ -49,12 +49,12 @@ export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
   constructor(public blockService: BlockService) {}
 
   ngOnInit(): void {
-    const trigger$ = this.selectedBlocks$.pipe(
+    const trigger$ = this.selectedBlockId$.pipe(
       debounceTime(this.DEBOUNCE_TIME),
     );
 
     const requestResult$ = trigger$.pipe(
-      switchMap(({ id }) => {
+      switchMap((id) => {
         return this.blockService.getBlock(id).pipe(
           map((b) => ({ success: true, payload: b })),
           catchError((error) => of({ success: false, payload: error })),
@@ -67,12 +67,12 @@ export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
     );
 
     const error$ = merge(
-      this.selectedBlocks$.pipe(mapTo(null)),
+      this.selectedBlockId$.pipe(mapTo(null)),
       requestResult$.pipe(map((v) => (!v.success ? v.payload : null))),
     );
 
     const isLoading$ = merge(
-      this.selectedBlocks$.pipe(mapTo(true)),
+      this.selectedBlockId$.pipe(mapTo(true)),
       requestResult$.pipe(mapTo(false)),
     );
 
@@ -104,18 +104,25 @@ export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
 
   selectBlock(block: BlockSummary): void {
     this.selectedBlock = block;
-    this.selectedBlocks$.next(block);
+    this.selectedBlockId$.next(block.id);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     for (const propName in changes) {
-      if (propName === "blockName") {
+      if (propName === "blockId") {
         const changedProp = changes[propName];
-        const selectedBlockName = changedProp.currentValue;
+        const selectedBlockId = changedProp.currentValue;
         const index = this.blocks.findIndex(
-          (block) => block.name === selectedBlockName,
+          (block) => block.id === selectedBlockId,
         );
-        this.selectBlock(this.blocks[index]);
+        if (index === -1) {
+          // The index is -1 if a block id selected from the list of executed
+          // observations is from another semester.
+          this.selectedBlock = null;
+          this.selectedBlockId$.next(selectedBlockId);
+        } else {
+          this.selectBlock(this.blocks[index]);
+        }
       }
     }
   }

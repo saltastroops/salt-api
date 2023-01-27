@@ -81,7 +81,7 @@ describe("BlockViewComponent", () => {
 
     // Select the third block in the first select element
     const selectElements = component.getAllByDisplayValue("Block A");
-    const value = (selectElements[0] as HTMLSelectElement).options[2].value;
+    const value = (selectElements[0] as HTMLSelectElement).options[3].value;
     fireEvent.change(selectElements[0], { target: { value } });
 
     // The third block is selected in the second select element as well
@@ -96,7 +96,7 @@ describe("BlockViewComponent", () => {
     // The first block is shown
     const selectElements = component.getAllByDisplayValue("Block A");
     const selectElement = selectElements[0] as HTMLSelectElement;
-    expect(selectElement.selectedIndex).toBe(0);
+    expect(selectElement.selectedIndex).toBe(1);
 
     // Get a previous and a next button
     const previousButton = component.getAllByText(/Prev/)[0];

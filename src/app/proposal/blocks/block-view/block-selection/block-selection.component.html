@@ -11,6 +11,9 @@
   </button>
   <div class="select">
     <select (change)="onSelect($event)">
+      <option disabled [value]="null" [selected]="selectedBlock === null">
+        Please select a block
+      </option>
       <option
         *ngFor="let b of sortedBlocks; index as i"
         [value]="i"

@@ -96,5 +96,6 @@ jobs:
           FINDING_CHARTS_DIR: tests/
           TCS_ICD_URL: https://www.example.com/
         run: |
+          sudo apt-get update
           sudo apt-get install xvfb libfontconfig wkhtmltopdf
           poetry run tox

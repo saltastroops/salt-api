@@ -1,89 +1,41 @@
-<div>
+<div id="observing-windows" class="observing-windows">
   <table class="table">
     <thead>
       <tr>
-        <th class="has-text-centered">Observing Windows</th>
+        <th colspan="4" class="has-text-centered">Observing Windows</th>
       </tr>
     </thead>
-    <tr>
-      <td>
-        <p *ngIf="blocksObservableTonight.length === 0">
-          This block is <b>NOT</b> observable tonight.
-        </p>
-        <p *ngIf="blocksObservableTonight.length === 1">
-          This block can be observed tonight from
-          {{ blocksObservableTonight[0].start | dfnsFormat: "H:mm:ss" }} to
-          {{ blocksObservableTonight[0].end | dfnsFormat: "H:mm:ss" }}.
-        </p>
-        <p *ngIf="blocksObservableTonight.length === 2">
-          This block can be observed tonight from
-          {{ blocksObservableTonight[0].start | dfnsFormat: "H:mm:ss" }} to
-          {{ blocksObservableTonight[0].end | dfnsFormat: "H:mm:ss" }} and from
-          {{ blocksObservableTonight[1].start | dfnsFormat: "H:mm:ss" }} to
-          {{ blocksObservableTonight[1].end | dfnsFormat: "H:mm:ss" }}.
-        </p>
-        <p *ngIf="remainingNights > 1">
-          It will be observable for {{ remainingNights }} more nights this
-          semester.
-        </p>
-        <p></p>
-        <p *ngIf="remainingNights === 1">
-          It will be observable for 1 more night this semester.
-        </p>
-        <p></p>
-        <p *ngIf="remainingNights === 0">
-          It will not be observable again this semester.
-        </p>
-        <p>
-          <a
-            *ngIf="!showObservingWindow"
-            class="has-text-link"
-            (click)="toggleObservingWindows()"
-            >Show observing windows.</a
-          >
-          <a
-            *ngIf="showObservingWindow"
-            class="has-text-link"
-            (click)="toggleObservingWindows()"
-            >Hide observing windows.</a
-          >
-        </p>
-      </td>
-    </tr>
-    <div *ngIf="showObservingWindow" class="alternate-background">
-      <div class="headers observing-windows row">
-        <div>Night starting on</div>
-        <div>Observing Window (Your Time)</div>
-        <div>Duration (seconds)</div>
-        <div>Type</div>
-      </div>
-      <div
-        *ngFor="let o of sortedObservingWindows()"
-        class="row observing-windows"
-      >
-        <div>{{ nightStart(o.start) | dfnsFormat: "d MMMM yyyy" }}</div>
-        <div>
-          {{ o.start | dfnsFormat: "HH:mm:ss" }} -
-          {{ o.end | dfnsFormat: "HH:mm:ss" }}
-        </div>
-        <div>{{ differenceInSeconds(o.end, o.start) }}</div>
-        <div>n/a</div>
-      </div>
-      <div class="row">
-        <div>
-          <p>Strict: The Moon condition is met during the window.</p>
-          <p>
-            Extended: The Moon condition is brighter than requested during the
-            window.
+    <tbody>
+      <tr>
+        <td>
+          <p *ngIf="blocksObservableTonight.length === 0">
+            This block is <b>NOT</b> observable tonight.
           </p>
-          <p>
-            Strict / Extended: The Moon condition is met in part of the window,
-            but a brighter than requested condition applies in the other part.
+          <p *ngIf="blocksObservableTonight.length === 1">
+            This block can be observed tonight from
+            {{ blocksObservableTonight[0].start | dfnsFormat: "H:mm:ss" }} to
+            {{ blocksObservableTonight[0].end | dfnsFormat: "H:mm:ss" }}.
           </p>
-        </div>
-      </div>
-      <div class="row">
-        <div>
+          <p *ngIf="blocksObservableTonight.length === 2">
+            This block can be observed tonight from
+            {{ blocksObservableTonight[0].start | dfnsFormat: "H:mm:ss" }} to
+            {{ blocksObservableTonight[0].end | dfnsFormat: "H:mm:ss" }} and
+            from
+            {{ blocksObservableTonight[1].start | dfnsFormat: "H:mm:ss" }} to
+            {{ blocksObservableTonight[1].end | dfnsFormat: "H:mm:ss" }}.
+          </p>
+          <p *ngIf="remainingNights > 1">
+            It will be observable for {{ remainingNights }} more nights this
+            semester.
+          </p>
+          <p></p>
+          <p *ngIf="remainingNights === 1">
+            It will be observable for 1 more night this semester.
+          </p>
+          <p></p>
+          <p *ngIf="remainingNights === 0">
+            It will not be observable again this semester.
+          </p>
           <p>
             <a
               *ngIf="!showObservingWindow"
@@ -98,8 +50,55 @@
               >Hide observing windows.</a
             >
           </p>
-        </div>
-      </div>
-    </div>
+        </td>
+      </tr>
+    </tbody>
+    <thead *ngIf="showObservingWindow">
+      <tr>
+        <th>Night starting on</th>
+        <th>Observing Window (Your Time)</th>
+        <th>Duration (seconds)</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="showObservingWindow">
+      <tr *ngFor="let o of sortedObservingWindows()">
+        <td>{{ nightStart(o.start) | dfnsFormat: "d MMMM yyyy" }}</td>
+        <td>
+          {{ o.start | dfnsFormat: "HH:mm:ss" }} -
+          {{ o.end | dfnsFormat: "HH:mm:ss" }}
+        </td>
+        <td>{{ differenceInSeconds(o.end, o.start) }}</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <p>
+            <a
+              *ngIf="!showObservingWindow"
+              class="has-text-link"
+              (click)="toggleObservingWindows()"
+              >Show observing windows.</a
+            >
+            <a
+              *ngIf="showObservingWindow"
+              class="has-text-link"
+              (click)="toggleObservingWindows()"
+              >Hide observing windows.</a
+            >
+          </p>
+        </td>
+      </tr>
+    </tbody>
   </table>
+  <div *ngIf="showObservingWindow">
+    <p>Strict: The Moon condition is met during the window.</p>
+    <p>
+      Extended: The Moon condition is brighter than requested during the window.
+    </p>
+    <p>
+      Strict / Extended: The Moon condition is met in part of the window, but a
+      brighter than requested condition applies in the other part.
+    </p>
+  </div>
 </div>

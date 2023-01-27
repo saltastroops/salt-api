@@ -64,6 +64,10 @@ export class ObservingWindowsComponent implements OnChanges {
 
   toggleObservingWindows(): void {
     this.showObservingWindow = !this.showObservingWindow;
+    const element = document.getElementById("observing-windows");
+    if (!this.showObservingWindow) {
+      element?.scrollIntoView();
+    }
   }
 
   numberOfObservableNightsRemaining(): number {

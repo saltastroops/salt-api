@@ -30,7 +30,7 @@ from saltapi.repository.hrs_repository import HrsRepository
     ],
 )
 def test_hrs(
-    db_connection: Connection, check_data: Callable[[Any], None], hrs_id
+    db_connection: Connection, check_data: Callable[[Any], None], hrs_id: int
 ) -> None:
     hrs_repository = HrsRepository(db_connection)
     hrs = hrs_repository.get(hrs_id)

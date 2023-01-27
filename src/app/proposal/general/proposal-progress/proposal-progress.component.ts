@@ -26,7 +26,7 @@ export class ProposalProgressComponent implements OnInit {
   loading = false;
   apiUrl = environment.apiUrl;
   currentSemester = currentSemester();
-  progressReportsUrls: ProgressReportsUrls = {};
+  progressReportsUrls: ProgressReportsUrls | null = null;
   showReports = false;
   reportsLinksText = "Show progress reports for other semesters";
 
@@ -56,6 +56,10 @@ export class ProposalProgressComponent implements OnInit {
         if (this.progressReportsUrls[currentSemester()]) {
           delete this.progressReportsUrls[currentSemester()];
         }
+
+        if (Object.keys(this.progressReportsUrls).length == 0) {
+          this.progressReportsUrls = null;
+        }
       });
   }
 
@@ -74,7 +78,15 @@ export class ProposalProgressComponent implements OnInit {
   progressReportsUrlsMap(
     progressReports: ProgressReportsUrls,
   ): Map<string, { [key: string]: string }> {
-    return new Map(Object.entries(progressReports));
+    const reportUrlsMap = new Map(Object.entries(progressReports));
+    for (const [key, value] of reportUrlsMap) {
+      const url = new URL(value["proposalProgressPdf"]);
+      const noOriginUrl = url.href.replace(url.origin, "");
+      reportUrlsMap.set(key, {
+        proposalProgressPdf: this.apiUrl + noOriginUrl,
+      });
+    }
+    return reportUrlsMap;
   }
 
   onClick(): void {

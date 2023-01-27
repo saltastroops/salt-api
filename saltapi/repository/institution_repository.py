@@ -47,7 +47,7 @@ FROM Partner P
         """
         Return the institution with a given name and department.
 
-        If the combination of name and department do not exist,
+        If the combination of name and department does not exist,
         a NotFoundError is raised.
         """
         stmt = text(
@@ -116,7 +116,8 @@ AND I2.Department = :department
 
         The primary key of the new database entry is returned.
 
-        If the name exists already an existing id is returned.
+        If the name exists already, the primary key of the existing name entry is
+        returned.
         """
         try:
             stmt = text(

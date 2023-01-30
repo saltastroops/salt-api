@@ -525,7 +525,7 @@ FROM ProposalInvestigator PI
     JOIN Partner P ON I2.Partner_Id = P.Partner_Id
     JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
     JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
-    LEFT JOIN P1Thesis PT  ON PC.ProposalCode_Id = PT.ProposalCode_Id 
+    LEFT JOIN P1Thesis PT ON PC.ProposalCode_Id = PT.ProposalCode_Id 
         AND PT.Student_Id = I.Investigator_Id
     LEFT JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
 WHERE PC.Proposal_Code = :proposal_code
@@ -550,11 +550,19 @@ ORDER BY I.Surname, I.FirstName
                 "name": investigator["institution_name"],
                 "department": investigator["department"],
             }
+            investigator["thesis"] = {
+                "thesis_type": investigator["thesis_type"],
+                "relevance_of_proposal": investigator["relevance_of_proposal"],
+                "year_of_completion": investigator["year_of_completion"],
+            }
             del investigator["partner_code"]
             del investigator["partner_name"]
             del investigator["institution_id"]
             del investigator["institution_name"]
             del investigator["department"]
+            del investigator["thesis_type"]
+            del investigator["relevance_of_proposal"]
+            del investigator["year_of_completion"]
 
             if investigator["approved"] == 1:
                 investigator["has_approved_proposal"] = True
@@ -1082,11 +1090,11 @@ GROUP BY B.Priority
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
 
-        time: Dict[str, int] = {f"priority_{p}": 0 for p in range(5)}
+        priority_charged_time: Dict[str, int] = {f"priority_{p}": 0 for p in range(5)}
         for row in result:
-            time[f"priority_{row.priority}"] = int(row.charged_time)
+            priority_charged_time[f"priority_{row.priority}"] = int(row.charged_time)
 
-        return time
+        return priority_charged_time
 
     def _block_observable_nights(
         self, proposal_code: str, semester: str, interval: TimeInterval
@@ -2105,30 +2113,6 @@ WHERE Proposal_Code = :proposal_code
             })
         return simulations
 
-    @staticmethod
-    def _get_bvit_simulations(proposal_code: str) -> List[Dict[str, Any]]:
-        # There are no BVIT simulations
-
-#         stmt = text(
-#             """
-# SELECT
-# 	P1BvitSimulation_Name		AS `name`,
-#     Path						AS url,
-#     PiComment					AS description
-# FROM P1BvitSimulation P1BS
-# 	JOIN ProposalCode PC ON	P1BS.ProposalCode_Id = PC.ProposalCode_Id
-# WHERE Proposal_Code = :proposal_code
-#         """
-#         )
-#         simulations = []
-#         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-#             simulations.append({
-#                 "name": row.name,
-#                 "url": f"/instrument-simulations/bvit/{row.id}.bsim",
-#                 "description": row.description
-#             })
-        return []
-
     def _get_science_configurations(self, proposal_code) -> List[Dict[str, Any]]:
         stmt = text(
             """
@@ -2166,7 +2150,7 @@ WHERE PC.Proposal_Code = :proposal_code
             if row.bvit:
                 instrument = "BVIT"
                 mode = row.bvit_filter
-                simulations = self._get_bvit_simulations(proposal_code)
+                simulations = []
             elif row.hrs:
                 instrument = "HRS"
                 mode = normalised_hrs_mode(row.hrs_mode)

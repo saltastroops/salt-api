@@ -5,9 +5,7 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.util import as_form
-from saltapi.web.schema.block import BlockSummary
 from saltapi.web.schema.common import (
-    BlockVisit,
     PartnerCode,
     PartnerName,
     Priority,
@@ -155,6 +153,22 @@ class ThesisType(str, Enum):
     PHD = "PhD"
 
 
+class Thesis(BaseModel):
+    thesis_type: ThesisType = Field(
+        ...,
+        title="Thesis type",
+        description="The thesis type"
+    )
+    relevance_of_proposal: Optional[str] = Field(
+        ...,
+        title="Relevance of proposal",
+        description="Importance and contribution of the proposal to the thesis."
+    )
+    year_of_completion: int = Field(
+        ...,
+        title="Year of completion",
+        description="The year when the thesis is expected to be completed."
+    )
 class Investigator(ProposalUser):
     """An investigator on a proposal."""
 
@@ -179,20 +193,10 @@ class Investigator(ProposalUser):
             " the investigator has neither approved nor rejected the proposal yet"
         ),
     )
-    thesis_type: Optional[ThesisType] = Field(
+    thesis: Optional[Thesis] = Field(
         ...,
-        title="Thesis type",
-        description="The thesis type"
-    )
-    relevance_of_proposal: Optional[str] = Field(
-        ...,
-        title="Relevance of proposal",
-        description="Importance and contribution of the proposal to the thesis."
-    )
-    year_of_completion: Optional[int] = Field(
-        ...,
-        title="Year of completion",
-        description="The year when the thesis is expected to be completed."
+        title="Thesis",
+        description="The thesis details"
     )
 
 
@@ -395,23 +399,10 @@ class Proposal(BaseModel):
             "Requested times for all semesters in the proposal."
         ),
     )
-    blocks: List[BlockSummary] = Field(
-        ..., title="Blocks", description="Blocks for the semester"
-    )
-    block_visits: List[BlockVisit] = Field(
-        ...,
-        title="Observations",
-        description="Observations made for the proposal in any semester",
-    )
     time_allocations: List[TimeAllocation] = Field(
         ...,
         title="Time allocations",
         description="Time allocations for the semester",
-    )
-    observation_comments: List[ObservationComment] = Field(
-        ...,
-        title="Observation comments",
-        description="Comments related to observing the proposal",
     )
 
 

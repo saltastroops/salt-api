@@ -1,17 +1,9 @@
-from enum import Enum
-from typing import Optional, List, Literal
+from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
-from saltapi.service.proposal import ProposalCode
-from saltapi.web.schema.common import Semester
-from saltapi.web.schema.proposal import Investigator, RequestedTime, TimeAllocation, \
-    GeneralProposalInfo, Proposal
+from saltapi.web.schema.proposal import GeneralProposalInfo, Proposal
 from saltapi.web.schema.target import Phase1Target
-from saltapi.web.schema.user import FullName
-
-
-
 
 
 class Simulation(BaseModel):
@@ -22,8 +14,8 @@ class Simulation(BaseModel):
     )
     url: str = Field(
         ...,
-        title="Simulation path",
-        description="The path to the simulation file."
+        title="Simulation URL",
+        description="The URL for the simulation file."
     )
     description: Optional[str] = Field(
         ...,

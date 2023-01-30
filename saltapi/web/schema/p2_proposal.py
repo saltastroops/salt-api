@@ -4,9 +4,8 @@ from typing import List, Optional
 from pydantic import Field
 
 from saltapi.web.schema.block import BlockSummary
-from saltapi.web.schema.common import Semester, BlockVisit
-from saltapi.web.schema.proposal import GeneralProposalInfo, Investigator, RequestedTime, ChargedTime, TimeAllocation, \
-    ObservationComment, Proposal
+from saltapi.web.schema.common import BlockVisit
+from saltapi.web.schema.proposal import GeneralProposalInfo, ChargedTime, ObservationComment, Proposal
 
 
 class P2GeneralProposalInfo(GeneralProposalInfo):
@@ -59,11 +58,6 @@ class P2Proposal(Proposal):
         ...,
         title="Charged time, by priority",
         description="Charged time, by priority, for the semester",
-    )
-    time_allocations: List[TimeAllocation] = Field(
-        ...,
-        title="Time allocations",
-        description="Time allocations for the semester",
     )
     observation_comments: List[ObservationComment] = Field(
         ...,

@@ -64,9 +64,25 @@ class ProposalService:
 
         return self.repository.list(username, from_semester, to_semester, limit)
 
+    def get_phase1_summary(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the file path of the latest Phase 1 proposal summary file.
+
+        Parameters
+        ----------
+        proposal_code: str
+            Proposal code.
+
+        Returns
+        -------
+        `~pathlib.Path`
+            The file path of the latest Phase 1 proposal summary file.
+        """
+        return self.repository.get_phase1_summary(proposal_code)
+
     def get_proposal_zip(self, proposal_code: str) -> pathlib.Path:
         """
-        Return the file path of proposal zip file.
+        Return the file path of the proposal zip file.
 
         Parameters
         ----------

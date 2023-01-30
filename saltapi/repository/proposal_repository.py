@@ -1,4 +1,5 @@
 import hashlib
+import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time
@@ -13,6 +14,7 @@ from sqlalchemy.exc import NoResultFound
 from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.util import (
     TimeInterval,
     next_semester,
@@ -1643,6 +1645,36 @@ AND P.Virtual != 1
             tmp[pc].setdefault("requested_percentage", 0)
             prp.append(tmp[pc])
         return prp
+
+    def get_phase1_summary(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the path of the latest Phase 1 summary file.
+
+        The summary file for a Phase 1 submission is stored in a folder
+        proposal_code/submission_number and has the name Summary.pdf.
+
+        Parameters
+        ----------
+        proposal_code
+
+        Returns
+        -------
+
+        """
+        summary_files = list(
+            (get_settings().proposals_dir / proposal_code).glob("*/Summary.pdf")
+        )
+
+        if len(summary_files) == 0:
+            raise NotFoundError(
+                f"No Phase 1 summary found for proposal {proposal_code}"
+            )
+
+        def submission_number(path: pathlib.Path) -> int:
+            return int(path.parent.stem)
+
+        # Return the summary file with the largest submission number
+        return max(summary_files, key=submission_number)
 
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(

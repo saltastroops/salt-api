@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, List
 from unittest.mock import patch
 
@@ -6,8 +7,10 @@ import freezegun
 import pytest
 from sqlalchemy.engine import Connection
 
+import saltapi.repository.proposal_repository
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.settings import get_settings, Settings
 from tests.conftest import find_username
 from tests.markers import nodatabase
 
@@ -607,3 +610,75 @@ def test_data_release_date_return_correct_release_date(
         proposal_repository._data_release_date(proprietary_period, block_visits)
         == expected_date
     )
+
+
+def mocked_settings(original_settings: Settings, proposals_dir: Path) -> Settings:
+    settings = original_settings.copy()
+    settings.proposals_dir = proposals_dir
+    return settings
+
+
+@pytest.mark.parametrize(
+    "proposal_code,last_phase1_submission,expected_path",
+    [
+        ("2021-2-SCI-099", 1, "2021-2-SCI-099/1/Summary.pdf"),
+        ("2021-2-LSP-001", 2, "2021-2-LSP-001/2/Summary.pdf"),
+        ("2022-2-SCI-088", 11, "2022-2-SCI-088/11/Summary.pdf"),
+    ],
+)
+def test_get_phase1_summary(
+    proposal_code: str,
+    last_phase1_submission: int,
+    expected_path: str,
+    db_connection: Connection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Fake the proposals directory
+    proposals_dir = tmp_path
+    original_settings = get_settings()
+    mock_settings = mocked_settings(original_settings, proposals_dir)
+    monkeypatch.setattr(
+        saltapi.repository.proposal_repository,
+        "get_settings",
+        lambda: mock_settings,
+    )
+
+    # Create the summary files
+    proposal_dir = proposals_dir / proposal_code
+    proposal_dir.mkdir()
+    for i in range(1, last_phase1_submission + 1):
+        submission_dir = proposals_dir / proposal_code / str(i)
+        submission_dir.mkdir()
+        summary = submission_dir / "Summary.pdf"
+        summary.write_text("Fake PDF")
+
+    proposal_repository = ProposalRepository(db_connection)
+
+    path = proposals_dir / Path(expected_path)
+    assert proposal_repository.get_phase1_summary(proposal_code) == path
+
+
+def test_get_phase1_summary_raises_not_found_error(
+    db_connection: Connection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Fake the proposals directory
+    proposals_dir = tmp_path
+    original_settings = get_settings()
+    mock_settings = mocked_settings(original_settings, proposals_dir)
+    monkeypatch.setattr(
+        saltapi.repository.proposal_repository,
+        "get_settings",
+        lambda: mock_settings,
+    )
+
+    # Fake a submission directory
+    submission_dir = proposals_dir / "2022-2-SCI-042" / "1"
+    submission_dir.mkdir(parents=True)
+
+    proposal_repository = ProposalRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        proposal_repository.get_phase1_summary("2022-2-SCI-042")

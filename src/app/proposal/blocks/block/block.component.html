@@ -19,9 +19,65 @@
     <wm-observing-windows
       [observingWindows]="block.observingWindows"
     ></wm-observing-windows>
+    <wm-target
+      *ngFor="let observation of block.observations"
+      [target]="observation.target"
+    ></wm-target>
+
+    <ng-container *ngFor="let observation of block.observations">
+      <table class="table">
+        <thead>
+        <tr class="secondary-header">
+          <th colspan="2" class="has-text-centered">
+            Finding charts ({{
+            firstValidFrom | dfnsFormat: "d MMMM yyyy H:mm"
+            }}
+            to {{ lastValidUntil | dfnsFormat: "d MMMM yyyy H:mm" }})
+          </th>
+        </tr>
+        <tr>
+          <th>Chart</th>
+          <th class="has-text-left">Comment</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let c of observation.finderCharts">
+          <td>
+            <a href="{{ originalFinderChartURL(c) }}">
+              <img
+                src="{{ thumbnailFinderChartURL(c) }}"
+                alt="Finding chart"
+                class="image is-128x128"
+              />
+            </a>
+          </td>
+          <td>
+            <p
+              *ngIf="c.comment; then comment; else noComment"
+              [innerHTML]="c.comment | nl2br"
+            ></p>
+            <ng-template #comment
+            ><p *ngIf="c.comment" [innerHTML]="c.comment | nl2br"></p
+            ></ng-template>
+            <ng-template #noComment><p #noneText>None</p></ng-template>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </ng-container>
   </div>
-  <wm-observation
-    *ngFor="let o of block.observations"
-    [observation]="o"
-  ></wm-observation>
+  <ng-container *ngFor="let observation of block.observations">
+    <div *ngFor="let tc of observation.telescopeConfigurations; index as tc_index">
+      <div *ngIf="observation.telescopeConfigurations.length > 1">
+        <h2 class="title is-2">Telescope Configuration #{{ tc_index + 1 }}</h2>
+        <hr class="heading-line telescope-configuration-header" />
+      </div>
+
+      <wm-payload
+        *ngFor="let pc of tc.payloadConfigurations; index as pc_index"
+        [telescopeConfiguration]="tc"
+        [payloadConfigurationIndex]="pc_index"
+      ></wm-payload>
+    </div>
+  </ng-container>
 </div>

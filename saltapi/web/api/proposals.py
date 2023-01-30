@@ -89,6 +89,32 @@ def get_proposals(
 
 
 @router.get(
+    "/{proposal_code}-phase1-summary.pdf",
+    summary="Get the latest Phase 1 summary file",
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+def get_phase1_summary(
+    proposal_code: ProposalCode = Path(
+        ProposalCode,
+        title="Proposal code",
+        description="Proposal code of the returned Phase 1 proposal summary file.",
+    ),
+    user: User = Depends(get_current_user),
+) -> FileResponse:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        path = proposal_service.get_phase1_summary(proposal_code)
+        return FileResponse(
+            path,
+            media_type="application/pdf",
+            filename=f"{proposal_code}-phase1-summary.pdf",
+        )
+
+
+@router.get(
     "/{proposal_code}.zip",
     summary="Get a proposal zip file",
     responses={200: {"content": {"application/zip": {}}}},
@@ -97,7 +123,7 @@ def get_proposal_zip(
     proposal_code: ProposalCode = Path(
         ProposalCode,
         title="Proposal code",
-        description="Proposal code of the returned proposal.",
+        description="Proposal code of the returned proposal zip file.",
     ),
     user: User = Depends(get_current_user),
 ) -> FileResponse:
@@ -144,7 +170,7 @@ def get_proposal(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal =proposal_service.get_proposal(proposal_code)
+        proposal = proposal_service.get_proposal(proposal_code)
         if proposal["phase"] == 1:
             return P1Proposal(**proposal)
         if proposal["phase"] == 2:

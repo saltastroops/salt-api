@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast, Union
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -13,7 +13,7 @@ from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
 )
-from saltapi.service.proposal import Proposal, ProposalListItem
+from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.util import semester_start
@@ -85,7 +85,7 @@ class ProposalService:
             raise NotFoundError("Proposal file not found")
         return path
 
-    def get_proposal(self, proposal_code: str) -> Proposal:
+    def get_proposal(self, proposal_code: str) -> Dict[str, Any]:
         """
         Return the JSON representation of a proposal.
 

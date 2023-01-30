@@ -2088,7 +2088,7 @@ WHERE Proposal_Code = :proposal_code
         stmt = text(
             """
 SELECT
-    P1SalticamSimulation_Id         AS id
+    P1SalticamSimulation_Id         AS id,
 	P1SalticamSimulation_Name		AS `name`,
     PiComment					    AS description
 FROM P1SalticamSimulation P1SS

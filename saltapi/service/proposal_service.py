@@ -17,8 +17,6 @@ from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.util import semester_start
-from saltapi.web.schema.P1Proposal import P1Proposal
-from saltapi.web.schema.P2Proposal import P2Proposal
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgressInput
 
@@ -87,7 +85,7 @@ class ProposalService:
             raise NotFoundError("Proposal file not found")
         return path
 
-    def get_proposal(self, proposal_code: str) -> Union[P1Proposal, P2Proposal]:
+    def get_proposal(self, proposal_code: str) -> Dict[str, Any]:
         """
         Return the JSON representation of a proposal.
 
@@ -101,12 +99,7 @@ class ProposalService:
         Proposal
             The JSON representation of the proposal.
         """
-        proposal = self.repository.get(proposal_code)
-        if proposal["phase"] == 1:
-            return P1Proposal(**proposal)
-        if proposal["phase"] == 2:
-            return P2Proposal(**proposal)
-
+        return self.repository.get(proposal_code)
 
     def get_observation_comments(self, proposal_code: str) -> List[Dict[str, str]]:
         return self.repository.get_observation_comments(proposal_code)

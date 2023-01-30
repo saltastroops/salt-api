@@ -79,6 +79,16 @@ class GeneralProposalInfo(BaseModel):
         title="First submission datetime",
         description="Datetime of the first submission for any semester",
     )
+    semesters: List[Semester] = Field(
+        ...,
+        title="Semesters",
+        description="List of semesters for which the proposal has been submitted",
+    )
+    submission_number: int = Field(
+        ...,
+        title="Submission number",
+        description="Current submission number for any semester",
+    )
     status: ProposalStatus = Field(
         ..., title="Proposal status", description="Proposal status"
     )
@@ -341,11 +351,6 @@ class Proposal(BaseModel):
         ...,
         title="Observations",
         description="Observations made for the proposal in any semester",
-    )
-    charged_time: ChargedTime = Field(
-        ...,
-        title="Charged time, by priority",
-        description="Charged time, by priority, for the semester",
     )
     time_allocations: List[TimeAllocation] = Field(
         ...,

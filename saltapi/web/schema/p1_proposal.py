@@ -1,4 +1,5 @@
-from typing import Optional, List
+from enum import Enum
+from typing import Optional, List, Literal
 
 from pydantic import BaseModel, Field
 
@@ -8,6 +9,11 @@ from saltapi.web.schema.proposal import Investigator, RequestedTime, TimeAllocat
     GeneralProposalInfo, Proposal
 from saltapi.web.schema.target import Phase1Target
 from saltapi.web.schema.user import FullName
+
+
+class ThesisType(str, Enum):
+    MASTERS = "Masters",
+    PHD = "PhD"
 
 
 class Simulation(BaseModel):
@@ -24,30 +30,30 @@ class Simulation(BaseModel):
     description: Optional[str] = Field(
         ...,
         title="Description",
-        description="The PI's Comment."
+        description="A Description of the simulation."
     )
 
 
-class ThesisStudent(BaseModel):
+class StudentThesis(BaseModel):
     student: FullName = Field(
         ...,
         title="Student",
         description="The student doing thesis"
     )
-    thesis_type: str = Field(
+    thesis_type: ThesisType = Field(
         ...,
         title="Thesis type",
         description="The thesis type"
     )
-    thesis_description: str = Field(
+    relevance_of_proposal: Optional[str] = Field(
         ...,
-        title="Thesis description",
-        description="Importance and contribution to the thesis"
+        title="Relevance of proposal",
+        description="Importance and contribution of the proposal too the thesis."
     )
-    completion_year: str = Field(
+    year_of_completion: str = Field(
         ...,
-        title="Completion year",
-        description="The year student will complete the studies."
+        title="Year of completion",
+        description="The year when the thesis is expected to be completed."
     )
 
 
@@ -74,7 +80,7 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
             " Contact?"
         ),
     )
-    thesis_students: List[ThesisStudent] = Field(
+    thesis_students: List[StudentThesis] = Field(
         ...,
         title="Students",
         description="The list of student doing thesis on this proposal"
@@ -103,20 +109,12 @@ class ScienceConfiguration(BaseModel):
     simulations: List[Simulation] = Field(
         ...,
         title="Simulations",
-        description="The Simulations name"
+        description="The simulations for the proposal."
     )
 
 class P1Proposal(Proposal):
-    """A proposal."""
+    """A phase 1 proposal."""
 
-    proposal_code: ProposalCode = Field(
-        ..., title="Proposal code", description="Proposal code"
-    )
-    semester: Semester = Field(
-        ...,
-        title="Semester",
-        description="Semester for which the proposal details are given",
-    )
     general_info: P1GeneralProposalInfo = Field(
         ...,
         title="General information",

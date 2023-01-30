@@ -12,17 +12,6 @@ from saltapi.web.schema.proposal import GeneralProposalInfo, Investigator, Reque
 class P2GeneralProposalInfo(GeneralProposalInfo):
     """Phase 2 general proposal information for a semester."""
 
-    submission_number: int = Field(
-        ...,
-        title="Submission number",
-        description="Current submission number for any semester",
-    )
-    semesters: List[Semester] = Field(
-        ...,
-        title="Semesters",
-        description="List of semesters for which the proposal has been submitted",
-    )
-
     data_release_date: Optional[date] = Field(
         ...,
         title="Data release date",

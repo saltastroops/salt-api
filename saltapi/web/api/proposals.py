@@ -1,4 +1,5 @@
 from datetime import date
+from pprint import pprint
 from typing import List, Optional, Union
 
 from fastapi import (
@@ -20,8 +21,8 @@ from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
-from saltapi.web.schema.P1Proposal import P1Proposal
-from saltapi.web.schema.P2Proposal import P2Proposal
+from saltapi.web.schema.p1_proposal import P1Proposal
+from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import (
     Comment,
@@ -141,7 +142,12 @@ def get_proposal(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        return proposal_service.get_proposal(proposal_code)
+        proposal =proposal_service.get_proposal(proposal_code)
+        if proposal["phase"] == 1:
+            return P1Proposal(**proposal)
+        if proposal["phase"] == 2:
+            pprint(proposal)
+            return P2Proposal(**proposal)
 
 
 @router.get(

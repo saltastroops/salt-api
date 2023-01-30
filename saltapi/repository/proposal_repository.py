@@ -490,7 +490,7 @@ WHERE PC.Proposal_Code = :proposal_code
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
         row = result.one()
-
+        print("####: ", row.submission_number)
         info = {
             "title": row.title,
             "abstract": row.abstract,
@@ -1906,7 +1906,8 @@ WHERE Proposal_Code = :proposal_code
     def _get_nir_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
-SELECT 
+SELECT
+    P1NirSimulation_Id          AS id,
 	P1NirSimulation_Name		AS `name`,
     Path						AS path,
     PiComment					AS description
@@ -1919,7 +1920,7 @@ WHERE Proposal_Code = :proposal_code
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             simulations.append({
                 "name": row.name,
-                "path": row.path,
+                "path": f"/instrument-simulation/hrs/{row.id}.hsim",
                 "description": row.description
             })
         return simulations
@@ -1928,7 +1929,8 @@ WHERE Proposal_Code = :proposal_code
     def _get_hrs_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
-SELECT 
+SELECT
+    P1HrsSimulation_Id          AS id,
 	P1HrsSimulation_Name		AS `name`,
     Path						AS path,
     PiComment					AS description
@@ -2085,8 +2087,8 @@ SELECT
 	FirstName		AS given_name,
     Surname			AS family_name,
     ThesisType		AS thesis_type,
-    ThesisDescr		AS thesis_description,
-    CompletionYear	AS completion_year
+    ThesisDescr		AS relevance_of_proposal,
+    CompletionYear	AS year_of_completion
     
 FROM P1Thesis PT
 	JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
@@ -2100,8 +2102,8 @@ WHERE Proposal_Code = :proposal_code
                 "given_name": row.given_name,
                 "family_name": row.family_name,
                 "thesis_type": row.thesis_type,
-                "completion_year": row.completion_year,
-                "thesis_description": row.thesis_description
+                "year_of_completion": row.year_of_completion,
+                "relevance_of_proposal": row.relevance_of_proposal
             })
         return students
 

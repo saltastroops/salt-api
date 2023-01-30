@@ -18,17 +18,17 @@ from saltapi.settings import get_settings
 from saltapi.util import (
     TimeInterval,
     next_semester,
+    normalised_hrs_mode,
     partner_name,
     semester_end,
     semester_of_datetime,
     semester_start,
-    tonight,
-    target_type,
-    target_magnitude,
-    target_proper_motion,
     target_coordinates,
+    target_magnitude,
     target_period_ephemeris,
-    normalised_hrs_mode,
+    target_proper_motion,
+    target_type,
+    tonight,
 )
 
 
@@ -2208,7 +2208,8 @@ WHERE PC.Proposal_Code = :proposal_code
                 simulations = self._get_salticam_simulations(proposal_code)
             else:
                 raise NotFoundError(
-                    f"Unknown instrument configuration found for proposal: {proposal_code}"
+                    "Unknown instrument configuration found for proposal:"
+                    f" {proposal_code}"
                 )
             configurations.append(
                 {"instrument": instrument, "mode": mode, "simulations": simulations}

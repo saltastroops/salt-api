@@ -1,7 +1,7 @@
 """Utility functions."""
 import inspect
 from datetime import datetime, timedelta
-from typing import NamedTuple, Type, Any, Optional, Dict
+from typing import Any, Dict, NamedTuple, Optional, Type
 
 import pytz
 from astropy.coordinates import Angle
@@ -228,6 +228,7 @@ def target_proper_motion(row: Any) -> Optional[Dict[str, Any]]:
         "declination_speed": float(row.dec_dot),
         "epoch": pytz.utc.localize(row.epoch),
     }
+
 
 def target_period_ephemeris(row: Any) -> Optional[Dict[str, Any]]:
     if row.period is None:

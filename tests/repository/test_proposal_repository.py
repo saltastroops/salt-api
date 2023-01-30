@@ -10,7 +10,7 @@ from sqlalchemy.engine import Connection
 import saltapi.repository.proposal_repository
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
-from saltapi.settings import get_settings, Settings
+from saltapi.settings import Settings, get_settings
 from tests.conftest import find_username
 from tests.markers import nodatabase
 

@@ -22,9 +22,9 @@ from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
+from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
-from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,

@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile

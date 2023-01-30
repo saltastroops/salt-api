@@ -13,11 +13,9 @@ from tests.conftest import (
 
 TEST_DATA = "integration/users/get_user.yaml"
 
-PROPOSALS_URL = "{proposal_code}/proprietary_period"
-
 
 def _url(proposal_code: str) -> str:
-    return "/proposals/" + proposal_code + "/proprietary_period/"
+    return "/proposals/" + proposal_code + "/proprietary-period/"
 
 
 def test_update_proprietary_period_should_return_401_for_unauthenticated_user(

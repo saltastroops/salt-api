@@ -64,6 +64,34 @@ class ProposalType(str, Enum):
     SCIENCE_VERIFICATION = "Science Verification"
 
 
+class UpdateStatus(str, Enum):
+    SUCCESSFUL = "Successful"
+    PENDING = "Pending"
+    FAILED = "Failed"
+
+
+class ProprietaryPeriod(BaseModel):
+    """Proprietary period."""
+
+    period: Optional[int] = Field(
+        ...,
+        title="Current proprietary period",
+        description="Proprietary period in months.",
+    )
+    maximum_period: Optional[int] = Field(
+        ...,
+        title="Maximum proprietary period, in months",
+        description=(
+            "Maximum proprietary period, in months for partner partners that have it."
+        ),
+    )
+    start_date: Optional[date] = Field(
+        ...,
+        title="Start date",
+        description="Start date from which the proprietary period is counted.",
+    )
+
+
 class GeneralProposalInfo(BaseModel):
     """General proposal information for a semester."""
 
@@ -178,15 +206,19 @@ class DataReleaseDate(BaseModel):
     )
 
 
-class DataReleaseDateUpdate(BaseModel):
-    """A request to update the data release date."""
+class ProprietaryPeriodUpdateRequest(BaseModel):
+    """A request to update the proprietary period."""
 
-    release_date: date = Field(
+    proprietary_period: int = Field(
         ...,
-        title="Data release date",
-        description="Requested date when the proposal data should become public",
+        ge=0,
+        title="The proprietary period",
+        description=(
+            "The proprietary period, in months. The proprietary period starts at the"
+            " end of the semester when the last observation was taken."
+        ),
     )
-    motivation: date = Field(
+    motivation: Optional[str] = Field(
         ...,
         title="Motivation",
         description="Motivation why the request should be granted",
@@ -240,7 +272,6 @@ class PartnerPercentage(BaseModel):
         title="Percentage",
         description="Percentage between 0 and 100 (both inclusive)",
     )
-
 
 
 class RequestedTime(BaseModel):
@@ -569,5 +600,3 @@ class ProposalProgressInput(BaseProgressReport):
             "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'."
         ),
     )
-
-

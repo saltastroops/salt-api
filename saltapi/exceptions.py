@@ -8,3 +8,7 @@ class NotFoundError(ValueError):
 
 class ValidationError(ValueError):
     pass
+
+
+class ResourceExistsError(ValueError):
+    pass

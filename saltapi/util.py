@@ -122,7 +122,6 @@ def semester_of_datetime(t: datetime) -> str:
 
     The given datetime must be timezone-aware.
     """
-
     if t.tzinfo is None:
         raise ValueError("The datetime must be timezone-aware")
 

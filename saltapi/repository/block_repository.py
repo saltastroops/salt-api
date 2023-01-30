@@ -410,7 +410,7 @@ ORDER BY ValidFrom, FindingChart_Id
                 "valid_until": pytz.utc.localize(row.valid_until)
                 if row.valid_until
                 else None,
-                "path": row.path,
+                "path": row.url,
             }
             for row in result
         ]

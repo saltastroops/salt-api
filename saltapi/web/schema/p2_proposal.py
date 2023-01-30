@@ -47,16 +47,6 @@ class P2Proposal(Proposal):
         title="General information",
         description="General proposal information for a semester",
     )
-    investigators: List[Investigator] = Field(
-        ..., title="Investigators", description="Investigators on the proposal"
-    )
-    requested_times: List[RequestedTime] = Field(
-        ...,
-        title="Requested times",
-        description=(
-            "Requested times for all semesters in the proposal."
-        ),
-    )
     blocks: List[BlockSummary] = Field(
         ..., title="Blocks", description="Blocks for the semester"
     )

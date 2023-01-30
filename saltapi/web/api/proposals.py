@@ -1,5 +1,4 @@
 from datetime import date
-from pprint import pprint
 from typing import List, Optional, Union
 
 from fastapi import (
@@ -149,7 +148,6 @@ def get_proposal(
         if proposal["phase"] == 1:
             return P1Proposal(**proposal)
         if proposal["phase"] == 2:
-            pprint(proposal)
             return P2Proposal(**proposal)
 
 

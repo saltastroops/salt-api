@@ -239,6 +239,7 @@ LIMIT :limit;
             "start_date": self.proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
+        general_info["data_release_date"] = self._data_release_date(proprietary_period, block_visits)
 
         proposal: Dict[str, Any] = {
             "proposal_code": proposal_code,
@@ -405,41 +406,6 @@ LIMIT 1
 
         return db_proposal_type
 
-    @staticmethod
-    def _data_release_date(
-        block_visits: List[Dict[str, Any]],
-        proprietary_period: Optional[int],
-        first_submission: date,
-    ) -> Optional[date]:
-        # no proprietary period - no release date
-        if proprietary_period is None:
-            return None
-
-        # find the latest observation
-        latest_observation = first_submission
-        for observation in block_visits:
-            if observation["night"] > latest_observation:
-                latest_observation = observation["night"]
-
-        # find the end of the semester when the latest observation was made
-        latest_observation_datetime = datetime(
-            latest_observation.year,
-            latest_observation.month,
-            latest_observation.day,
-            12,
-            0,
-            0,
-            0,
-            tzinfo=pytz.utc,
-        )
-        latest_observation_semester = semester_of_datetime(latest_observation_datetime)
-        latest_observation_semester_end = semester_end(latest_observation_semester)
-
-        # add the proprietary period to get the data release date
-        return latest_observation_semester_end.date() + relativedelta(
-            months=proprietary_period
-        )
-
     def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         """
         Return general proposal information for a semester.
@@ -463,6 +429,7 @@ SELECT PT.Title                            AS title,
        I.Surname                           AS astronomer_family_name,
        I.Email                             AS astronomer_email,
        PGI.TimeRestricted                  AS is_time_restricted,
+       P1T.Reason						   AS too_reason,
        IF(PGI.P4 IS NOT NULL,
           PGI.P4,
           0)                                AS is_p4,
@@ -482,6 +449,7 @@ FROM Proposal P
             ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
          LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
+         LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
   AND P.Current = 1
   AND S.Year = :year
@@ -507,6 +475,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "is_time_restricted": row.is_time_restricted != 0,
             "is_priority4": row.is_p4 != 0,
             "is_self_activatable": row.self_activatable != 0,
+            "target_of_opportunity_reason": row.too_reason
         }
 
         if info["proposal_type"] == "Director Discretionary Time (DDT)":
@@ -523,8 +492,6 @@ WHERE PC.Proposal_Code = :proposal_code
         info["first_submission"] = self._first_submission_date(proposal_code)
         info["submission_number"] = self._latest_submission(proposal_code)
         info["semesters"] = self._semesters(proposal_code)
-        info["thesis_students"] = self._get_thesis_students(proposal_code)
-        info["target_of_opportunity_reason"] = self._get_target_of_opportunity_reason(proposal_code)
 
         return info
 
@@ -536,24 +503,31 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         stmt = text(
             """
-SELECT PU.PiptUser_Id          AS id,
-       I.FirstName             AS given_name,
-       I.Surname               AS family_name,
-       I.Email                 AS email,
-       P.Partner_Code          AS partner_code,
-       P.Partner_Name          AS partner_name,
-       `IN`.InstituteName_Name AS institution_name,
-       I2.Institute_Id         AS institution_id,
-       I2.Department           AS department,
-       PI.InvestigatorOkay     AS approved,
-       PI.ApprovalCode         AS approval_code
+SELECT 
+    PU.PiptUser_Id          AS id,
+    I.FirstName             AS given_name,
+    I.Surname               AS family_name,
+    I.Email                 AS email,
+    P.Partner_Code          AS partner_code,
+    P.Partner_Name          AS partner_name,
+    `IN`.InstituteName_Name AS institution_name,
+    I2.Institute_Id         AS institution_id,
+    I2.Department           AS department,
+    PI.InvestigatorOkay     AS approved,
+    PI.ApprovalCode         AS approval_code,
+    ThesisType		       AS thesis_type,
+    ThesisDescr		       AS relevance_of_proposal,
+    CompletionYear	       AS year_of_completion
 FROM ProposalInvestigator PI
-         JOIN Investigator I ON PI.Investigator_Id = I.Investigator_Id
-         JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
-         JOIN Institute I2 ON I.Institute_Id = I2.Institute_Id
-         JOIN Partner P ON I2.Partner_Id = P.Partner_Id
-         JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
-         JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Investigator I ON PI.Investigator_Id = I.Investigator_Id
+    JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+    JOIN Institute I2 ON I.Institute_Id = I2.Institute_Id
+    JOIN Partner P ON I2.Partner_Id = P.Partner_Id
+    JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
+    JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
+    LEFT JOIN P1Thesis PT  ON PC.ProposalCode_Id = PT.ProposalCode_Id 
+        AND PT.Student_Id = I.Investigator_Id
+    LEFT JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
 WHERE PC.Proposal_Code = :proposal_code
 ORDER BY I.Surname, I.FirstName
         """
@@ -594,7 +568,6 @@ ORDER BY I.Surname, I.FirstName
 
             del investigator["approved"]
             del investigator["approval_code"]
-
         return investigators
 
     def _principal_investigator_user_id(self, proposal_code: str) -> int:
@@ -1836,9 +1809,11 @@ VALUES (
 
     def _data_release_date(
         self, proprietary_period: int, block_visits: List[dict[str, any]]
-    ) -> date:
+    ) -> Optional[date]:
         proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
+        if not proprietary_period:
+            return None
         # add the proprietary period to get the data release date
         return proprietary_period_start + relativedelta(months=proprietary_period)
 
@@ -2050,7 +2025,6 @@ WHERE Proposal_Code = :proposal_code
 SELECT
     P1NirSimulation_Id          AS id,
 	P1NirSimulation_Name		AS `name`,
-    Path						AS path,
     PiComment					AS description
 FROM P1NirSimulation P1NS
 	JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
@@ -2061,7 +2035,7 @@ WHERE Proposal_Code = :proposal_code
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             simulations.append({
                 "name": row.name,
-                "path": f"/instrument-simulation/hrs/{row.id}.hsim",
+                "url": f"/instrument-simulations/nir/{row.id}.nsim",
                 "description": row.description
             })
         return simulations
@@ -2073,7 +2047,6 @@ WHERE Proposal_Code = :proposal_code
 SELECT
     P1HrsSimulation_Id          AS id,
 	P1HrsSimulation_Name		AS `name`,
-    Path						AS path,
     PiComment					AS description
 FROM P1HrsSimulation P1HS
 	JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
@@ -2084,7 +2057,7 @@ WHERE Proposal_Code = :proposal_code
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             simulations.append({
                 "name": row.name,
-                "path": row.path,
+                "url": f"/instrument-simulations/hrs/{row.id}.hsim",
                 "description": row.description
             })
         return simulations
@@ -2093,9 +2066,9 @@ WHERE Proposal_Code = :proposal_code
     def _get_rss_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
-SELECT 
+SELECT
+    P1RssSimulation_Id          AS id,
 	P1RssSimulation_Name		AS `name`,
-    Path						AS path,
     PiComment					AS description
 FROM P1RssSimulation P1RS
 	JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
@@ -2106,7 +2079,7 @@ WHERE Proposal_Code = :proposal_code
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             simulations.append({
                 "name": row.name,
-                "path": row.path,
+                "url": f"/instrument-simulations/rss/{row.id}.rsim",
                 "description": row.description
             })
         return simulations
@@ -2114,9 +2087,9 @@ WHERE Proposal_Code = :proposal_code
     def _get_salticam_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
-SELECT 
+SELECT
+    P1SalticamSimulation_Id         AS id
 	P1SalticamSimulation_Name		AS `name`,
-    Path						    AS path,
     PiComment					    AS description
 FROM P1SalticamSimulation P1SS
 	JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
@@ -2127,31 +2100,34 @@ WHERE Proposal_Code = :proposal_code
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             simulations.append({
                 "name": row.name,
-                "path": row.path,
+                "url": f"/instrument-simulations/salticam/{row.id}.ssim",
                 "description": row.description
             })
         return simulations
 
-    def _get_bvit_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
-SELECT 
-	P1BvitSimulation_Name		AS `name`,
-    Path						AS path,
-    PiComment					AS description
-FROM P1BvitSimulation P1BS
-	JOIN ProposalCode PC ON	P1BS.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code
-        """
-        )
-        simulations = []
-        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            simulations.append({
-                "name": row.name,
-                "path": row.path,
-                "description": row.description
-            })
-        return simulations
+    @staticmethod
+    def _get_bvit_simulations(proposal_code: str) -> List[Dict[str, Any]]:
+        # There are no BVIT simulations
+
+#         stmt = text(
+#             """
+# SELECT
+# 	P1BvitSimulation_Name		AS `name`,
+#     Path						AS url,
+#     PiComment					AS description
+# FROM P1BvitSimulation P1BS
+# 	JOIN ProposalCode PC ON	P1BS.ProposalCode_Id = PC.ProposalCode_Id
+# WHERE Proposal_Code = :proposal_code
+#         """
+#         )
+#         simulations = []
+#         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+#             simulations.append({
+#                 "name": row.name,
+#                 "url": f"/instrument-simulations/bvit/{row.id}.bsim",
+#                 "description": row.description
+#             })
+        return []
 
     def _get_science_configurations(self, proposal_code) -> List[Dict[str, Any]]:
         stmt = text(
@@ -2219,48 +2195,3 @@ WHERE PC.Proposal_Code = :proposal_code
         if len(configurations) == 0:
             return []
         return configurations
-
-    def _get_thesis_students(self, proposal_code: str) -> List[Dict[str, Any]]:
-        students = []
-        stmt = text(
-            """
-SELECT
-	FirstName		AS given_name,
-    Surname			AS family_name,
-    ThesisType		AS thesis_type,
-    ThesisDescr		AS relevance_of_proposal,
-    CompletionYear	AS year_of_completion
-    
-FROM P1Thesis PT
-	JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
-	JOIN Investigator I ON PT.Student_Id = I.Investigator_Id
-    JOIN ProposalCode PC ON PT.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code
-        """
-        )
-        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            students.append({
-                "given_name": row.given_name,
-                "family_name": row.family_name,
-                "thesis_type": row.thesis_type,
-                "year_of_completion": row.year_of_completion,
-                "relevance_of_proposal": row.relevance_of_proposal
-            })
-        return students
-
-    def _get_target_of_opportunity_reason(self, proposal_code: str) -> Optional[str]:
-        stmt = text(
-            """
-SELECT
-	Reason				AS reason
-FROM P1ToO PT
-	JOIN ProposalCode PC ON PT.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code =  :proposal_code
-        """
-        )
-        result =  self.connection.execute(stmt, {"proposal_code": proposal_code})
-        row = result.scalar_one_or_none()
-        if not row:
-            return  None
-
-        return  row

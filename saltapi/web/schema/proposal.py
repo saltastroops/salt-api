@@ -150,6 +150,11 @@ class GeneralProposalInfo(BaseModel):
     )
 
 
+class ThesisType(str, Enum):
+    MASTERS = "Masters",
+    PHD = "PhD"
+
+
 class Investigator(ProposalUser):
     """An investigator on a proposal."""
 
@@ -173,6 +178,21 @@ class Investigator(ProposalUser):
             "Whether the investigator has approved the proposal. The value is null if"
             " the investigator has neither approved nor rejected the proposal yet"
         ),
+    )
+    thesis_type: Optional[ThesisType] = Field(
+        ...,
+        title="Thesis type",
+        description="The thesis type"
+    )
+    relevance_of_proposal: Optional[str] = Field(
+        ...,
+        title="Relevance of proposal",
+        description="Importance and contribution of the proposal to the thesis."
+    )
+    year_of_completion: Optional[int] = Field(
+        ...,
+        title="Year of completion",
+        description="The year when the thesis is expected to be completed."
     )
 
 

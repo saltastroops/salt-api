@@ -11,9 +11,7 @@ from saltapi.web.schema.target import Phase1Target
 from saltapi.web.schema.user import FullName
 
 
-class ThesisType(str, Enum):
-    MASTERS = "Masters",
-    PHD = "PhD"
+
 
 
 class Simulation(BaseModel):
@@ -22,7 +20,7 @@ class Simulation(BaseModel):
         title="Simulation name",
         description="The simulation name."
     )
-    path: str = Field(
+    url: str = Field(
         ...,
         title="Simulation path",
         description="The path to the simulation file."
@@ -32,30 +30,6 @@ class Simulation(BaseModel):
         title="Description",
         description="A Description of the simulation."
     )
-
-
-class StudentThesis(BaseModel):
-    student: FullName = Field(
-        ...,
-        title="Student",
-        description="The student doing thesis"
-    )
-    thesis_type: ThesisType = Field(
-        ...,
-        title="Thesis type",
-        description="The thesis type"
-    )
-    relevance_of_proposal: Optional[str] = Field(
-        ...,
-        title="Relevance of proposal",
-        description="Importance and contribution of the proposal too the thesis."
-    )
-    year_of_completion: str = Field(
-        ...,
-        title="Year of completion",
-        description="The year when the thesis is expected to be completed."
-    )
-
 
 
 class P1GeneralProposalInfo(GeneralProposalInfo):
@@ -71,20 +45,6 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
         description=(
             "Is the proposal only requesting priority 4 time?"
         ),
-    )
-    is_self_activatable: bool = Field(
-        ...,
-        title="Can the proposal be self-activated?",
-        description=(
-            "Can the proposal be activated by the Principal Investigator or Principal"
-            " Contact?"
-        ),
-    )
-    thesis_students: List[StudentThesis] = Field(
-        ...,
-        title="Students",
-        description="The list of student doing thesis on this proposal"
-
     )
     target_of_opportunity_reason: Optional[str] = Field(
         ...,
@@ -120,27 +80,12 @@ class P1Proposal(Proposal):
         title="General information",
         description="General proposal information for a semester",
     )
-    investigators: List[Investigator] = Field(
-        ..., title="Investigators", description="Investigators on the proposal"
-    )
     targets: Optional[List[Phase1Target]] = Field(
         ...,
         title="Targets",
         description=(
             "Targets for which observations are requested."
         ),
-    )
-    requested_times: List[RequestedTime] = Field(
-        ...,
-        title="Requested times",
-        description=(
-            "Requested times for all semesters in the proposal."
-        ),
-    )
-    time_allocations: List[TimeAllocation] = Field(
-        ...,
-        title="Time allocations",
-        description="Time allocations for the semester",
     )
     science_configurations: List[ScienceConfiguration] = Field(
         title="Instruments configurations",

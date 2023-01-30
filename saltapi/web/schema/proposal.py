@@ -384,11 +384,6 @@ class Proposal(BaseModel):
         title="Semester",
         description="Semester for which the proposal details are given",
     )
-    general_info: GeneralProposalInfo = Field(
-        ...,
-        title="General information",
-        description="General proposal information for a semester",
-    )
     investigators: List[Investigator] = Field(
         ..., title="Investigators", description="Investigators on the proposal"
     )

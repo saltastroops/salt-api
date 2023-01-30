@@ -2153,7 +2153,7 @@ WHERE PC.Proposal_Code = :proposal_code
             if row.bvit:
                 instrument = "BVIT"
                 mode = row.bvit_filter
-                simulations = []
+                simulations = []  # There are no BVIT simulations
             elif row.hrs:
                 instrument = "HRS"
                 mode = normalised_hrs_mode(row.hrs_mode)

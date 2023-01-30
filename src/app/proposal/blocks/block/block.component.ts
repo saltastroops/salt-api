@@ -1,10 +1,11 @@
 import { Component, Input } from "@angular/core";
 
+import { parseISO } from "date-fns";
+
+import { environment } from "../../../../environments/environment";
 import { Block } from "../../../types/block";
-import {parseISO} from "date-fns";
-import {FinderChart} from "../../../types/observation";
-import {finderChartURL} from "../../../util";
-import {environment} from "../../../../environments/environment";
+import { FinderChart } from "../../../types/observation";
+import { finderChartURL } from "../../../util";
 
 @Component({
   selector: "wm-block",

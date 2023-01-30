@@ -44,7 +44,6 @@ class P2GeneralProposalInfo(GeneralProposalInfo):
     )
 
 
-# type: ignore
 class P2Proposal(Proposal):
     general_info: P2GeneralProposalInfo = Field(
         ...,

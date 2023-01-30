@@ -193,7 +193,7 @@ def test_update_proprietary_period_should_allow_pi_to_submit_extensions_with_mot
         ),
     ],
 )
-def test_update_proprietary_period_should_not_allow_pi_of_other_proposals_to_submit_extensions(
+def test_update_proprietary_period_should_not_allow_pi_of_other_proposals_to_submit(
     proposal_code: str, proprietary_period_update: Dict[str, Any], client: TestClient
 ) -> None:
     pi = find_username(
@@ -219,7 +219,7 @@ def test_update_proprietary_period_should_not_allow_pi_of_other_proposals_to_sub
         ("2020-2-DDT-005", {"proprietary_period": 5, "motivation": None}),
     ],
 )
-def test_update_proprietary_period_should_allow_pc_to_submit_extensions_without_motivation(
+def test_update_proprietary_period_should_allow_pc_to_submit_without_motivation(
     proposal_code: str, proprietary_period_update: Dict[str, Any], client: TestClient
 ) -> None:
     pc = find_username("Principal Contact", proposal_code=proposal_code)
@@ -274,7 +274,7 @@ def test_update_proprietary_period_should_allow_pc_to_submit_extensions_with_mot
         ),
     ],
 )
-def test_update_proprietary_period_should_not_allow_pc_of_other_proposals_to_submit_extensions(
+def test_update_proprietary_period_should_not_allow_pc_of_other_proposals_to_submit(
     proposal_code: str, proprietary_period_update: Dict[str, Any], client: TestClient
 ) -> None:
     pc = find_username(
@@ -333,7 +333,7 @@ def test_update_proprietary_period_should_require_a_motivation(
         ),
     ],
 )
-def test_update_proprietary_period_should_not_allow_non_pi_pc_investigators_to_submit_extensions(
+def test_update_proprietary_period_should_not_allow_non_pi_pc_investigators_to_submit(
     proposal_code: str, proprietary_period_update: Dict[str, Any], client: TestClient
 ) -> None:
     pi = find_username("Investigator", proposal_code=proposal_code)

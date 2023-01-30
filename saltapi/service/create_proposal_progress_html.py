@@ -202,7 +202,7 @@ def create_proposal_progress_html(
                     </div>
     """
     if new_request["additional_pdf"]:
-        html_content += f"""
+        html_content += """
                     <br>
                     <div>
                         <b>

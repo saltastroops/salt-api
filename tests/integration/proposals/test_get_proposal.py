@@ -294,7 +294,7 @@ def test_should_return_phase1_proposal_summary_file(
     (proposal_dir / "2").mkdir()
     (proposal_dir / "3").mkdir()
     summary_content = b"This is a summary."
-    proposal_file = proposal_dir / "3" / f"Summary.pdf"
+    proposal_file = proposal_dir / "3" / "Summary.pdf"
     proposal_file.write_bytes(summary_content)
 
     class MockSettings(NamedTuple):

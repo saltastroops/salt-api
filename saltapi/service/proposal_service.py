@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -115,7 +115,7 @@ class ProposalService:
         Proposal
             The JSON representation of the proposal.
         """
-        return self.repository.get(proposal_code)
+        return cast(Dict[str, Any], self.repository.get(proposal_code))
 
     def get_observation_comments(self, proposal_code: str) -> List[Dict[str, str]]:
         return self.repository.get_observation_comments(proposal_code)

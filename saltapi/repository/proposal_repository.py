@@ -370,7 +370,7 @@ WHERE PC.Proposal_Code = :proposal_code
         dt = result.scalar_one()
         if type(dt) == date:
             dt = datetime.combine(dt, time.min)
-        return dt
+        return cast(datetime, dt)
 
     def _latest_submission_date(self, proposal_code: str) -> datetime:
         """Return the date and time when the latest submission was made."""
@@ -509,7 +509,7 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         stmt = text(
             """
-SELECT 
+SELECT
     PU.PiptUser_Id          AS id,
     I.FirstName             AS given_name,
     I.Surname               AS family_name,
@@ -531,7 +531,7 @@ FROM ProposalInvestigator PI
     JOIN Partner P ON I2.Partner_Id = P.Partner_Id
     JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
     JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
-    LEFT JOIN P1Thesis PT ON PC.ProposalCode_Id = PT.ProposalCode_Id 
+    LEFT JOIN P1Thesis PT ON PC.ProposalCode_Id = PT.ProposalCode_Id
         AND PT.Student_Id = I.Investigator_Id
     LEFT JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
 WHERE PC.Proposal_Code = :proposal_code
@@ -1855,7 +1855,7 @@ VALUES (
         ).date()
 
     def _data_release_date(
-        self, proprietary_period: int, block_visits: List[dict[str, any]]
+        self, proprietary_period: int, block_visits: List[dict[str, Any]]
     ) -> Optional[date]:
         proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
@@ -1885,7 +1885,7 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
                 return True
         return False
 
-    def maximum_proprietary_period(self, proposal_code: str) -> Optional[int]:
+    def maximum_proprietary_period(self, proposal_code: str) -> int:
         proposal_type = self.get_proposal_type(proposal_code)
         if proposal_type == "Commissioning":
             return 36
@@ -1934,7 +1934,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             },
         )
 
-    def _get_phase_one_targets(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_phase_one_targets(self, proposal_code: str) -> List[Dict[str, Any]]:
         # The phase 1 targets.
         stmt = text(
             """
@@ -1979,7 +1979,7 @@ SELECT DISTINCT RequestedTime                                   AS observing_tim
                     1,
                     0)                                          AS non_sidereal
 FROM P1ProposalTarget PPT
-	JOIN ProposalCode  PC ON PPT.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode  PC ON PPT.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Target T ON PPT.Target_Id = T.Target_Id
     JOIN TargetCoordinates TC ON T.TargetCoordinates_Id = TC.TargetCoordinates_Id
     JOIN P1ObservingConditions POC ON PC.ProposalCode_Id = POC.ProposalCode_Id
@@ -2028,18 +2028,20 @@ WHERE Proposal_Code = :proposal_code
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
 
-    def _get_requested_times(self, proposal_code, semester) -> List[Dict[str, Any]]:
+    def _get_requested_times(
+        self, proposal_code: str, semester
+    ) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
-	MP.ReqTimePercent					AS percentage,
+    MP.ReqTimePercent					AS percentage,
     PMT.P1MinimumUsefulTime				AS minimum_useful_time,
     MP.ReqTimeAmount					AS total_requested_time,
     PMT.P1TimeComment					AS `comment`,
     P.Partner_Name						AS partner_name,
     CONCAT(S.`Year`, '-', S.Semester)   AS semester
 FROM MultiPartner MP
-	JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner P ON MP.Partner_Id = P.Partner_Id
     JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id AND MP.Semester_Id = PMT.Semester_Id
@@ -2067,10 +2069,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1NirSimulation_Id          AS id,
-	P1NirSimulation_Name		AS `name`,
+    P1NirSimulation_Name		AS `name`,
     PiComment					AS description
 FROM P1NirSimulation P1NS
-	JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2090,10 +2092,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1HrsSimulation_Id          AS id,
-	P1HrsSimulation_Name		AS `name`,
+    P1HrsSimulation_Name		AS `name`,
     PiComment					AS description
 FROM P1HrsSimulation P1HS
-	JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2113,10 +2115,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1RssSimulation_Id          AS id,
-	P1RssSimulation_Name		AS `name`,
+    P1RssSimulation_Name		AS `name`,
     PiComment					AS description
 FROM P1RssSimulation P1RS
-	JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2136,10 +2138,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1SalticamSimulation_Id         AS id,
-	P1SalticamSimulation_Name		AS `name`,
+    P1SalticamSimulation_Name		AS `name`,
     PiComment					    AS description
 FROM P1SalticamSimulation P1SS
-	JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2154,7 +2156,7 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_science_configurations(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_science_configurations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2169,7 +2171,7 @@ SELECT
     RM.`Mode`					        AS rss_mode,
     SM.DetectorMode				        AS scam_detector_mode
 FROM P1Config P1C
-	JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
     LEFT JOIN P1Bvit PB ON P1C.P1Bvit_Id = PB.P1Bvit_Id
     LEFT JOIN BvitFilter BF ON PB.BvitFilter_Id = BF.BvitFilter_Id
     LEFT JOIN P1Hrs PH ON P1C.P1Hrs_Id = PH.P1Hrs_Id
@@ -2179,7 +2181,7 @@ FROM P1Config P1C
     LEFT JOIN P1Rss PR ON P1C.P1Rss_Id = PR.P1Rss_Id
     LEFT JOIN RssMode RM ON PR.RssMode_Id = RM.RssMode_Id
     LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
-    LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id    
+    LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id
 WHERE PC.Proposal_Code = :proposal_code
         """
         )

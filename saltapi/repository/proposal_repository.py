@@ -550,11 +550,14 @@ ORDER BY I.Surname, I.FirstName
                 "name": investigator["institution_name"],
                 "department": investigator["department"],
             }
-            investigator["thesis"] = {
-                "thesis_type": investigator["thesis_type"],
-                "relevance_of_proposal": investigator["relevance_of_proposal"],
-                "year_of_completion": investigator["year_of_completion"],
-            }
+            if investigator["thesis_type"]:
+                investigator["thesis"] = {
+                    "thesis_type": investigator["thesis_type"],
+                    "relevance_of_proposal": investigator["relevance_of_proposal"],
+                    "year_of_completion": investigator["year_of_completion"],
+                }
+            else:
+                investigator["thesis"] = None
             del investigator["partner_code"]
             del investigator["partner_name"]
             del investigator["institution_id"]

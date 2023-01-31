@@ -249,7 +249,7 @@ LIMIT :limit;
         requested_times = self._get_requested_times(proposal_code)
         # A Phase 2-only proposal has no requested times
         summary_url = (
-            f"/proposals/{proposal_code}/phase1-summary.pdf"
+            f"/proposals/{proposal_code}-phase1-summary.pdf"
             if len(requested_times)
             else None
         )

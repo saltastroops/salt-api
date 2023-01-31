@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 
 import { parseISO } from "date-fns";
 
@@ -12,10 +12,15 @@ import { finderChartURL } from "../../../util";
   templateUrl: "./block.component.html",
   styleUrls: ["./block.component.scss"],
 })
-export class BlockComponent {
+export class BlockComponent implements OnInit {
   @Input() block!: Block;
-  firstValidFrom: Date = parseISO("1970-01-01T00:00:00Z");
-  lastValidUntil: Date = parseISO("2100-01-01T00:00:00Z");
+  firstValidFrom: Date | undefined;
+  lastValidUntil: Date | undefined;
+
+  ngOnInit(): void {
+    this.firstValidFrom = parseISO("1970-01-01T00:00:00Z");
+    this.lastValidUntil = parseISO("2100-01-01T00:00:00Z");
+  }
 
   thumbnailFinderChartURL(finderChart: FinderChart): string {
     const url = finderChartURL(

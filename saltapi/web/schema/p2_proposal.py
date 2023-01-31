@@ -9,9 +9,8 @@ from saltapi.web.schema.proposal import (
     GeneralProposalInfo,
     ObservationComment,
     Proposal,
+    ProprietaryPeriod,
 )
-from saltapi.web.schema.proposal import GeneralProposalInfo, ChargedTime, ObservationComment, Proposal, \
-    ProprietaryPeriod
 
 
 class P2GeneralProposalInfo(GeneralProposalInfo):

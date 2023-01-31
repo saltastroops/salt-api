@@ -4,8 +4,13 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.service.target import Target
-from saltapi.util import target_coordinates, target_magnitude, target_type, target_proper_motion, \
-    target_period_ephemeris
+from saltapi.util import (
+    target_coordinates,
+    target_magnitude,
+    target_period_ephemeris,
+    target_proper_motion,
+    target_type,
+)
 
 
 class TargetRepository:

@@ -149,26 +149,26 @@ class GeneralProposalInfo(BaseModel):
 
 
 class ThesisType(str, Enum):
-    MASTERS = "Masters",
+    MASTERS = ("Masters",)
     PHD = "PhD"
 
 
 class Thesis(BaseModel):
     thesis_type: ThesisType = Field(
-        ...,
-        title="Thesis type",
-        description="The thesis type"
+        ..., title="Thesis type", description="The thesis type"
     )
     relevance_of_proposal: Optional[str] = Field(
         ...,
         title="Relevance of proposal",
-        description="Importance and contribution of the proposal to the thesis."
+        description="Importance and contribution of the proposal to the thesis.",
     )
     year_of_completion: int = Field(
         ...,
         title="Year of completion",
-        description="The year when the thesis is expected to be completed."
+        description="The year when the thesis is expected to be completed.",
     )
+
+
 class Investigator(ProposalUser):
     """An investigator on a proposal."""
 
@@ -194,9 +194,7 @@ class Investigator(ProposalUser):
         ),
     )
     thesis: Optional[Thesis] = Field(
-        ...,
-        title="Thesis",
-        description="The thesis details"
+        ..., title="Thesis", description="The thesis details"
     )
 
 
@@ -390,14 +388,17 @@ class Proposal(BaseModel):
     requested_times: List[RequestedTime] = Field(
         ...,
         title="Requested times",
-        description=(
-            "Requested times for all semesters in the proposal."
-        ),
+        description="Requested times for all semesters in the proposal.",
     )
     time_allocations: List[TimeAllocation] = Field(
         ...,
         title="Time allocations",
         description="Time allocations for the semester",
+    )
+    phase1_proposal_summary: Optional[str] = Field(
+        ...,
+        title="Proposal summary",
+        description="URL of a pdf document containing the phase 1 proposal summary",
     )
 
 

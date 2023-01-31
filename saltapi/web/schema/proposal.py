@@ -196,6 +196,11 @@ class Investigator(ProposalUser):
     thesis: Optional[Thesis] = Field(
         ..., title="Thesis", description="The thesis details"
     )
+    phase1_proposal_summary: Optional[str] = Field(
+        ...,
+        title="Proposal summary",
+        description="URL of a pdf document containing the phase 1 proposal summary",
+    )
 
 
 class ChargedTime(BaseModel):

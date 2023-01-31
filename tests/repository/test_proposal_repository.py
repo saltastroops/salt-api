@@ -618,6 +618,20 @@ def mocked_settings(original_settings: Settings, proposals_dir: Path) -> Setting
     return settings
 
 
+def test_phase_1_and_2_proposals_have_a_summary_url(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    proposal = proposal_repository.get("2022-1-SCI-008")
+    assert proposal["phase1_proposal_summary"] is not None
+
+
+def test_phase_2_only_proposals_have_no_summary_url(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    proposal = proposal_repository.get("2022-1-DDT-001")
+    assert proposal["phase1_proposal_summary"] is None
+
+
 @pytest.mark.parametrize(
     "proposal_code,last_phase1_submission,expected_path",
     [

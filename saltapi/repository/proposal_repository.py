@@ -246,6 +246,13 @@ LIMIT :limit;
             proprietary_period, block_visits
         )
 
+        requested_times = self._get_requested_times(proposal_code)
+        # A Phase 2-only proposal has no requested times
+        summary_url = (
+            f"/proposals/{proposal_code}/phase1-summary.pdf"
+            if len(requested_times)
+            else None
+        )
         proposal: Dict[str, Any] = {
             "proposal_code": proposal_code,
             "semester": semester,
@@ -258,9 +265,9 @@ LIMIT :limit;
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
-            "requested_times": self._get_requested_times(proposal_code),
+            "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
-            "proposal_summary": f"/proposals/{proposal_code}/phase1-summary.pdf",
+            "phase1_proposal_summary": summary_url,
         }
         return proposal
 

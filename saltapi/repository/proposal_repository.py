@@ -25,7 +25,8 @@ from saltapi.util import (
     target_magnitude,
     target_proper_motion,
     target_coordinates,
-    target_period_ephemeris, normalised_hrs_mode
+    target_period_ephemeris,
+    normalised_hrs_mode,
 )
 
 
@@ -239,7 +240,9 @@ LIMIT :limit;
             "start_date": self.proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
-        general_info["data_release_date"] = self._data_release_date(proprietary_period, block_visits)
+        general_info["data_release_date"] = self._data_release_date(
+            proprietary_period, block_visits
+        )
 
         proposal: Dict[str, Any] = {
             "proposal_code": proposal_code,
@@ -253,8 +256,8 @@ LIMIT :limit;
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
-            "requested_times": self._get_requested_times(proposal_code, semester),
-            "science_configurations": self._get_science_configurations(proposal_code)
+            "requested_times": self._get_requested_times(proposal_code),
+            "science_configurations": self._get_science_configurations(proposal_code),
         }
         return proposal
 
@@ -475,7 +478,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "is_time_restricted": row.is_time_restricted != 0,
             "is_priority4": row.is_p4 != 0,
             "is_self_activatable": row.self_activatable != 0,
-            "target_of_opportunity_reason": row.too_reason
+            "target_of_opportunity_reason": row.too_reason,
         }
 
         if info["proposal_type"] == "Director Discretionary Time (DDT)":
@@ -1979,11 +1982,11 @@ WHERE Proposal_Code = :proposal_code
                 "track_count": row.track_count,
                 "night_count": row.nights_count,
                 "observing_probabilities": {
-                    "moon":  row.moon,
-                    "competition":  row.competition_probability,
+                    "moon": row.moon,
+                    "competition": row.competition_probability,
                     "observability": row.observability_probability,
-                    "seeing":  row.seeing_probability,
-                    "total": row.total_probability
+                    "seeing": row.seeing_probability,
+                    "total": row.total_probability,
                 },
                 "period_ephemeris": target_period_ephemeris(row),
                 "horizons_identifier": row.horizons_identifier,
@@ -1992,7 +1995,7 @@ WHERE Proposal_Code = :proposal_code
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
 
-    def _get_requested_times(self, proposal_code, semester) -> List[Dict[str, Any]]:
+    def _get_requested_times(self, proposal_code) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2013,19 +2016,18 @@ WHERE Proposal_Code = :proposal_code
         req_times = []
 
         dist = []
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code,
-            "semester": semester
-        }):
+        for row in self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+            },
+        ):
             req_time = dict()
             req_time["total_requested_time"] = row.total_requested_time
             req_time["minimum_useful_time"] = row.minimum_useful_time
             req_time["comment"] = row.comment
-            req_time["semester"] = semester
-            dist.append({
-                "partner": row.partner_name,
-                "percentage": row.percentage
-            })
+            req_time["semester"] = row.semester
+            dist.append({"partner": row.partner_name, "percentage": row.percentage})
             req_time["distribution"] = dist
             req_times.append(req_time)
         return req_times
@@ -2044,13 +2046,14 @@ WHERE Proposal_Code = :proposal_code
         )
         simulations = []
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            simulations.append({
-                "name": row.name,
-                "url": f"/instrument-simulations/nir/{row.id}.nsim",
-                "description": row.description
-            })
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/nir/{row.id}.nsim",
+                    "description": row.description,
+                }
+            )
         return simulations
-
 
     def _get_hrs_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
@@ -2066,13 +2069,14 @@ WHERE Proposal_Code = :proposal_code
         )
         simulations = []
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            simulations.append({
-                "name": row.name,
-                "url": f"/instrument-simulations/hrs/{row.id}.hsim",
-                "description": row.description
-            })
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/hrs/{row.id}.hsim",
+                    "description": row.description,
+                }
+            )
         return simulations
-
 
     def _get_rss_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
@@ -2088,11 +2092,13 @@ WHERE Proposal_Code = :proposal_code
         )
         simulations = []
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            simulations.append({
-                "name": row.name,
-                "url": f"/instrument-simulations/rss/{row.id}.rsim",
-                "description": row.description
-            })
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/rss/{row.id}.rsim",
+                    "description": row.description,
+                }
+            )
         return simulations
 
     def _get_salticam_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
@@ -2109,11 +2115,13 @@ WHERE Proposal_Code = :proposal_code
         )
         simulations = []
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            simulations.append({
-                "name": row.name,
-                "url": f"/instrument-simulations/salticam/{row.id}.ssim",
-                "description": row.description
-            })
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/salticam/{row.id}.ssim",
+                    "description": row.description,
+                }
+            )
         return simulations
 
     def _get_science_configurations(self, proposal_code) -> List[Dict[str, Any]]:
@@ -2147,9 +2155,7 @@ WHERE PC.Proposal_Code = :proposal_code
         )
         configurations = []
 
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code
-        }):
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             if row.bvit:
                 instrument = "BVIT"
                 mode = row.bvit_filter
@@ -2171,13 +2177,11 @@ WHERE PC.Proposal_Code = :proposal_code
                 mode = row.scam_detector_mode
                 simulations = self._get_salticam_simulations(proposal_code)
             else:
-                raise NotFoundError(f"Unknown instrument configuration found for proposal: {proposal_code}")
+                raise NotFoundError(
+                    f"Unknown instrument configuration found for proposal: {proposal_code}"
+                )
             configurations.append(
-                {
-                    "instrument": instrument,
-                    "mode": mode,
-                    "simulations": simulations
-                }
+                {"instrument": instrument, "mode": mode, "simulations": simulations}
             )
         if len(configurations) == 0:
             return []

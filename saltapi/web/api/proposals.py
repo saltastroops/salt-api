@@ -111,6 +111,7 @@ def get_phase1_summary(
             path,
             media_type="application/pdf",
             filename=f"{proposal_code}-phase1-summary.pdf",
+            headers={"Content-Disposition": "inline"},
         )
 
 

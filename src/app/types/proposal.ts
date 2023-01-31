@@ -6,7 +6,7 @@ export interface Affiliation {
   partnerName: PartnerName;
   partnerCode: PartnerCode;
   institutionId: number;
-  name: string
+  name: string;
   department: string;
 }
 

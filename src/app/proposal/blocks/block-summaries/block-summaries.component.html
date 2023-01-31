@@ -24,57 +24,32 @@
 
 <br />
 
-<table class="table is-bordered">
+<table class="table is-bordered" [wmSort]="sort">
   <thead>
     <tr>
+      <th wmSortBy="id" data-testid="block-summary-id">Block ID</th>
+      <th wmSortBy="name" data-testid="block-summary-name">Block</th>
       <th
-        [ngClass]="sortableColumnClass('id')"
-        (click)="onColumnClick($event, 'id')"
-        data-testid="block-summary-id"
-      >
-        Block ID
-      </th>
-      <th
-        [ngClass]="sortableColumnClass('name')"
-        (click)="onColumnClick($event, 'name')"
-        data-testid="block-summary-name"
-      >
-        Block
-      </th>
-      <th
-        [ngClass]="sortableColumnClass('observationTime')"
-        (click)="onColumnClick($event, 'observationTime')"
+        wmSortBy="observationTime"
         data-testid="block-summary-observation-time"
       >
         Obs. Time (seconds)
       </th>
-      <th
-        [ngClass]="sortableColumnClass('priority')"
-        (click)="onColumnClick($event, 'priority')"
-        data-testid="block-summary-priority"
-      >
-        Priority
-      </th>
+      <th wmSortBy="priority" data-testid="block-summary-priority">Priority</th>
       <th>Done Visits</th>
       <th>Tonight?</th>
       <th
-        [ngClass]="sortableColumnClass('remainingNights')"
-        (click)="onColumnClick($event, 'remainingNights')"
+        wmSortBy="remainingNights"
         data-testid="block-summary-remaining-nights"
       >
         Remaining
       </th>
-      <th
-        [ngClass]="sortableColumnClass('observingConditions.maximumSeeing')"
-        (click)="onColumnClick($event, 'observingConditions.maximumSeeing')"
-        data-testid="block-summary-maximum-seeing"
-      >
+      <th wmSortBy="maximumSeeing" data-testid="block-summary-maximum-seeing">
         Max Seeing
       </th>
       <th>Transparency</th>
       <th
-        [ngClass]="sortableColumnClass('observingConditions.maximumLunarPhase')"
-        (click)="onColumnClick($event, 'observingConditions.maximumLunarPhase')"
+        wmSortBy="maximumLunarPhase"
         data-testid="block-summary-maximum-lunar-phase"
       >
         Max Lunar Phase

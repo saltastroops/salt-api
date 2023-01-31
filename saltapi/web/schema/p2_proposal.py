@@ -37,6 +37,11 @@ class P2GeneralProposalInfo(GeneralProposalInfo):
             " Contact?"
         ),
     )
+    target_of_opportunity_reason: Optional[str] = Field(
+        ...,
+        title="ToO reason",
+        description="Reason for ToO flag"
+    )
 
 #type: ignore
 class P2Proposal(Proposal):

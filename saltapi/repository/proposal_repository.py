@@ -2013,24 +2013,26 @@ FROM MultiPartner MP
 WHERE Proposal_Code = :proposal_code
         """
         )
-        req_times = []
 
-        dist = []
-        for row in self.connection.execute(
-            stmt,
-            {
-                "proposal_code": proposal_code,
-            },
-        ):
-            req_time = dict()
-            req_time["total_requested_time"] = row.total_requested_time
-            req_time["minimum_useful_time"] = row.minimum_useful_time
-            req_time["comment"] = row.comment
-            req_time["semester"] = row.semester
-            dist.append({"partner": row.partner_name, "percentage": row.percentage})
-            req_time["distribution"] = dist
-            req_times.append(req_time)
-        return req_times
+        req_time = defaultdict(lambda: dict())
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code
+        }):
+            semester = row.semester
+            if not req_time[semester]:
+                req_time[semester] = {
+                    "total_requested_time": row.total_requested_time,
+                    "minimum_useful_time": row.minimum_useful_time,
+                    "comment": row.comment,
+                    "semester": semester,
+                    "distribution": []
+                }
+            req_time[semester]["distribution"].append({
+                "partner": row.partner_name,
+                "percentage": row.percentage
+            })
+
+        return list(req_time.values())
 
     def _get_nir_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(

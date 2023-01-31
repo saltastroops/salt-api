@@ -268,6 +268,7 @@ LIMIT :limit;
             "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
             "phase1_proposal_summary": summary_url,
+            "proposal_file": f"/proposals/{proposal_code}.zip",
         }
         return proposal
 
@@ -1323,7 +1324,7 @@ WHERE PC.Proposal_Code = :proposal_code;
 
     def get_current_version(self, proposal_code: str) -> int:
         """
-        Return the current version (number) of sa proposal.
+        Return the current version (number) of a proposal.
 
         Parameters
         ----------
@@ -1349,6 +1350,35 @@ WHERE PC.Proposal_Code = :proposal_code
             raise NotFoundError(f"No such proposal code: {proposal_code}")
 
         return cast(int, version)
+
+    def get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
+        """
+        Return the current version (number) of a proposal.
+
+        Parameters
+        ----------
+        proposal_code: str
+            The proposal code.
+
+        Returns
+        -------
+        int
+            The proposal version.
+        """
+        stmt = text(
+            """
+SELECT COUNT(Submission) AS version
+FROM Proposal P
+JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code AND P.Phase = 1
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        current_version = result.scalar_one()
+        if current_version == 0:
+            return None
+
+        return cast(int, current_version)
 
     @staticmethod
     def generate_proposal_progress_filename(
@@ -1658,7 +1688,7 @@ AND P.Virtual != 1
         Return the path of the latest Phase 1 summary file.
 
         The summary file for a Phase 1 submission is stored in a folder
-        proposal_code/submission_number and has the name Summary.pdf.
+        <proposal_code>/<submission_number> and has the name Summary.pdf.
 
         Parameters
         ----------
@@ -1666,22 +1696,53 @@ AND P.Virtual != 1
 
         Returns
         -------
+        `~pathlib.Path`
+           The file path.
 
         """
-        summary_files = list(
-            (get_settings().proposals_dir / proposal_code).glob("*/Summary.pdf")
-        )
-
-        if len(summary_files) == 0:
+        current_phase1_version = self.get_current_phase1_version(proposal_code)
+        if current_phase1_version is None:
             raise NotFoundError(
-                f"No Phase 1 summary found for proposal {proposal_code}"
+                f"There exists no phase 1 proposal summary for proposal {proposal_code}"
             )
 
-        def submission_number(path: pathlib.Path) -> int:
-            return int(path.parent.stem)
+        path = (
+            get_settings().proposals_dir
+            / f"{proposal_code}"
+            / str(current_phase1_version)
+            / "Summary.pdf"
+        )
+        if not path.is_file():
+            raise NotFoundError(
+                f"No phase 1 proposal summary found for proposal {proposal_code}"
+            )
 
-        # Return the summary file with the largest submission number
-        return max(summary_files, key=submission_number)
+        return path
+
+    def get_proposal_file(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the path of the latest proposal zip file.
+
+        The proposal zip file for a submission  is stored in a folder
+        <proposal_code>/<submission_number> and has the name <proposal_code>/zip.
+
+        Parameters
+        ----------
+        proposal_code
+
+        Returns
+        -------
+        `~pathlib.Path`
+            The file path.
+
+        """
+        proposals_dir = get_settings().proposals_dir
+        version = self.get_current_version(proposal_code)
+        path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
+        if not path.exists():
+            raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
+
+        return path
 
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(

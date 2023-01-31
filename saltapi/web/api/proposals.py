@@ -138,7 +138,7 @@ def get_proposal_zip(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        path = proposal_service.get_proposal_zip(proposal_code)
+        path = proposal_service.get_proposal_file(proposal_code)
         return FileResponse(
             path, media_type="application/zip", filename=f"{proposal_code}.zip"
         )

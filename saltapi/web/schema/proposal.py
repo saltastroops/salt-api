@@ -400,6 +400,14 @@ class Proposal(BaseModel):
         title="Proposal summary",
         description="URL of a pdf document containing the phase 1 proposal summary",
     )
+    proposal_file: str = Field(
+        ...,
+        title="Proposal file",
+        description=(
+            "URL of the proposal file that can be imported into the Principal "
+            "Investigator Proposal Tool"
+        ),
+    )
 
 
 class PartnerRequestedPercentage(BaseModel):

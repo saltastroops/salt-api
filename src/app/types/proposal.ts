@@ -81,6 +81,7 @@ export interface Proposal {
   timeAllocations: TimeAllocation[];
   observationComments: ObservationComment[];
   configurations: InstrumentConfiguration[];
+  phase1ProposalSummary: string | null;
 }
 
 export interface ProposalListItem {

@@ -6,12 +6,14 @@
     <tr>
       <td colspan="2"><a class="has-text-link">Download zip file</a></td>
     </tr>
-    <tr>
-      <td colspan="2"><a>Download summary</a></td>
+    <tr *ngIf="doesSummaryExist()">
+      <td colspan="2">
+        <a [href]="summaryDownloadLink()">Download summary</a>
+      </td>
     </tr>
 
     <wm-responsible-astronomer
-      [generalProposalInfo]="generalProposalInfo"
+      [generalProposalInfo]="proposal.generalInfo"
     ></wm-responsible-astronomer>
   </table>
 </div>

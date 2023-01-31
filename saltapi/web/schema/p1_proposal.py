@@ -68,8 +68,8 @@ class P1Proposal(Proposal):
         title="Instruments configurations",
         description="The phase 1 instruments configurations.",
     )
-    summary: str = Field(
+    proposal_summary: str = Field(
         ...,
-        title="Summary",
+        title="Proposal summary",
         description="URL of a pdf document containing a proposal summary",
     )

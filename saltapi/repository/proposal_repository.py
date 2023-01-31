@@ -260,7 +260,7 @@ LIMIT :limit;
             "targets": self._get_phase_one_targets(proposal_code),
             "requested_times": self._get_requested_times(proposal_code),
             "science_configurations": self._get_science_configurations(proposal_code),
-            "phase1_summary": f"/proposals/{proposal_code}/phase1-summary.pdf",
+            "proposal_summary": f"/proposals/{proposal_code}/phase1-summary.pdf",
         }
         return proposal
 
@@ -2028,9 +2028,7 @@ WHERE Proposal_Code = :proposal_code
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
 
-    def _get_requested_times(
-        self, proposal_code: str, semester
-    ) -> List[Dict[str, Any]]:
+    def _get_requested_times(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT

@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
 
 import { environment } from "../../../../../environments/environment";
-import { GeneralProposalInfo, Proposal } from "../../../../types/proposal";
+import { Proposal } from "../../../../types/proposal";
 
 @Component({
   selector: "wm-proposal-download",
@@ -15,7 +15,11 @@ export class ProposalDownloadComponent {
     return this.proposal.phase1ProposalSummary !== null;
   }
 
-  summaryDownloadLink() {
+  summaryDownloadLink(): string {
     return environment.apiUrl + this.proposal.phase1ProposalSummary;
+  }
+
+  zipDownloadLink(): string {
+    return environment.apiUrl + "/" + this.proposal.proposalFile;
   }
 }

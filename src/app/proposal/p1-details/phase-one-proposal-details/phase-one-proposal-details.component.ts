@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { GeneralProposalInfo, Proposal } from "../../../types/proposal";
+import { Proposal } from "../../../types/proposal";
 
 @Component({
   selector: "wm-phase-one-proposal-details",

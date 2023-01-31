@@ -82,6 +82,7 @@ export interface Proposal {
   observationComments: ObservationComment[];
   configurations: InstrumentConfiguration[];
   phase1ProposalSummary: string | null;
+  proposalFile: string;
 }
 
 export interface ProposalListItem {

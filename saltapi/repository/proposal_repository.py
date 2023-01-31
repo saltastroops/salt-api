@@ -258,7 +258,7 @@ LIMIT :limit;
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
-            "requested_times": self._get_requested_times(proposal_code, semester),
+            "requested_times": self._get_requested_times(proposal_code),
             "science_configurations": self._get_science_configurations(proposal_code),
             "phase1_summary": f"/proposals/{proposal_code}/phase1-summary.pdf",
         }
@@ -2052,13 +2052,16 @@ WHERE Proposal_Code = :proposal_code
 
         dist = []
         for row in self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "semester": semester}
+            stmt,
+            {
+                "proposal_code": proposal_code,
+            },
         ):
             req_time = dict()
             req_time["total_requested_time"] = row.total_requested_time
             req_time["minimum_useful_time"] = row.minimum_useful_time
             req_time["comment"] = row.comment
-            req_time["semester"] = semester
+            req_time["semester"] = row.semester
             dist.append({"partner": row.partner_name, "percentage": row.percentage})
             req_time["distribution"] = dist
             req_times.append(req_time)

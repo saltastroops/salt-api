@@ -238,6 +238,7 @@ LIMIT :limit;
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
             "start_date": self.proprietary_period_start_date(block_visits),
+            "motivation": general_info["proprietary_period_motivation"]
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
         general_info["data_release_date"] = self._data_release_date(
@@ -433,6 +434,7 @@ SELECT PT.Title                            AS title,
        I.Email                             AS astronomer_email,
        PGI.TimeRestricted                  AS is_time_restricted,
        P1T.Reason						   AS too_reason,
+       PPER.Reason						   AS proprietary_period_motivation,
        IF(PGI.P4 IS NOT NULL,
           PGI.P4,
           0)                                AS is_p4,
@@ -453,6 +455,7 @@ FROM Proposal P
          LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
          LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
          LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
+         LEFT JOIN ProprietaryPeriodExtensionRequest PPER ON P.ProposalCode_Id = PPER.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
   AND P.Current = 1
   AND S.Year = :year
@@ -479,6 +482,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "is_priority4": row.is_p4 != 0,
             "is_self_activatable": row.self_activatable != 0,
             "target_of_opportunity_reason": row.too_reason,
+            "proprietary_period_motivation": row.proprietary_period_motivation,
         }
 
         if info["proposal_type"] == "Director Discretionary Time (DDT)":

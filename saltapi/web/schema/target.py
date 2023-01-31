@@ -128,10 +128,11 @@ class Target(BaseModel):
 
 class Phase1Target(Target):
     """A target in a Phase 1 proposal."""
+
     observing_time: int = Field(
         ...,
         title="The requested time",
-        description=" The total time requested to observe this target."
+        description=" The total time requested to observe this target.",
     )
 
     is_optional: bool = Field(
@@ -169,16 +170,16 @@ class Phase1Target(Target):
         ...,
         title="Number of tracks",
         description=(
-            "The number of tracks in which the observation can be made, given the requested observation "
-            "time and observation constraints."
+            "The number of tracks in which the observation can be made, given the"
+            " requested observation time and observation constraints."
         ),
     )
     night_count: int = Field(
         ...,
         title="Number of nights",
         description=(
-            "The number of nights in which the observation can be made, given the requested"
-            " observation time and observation constraints."
+            "The number of nights in which the observation can be made, given the"
+            " requested observation time and observation constraints."
         ),
     )
     observing_probabilities: ObservationProbabilities = Field(

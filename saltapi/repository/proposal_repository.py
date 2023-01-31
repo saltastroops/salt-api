@@ -1,4 +1,5 @@
 import hashlib
+import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time
@@ -13,20 +14,21 @@ from sqlalchemy.exc import NoResultFound
 from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.util import (
     TimeInterval,
     next_semester,
+    normalised_hrs_mode,
     partner_name,
     semester_end,
     semester_of_datetime,
     semester_start,
-    tonight,
-    target_type,
-    target_magnitude,
-    target_proper_motion,
     target_coordinates,
+    target_magnitude,
     target_period_ephemeris,
-    normalised_hrs_mode,
+    target_proper_motion,
+    target_type,
+    tonight,
 )
 
 
@@ -245,6 +247,13 @@ LIMIT :limit;
             proprietary_period, block_visits
         )
 
+        requested_times = self._get_requested_times(proposal_code)
+        # A Phase 2-only proposal has no requested times
+        summary_url = (
+            f"/proposals/{proposal_code}-phase1-summary.pdf"
+            if len(requested_times)
+            else None
+        )
         proposal: Dict[str, Any] = {
             "proposal_code": proposal_code,
             "semester": semester,
@@ -257,8 +266,9 @@ LIMIT :limit;
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
-            "requested_times": self._get_requested_times(proposal_code),
+            "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
+            "phase1_proposal_summary": summary_url,
         }
         return proposal
 
@@ -368,7 +378,7 @@ WHERE PC.Proposal_Code = :proposal_code
         dt = result.scalar_one()
         if type(dt) == date:
             dt = datetime.combine(dt, time.min)
-        return dt
+        return cast(datetime, dt)
 
     def _latest_submission_date(self, proposal_code: str) -> datetime:
         """Return the date and time when the latest submission was made."""
@@ -510,7 +520,7 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         stmt = text(
             """
-SELECT 
+SELECT
     PU.PiptUser_Id          AS id,
     I.FirstName             AS given_name,
     I.Surname               AS family_name,
@@ -532,7 +542,7 @@ FROM ProposalInvestigator PI
     JOIN Partner P ON I2.Partner_Id = P.Partner_Id
     JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
     JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
-    LEFT JOIN P1Thesis PT ON PC.ProposalCode_Id = PT.ProposalCode_Id 
+    LEFT JOIN P1Thesis PT ON PC.ProposalCode_Id = PT.ProposalCode_Id
         AND PT.Student_Id = I.Investigator_Id
     LEFT JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
 WHERE PC.Proposal_Code = :proposal_code
@@ -1647,6 +1657,36 @@ AND P.Virtual != 1
             prp.append(tmp[pc])
         return prp
 
+    def get_phase1_summary(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the path of the latest Phase 1 summary file.
+
+        The summary file for a Phase 1 submission is stored in a folder
+        proposal_code/submission_number and has the name Summary.pdf.
+
+        Parameters
+        ----------
+        proposal_code
+
+        Returns
+        -------
+
+        """
+        summary_files = list(
+            (get_settings().proposals_dir / proposal_code).glob("*/Summary.pdf")
+        )
+
+        if len(summary_files) == 0:
+            raise NotFoundError(
+                f"No Phase 1 summary found for proposal {proposal_code}"
+            )
+
+        def submission_number(path: pathlib.Path) -> int:
+            return int(path.parent.stem)
+
+        # Return the summary file with the largest submission number
+        return max(summary_files, key=submission_number)
+
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
             """
@@ -1826,7 +1866,7 @@ VALUES (
         ).date()
 
     def _data_release_date(
-        self, proprietary_period: int, block_visits: List[dict[str, any]]
+        self, proprietary_period: int, block_visits: List[dict[str, Any]]
     ) -> Optional[date]:
         proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
@@ -1856,7 +1896,7 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
                 return True
         return False
 
-    def maximum_proprietary_period(self, proposal_code: str) -> Optional[int]:
+    def maximum_proprietary_period(self, proposal_code: str) -> int:
         proposal_type = self.get_proposal_type(proposal_code)
         if proposal_type == "Commissioning":
             return 36
@@ -1905,7 +1945,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             },
         )
 
-    def _get_phase_one_targets(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_phase_one_targets(self, proposal_code: str) -> List[Dict[str, Any]]:
         # The phase 1 targets.
         stmt = text(
             """
@@ -1950,7 +1990,7 @@ SELECT DISTINCT RequestedTime                                   AS observing_tim
                     1,
                     0)                                          AS non_sidereal
 FROM P1ProposalTarget PPT
-	JOIN ProposalCode  PC ON PPT.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode  PC ON PPT.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Target T ON PPT.Target_Id = T.Target_Id
     JOIN TargetCoordinates TC ON T.TargetCoordinates_Id = TC.TargetCoordinates_Id
     JOIN P1ObservingConditions POC ON PC.ProposalCode_Id = POC.ProposalCode_Id
@@ -1999,18 +2039,18 @@ WHERE Proposal_Code = :proposal_code
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
 
-    def _get_requested_times(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_requested_times(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
-	MP.ReqTimePercent					AS percentage,
+    MP.ReqTimePercent					AS percentage,
     PMT.P1MinimumUsefulTime				AS minimum_useful_time,
     MP.ReqTimeAmount					AS total_requested_time,
     PMT.P1TimeComment					AS `comment`,
     P.Partner_Name						AS partner_name,
     CONCAT(S.`Year`, '-', S.Semester)   AS semester
 FROM MultiPartner MP
-	JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner P ON MP.Partner_Id = P.Partner_Id
     JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id AND MP.Semester_Id = PMT.Semester_Id
@@ -2041,10 +2081,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1NirSimulation_Id          AS id,
-	P1NirSimulation_Name		AS `name`,
+    P1NirSimulation_Name		AS `name`,
     PiComment					AS description
 FROM P1NirSimulation P1NS
-	JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2064,10 +2104,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1HrsSimulation_Id          AS id,
-	P1HrsSimulation_Name		AS `name`,
+    P1HrsSimulation_Name		AS `name`,
     PiComment					AS description
 FROM P1HrsSimulation P1HS
-	JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2087,10 +2127,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1RssSimulation_Id          AS id,
-	P1RssSimulation_Name		AS `name`,
+    P1RssSimulation_Name		AS `name`,
     PiComment					AS description
 FROM P1RssSimulation P1RS
-	JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2110,10 +2150,10 @@ WHERE Proposal_Code = :proposal_code
             """
 SELECT
     P1SalticamSimulation_Id         AS id,
-	P1SalticamSimulation_Name		AS `name`,
+    P1SalticamSimulation_Name		AS `name`,
     PiComment					    AS description
 FROM P1SalticamSimulation P1SS
-	JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2128,7 +2168,7 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_science_configurations(self, proposal_code) -> List[Dict[str, Any]]:
+    def _get_science_configurations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2143,7 +2183,7 @@ SELECT
     RM.`Mode`					        AS rss_mode,
     SM.DetectorMode				        AS scam_detector_mode
 FROM P1Config P1C
-	JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
     LEFT JOIN P1Bvit PB ON P1C.P1Bvit_Id = PB.P1Bvit_Id
     LEFT JOIN BvitFilter BF ON PB.BvitFilter_Id = BF.BvitFilter_Id
     LEFT JOIN P1Hrs PH ON P1C.P1Hrs_Id = PH.P1Hrs_Id
@@ -2153,7 +2193,7 @@ FROM P1Config P1C
     LEFT JOIN P1Rss PR ON P1C.P1Rss_Id = PR.P1Rss_Id
     LEFT JOIN RssMode RM ON PR.RssMode_Id = RM.RssMode_Id
     LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
-    LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id    
+    LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id
 WHERE PC.Proposal_Code = :proposal_code
         """
         )
@@ -2182,7 +2222,8 @@ WHERE PC.Proposal_Code = :proposal_code
                 simulations = self._get_salticam_simulations(proposal_code)
             else:
                 raise NotFoundError(
-                    f"Unknown instrument configuration found for proposal: {proposal_code}"
+                    "Unknown instrument configuration found for proposal:"
+                    f" {proposal_code}"
                 )
             configurations.append(
                 {"instrument": instrument, "mode": mode, "simulations": simulations}

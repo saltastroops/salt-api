@@ -4,6 +4,12 @@ from pydantic import Field
 
 from saltapi.web.schema.block import BlockSummary
 from saltapi.web.schema.common import BlockVisit
+from saltapi.web.schema.proposal import (
+    ChargedTime,
+    GeneralProposalInfo,
+    ObservationComment,
+    Proposal,
+)
 from saltapi.web.schema.proposal import GeneralProposalInfo, ChargedTime, ObservationComment, Proposal, \
     ProprietaryPeriod
 
@@ -38,9 +44,8 @@ class P2GeneralProposalInfo(GeneralProposalInfo):
         ),
     )
 
-#type: ignore
-class P2Proposal(Proposal):
 
+class P2Proposal(Proposal):
     general_info: P2GeneralProposalInfo = Field(
         ...,
         title="General information",

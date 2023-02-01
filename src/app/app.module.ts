@@ -43,6 +43,7 @@ import { ChargedTimeComponent } from "./proposal/general/charged-time/charged-ti
 import { GeneralProposalInfoComponent } from "./proposal/general/general-proposal-info/general-proposal-info.component";
 import { ObservationCommentsComponent } from "./proposal/general/observation-comments/observation-comments.component";
 import { DetailsTableComponent } from "./proposal/general/proposal-details/details-table/details-table.component";
+import { EditProprietaryPeriodModalComponent } from "./proposal/general/proposal-details/edit-proprietary-period-modal/edit-proprietary-period-modal.component";
 import { ProposalDetailsComponent } from "./proposal/general/proposal-details/proposal-details.component";
 import { ProposalDownloadComponent } from "./proposal/general/proposal-details/proposal-download/proposal-download.component";
 import { ProposalSummaryComponent } from "./proposal/general/proposal-details/proposal-summary/proposal-summary.component";
@@ -203,6 +204,7 @@ import { SortDirective } from "./sort.directive";
     RequestedTimesComponent,
     P1ConfigurationsComponent,
     StudentThesesComponent,
+    EditProprietaryPeriodModalComponent,
   ],
   imports: [
     BrowserModule,

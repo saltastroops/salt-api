@@ -7,6 +7,7 @@ import { catchError, map, switchMap } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
 import {
+  NewProprietaryPeriod,
   ObservationComment,
   ProgressReportsUrls,
   Proposal,
@@ -145,5 +146,31 @@ export class RealProposalService implements ProposalService {
         return reportsUrls;
       }),
     );
+  }
+
+  /**
+   * Submit a proprietary period to the API server.
+   */
+  public submitProprietaryPeriod(
+    proposalCode: string,
+    period: number,
+    motivation: string | null = null,
+  ): Observable<NewProprietaryPeriod> {
+    const uri =
+      environment.apiUrl + "/proposals/" + proposalCode + "/proprietary-period";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.http
+      .put<NewProprietaryPeriod>(uri, {
+        proprietary_period: period,
+        motivation: motivation,
+      })
+      .pipe(
+        map((proprietaryPeriod: NewProprietaryPeriod) => {
+          return camelcaseKeys(proprietaryPeriod, { deep: true });
+        }),
+        catchError(() => {
+          return throwError("Oops. Something is wrong.");
+        }),
+      );
   }
 }

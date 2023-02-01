@@ -28,6 +28,13 @@ export interface ContactDetails {
   email: string;
 }
 
+export interface ProprietaryPeriod {
+  period: number;
+  maximumPeriod: number;
+  startDate: string;
+  motivation: string | null;
+}
+
 export interface GeneralProposalInfo {
   title: string;
   abstract: string;
@@ -40,6 +47,7 @@ export interface GeneralProposalInfo {
   isTargetOfOpportunity: boolean;
   targetOfOpportunityReason: string | null;
   totalRequestedTime: number;
+  proprietaryPeriod: ProprietaryPeriod;
   dataReleaseDate: string;
   liaisonSaltAstronomer: ProposalUser | null;
   summaryForSaltAstronomer: string;
@@ -188,3 +196,7 @@ export interface TimeStatistics {
 }
 
 export type ProgressReportsUrls = { [key: string]: { [key: string]: string } };
+
+export interface NewProprietaryPeriod extends ProprietaryPeriod {
+  status: string;
+}

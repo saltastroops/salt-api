@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 
 import {
+  NewProprietaryPeriod,
   ObservationComment,
   Proposal,
   ProposalListItem,
@@ -61,4 +62,10 @@ export abstract class ProposalService {
     proposalCode: string,
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Observable<any>;
+
+  public abstract submitProprietaryPeriod(
+    proposalCode: string,
+    period: number,
+    motivation: string | null,
+  ): Observable<NewProprietaryPeriod>;
 }

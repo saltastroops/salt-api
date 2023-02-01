@@ -1,4 +1,8 @@
 <div>
+  <wm-edit-proprietary-period-modal
+    #proprietaryPeriodModal
+    (updatePeriod)="onProprietaryPeriodUpdate($event)"
+  ></wm-edit-proprietary-period-modal>
   <table class="table">
     <tr class="secondary-header">
       <th colspan="2" class="has-text-centered">Details</th>
@@ -6,22 +10,22 @@
     <tbody>
       <tr>
         <th>Status</th>
-        <td>{{ generalProposalInfo.status.value }}</td>
+        <td>{{ proposal.generalInfo.status.value }}</td>
       </tr>
-      <tr
+      <div
         class="row proposal-details-row"
-        *ngIf="generalProposalInfo.status.reason"
+        *ngIf="proposal.generalInfo.status.reason"
       >
-        <th>Status reason</th>
-        <td>{{ generalProposalInfo.status.reason }}</td>
-      </tr>
+        <div>Status reason</div>
+        <div>{{ proposal.generalInfo.status.reason }}</div>
+      </div>
       <tr>
         <th>Type</th>
-        <td>{{ generalProposalInfo.proposalType }}</td>
+        <td>{{ proposal.generalInfo.proposalType }}</td>
       </tr>
       <tr>
         <th>Target of Opportunity</th>
-        <td *ngIf="generalProposalInfo.isTargetOfOpportunity">
+        <td *ngIf="proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -30,7 +34,7 @@
             />
           </div>
         </td>
-        <td *ngIf="!generalProposalInfo.isTargetOfOpportunity">
+        <td *ngIf="!proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -42,13 +46,25 @@
       </tr>
       <tr>
         <th>Total time</th>
-        <td>{{ generalProposalInfo.totalRequestedTime }}</td>
+        <td>{{ proposal.generalInfo.totalRequestedTime }}</td>
       </tr>
       <tr>
         <th>Proprietary period</th>
         <td class="proprietary-period">
-          <div>{{ generalProposalInfo.dataReleaseDate }}</div>
-          <div><button class="button is-small">change</button></div>
+          <div>{{ releaseDate | dfnsFormat: "d MMMM yyyy" }}</div>
+          <div>
+            <button
+              (click)="
+                proprietaryPeriodModal.openModal(
+                  proposal.generalInfo.proprietaryPeriod,
+                  proposal.proposalCode
+                )
+              "
+              class="button is-small"
+            >
+              change
+            </button>
+          </div>
         </td>
       </tr>
     </tbody>

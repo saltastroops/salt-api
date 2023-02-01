@@ -313,7 +313,7 @@ class ProposalService:
         Set the proposal status for a proposal code.
         """
 
-        allowed_status_list = ["Active", "Inactive"]
+        allowed_status_list = ["Active", "Under technical review"]
         if status not in allowed_status_list:
             raise AuthorizationError()
         return self.repository.update_proposal_status(proposal_code, status, reason)

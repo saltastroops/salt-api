@@ -107,11 +107,11 @@ def get_phase1_summary(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         path = proposal_service.get_phase1_summary(proposal_code)
+        filename = f"{proposal_code}-phase1-summary.pdf"
         return FileResponse(
             path,
             media_type="application/pdf",
-            filename=f"{proposal_code}-phase1-summary.pdf",
-            headers={"Content-Disposition": "inline"},
+            headers={"Content-Disposition": f'inline; filename="{filename}"'},
         )
 
 

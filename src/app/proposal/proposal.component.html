@@ -19,12 +19,20 @@
     <div class="block">
       <wm-proposal-details [proposal]="p"></wm-proposal-details>
     </div>
+    <div class="block">
+      <wm-requested-times
+        [requestedTimes]="proposal.requestedTimes"
+      ></wm-requested-times>
+    </div>
 
     <div class="inline-view">
       <wm-charged-time
         [chargedTime]="p.chargedTime"
         [timeAllocations]="p.timeAllocations"
       ></wm-charged-time>
+      <wm-time-allocations-table
+        [time_allocations]="proposal.timeAllocations"
+      ></wm-time-allocations-table>
     </div>
 
     <div class="block">
@@ -62,6 +70,6 @@
     <wm-block-view [blocks]="p.blocks" [blockId]="blockId"></wm-block-view>
   </ng-template>
   <ng-template #phase1>
-    <wm-p1-details [proposal]="proposal"></wm-p1-details>
+    <wm-p1-details [proposal]="p"></wm-p1-details>
   </ng-template>
 </div>

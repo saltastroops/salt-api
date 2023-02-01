@@ -53,7 +53,7 @@ import { ProposalProgressComponent } from "./proposal/general/proposal-progress/
 import { RequestedObservingConditionsComponent } from "./proposal/general/proposal-progress/requested-observing-conditions/requested-observing-conditions.component";
 import { SubmittedTimeRequestsComponent } from "./proposal/general/proposal-progress/submitted-time-requests/submitted-time-requests.component";
 import { SummaryOfExecutedObservationsComponent } from "./proposal/general/summary-of-executed-observations/summary-of-executed-observations.component";
-import { TimeAllocationTableComponent } from "./proposal/general/time-allocation-table/time-allocation-table.component";
+import { TimeAllocationsTableComponent } from "./proposal/general/time-allocations-table/time-allocations-table.component";
 import { BvitComponent } from "./proposal/instruments/bvit/bvit.component";
 import { HrsConfigurationComponent } from "./proposal/instruments/hrs/hrs-configuration/hrs-configuration.component";
 import { HrsDetectorComponent } from "./proposal/instruments/hrs/hrs-detector/hrs-detector.component";
@@ -87,10 +87,10 @@ import { P1ConfigurationsComponent } from "./proposal/p1-details/p1-configuratio
 import { P1DetailsComponent } from "./proposal/p1-details/p1-details.component";
 import { PhaseOneProposalDetailsTableComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details-table/phase-one-proposal-details-table.component";
 import { PhaseOneProposalDetailsComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details.component";
-import { PhaseOneRequestedTimeComponent } from "./proposal/p1-details/phase-one-requested-time/phase-one-requested-time.component";
 import { PhaseOneTargetComponent } from "./proposal/p1-details/phase-one-target/phase-one-target.component";
-import { RequestedTimeDistributionComponent } from "./proposal/p1-details/requested-time-distribution/requested-time-distribution.component";
+import { StudentThesesComponent } from "./proposal/p1-details/students-theses/student-theses.component";
 import { ProposalComponent } from "./proposal/proposal.component";
+import { RequestedTimesComponent } from "./proposal/requested-time/requested-times.component";
 import { TargetComponent } from "./proposal/target/target.component";
 import { RegisterUserComponent } from "./register-user/register-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
@@ -124,7 +124,7 @@ import { SortDirective } from "./sort.directive";
     nl2brPipe,
     LoadingSpinnerComponent,
     SummaryOfExecutedObservationsComponent,
-    TimeAllocationTableComponent,
+    TimeAllocationsTableComponent,
     ChargedTimeComponent,
     ObservationCommentsComponent,
     RssSpectroscopyComponent,
@@ -200,9 +200,9 @@ import { SortDirective } from "./sort.directive";
     ResponsibleAstronomerComponent,
     DetailsTableComponent,
     PhaseOneProposalDetailsTableComponent,
-    RequestedTimeDistributionComponent,
-    PhaseOneRequestedTimeComponent,
+    RequestedTimesComponent,
     P1ConfigurationsComponent,
+    StudentThesesComponent,
   ],
   imports: [
     BrowserModule,

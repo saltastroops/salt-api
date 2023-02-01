@@ -1,0 +1,22 @@
+@import "src/styles";
+
+.semester-section {
+  background-color: $secondary-header;
+
+}
+.white-text {
+  color: white;
+}
+
+.comment-section {
+  background-color: $tertiary-header;
+
+}
+
+.sub-section {
+  background-color: $dark-strip;
+}
+
+table.table.fixed {
+  width: 50%;
+}

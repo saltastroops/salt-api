@@ -9,7 +9,6 @@
   </thead>
   <thead>
     <tr class="headers">
-      <th>Observation Id</th>
       <th>Instrument</th>
       <th>Mode</th>
       <th>Simulations</th>
@@ -17,11 +16,14 @@
   </thead>
 
   <tbody>
-    <tr *ngFor="let c of configurations">
-      <td>{{ c.observationId }}</td>
+    <tr *ngFor="let c of scienceConfigurations">
       <td>{{ c.instrument }}</td>
       <td>{{ c.mode }}</td>
-      <td>{{ c.simulations }}</td>
+      <td>
+        <p *ngFor="let s of c.simulations">
+          <a href="{{ s.url }}">{{ s.name }}</a>
+        </p>
+      </td>
     </tr>
   </tbody>
 </table>

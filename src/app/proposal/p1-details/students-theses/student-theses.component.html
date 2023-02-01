@@ -1,0 +1,31 @@
+<table
+  class="table"
+  *ngIf="isThesisProposal || generalInfo.isTargetOfOpportunity"
+>
+  <tr class="comment-section" *ngIf="generalInfo.isTargetOfOpportunity">
+    <th colspan="4">Reason for ToO flag</th>
+  </tr>
+  <tr *ngIf="generalInfo.isTargetOfOpportunity">
+    <td colspan="4">{{ generalInfo.targetOfOpportunityReason }}</td>
+  </tr>
+  <tr class="comment-section" *ngIf="generalInfo.isTargetOfOpportunity">
+    <th colspan="4">
+      This proposal will be used for {{ thesisStudents.length }} post-graduate
+      theses.
+    </th>
+  </tr>
+  <tr class="secondary-header" *ngIf="isThesisProposal">
+    <th>Student's Name</th>
+    <th>Thesis Type</th>
+    <th>Year of completion</th>
+    <th>Importance and contribution to the thesis</th>
+  </tr>
+  <tbody *ngIf="isThesisProposal">
+    <tr *ngFor="let s of thesisStudents">
+      <td>{{ s.givenName + " " + s.familyName }}</td>
+      <td>{{ s.thesis?.thesisType }}</td>
+      <td>{{ s.thesis?.yearOfCompletion }}</td>
+      <td>{{ s.thesis?.relevanceOfProposal }}</td>
+    </tr>
+  </tbody>
+</table>

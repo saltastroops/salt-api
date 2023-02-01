@@ -21,7 +21,7 @@
       </tr>
       <tr>
         <th>Target of Opportunity</th>
-        <td *ngIf="generalProposalInfo.targetOfOpportunity">
+        <td *ngIf="generalProposalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -30,7 +30,7 @@
             />
           </div>
         </td>
-        <td *ngIf="!generalProposalInfo.targetOfOpportunity">
+        <td *ngIf="!generalProposalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"

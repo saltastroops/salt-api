@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { InstrumentConfiguration } from "../../../types/proposal";
+import { P1ScienceConfiguration } from "../../../types/proposal";
 
 @Component({
   selector: "wm-p1-configurations",
@@ -8,5 +8,5 @@ import { InstrumentConfiguration } from "../../../types/proposal";
   styleUrls: ["./p1-configurations.component.scss"],
 })
 export class P1ConfigurationsComponent {
-  @Input() configurations!: InstrumentConfiguration[];
+  @Input() scienceConfigurations!: P1ScienceConfiguration[];
 }

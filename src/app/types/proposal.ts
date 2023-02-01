@@ -37,7 +37,8 @@ export interface GeneralProposalInfo {
   semesters: string[]; // TODO semester need to be handled correctly
   status: ProposalStatus; // TODO you should remove a ProposalStatus and add display it correctly on General.
   proposalType: string;
-  targetOfOpportunity: boolean;
+  isTargetOfOpportunity: boolean;
+  targetOfOpportunityReason: string | null;
   totalRequestedTime: number;
   dataReleaseDate: string;
   liaisonSaltAstronomer: ProposalUser | null;
@@ -47,12 +48,19 @@ export interface GeneralProposalInfo {
   isTimeRestricted: boolean;
   isP4: boolean;
 }
+type ThesisType = "PhD" | "Masters";
+interface ThesisInfo {
+  thesisType: ThesisType;
+  yearOfCompletion: number;
+  relevanceOfProposal: string;
+}
 
 export interface Investigator extends ProposalUser {
   affiliation: Affiliation;
   isPc: boolean;
   isPi: boolean;
-  hasApprovedProposal: boolean | null;
+  hasApprovedProposal: boolean;
+  thesis: ThesisInfo | null;
 }
 
 export interface ObservationComment {
@@ -61,11 +69,14 @@ export interface ObservationComment {
   commentDate: string;
 }
 
-export interface InstrumentConfiguration {
-  observationId: number;
+export interface P1ScienceConfiguration {
   instrument: string;
   mode: string;
-  simulations: string;
+  simulations: {
+    name: string;
+    url: string;
+    description: string | null;
+  }[];
 }
 
 export interface Proposal {
@@ -75,15 +86,15 @@ export interface Proposal {
   generalInfo: GeneralProposalInfo;
   investigators: Investigator[];
   targets: Phase1Target[] | null;
-  requestedTime: RequestedTime;
+  requestedTimes: RequestedTime[];
   blocks: BlockSummary[];
   blockVisits: BlockVisit[];
   chargedTime: ChargedTime;
   timeAllocations: TimeAllocation[];
   observationComments: ObservationComment[];
-  configurations: InstrumentConfiguration[];
   phase1ProposalSummary: string | null;
   proposalFile: string;
+  scienceConfigurations: P1ScienceConfiguration[];
 }
 
 export interface ProposalListItem {

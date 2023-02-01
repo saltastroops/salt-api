@@ -1,0 +1,65 @@
+<div>
+  <table class="table fixed">
+    <thead>
+      <tr>
+        <th colspan="2" class="has-text-centered">Requested Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container
+        *ngFor="let sm of Object.keys(semesterRequestedTimes).sort()"
+      >
+        <tr class="semester-section" (click)="selectSemester(sm)">
+          <th colspan="2">
+            <span class="white-text is-pulled-left">
+              {{ sm }}
+            </span>
+            <span class="is-pulled-right">
+              <button
+                class="button has-text-weight-bold is-outlined is-rounded"
+              >
+                {{ sm === selectedSemester ? "&#8689;" : "&#8690;" }}
+              </button>
+            </span>
+          </th>
+        </tr>
+        <ng-container *ngIf="sm === selectedSemester">
+          <tr class="comment-section">
+            <th colspan="2" class="has-text-centered">
+              Requested Time Distribution
+            </th>
+          </tr>
+          <tr class="sub-section">
+            <th>Partner</th>
+            <th>Percent</th>
+          </tr>
+          <tr *ngFor="let d of semesterRequestedTimes[sm].distribution">
+            <td>{{ d.partner }}</td>
+            <td>{{ d.percentage }}</td>
+          </tr>
+          <tr class="comment-section">
+            <th colspan="2" class="has-text-centered">Time Request</th>
+          </tr>
+          <tr>
+            <th>Requested Time</th>
+            <td>{{ semesterRequestedTimes[sm]["totalRequestedTime"] }}</td>
+          </tr>
+          <tr>
+            <th>Minimum Useful Time</th>
+            <td>{{ semesterRequestedTimes[sm]["minimumUsefulTime"] }}</td>
+          </tr>
+          <tr class="headers">
+            <th colspan="2" class="comment-section has-text-centered">
+              Comments
+            </th>
+          </tr>
+          <tr>
+            <td colspan="2" class="comment-text">
+              {{ semesterRequestedTimes[sm]["comment"] }}
+            </td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</div>

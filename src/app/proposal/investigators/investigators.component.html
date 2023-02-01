@@ -42,9 +42,8 @@
       <td *ngIf="!i.isPc"></td>
       <td>{{ i.givenName + " " + i.familyName }}</td>
       <td>{{ i.affiliation.partnerName }}</td>
-      <td>{{ i.affiliation.institution }}</td>
+      <td>{{ i.affiliation.name }}</td>
       <td>{{ i.affiliation.department }}</td>
-      <!-- TODO: Replace with correct code -->
       <ng-template [ngIf]="i.hasApprovedProposal === true">
         <td>
           <div><button class="button is-danger is-small">Reject</button></div>

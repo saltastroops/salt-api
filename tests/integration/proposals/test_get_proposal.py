@@ -316,7 +316,7 @@ def test_should_return_phase1_proposal_summary_file(
     assert response.headers["Content-Type"] == "application/pdf"
     assert (
         response.headers["Content-Disposition"]
-        == f'attachment; filename="{proposal_code}-phase1-summary.pdf"'
+        == f'inline; filename="{proposal_code}-phase1-summary.pdf"'
     )
 
 

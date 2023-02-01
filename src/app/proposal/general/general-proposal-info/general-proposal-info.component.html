@@ -2,20 +2,19 @@
   <table class="table is-striped">
     <thead>
       <tr class="secondary-header">
-        <th colspan="6" class="has-text-centered">General</th>
+        <th colspan="5" class="has-text-centered">General</th>
       </tr>
       <tr>
-        <th colspan="6" class="has-text-centered">Title</th>
+        <th colspan="5" class="has-text-centered">Title</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td colspan="6">{{ generalProposalInfo.title }}</td>
+        <td colspan="5">{{ generalProposalInfo.title }}</td>
       </tr>
     </tbody>
     <thead>
       <tr>
-        <th>PID</th>
         <th>Code</th>
         <th>Phase</th>
         <th>Semester</th>
@@ -25,7 +24,6 @@
     </thead>
     <tbody>
       <tr>
-        <td>n/a</td>
         <td>{{ proposalCode }}</td>
         <td>{{ phase }}</td>
         <td>
@@ -51,12 +49,12 @@
     </tbody>
     <thead>
       <tr>
-        <th colspan="6" class="has-text-centered">Abstract</th>
+        <th colspan="5" class="has-text-centered">Abstract</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td colspan="6" [innerHTML]="generalProposalInfo.abstract | nl2br"></td>
+        <td colspan="5" [innerHTML]="generalProposalInfo.abstract | nl2br"></td>
       </tr>
     </tbody>
     <thead>
@@ -66,7 +64,7 @@
     </thead>
     <tbody>
       <tr>
-        <td colspan="6" class="{{ backgroundColor }}" id="proposal-comment">
+        <td colspan="5" class="{{ backgroundColor }}" id="proposal-comment">
           {{ statusDescription }}
         </td>
       </tr>

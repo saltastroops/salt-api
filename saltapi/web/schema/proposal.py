@@ -88,6 +88,11 @@ class ProprietaryPeriod(BaseModel):
         title="Start date",
         description="Start date from which the proprietary period is counted.",
     )
+    motivation: Optional[str] = Field(
+        ...,
+        title="Proprietary period reason",
+        description="The reason proprietary period extension.",
+    )
 
 
 class GeneralProposalInfo(BaseModel):

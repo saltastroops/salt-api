@@ -1,4 +1,3 @@
-from datetime import date
 from typing import List, Optional
 
 from pydantic import Field
@@ -10,13 +9,14 @@ from saltapi.web.schema.proposal import (
     GeneralProposalInfo,
     ObservationComment,
     Proposal,
+    ProprietaryPeriod,
 )
 
 
 class P2GeneralProposalInfo(GeneralProposalInfo):
     """Phase 2 general proposal information for a semester."""
 
-    data_release_date: Optional[date] = Field(
+    proprietary_period: Optional[ProprietaryPeriod] = Field(
         ...,
         title="Data release date",
         description="Date when the proposal data is scheduled to become public",

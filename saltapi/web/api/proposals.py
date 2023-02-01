@@ -31,7 +31,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatusContent,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus,
+    UpdateStatus, ProposalStatusValue, ProposalInactiveReason,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -300,15 +300,33 @@ def update_proposal_status(
         title="Proposal code",
         description="Proposal code of the proposal whose status is updated.",
     ),
-    proposal_status: ProposalStatusContent = Body(
+    proposal_status: ProposalStatusValue = Body(
         ..., alias="status", title="Proposal status", description="New proposal status."
     ),
+    inactive_reason: Optional[ProposalInactiveReason] = Body(
+        None,
+        alias="reason",
+        title="Proposal inactive reason",
+        description="New proposal inactive reason.",
+    ),
+    user: User = Depends(get_current_user),
 ) -> ProposalStatusContent:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_proposal_status(user)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+
+        proposal_service.update_proposal_status(proposal_code, proposal_status, inactive_reason)
+
+        unit_of_work.commit()
+
+        return proposal_service.get_proposal_status(proposal_code)
+
+
 
 
 @router.get(

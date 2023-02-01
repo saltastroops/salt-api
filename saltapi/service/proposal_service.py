@@ -8,7 +8,6 @@ from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
-from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
@@ -80,7 +79,7 @@ class ProposalService:
         """
         return self.repository.get_phase1_summary(proposal_code)
 
-    def get_proposal_zip(self, proposal_code: str) -> pathlib.Path:
+    def get_proposal_file(self, proposal_code: str) -> pathlib.Path:
         """
         Return the file path of the proposal zip file.
 
@@ -94,12 +93,7 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
-        proposals_dir = get_settings().proposals_dir
-        version = self.repository.get_current_version(proposal_code)
-        path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
-        if not path.exists():
-            raise NotFoundError("Proposal file not found")
-        return path
+        return self.repository.get_proposal_file(proposal_code)
 
     def get_proposal(self, proposal_code: str) -> Dict[str, Any]:
         """

@@ -633,16 +633,30 @@ def test_phase_2_only_proposals_have_no_summary_url(db_connection: Connection) -
 
 
 @pytest.mark.parametrize(
-    "proposal_code,last_phase1_submission,expected_path",
+    "proposal_code,expected_current_version",
+    [("2021-2-LSP-001", 2), ("2020-1-DDT-001", None)],
+)
+def test_current_phase1_version(
+    proposal_code: str, expected_current_version: int, db_connection: Connection
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    assert (
+        proposal_repository.get_current_phase1_version(proposal_code)
+        == expected_current_version
+    )
+
+
+@pytest.mark.parametrize(
+    "proposal_code,current_version,expected_path",
     [
-        ("2021-2-SCI-099", 1, "2021-2-SCI-099/1/Summary.pdf"),
+        ("2022-2-SCI-007", 1, "2022-2-SCI-007/1/Summary.pdf"),
         ("2021-2-LSP-001", 2, "2021-2-LSP-001/2/Summary.pdf"),
-        ("2022-2-SCI-088", 11, "2022-2-SCI-088/11/Summary.pdf"),
     ],
 )
 def test_get_phase1_summary(
     proposal_code: str,
-    last_phase1_submission: int,
+    current_version: int,
     expected_path: str,
     db_connection: Connection,
     tmp_path: Path,
@@ -658,14 +672,14 @@ def test_get_phase1_summary(
         lambda: mock_settings,
     )
 
-    # Create the summary files
-    proposal_dir = proposals_dir / proposal_code
-    proposal_dir.mkdir()
-    for i in range(1, last_phase1_submission + 1):
-        submission_dir = proposals_dir / proposal_code / str(i)
+    # Create the phase 1 summary
+    if current_version:
+        proposal_dir = proposals_dir / proposal_code
+        proposal_dir.mkdir()
+        submission_dir = proposals_dir / proposal_code / str(current_version)
         submission_dir.mkdir()
-        summary = submission_dir / "Summary.pdf"
-        summary.write_text("Fake PDF")
+        proposal_file = submission_dir / "Summary.pdf"
+        proposal_file.write_text("Fake pdf")
 
     proposal_repository = ProposalRepository(db_connection)
 
@@ -673,7 +687,30 @@ def test_get_phase1_summary(
     assert proposal_repository.get_phase1_summary(proposal_code) == path
 
 
+@pytest.mark.parametrize("proposal_code", ["2018-2-LSP-001", "2020-2-DDT-001"])
 def test_get_phase1_summary_raises_not_found_error(
+    proposal_code: str,
+    db_connection: Connection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        proposal_repository.get_phase1_summary(proposal_code)
+
+
+@pytest.mark.parametrize(
+    "proposal_code,last_submission,expected_path",
+    [
+        ("2018-2-LSP-001", 440, "2018-2-LSP-001/440/2018-2-LSP-001.zip"),
+        ("2020-1-DDT-001", 1, "2020-1-DDT-001/1/2020-1-DDT-001.zip"),
+    ],
+)
+def test_get_proposal_file(
+    proposal_code: str,
+    last_submission: int,
+    expected_path: str,
     db_connection: Connection,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -688,11 +725,26 @@ def test_get_phase1_summary_raises_not_found_error(
         lambda: mock_settings,
     )
 
-    # Fake a submission directory
-    submission_dir = proposals_dir / "2022-2-SCI-042" / "1"
-    submission_dir.mkdir(parents=True)
+    # Create the proposal file
+    proposal_dir = proposals_dir / proposal_code
+    proposal_dir.mkdir()
+    submission_dir = proposals_dir / proposal_code / str(last_submission)
+    submission_dir.mkdir()
+    proposal_file = submission_dir / f"{proposal_code}.zip"
+    proposal_file.write_text("Fake zip")
 
     proposal_repository = ProposalRepository(db_connection)
 
+    path = proposals_dir / Path(expected_path)
+    assert proposal_repository.get_proposal_file(proposal_code) == path
+
+
+@pytest.mark.parametrize("proposal_code", ["2018-2-LSP-001", "2020-2-DDT-001"])
+def test_get_proposal_file_raises_not_found_error(
+    proposal_code: str,
+    db_connection: Connection,
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
     with pytest.raises(NotFoundError):
-        proposal_repository.get_phase1_summary("2022-2-SCI-042")
+        proposal_repository.get_proposal_file(proposal_code)

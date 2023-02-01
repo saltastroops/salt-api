@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { GeneralProposalInfo } from "../../../types/proposal";
+import { Proposal } from "../../../types/proposal";
 
 @Component({
   selector: "wm-phase-one-proposal-details",
@@ -8,5 +8,5 @@ import { GeneralProposalInfo } from "../../../types/proposal";
   styleUrls: ["./phase-one-proposal-details.component.scss"],
 })
 export class PhaseOneProposalDetailsComponent {
-  @Input() generalProposalInfo!: GeneralProposalInfo;
+  @Input() proposal!: Proposal;
 }

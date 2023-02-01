@@ -17,9 +17,7 @@
   <ng-template *ngIf="p.phase === 2; then phase2; else phase1"></ng-template>
   <ng-template #phase2>
     <div class="block">
-      <wm-proposal-details
-        [generalProposalInfo]="p.generalInfo"
-      ></wm-proposal-details>
+      <wm-proposal-details [proposal]="p"></wm-proposal-details>
     </div>
 
     <div class="inline-view">

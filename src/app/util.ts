@@ -1,3 +1,6 @@
+import add from "date-fns/add";
+import sub from "date-fns/sub";
+
 import {
   FinderChart,
   FinderChartFileType,
@@ -63,4 +66,31 @@ export function finderChartURL(
   }
 
   return null;
+}
+
+/**
+ * Return the start and end time of the current Julian day.
+ *
+ * The Julian days starts and ends at noon UTC.
+ */
+export function currentJulianDay(): { start: Date; end: Date } {
+  const now = new Date();
+  const nowHours = now.getUTCHours();
+  let start = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      12,
+      0,
+      0,
+      0,
+    ),
+  );
+  if (nowHours < 12) {
+    start = sub(start, { days: 1 });
+  }
+  const end = add(start, { days: 1 });
+
+  return { start, end };
 }

@@ -34,7 +34,6 @@ import { BlockViewComponent } from "./proposal/blocks/block-view/block-view.comp
 import { BlockComponent } from "./proposal/blocks/block/block.component";
 import { IterationsComponent } from "./proposal/blocks/block/iterations/iterations.component";
 import { ObservationProbabilitiesComponent } from "./proposal/blocks/block/observation-probabilities/observation-probabilities.component";
-import { ObservationComponent } from "./proposal/blocks/block/observation/observation.component";
 import { ObservingConditionsComponent } from "./proposal/blocks/block/observing-conditions/observing-conditions.component";
 import { ObservingWindowsComponent } from "./proposal/blocks/block/observing-windows/observing-windows.component";
 import { PayloadConfigurationComponent } from "./proposal/blocks/block/payload-configuration/payload-configuration.component";
@@ -132,7 +131,6 @@ import { SortDirective } from "./sort.directive";
     RssSlitMaskComponent,
     SalticamDetectorComponent,
     ArcBibleComponent,
-    ObservationComponent,
     RssComponent,
     RssGeneralInfoComponent,
     RssDetectorComponent,
@@ -145,7 +143,6 @@ import { SortDirective } from "./sort.directive";
     ObservingWindowsComponent,
     ObservationProbabilitiesComponent,
     PriorityCommentComponent,
-    ObservationComponent,
     PayloadConfigurationComponent,
     HrsComponent,
     HrsGeneralInfoComponent,

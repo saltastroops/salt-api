@@ -1,7 +1,17 @@
+import { parseISO } from "date-fns";
+
 import { FinderChart, FinderChartFile } from "./types/observation";
-import { finderChartURL } from "./util";
+import { currentJulianDay, finderChartURL } from "./util";
 
 describe("util", () => {
+  beforeEach(() => {
+    jasmine.clock().install();
+  });
+
+  afterEach(() => {
+    jasmine.clock().uninstall();
+  });
+
   it("should return the correct finder chart URL", () => {
     const files: FinderChartFile[] = [
       { size: "original", url: "/o.png" },
@@ -42,5 +52,35 @@ describe("util", () => {
         baseURL,
       ),
     ).toEqual("https://example.com/t.jpg");
+  });
+
+  it("should calculate the correct current Julian day", () => {
+    const checkJulianDay = (
+      now: string,
+      expectedStart: string,
+      expectedEnd: string,
+    ) => {
+      jasmine.clock().mockDate(parseISO(now));
+      const jd = currentJulianDay();
+      expect(jd.start).toEqual(parseISO(expectedStart));
+      expect(jd.end).toEqual(parseISO(expectedEnd));
+      console.log(parseISO("2022-09-09T12:00:00+02"));
+    };
+
+    checkJulianDay(
+      "2022-05-06T12:00:00Z",
+      "2022-05-06T12:00:00Z",
+      "2022-05-07T12:00:00Z",
+    );
+    checkJulianDay(
+      "2023-01-01T11:59:59Z",
+      "2022-12-31T12:00:00Z",
+      "2023-01-01T12:00:00Z",
+    );
+    checkJulianDay(
+      "2023-06-30T23:12:19Z",
+      "2023-06-30T12:00:00Z",
+      "2023-07-01T12:00:00Z",
+    );
   });
 });

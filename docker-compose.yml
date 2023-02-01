@@ -1,0 +1,12 @@
+version: "3.5"
+services:
+  web-manager:
+    build:
+      context: .
+      args:
+        RUN_MODE: ${RUN_MODE}
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - ${PORT}:80

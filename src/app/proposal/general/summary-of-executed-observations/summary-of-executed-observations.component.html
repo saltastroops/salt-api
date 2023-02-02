@@ -40,13 +40,13 @@
         Accepted?
       </th>
       <th>Rejection Reason</th>
-      <th>Edit</th>
+<!--      <th>Edit</th>-->
       <th>Data</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td colspan="9"></td>
+      <td colspan="8"></td>
       <td>
         <label class="checkbox">
           <input
@@ -116,22 +116,22 @@
         />
       </td>
       <td>{{ e.rejectionReason }}</td>
-      <td *ngIf="e.status === 'Accepted'">
-        <button
-          class="button is-danger is-small"
-          [hidden]="showEditBlockButton"
-        >
-          Put block on hold
-        </button>
-      </td>
-      <td *ngIf="e.status === 'Rejected'">
-        <button
-          class="button is-success is-small"
-          [hidden]="showEditBlockButton"
-        >
-          Put block off hold
-        </button>
-      </td>
+<!--      <td *ngIf="e.status === 'Accepted'">-->
+<!--        <button-->
+<!--          class="button is-danger is-small"-->
+<!--          [hidden]="showEditBlockButton"-->
+<!--        >-->
+<!--          Put block on hold-->
+<!--        </button>-->
+<!--      </td>-->
+<!--      <td *ngIf="e.status === 'Rejected'">-->
+<!--        <button-->
+<!--          class="button is-success is-small"-->
+<!--          [hidden]="showEditBlockButton"-->
+<!--        >-->
+<!--          Put block off hold-->
+<!--        </button>-->
+<!--      </td>-->
       <td>
         <label class="checkbox">
           <input

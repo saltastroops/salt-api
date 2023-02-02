@@ -628,23 +628,22 @@ WHERE PiptUser_Id = :user_id
         stmt = text(
             """
 SELECT 
-	PU.PiptUser_Id          AS id,
+	I.PiptUser_Id          AS id,
     I.FirstName             AS given_name,
     I.Surname               AS family_name
 FROM SaltAstronomers SA
 	JOIN Investigator I ON SA.Investigator_Id = I.Investigator_Id
-    JOIN PiptUser PU ON PU.Investigator_Id = I.Investigator_Id
         """
         )
 
         result = self.connection.execute(stmt)
 
-        users = [
-            {
-                "id": row.id,
-                "given_name": row.given_name,
-                "family_name": row.family_name,
-            }
-            for row in result
-        ]
-        return users
+        salt_astronomers = []
+        for row in result:
+            if row.given_name != "Techops":
+                salt_astronomers.append({
+                    "id": row.id,
+                    "given_name": row.given_name,
+                    "family_name": row.family_name,
+                })
+        return salt_astronomers

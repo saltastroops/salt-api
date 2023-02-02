@@ -444,6 +444,7 @@ SELECT PT.Title                            AS title,
        I.Email                             AS astronomer_email,
        PGI.TimeRestricted                  AS is_time_restricted,
        P1T.Reason						   AS too_reason,
+       I.PiptUser_Id                      AS liaison_salt_astronomer_id,
        IF(PGI.P4 IS NOT NULL,
           PGI.P4,
           0)                                AS is_p4,
@@ -497,6 +498,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         if row.astronomer_email:
             info["liaison_salt_astronomer"] = {
+                "id": row.liaison_salt_astronomer_id,
                 "given_name": row.astronomer_given_name,
                 "family_name": row.astronomer_family_name,
             }

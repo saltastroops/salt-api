@@ -24,3 +24,11 @@ $navbar-item-color: lighten($text, 30%);
 .has-two-columns {
   grid-template-columns: 70% 30%;
 }
+
+.work-in-progress {
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 1rem;
+  background: lightgoldenrodyellow;
+  border-bottom: 1px solid orange;
+}

@@ -21,7 +21,7 @@ export interface HrsConfiguration {
   fiberSeparation: number;
   iodineCellPosition: HrsIodineCellPosition;
   isThArLampOn: boolean;
-  nodAndShuffle: HrsNodAndShuffle;
+  nodAndShuffle: HrsNodAndShuffle | null;
 }
 
 export interface HrsDetector {

@@ -96,10 +96,15 @@ def get_users(
         permission_service.check_permission_to_view_users(user)
         user_service = services.user_service(unit_of_work.connection)
 
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_view_users(user)
-
         return user_service.get_users()
+
+@router.get("/salt-astronomers", summary="Get SALT astronomers", response_model=List[UserListItem])
+def get_users(
+        user: _User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
+    with UnitOfWork() as unit_of_work:
+        user_service = services.user_service(unit_of_work.connection)
+        return user_service.get_salt_astronomers()
 
 
 @router.get("/{user_id}", summary="Get user details", response_model=User)

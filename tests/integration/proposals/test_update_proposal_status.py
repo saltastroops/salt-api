@@ -8,7 +8,7 @@ PROPOSALS_URL = "/proposals"
 
 
 def test_proposal_status_update_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2021-2-LSP-001"
     proposal_status_value = "Active"
@@ -18,12 +18,12 @@ def test_proposal_status_update_requires_authentication(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"status": proposal_status_value, "reason": proposal_inactive_reason},
-        )
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_proposal_status_update_requires_proposal_status(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2021-2-LSP-001"
     username = find_username("administrator")
@@ -31,12 +31,12 @@ def test_proposal_status_update_requires_proposal_status(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        )
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_proposal_status_update_requires_valid_proposal_status_value(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2023-1-MLT-006"
     username = find_username("administrator")
@@ -48,12 +48,12 @@ def test_proposal_status_update_requires_valid_proposal_status_value(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"status": proposal_status_value, "reason": proposal_inactive_reason},
-        )
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_proposal_status_update_requires_valid_proposal_inactive_reason(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2023-1-MLT-006"
     username = find_username("administrator")
@@ -65,12 +65,12 @@ def test_proposal_status_update_requires_valid_proposal_inactive_reason(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"status": proposal_status_value, "reason": proposal_inactive_reason},
-        )
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_proposal_status_update(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2023-1-MLT-006"
     username = find_username("administrator")
@@ -82,7 +82,7 @@ def test_proposal_status_update(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"status": proposal_status_value, "reason": proposal_inactive_reason},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
 
     proposal_status = response.json()

@@ -2143,9 +2143,7 @@ WHERE Proposal_Code = :proposal_code
         )
 
         req_time = defaultdict(lambda: dict())
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code
-        }):
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             semester = row.semester
             if not req_time[semester]:
                 req_time[semester] = {
@@ -2153,12 +2151,11 @@ WHERE Proposal_Code = :proposal_code
                     "minimum_useful_time": row.minimum_useful_time,
                     "comment": row.comment,
                     "semester": semester,
-                    "distribution": []
+                    "distribution": [],
                 }
-            req_time[semester]["distribution"].append({
-                "partner": row.partner_name,
-                "percentage": row.percentage
-            })
+            req_time[semester]["distribution"].append(
+                {"partner": row.partner_name, "percentage": row.percentage}
+            )
 
         return list(req_time.values())
 

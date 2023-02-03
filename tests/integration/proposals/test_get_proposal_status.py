@@ -8,7 +8,7 @@ PROPOSALS_URL = "/proposals"
 
 
 def test_should_return_401_when_requesting_proposal_status_for_unauthenticated_user(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2021-2-LSP-001"
     not_authenticated(client)
@@ -17,7 +17,7 @@ def test_should_return_401_when_requesting_proposal_status_for_unauthenticated_u
 
 
 def test_should_return_404_when_requesting_proposal_status_non_existing_proposal(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2099-2-DDT-001"
 
@@ -40,7 +40,7 @@ def test_should_return_404_when_requesting_proposal_status_non_existing_proposal
     ],
 )
 def test_should_return_proposal_status_when_requesting_block_status_for_permitted_users(
-        username: str, client: TestClient
+    username: str, client: TestClient
 ) -> None:
     proposal_code = "2019-2-SCI-006"
 
@@ -63,7 +63,7 @@ def test_should_return_proposal_status_when_requesting_block_status_for_permitte
     ],
 )
 def test_should_return_403_when_requesting_proposal_status_for_non_permitted_users(
-        username: str, client: TestClient
+    username: str, client: TestClient
 ) -> None:
     proposal_code = "2020-2-DDT-005"
 

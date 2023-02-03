@@ -1223,7 +1223,9 @@ WHERE PIR.InactiveReason = :inactive_reason
         result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
         return cast(int, result.scalar_one())
 
-    def update_proposal_status(self, proposal_code: str, status: str, reason: Optional[str]) -> None:
+    def update_proposal_status(
+        self, proposal_code: str, status: str, reason: Optional[str]
+    ) -> None:
         """
         Update the status of a proposal.
         """
@@ -1234,9 +1236,7 @@ WHERE PIR.InactiveReason = :inactive_reason
         try:
             status_id = self._proposal_status_id(status)
             proposal_inactive_reason_id = (
-                self._proposal_inactive_reason_id(reason)
-                if reason
-                else None
+                self._proposal_inactive_reason_id(reason) if reason else None
             )
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
@@ -1253,7 +1253,12 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
         """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "status_id": status_id, "proposal_inactive_reason_id": proposal_inactive_reason_id}
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "status_id": status_id,
+                "proposal_inactive_reason_id": proposal_inactive_reason_id,
+            },
         )
         if not result.rowcount:
             raise NotFoundError()

@@ -13,7 +13,7 @@ class FakeProposalRepository:
         self.proposal_status = {"value": "Under scientific review", "reason": None}
 
     def list(
-            self, username: str, from_semester: str, to_semester: str, limit: str
+        self, username: str, from_semester: str, to_semester: str, limit: str
     ) -> List[ProposalListItem]:
         return [
             cast(ProposalListItem, from_semester),
@@ -27,10 +27,10 @@ class FakeProposalRepository:
         raise NotFoundError()
 
     def update_proposal_status(
-            self,
-            proposal_code: str,
-            proposal_status_value: str,
-            inactive_reason: Optional[str],
+        self,
+        proposal_code: str,
+        proposal_status_value: str,
+        inactive_reason: Optional[str],
     ) -> None:
         if proposal_code == VALID_PROPOSAL_CODE:
             self.proposal_status = {
@@ -112,13 +112,10 @@ def test_update_proposal_status() -> None:
     inactive_reason = None
     proposal_service = create_proposal_repository()
     proposal_service.update_proposal_status(
-        proposal_code,
-        proposal_status_value,
-        inactive_reason
+        proposal_code, proposal_status_value, inactive_reason
     )
 
     new_proposal_status = proposal_service.get_proposal_status(VALID_PROPOSAL_CODE)
 
     assert new_proposal_status["value"] == "Approved"
     assert new_proposal_status["reason"] is None
-

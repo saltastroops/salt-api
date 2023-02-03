@@ -19,6 +19,7 @@ from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
+from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
@@ -193,8 +194,9 @@ def get_proposal_status(
         ProposalCode,
         title="Proposal code",
         description="Proposal code of the proposal whose status is requested.",
-    )
-) -> ProposalStatusContent:
+    ),
+    user: User = Depends(get_current_user),
+) -> _ProposalStatus:
     """
     Returns the current status of the proposal with a given proposal code.
 
@@ -214,7 +216,12 @@ def get_proposal_status(
     Under scientific review | The (Phase 1) proposal is being evaluated by the TAC(s).
     Under technical review | The (Phase 2) proposal is being checked by the PI and is not in the queue yet.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+
+        return proposal_service.get_proposal_status(proposal_code)
 
 
 @router.put(
@@ -310,7 +317,7 @@ def update_proposal_status(
         description="New proposal inactive reason.",
     ),
     user: User = Depends(get_current_user),
-) -> ProposalStatusContent:
+) -> _ProposalStatus:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.

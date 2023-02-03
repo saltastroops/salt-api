@@ -332,7 +332,7 @@ def update_proprietary_period(
 @router.put(
     "/{proposal_code}/status",
     summary="Update the proposal status",
-    response_model=ProposalStatusContent,
+    response_model=ProposalStatus,
     status_code=status.HTTP_200_OK,
 )
 def update_proposal_status(

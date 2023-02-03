@@ -168,9 +168,6 @@ class ObservationProbabilities(BaseModel):
         ge=0,
         le=1,
     )
-    average_ranking: Optional[float] = Field(
-        ..., title="Average ranking", description="Average ranking", ge=0
-    )
     total: Optional[float] = Field(
         ...,
         title="Total probability",

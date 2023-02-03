@@ -8,12 +8,11 @@ from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
-from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
 )
-from saltapi.service.proposal import Proposal, ProposalListItem
+from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.util import semester_start
@@ -64,9 +63,25 @@ class ProposalService:
 
         return self.repository.list(username, from_semester, to_semester, limit)
 
-    def get_proposal_zip(self, proposal_code: str) -> pathlib.Path:
+    def get_phase1_summary(self, proposal_code: str) -> pathlib.Path:
         """
-        Return the file path of proposal zip file.
+        Return the file path of the latest Phase 1 proposal summary file.
+
+        Parameters
+        ----------
+        proposal_code: str
+            Proposal code.
+
+        Returns
+        -------
+        `~pathlib.Path`
+            The file path of the latest Phase 1 proposal summary file.
+        """
+        return self.repository.get_phase1_summary(proposal_code)
+
+    def get_proposal_file(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the file path of the proposal zip file.
 
         Parameters
         ----------
@@ -78,14 +93,9 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
-        proposals_dir = get_settings().proposals_dir
-        version = self.repository.get_current_version(proposal_code)
-        path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
-        if not path.exists():
-            raise NotFoundError("Proposal file not found")
-        return path
+        return self.repository.get_proposal_file(proposal_code)
 
-    def get_proposal(self, proposal_code: str) -> Proposal:
+    def get_proposal(self, proposal_code: str) -> Dict[str, Any]:
         """
         Return the JSON representation of a proposal.
 
@@ -99,7 +109,7 @@ class ProposalService:
         Proposal
             The JSON representation of the proposal.
         """
-        return self.repository.get(proposal_code)
+        return cast(Dict[str, Any], self.repository.get(proposal_code))
 
     def get_observation_comments(self, proposal_code: str) -> List[Dict[str, str]]:
         return self.repository.get_observation_comments(proposal_code)

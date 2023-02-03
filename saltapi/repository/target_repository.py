@@ -1,11 +1,16 @@
 from typing import Any, Dict, Optional
 
-import pytz
-from astropy.coordinates import Angle
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.service.target import Target
+from saltapi.util import (
+    target_coordinates,
+    target_magnitude,
+    target_period_ephemeris,
+    target_proper_motion,
+    target_type,
+)
 
 
 class TargetRepository:
@@ -39,7 +44,8 @@ SELECT DISTINCT T.Target_Id                                      AS id,
                 TB.Time_Base                                     AS period_time_base,
                 HT.Identifier                                    AS horizons_identifier,
                 IF((MT1.Target_Id IS NOT NULL
-                    OR MTF.Target_Id IS NOT NULL),
+                    OR MTF.Target_Id IS NOT NULL
+                    OR HT.Identifier IS NOT NULL),
                     1,
                     0)                                           AS non_sidereal
 FROM Target T
@@ -64,65 +70,16 @@ WHERE T.Target_Id = :target_id;
         target = {
             "id": row.id,
             "name": row.name,
-            "coordinates": self._coordinates(row),
-            "proper_motion": self._proper_motion(row),
-            "magnitude": self._magnitude(row),
-            "target_type": self._target_type(row),
-            "period_ephemeris": self._period_ephemeris(row),
+            "coordinates": target_coordinates(row),
+            "proper_motion": target_proper_motion(row),
+            "magnitude": target_magnitude(row),
+            "target_type": target_type(row),
+            "period_ephemeris": target_period_ephemeris(row),
             "horizons_identifier": row.horizons_identifier,
             "non_sidereal": row.non_sidereal == 1,
         }
 
         return target
-
-    @staticmethod
-    def _coordinates(row: Any) -> Optional[Dict[str, Any]]:
-        if row.ra_h is None:
-            return None
-
-        ra = Angle(f"{row.ra_h}:{row.ra_m}:{row.ra_s} hours").degree
-        dec = Angle(f"{row.dec_sign}{row.dec_d}:{row.dec_m}:{row.dec_s} degrees").degree
-
-        if ra == 0 and dec == 0:
-            return None
-
-        return {
-            "right_ascension": float(ra),
-            "declination": float(dec),
-            "equinox": float(row.equinox),
-        }
-
-    @staticmethod
-    def _magnitude(row: Any) -> Optional[Dict[str, Any]]:
-        if row.min_mag is None:
-            return None
-
-        return {
-            "minimum_magnitude": float(row.min_mag),
-            "maximum_magnitude": float(row.max_mag),
-            "bandpass": row.bandpass,
-        }
-
-    @staticmethod
-    def _proper_motion(row: Any) -> Optional[Dict[str, Any]]:
-        if row.ra_dot is None or (row.ra_dot == 0 and row.dec_dot == 0):
-            return None
-
-        return {
-            "right_ascension_speed": float(row.ra_dot),
-            "declination_speed": float(row.dec_dot),
-            "epoch": pytz.utc.localize(row.epoch),
-        }
-
-    @staticmethod
-    def _target_type(row: Any) -> Optional[str]:
-        if row.target_sub_type is None:
-            return None
-
-        if row.target_type != "Unknown":
-            return f"{row.target_type} - {row.target_sub_type}"
-        else:
-            return "Unknown"
 
     @staticmethod
     def _period_ephemeris(row: Any) -> Optional[Dict[str, Any]]:

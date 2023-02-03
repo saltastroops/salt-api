@@ -180,7 +180,7 @@ async def get_proposal_progress_report_pdf(
                 proposal_progress_byte_io,
                 headers={
                     "Content-Disposition": (
-                        f"attachment; filename=ProposalProgressReport-{semester}.pdf"
+                        f"inline; filename=ProposalProgressReport-{semester}.pdf"
                     )
                 },
                 media_type="application/pdf",

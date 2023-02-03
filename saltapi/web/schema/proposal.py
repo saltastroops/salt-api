@@ -5,9 +5,7 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.util import as_form
-from saltapi.web.schema.block import BlockSummary
 from saltapi.web.schema.common import (
-    BlockVisit,
     PartnerCode,
     PartnerName,
     Priority,
@@ -15,7 +13,6 @@ from saltapi.web.schema.common import (
     Semester,
 )
 from saltapi.web.schema.institution import Institution
-from saltapi.web.schema.target import Phase1Target
 from saltapi.web.schema.user import FullName
 
 
@@ -102,6 +99,11 @@ class ProprietaryPeriod(BaseModel):
         title="Start date",
         description="Start date from which the proprietary period is counted.",
     )
+    motivation: Optional[str] = Field(
+        ...,
+        title="Proprietary period reason",
+        description="The reason proprietary period extension.",
+    )
 
 
 class GeneralProposalInfo(BaseModel):
@@ -119,15 +121,15 @@ class GeneralProposalInfo(BaseModel):
         title="First submission datetime",
         description="Datetime of the first submission for any semester",
     )
-    submission_number: int = Field(
-        ...,
-        title="Submission number",
-        description="Current submission number for any semester",
-    )
     semesters: List[Semester] = Field(
         ...,
         title="Semesters",
         description="List of semesters for which the proposal has been submitted",
+    )
+    submission_number: int = Field(
+        ...,
+        title="Submission number",
+        description="Current submission number for any semester",
     )
     status: ProposalStatus = Field(
         ..., title="Proposal status", description="Proposal status"
@@ -135,7 +137,7 @@ class GeneralProposalInfo(BaseModel):
     proposal_type: ProposalType = Field(
         ..., title="Proposal type", description="Proposal type"
     )
-    target_of_opportunity: bool = Field(
+    is_target_of_opportunity: bool = Field(
         ...,
         title="Target of opportunity?",
         description="Whether the proposal contains targets of opportunity",
@@ -145,28 +147,13 @@ class GeneralProposalInfo(BaseModel):
         title="Total requested time",
         description="Total requested time, in seconds",
     )
-    proprietary_period: ProprietaryPeriod = Field(
-        ...,
-        title="Proprietary period",
-        description="The Proprietary period.",
-    )
+
     liaison_salt_astronomer: Optional[FullName] = Field(
         ...,
         title="Liaison astronomer",
         description="SALT Astronomer who is the liaison astronomer for the proposal",
     )
-    summary_for_salt_astronomer: str = Field(
-        ...,
-        title="Summary for the SALT Astronomer",
-        description=(
-            "Brief summary with the essential information for the SALT Astronomer"
-        ),
-    )
-    summary_for_night_log: str = Field(
-        ...,
-        title="Summary for the night log",
-        description="Brief (one-line) summary to include in the observing night log",
-    )
+
     is_self_activatable: bool = Field(
         ...,
         title="Can the proposal be self-activated?",
@@ -174,6 +161,27 @@ class GeneralProposalInfo(BaseModel):
             "Can the proposal be activated by the Principal Investigator or Principal"
             " Contact?"
         ),
+    )
+
+
+class ThesisType(str, Enum):
+    MASTERS = ("Masters",)
+    PHD = "PhD"
+
+
+class Thesis(BaseModel):
+    thesis_type: ThesisType = Field(
+        ..., title="Thesis type", description="The thesis type"
+    )
+    relevance_of_proposal: Optional[str] = Field(
+        ...,
+        title="Relevance of proposal",
+        description="Importance and contribution of the proposal to the thesis.",
+    )
+    year_of_completion: int = Field(
+        ...,
+        title="Year of completion",
+        description="The year when the thesis is expected to be completed.",
     )
 
 
@@ -200,6 +208,9 @@ class Investigator(ProposalUser):
             "Whether the investigator has approved the proposal. The value is null if"
             " the investigator has neither approved nor rejected the proposal yet"
         ),
+    )
+    thesis: Optional[Thesis] = Field(
+        ..., title="Thesis", description="The thesis details"
     )
 
 
@@ -288,9 +299,7 @@ class Comment(BaseModel):
         }
 
 
-class PartnerPercentage(
-    BaseModel
-):  # TODO There is a similar class to this just missing a partner code
+class PartnerPercentage(BaseModel):
     """A percentage (for example of the requested time) for a partner."""
 
     partner: PartnerName = Field(..., title="SALT partner", description="SALT partner")
@@ -389,52 +398,31 @@ class Proposal(BaseModel):
         title="Semester",
         description="Semester for which the proposal details are given",
     )
-    general_info: GeneralProposalInfo = Field(
-        ...,
-        title="General information",
-        description="General proposal information for a semester",
-    )
     investigators: List[Investigator] = Field(
         ..., title="Investigators", description="Investigators on the proposal"
     )
-    targets: Optional[List[Phase1Target]] = Field(
-        ...,
-        title="Targets",
-        description=(
-            "Targets for which observations are requested. These are only "
-            "included for phase 1 proposals."
-        ),
-    )
-    requested_times: Optional[List[RequestedTime]] = Field(
+    requested_times: List[RequestedTime] = Field(
         ...,
         title="Requested times",
-        description=(
-            "Requested times for all semesters in the proposal. These are only "
-            "included for a phase 1 proposal."
-        ),
-    )
-    blocks: List[BlockSummary] = Field(
-        ..., title="Blocks", description="Blocks for the semester"
-    )
-    block_visits: List[BlockVisit] = Field(
-        ...,
-        title="Observations",
-        description="Observations made for the proposal in any semester",
-    )
-    charged_time: ChargedTime = Field(
-        ...,
-        title="Charged time, by priority",
-        description="Charged time, by priority, for the semester",
+        description="Requested times for all semesters in the proposal.",
     )
     time_allocations: List[TimeAllocation] = Field(
         ...,
         title="Time allocations",
         description="Time allocations for the semester",
     )
-    observation_comments: List[ObservationComment] = Field(
+    phase1_proposal_summary: Optional[str] = Field(
         ...,
-        title="Observation comments",
-        description="Comments related to observing the proposal",
+        title="Proposal summary",
+        description="URL of a pdf document containing the phase 1 proposal summary",
+    )
+    proposal_file: str = Field(
+        ...,
+        title="Proposal file",
+        description=(
+            "URL of the proposal file that can be imported into the Principal "
+            "Investigator Proposal Tool"
+        ),
     )
 
 

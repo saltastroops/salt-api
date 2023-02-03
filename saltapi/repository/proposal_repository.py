@@ -1292,17 +1292,26 @@ WHERE PIR.InactiveReason = :inactive_reason
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
-        stmt = text(
-            """
+        txt = """
 UPDATE ProposalGeneralInfo PGI, ProposalInactiveReason PIR
-LEFT JOIN ProposalInactiveReason PIR ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
-SET PGI.ProposalStatus_Id = :status_id,
-    PIR.ProposalInactiveReason_Id = :proposal_inactive_reason_id
+SET PGI.ProposalStatus_Id = :status_id
+        """
+
+        if proposal_inactive_reason_id is not None:
+            txt += """
+, PIR.ProposalInactiveReason_Id = :proposal_inactive_reason_id
+WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
+                         FROM ProposalCode PC
+                         WHERE PC.Proposal_Code = :proposal_code)
+            """
+        else:
+            txt += """
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code);
-        """
-        )
+            """
+
+        stmt = text(txt)
         result = self.connection.execute(
             stmt,
             {

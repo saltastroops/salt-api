@@ -2,11 +2,10 @@ from typing import Dict, List, Optional, cast
 
 import pytest
 
-from saltapi.exceptions import AuthorizationError, NotFoundError
+from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.proposal_service import ProposalService
-from saltapi.web.schema.proposal import ProposalStatus, ProposalStatusValue
 
 
 class FakeProposalRepository:
@@ -14,7 +13,7 @@ class FakeProposalRepository:
         self.proposal_status = {"value": "Under scientific review", "reason": None}
 
     def list(
-        self, username: str, from_semester: str, to_semester: str, limit: str
+            self, username: str, from_semester: str, to_semester: str, limit: str
     ) -> List[ProposalListItem]:
         return [
             cast(ProposalListItem, from_semester),
@@ -28,14 +27,12 @@ class FakeProposalRepository:
         raise NotFoundError()
 
     def update_proposal_status(
-        self,
-        proposal_code: str,
-        proposal_status_value: str,
-        inactive_reason: Optional[str],
+            self,
+            proposal_code: str,
+            proposal_status_value: str,
+            inactive_reason: Optional[str],
     ) -> None:
         if proposal_code == VALID_PROPOSAL_CODE:
-            if proposal_status_value not in ProposalStatusValue.value:
-                raise AuthorizationError()
             self.proposal_status = {
                 "value": proposal_status_value,
                 "reason": inactive_reason,
@@ -101,3 +98,27 @@ def test_get_proposal_status() -> None:
 
     assert proposal_status["value"] == "Under scientific review"
     assert proposal_status["reason"] is None
+
+
+def test_update_proposal_status_raises_for_wrong_proposal_code() -> None:
+    proposal_service = create_proposal_repository()
+    with pytest.raises(NotFoundError):
+        proposal_service.get_proposal_status("2022-2-DDT-001")
+
+
+def test_update_proposal_status() -> None:
+    proposal_code = VALID_PROPOSAL_CODE
+    proposal_status_value = "Approved"
+    inactive_reason = None
+    proposal_service = create_proposal_repository()
+    proposal_service.update_proposal_status(
+        proposal_code,
+        proposal_status_value,
+        inactive_reason
+    )
+
+    new_proposal_status = proposal_service.get_proposal_status(VALID_PROPOSAL_CODE)
+
+    assert new_proposal_status["value"] == "Approved"
+    assert new_proposal_status["reason"] is None
+

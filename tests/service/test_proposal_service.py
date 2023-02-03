@@ -8,6 +8,9 @@ from saltapi.service.proposal_service import ProposalService
 
 
 class FakeProposalRepository:
+    def __init__(self) -> None:
+        self.proposal_status = {"value": "Under scientific review", "reason": None}
+
     def list(
         self, username: str, from_semester: str, to_semester: str, limit: str
     ) -> List[ProposalListItem]:
@@ -17,11 +20,29 @@ class FakeProposalRepository:
             cast(ProposalListItem, limit),
         ]
 
+    def get_proposal_status(self, proposal_code: str) -> Dict[str, str]:
+        if proposal_code == VALID_PROPOSAL_CODE:
+            return self.proposal_status
+        raise NotFoundError()
+
+    def update_proposal_status(
+            self, proposal_code: str, proposal_status_value: str, inactive_reason: Optional[str]
+    ) -> None:
+        if proposal_code == VALID_PROPOSAL_CODE:
+            if proposal_status_value not in ProposalStatusValue.value:
+                raise AuthorizationError()
+            self.proposal_status = {"value": proposal_status_value, "reason": inactive_reason}
+        else:
+            raise NotFoundError()
+
 
 def create_proposal_repository() -> ProposalService:
     proposal_repository = FakeProposalRepository()
     proposal_service = ProposalService(cast(ProposalRepository, proposal_repository))
     return proposal_service
+
+
+VALID_PROPOSAL_CODE = "2023-1-MLT-006"
 
 
 def test_list_proposal_summaries_returns_correct_proposals() -> None:

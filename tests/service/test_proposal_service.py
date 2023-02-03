@@ -1,12 +1,12 @@
-from typing import List, cast, Optional, Dict
+from typing import Dict, List, Optional, cast
 
 import pytest
 
-from saltapi.exceptions import NotFoundError, AuthorizationError
+from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.proposal_service import ProposalService
-from saltapi.web.schema.proposal import ProposalStatusValue, ProposalStatus
+from saltapi.web.schema.proposal import ProposalStatus, ProposalStatusValue
 
 
 class FakeProposalRepository:
@@ -28,12 +28,18 @@ class FakeProposalRepository:
         raise NotFoundError()
 
     def update_proposal_status(
-            self, proposal_code: str, proposal_status_value: str, inactive_reason: Optional[str]
+        self,
+        proposal_code: str,
+        proposal_status_value: str,
+        inactive_reason: Optional[str],
     ) -> None:
         if proposal_code == VALID_PROPOSAL_CODE:
             if proposal_status_value not in ProposalStatusValue.value:
                 raise AuthorizationError()
-            self.proposal_status = {"value": proposal_status_value, "reason": inactive_reason}
+            self.proposal_status = {
+                "value": proposal_status_value,
+                "reason": inactive_reason,
+            }
         else:
             raise NotFoundError()
 

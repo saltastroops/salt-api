@@ -33,10 +33,11 @@ from saltapi.web.schema.proposal import (
     Proposal,
     ProposalInactiveReason,
     ProposalListItem,
+    ProposalStatus,
     ProposalStatusContent,
     ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus, ProposalStatus,
+    UpdateStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])

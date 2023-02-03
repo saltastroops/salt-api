@@ -36,7 +36,7 @@ from saltapi.web.schema.proposal import (
     ProposalStatusContent,
     ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus,
+    UpdateStatus, ProposalStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -222,7 +222,7 @@ def get_scientific_justification(
 @router.get(
     "/{proposal_code}/status",
     summary="Get the proposal status",
-    response_model=ProposalStatusContent,
+    response_model=ProposalStatus,
 )
 def get_proposal_status(
     proposal_code: ProposalCode = Path(

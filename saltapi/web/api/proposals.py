@@ -29,10 +29,12 @@ from saltapi.web.schema.proposal import (
     DataReleaseDate,
     ObservationComment,
     Proposal,
+    ProposalInactiveReason,
     ProposalListItem,
     ProposalStatusContent,
+    ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus, ProposalStatusValue, ProposalInactiveReason,
+    UpdateStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])

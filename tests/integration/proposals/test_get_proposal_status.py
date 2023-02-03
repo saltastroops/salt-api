@@ -39,7 +39,7 @@ def test_should_return_404_when_requesting_proposal_status_non_existing_proposal
         find_username("TAC Chair", partner_code="RSA"),
     ],
 )
-def test_should_return_proposal_status_when_requesting_block_status_for_permitted_users(
+def test_should_return_proposal_status_when_requesting_proposal_status_for_permitted_users(
     username: str, client: TestClient
 ) -> None:
     proposal_code = "2019-2-SCI-006"

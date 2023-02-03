@@ -329,13 +329,13 @@ def update_proposal_status(
         permission_service.check_permission_to_update_proposal_status(user)
         proposal_service = services.proposal_service(unit_of_work.connection)
 
-        proposal_service.update_proposal_status(proposal_code, proposal_status, inactive_reason)
+        proposal_service.update_proposal_status(
+            proposal_code, proposal_status, inactive_reason
+        )
 
         unit_of_work.commit()
 
         return proposal_service.get_proposal_status(proposal_code)
-
-
 
 
 @router.get(

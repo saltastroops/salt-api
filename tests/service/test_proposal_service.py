@@ -1,10 +1,12 @@
-from typing import List, cast
+from typing import List, cast, Optional, Dict
 
 import pytest
 
+from saltapi.exceptions import NotFoundError, AuthorizationError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.proposal_service import ProposalService
+from saltapi.web.schema.proposal import ProposalStatusValue, ProposalStatus
 
 
 class FakeProposalRepository:
@@ -79,3 +81,17 @@ def test_list_proposal_summaries_raises_error_from_wrong_semester_order() -> Non
             username="someone", from_semester="2019-1", to_semester="2018-2"
         )
     assert "semester" in str(excinfo.value)
+
+
+def test_get_proposal_status_raises_for_wrong_proposal_code() -> None:
+    proposal_service = create_proposal_repository()
+    with pytest.raises(NotFoundError):
+        proposal_service.get_proposal_status("2021-2-LSP-001")
+
+
+def test_get_proposal_status() -> None:
+    proposal_service = create_proposal_repository()
+    proposal_status = proposal_service.get_proposal_status(VALID_PROPOSAL_CODE)
+
+    assert proposal_status["value"] == "Under scientific review"
+    assert proposal_status["reason"] is None

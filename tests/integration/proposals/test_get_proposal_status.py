@@ -16,7 +16,7 @@ def test_should_return_401_when_requesting_proposal_status_for_unauthenticated_u
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_should_return_404_when_requesting_proposal_status_non_existing_proposal(
+def test_should_return_404_when_requesting_proposal_status_of_non_existing_proposal(
     client: TestClient,
 ) -> None:
     proposal_code = "2099-2-DDT-001"

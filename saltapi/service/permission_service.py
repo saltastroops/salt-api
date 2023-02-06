@@ -5,7 +5,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
-from saltapi.web.schema.proposal import ProprietaryPeriodUpdateRequest, ProposalStatus
+from saltapi.web.schema.proposal import ProprietaryPeriodUpdateRequest, ProposalStatusValue
 
 
 class PermissionService:
@@ -183,7 +183,13 @@ class PermissionService:
 
         self.check_role(username, roles, proposal_code)
 
-    def check_permission_to_update_proposal_status(self, user: User, proposal_code: str, is_self_activatable: bool, proposal_status: str) -> None:
+    def check_permission_to_update_proposal_status(
+            self,
+            user: User,
+            proposal_code: str,
+            is_self_activatable: bool,
+            proposal_status: str
+    ) -> None:
         """
         Check whether the user may update a proposal status.
 
@@ -195,10 +201,10 @@ class PermissionService:
         username = user.username
         if self.user_has_role(username, Role.PRINCIPAL_CONTACT, proposal_code) or\
             self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
-            if proposal_status == ProposalStatus.value.INACTIVE or \
+            if proposal_status == ProposalStatusValue.INACTIVE or \
                     (
                         is_self_activatable and
-                        proposal_status == ProposalStatus.value.ACTIVE
+                        proposal_status == ProposalStatusValue.ACTIVE
                     ):
                 return
             raise AuthorizationError()

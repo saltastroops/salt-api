@@ -30,12 +30,10 @@ from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     ObservationComment,
-    ProposalInactiveReason,
     ProposalListItem,
     ProposalStatus,
-    ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus,
+    UpdateStatus, ProposalStatusContent,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -354,7 +352,6 @@ def update_proposal_status(
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal = proposal_service.get_proposal(proposal_code)
         permission_service = services.permission_service(unit_of_work.connection)
-        print(proposal["general_info"]["is_self_activatable"])
         permission_service.check_permission_to_update_proposal_status(
             user, proposal_code, proposal["general_info"]["is_self_activatable"], proposal_status.status.value
         )

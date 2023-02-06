@@ -335,12 +335,25 @@ def update_proposal_status(
     proposal_status: ProposalStatusContent = Body(
         ..., alias="status", title="Proposal status", description="New proposal status."
     ),
+    user: User = Depends(get_current_user),
 ) -> ProposalStatusContent:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal = proposal_service.get_proposal(proposal_code)
+        permission_service = services.permission_service(unit_of_work.connection)
+        print(proposal["general_info"]["is_self_activatable"])
+        permission_service.check_permission_to_update_proposal_status(
+            user, proposal_code, proposal["general_info"]["is_self_activatable"], proposal_status.status.value
+        )
+
+        proposal_service.update_proposal_status(proposal_code, proposal_status.status.value, proposal_status.status.reason)
+
+        unit_of_work.connection.commit()
+        return proposal_status
 
 
 @router.get(

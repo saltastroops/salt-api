@@ -317,3 +317,6 @@ class ProposalService:
         self.repository.update_proprietary_period(
             proposal_code=proposal_code, proprietary_period=proprietary_period
         )
+
+    def update_proposal_status(self, proposal_code: str, proposal_status: str, status_reason: Optional[str]):
+        self.repository.update_proposal_status(proposal_code, proposal_status, status_reason)

@@ -1263,7 +1263,7 @@ WHERE PC.Proposal_Code = :proposal_code
         except NoResultFound:
             raise NotFoundError()
 
-    def update_proposal_status(self, proposal_code: str, status: str) -> None:
+    def update_proposal_status(self, proposal_code: str, status: str, status_reason: Optional[str] = None) -> None:
         """
         Update the status of a proposal.
         """
@@ -1279,14 +1279,22 @@ WHERE PC.Proposal_Code = :proposal_code
         stmt = text(
             """
 UPDATE ProposalGeneralInfo
-SET ProposalStatus_Id = :status_id
-WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
-                         FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code);
+SET 
+	ProposalStatus_Id = :status_id,
+    ProposalInactiveReason_Id = (
+		Select ProposalInactiveReason_Id 
+        FROM ProposalInactiveReason 
+        WHERE InactiveReason = :status_reason
+    )
+WHERE ProposalCode_Id = (
+    SELECT PC.ProposalCode_Id
+    FROM ProposalCode PC
+    WHERE PC.Proposal_Code = :proposal_code
+);
         """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "status_id": status_id}
+            stmt, {"proposal_code": proposal_code, "status_id": status_id, "status_reason": status_reason}
         )
         if not result.rowcount:
             raise NotFoundError()

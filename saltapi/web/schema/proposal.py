@@ -36,13 +36,22 @@ class ProposalStatusValue(str, Enum):
     UNDER_TECHNICAL_REVIEW = "Under technical review"
 
 
+class ProposalInactiveReason(str, Enum):
+    WAITING_FOR_INSTRUMENT_AVAILABILITY = 'Waiting for instrument availability'
+    WAITING_FOR_FEEDBACK = 'Waiting for feedback'
+    UNDOABLE = 'Undoable'
+    TOO_AWAITING_PI_INITIATION = 'ToO, awaiting PI initiation'
+    TARGET_NOT_VISIBLE = 'Target not visible'
+    OTHER = 'Other'
+
+
 class ProposalStatus(BaseModel):
     """Proposal status."""
 
     value: ProposalStatusValue = Field(
         ..., title="Proposal status", description="Proposal status"
     )
-    reason: Optional[str] = Field(
+    reason: Optional[ProposalInactiveReason] = Field(
         ..., title="Proposal status reason", description="Proposal status reason"
     )
 

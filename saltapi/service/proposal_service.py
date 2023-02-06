@@ -330,4 +330,4 @@ class ProposalService:
         """
         Set the proposal status for a proposal code.
         """
-        return self.repository.update_proposal_status(proposal_code, status, reason)
+        self.repository.update_proposal_status(proposal_code, status, reason)

@@ -65,7 +65,7 @@ def test_should_return_proposal_status_when_requesting_proposal_status_for_permi
 def test_should_return_403_when_requesting_proposal_status_for_non_permitted_users(
     username: str, client: TestClient
 ) -> None:
-    proposal_code = "2020-2-DDT-005"
+    proposal_code = "2019-2-SCI-006"
 
     authenticate(username, client)
     response = client.get(PROPOSALS_URL + "/" + proposal_code + "/status")

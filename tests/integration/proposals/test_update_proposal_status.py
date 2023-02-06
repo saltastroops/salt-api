@@ -97,3 +97,33 @@ def test_proposal_status_update(
 
     assert new_block_status["value"] == proposal_status_value
     assert new_block_status["reason"] == proposal_inactive_reason
+
+
+def test_proposal_status_update_with_inactive_reason(
+        client: TestClient,
+) -> None:
+    proposal_code = "2022-2-SCI-007"
+    username = find_username("administrator")
+    authenticate(username, client)
+
+    proposal_status_value = "Inactive"
+    proposal_inactive_reason = "Undoable"
+
+    response = client.put(
+        PROPOSALS_URL + "/" + proposal_code + "/status",
+        json={"status": proposal_status_value, "reason": proposal_inactive_reason},
+        )
+    assert response.status_code == status.HTTP_200_OK
+
+    proposal_status = response.json()
+
+    assert proposal_status["value"] == proposal_status_value
+    assert proposal_status["reason"] == proposal_inactive_reason
+
+    resp = client.get(PROPOSALS_URL + "/" + proposal_code + "/status")
+    assert resp.status_code == status.HTTP_200_OK
+
+    new_block_status = resp.json()
+
+    assert new_block_status["value"] == proposal_status_value
+    assert new_block_status["reason"] == proposal_inactive_reason

@@ -106,6 +106,21 @@ def test_update_proposal_status_raises_for_wrong_proposal_code() -> None:
         proposal_service.get_proposal_status("2022-2-DDT-001")
 
 
+def test_update_proposal_status_with_inactive_reason() -> None:
+    proposal_code = VALID_PROPOSAL_CODE
+    proposal_status_value = "Inactive"
+    inactive_reason = "Undoable"
+    proposal_service = create_proposal_repository()
+    proposal_service.update_proposal_status(
+        proposal_code, proposal_status_value, inactive_reason
+    )
+
+    new_proposal_status = proposal_service.get_proposal_status(VALID_PROPOSAL_CODE)
+
+    assert new_proposal_status["value"] == "Inactive"
+    assert new_proposal_status["reason"] == "Undoable"
+
+
 def test_update_proposal_status() -> None:
     proposal_code = VALID_PROPOSAL_CODE
     proposal_status_value = "Approved"

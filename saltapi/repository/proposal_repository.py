@@ -1278,23 +1278,22 @@ WHERE PC.Proposal_Code = :proposal_code
 
         stmt = text(
             """
-UPDATE ProposalGeneralInfo
+UPDATE ProposalGeneralInfo  PGI
 SET 
-	ProposalStatus_Id = :status_id,
-    ProposalInactiveReason_Id = (
+    PGI.ProposalStatus_Id = :status_id,
+    PGI.ProposalInactiveReason_Id = (
 		Select ProposalInactiveReason_Id 
         FROM ProposalInactiveReason 
         WHERE InactiveReason = :status_reason
     )
-WHERE ProposalCode_Id = (
-    SELECT PC.ProposalCode_Id
-    FROM ProposalCode PC
-    WHERE PC.Proposal_Code = :proposal_code
-);
+WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
+                         FROM ProposalCode PC
+                         WHERE PC.Proposal_Code = :proposal_code);
         """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "status_id": status_id, "status_reason": status_reason}
+            stmt, {
+                "proposal_code": proposal_code, "status_id": status_id, "status_reason": status_reason}
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -2138,7 +2137,7 @@ WHERE Proposal_Code = :proposal_code
                     "minimum_useful_time": row.minimum_useful_time,
                     "comment": row.comment,
                     "semester": semester,
-                    "distribution": []
+                    "distribution": [],
                 }
             req_time[semester]["distribution"].append({
                 "partner": row.partner_name,

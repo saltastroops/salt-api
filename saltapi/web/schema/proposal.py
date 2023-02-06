@@ -37,12 +37,14 @@ class ProposalStatusValue(str, Enum):
 
 
 class ProposalInactiveReason(str, Enum):
-    WAITING_FOR_INSTRUMENT_AVAILABILITY = 'Waiting for instrument availability'
-    WAITING_FOR_FEEDBACK = 'Waiting for feedback'
-    UNDOABLE = 'Undoable'
-    TOO_AWAITING_PI_INITIATION = 'ToO, awaiting PI initiation'
-    TARGET_NOT_VISIBLE = 'Target not visible'
-    OTHER = 'Other'
+    """Proposal inactive reason."""
+
+    TARGET_NOT_VISIBLE = "Target not visible"
+    UNDOABLE = "Undoable"
+    WAITING_FOR_FEEDBACK = "Waiting for feedback"
+    WAITING_FOR_INSTRUMENT_AVAILABILITY = "Waiting for instrument availability"
+    ToO_AWAITING_PI_INITIATION = "ToO, awaiting PI initiation"
+    OTHER = "Other"
 
 
 class ProposalStatus(BaseModel):

@@ -19,6 +19,7 @@ from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
+from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
@@ -29,8 +30,10 @@ from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     ObservationComment,
+    ProposalInactiveReason,
     ProposalListItem,
-    ProposalStatusContent,
+    ProposalStatus,
+    ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
     UpdateStatus,
 )
@@ -218,15 +221,16 @@ def get_scientific_justification(
 @router.get(
     "/{proposal_code}/status",
     summary="Get the proposal status",
-    response_model=ProposalStatusContent,
+    response_model=ProposalStatus,
 )
 def get_proposal_status(
     proposal_code: ProposalCode = Path(
         ProposalCode,
         title="Proposal code",
         description="Proposal code of the proposal whose status is requested.",
-    )
-) -> ProposalStatusContent:
+    ),
+    user: User = Depends(get_current_user),
+) -> _ProposalStatus:
     """
     Returns the current status of the proposal with a given proposal code.
 
@@ -246,7 +250,12 @@ def get_proposal_status(
     Under scientific review | The (Phase 1) proposal is being evaluated by the TAC(s).
     Under technical review | The (Phase 2) proposal is being checked by the PI and is not in the queue yet.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+
+        return proposal_service.get_proposal_status(proposal_code)
 
 
 @router.put(

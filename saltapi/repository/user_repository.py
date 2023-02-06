@@ -623,7 +623,7 @@ WHERE PiptUser_Id = :user_id
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         """
-       Returns a list of salt Astronomers
+       Return the list of SALT Astronomers.
        """
         stmt = text(
             """
@@ -638,12 +638,11 @@ FROM SaltAstronomers SA
 
         result = self.connection.execute(stmt)
 
-        salt_astronomers = []
-        for row in result:
-            if row.given_name != "Techops":
-                salt_astronomers.append({
-                    "id": row.id,
-                    "given_name": row.given_name,
-                    "family_name": row.family_name,
-                })
-        return salt_astronomers
+        return [
+            {
+                "id": row.id,
+                "given_name": row.given_name,
+                "family_name": row.family_name,
+            }
+            for row in result if row.given_name != "Techops"
+        ]

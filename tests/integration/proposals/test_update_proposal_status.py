@@ -63,7 +63,8 @@ def test_proposal_status_update_requires_valid_proposal_status_value(
     ],
 )
 def test_proposal_status_update_requires_permissions(
-        username: str, client: TestClient,
+    username: str,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     authenticate(username, client)
@@ -74,7 +75,7 @@ def test_proposal_status_update_requires_permissions(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"status": proposal_status_value, "reason": proposal_inactive_reason},
-        )
+    )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -126,7 +127,7 @@ def test_proposal_status_update(
 
 
 def test_proposal_status_update_with_inactive_reason(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2022-2-SCI-007"
     username = find_username("administrator")
@@ -138,7 +139,7 @@ def test_proposal_status_update_with_inactive_reason(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"status": proposal_status_value, "reason": proposal_inactive_reason},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
 
     proposal_status = response.json()

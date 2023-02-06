@@ -52,6 +52,32 @@ def test_proposal_status_update_requires_valid_proposal_status_value(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+@pytest.mark.parametrize(
+    "username",
+    [
+        find_username("Investigator", proposal_code="2019-2-SCI-006"),
+        find_username("Principal Contact", proposal_code="2019-2-SCI-006"),
+        find_username("Principal Investigator", proposal_code="2019-2-SCI-006"),
+        find_username("TAC Member", partner_code="RSA"),
+        find_username("TAC Chair", partner_code="RSA"),
+    ],
+)
+def test_proposal_status_update_requires_permissions(
+        username: str, client: TestClient,
+) -> None:
+    proposal_code = "2019-2-SCI-006"
+    authenticate(username, client)
+
+    proposal_status_value = "Under scientific review"
+    proposal_inactive_reason = None
+
+    response = client.put(
+        PROPOSALS_URL + "/" + proposal_code + "/status",
+        json={"status": proposal_status_value, "reason": proposal_inactive_reason},
+        )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
 def test_proposal_status_update_requires_valid_proposal_inactive_reason(
     client: TestClient,
 ) -> None:

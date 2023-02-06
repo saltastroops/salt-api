@@ -317,3 +317,17 @@ class ProposalService:
         self.repository.update_proprietary_period(
             proposal_code=proposal_code, proprietary_period=proprietary_period
         )
+
+    def get_proposal_status(self, proposal_code: str) -> Dict[str, str]:
+        """
+        Get the proposal status for a proposal code.
+        """
+        return self.repository.get_proposal_status(proposal_code)
+
+    def update_proposal_status(
+        self, proposal_code: str, status: str, reason: Optional[str]
+    ) -> None:
+        """
+        Set the proposal status for a proposal code.
+        """
+        self.repository.update_proposal_status(proposal_code, status, reason)

@@ -1263,7 +1263,20 @@ WHERE PC.Proposal_Code = :proposal_code
         except NoResultFound:
             raise NotFoundError()
 
-    def update_proposal_status(self, proposal_code: str, status: str) -> None:
+    def _proposal_inactive_reason_id(self, inactive_reason: str) -> int:
+        stmt = text(
+            """
+SELECT PIR.ProposalInactiveReason_Id AS id
+FROM ProposalInactiveReason PIR
+WHERE PIR.InactiveReason = :inactive_reason
+        """
+        )
+        result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
+        return cast(int, result.scalar_one())
+
+    def update_proposal_status(
+        self, proposal_code: str, status: str, reason: Optional[str]
+    ) -> None:
         """
         Update the status of a proposal.
         """
@@ -1273,20 +1286,29 @@ WHERE PC.Proposal_Code = :proposal_code
         # wrong status value.
         try:
             status_id = self._proposal_status_id(status)
+            proposal_inactive_reason_id = (
+                self._proposal_inactive_reason_id(reason) if reason else None
+            )
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
         stmt = text(
             """
-UPDATE ProposalGeneralInfo
-SET ProposalStatus_Id = :status_id
+UPDATE ProposalGeneralInfo PGI
+SET PGI.ProposalStatus_Id = :status_id,
+    PGI.ProposalInactiveReason_Id = :proposal_inactive_reason_id
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code);
-        """
+                         WHERE PC.Proposal_Code = :proposal_code)
+            """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "status_id": status_id}
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "status_id": status_id,
+                "proposal_inactive_reason_id": proposal_inactive_reason_id,
+            },
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -2120,9 +2142,7 @@ WHERE Proposal_Code = :proposal_code
         )
 
         req_time = defaultdict(lambda: dict())
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code
-        }):
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             semester = row.semester
             if not req_time[semester]:
                 req_time[semester] = {
@@ -2130,12 +2150,11 @@ WHERE Proposal_Code = :proposal_code
                     "minimum_useful_time": row.minimum_useful_time,
                     "comment": row.comment,
                     "semester": semester,
-                    "distribution": []
+                    "distribution": [],
                 }
-            req_time[semester]["distribution"].append({
-                "partner": row.partner_name,
-                "percentage": row.percentage
-            })
+            req_time[semester]["distribution"].append(
+                {"partner": row.partner_name, "percentage": row.percentage}
+            )
 
         return list(req_time.values())
 

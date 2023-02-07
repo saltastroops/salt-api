@@ -21,7 +21,6 @@ export interface HrsConfiguration {
   fiberSeparation: number;
   iodineCellPosition: HrsIodineCellPosition;
   isThArLampOn: boolean;
-  nodAndShuffle: HrsNodAndShuffle | null;
 }
 
 export interface HrsDetector {
@@ -55,11 +54,6 @@ export type HrsMode =
   | "Int Cal Fiber"
   | "Low Resolution"
   | "Medium Resolution";
-
-export interface HrsNodAndShuffle {
-  nodInterval: number;
-  nodCount: number;
-}
 
 export interface HrsProcedure {
   cycles: number;

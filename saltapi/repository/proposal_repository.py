@@ -1770,6 +1770,35 @@ AND P.Virtual != 1
 
         return path
 
+    def get_progress_report_semesters(self, proposal_code: str) -> List[str]:
+        """
+        Return the list of semesters for which a progress report has been submitted.
+
+        The list is sorted in ascending order.
+
+        Parameters
+        ----------
+        proposal_code: str
+            Proposal code.
+
+        Returns
+        -------
+        list of str
+            The sorted list of semesters.
+        """
+        stmt = text(
+            """
+SELECT CONCAT(S.Year, '-', S.Semester) AS semester
+FROM ProposalProgress PP
+         JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN Semester S ON PP.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code;
+
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        return sorted(row.semester for row in result)
+
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
             """
@@ -2141,7 +2170,7 @@ WHERE Proposal_Code = :proposal_code
         """
         )
 
-        req_time = defaultdict(lambda: dict())
+        req_time: DefaultDict[str, Dict[str, Any]] = defaultdict(lambda: dict())
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             semester = row.semester
             if not req_time[semester]:

@@ -33,17 +33,6 @@ class HrsMode(str, Enum):
     MEDIUM_RESOLUTION = "Medium Resolution"
 
 
-class HrsNodAndShuffle(BaseModel):
-    """HRS nod and shuffle settings."""
-
-    nod_interval: int = Field(
-        ..., title="Nod interval", description="Time per nod interval, in seconds"
-    )
-    nod_count: int = Field(
-        ..., title="Nod count", description="Number of nods required"
-    )
-
-
 class HrsTargetLocation(str, Enum):
     """HRS target location."""
 
@@ -66,9 +55,6 @@ class HrsConfiguration(BaseModel):
     )
     is_th_ar_lamp_on: bool = Field(
         ..., title="ThAr lamp on?", description="Whether the ThAr lamp is on"
-    )
-    nod_and_shuffle: Optional[HrsNodAndShuffle] = Field(
-        ..., title="Node and shuffle", description="Nod and shuffle settings"
     )
 
 

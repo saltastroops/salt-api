@@ -620,3 +620,29 @@ WHERE PiptUser_Id = :user_id
             roles.append(Role.TAC_MEMBER)
 
         return roles
+
+    def get_salt_astronomers(self) -> List[Dict[str, Any]]:
+        """
+       Return the list of SALT Astronomers.
+       """
+        stmt = text(
+            """
+SELECT 
+	I.PiptUser_Id          AS id,
+    I.FirstName             AS given_name,
+    I.Surname               AS family_name
+FROM SaltAstronomers SA
+	JOIN Investigator I ON SA.Investigator_Id = I.Investigator_Id
+        """
+        )
+
+        result = self.connection.execute(stmt)
+
+        return [
+            {
+                "id": row.id,
+                "given_name": row.given_name,
+                "family_name": row.family_name,
+            }
+            for row in result if row.given_name != "Techops"
+        ]

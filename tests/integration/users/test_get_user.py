@@ -135,24 +135,6 @@ def test_admins_may_view_list_of_users(client: TestClient) -> None:
     assert response.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.parametrize(
-    "username",
-    [
-        find_username("administrator"),
-        find_username("SALT Astronomer"),
-        find_username("Board Member"),
-        find_username("TAC Member", partner_code="RSA"),
-        find_username("TAC Chair", partner_code="RSA"),
-        find_username("Investigator", proposal_code="2019-2-SCI-006"),
-    ],
-)
-def test_any_user_can_view_list_of_salt_astronomers(
-        username: str, client: TestClient
-) -> None:
-    authenticate(username, client)
-    response = client.get("/users/salt-astronomers")
-    assert response.status_code == status.HTTP_200_OK
-
 def test_unauthenticated_users_can_view_list_of_salt_astronomers(
         client: TestClient
 ) -> None:

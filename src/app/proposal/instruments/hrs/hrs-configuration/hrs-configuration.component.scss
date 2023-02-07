@@ -9,3 +9,23 @@
 .configuration-row div {
   line-height: 8px;
 }
+
+.low-resolution {
+  background-color: $blue-background-color;
+}
+
+.medium-resolution {
+  background-color: $green;
+}
+
+.high-resolution {
+  background-color: $yellow-background;
+}
+
+.high-stability {
+  background-color: $orange-background;
+}
+
+.int-cal-fiber {
+  background-color: $red-background;
+}

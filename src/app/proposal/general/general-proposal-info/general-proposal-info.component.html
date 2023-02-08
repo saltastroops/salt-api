@@ -5,12 +5,21 @@
         <th colspan="5" class="has-text-centered">General</th>
       </tr>
       <tr>
-        <th colspan="5" class="has-text-centered">Title</th>
+        <th colspan="3">Title</th>
+        <th colspan="1">PI</th>
+        <th colspan="1">PC</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td colspan="5">{{ generalProposalInfo.title }}</td>
+        <td colspan="3">{{ proposal.generalInfo.title }}</td>
+        <td colspan="1">
+          {{ principalInvestigator?.givenName }}
+          {{ principalInvestigator?.familyName }}
+        </td>
+        <td colspan="1">
+          {{ principalContact?.givenName }} {{ principalContact?.familyName }}
+        </td>
       </tr>
     </tbody>
     <thead>
@@ -24,13 +33,13 @@
     </thead>
     <tbody>
       <tr>
-        <td>{{ proposalCode }}</td>
-        <td>{{ phase }}</td>
+        <td>{{ proposal.proposalCode }}</td>
+        <td>{{ proposal.phase }}</td>
         <td>
           <div class="select">
             <select [formControl]="semesterControl">
               <option
-                *ngFor="let s of generalProposalInfo.semesters"
+                *ngFor="let s of proposal.generalInfo.semesters"
                 [value]="s"
               >
                 {{ s }}
@@ -43,7 +52,7 @@
         </td>
         <td>
           {{ currentSubmission | dfnsFormat: "d MMMM yyyy" }}
-          (#{{ generalProposalInfo.submissionNumber }})
+          (#{{ proposal.generalInfo.submissionNumber }})
         </td>
       </tr>
     </tbody>
@@ -54,7 +63,10 @@
     </thead>
     <tbody>
       <tr>
-        <td colspan="5" [innerHTML]="generalProposalInfo.abstract | nl2br"></td>
+        <td
+          colspan="5"
+          [innerHTML]="proposal.generalInfo.abstract | nl2br"
+        ></td>
       </tr>
     </tbody>
     <thead>

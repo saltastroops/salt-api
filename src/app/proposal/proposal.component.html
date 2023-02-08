@@ -7,12 +7,7 @@
   <h1 class="title is-1">{{ p.proposalCode }}</h1>
   <hr class="heading-line proposal-header" />
   <div class="block">
-    <wm-general-proposal-info
-      [generalProposalInfo]="p.generalInfo"
-      [currentSemester]="p.semester"
-      [phase]="p.phase"
-      [proposalCode]="p.proposalCode"
-    ></wm-general-proposal-info>
+    <wm-general-proposal-info [proposal]="p"></wm-general-proposal-info>
   </div>
   <ng-template *ngIf="p.phase === 2; then phase2; else phase1"></ng-template>
   <ng-template #phase2>

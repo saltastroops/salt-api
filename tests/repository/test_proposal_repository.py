@@ -748,3 +748,18 @@ def test_get_proposal_file_raises_not_found_error(
 
     with pytest.raises(NotFoundError):
         proposal_repository.get_proposal_file(proposal_code)
+
+
+@pytest.mark.parametrize(
+    "proposal_code,semesters",
+    [
+        ("2020-2-SCI-043", []),
+        ("2020-2-SCI-018", ["2020-2"]),
+        ("2019-2-MLT-001", ["2019-2", "2020-1", "2020-2"]),
+    ],
+)
+def test_get_progress_report_semesters(
+    proposal_code: str, semesters: List[str], db_connection: Connection
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    assert proposal_repository.get_progress_report_semesters(proposal_code) == semesters

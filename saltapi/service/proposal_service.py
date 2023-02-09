@@ -122,7 +122,7 @@ class ProposalService:
     def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
     ) -> Dict[str, Dict[str, str]]:
-        semesters = self.repository.list_of_semesters(proposal_code)
+        semesters = self.repository.get_progress_report_semesters(proposal_code)
 
         progress_report_urls = dict()
         for semester in semesters:

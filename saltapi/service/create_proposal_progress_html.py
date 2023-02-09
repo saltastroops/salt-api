@@ -201,7 +201,7 @@ def create_proposal_progress_html(
                         {new_request['change_reason']}
                     </div>
     """
-    if new_request["additional_pdf"]:
+    if "additional_pdf" in new_request:
         html_content += """
                     <br>
                     <div>

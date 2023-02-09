@@ -49,7 +49,6 @@ import { ProposalDownloadComponent } from "./proposal/general/proposal-details/p
 import { ProposalSummaryComponent } from "./proposal/general/proposal-details/proposal-summary/proposal-summary.component";
 import { ResponsibleAstronomerComponent } from "./proposal/general/proposal-details/responsible-astronomer/responsible-astronomer.component";
 import { ProgressRequestFormComponent } from "./proposal/general/proposal-progress/progress-request-form/progress-request-form.component";
-import { ProposalProgressTableComponent } from "./proposal/general/proposal-progress/proposal-progress-table/proposal-progress-table.component";
 import { ProposalProgressComponent } from "./proposal/general/proposal-progress/proposal-progress.component";
 import { RequestedObservingConditionsComponent } from "./proposal/general/proposal-progress/requested-observing-conditions/requested-observing-conditions.component";
 import { SubmittedTimeRequestsComponent } from "./proposal/general/proposal-progress/submitted-time-requests/submitted-time-requests.component";
@@ -178,7 +177,6 @@ import { SortDirective } from "./sort.directive";
     PageMissingComponent,
     ManageUserProfileComponent,
     SmallLoadingSpinnerComponent,
-    ProposalProgressTableComponent,
     ProposalProgressComponent,
     RequestedObservingConditionsComponent,
     SubmittedTimeRequestsComponent,

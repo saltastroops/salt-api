@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import {
   AbstractControl,
   UntypedFormArray,
@@ -10,7 +10,7 @@ import {
 import { ProposalService } from "../../../../service/proposal.service";
 import { Proposal, ProposalProgress } from "../../../../types/proposal";
 import { getNextSemester } from "../../../../util";
-import { GENERIC_ERROR_MESSAGE } from "../../../../utils";
+import { GENERIC_ERROR_MESSAGE, currentSemester } from "../../../../utils";
 
 @Component({
   selector: "wm-progress-request-form",
@@ -20,11 +20,14 @@ import { GENERIC_ERROR_MESSAGE } from "../../../../utils";
 export class ProgressRequestFormComponent implements OnInit {
   @Input() progressReport!: ProposalProgress;
   @Input() proposal!: Proposal;
+  @Output() successfulSubmission: EventEmitter<ProposalProgress> =
+    new EventEmitter();
 
   proposalProgressForm!: UntypedFormGroup;
   loading = false;
   submitted = false;
   error: string | undefined = undefined;
+  currentSemester = currentSemester();
   nextSemester = getNextSemester();
   changeReasonError = false;
   file: File | null = null;
@@ -79,6 +82,7 @@ export class ProgressRequestFormComponent implements OnInit {
   }
 
   submit(): void {
+    this.loading = true;
     this.submitted = true;
     this.validatePartnerRequestedPercentagesControls();
 
@@ -123,7 +127,7 @@ export class ProgressRequestFormComponent implements OnInit {
     this.proposalService
       .putProgressReport(
         this.proposal.proposalCode,
-        this.nextSemester,
+        this.currentSemester,
         formData,
         this.file,
       )
@@ -131,6 +135,7 @@ export class ProgressRequestFormComponent implements OnInit {
         (data) => {
           this.progressReport = { ...data };
           this.loading = false;
+          this.successfulSubmission.emit(data);
         },
         () => {
           this.error = GENERIC_ERROR_MESSAGE;

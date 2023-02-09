@@ -26,7 +26,8 @@ export class ProposalProgressComponent implements OnInit {
   loading = false;
   apiUrl = environment.apiUrl;
   currentSemester = currentSemester();
-  progressReportsUrls: ProgressReportsUrls | null = null;
+  currentProgressReportExists!: boolean;
+  otherProgressReportsUrls: ProgressReportsUrls | null = null;
   showReports = false;
   reportsLinksText = "Show progress reports for other semesters";
 
@@ -52,14 +53,9 @@ export class ProposalProgressComponent implements OnInit {
         }),
       )
       .subscribe((p: ProgressReportsUrls) => {
-        this.progressReportsUrls = p;
-        if (this.progressReportsUrls[currentSemester()]) {
-          delete this.progressReportsUrls[currentSemester()];
-        }
-
-        if (Object.keys(this.progressReportsUrls).length == 0) {
-          this.progressReportsUrls = null;
-        }
+        const _currentSemester = currentSemester();
+        this.otherProgressReportsUrls = this.otherProgressReports(p);
+        this.currentProgressReportExists = p[_currentSemester] !== undefined;
       });
   }
 
@@ -73,6 +69,30 @@ export class ProposalProgressComponent implements OnInit {
 
     const element = document.getElementById("proposal-progress");
     element?.scrollIntoView();
+  }
+
+  onSuccessfulSubmission(progressReport: ProposalProgress): void {
+    if (progressReport.semester === this.currentSemester) {
+      this.currentProgressReportExists = true;
+    }
+  }
+
+  otherProgressReports(
+    progressReportsUrls: ProgressReportsUrls,
+  ): ProgressReportsUrls | null {
+    let otherProgressReportsUrls: ProgressReportsUrls | null = {
+      ...progressReportsUrls,
+    };
+    const _currentSemester = currentSemester();
+    if (progressReportsUrls[_currentSemester]) {
+      delete otherProgressReportsUrls[currentSemester()];
+    }
+
+    if (Object.keys(otherProgressReportsUrls).length == 0) {
+      otherProgressReportsUrls = null;
+    }
+
+    return otherProgressReportsUrls;
   }
 
   progressReportsUrlsMap(

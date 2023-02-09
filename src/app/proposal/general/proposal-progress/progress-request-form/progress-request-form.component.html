@@ -1,3 +1,11 @@
+<div class="inline-view">
+  <wm-submitted-time-requests
+    [submittedTimeRequests]="progressReport.previousTimeRequests"
+  ></wm-submitted-time-requests>
+  <wm-requested-observing-conditions
+    [lastObservingConstraints]="progressReport.lastObservingConstraints"
+  ></wm-requested-observing-conditions>
+</div>
 <div class="progress-report-form">
   <h2 class="title is-5">Requests for next semester ({{ nextSemester }})</h2>
   <form [formGroup]="proposalProgressForm" (ngSubmit)="submit()">

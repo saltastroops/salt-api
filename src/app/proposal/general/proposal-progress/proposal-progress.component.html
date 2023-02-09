@@ -2,17 +2,13 @@
   <h2 class="title is-2">Proposal Progress</h2>
   <hr class="heading-line proposal-progress-header" />
   <div *ngIf="showForm" class="progress-report-view">
-    <wm-proposal-progress-table
+    <wm-progress-request-form
       [proposal]="proposal"
       [progressReport]="proposalProgress"
-    ></wm-proposal-progress-table>
+      (successfulSubmission)="onSuccessfulSubmission($event)"
+    ></wm-progress-request-form>
   </div>
-  <div
-    *ngIf="
-      progressReportsUrls?.['proposalProgressPdf'];
-      else noCurrentProgressReport
-    "
-  >
+  <div *ngIf="currentProgressReportExists; else noCurrentProgressReport">
     <div>
       <a
         class="has-text-link"
@@ -25,7 +21,7 @@
             '/report.pdf'
         }}"
       >
-        View the progress report as pdf.
+        View the progress report as pdf
       </a>
     </div>
   </div>
@@ -51,7 +47,7 @@
       Edit
     </button>
   </div>
-  <div *ngIf="progressReportsUrls">
+  <div *ngIf="otherProgressReportsUrls">
     <a
       data-test="other-reports-links"
       href="javascript:void(0)"
@@ -62,7 +58,7 @@
       <ul>
         <li
           *ngFor="
-            let u of progressReportsUrlsMap(progressReportsUrls) | keyvalue
+            let u of progressReportsUrlsMap(otherProgressReportsUrls) | keyvalue
           "
         >
           <a class="has-text-link" href="{{ u.value['proposalProgressPdf'] }}">

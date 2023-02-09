@@ -98,7 +98,12 @@ def get_users(
 
         return user_service.get_users()
 
-@router.get("/salt-astronomers", summary="Get the SALT astronomers", response_model=List[UserListItem])
+
+@router.get(
+    "/salt-astronomers",
+    summary="Get the SALT astronomers",
+    response_model=List[UserListItem],
+)
 def get_salt_astronomers() -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)

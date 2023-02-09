@@ -122,7 +122,7 @@ class ProposalService:
     def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
     ) -> Dict[str, Dict[str, str]]:
-        semesters = self.repository.list_of_semesters(proposal_code)
+        semesters = self.repository.get_progress_report_semesters(proposal_code)
 
         progress_report_urls = dict()
         for semester in semesters:
@@ -317,3 +317,17 @@ class ProposalService:
         self.repository.update_proprietary_period(
             proposal_code=proposal_code, proprietary_period=proprietary_period
         )
+
+    def get_proposal_status(self, proposal_code: str) -> Dict[str, str]:
+        """
+        Get the proposal status for a proposal code.
+        """
+        return self.repository.get_proposal_status(proposal_code)
+
+    def update_proposal_status(
+        self, proposal_code: str, status: str, reason: Optional[str]
+    ) -> None:
+        """
+        Set the proposal status for a proposal code.
+        """
+        self.repository.update_proposal_status(proposal_code, status, reason)

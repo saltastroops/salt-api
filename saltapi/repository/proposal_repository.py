@@ -1263,7 +1263,20 @@ WHERE PC.Proposal_Code = :proposal_code
         except NoResultFound:
             raise NotFoundError()
 
-    def update_proposal_status(self, proposal_code: str, status: str) -> None:
+    def _proposal_inactive_reason_id(self, inactive_reason: str) -> int:
+        stmt = text(
+            """
+SELECT PIR.ProposalInactiveReason_Id AS id
+FROM ProposalInactiveReason PIR
+WHERE PIR.InactiveReason = :inactive_reason
+        """
+        )
+        result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
+        return cast(int, result.scalar_one())
+
+    def update_proposal_status(
+        self, proposal_code: str, status: str, reason: Optional[str]
+    ) -> None:
         """
         Update the status of a proposal.
         """
@@ -1273,20 +1286,29 @@ WHERE PC.Proposal_Code = :proposal_code
         # wrong status value.
         try:
             status_id = self._proposal_status_id(status)
+            proposal_inactive_reason_id = (
+                self._proposal_inactive_reason_id(reason) if reason else None
+            )
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
         stmt = text(
             """
-UPDATE ProposalGeneralInfo
-SET ProposalStatus_Id = :status_id
+UPDATE ProposalGeneralInfo PGI
+SET PGI.ProposalStatus_Id = :status_id,
+    PGI.ProposalInactiveReason_Id = :proposal_inactive_reason_id
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code);
-        """
+                         WHERE PC.Proposal_Code = :proposal_code)
+            """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "status_id": status_id}
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "status_id": status_id,
+                "proposal_inactive_reason_id": proposal_inactive_reason_id,
+            },
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -1748,6 +1770,35 @@ AND P.Virtual != 1
 
         return path
 
+    def get_progress_report_semesters(self, proposal_code: str) -> List[str]:
+        """
+        Return the list of semesters for which a progress report has been submitted.
+
+        The list is sorted in ascending order.
+
+        Parameters
+        ----------
+        proposal_code: str
+            Proposal code.
+
+        Returns
+        -------
+        list of str
+            The sorted list of semesters.
+        """
+        stmt = text(
+            """
+SELECT CONCAT(S.Year, '-', S.Semester) AS semester
+FROM ProposalProgress PP
+         JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN Semester S ON PP.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code;
+
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        return sorted(row.semester for row in result)
+
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
             """
@@ -2119,10 +2170,8 @@ WHERE Proposal_Code = :proposal_code
         """
         )
 
-        req_time = defaultdict(lambda: dict())
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code
-        }):
+        req_time: DefaultDict[str, Dict[str, Any]] = defaultdict(lambda: dict())
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             semester = row.semester
             if not req_time[semester]:
                 req_time[semester] = {
@@ -2130,12 +2179,11 @@ WHERE Proposal_Code = :proposal_code
                     "minimum_useful_time": row.minimum_useful_time,
                     "comment": row.comment,
                     "semester": semester,
-                    "distribution": []
+                    "distribution": [],
                 }
-            req_time[semester]["distribution"].append({
-                "partner": row.partner_name,
-                "percentage": row.percentage
-            })
+            req_time[semester]["distribution"].append(
+                {"partner": row.partner_name, "percentage": row.percentage}
+            )
 
         return list(req_time.values())
 

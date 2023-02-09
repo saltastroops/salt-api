@@ -36,6 +36,17 @@ class ProposalStatusValue(str, Enum):
     UNDER_TECHNICAL_REVIEW = "Under technical review"
 
 
+class ProposalInactiveReason(str, Enum):
+    """Proposal inactive reason."""
+
+    TARGET_NOT_VISIBLE = "Target not visible"
+    UNDOABLE = "Undoable"
+    WAITING_FOR_FEEDBACK = "Waiting for feedback"
+    WAITING_FOR_INSTRUMENT_AVAILABILITY = "Waiting for instrument availability"
+    ToO_AWAITING_PI_INITIATION = "ToO, awaiting PI initiation"
+    OTHER = "Other"
+
+
 class ProposalStatus(BaseModel):
     """Proposal status."""
 

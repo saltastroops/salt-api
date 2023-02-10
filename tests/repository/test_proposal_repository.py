@@ -786,12 +786,15 @@ def test_insert_progress_report_can_be_repeated(db_connection: Connection) -> No
             "additional_pdf_filename": "/some/other/fake/path",
         },
     )
-    proposal_repository.insert_or_update_proposal_progress(
-        data,
-        "2020-2-SCI-043",
-        "2020-1",
-        {
-            "proposal_progress_filename": "/some/fake/path",
-            "additional_pdf_filename": "/some/other/fake/path",
-        },
-    )
+    try:
+        proposal_repository.insert_or_update_proposal_progress(
+            data,
+            "2020-2-SCI-043",
+            "2020-1",
+            {
+                "proposal_progress_filename": "/some/fake/path",
+                "additional_pdf_filename": "/some/other/fake/path",
+            },
+        )
+    except Exception:
+        assert False, "Inserting a progress report is not idempotent."

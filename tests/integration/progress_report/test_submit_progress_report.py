@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, NamedTuple, Generator, Callable
+from typing import Any, Callable, NamedTuple
 
 import pytest
 from fastapi.testclient import TestClient
@@ -123,8 +123,9 @@ def test_submit_progress_report_repeatedly(
         "description_of_observing_constraints": 'Thick cloud and 3" seeing.',
         "change_reason": "Previous data suggests the conditions may be relaxed.",
         "summary_of_proposal_status": "All going well.",
-        "strategy_changes": "Relax the observing conditions to increase the "
-        "observation probability.",
+        "strategy_changes": (
+            "Relax the observing conditions to increase the observation probability."
+        ),
         "partner_requested_percentages": "RSA:33;UKSC:1;RU:64",
     }
     response = client.put(

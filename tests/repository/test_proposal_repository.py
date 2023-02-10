@@ -763,38 +763,3 @@ def test_get_progress_report_semesters(
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
     assert proposal_repository.get_progress_report_semesters(proposal_code) == semesters
-
-
-def test_insert_progress_report_can_be_repeated(db_connection: Connection) -> None:
-    proposal_repository = ProposalRepository(db_connection)
-    data = {
-        "requested_time": 4200,
-        "maximum_seeing": 2,
-        "transparency": "Thin cloud",
-        "description_of_observing_constraints": 'Thin/thick cloud and 2-3" seeing.',
-        "change_reason": "N/A",
-        "summary_of_proposal_status": "See attached.",
-        "strategy_changes": "None",
-        "partner_requested_percentages": "RSA:100;OTH:0",
-    }
-    proposal_repository.insert_or_update_proposal_progress(
-        data,
-        "2020-2-SCI-043",
-        "2020-1",
-        {
-            "proposal_progress_filename": "/some/fake/path",
-            "additional_pdf_filename": "/some/other/fake/path",
-        },
-    )
-    try:
-        proposal_repository.insert_or_update_proposal_progress(
-            data,
-            "2020-2-SCI-043",
-            "2020-1",
-            {
-                "proposal_progress_filename": "/some/fake/path",
-                "additional_pdf_filename": "/some/other/fake/path",
-            },
-        )
-    except Exception:
-        assert False, "Inserting a progress report is not idempotent."

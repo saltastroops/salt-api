@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 from starlette import status
 
+import saltapi.repository.proposal_repository
 from tests.conftest import authenticate, find_username, not_authenticated
 
 PROPOSALS_URL = "/proposals"
@@ -253,6 +254,70 @@ def test_should_return_403_when_requesting_gwe_proposal_for_non_permitted_user(
             PROPOSALS_URL + "/2019-1-GWE-005" + extension,
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_should_return_401_when_requesting_summary_for_unauthorized_user(
+    client: TestClient,
+) -> None:
+    response = client.get(f"{PROPOSALS_URL}/2021-2-LSP-001-phase1-summary.pdf")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.parametrize(
+    "username",
+    [
+        find_username("Investigator", proposal_code="2018-2-LSP-001"),
+        find_username("Principal Contact", proposal_code="2018-2-LSP-001"),
+        find_username("Principal Investigator", proposal_code="2018-2-LSP-001"),
+        find_username("TAC Member", partner_code="UW"),
+        find_username("TAC Chair", partner_code="UW"),
+        find_username("Board Member"),
+    ],
+)
+def test_should_return_403_when_requesting_summary_for_non_permitted_user(
+    username: str,
+    client: TestClient,
+) -> None:
+    authenticate(username, client)
+    response = client.get(f"{PROPOSALS_URL}/2019-2-SCI-006-phase1-summary.pdf")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_should_return_phase1_proposal_summary_file(
+    client: TestClient, tmp_path: pathlib.Path, monkeypatch: MonkeyPatch
+) -> None:
+    # Set up the proposal directory
+    proposal_code = "2019-2-SCI-045"
+    proposal_dir = tmp_path / proposal_code
+    proposal_dir.mkdir()
+    (proposal_dir / "1").mkdir()
+    (proposal_dir / "2").mkdir()
+    (proposal_dir / "3").mkdir()
+    summary_content = b"This is a summary."
+    proposal_file = proposal_dir / "3" / "Summary.pdf"
+    proposal_file.write_bytes(summary_content)
+
+    class MockSettings(NamedTuple):
+        proposals_dir: pathlib.Path
+
+    def mock_get_settings() -> Any:
+        return MockSettings(tmp_path)
+
+    # Request the summary file
+    monkeypatch.setattr(
+        saltapi.repository.proposal_repository, "get_settings", mock_get_settings
+    )
+    username = find_username("SALT Astronomer")
+    authenticate(username, client)
+    response = client.get(f"{PROPOSALS_URL}/{proposal_code}-phase1-summary.pdf")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.content == summary_content
+    assert response.headers["Content-Type"] == "application/pdf"
+    assert (
+        response.headers["Content-Disposition"]
+        == f'inline; filename="{proposal_code}-phase1-summary.pdf"'
+    )
 
 
 def test_should_return_proposal_file(

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from fastapi import (
     APIRouter,
@@ -19,18 +19,23 @@ from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
+from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
+from saltapi.web.schema.p1_proposal import P1Proposal
+from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
-    ProprietaryPeriodUpdateRequest,
     ObservationComment,
-    Proposal,
+    ProposalInactiveReason,
     ProposalListItem,
-    ProposalStatusContent, UpdateStatus,
+    ProposalStatus,
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+    UpdateStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -87,6 +92,33 @@ def get_proposals(
 
 
 @router.get(
+    "/{proposal_code}-phase1-summary.pdf",
+    summary="Get the latest Phase 1 summary file",
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+def get_phase1_summary(
+    proposal_code: ProposalCode = Path(
+        ProposalCode,
+        title="Proposal code",
+        description="Proposal code of the returned Phase 1 proposal summary file.",
+    ),
+    user: User = Depends(get_current_user),
+) -> FileResponse:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        path = proposal_service.get_phase1_summary(proposal_code)
+        filename = f"{proposal_code}-phase1-summary.pdf"
+        return FileResponse(
+            path,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{filename}"'},
+        )
+
+
+@router.get(
     "/{proposal_code}.zip",
     summary="Get a proposal zip file",
     responses={200: {"content": {"application/zip": {}}}},
@@ -95,7 +127,7 @@ def get_proposal_zip(
     proposal_code: ProposalCode = Path(
         ProposalCode,
         title="Proposal code",
-        description="Proposal code of the returned proposal.",
+        description="Proposal code of the returned proposal zip file.",
     ),
     user: User = Depends(get_current_user),
 ) -> FileResponse:
@@ -109,7 +141,7 @@ def get_proposal_zip(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        path = proposal_service.get_proposal_zip(proposal_code)
+        path = proposal_service.get_proposal_file(proposal_code)
         return FileResponse(
             path, media_type="application/zip", filename=f"{proposal_code}.zip"
         )
@@ -118,7 +150,7 @@ def get_proposal_zip(
 @router.get(
     "/{proposal_code}",
     summary="Get a proposal",
-    response_model=Proposal,
+    response_model=Union[P1Proposal, P2Proposal],
 )
 def get_proposal(
     proposal_code: ProposalCode = Path(
@@ -142,7 +174,11 @@ def get_proposal(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        return proposal_service.get_proposal(proposal_code)
+        proposal = proposal_service.get_proposal(proposal_code)
+        if proposal["phase"] == 1:
+            return P1Proposal(**proposal)
+        if proposal["phase"] == 2:
+            return P2Proposal(**proposal)
 
 
 @router.get(
@@ -185,15 +221,16 @@ def get_scientific_justification(
 @router.get(
     "/{proposal_code}/status",
     summary="Get the proposal status",
-    response_model=ProposalStatusContent,
+    response_model=ProposalStatus,
 )
 def get_proposal_status(
     proposal_code: ProposalCode = Path(
         ProposalCode,
         title="Proposal code",
         description="Proposal code of the proposal whose status is requested.",
-    )
-) -> ProposalStatusContent:
+    ),
+    user: User = Depends(get_current_user),
+) -> _ProposalStatus:
     """
     Returns the current status of the proposal with a given proposal code.
 
@@ -213,7 +250,12 @@ def get_proposal_status(
     Under scientific review | The (Phase 1) proposal is being evaluated by the TAC(s).
     Under technical review | The (Phase 2) proposal is being checked by the PI and is not in the queue yet.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+
+        return proposal_service.get_proposal_status(proposal_code)
 
 
 @router.put(
@@ -232,8 +274,11 @@ def update_proprietary_period(
     proprietary_period_update_request: ProprietaryPeriodUpdateRequest = Body(
         ...,
         title="The details for the proprietary period update.",
-        description="The requested proprietary period in months and a motivation. The motivation is only required if "
-                    "the requested proprietary period is longer than the maximum proprietary period for the proposal.",
+        description=(
+            "The requested proprietary period in months and a motivation. The"
+            " motivation is only required if the requested proprietary period is longer"
+            " than the maximum proprietary period for the proposal."
+        ),
     ),
     user: User = Depends(get_current_user),
 ) -> JSONResponse:
@@ -280,16 +325,14 @@ def update_proprietary_period(
                 **proposal["general_info"]["proprietary_period"],
                 "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
                 "status": update_status,
-            }
+            },
         )
-
-
 
 
 @router.put(
     "/{proposal_code}/status",
     summary="Update the proposal status",
-    response_model=ProposalStatusContent,
+    response_model=ProposalStatus,
     status_code=status.HTTP_200_OK,
 )
 def update_proposal_status(
@@ -298,15 +341,33 @@ def update_proposal_status(
         title="Proposal code",
         description="Proposal code of the proposal whose status is updated.",
     ),
-    proposal_status: ProposalStatusContent = Body(
+    proposal_status: ProposalStatusValue = Body(
         ..., alias="status", title="Proposal status", description="New proposal status."
     ),
-) -> ProposalStatusContent:
+    inactive_reason: Optional[ProposalInactiveReason] = Body(
+        None,
+        alias="reason",
+        title="Proposal inactive reason",
+        description="New proposal inactive reason.",
+    ),
+    user: User = Depends(get_current_user),
+) -> _ProposalStatus:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_proposal_status(user)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+
+        proposal_service.update_proposal_status(
+            proposal_code, proposal_status, inactive_reason
+        )
+
+        unit_of_work.commit()
+
+        return proposal_service.get_proposal_status(proposal_code)
 
 
 @router.get(

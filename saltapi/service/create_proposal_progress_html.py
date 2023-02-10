@@ -198,16 +198,20 @@ def create_proposal_progress_html(
                         </b>
                     </div>
                     <div class="left-shifted">
-                        Please see the attached document.
-                        -- TODO Double Check this content --
+                        {new_request['change_reason']}
                     </div>
+    """
+    if new_request["additional_pdf"]:
+        html_content += """
                     <br>
                     <div>
                         <b>
-                            A supplementary pdf is attached to this report
-                            -- TODO: this needs to be a boolean to show --
+                            A supplementary pdf is attached to this report.
                         </b>
                     </div>
+        """
+
+    html_content += f"""
                 </div>
             </div>
             <div class="section">
@@ -224,8 +228,7 @@ def create_proposal_progress_html(
                 <hr>
                 <div>
                     <p>
-                        Please see the attached document.
-                        -- TODO Double Check this content --
+                        {new_request['summary_of_proposal_status']}
                     </p>
                 </div>
             </div>
@@ -244,24 +247,9 @@ def create_proposal_progress_html(
                 <hr>
                 <div>
                     <p>
-                        Please see the attached document.
-                        -- TODO Double Check this content --
+                        {new_request['strategy_changes']}
                     </p>
                 </div>
-            </div>
-        </div>
-        <div>
-            <div class="section">
-                <b>Reasons why the time request has changed</b>
-                <p>{new_request['change_reason']}</p>
-            </div>
-            <div class="section">
-                <b>Summary of your proposal's status</b>
-                <p>{new_request['summary_of_proposal_status']}</p>
-            </div>
-            <div class="section">
-                <b>Strategy changes</b>
-                <p>{new_request['strategy_changes']}</p>
             </div>
         </div>
     </body>

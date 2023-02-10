@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.service.instrument import HRS
+from saltapi.util import normalised_hrs_mode
 
 
 class HrsRepository:
@@ -19,15 +20,12 @@ class HrsRepository:
 SELECT H.Hrs_Id                                     AS hrs_id,
        H.ObservingTime / 1000                       AS observation_time,
        H.OverheadTime / 1000                        AS overhead_time,
-       IF(HC.HrsNodAndShuffle_Id IS NOT NULL, 1, 0) AS has_nod_and_shuffle,
        HM.ExposureMode                              AS mode,
        HET.ExposureType                             AS exposure_type,
        HTL.TargetLocation                           AS target_location,
        HC.FibreSeparation                           AS fiber_separation,
        HICP.IodineCellPosition                      AS iodine_cell_position,
        ThArLampOn                                   AS th_ar_lamp_on,
-       HNAS.NodInterval                             AS nod_interval,
-       HNAS.NodCount                                AS nod_count,
        HBlueD.PreShuffle                            AS blue_pre_shuffle_rows,
        HBlueD.PostShuffle                           AS blue_post_shuffle_rows,
        HBlueD.PreBinRows                            AS blue_pre_binned_rows,
@@ -53,8 +51,6 @@ FROM Hrs H
               ON HC.HrsTargetLocation_Id = HTL.HrsTargetLocation_Id
          JOIN HrsIodineCellPosition HICP
               ON HC.HrsIodineCellPosition_Id = HICP.HrsIodineCellPosition_Id
-         LEFT JOIN HrsNodAndShuffle HNAS
-                   ON HC.HrsNodAndShuffle_Id = HNAS.HrsNodAndShuffle_Id
          JOIN HrsBlueDetector HBlueD ON H.HrsBlueDetector_Id = HBlueD.HrsBlueDetector_Id
          JOIN HrsRoSpeed HBlueS ON HBlueD.HrsRoSpeed_Id = HBlueS.HrsRoSpeed_Id
          JOIN HrsRoAmplifiers HBlueA
@@ -82,17 +78,6 @@ WHERE H.Hrs_Id = :hrs_id
 
         return hrs
 
-    def _mode(self, row: Any) -> str:
-        modes = {
-            "HIGH RESOLUTION": "High Resolution",
-            "HIGH STABILITY": "High Stability",
-            "INT CAL FIBRE": "Int Cal Fiber",
-            "LOW RESOLUTION": "Low Resolution",
-            "MEDIUM RESOLUTION": "Medium Resolution",
-        }
-
-        return modes[row.mode]
-
     def _target_location(self, row: Any) -> str:
         locations = {
             "-1 ALPHA (STAR)": "The star fiber is placed on the optical axis",
@@ -118,22 +103,13 @@ WHERE H.Hrs_Id = :hrs_id
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """HRS configuration."""
 
-        if row.has_nod_and_shuffle:
-            nod_and_shuffle: Optional[Dict[str, int]] = {
-                "nod_interval": row.nod_interval,
-                "nod_count": row.nod_count,
-            }
-        else:
-            nod_and_shuffle = None
-
         configuration = {
-            "mode": self._mode(row),
+            "mode": normalised_hrs_mode(row.mode),
             "exposure_type": row.exposure_type,
             "target_location": self._target_location(row),
             "fiber_separation": float(row.fiber_separation),
             "iodine_cell_position": self._iodine_cell_position(row),
             "is_th_ar_lamp_on": True if row.th_ar_lamp_on else False,
-            "nod_and_shuffle": nod_and_shuffle,
         }
 
         return configuration

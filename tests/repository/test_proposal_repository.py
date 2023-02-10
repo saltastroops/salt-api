@@ -1,19 +1,21 @@
-from datetime import datetime, date
+from datetime import date, datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, List
 from unittest.mock import patch
 
 import freezegun
 import pytest
-import pytz
 from sqlalchemy.engine import Connection
 
+import saltapi.repository.proposal_repository
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.settings import Settings, get_settings
 from tests.conftest import find_username
 from tests.markers import nodatabase
 
-
 mock_now = date(2022, 12, 1)
+
 
 @nodatabase
 @pytest.mark.parametrize(
@@ -500,14 +502,16 @@ def test_get_current_version_raises_not_found_error(db_connection: Connection) -
         ("2016-1-SVP-001", 12),
         ("2019-1-GWE-005", 1200),
         ("2022-1-ORP-001", 24),
-        ("2020-2-DDT-005", 6)
+        ("2020-2-DDT-005", 6),
     ],
 )
 def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
-        proposal_code: str, maximum_period: int, db_connection: Connection
+    proposal_code: str, maximum_period: int, db_connection: Connection
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
-    assert proposal_repository.maximum_proprietary_period(proposal_code) == maximum_period
+    assert (
+        proposal_repository.maximum_proprietary_period(proposal_code) == maximum_period
+    )
 
 
 @pytest.mark.parametrize(
@@ -522,29 +526,33 @@ def test_get_maximum_proprietary_period_returns_correct_proprietary_period(
         ("2020-2-SCI-005", [{"night": date(2021, 11, 1)}], date(2022, 5, 1)),
         ("2020-2-SCI-005", [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
         ("2020-2-SCI-005", [{"night": date(2021, 12, 1)}], date(2022, 5, 1)),
-        ("2020-2-SCI-005", [
-            {"night": date(2021, 12, 20)},
-            {"night": date(2021, 6, 1)},
-            {"night": date(2021, 6, 24)},
-            {"night": date(2021, 6, 23)},
-            {"night": date(2021, 12, 2)}
-        ], date(2022, 5, 1)),
+        (
+            "2020-2-SCI-005",
+            [
+                {"night": date(2021, 12, 20)},
+                {"night": date(2021, 6, 1)},
+                {"night": date(2021, 6, 24)},
+                {"night": date(2021, 6, 23)},
+                {"night": date(2021, 12, 2)},
+            ],
+            date(2022, 5, 1),
+        ),
     ],
 )
 def test_proprietary_period_start_date_returns_correct_start_date(
-        proposal_code: str,
-        block_visits: List[Dict[str, Any]],
-        expected_date: datetime,
-        db_connection: Connection,
-        monkeypatch
+    proposal_code: str,
+    block_visits: List[Dict[str, Any]],
+    expected_date: datetime,
+    db_connection: Connection,
+    monkeypatch,
 ) -> None:
     with patch("saltapi.repository.proposal_repository.datetime") as mock_datetime:
         mock_datetime.today.return_value = mock_now
         mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
         proposal_repository = ProposalRepository(db_connection)
         assert (
-                proposal_repository.proprietary_period_start_date(block_visits)
-                == expected_date
+            proposal_repository.proprietary_period_start_date(block_visits)
+            == expected_date
         )
 
 
@@ -563,31 +571,195 @@ def test_proprietary_period_start_date_returns_correct_start_date(
         ("2020-2-SCI-005", 10, [{"night": date(2021, 8, 2)}], date(2022, 9, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 10, 31)}], date(2021, 11, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 10, 31)}], date(2022, 9, 1)),
-        ("2020-2-SCI-005", 0, [
-            {"night": date(2021, 12, 20)},
-            {"night": date(2021, 6, 1)},
-            {"night": date(2021, 6, 24)},
-            {"night": date(2021, 6, 23)},
-            {"night": date(2021, 12, 2)}
-        ], date(2022, 5, 1)),
-        ("2020-2-SCI-005", 10, [
-            {"night": date(2021, 12, 20)},
-            {"night": date(2021, 6, 1)},
-            {"night": date(2021, 6, 24)},
-            {"night": date(2021, 6, 23)},
-            {"night": date(2021, 12, 2)}
-        ], date(2023, 3, 1)),
+        (
+            "2020-2-SCI-005",
+            0,
+            [
+                {"night": date(2021, 12, 20)},
+                {"night": date(2021, 6, 1)},
+                {"night": date(2021, 6, 24)},
+                {"night": date(2021, 6, 23)},
+                {"night": date(2021, 12, 2)},
+            ],
+            date(2022, 5, 1),
+        ),
+        (
+            "2020-2-SCI-005",
+            10,
+            [
+                {"night": date(2021, 12, 20)},
+                {"night": date(2021, 6, 1)},
+                {"night": date(2021, 6, 24)},
+                {"night": date(2021, 6, 23)},
+                {"night": date(2021, 12, 2)},
+            ],
+            date(2023, 3, 1),
+        ),
     ],
 )
 def test_data_release_date_return_correct_release_date(
-        proposal_code: str,
-        proprietary_period: int,
-        block_visits: List[Dict[str, Any]],
-        expected_date: datetime, db_connection: Connection
+    proposal_code: str,
+    proprietary_period: int,
+    block_visits: List[Dict[str, Any]],
+    expected_date: datetime,
+    db_connection: Connection,
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
 
-    assert proposal_repository._data_release_date(
-        proprietary_period,
-        block_visits
-    ) == expected_date
+    assert (
+        proposal_repository._data_release_date(proprietary_period, block_visits)
+        == expected_date
+    )
+
+
+def mocked_settings(original_settings: Settings, proposals_dir: Path) -> Settings:
+    settings = original_settings.copy()
+    settings.proposals_dir = proposals_dir
+    return settings
+
+
+def test_phase_1_and_2_proposals_have_a_summary_url(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    proposal = proposal_repository.get("2022-1-SCI-008")
+    assert proposal["phase1_proposal_summary"] is not None
+
+
+def test_phase_2_only_proposals_have_no_summary_url(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    proposal = proposal_repository.get("2022-1-DDT-001")
+    assert proposal["phase1_proposal_summary"] is None
+
+
+@pytest.mark.parametrize(
+    "proposal_code,expected_current_version",
+    [("2021-2-LSP-001", 2), ("2020-1-DDT-001", None)],
+)
+def test_current_phase1_version(
+    proposal_code: str, expected_current_version: int, db_connection: Connection
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    assert (
+        proposal_repository.get_current_phase1_version(proposal_code)
+        == expected_current_version
+    )
+
+
+@pytest.mark.parametrize(
+    "proposal_code,current_version,expected_path",
+    [
+        ("2022-2-SCI-007", 1, "2022-2-SCI-007/1/Summary.pdf"),
+        ("2021-2-LSP-001", 2, "2021-2-LSP-001/2/Summary.pdf"),
+    ],
+)
+def test_get_phase1_summary(
+    proposal_code: str,
+    current_version: int,
+    expected_path: str,
+    db_connection: Connection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Fake the proposals directory
+    proposals_dir = tmp_path
+    original_settings = get_settings()
+    mock_settings = mocked_settings(original_settings, proposals_dir)
+    monkeypatch.setattr(
+        saltapi.repository.proposal_repository,
+        "get_settings",
+        lambda: mock_settings,
+    )
+
+    # Create the phase 1 summary
+    if current_version:
+        proposal_dir = proposals_dir / proposal_code
+        proposal_dir.mkdir()
+        submission_dir = proposals_dir / proposal_code / str(current_version)
+        submission_dir.mkdir()
+        proposal_file = submission_dir / "Summary.pdf"
+        proposal_file.write_text("Fake pdf")
+
+    proposal_repository = ProposalRepository(db_connection)
+
+    path = proposals_dir / Path(expected_path)
+    assert proposal_repository.get_phase1_summary(proposal_code) == path
+
+
+@pytest.mark.parametrize("proposal_code", ["2018-2-LSP-001", "2020-2-DDT-001"])
+def test_get_phase1_summary_raises_not_found_error(
+    proposal_code: str,
+    db_connection: Connection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        proposal_repository.get_phase1_summary(proposal_code)
+
+
+@pytest.mark.parametrize(
+    "proposal_code,last_submission,expected_path",
+    [
+        ("2018-2-LSP-001", 440, "2018-2-LSP-001/440/2018-2-LSP-001.zip"),
+        ("2020-1-DDT-001", 1, "2020-1-DDT-001/1/2020-1-DDT-001.zip"),
+    ],
+)
+def test_get_proposal_file(
+    proposal_code: str,
+    last_submission: int,
+    expected_path: str,
+    db_connection: Connection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Fake the proposals directory
+    proposals_dir = tmp_path
+    original_settings = get_settings()
+    mock_settings = mocked_settings(original_settings, proposals_dir)
+    monkeypatch.setattr(
+        saltapi.repository.proposal_repository,
+        "get_settings",
+        lambda: mock_settings,
+    )
+
+    # Create the proposal file
+    proposal_dir = proposals_dir / proposal_code
+    proposal_dir.mkdir()
+    submission_dir = proposals_dir / proposal_code / str(last_submission)
+    submission_dir.mkdir()
+    proposal_file = submission_dir / f"{proposal_code}.zip"
+    proposal_file.write_text("Fake zip")
+
+    proposal_repository = ProposalRepository(db_connection)
+
+    path = proposals_dir / Path(expected_path)
+    assert proposal_repository.get_proposal_file(proposal_code) == path
+
+
+@pytest.mark.parametrize("proposal_code", ["2018-2-LSP-001", "2020-2-DDT-001"])
+def test_get_proposal_file_raises_not_found_error(
+    proposal_code: str,
+    db_connection: Connection,
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        proposal_repository.get_proposal_file(proposal_code)
+
+
+@pytest.mark.parametrize(
+    "proposal_code,semesters",
+    [
+        ("2020-2-SCI-043", []),
+        ("2020-2-SCI-018", ["2020-2"]),
+        ("2019-2-MLT-001", ["2019-2", "2020-1", "2020-2"]),
+    ],
+)
+def test_get_progress_report_semesters(
+    proposal_code: str, semesters: List[str], db_connection: Connection
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    assert proposal_repository.get_progress_report_semesters(proposal_code) == semesters

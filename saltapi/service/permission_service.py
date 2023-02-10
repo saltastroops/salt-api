@@ -1,5 +1,5 @@
 import enum
-from typing import Dict, List, Optional, cast, Any
+from typing import Any, Dict, List, Optional, cast
 
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
@@ -80,8 +80,6 @@ class PermissionService:
             return self.user_repository.is_tac_member_in_general(username)
         else:
             return False
-
-    # def _user_
 
     def check_role(
         self,
@@ -440,7 +438,6 @@ class PermissionService:
     def check_permission_to_update_proprietary_period(
         self, user: User, proposal_code: str
     ) -> None:
-
         username = user.username
         roles = [
             Role.PRINCIPAL_INVESTIGATOR,

@@ -172,7 +172,9 @@ def find_username(
     raise ValueError(f"Unknown user type: {user_type}")
 
 
-def find_usernames(role: str, has_role: bool, proposal_code: Optional[str] = None) -> List[str]:
+def find_usernames(
+    role: str, has_role: bool, proposal_code: Optional[str] = None
+) -> List[str]:
     normalized_role = role.lower()
     normalized_role = normalized_role.replace(" ", "_").replace("-", "_")
 

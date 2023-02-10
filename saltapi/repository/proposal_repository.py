@@ -1,4 +1,5 @@
 import hashlib
+import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time
@@ -13,13 +14,20 @@ from sqlalchemy.exc import NoResultFound
 from saltapi.exceptions import NotFoundError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.util import (
     TimeInterval,
     next_semester,
+    normalised_hrs_mode,
     partner_name,
     semester_end,
     semester_of_datetime,
     semester_start,
+    target_coordinates,
+    target_magnitude,
+    target_period_ephemeris,
+    target_proper_motion,
+    target_type,
     tonight,
 )
 
@@ -231,10 +239,20 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": self.proprietary_period_start_date(block_visits),
+            "start_date": self.proprietary_period_start_date(block_visits)
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
+        general_info["data_release_date"] = self._data_release_date(
+            proprietary_period, block_visits
+        )
 
+        requested_times = self._get_requested_times(proposal_code)
+        # A Phase 2-only proposal has no requested times
+        summary_url = (
+            f"/proposals/{proposal_code}-phase1-summary.pdf"
+            if len(requested_times)
+            else None
+        )
         proposal: Dict[str, Any] = {
             "proposal_code": proposal_code,
             "semester": semester,
@@ -246,8 +264,11 @@ LIMIT :limit;
             "time_allocations": self.time_allocations(proposal_code, semester),
             "charged_time": self.charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
-            "targets": None,
-            "requested_times": None,
+            "targets": self._get_phase_one_targets(proposal_code),
+            "requested_times": requested_times,
+            "science_configurations": self._get_science_configurations(proposal_code),
+            "phase1_proposal_summary": summary_url,
+            "proposal_file": f"/proposals/{proposal_code}.zip",
         }
         return proposal
 
@@ -357,7 +378,7 @@ WHERE PC.Proposal_Code = :proposal_code
         dt = result.scalar_one()
         if type(dt) == date:
             dt = datetime.combine(dt, time.min)
-        return dt
+        return cast(datetime, dt)
 
     def _latest_submission_date(self, proposal_code: str) -> datetime:
         """Return the date and time when the latest submission was made."""
@@ -421,6 +442,12 @@ SELECT PT.Title                            AS title,
        I.FirstName                         AS astronomer_given_name,
        I.Surname                           AS astronomer_family_name,
        I.Email                             AS astronomer_email,
+       PGI.TimeRestricted                  AS is_time_restricted,
+       P1T.Reason						   AS too_reason,
+       I.PiptUser_Id                       AS liaison_salt_astronomer_id,
+       IF(PGI.P4 IS NOT NULL,
+          PGI.P4,
+          0)                               AS is_p4,
        IF(PSA.PiPcMayActivate IS NOT NULL,
           PSA.PiPcMayActivate,
           0)                               AS self_activatable
@@ -437,6 +464,7 @@ FROM Proposal P
             ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
          LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
+         LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
   AND P.Current = 1
   AND S.Year = :year
@@ -456,10 +484,13 @@ WHERE PC.Proposal_Code = :proposal_code
             "submission_number": row.submission_number,
             "status": {"value": row.status, "reason": row.reason},
             "proposal_type": self._map_proposal_type(row.proposal_type),
-            "target_of_opportunity": row.target_of_opportunity,
+            "is_target_of_opportunity": row.target_of_opportunity,
             "total_requested_time": row.total_requested_time,
             "proprietary_period": row.proprietary_period,
-            "is_self_activatable": row.self_activatable > 0,
+            "is_time_restricted": row.is_time_restricted != 0,
+            "is_priority4": row.is_p4 != 0,
+            "is_self_activatable": row.self_activatable != 0,
+            "target_of_opportunity_reason": row.too_reason,
         }
 
         if info["proposal_type"] == "Director Discretionary Time (DDT)":
@@ -467,6 +498,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         if row.astronomer_email:
             info["liaison_salt_astronomer"] = {
+                "id": row.liaison_salt_astronomer_id,
                 "given_name": row.astronomer_given_name,
                 "family_name": row.astronomer_family_name,
             }
@@ -487,24 +519,31 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         stmt = text(
             """
-SELECT PU.PiptUser_Id          AS id,
-       I.FirstName             AS given_name,
-       I.Surname               AS family_name,
-       I.Email                 AS email,
-       P.Partner_Code          AS partner_code,
-       P.Partner_Name          AS partner_name,
-       `IN`.InstituteName_Name AS institution_name,
-       I2.Institute_Id         AS institution_id,
-       I2.Department           AS department,
-       PI.InvestigatorOkay     AS approved,
-       PI.ApprovalCode         AS approval_code
+SELECT
+    PU.PiptUser_Id          AS id,
+    I.FirstName             AS given_name,
+    I.Surname               AS family_name,
+    I.Email                 AS email,
+    P.Partner_Code          AS partner_code,
+    P.Partner_Name          AS partner_name,
+    `IN`.InstituteName_Name AS institution_name,
+    I2.Institute_Id         AS institution_id,
+    I2.Department           AS department,
+    PI.InvestigatorOkay     AS approved,
+    PI.ApprovalCode         AS approval_code,
+    ThesisType		       AS thesis_type,
+    ThesisDescr		       AS relevance_of_proposal,
+    CompletionYear	       AS year_of_completion
 FROM ProposalInvestigator PI
-         JOIN Investigator I ON PI.Investigator_Id = I.Investigator_Id
-         JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
-         JOIN Institute I2 ON I.Institute_Id = I2.Institute_Id
-         JOIN Partner P ON I2.Partner_Id = P.Partner_Id
-         JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
-         JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Investigator I ON PI.Investigator_Id = I.Investigator_Id
+    JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+    JOIN Institute I2 ON I.Institute_Id = I2.Institute_Id
+    JOIN Partner P ON I2.Partner_Id = P.Partner_Id
+    JOIN InstituteName `IN` ON I2.InstituteName_Id = `IN`.InstituteName_Id
+    JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
+    LEFT JOIN P1Thesis PT ON PC.ProposalCode_Id = PT.ProposalCode_Id
+        AND PT.Student_Id = I.Investigator_Id
+    LEFT JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
 WHERE PC.Proposal_Code = :proposal_code
 ORDER BY I.Surname, I.FirstName
         """
@@ -527,11 +566,22 @@ ORDER BY I.Surname, I.FirstName
                 "name": investigator["institution_name"],
                 "department": investigator["department"],
             }
+            if investigator["thesis_type"]:
+                investigator["thesis"] = {
+                    "thesis_type": investigator["thesis_type"],
+                    "relevance_of_proposal": investigator["relevance_of_proposal"],
+                    "year_of_completion": investigator["year_of_completion"],
+                }
+            else:
+                investigator["thesis"] = None
             del investigator["partner_code"]
             del investigator["partner_name"]
             del investigator["institution_id"]
             del investigator["institution_name"]
             del investigator["department"]
+            del investigator["thesis_type"]
+            del investigator["relevance_of_proposal"]
+            del investigator["year_of_completion"]
 
             if investigator["approved"] == 1:
                 investigator["has_approved_proposal"] = True
@@ -545,7 +595,6 @@ ORDER BY I.Surname, I.FirstName
 
             del investigator["approved"]
             del investigator["approval_code"]
-
         return investigators
 
     def _principal_investigator_user_id(self, proposal_code: str) -> int:
@@ -1060,11 +1109,11 @@ GROUP BY B.Priority
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
 
-        time: Dict[str, int] = {f"priority_{p}": 0 for p in range(5)}
+        priority_charged_time: Dict[str, int] = {f"priority_{p}": 0 for p in range(5)}
         for row in result:
-            time[f"priority_{row.priority}"] = int(row.charged_time)
+            priority_charged_time[f"priority_{row.priority}"] = int(row.charged_time)
 
-        return time
+        return priority_charged_time
 
     def _block_observable_nights(
         self, proposal_code: str, semester: str, interval: TimeInterval
@@ -1212,7 +1261,20 @@ WHERE PC.Proposal_Code = :proposal_code
         except NoResultFound:
             raise NotFoundError()
 
-    def update_proposal_status(self, proposal_code: str, status: str) -> None:
+    def _proposal_inactive_reason_id(self, inactive_reason: str) -> int:
+        stmt = text(
+            """
+SELECT PIR.ProposalInactiveReason_Id AS id
+FROM ProposalInactiveReason PIR
+WHERE PIR.InactiveReason = :inactive_reason
+        """
+        )
+        result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
+        return cast(int, result.scalar_one())
+
+    def update_proposal_status(
+        self, proposal_code: str, status: str, reason: Optional[str]
+    ) -> None:
         """
         Update the status of a proposal.
         """
@@ -1222,20 +1284,29 @@ WHERE PC.Proposal_Code = :proposal_code
         # wrong status value.
         try:
             status_id = self._proposal_status_id(status)
+            proposal_inactive_reason_id = (
+                self._proposal_inactive_reason_id(reason) if reason else None
+            )
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
         stmt = text(
             """
-UPDATE ProposalGeneralInfo
-SET ProposalStatus_Id = :status_id
+UPDATE ProposalGeneralInfo PGI
+SET PGI.ProposalStatus_Id = :status_id,
+    PGI.ProposalInactiveReason_Id = :proposal_inactive_reason_id
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code);
-        """
+                         WHERE PC.Proposal_Code = :proposal_code)
+            """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "status_id": status_id}
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "status_id": status_id,
+                "proposal_inactive_reason_id": proposal_inactive_reason_id,
+            },
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -1277,7 +1348,7 @@ WHERE PC.Proposal_Code = :proposal_code;
 
     def get_current_version(self, proposal_code: str) -> int:
         """
-        Return the current version (number) of sa proposal.
+        Return the current version (number) of a proposal.
 
         Parameters
         ----------
@@ -1303,6 +1374,35 @@ WHERE PC.Proposal_Code = :proposal_code
             raise NotFoundError(f"No such proposal code: {proposal_code}")
 
         return cast(int, version)
+
+    def get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
+        """
+        Return the current version (number) of a proposal.
+
+        Parameters
+        ----------
+        proposal_code: str
+            The proposal code.
+
+        Returns
+        -------
+        int
+            The proposal version.
+        """
+        stmt = text(
+            """
+SELECT COUNT(Submission) AS version
+FROM Proposal P
+JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code AND P.Phase = 1
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        current_version = result.scalar_one()
+        if current_version == 0:
+            return None
+
+        return cast(int, current_version)
 
     @staticmethod
     def generate_proposal_progress_filename(
@@ -1607,6 +1707,96 @@ AND P.Virtual != 1
             prp.append(tmp[pc])
         return prp
 
+    def get_phase1_summary(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the path of the latest Phase 1 summary file.
+
+        The summary file for a Phase 1 submission is stored in a folder
+        <proposal_code>/<submission_number> and has the name Summary.pdf.
+
+        Parameters
+        ----------
+        proposal_code
+
+        Returns
+        -------
+        `~pathlib.Path`
+           The file path.
+
+        """
+        current_phase1_version = self.get_current_phase1_version(proposal_code)
+        if current_phase1_version is None:
+            raise NotFoundError(
+                f"There exists no phase 1 proposal summary for proposal {proposal_code}"
+            )
+
+        path = (
+            get_settings().proposals_dir
+            / f"{proposal_code}"
+            / str(current_phase1_version)
+            / "Summary.pdf"
+        )
+        if not path.is_file():
+            raise NotFoundError(
+                f"No phase 1 proposal summary found for proposal {proposal_code}"
+            )
+
+        return path
+
+    def get_proposal_file(self, proposal_code: str) -> pathlib.Path:
+        """
+        Return the path of the latest proposal zip file.
+
+        The proposal zip file for a submission  is stored in a folder
+        <proposal_code>/<submission_number> and has the name <proposal_code>/zip.
+
+        Parameters
+        ----------
+        proposal_code
+
+        Returns
+        -------
+        `~pathlib.Path`
+            The file path.
+
+        """
+        proposals_dir = get_settings().proposals_dir
+        version = self.get_current_version(proposal_code)
+        path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
+        if not path.exists():
+            raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
+
+        return path
+
+    def get_progress_report_semesters(self, proposal_code: str) -> List[str]:
+        """
+        Return the list of semesters for which a progress report has been submitted.
+
+        The list is sorted in ascending order.
+
+        Parameters
+        ----------
+        proposal_code: str
+            Proposal code.
+
+        Returns
+        -------
+        list of str
+            The sorted list of semesters.
+        """
+        stmt = text(
+            """
+SELECT CONCAT(S.Year, '-', S.Semester) AS semester
+FROM ProposalProgress PP
+         JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN Semester S ON PP.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code;
+
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        return sorted(row.semester for row in result)
+
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         stmt = text(
             """
@@ -1770,30 +1960,34 @@ VALUES (
         if not observation_night:
             observation_night = datetime.today()
 
-        return semester_end(semester_of_datetime(
-            datetime(
-                observation_night.year,
-                observation_night.month,
-                observation_night.day,
-                12, 0, 0, 1, tzinfo=pytz.utc)
-        )).date()
+        return semester_end(
+            semester_of_datetime(
+                datetime(
+                    observation_night.year,
+                    observation_night.month,
+                    observation_night.day,
+                    12,
+                    0,
+                    0,
+                    1,
+                    tzinfo=pytz.utc,
+                )
+            )
+        ).date()
 
     def _data_release_date(
-            self,
-            proprietary_period: int,
-            block_visits: List[dict[str, any]]
-    ) -> date:
-        proprietary_period_start = self.proprietary_period_start_date(
-            block_visits
-        )
+        self, proprietary_period: int, block_visits: List[dict[str, Any]]
+    ) -> Optional[date]:
+        proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
+        if proprietary_period is None:
+            return None
         # add the proprietary period to get the data release date
-        return proprietary_period_start + relativedelta(
-            months=proprietary_period
-        )
+        return proprietary_period_start + relativedelta(months=proprietary_period)
 
     def is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
-        stmt = text("""
+        stmt = text(
+            """
 SELECT P.Partner_Code    AS partner_code,
        SUM(PA.TimeAlloc) AS time_allocation
 FROM PriorityAlloc PA
@@ -1803,19 +1997,16 @@ FROM PriorityAlloc PA
          JOIN Partner P ON MP.Partner_Id = P.Partner_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY PA.MultiPartner_Id, PA.Priority
-        """)
-        result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code}
+        """
         )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
 
         for row in result:
             if row.partner_code == partner_code and row.time_allocation > 0:
                 return True
         return False
 
-    def maximum_proprietary_period(
-        self, proposal_code: str
-    ) -> Optional[int]:
+    def maximum_proprietary_period(self, proposal_code: str) -> int:
         proposal_type = self.get_proposal_type(proposal_code)
         if proposal_type == "Commissioning":
             return 36
@@ -1829,13 +2020,20 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
             return 12
         if proposal_type == "OPTICON-Radionet Pilot":
             return 24
-        if proposal_type in ["Key Science Program", "Large Science Proposal", "Science", "Science - Long Term"]:
+        if proposal_type in [
+            "Key Science Program",
+            "Large Science Proposal",
+            "Science",
+            "Science - Long Term",
+        ]:
             if self.is_partner_allocated(proposal_code, "RSA"):
                 return 24
             return 1200
         raise ValueError("Unknown proposal type.")
 
-    def update_proprietary_period(self, proposal_code: str, proprietary_period: int) -> None:
+    def update_proprietary_period(
+        self, proposal_code: str, proprietary_period: int
+    ) -> None:
         stmt = text(
             """
 UPDATE ProposalGeneralInfo
@@ -1856,3 +2054,289 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                 "proprietary_period": proprietary_period,
             },
         )
+
+    def _get_phase_one_targets(self, proposal_code: str) -> List[Dict[str, Any]]:
+        # The phase 1 targets.
+        stmt = text(
+            """
+SELECT DISTINCT RequestedTime                                   AS observing_time,
+                T.Target_Id                                     AS id,
+                T.Target_Name                                   AS name,
+                TC.RaH                                          AS ra_h,
+                TC.RaM                                          AS ra_m,
+                TC.RaS                                          AS ra_s,
+                TC.DecSign                                      AS dec_sign,
+                TC.DecD                                         AS dec_d,
+                TC.DecM                                         AS dec_m,
+                TC.DecS                                         AS dec_s,
+                TC.Equinox                                      AS equinox,
+                TM.MinMag                                       AS min_mag,
+                TM.MaxMag                                       AS max_mag,
+                BP.FilterName                                   AS bandpass,
+                TST.TargetSubType                               AS target_sub_type,
+                TT.TargetType                                   AS target_type,
+                PPT.Optional									AS optional,
+                PPT.NVisits										AS requested_observations,
+                PPT.MaxLunarPhase								AS max_luner_phase,
+                PR.Ranking										AS ranking,
+                PPT.TrackCount									AS track_count,
+                PPT.NightCount									AS nights_count,
+                M.Moon											AS moon,
+                PTP.CompetitionProbability						AS competition_probability,
+                PTP.ObservabilityProbability					AS observability_probability,
+                PTP.SeeingProbability							AS seeing_probability,
+                PTP.TotalProbability							AS total_probability,
+                MT.RaDot                                        AS ra_dot,
+                MT.DecDot                                       AS dec_dot,
+                MT.Epoch                                        AS epoch,
+                PT.Period                                       AS period,
+                PT.Pdot                                         AS period_change_rate,
+                PT.T0                                           AS period_zero_point,
+                TB.Time_Base                                    AS period_time_base,
+                HT.Identifier                                   AS horizons_identifier,
+                IF((MT1.Target_Id IS NOT NULL
+                    OR MTF.Target_Id IS NOT NULL
+                    OR HT.Identifier IS NOT NULL),
+                    1,
+                    0)                                          AS non_sidereal
+FROM P1ProposalTarget PPT
+    JOIN ProposalCode  PC ON PPT.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Target T ON PPT.Target_Id = T.Target_Id
+    JOIN TargetCoordinates TC ON T.TargetCoordinates_Id = TC.TargetCoordinates_Id
+    JOIN P1ObservingConditions POC ON PC.ProposalCode_Id = POC.ProposalCode_Id
+     LEFT JOIN TargetMagnitudes TM ON T.TargetMagnitudes_Id = TM.TargetMagnitudes_Id
+     LEFT JOIN Bandpass BP ON TM.Bandpass_Id = BP.Bandpass_Id
+         LEFT JOIN TargetSubType TST ON T.TargetSubType_Id = TST.TargetSubType_Id
+         LEFT JOIN TargetType TT ON TST.TargetType_Id = TT.TargetType_Id
+         LEFT JOIN MovingTarget MT ON T.MovingTarget_Id = MT.MovingTarget_Id
+         LEFT JOIN PeriodicTarget PT ON T.PeriodicTarget_Id = PT.PeriodicTarget_Id
+         LEFT JOIN TimeBase TB ON PT.TimeBase_Id = TB.TimeBase_Id
+         LEFT JOIN HorizonsTarget HT ON T.HorizonsTarget_Id = HT.HorizonsTarget_Id
+         LEFT JOIN MovingTable MT1 ON T.Target_Id = MT1.Target_Id
+         LEFT JOIN MovingTableFile MTF ON T.Target_Id = MTF.Target_Id
+         LEFT JOIN PiRanking PR ON PPT.PiRanking_Id = PR.PiRanking_Id
+         LEFT JOIN Moon M ON POC.Moon_Id = M.Moon_Id
+         LEFT JOIN P1TargetProbabilities PTP ON PC.ProposalCode_Id = PTP.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+    """
+        )
+        return [
+            {
+                "id": row.id,
+                "name": row.name,
+                "observing_time": row.observing_time,
+                "coordinates": target_coordinates(row),
+                "proper_motion": target_proper_motion(row),
+                "magnitude": target_magnitude(row),
+                "target_type": target_type(row),
+                "is_optional": row.optional,
+                "requested_observations": row.requested_observations,
+                "max_lunar_phase": row.max_luner_phase,
+                "ranking": row.ranking,
+                "track_count": row.track_count,
+                "night_count": row.nights_count,
+                "observing_probabilities": {
+                    "moon": row.moon,
+                    "competition": row.competition_probability,
+                    "observability": row.observability_probability,
+                    "seeing": row.seeing_probability,
+                    "total": row.total_probability,
+                },
+                "period_ephemeris": target_period_ephemeris(row),
+                "horizons_identifier": row.horizons_identifier,
+                "non_sidereal": row.non_sidereal == 1,
+            }
+            for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
+        ]
+
+    def _get_requested_times(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+    MP.ReqTimePercent					AS percentage,
+    PMT.P1MinimumUsefulTime				AS minimum_useful_time,
+    MP.ReqTimeAmount					AS total_requested_time,
+    PMT.P1TimeComment					AS `comment`,
+    P.Partner_Name						AS partner_name,
+    CONCAT(S.`Year`, '-', S.Semester)   AS semester
+FROM MultiPartner MP
+    JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S ON MP.Semester_Id = S.Semester_Id
+    JOIN Partner P ON MP.Partner_Id = P.Partner_Id
+    JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id AND MP.Semester_Id = PMT.Semester_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+
+        req_time: DefaultDict[str, Dict[str, Any]] = defaultdict(lambda: dict())
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            semester = row.semester
+            if not req_time[semester]:
+                req_time[semester] = {
+                    "total_requested_time": row.total_requested_time,
+                    "minimum_useful_time": row.minimum_useful_time,
+                    "comment": row.comment,
+                    "semester": semester,
+                    "distribution": [],
+                }
+            req_time[semester]["distribution"].append(
+                {"partner": row.partner_name, "percentage": row.percentage}
+            )
+
+        return list(req_time.values())
+
+    def _get_nir_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+    P1NirSimulation_Id          AS id,
+    P1NirSimulation_Name		AS `name`,
+    PiComment					AS description
+FROM P1NirSimulation P1NS
+    JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/nir/{row.id}.nsim",
+                    "description": row.description,
+                }
+            )
+        return simulations
+
+    def _get_hrs_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+    P1HrsSimulation_Id          AS id,
+    P1HrsSimulation_Name		AS `name`,
+    PiComment					AS description
+FROM P1HrsSimulation P1HS
+    JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/hrs/{row.id}.hsim",
+                    "description": row.description,
+                }
+            )
+        return simulations
+
+    def _get_rss_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+    P1RssSimulation_Id          AS id,
+    P1RssSimulation_Name		AS `name`,
+    PiComment					AS description
+FROM P1RssSimulation P1RS
+    JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/rss/{row.id}.rsim",
+                    "description": row.description,
+                }
+            )
+        return simulations
+
+    def _get_salticam_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+    P1SalticamSimulation_Id         AS id,
+    P1SalticamSimulation_Name		AS `name`,
+    PiComment					    AS description
+FROM P1SalticamSimulation P1SS
+    JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        simulations = []
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            simulations.append(
+                {
+                    "name": row.name,
+                    "url": f"/instrument-simulations/salticam/{row.id}.ssim",
+                    "description": row.description,
+                }
+            )
+        return simulations
+
+    def _get_science_configurations(self, proposal_code: str) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT
+    P1C.P1Bvit_Id				        AS bvit,
+    P1C.P1Hrs_Id				        AS hrs,
+    P1C.P1Nir_Id				        AS nir,
+    P1C.P1Rss_Id				        AS rss,
+    P1C.P1Salticam_Id			        AS scam,
+    BF.BvitFilter_Name			        AS bvit_filter,
+    HM.ExposureMode				        AS hrs_mode,
+    NG.Grating					        AS nir_grating,
+    RM.`Mode`					        AS rss_mode,
+    SM.DetectorMode				        AS scam_detector_mode
+FROM P1Config P1C
+    JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
+    LEFT JOIN P1Bvit PB ON P1C.P1Bvit_Id = PB.P1Bvit_Id
+    LEFT JOIN BvitFilter BF ON PB.BvitFilter_Id = BF.BvitFilter_Id
+    LEFT JOIN P1Hrs PH ON P1C.P1Hrs_Id = PH.P1Hrs_Id
+    LEFT JOIN HrsMode HM ON PH.HrsMode_Id = HM.HrsMode_Id
+    LEFT JOIN P1Nir PN ON P1C.P1Nir_Id = PN.P1Nir_Id
+    LEFT JOIN NirGrating NG ON PN.NirGrating_Id = NG.NirGrating_Id
+    LEFT JOIN P1Rss PR ON P1C.P1Rss_Id = PR.P1Rss_Id
+    LEFT JOIN RssMode RM ON PR.RssMode_Id = RM.RssMode_Id
+    LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
+    LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id
+WHERE PC.Proposal_Code = :proposal_code
+        """
+        )
+        configurations = []
+
+        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            if row.bvit:
+                instrument = "BVIT"
+                mode = row.bvit_filter
+                simulations = []  # There are no BVIT simulations
+            elif row.hrs:
+                instrument = "HRS"
+                mode = normalised_hrs_mode(row.hrs_mode)
+                simulations = self._get_hrs_simulations(proposal_code)
+            elif row.nir:
+                instrument = "NIR"
+                mode = row.nir_grating
+                simulations = self._get_nir_simulations(proposal_code)
+            elif row.rss:
+                instrument = "RSS"
+                mode = row.rss_mode
+                simulations = self._get_rss_simulations(proposal_code)
+            elif row.scam:
+                instrument = "SALTICAM"
+                mode = row.scam_detector_mode
+                simulations = self._get_salticam_simulations(proposal_code)
+            else:
+                raise NotFoundError(
+                    "Unknown instrument configuration found for proposal:"
+                    f" {proposal_code}"
+                )
+            configurations.append(
+                {"instrument": instrument, "mode": mode, "simulations": simulations}
+            )
+        if len(configurations) == 0:
+            return []
+        return configurations

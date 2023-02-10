@@ -1,6 +1,13 @@
-<h2 class="title is-2">Summary of executed observations</h2>
+<h2 id="executed-observations" class="title is-2">
+  Summary of executed observations
+</h2>
 <hr class="heading-line summary-header" />
-<table class="table" [wmSort]="sort">
+<p class="mb-2">
+  <a class="has-text-link" (click)="toggleObservationsList(false)">
+    {{ showObservationsList ? "Hide" : "Show" }} list of observations.
+  </a>
+</p>
+<table class="table" [wmSort]="sort" *ngIf="showObservationsList">
   <thead>
     <tr>
       <th
@@ -146,3 +153,8 @@
     </tr>
   </tbody>
 </table>
+<p *ngIf="showObservationsList">
+  <a class="has-text-link" (click)="toggleObservationsList(true)">
+    Hide list of observations.
+  </a>
+</p>

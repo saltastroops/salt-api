@@ -33,7 +33,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus, ProposalStatusContent,
+    UpdateStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -330,7 +330,7 @@ def update_proprietary_period(
 @router.put(
     "/{proposal_code}/status",
     summary="Update the proposal status",
-    response_model=ProposalStatusContent,
+    response_model=ProposalStatus,
     status_code=status.HTTP_200_OK,
 )
 def update_proposal_status(
@@ -339,27 +339,32 @@ def update_proposal_status(
         title="Proposal code",
         description="Proposal code of the proposal whose status is updated.",
     ),
-    proposal_status: ProposalStatusContent = Body(
-        ..., alias="status", title="Proposal status", description="New proposal status."
+    proposal_status: ProposalStatus = Body(
+        ...,
+        alias="status",
+        title="Proposal status and (optional) status reason",
+        description="Nwe proposal status and (optional) status reason."
     ),
     user: User = Depends(get_current_user),
-) -> ProposalStatusContent:
+) -> ProposalStatus:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.
     """
     with UnitOfWork() as unit_of_work:
         proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal = proposal_service.get_proposal(proposal_code)
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proposal_status(
-            user, proposal_code, proposal["general_info"]["is_self_activatable"], proposal_status.status.value
+            user, proposal_code, proposal_status.value
         )
 
-        proposal_service.update_proposal_status(proposal_code, proposal_status.status.value, proposal_status.status.reason)
+        proposal_service.update_proposal_status(
+            proposal_code, proposal_status.value,
+            proposal_status.reason
+        )
 
         unit_of_work.connection.commit()
-        return proposal_status
+        return ProposalStatus(**proposal_service.get_proposal_status(proposal_code))
 
 
 @router.get(

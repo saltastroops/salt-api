@@ -1263,6 +1263,17 @@ WHERE PC.Proposal_Code = :proposal_code
         except NoResultFound:
             raise NotFoundError()
 
+    def _proposal_inactive_reason_id(self, inactive_reason: str) -> int:
+        stmt = text(
+            """
+SELECT PIR.ProposalInactiveReason_Id AS id
+FROM ProposalInactiveReason PIR
+WHERE PIR.InactiveReason = :inactive_reason
+        """
+        )
+        result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
+        return cast(int, result.scalar_one())
+
     def update_proposal_status(self, proposal_code: str, status: str, status_reason: Optional[str] = None) -> None:
         """
         Update the status of a proposal.
@@ -1273,6 +1284,10 @@ WHERE PC.Proposal_Code = :proposal_code
         # wrong status value.
         try:
             status_id = self._proposal_status_id(status)
+            proposal_inactive_reason_id = (
+                self._proposal_inactive_reason_id(status_reason) if status_reason else None
+            )
+
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
@@ -1281,11 +1296,7 @@ WHERE PC.Proposal_Code = :proposal_code
 UPDATE ProposalGeneralInfo  PGI
 SET 
     PGI.ProposalStatus_Id = :status_id,
-    PGI.ProposalInactiveReason_Id = (
-		Select ProposalInactiveReason_Id 
-        FROM ProposalInactiveReason 
-        WHERE InactiveReason = :status_reason
-    )
+    PGI.ProposalInactiveReason_Id = :proposal_inactive_reason_id
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code);
@@ -1293,7 +1304,10 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
         )
         result = self.connection.execute(
             stmt, {
-                "proposal_code": proposal_code, "status_id": status_id, "status_reason": status_reason}
+                "proposal_code": proposal_code,
+                "status_id": status_id,
+                "proposal_inactive_reason_id": proposal_inactive_reason_id,
+            }
         )
         if not result.rowcount:
             raise NotFoundError()

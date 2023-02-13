@@ -187,7 +187,6 @@ class PermissionService:
             self,
             user: User,
             proposal_code: str,
-            is_self_activatable: bool,
             proposal_status: str
     ) -> None:
         """
@@ -197,13 +196,14 @@ class PermissionService:
 
         * a SALT Astronomer
         * an administrator
+        * a Principal Investigator or Principal Contact (if the proposal is deactivated or if it is activated self-activation is allowed)
         """
         username = user.username
         if self.user_has_role(username, Role.PRINCIPAL_CONTACT, proposal_code) or\
             self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
             if proposal_status == ProposalStatusValue.INACTIVE or \
                     (
-                        is_self_activatable and
+                        self.proposal_repository.is_self_activatable(proposal_code) and
                         proposal_status == ProposalStatusValue.ACTIVE
                     ):
                 return

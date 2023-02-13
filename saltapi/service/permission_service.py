@@ -325,6 +325,16 @@ class PermissionService:
                 roles=roles,
             )
 
+    def check_permission_to_switch_user(self, user: User) -> None:
+        """
+        Check whether the user may switch the user, i.e. login as someone else.
+
+        This is the case if the user is an administrator.
+        """
+        roles = [Role.ADMINISTRATOR]
+
+        self.check_role(user.username, roles)
+
     def check_permission_to_view_users(self, user: User) -> None:
         """
         Check whether the user may view the list of users.

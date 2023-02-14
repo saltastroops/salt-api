@@ -5,7 +5,10 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
-from saltapi.web.schema.proposal import ProprietaryPeriodUpdateRequest, ProposalStatusValue
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:

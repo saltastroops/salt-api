@@ -109,3 +109,6 @@ SALT Team
         if user.username and self._does_user_exist(user.username):
             raise ValidationError(f"The username {user.username} exists already.")
         self.repository.update(user_id, user)
+
+    def get_salt_astronomers(self) -> List[Dict[str, Any]]:
+        return self.repository.get_salt_astronomers()

@@ -13,7 +13,7 @@ from saltapi.web.schema.common import (
     Semester,
 )
 from saltapi.web.schema.institution import Institution
-from saltapi.web.schema.user import FullName
+from saltapi.web.schema.user import FullName, UserListItem
 
 
 class ProposalUser(FullName):
@@ -99,11 +99,6 @@ class ProprietaryPeriod(BaseModel):
         title="Start date",
         description="Start date from which the proprietary period is counted.",
     )
-    motivation: Optional[str] = Field(
-        ...,
-        title="Proprietary period reason",
-        description="The reason proprietary period extension.",
-    )
 
 
 class GeneralProposalInfo(BaseModel):
@@ -148,7 +143,7 @@ class GeneralProposalInfo(BaseModel):
         description="Total requested time, in seconds",
     )
 
-    liaison_salt_astronomer: Optional[FullName] = Field(
+    liaison_salt_astronomer: Optional[UserListItem] = Field(
         ...,
         title="Liaison astronomer",
         description="SALT Astronomer who is the liaison astronomer for the proposal",

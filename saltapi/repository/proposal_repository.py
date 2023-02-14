@@ -1272,41 +1272,40 @@ WHERE PIR.InactiveReason = :inactive_reason
         result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
         return cast(int, result.scalar_one())
 
-    def update_proposal_status(
-        self, proposal_code: str, status: str, reason: Optional[str]
-    ) -> None:
+    def update_proposal_status(self, proposal_code: str, status: str, status_reason: Optional[str] = None) -> None:
         """
         Update the status of a proposal.
         """
 
-        # We could query for the status id within the UPDATE query, but then it would
+        # We could query for the status and reason ids within the UPDATE query, but then it would
         # not be clear whether a failing query is due to a wrong proposal code or a
-        # wrong status value.
+        # wrong status or reason value.
         try:
             status_id = self._proposal_status_id(status)
             proposal_inactive_reason_id = (
-                self._proposal_inactive_reason_id(reason) if reason else None
+                self._proposal_inactive_reason_id(status_reason) if status_reason else None
             )
+
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
         stmt = text(
             """
-UPDATE ProposalGeneralInfo PGI
-SET PGI.ProposalStatus_Id = :status_id,
+UPDATE ProposalGeneralInfo  PGI
+SET 
+    PGI.ProposalStatus_Id = :status_id,
     PGI.ProposalInactiveReason_Id = :proposal_inactive_reason_id
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code)
-            """
+                         WHERE PC.Proposal_Code = :proposal_code);
+        """
         )
         result = self.connection.execute(
-            stmt,
-            {
+            stmt, {
                 "proposal_code": proposal_code,
                 "status_id": status_id,
                 "proposal_inactive_reason_id": proposal_inactive_reason_id,
-            },
+            }
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -2179,9 +2178,10 @@ WHERE Proposal_Code = :proposal_code
                     "semester": semester,
                     "distribution": [],
                 }
-            req_time[semester]["distribution"].append(
-                {"partner": row.partner_name, "percentage": row.percentage}
-            )
+            req_time[semester]["distribution"].append({
+                "partner": row.partner_name,
+                "percentage": row.percentage
+            })
 
         return list(req_time.values())
 

@@ -343,7 +343,7 @@ def update_proposal_status(
         ...,
         alias="status",
         title="Proposal status and (optional) status reason",
-        description="New proposal status and (optional) status reason."
+        description="New proposal status and (optional) status reason.",
     ),
     user: User = Depends(get_current_user),
 ) -> ProposalStatus:
@@ -359,8 +359,7 @@ def update_proposal_status(
         )
 
         proposal_service.update_proposal_status(
-            proposal_code, proposal_status.value,
-            proposal_status.reason
+            proposal_code, proposal_status.value, proposal_status.reason
         )
 
         unit_of_work.connection.commit()

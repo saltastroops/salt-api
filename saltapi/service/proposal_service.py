@@ -332,5 +332,9 @@ class ProposalService:
         """
         self.repository.update_proposal_status(proposal_code, status, reason)
 
-    def update_proposal_status(self, proposal_code: str, proposal_status: str, status_reason: Optional[str]):
-        self.repository.update_proposal_status(proposal_code, proposal_status, status_reason)
+    def update_proposal_status(
+        self, proposal_code: str, proposal_status: str, status_reason: Optional[str]
+    ):
+        self.repository.update_proposal_status(
+            proposal_code, proposal_status, status_reason
+        )

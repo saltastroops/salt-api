@@ -45,7 +45,7 @@ def test_proposal_status_update_requires_valid_proposal_status_value(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={ "value": proposal_status_value, "reason": None},
+        json={"value": proposal_status_value, "reason": None},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -75,16 +75,17 @@ def test_proposal_status_update_requires_permissions(
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
+
 @pytest.mark.parametrize(
     "username",
     [
         find_username("Principal Contact", proposal_code="2019-2-SCI-006"),
-        find_username("Principal Investigator", proposal_code="2019-2-SCI-006")
+        find_username("Principal Investigator", proposal_code="2019-2-SCI-006"),
     ],
 )
 def test_pi_and_pc_can_set_proposal_status_to_inactive(
-        username: str,
-        client: TestClient,
+    username: str,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     authenticate(username, client)
@@ -94,19 +95,20 @@ def test_pi_and_pc_can_set_proposal_status_to_inactive(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "reason": None},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
+
 
 @pytest.mark.parametrize(
     "username",
     [
         find_username("Principal Contact", proposal_code="2019-2-SCI-006"),
-        find_username("Principal Investigator", proposal_code="2019-2-SCI-006")
+        find_username("Principal Investigator", proposal_code="2019-2-SCI-006"),
     ],
 )
 def test_pi_and_pc_can_not_set_proposal_status_to_active(
-        username: str,
-        client: TestClient,
+    username: str,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     authenticate(username, client)
@@ -116,19 +118,20 @@ def test_pi_and_pc_can_not_set_proposal_status_to_active(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "reason": None},
-        )
+    )
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
 
 @pytest.mark.parametrize(
     "username",
     [
         find_username("Principal Contact", proposal_code="2018-2-LSP-001"),
-        find_username("Principal Investigator", proposal_code="2018-2-LSP-001")
+        find_username("Principal Investigator", proposal_code="2018-2-LSP-001"),
     ],
 )
-def  test_pi_and_pc_can_activate_self_activatable_proposal(
-        username: str,
-        client: TestClient,
+def test_pi_and_pc_can_activate_self_activatable_proposal(
+    username: str,
+    client: TestClient,
 ) -> None:
     proposal_code = "2018-2-LSP-001"
     authenticate(username, client)
@@ -138,8 +141,9 @@ def  test_pi_and_pc_can_activate_self_activatable_proposal(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "reason": None},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
+
 
 def test_proposal_status_update_requires_valid_proposal_inactive_reason(
     client: TestClient,

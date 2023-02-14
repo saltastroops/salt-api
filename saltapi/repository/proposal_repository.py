@@ -239,7 +239,7 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": self.proprietary_period_start_date(block_visits)
+            "start_date": self.proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
         general_info["data_release_date"] = self._data_release_date(
@@ -1272,7 +1272,9 @@ WHERE PIR.InactiveReason = :inactive_reason
         result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
         return cast(int, result.scalar_one())
 
-    def update_proposal_status(self, proposal_code: str, status: str, status_reason: Optional[str] = None) -> None:
+    def update_proposal_status(
+        self, proposal_code: str, status: str, status_reason: Optional[str] = None
+    ) -> None:
         """
         Update the status of a proposal.
         """
@@ -1283,7 +1285,9 @@ WHERE PIR.InactiveReason = :inactive_reason
         try:
             status_id = self._proposal_status_id(status)
             proposal_inactive_reason_id = (
-                self._proposal_inactive_reason_id(status_reason) if status_reason else None
+                self._proposal_inactive_reason_id(status_reason)
+                if status_reason
+                else None
             )
 
         except NoResultFound:
@@ -1301,11 +1305,12 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
         """
         )
         result = self.connection.execute(
-            stmt, {
+            stmt,
+            {
                 "proposal_code": proposal_code,
                 "status_id": status_id,
                 "proposal_inactive_reason_id": proposal_inactive_reason_id,
-            }
+            },
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -2178,10 +2183,9 @@ WHERE Proposal_Code = :proposal_code
                     "semester": semester,
                     "distribution": [],
                 }
-            req_time[semester]["distribution"].append({
-                "partner": row.partner_name,
-                "percentage": row.percentage
-            })
+            req_time[semester]["distribution"].append(
+                {"partner": row.partner_name, "percentage": row.percentage}
+            )
 
         return list(req_time.values())
 

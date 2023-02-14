@@ -8,102 +8,78 @@ BLOCK_VISIT_URL = "/block-visits"
 
 
 def test_patch_block_visit_status_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 1
     not_authenticated(client)
-    block_visit_status = {
-        "status": "Accepted",
-        "reason": None
-    }
+    block_visit_status = {"status": "Accepted", "reason": None}
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_patch_block_visit_status_requires_existing_block_visit(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = -1
     user = find_username("Administrator")
     authenticate(user, client)
-    block_visit_status = {
-        "status": "Accepted",
-        "reason": None
-    }
+    block_visit_status = {"status": "Accepted", "reason": None}
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_patch_block_visit_status_requires_valid_block_visit_status(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006
     user = find_username("Administrator")
     authenticate(user, client)
-    block_visit_status = {
-        "status": "Status",
-        "reason": None
-    }
+    block_visit_status = {"status": "Status", "reason": None}
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_patch_block_visit_status_requires_valid_block_rejection_reason(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006
     user = find_username("Administrator")
     authenticate(user, client)
-    block_visit_status = {
-        "status": "Rejected",
-        "reason": "Wrong reason"
-    }
+    block_visit_status = {"status": "Rejected", "reason": "Wrong reason"}
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_patch_block_visit_status_requires_block_visit_status(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006
     user = find_username("Administrator")
     authenticate(user, client)
-    block_visit_status = {
-        "status": None,
-        "reason": "Other"
-    }
+    block_visit_status = {"status": None, "reason": "Other"}
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_patch_block_visit_status_requires_block_rejection_reason(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006
     user = find_username("Administrator")
     authenticate(user, client)
-    block_visit_status = {
-        "status": "Rejected",
-        "reason": None
-    }
+    block_visit_status = {"status": "Rejected", "reason": None}
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -119,24 +95,23 @@ def test_patch_block_visit_status_requires_block_rejection_reason(
     ],
 )
 def test_patch_block_visit_status_requires_permissions(
-        username: str, client: TestClient
+    username: str, client: TestClient
 ) -> None:
     block_visit_id = 24700  # belongs to proposal 2016-2-COM-001
 
     authenticate(username, client)
     block_visit_status = {
         "status": "Rejected",
-        "reason": "Observing conditions not met"
+        "reason": "Observing conditions not met",
     }
     response = client.patch(
-        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json=block_visit_status
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_patch_block_visit_status(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 27248  # belongs to proposal 2016-2-COM-001
 
@@ -148,7 +123,7 @@ def test_patch_block_visit_status(
 
     resp = client.patch(
         BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json={"status": block_visit_status, "reason": rejection_rejection}
+        json={"status": block_visit_status, "reason": rejection_rejection},
     )
     assert resp.status_code == status.HTTP_200_OK
 

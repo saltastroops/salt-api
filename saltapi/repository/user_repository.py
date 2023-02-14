@@ -623,8 +623,8 @@ WHERE PiptUser_Id = :user_id
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         """
-       Return the list of SALT Astronomers.
-       """
+        Return the list of SALT Astronomers.
+        """
         stmt = text(
             """
 SELECT 
@@ -644,5 +644,6 @@ FROM SaltAstronomers SA
                 "given_name": row.given_name,
                 "family_name": row.family_name,
             }
-            for row in result if row.given_name != "Techops"
+            for row in result
+            if row.given_name != "Techops"
         ]

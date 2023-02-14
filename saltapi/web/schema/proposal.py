@@ -54,7 +54,7 @@ class ProposalStatus(BaseModel):
         ..., title="Proposal status", description="Proposal status"
     )
     comment: Optional[str] = Field(
-        ..., title="Proposal status reason", description="Proposal status reason"
+        ..., title="Proposal status comment", description="Proposal status comment"
     )
 
 

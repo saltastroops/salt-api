@@ -65,6 +65,8 @@ class FakeBlockRepository:
                 status_value.value for status_value in BlockVisitStatusValue
             ]:
                 raise NotFoundError(f"Unknown block visit status: {status}")
+            if status == "Rejected" and rejection_reason is None:
+                raise AuthorizationError()
             self.block_visit_status = {
                 "status": status,
                 "rejected_reason": rejection_reason,

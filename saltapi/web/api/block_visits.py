@@ -83,6 +83,8 @@ def update_block_visit_status(
         permission_service.check_permission_to_update_block_visit_status(user)
 
         block_service = services.block_service(unit_of_work.connection)
-        return block_service.update_block_visit_status(
+        block_service.update_block_visit_status(
             block_visit_id, block_visit_status, rejection_reason
         )
+
+        unit_of_work.commit()

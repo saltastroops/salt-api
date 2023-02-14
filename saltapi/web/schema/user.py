@@ -100,3 +100,11 @@ class PasswordResetRequest(BaseModel):
             "Username or email address of the user whose password should be reset"
         ),
     )
+
+
+class UserSwitchDetails(BaseModel):
+    """Username of the user to switch to."""
+
+    username: str = Field(
+        ..., title="Username", description="Username of the user to switch to"
+    )

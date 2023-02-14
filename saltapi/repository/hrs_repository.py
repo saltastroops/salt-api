@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
@@ -20,15 +20,12 @@ class HrsRepository:
 SELECT H.Hrs_Id                                     AS hrs_id,
        H.ObservingTime / 1000                       AS observation_time,
        H.OverheadTime / 1000                        AS overhead_time,
-       IF(HC.HrsNodAndShuffle_Id IS NOT NULL, 1, 0) AS has_nod_and_shuffle,
        HM.ExposureMode                              AS mode,
        HET.ExposureType                             AS exposure_type,
        HTL.TargetLocation                           AS target_location,
        HC.FibreSeparation                           AS fiber_separation,
        HICP.IodineCellPosition                      AS iodine_cell_position,
        ThArLampOn                                   AS th_ar_lamp_on,
-       HNAS.NodInterval                             AS nod_interval,
-       HNAS.NodCount                                AS nod_count,
        HBlueD.PreShuffle                            AS blue_pre_shuffle_rows,
        HBlueD.PostShuffle                           AS blue_post_shuffle_rows,
        HBlueD.PreBinRows                            AS blue_pre_binned_rows,
@@ -54,8 +51,6 @@ FROM Hrs H
               ON HC.HrsTargetLocation_Id = HTL.HrsTargetLocation_Id
          JOIN HrsIodineCellPosition HICP
               ON HC.HrsIodineCellPosition_Id = HICP.HrsIodineCellPosition_Id
-         LEFT JOIN HrsNodAndShuffle HNAS
-                   ON HC.HrsNodAndShuffle_Id = HNAS.HrsNodAndShuffle_Id
          JOIN HrsBlueDetector HBlueD ON H.HrsBlueDetector_Id = HBlueD.HrsBlueDetector_Id
          JOIN HrsRoSpeed HBlueS ON HBlueD.HrsRoSpeed_Id = HBlueS.HrsRoSpeed_Id
          JOIN HrsRoAmplifiers HBlueA
@@ -108,14 +103,6 @@ WHERE H.Hrs_Id = :hrs_id
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """HRS configuration."""
 
-        if row.has_nod_and_shuffle:
-            nod_and_shuffle: Optional[Dict[str, int]] = {
-                "nod_interval": row.nod_interval,
-                "nod_count": row.nod_count,
-            }
-        else:
-            nod_and_shuffle = None
-
         configuration = {
             "mode": normalised_hrs_mode(row.mode),
             "exposure_type": row.exposure_type,
@@ -123,7 +110,6 @@ WHERE H.Hrs_Id = :hrs_id
             "fiber_separation": float(row.fiber_separation),
             "iodine_cell_position": self._iodine_cell_position(row),
             "is_th_ar_lamp_on": True if row.th_ar_lamp_on else False,
-            "nod_and_shuffle": nod_and_shuffle,
         }
 
         return configuration

@@ -3,7 +3,7 @@ import { UntypedFormControl } from "@angular/forms";
 
 import { parseISO } from "date-fns";
 
-import { GeneralProposalInfo } from "../../../types/proposal";
+import { Investigator, Proposal } from "../../../types/proposal";
 
 @Component({
   selector: "wm-general-proposal-info",
@@ -11,24 +11,32 @@ import { GeneralProposalInfo } from "../../../types/proposal";
   styleUrls: ["./general-proposal-info.component.scss"],
 })
 export class GeneralProposalInfoComponent implements OnInit {
-  @Input() generalProposalInfo!: GeneralProposalInfo;
-  @Input() currentSemester!: string;
-  @Input() phase!: number;
-  @Input() proposalCode!: string;
+  @Input() proposal!: Proposal;
   semesterControl = new UntypedFormControl();
   currentSubmission!: Date;
   firstSubmission!: Date;
   statusDescription = "";
   backgroundColor = "";
+  principalInvestigator: Investigator | undefined;
+  principalContact: Investigator | undefined;
 
   ngOnInit(): void {
     this.currentSubmission = parseISO(
-      this.generalProposalInfo.currentSubmission,
+      this.proposal.generalInfo.currentSubmission,
     );
-    this.firstSubmission = parseISO(this.generalProposalInfo.firstSubmission);
-    this.semesterControl.setValue(this.currentSemester);
+    this.firstSubmission = parseISO(this.proposal.generalInfo.firstSubmission);
 
-    const status = this.generalProposalInfo.status.value;
+    const investigators = this.proposal.investigators;
+    this.semesterControl.setValue(this.proposal.semester);
+
+    this.principalContact = investigators.find(
+      (investigator) => investigator.isPc,
+    );
+    this.principalInvestigator = investigators.find(
+      (investigator) => investigator.isPi,
+    );
+
+    const status = this.proposal.generalInfo.status.value;
 
     switch (status) {
       case "Active":

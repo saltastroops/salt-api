@@ -24,6 +24,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   showEditBlockButton = false;
   columnsSortDirections: { [columnName: string]: string } = {};
   sortedColumn = "";
+  showObservationsList = false;
 
   constructor(private authService: AuthenticationService) {}
 
@@ -86,6 +87,14 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
 
   onClick(blockId: number): void {
     this.selectBlock.emit(blockId);
+  }
+
+  toggleObservationsList(scrollToSection: boolean): void {
+    this.showObservationsList = !this.showObservationsList;
+    if (scrollToSection) {
+      const element = document.getElementById("executed-observations");
+      element?.scrollIntoView();
+    }
   }
 }
 

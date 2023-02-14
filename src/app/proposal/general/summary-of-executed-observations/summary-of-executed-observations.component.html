@@ -1,6 +1,13 @@
-<h2 class="title is-2">Summary of executed observations</h2>
+<h2 id="executed-observations" class="title is-2">
+  Summary of executed observations
+</h2>
 <hr class="heading-line summary-header" />
-<table class="table" [wmSort]="sort">
+<p class="mb-2">
+  <a class="has-text-link" (click)="toggleObservationsList(false)">
+    {{ showObservationsList ? "Hide" : "Show" }} list of observations.
+  </a>
+</p>
+<table class="table" [wmSort]="sort" *ngIf="showObservationsList">
   <thead>
     <tr>
       <th
@@ -40,13 +47,13 @@
         Accepted?
       </th>
       <th>Rejection Reason</th>
-      <th>Edit</th>
+      <!--      <th>Edit</th>-->
       <th>Data</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td colspan="9"></td>
+      <td colspan="8"></td>
       <td>
         <label class="checkbox">
           <input
@@ -116,22 +123,22 @@
         />
       </td>
       <td>{{ e.rejectionReason }}</td>
-      <td *ngIf="e.status === 'Accepted'">
-        <button
-          class="button is-danger is-small"
-          [hidden]="showEditBlockButton"
-        >
-          Put block on hold
-        </button>
-      </td>
-      <td *ngIf="e.status === 'Rejected'">
-        <button
-          class="button is-success is-small"
-          [hidden]="showEditBlockButton"
-        >
-          Put block off hold
-        </button>
-      </td>
+      <!--      <td *ngIf="e.status === 'Accepted'">-->
+      <!--        <button-->
+      <!--          class="button is-danger is-small"-->
+      <!--          [hidden]="showEditBlockButton"-->
+      <!--        >-->
+      <!--          Put block on hold-->
+      <!--        </button>-->
+      <!--      </td>-->
+      <!--      <td *ngIf="e.status === 'Rejected'">-->
+      <!--        <button-->
+      <!--          class="button is-success is-small"-->
+      <!--          [hidden]="showEditBlockButton"-->
+      <!--        >-->
+      <!--          Put block off hold-->
+      <!--        </button>-->
+      <!--      </td>-->
       <td>
         <label class="checkbox">
           <input
@@ -146,3 +153,8 @@
     </tr>
   </tbody>
 </table>
+<p *ngIf="showObservationsList">
+  <a class="has-text-link" (click)="toggleObservationsList(true)">
+    Hide list of observations.
+  </a>
+</p>

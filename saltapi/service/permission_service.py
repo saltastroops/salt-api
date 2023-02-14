@@ -132,56 +132,6 @@ class PermissionService:
 
             self.check_role(username, roles, proposal_code)
 
-    def check_permission_to_activate_proposal(
-        self, user: User, proposal_code: str
-    ) -> None:
-        """
-        Check whether the user may activate a proposal.
-
-        This is the case if the user is any of the following:
-
-        * the Principal Investigator (and the proposal can be activated by the PI or PC)
-        * the Principal Contact (and the proposal can be activated by the PI or PC)
-        * a SALT Astronomer
-        * an administrator
-        """
-        username = user.username
-
-        if self.proposal_repository.is_self_activatable(proposal_code):
-            roles = [
-                Role.PRINCIPAL_INVESTIGATOR,
-                Role.PRINCIPAL_CONTACT,
-                Role.SALT_ASTRONOMER,
-                Role.ADMINISTRATOR,
-            ]
-            self.check_role(username, roles, proposal_code)
-        else:
-            roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
-            self.check_role(username, roles, proposal_code)
-
-    def check_permission_to_deactivate_proposal(
-        self, user: User, proposal_code: str
-    ) -> None:
-        """
-        Check whether the user may deactivate a proposal.
-
-        This is the case if the user is any of the following:
-
-        * the Principal Investigator
-        * the Principal Contact
-        * a SALT Astronomer
-        * an administrator
-        """
-        username = user.username
-
-        roles = [
-            Role.PRINCIPAL_INVESTIGATOR,
-            Role.PRINCIPAL_CONTACT,
-            Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR,
-        ]
-
-        self.check_role(username, roles, proposal_code)
 
     def check_permission_to_update_proposal_status(
             self,

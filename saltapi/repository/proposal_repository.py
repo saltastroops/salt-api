@@ -1279,9 +1279,9 @@ WHERE PIR.InactiveReason = :inactive_reason
         Update the status of a proposal.
         """
 
-        # We could query for the status id within the UPDATE query, but then it would
+        # We could query for the status and reason ids within the UPDATE query, but then it would
         # not be clear whether a failing query is due to a wrong proposal code or a
-        # wrong status value.
+        # wrong status or reason value.
         try:
             status_id = self._proposal_status_id(status)
             proposal_inactive_reason_id = (

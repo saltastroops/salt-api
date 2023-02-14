@@ -343,7 +343,7 @@ def update_proposal_status(
         ...,
         alias="status",
         title="Proposal status and (optional) status reason",
-        description="Nwe proposal status and (optional) status reason."
+        description="New proposal status and (optional) status reason."
     ),
     user: User = Depends(get_current_user),
 ) -> ProposalStatus:

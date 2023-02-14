@@ -195,3 +195,17 @@ def test_update_block_visit_status_raises_error_for_wrong_block_id() -> None:
     status = BlockVisitStatusValue("In queue")
     with pytest.raises(NotFoundError):
         block_service.update_block_visit_status(0, status, None)
+
+
+def test_update_block_visit_status_raises_error_for_invalid_status() -> None:
+    block_service = create_block_service()
+    status = "Wrong status"
+    with pytest.raises(NotFoundError):
+        block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)
+
+
+def test_update_block_visit_status_raises_error_for_required_rejection_reason() -> None:
+    block_service = create_block_service()
+    status = BlockVisitStatusValue("Rejected")
+    with pytest.raises(AuthorizationError):
+        block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)

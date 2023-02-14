@@ -53,7 +53,7 @@ class ProposalStatus(BaseModel):
     value: ProposalStatusValue = Field(
         ..., title="Proposal status", description="Proposal status"
     )
-    reason: Optional[ProposalInactiveReason] = Field(
+    comment: Optional[str] = Field(
         ..., title="Proposal status reason", description="Proposal status reason"
     )
 

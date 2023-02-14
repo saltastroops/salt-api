@@ -360,7 +360,7 @@ def update_proposal_status(
 
         proposal_service.update_proposal_status(
             proposal_code, proposal_status.value,
-            proposal_status.reason
+            proposal_status.comment
         )
 
         unit_of_work.connection.commit()

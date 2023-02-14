@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection

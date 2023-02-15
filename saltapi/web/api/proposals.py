@@ -342,8 +342,8 @@ def update_proposal_status(
     proposal_status: ProposalStatus = Body(
         ...,
         alias="status",
-        title="Proposal status and (optional) status reason",
-        description="New proposal status and (optional) status reason."
+        title="Proposal status and (optional) status comment",
+        description="New proposal status and (optional) status comment."
     ),
     user: User = Depends(get_current_user),
 ) -> ProposalStatus:
@@ -352,12 +352,12 @@ def update_proposal_status(
     corresponding GET request for a description of the available status values.
     """
     with UnitOfWork() as unit_of_work:
-        proposal_service = services.proposal_service(unit_of_work.connection)
+
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proposal_status(
             user, proposal_code, proposal_status.value
         )
-
+        proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_proposal_status(
             proposal_code, proposal_status.value,
             proposal_status.comment

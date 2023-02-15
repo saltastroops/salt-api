@@ -119,11 +119,11 @@ def test_patch_block_visit_status(
     authenticate(username, client)
 
     block_visit_status = "Rejected"
-    rejection_rejection = "Observing conditions not met"
+    rejection_reason = "Observing conditions not met"
 
     resp = client.patch(
         BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status",
-        json={"status": block_visit_status, "reason": rejection_rejection},
+        json={"status": block_visit_status, "reason": rejection_reason},
     )
     assert resp.status_code == status.HTTP_200_OK
 
@@ -132,4 +132,4 @@ def test_patch_block_visit_status(
     new_block_visit = response.json()
 
     assert new_block_visit["status"] == block_visit_status
-    assert new_block_visit["rejection_reason"] == rejection_rejection
+    assert new_block_visit["rejection_reason"] == rejection_reason

@@ -1,20 +1,23 @@
 import uuid
 from typing import Callable
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
 from saltapi.service.authentication_service import (
     SECONDARY_AUTH_TOKEN_KEY,
     USER_ID_KEY,
     AuthenticationService,
+    get_current_user,
 )
 from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.web import services
+from saltapi.web.schema.user import UserSwitchDetails
 
 router = APIRouter(tags=["Authentication"])
 
@@ -71,6 +74,20 @@ def token(
         )
 
 
+def _login_user(user: User, request: Request) -> Response:
+    secondary_auth_token = str(uuid.uuid4())
+    request.session[USER_ID_KEY] = user.id
+    request.session[SECONDARY_AUTH_TOKEN_KEY] = secondary_auth_token
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
+    response.set_cookie(
+        key=SECONDARY_AUTH_TOKEN_KEY,
+        value=secondary_auth_token,
+        httponly=False,
+        max_age=3600 * get_settings().auth_token_lifetime_hours,
+    )
+    return response
+
+
 @router.post("/login", summary="Log in", status_code=status.HTTP_204_NO_CONTENT)
 def login(
     request: Request,
@@ -107,17 +124,7 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    secondary_auth_token = str(uuid.uuid4())
-    request.session[USER_ID_KEY] = user.id
-    request.session[SECONDARY_AUTH_TOKEN_KEY] = secondary_auth_token
-    response = Response(status_code=status.HTTP_204_NO_CONTENT)
-    response.set_cookie(
-        key=SECONDARY_AUTH_TOKEN_KEY,
-        value=secondary_auth_token,
-        httponly=False,
-        max_age=3600 * get_settings().auth_token_lifetime_hours,
-    )
-    return response
+    return _login_user(user, request)
 
 
 @router.post("/logout", summary="Log out", status_code=status.HTTP_204_NO_CONTENT)
@@ -139,3 +146,24 @@ def logout(request: Request) -> Response:
     if SECONDARY_AUTH_TOKEN_KEY in request.cookies:
         response.delete_cookie(SECONDARY_AUTH_TOKEN_KEY)
     return response
+
+
+@router.post("/switch-user", summary="Switch the user")
+def switch_user(
+    request: Request,
+    user_switch: UserSwitchDetails = Body(
+        ..., title="User switch details", description="Details for switching the user"
+    ),
+    user: User = Depends(get_current_user),
+) -> Response:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_switch_user(user)
+
+        user_service = services.user_service(unit_of_work.connection)
+        try:
+            user = user_service.get_user_by_username(user_switch.username)
+        except NotFoundError:
+            raise ValidationError(f"Unknown username: {user_switch.username}")
+
+        return _login_user(user, request)

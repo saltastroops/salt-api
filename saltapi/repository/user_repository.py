@@ -627,12 +627,12 @@ WHERE PiptUser_Id = :user_id
         """
         stmt = text(
             """
-SELECT 
-	I.PiptUser_Id          AS id,
+SELECT
+    I.PiptUser_Id          AS id,
     I.FirstName             AS given_name,
     I.Surname               AS family_name
 FROM SaltAstronomers SA
-	JOIN Investigator I ON SA.Investigator_Id = I.Investigator_Id
+    JOIN Investigator I ON SA.Investigator_Id = I.Investigator_Id
         """
         )
 

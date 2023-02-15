@@ -133,7 +133,9 @@ def update_user(
         title="User id",
         description="User id of the user making the request.",
     ),
-    user_update: UserUpdate = Body(..., title="User Details", description="??"),
+    user_update: UserUpdate = Body(
+        ..., title="User Details", description="User details to update"
+    ),
     user: _User = Depends(get_current_user),
 ) -> _User:
     with UnitOfWork() as unit_of_work:

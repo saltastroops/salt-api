@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, Path, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 
 from saltapi.exceptions import ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork

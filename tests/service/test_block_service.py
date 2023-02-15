@@ -2,7 +2,11 @@ from typing import Any, Dict, Optional, cast
 
 import pytest
 
-from saltapi.exceptions import AuthorizationError, NotFoundError, ValidationError
+from saltapi.exceptions import (
+    AuthorizationError,
+    NotFoundError,
+    ValidationError,
+)
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockStatus
 from saltapi.service.block_service import BlockService

@@ -316,7 +316,7 @@ def update_proprietary_period(
             proposal = proposal_service.get_proposal(proposal_code)
             status_code = status.HTTP_200_OK
             update_status = UpdateStatus.SUCCESSFUL
-        unit_of_work.connection.commit()
+        unit_of_work.commit()
         return JSONResponse(
             status_code=status_code,
             content={
@@ -342,8 +342,8 @@ def update_proposal_status(
     proposal_status: ProposalStatus = Body(
         ...,
         alias="status",
-        title="Proposal status and (optional) status reason",
-        description="New proposal status and (optional) status reason."
+        title="Proposal status and (optional) status comment",
+        description="New proposal status and (optional) status comment."
     ),
     user: User = Depends(get_current_user),
 ) -> ProposalStatus:
@@ -352,18 +352,18 @@ def update_proposal_status(
     corresponding GET request for a description of the available status values.
     """
     with UnitOfWork() as unit_of_work:
-        proposal_service = services.proposal_service(unit_of_work.connection)
+
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proposal_status(
             user, proposal_code, proposal_status.value
         )
-
+        proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_proposal_status(
             proposal_code, proposal_status.value,
-            proposal_status.reason
+            proposal_status.comment
         )
 
-        unit_of_work.connection.commit()
+        unit_of_work.commit()
         return ProposalStatus(**proposal_service.get_proposal_status(proposal_code))
 
 
@@ -429,7 +429,7 @@ def post_observation_comment(
         observation_comment = proposal_service.add_observation_comment(
             proposal_code=proposal_code, comment=comment.comment, user=user
         )
-        unit_of_work.connection.commit()
+        unit_of_work.commit()
         return ObservationComment(**observation_comment)
 
 

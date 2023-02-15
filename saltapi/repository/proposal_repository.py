@@ -52,7 +52,7 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 PT.Title                        AS title,
                 P.Phase                         AS phase,
                 PS.Status                       AS status,
-                PIR.InactiveReason              AS reason,
+                PGI.StatusComment               AS comment,
                 T.ProposalType                  AS proposal_type,
                 Leader.PiptUser_Id              AS pi_user_id,
                 Leader.FirstName                AS pi_given_name,
@@ -152,7 +152,7 @@ LIMIT :limit;
                 "semester": row.semester,
                 "title": row.title,
                 "phase": row.phase,
-                "status": {"value": row.status, "reason": row.reason},
+                "status": {"value": row.status, "comment": row.comment},
                 "proposal_type": self._map_proposal_type(row.proposal_type),
                 "principal_investigator": {
                     "given_name": row.pi_given_name,
@@ -432,9 +432,9 @@ SELECT PT.Title                            AS title,
        PT.ReadMe                           AS summary_for_salt_astronomer,
        PT.NightlogSummary                  AS summary_for_night_log,
        P.Submission                        AS submission_number,
-       PS.Status                           AS status,
-       PIR.InactiveReason                  AS reason,
        T.ProposalType                      AS proposal_type,
+       PS.Status                           AS status,
+       PGI.StatusComment                   AS comment,
        PGI.ActOnAlert                      AS target_of_opportunity,
        P.TotalReqTime                      AS total_requested_time,
        PGI.ProprietaryPeriod               AS proprietary_period,
@@ -460,8 +460,6 @@ FROM Proposal P
          JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
          JOIN ProposalStatus PS ON PGI.ProposalStatus_Id = PS.ProposalStatus_Id
          JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
-         LEFT JOIN ProposalInactiveReason PIR
-            ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
          LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
          LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
@@ -482,7 +480,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "summary_for_salt_astronomer": row.summary_for_salt_astronomer,
             "summary_for_night_log": row.summary_for_night_log,
             "submission_number": row.submission_number,
-            "status": {"value": row.status, "reason": row.reason},
+            "status": {"value": row.status, "comment": row.comment},
             "proposal_type": self._map_proposal_type(row.proposal_type),
             "is_target_of_opportunity": row.target_of_opportunity,
             "total_requested_time": row.total_requested_time,
@@ -1242,11 +1240,12 @@ WHERE PC.ProposalComment_Id = :proposal_comment_id
         """
         stmt = text(
             """
-SELECT PS.Status AS status, PIR.InactiveReason AS reason
-FROM ProposalStatus PS
-         JOIN ProposalGeneralInfo PGI ON PS.ProposalStatus_Id = PGI.ProposalStatus_Id
+SELECT
+	PS.Status 			AS `status`,
+    PGI.StatusComment 	AS `comment`
+FROM ProposalGeneralInfo PGI 
+         JOIN ProposalStatus PS ON PS.ProposalStatus_Id = PGI.ProposalStatus_Id
          JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
-         LEFT JOIN ProposalInactiveReason PIR ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
 WHERE PC.Proposal_Code = :proposal_code
         """
         )
@@ -1254,7 +1253,7 @@ WHERE PC.Proposal_Code = :proposal_code
         try:
             row = result.one()
 
-            status = {"value": row.status, "reason": row.reason}
+            status = {"value": row.status, "comment": row.comment}
 
             return status
 
@@ -1272,7 +1271,7 @@ WHERE PIR.InactiveReason = :inactive_reason
         result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
         return cast(int, result.scalar_one())
 
-    def update_proposal_status(self, proposal_code: str, status: str, status_reason: Optional[str] = None) -> None:
+    def update_proposal_status(self, proposal_code: str, status: str, status_comment: Optional[str] = None) -> None:
         """
         Update the status of a proposal.
         """
@@ -1282,10 +1281,6 @@ WHERE PIR.InactiveReason = :inactive_reason
         # wrong status or reason value.
         try:
             status_id = self._proposal_status_id(status)
-            proposal_inactive_reason_id = (
-                self._proposal_inactive_reason_id(status_reason) if status_reason else None
-            )
-
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
@@ -1294,7 +1289,7 @@ WHERE PIR.InactiveReason = :inactive_reason
 UPDATE ProposalGeneralInfo  PGI
 SET 
     PGI.ProposalStatus_Id = :status_id,
-    PGI.ProposalInactiveReason_Id = :proposal_inactive_reason_id
+    PGI.StatusComment = :status_comment
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code);
@@ -1304,7 +1299,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             stmt, {
                 "proposal_code": proposal_code,
                 "status_id": status_id,
-                "proposal_inactive_reason_id": proposal_inactive_reason_id,
+                "status_comment": status_comment,
             }
         )
         if not result.rowcount:

@@ -1,7 +1,8 @@
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, HTTPException, status
 
+from saltapi.exceptions import ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.block import BlockVisit as _BlockVisit
@@ -83,8 +84,11 @@ def update_block_visit_status(
         permission_service.check_permission_to_update_block_visit_status(user)
 
         block_service = services.block_service(unit_of_work.connection)
-        block_service.update_block_visit_status(
-            block_visit_id, block_visit_status, rejection_reason
-        )
+        try:
+            block_service.update_block_visit_status(
+                block_visit_id, block_visit_status, rejection_reason
+            )
 
-        unit_of_work.commit()
+            unit_of_work.commit()
+        except ValidationError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)

@@ -16,7 +16,7 @@ def test_proposal_status_update_requires_authentication(
     not_authenticated(client)
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": None},
+        json={"value": proposal_status_value, "comment": None},
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -45,7 +45,7 @@ def test_proposal_status_update_requires_valid_proposal_status_value(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={ "value": proposal_status_value, "reason": None},
+        json={ "value": proposal_status_value, "comment": None},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -71,7 +71,7 @@ def test_proposal_status_update_requires_permissions(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": None},
+        json={"value": proposal_status_value, "comment": None},
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -93,7 +93,7 @@ def test_pi_and_pc_can_set_proposal_status_to_inactive(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": None},
+        json={"value": proposal_status_value, "comment": None},
         )
     assert response.status_code == status.HTTP_200_OK
 
@@ -115,7 +115,7 @@ def test_pi_and_pc_can_not_set_proposal_status_to_active(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": None},
+        json={"value": proposal_status_value, "comment": None},
         )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -137,25 +137,9 @@ def  test_pi_and_pc_can_activate_self_activatable_proposal(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": None},
+        json={"value": proposal_status_value, "comment": None},
         )
     assert response.status_code == status.HTTP_200_OK
-
-def test_proposal_status_update_requires_valid_proposal_inactive_reason(
-    client: TestClient,
-) -> None:
-    proposal_code = "2023-1-MLT-006"
-    username = find_username("administrator")
-    authenticate(username, client)
-
-    proposal_status_value = "Under scientific review"
-    proposal_inactive_reason = "Wrong inactive reason"
-
-    response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": proposal_inactive_reason},
-    )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.parametrize(
@@ -178,18 +162,18 @@ def test_sa_and_admins_may_make_any_status_change(
 ) -> None:
     username = find_username(user_role)
     authenticate(username, client)
-    proposal_inactive_reason = None
+    status_comment = None
 
     proposal_code = "2023-1-MLT-006"
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": proposal_inactive_reason},
+        json={"value": proposal_status_value, "comment": status_comment},
     )
     assert response.status_code == status.HTTP_200_OK
 
     proposal_status = response.json()
     assert proposal_status["value"] == proposal_status_value
-    assert proposal_status["reason"] == proposal_inactive_reason
+    assert proposal_status["comment"] == status_comment
 
     resp = client.get(PROPOSALS_URL + "/" + proposal_code + "/status")
     assert resp.status_code == status.HTTP_200_OK
@@ -197,34 +181,37 @@ def test_sa_and_admins_may_make_any_status_change(
     new_block_status = resp.json()
 
     assert new_block_status["value"] == proposal_status_value
-    assert new_block_status["reason"] == proposal_inactive_reason
+    assert new_block_status["comment"] == status_comment
 
 
-def test_proposal_status_update_with_inactive_reason(
-    client: TestClient,
+@pytest.mark.parametrize(
+    "proposal_status_value",
+    [
+        "Active",
+        "Completed",
+        "Superseded",
+        "In preparation",
+        "Rejected",
+        "Under technical review",
+        "Under scientific review",
+        "Inactive",
+    ],
+)
+def test_proposal_status_update_with_a_comment(
+        proposal_status_value: str, client: TestClient,
 ) -> None:
     proposal_code = "2022-2-SCI-007"
     username = find_username("administrator")
     authenticate(username, client)
-
-    proposal_status_value = "Inactive"
-    proposal_inactive_reason = "Undoable"
+    status_comment = "This is a test comment."
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={"value": proposal_status_value, "reason": proposal_inactive_reason},
+        json={"value": proposal_status_value, "comment": status_comment},
     )
     assert response.status_code == status.HTTP_200_OK
 
     proposal_status = response.json()
 
     assert proposal_status["value"] == proposal_status_value
-    assert proposal_status["reason"] == proposal_inactive_reason
-
-    resp = client.get(PROPOSALS_URL + "/" + proposal_code + "/status")
-    assert resp.status_code == status.HTTP_200_OK
-
-    new_block_status = resp.json()
-
-    assert new_block_status["value"] == proposal_status_value
-    assert new_block_status["reason"] == proposal_inactive_reason
+    assert proposal_status["comment"] == status_comment

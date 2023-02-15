@@ -362,7 +362,7 @@ def update_proposal_status(
             proposal_code, proposal_status.value, proposal_status.reason
         )
 
-        unit_of_work.connection.commit()
+        unit_of_work.commit()
         return ProposalStatus(**proposal_service.get_proposal_status(proposal_code))
 
 

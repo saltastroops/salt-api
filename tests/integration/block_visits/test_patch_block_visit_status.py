@@ -84,6 +84,19 @@ def test_patch_block_visit_status_requires_block_rejection_reason(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+def test_patch_block_visit_status_requires_no_rejection_reason_for_block_visit_status_not_rejected(
+        client: TestClient,
+) -> None:
+    block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006
+    user = find_username("Administrator")
+    authenticate(user, client)
+    block_visit_status = {"status": "Accepted", "reason": "Phase 2 problems"}
+    response = client.patch(
+        BLOCK_VISIT_URL + "/" + str(block_visit_id) + "/status", json=block_visit_status
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
 @pytest.mark.parametrize(
     "username",
     [

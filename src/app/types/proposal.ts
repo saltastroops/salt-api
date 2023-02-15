@@ -133,7 +133,7 @@ export type ProposalStatusValue =
 
 export interface ProposalStatus {
   value: ProposalStatusValue;
-  reason: string | null;
+  comment: string | null;
 }
 
 export type ProposalType =

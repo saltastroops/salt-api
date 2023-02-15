@@ -12,13 +12,13 @@
         <th>Status</th>
         <td>{{ proposal.generalInfo.status.value }}</td>
       </tr>
-      <div
+      <tr
         class="row proposal-details-row"
-        *ngIf="proposal.generalInfo.status.reason"
+        *ngIf="proposal.generalInfo.status.comment"
       >
-        <div>Status reason</div>
-        <div>{{ proposal.generalInfo.status.reason }}</div>
-      </div>
+        <th>Status comment</th>
+        <td>{{ proposal.generalInfo.status.comment }}</td>
+      </tr>
       <tr>
         <th>Type</th>
         <td>{{ proposal.generalInfo.proposalType }}</td>

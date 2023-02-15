@@ -258,7 +258,7 @@ Show
       <th wmSortBy="status" data-test="proposal-status-header">
         Proposal Status
       </th>
-      <th>Proposal Status Reason</th>
+      <th>Status Comment</th>
       <th wmSortBy="proposalType" data-test="proposal-type-header">
         Proposal Type
       </th>
@@ -281,7 +281,7 @@ Show
         <td data-test="proposal-semester">{{ proposal.semester }}</td>
         <td data-test="proposal-phase">{{ proposal.phase }}</td>
         <td data-test="proposal-status">{{ proposal.status.value }}</td>
-        <td>{{ proposal.status.reason }}</td>
+        <td>{{ proposal.status.comment }}</td>
         <td data-test="proposal-type">{{ proposal.proposalType }}</td>
         <td data-test="proposal-principal-investigator">
           {{ proposal.principalInvestigator.givenName }}

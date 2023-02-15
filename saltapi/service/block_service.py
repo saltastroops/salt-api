@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 import requests
 from defusedxml import minidom
 
-from saltapi.exceptions import AuthorizationError
+from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockVisit
 from saltapi.settings import get_settings
@@ -53,8 +53,8 @@ class BlockService:
         """
         Set the block visit status for a block visit id.
         """
-        if status == "Rejected" and reason is None:
-            raise AuthorizationError()
+        if (status == "Rejected" and reason is None) or (status != "Rejected" and reason is not None):
+            raise ValidationError()
         return self.block_repository.update_block_visit_status(
             block_visit_id, status, reason
         )

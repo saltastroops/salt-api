@@ -69,8 +69,9 @@ class FakeBlockRepository:
                 status_value.value for status_value in BlockVisitStatusValue
             ]:
                 raise ValidationError(f"Unknown block visit status: {status}")
-            if (status == "Rejected" and rejection_reason is None) and (status != "Rejected" and rejection_reason is
-                                                                        not None):
+            if (status == "Rejected" and rejection_reason is None) and (
+                status != "Rejected" and rejection_reason is not None
+            ):
                 raise ValidationError()
             self.block_visit_status = {
                 "status": status,
@@ -216,8 +217,12 @@ def test_update_block_visit_status_raises_error_for_required_rejection_reason() 
         block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)
 
 
-def test_update_block_visit_status_raises_error_for_block_visit_status_not_rejected_with_rejection_reason() -> None:
+def test_update_block_visit_status_raises_error_for_block_visit_status_not_rejected_with_rejection_reason() -> (
+    None
+):
     block_service = create_block_service()
     status = BlockVisitStatusValue("Accepted")
     with pytest.raises(ValidationError):
-        block_service.update_block_visit_status(BLOCK_VISIT_ID, status, "Telescope technical problems")
+        block_service.update_block_visit_status(
+            BLOCK_VISIT_ID, status, "Telescope technical problems"
+        )

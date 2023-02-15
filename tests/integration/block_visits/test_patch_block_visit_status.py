@@ -85,7 +85,7 @@ def test_patch_block_visit_status_requires_block_rejection_reason(
 
 
 def test_patch_block_visit_status_requires_no_rejection_reason_for_block_visit_status_not_rejected(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006
     user = find_username("Administrator")

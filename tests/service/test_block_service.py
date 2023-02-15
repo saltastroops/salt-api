@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional, cast
 
 import pytest
 
-from saltapi.exceptions import AuthorizationError, NotFoundError
+from saltapi.exceptions import AuthorizationError, NotFoundError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.block import Block, BlockStatus
 from saltapi.service.block_service import BlockService
@@ -64,15 +64,16 @@ class FakeBlockRepository:
             if status not in [
                 status_value.value for status_value in BlockVisitStatusValue
             ]:
-                raise NotFoundError(f"Unknown block visit status: {status}")
-            if status == "Rejected" and rejection_reason is None:
-                raise AuthorizationError()
+                raise ValidationError(f"Unknown block visit status: {status}")
+            if (status == "Rejected" and rejection_reason is None) and (status != "Rejected" and rejection_reason is
+                                                                        not None):
+                raise ValidationError()
             self.block_visit_status = {
                 "status": status,
                 "rejected_reason": rejection_reason,
             }
         else:
-            raise NotFoundError()
+            raise ValidationError()
 
 
 BLOCK = {
@@ -193,19 +194,26 @@ def test_cannot_update_with_a_wrong_block_visit_type() -> None:
 def test_update_block_visit_status_raises_error_for_wrong_block_id() -> None:
     block_service = create_block_service()
     status = BlockVisitStatusValue("In queue")
-    with pytest.raises(NotFoundError):
+    with pytest.raises(ValidationError):
         block_service.update_block_visit_status(0, status, None)
 
 
 def test_update_block_visit_status_raises_error_for_invalid_status() -> None:
     block_service = create_block_service()
     status = "Wrong status"
-    with pytest.raises(NotFoundError):
+    with pytest.raises(ValidationError):
         block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)
 
 
 def test_update_block_visit_status_raises_error_for_required_rejection_reason() -> None:
     block_service = create_block_service()
     status = BlockVisitStatusValue("Rejected")
-    with pytest.raises(AuthorizationError):
+    with pytest.raises(ValidationError):
         block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)
+
+
+def test_update_block_visit_status_raises_error_for_block_visit_status_not_rejected_with_rejection_reason() -> None:
+    block_service = create_block_service()
+    status = BlockVisitStatusValue("Accepted")
+    with pytest.raises(ValidationError):
+        block_service.update_block_visit_status(BLOCK_VISIT_ID, status, "Telescope technical problems")

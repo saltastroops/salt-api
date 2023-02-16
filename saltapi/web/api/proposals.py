@@ -33,7 +33,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus,
+    UpdateStatus, ProposalSelfActivatable,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -464,3 +464,39 @@ def get_data_release_date(
     public.
     """
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@router.put(
+    "/{proposal_code}/self-activatable",
+    summary="Create an observation comment",
+    response_model=ProposalSelfActivatable,
+    status_code=201,
+)
+def put_is_self_activatable(
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description=(
+                    "Proposal code of the proposal for which an observation comment is added."
+            ),
+        ),
+        is_self_activatable: bool = Body(..., title="Comment", description="Text of the comment."),
+        user: User = Depends(get_current_user),
+) -> ProposalSelfActivatable:
+    """
+    Adds a new comment related to an observation. The user submitting the request is
+    recorded as the comment author.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_change_self_Activatable(user)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal_service.update_is_self_activatable(
+            proposal_code=proposal_code, is_self_activatable=is_self_activatable
+        )
+        unit_of_work.commit()
+        return ProposalSelfActivatable(
+            proposal_code=proposal_code,
+            is_self_activatable = proposal_service.is_self_activatable(proposal_code)
+        )

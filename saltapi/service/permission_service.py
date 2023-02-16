@@ -431,3 +431,7 @@ class PermissionService:
             proposal_code
         )
         return maximum_period <= proprietary_period_update.proprietary_period
+
+    def check_permission_to_change_self_Activatable(self, user: User):
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+        self.check_role(user.username, roles)

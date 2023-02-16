@@ -2335,3 +2335,24 @@ WHERE PC.Proposal_Code = :proposal_code
         if len(configurations) == 0:
             return []
         return configurations
+
+    def update_is_self_activatable(self, proposal_code, is_self_activatable) -> None:
+        stmt = text(
+            """
+        INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
+        VALUE(
+            (
+                SELECT ProposalCode_Id FROM ProposalCode 
+                WHERE Proposal_Code = :proposal_code
+            ), 
+            :is_self_activatable
+        )
+        ON DUPLICATE KEY UPDATE PiPcMayActivate = :is_self_activatable;
+        """
+        )
+        self.connection.execute(
+            stmt, {
+                "proposal_code": proposal_code,
+                "is_self_activatable": is_self_activatable,
+            }
+        )

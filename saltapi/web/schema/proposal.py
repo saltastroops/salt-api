@@ -626,3 +626,17 @@ class ProposalProgressInput(BaseProgressReport):
             "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'."
         ),
     )
+
+
+class ProposalSelfActivatable(BaseModel):
+    is_self_activatable: bool = Field(
+        ...,
+        title="Can the proposal be self-activated?",
+        description=(
+            "Can the proposal be activated by the Principal Investigator or Principal"
+            " Contact?"
+        ),
+    )
+    proposal_code: ProposalCode = Field(
+        ..., title="Proposal code", description="Proposal code"
+    )

@@ -45,7 +45,7 @@ def test_proposal_status_update_requires_valid_proposal_status_value(
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
-        json={ "value": proposal_status_value, "comment": None},
+        json={"value": proposal_status_value, "comment": None},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -95,8 +95,9 @@ def test_pi_and_pc_can_set_proposal_status_to_inactive(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
+
 
 @pytest.mark.parametrize(
     "username",
@@ -117,7 +118,7 @@ def test_pi_and_pc_can_not_set_proposal_status_to_active(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -140,7 +141,7 @@ def test_pi_and_pc_can_activate_self_activatable_proposal(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -200,7 +201,8 @@ def test_sa_and_admins_may_make_any_status_change(
     ],
 )
 def test_proposal_status_update_with_a_comment(
-        proposal_status_value: str, client: TestClient,
+    proposal_status_value: str,
+    client: TestClient,
 ) -> None:
     proposal_code = "2022-2-SCI-007"
     username = find_username("administrator")

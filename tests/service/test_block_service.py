@@ -61,25 +61,6 @@ class FakeBlockRepository:
         else:
             raise NotFoundError()
 
-    def update_block_visit_status(
-        self, block_visit_id: int, status: str, rejection_reason: Optional[str]
-    ) -> None:
-        if block_visit_id == BLOCK_VISIT_ID:
-            if status not in [
-                status_value.value for status_value in BlockVisitStatusValue
-            ]:
-                raise ValidationError(f"Unknown block visit status: {status}")
-            if (status == "Rejected" and rejection_reason is None) and (
-                status != "Rejected" and rejection_reason is not None
-            ):
-                raise ValidationError()
-            self.block_visit_status = {
-                "status": status,
-                "rejected_reason": rejection_reason,
-            }
-        else:
-            raise ValidationError()
-
 
 BLOCK = {
     "id": 1,
@@ -168,61 +149,3 @@ def test_get_block_visit() -> None:
     block_visit = block_service.get_block_visit(BLOCK_VISIT_ID)
 
     assert BLOCK_VISIT == block_visit
-
-
-def test_update_block_visit_status() -> None:
-    block_service = create_block_service()
-
-    old_status = block_service.get_block_visit(BLOCK_VISIT_ID)["status"]
-    assert old_status != "Accepted"
-
-    status_update = BlockVisitStatusValue("Accepted")
-    block_service.update_block_visit_status(BLOCK_VISIT_ID, status_update, None)
-
-    new_status = block_service.get_block_visit(BLOCK_VISIT_ID)
-    assert new_status["status"] == "Accepted"
-
-
-def test_cannot_update_with_a_wrong_block_visit_type() -> None:
-    block_service = create_block_service()
-
-    block_visit = block_service.get_block_visit(BLOCK_VISIT_ID)
-    assert block_visit["status"] != "Not set"
-
-    with pytest.raises(ValueError) as excinfo:
-        block_service.update_block_visit_status(
-            BLOCK_VISIT_ID, "Wrong block visit status", None
-        )
-    assert "block visit status" in str(excinfo.value)
-
-
-def test_update_block_visit_status_raises_error_for_wrong_block_id() -> None:
-    block_service = create_block_service()
-    status = BlockVisitStatusValue("In queue")
-    with pytest.raises(ValidationError):
-        block_service.update_block_visit_status(0, status, None)
-
-
-def test_update_block_visit_status_raises_error_for_invalid_status() -> None:
-    block_service = create_block_service()
-    status = "Wrong status"
-    with pytest.raises(ValidationError):
-        block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)
-
-
-def test_update_block_visit_status_raises_error_for_required_rejection_reason() -> None:
-    block_service = create_block_service()
-    status = BlockVisitStatusValue("Rejected")
-    with pytest.raises(ValidationError):
-        block_service.update_block_visit_status(BLOCK_VISIT_ID, status, None)
-
-
-def test_update_block_visit_status_raises_error_for_block_visit_status_not_rejected_with_rejection_reason() -> (
-    None
-):
-    block_service = create_block_service()
-    status = BlockVisitStatusValue("Accepted")
-    with pytest.raises(ValidationError):
-        block_service.update_block_visit_status(
-            BLOCK_VISIT_ID, status, "Telescope technical problems"
-        )

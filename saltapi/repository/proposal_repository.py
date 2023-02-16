@@ -1271,9 +1271,7 @@ WHERE PIR.InactiveReason = :inactive_reason
         result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
         return cast(int, result.scalar_one())
 
-    def update_proposal_status(
     def update_proposal_status(self, proposal_code: str, status: str, status_comment: Optional[str] = None) -> None:
-    ) -> None:
         """
         Update the status of a proposal.
         """

@@ -11,7 +11,7 @@ from sqlalchemy.engine import Connection
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import NewUserDetails, UserUpdate
-from tests.conftest import find_usernames
+from tests.conftest import find_username, find_usernames
 from tests.markers import nodatabase
 
 
@@ -381,3 +381,161 @@ def test_find_by_username_and_password_raises_error_for_wrong_password(
     # None may raise an exception other than NotFoundError
     with pytest.raises(Exception):
         user_repository.find_user_with_username_and_password(username, cast(str, None))
+
+
+def test_get_proposal_permissions_raises_not_found_error(
+    db_connection: Connection,
+) -> None:
+    user_repository = UserRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        user_repository.get_proposal_permissions("non-existing-user")
+
+
+def test_get_proposal_permissions(
+    db_connection: Connection,
+) -> None:
+    user_repository = UserRepository(db_connection)
+
+    username1 = find_username("Administrator")
+    username2 = find_username("SALT Astronomer")
+    permission1 = {"proposal_code": "2020-2-SCI-008", "permission_type": "View"}
+    permission2 = {"proposal_code": "2020-2-SCI-009", "permission_type": "View"}
+    permission3 = {"proposal_code": "2020-2-SCI-010", "permission_type": "View"}
+
+    # Initially there are no granted permissions
+    assert len(user_repository.get_proposal_permissions(username1)) == 0
+
+    # Grant some permissions
+    user_repository.grant_proposal_permission(username1, **permission1)
+    user_repository.grant_proposal_permission(username2, **permission2)
+    user_repository.grant_proposal_permission(username1, **permission3)
+
+    # Check that the correct permissions are returned
+    granted_permissions = user_repository.get_proposal_permissions(username1)
+
+    assert len(granted_permissions) == 2
+    assert permission1 in granted_permissions
+    assert permission3 in granted_permissions
+
+
+@pytest.mark.parametrize(
+    "username,proposal_code,permission_type",
+    [
+        ("non-existing-username", "2020-1-SCI-003", "View"),
+        (find_username("Administrator"), "non-existing-proposal-code", "View"),
+        (find_username("Administrator"), "2020-1-SCI-003", "non-existing-type"),
+    ],
+)
+def test_grant_proposal_permission_raises_not_found_errors(
+    username: str, proposal_code: str, permission_type: str, db_connection: Connection
+) -> None:
+    user_repository = UserRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        user_repository.grant_proposal_permission(
+            grantee_username=username,
+            permission_type=permission_type,
+            proposal_code=proposal_code,
+        )
+
+
+def test_grant_proposal_permission(db_connection: Connection) -> None:
+    user_repository = UserRepository(db_connection)
+
+    username = find_username("Principal Investigator", proposal_code="2018-2-LSP-001")
+    permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
+
+    # Initially there are no granted permissions
+    assert len(user_repository.get_proposal_permissions(username)) == 0
+
+    # Grant a permission
+    user_repository.grant_proposal_permission(grantee_username=username, **permission)
+
+    # Check that the permission has been granted
+    granted_permissions = user_repository.get_proposal_permissions(username)
+    assert len(granted_permissions) == 1
+    assert granted_permissions[0] == permission
+
+
+def test_grant_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
+    user_repository = UserRepository(db_connection)
+
+    username = find_username("Administrator")
+    permission = {"proposal_code": "2022-2-SCI-007", "permission_type": "View"}
+
+    # Initially there are no granted permissions
+    assert len(user_repository.get_proposal_permissions(username)) == 0
+
+    # Grant some permissions
+    user_repository.grant_proposal_permission(username, **permission)
+    user_repository.grant_proposal_permission(username, **permission)
+
+    # Check that the permission has not been added twice
+    granted_permissions = user_repository.get_proposal_permissions(username)
+    assert len(granted_permissions) == 1
+    assert granted_permissions[0] == permission
+
+
+@pytest.mark.parametrize(
+    "username,proposal_code,permission_type",
+    [
+        ("non-existing-username", "2020-1-SCI-003", "View"),
+        (find_username("Administrator"), "non-existing-proposal-code", "View"),
+        (find_username("Administrator"), "2020-1-SCI-003", "non-existing-type"),
+    ],
+)
+def test_revoke_proposal_permission_raises_not_found_errors(
+    username: str, proposal_code: str, permission_type: str, db_connection: Connection
+) -> None:
+    user_repository = UserRepository(db_connection)
+
+    with pytest.raises(NotFoundError):
+        user_repository.revoke_proposal_permission(
+            grantee_username=username,
+            permission_type=permission_type,
+            proposal_code=proposal_code,
+        )
+
+
+def test_revoke_proposal_permission(db_connection: Connection) -> None:
+    user_repository = UserRepository(db_connection)
+
+    username = find_username("Principal Investigator", proposal_code="2018-2-LSP-001")
+    permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
+
+    # Grant a permission
+    user_repository.grant_proposal_permission(grantee_username=username, **permission)
+
+    # Check that the permission has been granted
+    granted_permissions = user_repository.get_proposal_permissions(username)
+    assert len(granted_permissions) == 1
+
+    # Revoke the permission
+    user_repository.revoke_proposal_permission(grantee_username=username, **permission)
+
+    # Check that the permission has been revoked
+    granted_permissions = user_repository.get_proposal_permissions(username)
+    assert len(granted_permissions) == 0
+
+
+def test_revoke_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
+    user_repository = UserRepository(db_connection)
+
+    username = find_username("Principal Investigator", proposal_code="2018-2-LSP-001")
+    permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
+
+    # Grant a permission
+    user_repository.grant_proposal_permission(grantee_username=username, **permission)
+
+    # Check that the permission has been granted
+    granted_permissions = user_repository.get_proposal_permissions(username)
+    assert len(granted_permissions) == 1
+
+    # Revoke the permission twice
+    user_repository.revoke_proposal_permission(grantee_username=username, **permission)
+    user_repository.revoke_proposal_permission(grantee_username=username, **permission)
+
+    # Check that the permission has been revoked
+    granted_permissions = user_repository.get_proposal_permissions(username)
+    assert len(granted_permissions) == 0

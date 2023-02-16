@@ -6,6 +6,7 @@ from typing import Any, Dict, List, cast
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
+from sqlalchemy.exc import NoResultFound
 
 from saltapi.exceptions import NotFoundError
 from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
@@ -647,3 +648,127 @@ FROM SaltAstronomers SA
             for row in result
             if row.given_name != "Techops"
         ]
+
+    def get_proposal_permissions(self, grantee_username: str) -> List[Dict[str, Any]]:
+        """
+        Return the list of proposal permissions which have been granted to a user.
+
+        An error is raised if the user does not exist.
+        """
+        # We could query for the id in the insert statement, but that might give rise
+        # to cryptic errors.
+        grantee_id = self.get_by_username(grantee_username).id
+        stmt = text(
+            """
+SELECT PC.Proposal_Code AS proposal_code, PP.ProposalPermission AS permission_type
+FROM ProposalPermissionGrant PPG
+         JOIN ProposalCode PC ON PPG.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN ProposalPermission PP
+              ON PPG.ProposalPermission_Id = PP.ProposalPermission_Id
+WHERE PPG.Grantee_Id = :grantee_id
+        """
+        )
+        result = self.connection.execute(stmt, {"grantee_id": grantee_id})
+
+        return [
+            {"proposal_code": row.proposal_code, "permission_type": row.permission_type}
+            for row in result
+        ]
+
+    def grant_proposal_permission(
+        self, grantee_username: str, permission_type: str, proposal_code: str
+    ) -> None:
+        """
+        Grant a proposal permission to a user.
+
+        If the permission exists already, nothing is done and no error is raised.
+
+        An error is raised if the passed username, permission type or proposal code
+        doesn't exist.
+        """
+        # We could query for the ids in the insert statement, but that might give rise
+        # to cryptic errors.
+        grantee_id = self.get_by_username(grantee_username).id
+        permission_type_id = self._get_proposal_permission_type_id(permission_type)
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
+
+        stmt = text(
+            """
+INSERT IGNORE INTO ProposalPermissionGrant (ProposalCode_Id,
+                                            ProposalPermission_Id,
+                                            Grantee_Id)
+VALUES (:proposal_code_id, :permission_type_id, :grantee_id)
+        """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "permission_type_id": permission_type_id,
+                "proposal_code_id": proposal_code_id,
+                "grantee_id": grantee_id,
+            },
+        )
+
+    def revoke_proposal_permission(
+        self, grantee_username: str, permission_type: str, proposal_code: str
+    ) -> None:
+        """
+        Revoke a proposal permission from a user.
+
+        If the user does not have the permission, nothing is done and no error is
+        raised.
+
+        An error is raised if the passed username, permission type or proposal code
+        doesn't exist.
+        """
+        # We could query for the ids in the insert statement, but that might give rise
+        # to cryptic errors.
+        grantee_id = self.get_by_username(grantee_username).id
+        permission_type_id = self._get_proposal_permission_type_id(permission_type)
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
+
+        stmt = text(
+            """
+DELETE
+FROM ProposalPermissionGrant
+WHERE Grantee_Id = :grantee_id
+  AND ProposalCode_Id = :proposal_code_id
+  AND ProposalPermission_Id = :permission_type_id;
+        """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "grantee_id": grantee_id,
+                "proposal_code_id": proposal_code_id,
+                "permission_type_id": permission_type_id,
+            },
+        )
+
+    def _get_proposal_permission_type_id(self, permission_type: str) -> int:
+        stmt = text(
+            """
+SELECT ProposalPermission_Id
+FROM ProposalPermission
+WHERE ProposalPermission = :permission
+        """
+        )
+        result = self.connection.execute(stmt, {"permission": permission_type})
+        try:
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError()
+
+    def _get_proposal_code_id(self, proposal_code: str) -> int:
+        stmt = text(
+            """
+SELECT ProposalCode_Id
+FROM ProposalCode
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        try:
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError()

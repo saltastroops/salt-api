@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
+from saltapi.web.schema.common import ProposalCode
 from saltapi.web.schema.institution import Institution
 
 
@@ -107,4 +108,23 @@ class UserSwitchDetails(BaseModel):
 
     username: str = Field(
         ..., title="Username", description="Username of the user to switch to"
+    )
+
+
+class ProposalPermissionType(str, Enum):
+    """Proposal permission type."""
+
+    VIEW = "View"
+
+
+class ProposalPermission(BaseModel):
+    """A permission for a specific proposal."""
+
+    permission_type: ProposalPermissionType = Field(
+        ..., title="Proposal permission type", description="Proposal permission type"
+    )
+    proposal_code: ProposalCode = Field(
+        ...,
+        title="Proposal code",
+        description="Proposal code to which the permission applies",
     )

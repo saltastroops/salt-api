@@ -54,9 +54,13 @@ class BlockService:
         Set the block visit status for a block visit id.
         """
         if status == "Rejected" and reason is None:
-            raise ValidationError("A reason is required for the block status value \"Rejected\"`.")
+            raise ValidationError(
+                'A reason is required for the block status value "Rejected"`.'
+            )
         if status != "Rejected" and reason is not None:
-            raise ValidationError("No reason must be given for a block status other than \"Rejected\".")
+            raise ValidationError(
+                'No reason must be given for a block status other than "Rejected".'
+            )
         return self.block_repository.update_block_visit_status(
             block_visit_id, status, reason
         )

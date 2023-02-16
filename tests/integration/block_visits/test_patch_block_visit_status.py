@@ -84,7 +84,7 @@ def test_patch_block_visit_status_requires_block_rejection_reason(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_patch_block_visit_status_requires_no_rejection_reason_for_block_visit_status_not_rejected(
+def test_patch_block_visit_status_must_have_no_rejection_reason_for_block_visit_status_not_rejected(
     client: TestClient,
 ) -> None:
     block_visit_id = 25392  # belongs to proposal 2019-2-SCI-006

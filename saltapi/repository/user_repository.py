@@ -116,6 +116,20 @@ FROM PiptUser AS PU
         user = self._get(result)
         return user
 
+    def is_existing_user_id(self, user_id: int) -> bool:
+        """
+        Return whether a user id exists.
+        """
+
+        stmt = text(
+            """
+SELECT COUNT(*) AS user_count FROM PiptUser WHERE PiptUser_Id=:user_id
+        """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+
+        return cast(int, result.scalar_one()) > 0
+
     def get_users(self) -> List[Dict[str, Any]]:
         """
         Returns a list of users information
@@ -649,15 +663,16 @@ FROM SaltAstronomers SA
             if row.given_name != "Techops"
         ]
 
-    def get_proposal_permissions(self, grantee_username: str) -> List[Dict[str, Any]]:
+    def get_proposal_permissions(self, user_id: int) -> List[Dict[str, Any]]:
         """
         Return the list of proposal permissions which have been granted to a user.
 
         An error is raised if the user does not exist.
         """
-        # We could query for the id in the insert statement, but that might give rise
-        # to cryptic errors.
-        grantee_id = self.get_by_username(grantee_username).id
+        # Check that the user actually exists.
+        if not self.is_existing_user_id(user_id):
+            raise NotFoundError(f"No such user id: {user_id}")
+
         stmt = text(
             """
 SELECT PC.Proposal_Code AS proposal_code, PP.ProposalPermission AS permission_type
@@ -668,7 +683,7 @@ FROM ProposalPermissionGrant PPG
 WHERE PPG.Grantee_Id = :grantee_id
         """
         )
-        result = self.connection.execute(stmt, {"grantee_id": grantee_id})
+        result = self.connection.execute(stmt, {"grantee_id": user_id})
 
         return [
             {"proposal_code": row.proposal_code, "permission_type": row.permission_type}
@@ -676,7 +691,7 @@ WHERE PPG.Grantee_Id = :grantee_id
         ]
 
     def grant_proposal_permission(
-        self, grantee_username: str, permission_type: str, proposal_code: str
+        self, user_id: int, permission_type: str, proposal_code: str
     ) -> None:
         """
         Grant a proposal permission to a user.
@@ -686,9 +701,12 @@ WHERE PPG.Grantee_Id = :grantee_id
         An error is raised if the passed username, permission type or proposal code
         doesn't exist.
         """
+        # Check that the user actually exists.
+        if not self.is_existing_user_id(user_id):
+            raise NotFoundError(f"No such user id: {user_id}")
+
         # We could query for the ids in the insert statement, but that might give rise
         # to cryptic errors.
-        grantee_id = self.get_by_username(grantee_username).id
         permission_type_id = self._get_proposal_permission_type_id(permission_type)
         proposal_code_id = self._get_proposal_code_id(proposal_code)
 
@@ -705,12 +723,12 @@ VALUES (:proposal_code_id, :permission_type_id, :grantee_id)
             {
                 "permission_type_id": permission_type_id,
                 "proposal_code_id": proposal_code_id,
-                "grantee_id": grantee_id,
+                "grantee_id": user_id,
             },
         )
 
     def revoke_proposal_permission(
-        self, grantee_username: str, permission_type: str, proposal_code: str
+        self, user_id, permission_type: str, proposal_code: str
     ) -> None:
         """
         Revoke a proposal permission from a user.
@@ -721,9 +739,12 @@ VALUES (:proposal_code_id, :permission_type_id, :grantee_id)
         An error is raised if the passed username, permission type or proposal code
         doesn't exist.
         """
+        # Check that the user actually exists.
+        if not self.is_existing_user_id(user_id):
+            raise NotFoundError(f"No such user id: {user_id}")
+
         # We could query for the ids in the insert statement, but that might give rise
         # to cryptic errors.
-        grantee_id = self.get_by_username(grantee_username).id
         permission_type_id = self._get_proposal_permission_type_id(permission_type)
         proposal_code_id = self._get_proposal_code_id(proposal_code)
 
@@ -739,7 +760,7 @@ WHERE Grantee_Id = :grantee_id
         self.connection.execute(
             stmt,
             {
-                "grantee_id": grantee_id,
+                "grantee_id": user_id,
                 "proposal_code_id": proposal_code_id,
                 "permission_type_id": permission_type_id,
             },

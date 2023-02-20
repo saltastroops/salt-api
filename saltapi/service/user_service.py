@@ -115,23 +115,19 @@ SALT Team
         return self.repository.get_salt_astronomers()
 
     def get_proposal_permissions(self, user_id: int) -> List[Dict[str, Any]]:
-        user = self.repository.get(user_id)
-
-        # While it would be convenient to have a repository method accepting the user
-        # id rather than username, this might lead to errors that are hard to
-        # understand.
-        return self.repository.get_proposal_permissions(user.username)
+        return self.repository.get_proposal_permissions(user_id)
 
     def grant_proposal_permission(
         self, user_id: int, permission_type: ProposalPermissionType, proposal_code: str
     ) -> None:
-        user = self.repository.get(user_id)
+        if not self.repository.is_existing_user_id(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
 
         # We know that the user exists and that the permission type is correct. So any
         # not found error must be due to an incorrect proposal code.
         try:
             self.repository.grant_proposal_permission(
-                grantee_username=user.username,
+                user_id=user_id,
                 permission_type=permission_type.value,
                 proposal_code=proposal_code,
             )
@@ -141,13 +137,14 @@ SALT Team
     def revoke_proposal_permission(
         self, user_id: int, permission_type: ProposalPermissionType, proposal_code: str
     ) -> None:
-        user = self.repository.get(user_id)
+        if not self.repository.is_existing_user_id(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
 
         # We know that the user exists and that the permission type is correct. So any
         # not found error must be due to an incorrect proposal code.
         try:
             self.repository.revoke_proposal_permission(
-                grantee_username=user.username,
+                user_id=user_id,
                 permission_type=permission_type.value,
                 proposal_code=proposal_code,
             )

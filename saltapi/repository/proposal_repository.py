@@ -2338,15 +2338,26 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
+    def _get_proposal_code_id(self, proposal_code: str):
+        stmt = text(
+            """
+SELECT ProposalCode_Id FROM ProposalCode 
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        proposal_code_id = result.scalar_one()
+        if not proposal_code_id:
+            raise NotFoundError(f"Couldn't found  proposal code `{proposal_code}`")
+
+        return cast(int, proposal_code_id)
     def update_is_self_activatable(self, proposal_code, is_self_activatable) -> None:
+        proposal_code_id = self._get_proposal_code_id(proposal_code)  # To throw a more meaningful error.
         stmt = text(
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
         VALUE(
-            (
-                SELECT ProposalCode_Id FROM ProposalCode 
-                WHERE Proposal_Code = :proposal_code
-            ), 
+            :proposal_code_id, 
             :is_self_activatable
         )
         ON DUPLICATE KEY UPDATE PiPcMayActivate = :is_self_activatable;
@@ -2354,7 +2365,7 @@ WHERE PC.Proposal_Code = :proposal_code
         )
         self.connection.execute(
             stmt, {
-                "proposal_code": proposal_code,
-                "is_self_activatable": is_self_activatable,
+                "proposal_code_id": proposal_code_id,
+                "is_self_activatable": 1 if is_self_activatable else 0,
             }
         )

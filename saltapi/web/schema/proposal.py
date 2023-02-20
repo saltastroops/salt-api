@@ -628,15 +628,12 @@ class ProposalProgressInput(BaseProgressReport):
     )
 
 
-class ProposalSelfActivatable(BaseModel):
-    is_self_activatable: bool = Field(
+class SelfActivation(BaseModel):
+    allowed: bool = Field(
         ...,
         title="Can the proposal be self-activated?",
         description=(
             "Can the proposal be activated by the Principal Investigator or Principal"
             " Contact?"
         ),
-    )
-    proposal_code: ProposalCode = Field(
-        ..., title="Proposal code", description="Proposal code"
     )

@@ -33,7 +33,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus, ProposalSelfActivatable,
+    UpdateStatus, SelfActivation,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -465,10 +465,10 @@ def get_data_release_date(
 
 
 @router.put(
-    "/{proposal_code}/self-activatable",
-    summary="Create an observation comment",
-    response_model=ProposalSelfActivatable,
-    status_code=201,
+    "/{proposal_code}/self-activation/{allowed}",
+    summary="Change the status whether the proposal may be activated by the Principal Investigator and Principal Contact",
+    response_model=SelfActivation,
+    status_code=200,
 )
 def put_is_self_activatable(
         proposal_code: ProposalCode = Path(
@@ -478,23 +478,28 @@ def put_is_self_activatable(
                     "Proposal code of the proposal for which an observation comment is added."
             ),
         ),
-        is_self_activatable: bool = Body(..., title="Comment", description="Text of the comment."),
+        allowed: bool = Path(
+            ...,
+            title="Allowed",
+            description=(
+                    "is the Principal Investigator or Principal Contact allowed to activate proposal."
+            )
+        ),
         user: User = Depends(get_current_user),
-) -> ProposalSelfActivatable:
+) -> SelfActivation:
     """
     Adds a new comment related to an observation. The user submitting the request is
     recorded as the comment author.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_change_self_Activatable(user)
+        permission_service.check_permission_to_change_self_activatable(user)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_is_self_activatable(
-            proposal_code=proposal_code, is_self_activatable=is_self_activatable
+            proposal_code=proposal_code, is_self_activatable=allowed
         )
         unit_of_work.commit()
-        return ProposalSelfActivatable(
-            proposal_code=proposal_code,
-            is_self_activatable = proposal_service.is_self_activatable(proposal_code)
+        return SelfActivation(
+            allowed = proposal_service.is_self_activatable(proposal_code)
         )

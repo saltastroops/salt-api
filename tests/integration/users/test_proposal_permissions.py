@@ -187,7 +187,6 @@ def test_revoking_permission_for_unknown_permission_type_gives_unprocessable_err
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-@pytest.mark.skip
 @pytest.mark.parametrize(
     "username",
     [
@@ -204,6 +203,8 @@ def test_revoking_permission_for_unknown_permission_type_gives_unprocessable_err
 def test_proposal_permission_can_be_granted_and_revoked(
     username: str, client: TestClient
 ):
+    admin = find_username("Administrator")
+
     authenticate(username, client)
     permission = {"proposal_code": PROPOSAL_CODE, "permission_type": "View"}
 
@@ -212,25 +213,34 @@ def test_proposal_permission_can_be_granted_and_revoked(
     assert response.status_code == status.HTTP_200_OK
 
     # Check that there is no permission
+    # This is done as an admin in order to avoid 403 errors
+    authenticate(admin, client)
     response = client.get(BASE_URL + "proposal-permissions")
+    assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0
+    authenticate(username, client)
 
     # Grant the permission
-    response = client.post(BASE_URL + "proposal-permission", json=permission)
+    response = client.post(BASE_URL + "grant-proposal-permission", json=permission)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == permission
 
     # Check the permission has been granted
+    # This is done as an admin in order to avoid 403 errors
+    authenticate(admin, client)
     response = client.get(BASE_URL + "proposal-permissions")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [permission]
+    authenticate(username, client)
 
     # Revoke the permission again
     response = client.post(BASE_URL + "revoke-proposal-permission", json=permission)
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == [permission]
+    assert response.json() == permission
 
     # Check the permission has been revoked
+    # This is done as an admin in order to avoid 403 errors
+    authenticate(admin, client)
     response = client.get(BASE_URL + "proposal-permissions")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0

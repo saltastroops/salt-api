@@ -11,7 +11,7 @@ from sqlalchemy.engine import Connection
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import NewUserDetails, UserUpdate
-from tests.conftest import find_username, find_usernames
+from tests.conftest import find_usernames
 from tests.markers import nodatabase
 
 
@@ -411,7 +411,6 @@ def test_get_proposal_permissions(
 
     user1_id = 42
     user2_id = 145
-    user2 = user_repository.get_by_username(find_username("SALT Astronomer"))
     permission1 = {"proposal_code": "2020-2-SCI-008", "permission_type": "View"}
     permission2 = {"proposal_code": "2020-2-SCI-009", "permission_type": "View"}
     permission3 = {"proposal_code": "2020-2-SCI-010", "permission_type": "View"}

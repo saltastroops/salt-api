@@ -728,7 +728,7 @@ VALUES (:proposal_code_id, :permission_type_id, :grantee_id)
         )
 
     def revoke_proposal_permission(
-        self, user_id, permission_type: str, proposal_code: str
+        self, user_id: int, permission_type: str, proposal_code: str
     ) -> None:
         """
         Revoke a proposal permission from a user.

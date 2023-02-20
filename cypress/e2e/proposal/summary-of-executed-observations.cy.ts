@@ -1,7 +1,7 @@
 import { SummaryOfExecutedObservations } from "../../support/components/summary-of-executed-observations";
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
-import { getApiUrl, userDetailsAreStored } from "../../support/utils";
+import { getApiUrl } from "../../support/utils";
 
 const apiUrl = getApiUrl();
 
@@ -24,8 +24,6 @@ describe("Block summaries", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
-    // Then user details are stored
-    userDetailsAreStored();
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);

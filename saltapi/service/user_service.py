@@ -7,6 +7,7 @@ from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
 from saltapi.settings import get_settings
+from saltapi.web.schema.user import ProposalPermissionType
 
 
 class UserService:
@@ -112,3 +113,42 @@ SALT Team
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         return self.repository.get_salt_astronomers()
+
+    def get_proposal_permissions(self, user_id: int) -> List[Dict[str, Any]]:
+        return self.repository.get_proposal_permissions(user_id)
+
+    def grant_proposal_permission(
+        self, user_id: int, permission_type: ProposalPermissionType, proposal_code: str
+    ) -> None:
+        if not self.repository.is_existing_user_id(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        # We know that the user exists and that the permission type is correct. So any
+        # not found error must be due to an incorrect proposal code.
+        try:
+            self.repository.grant_proposal_permission(
+                user_id=user_id,
+                permission_type=permission_type.value,
+                proposal_code=proposal_code,
+            )
+        except NotFoundError:
+            raise ValidationError(f"Unknown proposal code: {proposal_code}")
+
+    def revoke_proposal_permission(
+        self, user_id: int, permission_type: ProposalPermissionType, proposal_code: str
+    ) -> None:
+        if not self.repository.is_existing_user_id(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        # We know that the user exists and that the permission type is correct. So any
+        # not found error must be due to an incorrect proposal code.
+        try:
+            self.repository.revoke_proposal_permission(
+                user_id=user_id,
+                permission_type=permission_type.value,
+                proposal_code=proposal_code,
+            )
+
+            return
+        except NotFoundError:
+            raise ValidationError(f"Unknown proposal code: {proposal_code}")

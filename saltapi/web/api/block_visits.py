@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
@@ -40,7 +40,7 @@ def get_block_visit(
         return block_visit
 
 
-@router.patch("/{block_visit_id}/status", summary="Update the status of a block visit")
+@router.put("/{block_visit_id}/status", summary="Update the status of a block visit")
 def update_block_visit_status(
     block_visit_id: int = Path(
         ..., title="Block visit id", description="Unique identifier for a block visit"
@@ -83,6 +83,8 @@ def update_block_visit_status(
         permission_service.check_permission_to_update_block_visit_status(user)
 
         block_service = services.block_service(unit_of_work.connection)
-        return block_service.update_block_visit_status(
+        block_service.update_block_visit_status(
             block_visit_id, block_visit_status, rejection_reason
         )
+
+        unit_of_work.commit()

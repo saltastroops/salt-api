@@ -5,7 +5,10 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
-from saltapi.web.schema.proposal import ProprietaryPeriodUpdateRequest, ProposalStatusValue
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:
@@ -132,12 +135,8 @@ class PermissionService:
 
             self.check_role(username, roles, proposal_code)
 
-
     def check_permission_to_update_proposal_status(
-            self,
-            user: User,
-            proposal_code: str,
-            proposal_status: str
+        self, user: User, proposal_code: str, proposal_status: str
     ) -> None:
         """
         Check whether the user may update a proposal status.
@@ -149,13 +148,13 @@ class PermissionService:
         * a Principal Investigator or Principal Contact (if the proposal is deactivated or if it is activated self-activation is allowed)
         """
         username = user.username
-        if self.user_has_role(username, Role.PRINCIPAL_CONTACT, proposal_code) or\
-            self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
-            if proposal_status == ProposalStatusValue.INACTIVE or \
-                    (
-                        self.proposal_repository.is_self_activatable(proposal_code) and
-                        proposal_status == ProposalStatusValue.ACTIVE
-                    ):
+        if self.user_has_role(
+            username, Role.PRINCIPAL_CONTACT, proposal_code
+        ) or self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
+            if proposal_status == ProposalStatusValue.INACTIVE or (
+                self.proposal_repository.is_self_activatable(proposal_code)
+                and proposal_status == ProposalStatusValue.ACTIVE
+            ):
                 return
             raise AuthorizationError()
 

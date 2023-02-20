@@ -1271,7 +1271,9 @@ WHERE PIR.InactiveReason = :inactive_reason
         result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
         return cast(int, result.scalar_one())
 
-    def update_proposal_status(self, proposal_code: str, status: str, status_comment: Optional[str] = None) -> None:
+    def update_proposal_status(
+        self, proposal_code: str, status: str, status_comment: Optional[str] = None
+    ) -> None:
         """
         Update the status of a proposal.
         """
@@ -1296,11 +1298,12 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
         """
         )
         result = self.connection.execute(
-            stmt, {
+            stmt,
+            {
                 "proposal_code": proposal_code,
                 "status_id": status_id,
                 "status_comment": status_comment,
-            }
+            },
         )
         if not result.rowcount:
             raise NotFoundError()
@@ -2173,10 +2176,9 @@ WHERE Proposal_Code = :proposal_code
                     "semester": semester,
                     "distribution": [],
                 }
-            req_time[semester]["distribution"].append({
-                "partner": row.partner_name,
-                "percentage": row.percentage
-            })
+            req_time[semester]["distribution"].append(
+                {"partner": row.partner_name, "percentage": row.percentage}
+            )
 
         return list(req_time.values())
 

@@ -30,10 +30,8 @@ from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     ObservationComment,
-    ProposalInactiveReason,
     ProposalListItem,
     ProposalStatus,
-    ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
     UpdateStatus,
 )
@@ -318,7 +316,7 @@ def update_proprietary_period(
             proposal = proposal_service.get_proposal(proposal_code)
             status_code = status.HTTP_200_OK
             update_status = UpdateStatus.SUCCESSFUL
-        unit_of_work.connection.commit()
+        unit_of_work.commit()
         return JSONResponse(
             status_code=status_code,
             content={
@@ -341,33 +339,30 @@ def update_proposal_status(
         title="Proposal code",
         description="Proposal code of the proposal whose status is updated.",
     ),
-    proposal_status: ProposalStatusValue = Body(
-        ..., alias="status", title="Proposal status", description="New proposal status."
-    ),
-    inactive_reason: Optional[ProposalInactiveReason] = Body(
-        None,
-        alias="reason",
-        title="Proposal inactive reason",
-        description="New proposal inactive reason.",
+    proposal_status: ProposalStatus = Body(
+        ...,
+        alias="status",
+        title="Proposal status and (optional) status comment",
+        description="New proposal status and (optional) status comment.",
     ),
     user: User = Depends(get_current_user),
-) -> _ProposalStatus:
+) -> ProposalStatus:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_update_proposal_status(user)
+        permission_service.check_permission_to_update_proposal_status(
+            user, proposal_code, proposal_status.value
+        )
         proposal_service = services.proposal_service(unit_of_work.connection)
-
         proposal_service.update_proposal_status(
-            proposal_code, proposal_status, inactive_reason
+            proposal_code, proposal_status.value, proposal_status.comment
         )
 
         unit_of_work.commit()
-
-        return proposal_service.get_proposal_status(proposal_code)
+        return ProposalStatus(**proposal_service.get_proposal_status(proposal_code))
 
 
 @router.get(
@@ -432,7 +427,7 @@ def post_observation_comment(
         observation_comment = proposal_service.add_observation_comment(
             proposal_code=proposal_code, comment=comment.comment, user=user
         )
-        unit_of_work.connection.commit()
+        unit_of_work.commit()
         return ObservationComment(**observation_comment)
 
 

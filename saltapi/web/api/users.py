@@ -14,6 +14,7 @@ from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     NewUserDetails,
     PasswordResetRequest,
+    ProposalPermission,
     User,
     UserListItem,
     UserUpdate,
@@ -98,7 +99,12 @@ def get_users(
 
         return user_service.get_users()
 
-@router.get("/salt-astronomers", summary="Get the SALT astronomers", response_model=List[UserListItem])
+
+@router.get(
+    "/salt-astronomers",
+    summary="Get the SALT astronomers",
+    response_model=List[UserListItem],
+)
 def get_salt_astronomers() -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
@@ -126,9 +132,11 @@ def update_user(
     user_id: int = Path(
         ...,
         title="User id",
-        description="User id of the user making the request.",
+        description="Id of the user to update.",
     ),
-    user_update: UserUpdate = Body(..., title="User Details", description="??"),
+    user_update: UserUpdate = Body(
+        ..., title="User Details", description="User details to update"
+    ),
     user: _User = Depends(get_current_user),
 ) -> _User:
     with UnitOfWork() as unit_of_work:
@@ -143,3 +151,104 @@ def update_user(
         unit_of_work.commit()
 
         return user_service.get_user(user_id)
+
+
+@router.get(
+    "/{user_id}/proposal-permissions",
+    summary="Get proposal permissions",
+    response_model=List[ProposalPermission],
+)
+def get_proposal_permissions(
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id of the user",
+    ),
+    user: _User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_user(user, user_id)
+        user_service = services.user_service(unit_of_work.connection)
+
+        return user_service.get_proposal_permissions(user_id)
+
+
+@router.post(
+    "/{user_id}/grant-proposal-permission",
+    summary="Grant a proposal permission",
+    response_model=ProposalPermission,
+)
+def grant_proposal_permission(
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id of the user to whom the permission is granted",
+    ),
+    permission: ProposalPermission = Body(
+        ..., title="Permission", description="The permission to grant"
+    ),
+    user: _User = Depends(get_current_user),
+) -> ProposalPermission:
+    """
+    Grant a proposal permission to a user.
+
+    In case of success, the response contains the granted permission.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_grant_user_permissions(
+            user, permission.proposal_code
+        )
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.grant_proposal_permission(
+            user_id=user_id,
+            proposal_code=permission.proposal_code,
+            permission_type=permission.permission_type,
+        )
+
+        unit_of_work.commit()
+
+        # Querying the database for the permission is somewhat pointless, so we just
+        # return the permission submitted by the user.
+        return permission
+
+
+@router.post(
+    "/{user_id}/revoke-proposal-permission",
+    summary="Revoke a proposal permission",
+    response_model=ProposalPermission,
+)
+def revoke_proposal_permission(
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id of the user for whom the permission is revoked",
+    ),
+    permission: ProposalPermission = Body(
+        ..., title="Permission", description="The permission to revoke"
+    ),
+    user: _User = Depends(get_current_user),
+) -> ProposalPermission:
+    """
+    Revoke a proposal permission from a user.
+
+    In case of success, the response contains the revoked permission.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_grant_user_permissions(
+            user, permission.proposal_code
+        )
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.revoke_proposal_permission(
+            user_id=user_id,
+            proposal_code=permission.proposal_code,
+            permission_type=permission.permission_type,
+        )
+
+        unit_of_work.commit()
+
+        # Querying the database for the permission is somewhat pointless, so we just
+        # return the permission submitted by the user.
+        return permission

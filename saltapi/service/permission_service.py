@@ -6,7 +6,10 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
-from saltapi.web.schema.proposal import ProprietaryPeriodUpdateRequest
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:
@@ -27,7 +30,7 @@ class PermissionService:
         proposal_code: Optional[str] = None,
     ) -> bool:
         """
-        Check whether the user has a role required to perform a specific
+        Check that the user has a role required to perform a specific
         action on a given proposal.
         """
         if role == Role.ADMINISTRATOR:
@@ -88,7 +91,7 @@ class PermissionService:
         proposal_code: Optional[str] = None,
     ) -> None:
         """
-        Check whether the user has at least one of a given list of roles.
+        Check that the user has at least one of a given list of roles.
         """
         has_role = False
         for role in roles:
@@ -100,7 +103,7 @@ class PermissionService:
 
     def check_permission_to_view_proposal(self, user: User, proposal_code: str) -> None:
         """
-        Check whether the user may view a proposal.
+        Check that the user may view a proposal.
 
         This is the case if the user is any of the following:
 
@@ -137,70 +140,31 @@ class PermissionService:
 
             self.check_role(username, roles, proposal_code)
 
-    def check_permission_to_activate_proposal(
-        self, user: User, proposal_code: str
+    def check_permission_to_update_proposal_status(
+        self, user: User, proposal_code: str, proposal_status: str
     ) -> None:
         """
-        Check whether the user may activate a proposal.
-
-        This is the case if the user is any of the following:
-
-        * the Principal Investigator (and the proposal can be activated by the PI or PC)
-        * the Principal Contact (and the proposal can be activated by the PI or PC)
-        * a SALT Astronomer
-        * an administrator
-        """
-        username = user.username
-
-        if self.proposal_repository.is_self_activatable(proposal_code):
-            roles = [
-                Role.PRINCIPAL_INVESTIGATOR,
-                Role.PRINCIPAL_CONTACT,
-                Role.SALT_ASTRONOMER,
-                Role.ADMINISTRATOR,
-            ]
-            self.check_role(username, roles, proposal_code)
-        else:
-            roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
-            self.check_role(username, roles, proposal_code)
-
-    def check_permission_to_deactivate_proposal(
-        self, user: User, proposal_code: str
-    ) -> None:
-        """
-        Check whether the user may deactivate a proposal.
-
-        This is the case if the user is any of the following:
-
-        * the Principal Investigator
-        * the Principal Contact
-        * a SALT Astronomer
-        * an administrator
-        """
-        username = user.username
-
-        roles = [
-            Role.PRINCIPAL_INVESTIGATOR,
-            Role.PRINCIPAL_CONTACT,
-            Role.SALT_ASTRONOMER,
-            Role.ADMINISTRATOR,
-        ]
-
-        self.check_role(username, roles, proposal_code)
-
-    def check_permission_to_update_proposal_status(self, user: User) -> None:
-        """
-        Check whether the user may update a proposal status.
+        Check that the user may update a proposal status.
 
         This is the case if the user is any of the following:
 
         * a SALT Astronomer
         * an administrator
+        * a Principal Investigator or Principal Contact (if the proposal is deactivated
+          or if it is activated and self-activation is allowed)
         """
         username = user.username
+        if self.user_has_role(
+            username, Role.PRINCIPAL_CONTACT, proposal_code
+        ) or self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
+            if proposal_status == ProposalStatusValue.INACTIVE or (
+                self.proposal_repository.is_self_activatable(proposal_code)
+                and proposal_status == ProposalStatusValue.ACTIVE
+            ):
+                return
+            raise AuthorizationError()
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
-
         self.check_role(username, roles)
 
     def check_permission_to_add_observation_comment(
@@ -239,7 +203,7 @@ class PermissionService:
 
     def check_permission_to_view_block(self, user: User, block_id: int) -> None:
         """
-        Check whether the user may view a block.
+        Check that the user may view a block.
 
         This is the case if the user may view the proposal which the block belongs to.
         """
@@ -251,7 +215,7 @@ class PermissionService:
 
     def check_permission_to_view_block_status(self, user: User, block_id: int) -> None:
         """
-        Check whether the user may view a block status.
+        Check that the user may view a block status.
 
         This is the case if the user may view the block.
         """
@@ -261,7 +225,7 @@ class PermissionService:
         self, user: User, block_id: int
     ) -> None:
         """
-        Check whether the user may view a block status.
+        Check that the user may view a block status.
 
         This is the case if the user is any of the following:
 
@@ -289,7 +253,7 @@ class PermissionService:
         self, user: User, block_visit_id: int
     ) -> None:
         """
-        Check whether the user may view a block visit.
+        Check that the user may view a block visit.
 
         This is the case if the user may view the proposal for which the block visit
         was taken.
@@ -302,7 +266,7 @@ class PermissionService:
 
     def check_permission_to_update_block_visit_status(self, user: User) -> None:
         """
-        Check whether the user may update a block visit status.
+        Check that the user may update a block visit status.
 
         This is the case if the user is any of the following:
 
@@ -315,42 +279,43 @@ class PermissionService:
 
         self.check_role(username, roles)
 
-    def check_permission_to_view_user(self, user: User, updated_user_id: int) -> None:
+    def check_permission_to_view_user(self, user: User, viewed_user_id: int) -> None:
         """
-        Check whether the user may view a user.
+        Check that the user may view a user.
 
         Administrators may view any users. Other users may only view their own user
         details.
         """
-        if not user.id == updated_user_id:
-            roles = [Role.ADMINISTRATOR]
+        if not user.id == viewed_user_id:
+            self._check_user_is_admin(user)
 
-            self.check_role(
-                username=user.username,
-                roles=roles,
-            )
-
-    def check_permission_to_view_users(self, user: User) -> None:
+    def check_permission_to_switch_user(self, user: User) -> None:
         """
-        Check whether the user may view the list of users.
+        Check that the user may switch the user, i.e. login as someone else.
 
         This is the case if the user is an administrator.
         """
-        roles = [Role.ADMINISTRATOR]
+        self._check_user_is_admin(user)
 
-        self.check_role(user.username, roles)
+    def check_permission_to_view_users(self, user: User) -> None:
+        """
+        Check that the user may view the list of users.
+
+        This is the case if the user is an administrator.
+        """
+        self._check_user_is_admin(user)
 
     def check_permission_to_update_user(self, user: User, updated_user_id: int) -> None:
         """
-        Check whether the user may update a user.
+        Check that the user may update a user.
 
-        This is the case if the user may update a user.
+        This is the case if the user may view the user.
         """
         self.check_permission_to_view_user(user, updated_user_id)
 
     def check_permission_to_view_mos_mask_metadata(self, user: User) -> None:
         """
-        Check whether the user may view MOS mask data.
+        Check that the user may view MOS mask data.
 
         This is the case if the user is any of the following:
 
@@ -367,7 +332,7 @@ class PermissionService:
 
     def check_permission_to_update_mos_mask_metadata(self, user: User) -> None:
         """
-        Check whether the user can update MOS mask metadata.
+        Check that the user can update MOS mask metadata.
         """
         username = user.username
 
@@ -377,7 +342,7 @@ class PermissionService:
 
     def check_permission_to_view_obsolete_masks_in_magazine(self, user: User) -> None:
         """
-        Check whether the user can view the obsolete masks in the magazine.
+        Check that the user can view the obsolete masks in the magazine.
         """
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
@@ -394,7 +359,7 @@ class PermissionService:
         self, user: User, proposal_code: str
     ) -> None:
         """
-        Check whether the user can update proposal progress details.
+        Check that the user can update proposal progress details.
         """
         username = user.username
 
@@ -408,7 +373,7 @@ class PermissionService:
 
     def check_permission_to_view_currently_observed_block(self, user: User) -> None:
         """
-        Check whether the user may view the currently observed block.
+        Check that the user may view the currently observed block.
 
         This is the case if the user is any of the following:
 
@@ -428,7 +393,7 @@ class PermissionService:
 
     def check_permission_to_view_scheduled_block(self, user: User) -> None:
         """
-        Check whether the user may view the next scheduled block.
+        Check that the user may view the next scheduled block.
 
         This is the case if the user may view the currently observed block.
         """
@@ -442,6 +407,25 @@ class PermissionService:
         roles = [
             Role.PRINCIPAL_INVESTIGATOR,
             Role.PRINCIPAL_CONTACT,
+            Role.ADMINISTRATOR,
+        ]
+        self.check_role(username, roles, proposal_code)
+
+    def check_permission_to_grant_user_permissions(
+        self, user: User, proposal_code: str
+    ) -> None:
+        """
+        Check that the user is allowed to grant permissions for a proposal to a user (or
+        revoke them).
+
+        This is the case if the user is the Principal Investigator, the Principal
+        Contact, a SALT Astronomer or an administrator.
+        """
+        username = user.username
+        roles = [
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+            Role.SALT_ASTRONOMER,
             Role.ADMINISTRATOR,
         ]
         self.check_role(username, roles, proposal_code)
@@ -462,3 +446,11 @@ class PermissionService:
             proposal_code
         )
         return maximum_period <= proprietary_period_update.proprietary_period
+
+    def _check_user_is_admin(self, user: User) -> None:
+        roles = [Role.ADMINISTRATOR]
+
+        self.check_role(
+            username=user.username,
+            roles=roles,
+        )

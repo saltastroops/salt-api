@@ -6,10 +6,14 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from loguru import logger
-from pydantic.error_wrappers import ValidationError
+from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from starlette.datastructures import URL
 
-from saltapi.exceptions import AuthorizationError, NotFoundError
+from saltapi.exceptions import (
+    AuthorizationError,
+    NotFoundError,
+    ValidationError,
+)
 
 
 def log_message(method: str, url: Union[str, URL], message: Any) -> None:
@@ -60,6 +64,17 @@ def setup_exception_handler(app: FastAPI) -> None:
         log_message(request.method, request.url, exc)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": "Not Found"}
+        )
+
+    @app.exception_handler(PydanticValidationError)
+    async def pydantic_validation_error_handler(
+        request: Request, exc: PydanticValidationError
+    ) -> Response:
+        """Catch a ValidationError."""
+
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(exc)}
         )
 
     @app.exception_handler(ValidationError)

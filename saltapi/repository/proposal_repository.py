@@ -2346,11 +2346,11 @@ WHERE Proposal_Code = :proposal_code
         """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        proposal_code_id = result.scalar_one()
+        proposal_code_id = result.one_or_none()
         if not proposal_code_id:
             raise NotFoundError(f"Couldn't found  proposal code `{proposal_code}`")
 
-        return cast(int, proposal_code_id)
+        return cast(int, proposal_code_id[0])
     def update_is_self_activatable(self, proposal_code, is_self_activatable) -> None:
         proposal_code_id = self._get_proposal_code_id(proposal_code)  # To throw a more meaningful error.
         stmt = text(
@@ -2369,3 +2369,70 @@ WHERE Proposal_Code = :proposal_code
                 "is_self_activatable": 1 if is_self_activatable else 0,
             }
         )
+
+    def get_liaison_astronomer(self, proposal_code: str) -> Dict[str, any]:
+        stmt = text(
+            """
+SELECT
+    I.PiptUser_Id           AS id,
+    I.FirstName             AS given_name,
+    I.Surname               AS family_name
+FROM ProposalContact PCon
+    JOIN Investigator I ON I.Investigator_Id = PCon.Astronomer_Id
+    JOIN ProposalCode PC ON PC.ProposalCode_Id = PCon.ProposalCode_Id
+WHERE PCon.ProposalCode_Id = (
+    SELECT ProposalCode_Id FROM ProposalCode 
+    WHERE Proposal_Code = :proposal_code
+)
+        """
+        )
+        result = self.connection.execute(
+            stmt, {
+                "proposal_code": proposal_code,
+            }
+        )
+        sa = result.one_or_none()
+        if not sa:
+            raise NotFoundError(f"No liaison astronomer for proposal code `{proposal_code}`")
+        return {
+            "id": sa.id,
+            "family_name": sa.family_name,
+            "given_name": sa.given_name,
+        }
+
+    def update_liaison_astronomer(self, proposal_code, liaison_astronomer_id) -> None:
+
+        investigator_id = self.get_investigator_id(user_id=liaison_astronomer_id)
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
+
+        stmt = text(
+            """
+UPDATE ProposalContact
+SET Astronomer_Id = :liaison_astronomer_id
+WHERE ProposalCode_Id = :proposal_code_id
+        """
+        )
+        self.connection.execute(
+            stmt, {
+                "proposal_code_id": proposal_code_id,
+                "liaison_astronomer_id": investigator_id,
+            }
+        )
+
+    def get_investigator_id(self, user_id: int):
+        stmt = text(
+            """
+SELECT Investigator_Id FROM Investigator WHERE PiptUser_Id = :user_id
+
+        """
+        )
+        result = self.connection.execute(
+            stmt, {
+                "user_id": user_id
+            }
+        )
+        investigator_id = result.one_or_none()
+        if not investigator_id:
+            raise NotFoundError(f"Couldn't found the investigator with id `{user_id}`")
+
+        return cast(int, investigator_id[0])

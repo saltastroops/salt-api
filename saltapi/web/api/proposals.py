@@ -35,6 +35,7 @@ from saltapi.web.schema.proposal import (
     ProprietaryPeriodUpdateRequest,
     UpdateStatus, SelfActivation,
 )
+from saltapi.web.schema.user import UserListItem
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
 
@@ -503,3 +504,39 @@ def put_is_self_activatable(
         return SelfActivation(
             allowed = proposal_service.is_self_activatable(proposal_code)
         )
+
+@router.put(
+    "/{proposal_code}/liaison-astronomer/{liaison_astronomer_id}",
+    summary="Create an observation comment",
+    response_model=UserListItem,
+    status_code=200,
+)
+def update_liaison_astronomer(
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description=(
+                    "Proposal code of the proposal for which an observation comment is added."
+            ),
+        ),
+        liaison_astronomer_id: int = Path(
+            ...,
+            title="Liaison astronomer id",
+            description="The user id of the liaison astronomer."
+        ),
+        user: User = Depends(get_current_user),
+) -> UserListItem:
+    """
+    Adds a new comment related to an observation. The user submitting the request is
+    recorded as the comment author.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_liaison_astronomer(user)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal_service.update_liaison_astronomer(
+            proposal_code=proposal_code, liaison_astronomer_id=liaison_astronomer_id
+        )
+        unit_of_work.commit()
+        return UserListItem(**proposal_service.get_liaison_astronomer(proposal_code))

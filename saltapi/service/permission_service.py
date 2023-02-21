@@ -453,3 +453,7 @@ class PermissionService:
     def check_permission_to_change_self_activatable(self, user: User):
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
         self.check_role(user.username, roles)
+
+    def check_permission_to_update_liaison_astronomer(self, user):
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+        self.check_role(user.username, roles)

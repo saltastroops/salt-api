@@ -1,7 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.engine import Connection
 from starlette import status
 
+from saltapi.repository.user_repository import UserRepository
 from tests.conftest import authenticate, find_username, not_authenticated
 
 PROPOSALS_URL = "/proposals"
@@ -154,6 +156,48 @@ def test_should_return_correct_list_of_proposals_for_authenticated_user(
         assert set(p["proposal_code"] for p in proposals) == set(
             proposal_codes.split(", ")
         )
+
+
+def test_should_honour_proposal_grant_view_permission(
+    client: TestClient, db_connection: Connection
+) -> None:
+    proposal_code = "2023-1-SCI-031"
+    username = find_username("Principal Investigator", "2018-2-LSP-001")
+    user = UserRepository(db_connection).get_by_username(username)
+
+    # Ensure that the view permission has *not* been granted for the proposal
+    admin = find_username("Administrator")
+    authenticate(admin, client)
+    response = client.post(
+        f"/users/{user.id}/revoke-proposal-permission",
+        json={"permission_type": "View", "proposal_code": proposal_code},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # The user should not have access to the proposal
+    authenticate(username, client)
+    response = client.get(PROPOSALS_URL + "/")
+    assert response.status_code == status.HTTP_200_OK
+    initial_proposals = response.json()
+    initial_proposal_count = len(initial_proposals)
+    assert proposal_code not in [p["proposal_code"] for p in initial_proposals]
+
+    # Now grant the proposal view permission to the user
+    authenticate(admin, client)
+    response = client.post(
+        f"/users/{user.id}/grant-proposal-permission",
+        json={"permission_type": "View", "proposal_code": proposal_code},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # Now the user should have access to the proposal
+    authenticate(username, client)
+    response = client.get(PROPOSALS_URL + "/")
+    assert response.status_code == status.HTTP_200_OK
+    final_proposals = response.json()
+    final_proposal_count = len(final_proposals)
+    assert final_proposal_count == initial_proposal_count + 1
+    assert proposal_code in [p["proposal_code"] for p in final_proposals]
 
 
 @pytest.mark.parametrize(

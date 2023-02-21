@@ -4,9 +4,11 @@ from typing import Any, NamedTuple
 import pytest
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
+from sqlalchemy.engine import Connection
 from starlette import status
 
 import saltapi.repository.proposal_repository
+from saltapi.repository.user_repository import UserRepository
 from tests.conftest import authenticate, find_username, not_authenticated
 
 PROPOSALS_URL = "/proposals"
@@ -260,8 +262,36 @@ def test_should_return_403_when_requesting_gwe_proposal_for_non_permitted_user(
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_should_honour_proposal_grant_view_permission(client: TestClient) -> None:
-    username = find_username("proposal_view_grantee", "2023-1-SCI-031")
+def test_should_honour_proposal_grant_view_permission(
+    client: TestClient, db_connection: Connection
+) -> None:
+    proposal_code = "2023-1-SCI-031"
+    username = find_username("Principal Investigator", "2018-2-LSP-001")
+    user = UserRepository(db_connection).get_by_username(username)
+
+    # Ensure that the view permission has *not* been granted for the proposal
+    admin = find_username("Administrator")
+    authenticate(admin, client)
+    response = client.post(
+        f"/users/{user.id}/revoke-proposal-permission",
+        json={"permission_type": "View", "proposal_code": proposal_code},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # The user should not have access to the proposal
+    authenticate(username, client)
+    response = client.get(PROPOSALS_URL + "/2023-1-SCI-031")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    # Now grant the proposal view permission to the user
+    authenticate(admin, client)
+    response = client.post(
+        f"/users/{user.id}/grant-proposal-permission",
+        json={"permission_type": "View", "proposal_code": proposal_code},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # Now the user should have access to the proposal
     authenticate(username, client)
     response = client.get(PROPOSALS_URL + "/2023-1-SCI-031")
     assert response.status_code == status.HTTP_200_OK

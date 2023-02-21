@@ -9,7 +9,7 @@ from pytest_pymysql_autorecord.util import DatabaseMock
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
-from saltapi.repository.user_repository import UserRepository, ProposalPermission
+from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import NewUserDetails, UserUpdate
 from tests.conftest import find_usernames
 from tests.markers import nodatabase
@@ -321,18 +321,26 @@ def test_role_checks_return_false_for_non_existing_proposal(
     )
 
 
-def test_has_been_granted_returns_correct_result(db_connection: Connection) -> None:
+def test_has_proposal_permission_returns_correct_result(
+    db_connection: Connection,
+) -> None:
     user_repository = UserRepository(db_connection)
     proposal_code = "2022-2-COM-001"
-    assert user_repository.has_been_granted(
-        ProposalPermission.VIEW,
-        find_usernames("proposal_view_grantee", True, proposal_code)[0],
-        proposal_code,
+    grantee_username = find_usernames("proposal_view_grantee", True, proposal_code)[0]
+    grantee_id = user_repository.get_by_username(grantee_username).id
+    assert user_repository.user_has_proposal_permission(
+        user_id=grantee_id,
+        permission_type="View",
+        proposal_code=proposal_code,
     )
-    assert not user_repository.has_been_granted(
-        ProposalPermission.VIEW,
-        find_usernames("proposal_view_grantee", False, proposal_code)[0],
-        proposal_code,
+    non_grantee_username = find_usernames("proposal_view_grantee", True, proposal_code)[
+        0
+    ]
+    non_grantee_id = user_repository.get_by_username(non_grantee_username).id
+    assert user_repository.user_has_proposal_permission(
+        user_id=non_grantee_id,
+        permission_type="View",
+        proposal_code=proposal_code,
     )
 
 

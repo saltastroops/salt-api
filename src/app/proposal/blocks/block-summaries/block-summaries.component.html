@@ -136,29 +136,57 @@
           <div>{{ b.observingConditions.transparency }}</div>
           <div *ngIf="b.observingConditions.transparency === 'Any'">
             <img
+              *ngIf="!isCompleted(b)"
               class="icon"
               src="/assets/icons/noun_Cloud_moon_2462941.svg"
+              alt="any weather conditions"
+            />
+            <img
+              *ngIf="isCompleted(b)"
+              class="icon"
+              src="/assets/icons/noun_Cloud_moon_2462941-light.svg"
               alt="any weather conditions"
             />
           </div>
           <div *ngIf="b.observingConditions.transparency === 'Clear'">
             <img
+              *ngIf="!isCompleted(b)"
               class="icon"
               src="/assets/icons/noun_Night_2325384.svg"
+              alt="clear sky"
+            />
+            <img
+              *ngIf="isCompleted(b)"
+              class="icon"
+              src="/assets/icons/noun_Night_2325384-light.svg"
               alt="clear sky"
             />
           </div>
           <div *ngIf="b.observingConditions.transparency === 'Thin cloud'">
             <img
+              *ngIf="!isCompleted(b)"
               class="icon"
               src="/assets/icons/noun_Cloud_1188472.svg"
+              alt="thin clouds"
+            />
+            <img
+              *ngIf="isCompleted(b)"
+              class="icon"
+              src="/assets/icons/noun_Cloud_1188472-light.svg"
               alt="thin clouds"
             />
           </div>
           <div *ngIf="b.observingConditions.transparency === 'Thick cloud'">
             <img
+              *ngIf="!isCompleted(b)"
               class="icon"
               src="/assets/icons/noun_Cloud_2891552.svg"
+              alt="thick clouds"
+            />
+            <img
+              *ngIf="isCompleted(b)"
+              class="icon"
+              src="/assets/icons/noun_Cloud_2891552-light.svg"
               alt="thick clouds"
             />
           </div>

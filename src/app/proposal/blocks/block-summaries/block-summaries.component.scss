@@ -55,19 +55,6 @@
 }
 
 .completed-block {
-  background-color: $completed-background-color;
-}
-
-.pointer {
-  cursor: pointer;
-}
-.pointer.active.asc:after {
-  content: "▲";
-}
-.pointer.active.desc:after {
-  content: "▼";
-}
-
-.pointer.sortable_column:hover {
-  background: $primary-header;
+  background-color: #f5f5f5;
+  color: #999996;
 }

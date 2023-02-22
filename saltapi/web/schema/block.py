@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
@@ -163,6 +164,11 @@ class Block(BaseModel):
             "List of observations in the block. With the exception of some legacy"
             " proposals, there is always a single observation in the block"
         ),
+    )
+    latest_submission_date: datetime = Field(
+        ...,
+        title="Latest block submission date",
+        description="Latest block submission date",
     )
 
 

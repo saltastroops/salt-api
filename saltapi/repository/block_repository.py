@@ -68,7 +68,8 @@ SELECT B.Block_Id                      AS block_id,
        BP.SeeingProbability            AS seeing_probability,
        BP.AveRanking                   AS average_ranking,
        BP.TotalProbability             AS total_probability,
-       B.BlockStatusReason             AS reason
+       B.BlockStatusReason             AS reason,
+       P.SubmissionDate                AS latest_submission_date
 FROM Block B
          JOIN BlockStatus BS ON B.BlockStatus_Id = BS.BlockStatus_Id
          LEFT JOIN PiRanking PR ON B.PiRanking_Id = PR.PiRanking_Id
@@ -126,6 +127,7 @@ WHERE B.Block_Id = :block_id;
             "observing_windows": self._observing_windows(block_id),
             "block_visits": self._block_visits(block_id),
             "observations": self._pointings(block_id),
+            "latest_submission_date": pytz.utc.localize(row.latest_submission_date)
         }
 
         return block

@@ -27,7 +27,7 @@ class BlockService:
 
         return self.block_repository.get_block_status(block_id)
 
-    def update_block_status(self, block_id: int, status: str, reason: str) -> None:
+    def update_block_status(self, block_id: int, status: str, reason: Optional[str]) -> None:
         """
         Set the block status for a block id.
         """

@@ -1684,10 +1684,10 @@ WHERE PC.Proposal_Code = :proposal_code
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         tmp = dict()
-        # Some partners may have a time request for other semesters, but not for the
-        # one under consideration. We therefore collect the partners for which there
-        # is a time request percentage in any semester, and if a partner has a time
-        # request for the semester under consideration, we store that request.
+        # Some partners may have a time request (which may be 0) for other semesters,
+        # but not for the one under consideration. We therefore collect the partners for
+        # which there is a time request percentage in any semester, and if a partner has
+        # a time request for the semester under consideration, we store that request.
         for row in result:
             tmp[row.partner_code] = {
                 "partner_name": row.partner_name,

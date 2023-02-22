@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import freezegun
 import pytest
 from dateutil.parser import parse
@@ -5,6 +7,7 @@ from dateutil.parser import parse
 from saltapi.util import (
     TimeInterval,
     next_semester,
+    parse_partner_requested_percentages,
     partner_name,
     semester_end,
     semester_of_datetime,
@@ -127,3 +130,57 @@ def test_semester_end_raises_error_for_incorrect_semester() -> None:
 def test_next_semester_returns_correct_semester(semester: str, d: str) -> None:
     with freezegun.freeze_time(d):
         assert next_semester() == semester
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        # no value - hence the values don't add up to 100%
+        "",
+        # invalid value
+        "RSA:OTH:100",
+        # unknown partner code
+        "UNKNOWN:100",
+        # invalid float value
+        "RSA:8e",
+        # negative float value
+        "RSA:-3;IUCAA:53;UKSC:50",
+        # values don't add up to 100%
+        "RSA:99",
+        # values don't add up to 100%
+        "RSA:101",
+        # values don't add up to 100%
+        "RSA:33;DC:66"
+        # values don't add up to 100%
+        "RSA:50;POL:50.5",
+    ],
+)
+def test_parse_partner_requested_percentages_fails_for_invalid_values(
+    value: str,
+) -> None:
+    with pytest.raises(ValueError):
+        parse_partner_requested_percentages(value)
+
+
+@pytest.mark.parametrize(
+    "value,percentages",
+    [
+        ("RSA:100", (("RSA", 100),)),
+        (
+            "IUCAA:5.8;UKSC:94.2",
+            (
+                ("IUCAA", 5.8),
+                ("UKSC", 94.2),
+            ),
+        ),
+        (" RSA : 0 ; DC : 90 ; IUCAA : 10", (("RSA", 0), ("DC", 90), ("IUCAA", 10))),
+    ],
+)
+def test_parse_partner_requested_percentages(
+    value: str, percentages: Tuple[Tuple[str, float], ...]
+) -> None:
+    expected_percentages = [
+        {"partner_code": partner_code, "requested_percentage": percentage}
+        for partner_code, percentage in percentages
+    ]
+    assert parse_partner_requested_percentages(value) == expected_percentages

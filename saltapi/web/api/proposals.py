@@ -23,7 +23,7 @@ from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import User
 from saltapi.util import semester_start
 from saltapi.web import services
-from saltapi.web.schema.common import ProposalCode, Semester
+from saltapi.web.schema.common import ProposalCode, Semester, Message
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.proposal import (
@@ -35,7 +35,7 @@ from saltapi.web.schema.proposal import (
     ProprietaryPeriodUpdateRequest,
     UpdateStatus, SelfActivation,
 )
-from saltapi.web.schema.user import UserListItem
+from saltapi.web.schema.user import LiaisonAstronomerId
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
 
@@ -466,10 +466,9 @@ def get_data_release_date(
 
 
 @router.put(
-    "/{proposal_code}/self-activation/{allowed}",
+    "/{proposal_code}/self-activation",
     summary="Change the status whether the proposal may be activated by the Principal Investigator and Principal Contact",
-    response_model=SelfActivation,
-    status_code=200,
+    response_model=SelfActivation
 )
 def put_is_self_activatable(
         proposal_code: ProposalCode = Path(
@@ -479,18 +478,19 @@ def put_is_self_activatable(
                     "Proposal code of the proposal for which an observation comment is added."
             ),
         ),
-        allowed: bool = Path(
+        allowed: bool = Body(
             ...,
-            title="Allowed",
+            title="Allowed to self-activate",
             description=(
-                    "is the Principal Investigator or Principal Contact allowed to activate proposal."
+                    "is the Principal Investigator or Principal Contact allowed to activate the proposal."
             )
         ),
         user: User = Depends(get_current_user),
 ) -> SelfActivation:
     """
-    Adds a new comment related to an observation. The user submitting the request is
-    recorded as the comment author.
+    Change the self-activation status of the proposal.
+
+    A proposal is self-activatable if the Principal Investigator or Principal Contact are allowed to activate it.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
@@ -506,9 +506,9 @@ def put_is_self_activatable(
         )
 
 @router.put(
-    "/{proposal_code}/liaison-astronomer/{liaison_astronomer_id}",
-    summary="Create an observation comment",
-    response_model=UserListItem,
+    "/{proposal_code}/liaison-astronomer",
+    summary="Set the liaison astronomer for the proposal",
+    response_model=Message,
     status_code=200,
 )
 def update_liaison_astronomer(
@@ -516,27 +516,32 @@ def update_liaison_astronomer(
             ...,
             title="Proposal code",
             description=(
-                    "Proposal code of the proposal for which an observation comment is added."
+                    "Proposal code of the proposal for which the liaison astronomer is updated."
             ),
         ),
-        liaison_astronomer_id: int = Path(
+        liaison_astronomer_id: Optional[LiaisonAstronomerId] = Body(
             ...,
             title="Liaison astronomer id",
             description="The user id of the liaison astronomer."
         ),
         user: User = Depends(get_current_user),
-) -> UserListItem:
+) -> Message:
     """
-    Adds a new comment related to an observation. The user submitting the request is
-    recorded as the comment author.
+    Update the liaison astronomer of the proposal.
     """
     with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_update_liaison_astronomer(user)
+        try:
+            permission_service = services.permission_service(unit_of_work.connection)
+            permission_service.check_permission_to_update_liaison_astronomer(user)
 
-        proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal_service.update_liaison_astronomer(
-            proposal_code=proposal_code, liaison_astronomer_id=liaison_astronomer_id
-        )
-        unit_of_work.commit()
-        return UserListItem(**proposal_service.get_liaison_astronomer(proposal_code))
+            proposal_service = services.proposal_service(unit_of_work.connection)
+            proposal_service.update_liaison_astronomer(
+                proposal_code=proposal_code, liaison_astronomer_id=liaison_astronomer_id.id
+            )
+            unit_of_work.commit()
+            return Message(message="Successful")
+        except ValueError:
+            HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The SALT astronomer id not found: {user_id}",
+            )

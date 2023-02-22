@@ -2352,7 +2352,9 @@ WHERE Proposal_Code = :proposal_code
 
         return cast(int, proposal_code_id[0])
     def update_is_self_activatable(self, proposal_code, is_self_activatable) -> None:
-        proposal_code_id = self._get_proposal_code_id(proposal_code)  # To throw a more meaningful error.
+        # The id could be evaluated in the INSERT query, but this would lead to more
+        # cryptic errors for a non-existing proposal code.
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
         stmt = text(
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
@@ -2371,6 +2373,9 @@ WHERE Proposal_Code = :proposal_code
         )
 
     def get_liaison_astronomer(self, proposal_code: str) -> Dict[str, any]:
+        # The id could be evaluated in the INSERT query, but this would lead to more
+        # cryptic errors for a non-existing proposal code.
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
         stmt = text(
             """
 SELECT
@@ -2380,15 +2385,12 @@ SELECT
 FROM ProposalContact PCon
     JOIN Investigator I ON I.Investigator_Id = PCon.Astronomer_Id
     JOIN ProposalCode PC ON PC.ProposalCode_Id = PCon.ProposalCode_Id
-WHERE PCon.ProposalCode_Id = (
-    SELECT ProposalCode_Id FROM ProposalCode 
-    WHERE Proposal_Code = :proposal_code
-)
+WHERE PCon.ProposalCode_Id = :proposal_code_id
         """
         )
         result = self.connection.execute(
             stmt, {
-                "proposal_code": proposal_code,
+                "proposal_code_id": proposal_code_id,
             }
         )
         sa = result.one_or_none()
@@ -2400,9 +2402,10 @@ WHERE PCon.ProposalCode_Id = (
             "given_name": sa.given_name,
         }
 
-    def update_liaison_astronomer(self, proposal_code, liaison_astronomer_id) -> None:
-
-        investigator_id = self.get_investigator_id(user_id=liaison_astronomer_id)
+    def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
+        # The ids could be retrieved within the SQL statement, but then a wrong proposal code or liaison id
+        # would lead to more cryptic errors.
+        investigator_id = self.get_investigator_id(user_id=liaison_astronomer_id) if liaison_astronomer_id else None
         proposal_code_id = self._get_proposal_code_id(proposal_code)
 
         stmt = text(
@@ -2422,7 +2425,9 @@ WHERE ProposalCode_Id = :proposal_code_id
     def get_investigator_id(self, user_id: int):
         stmt = text(
             """
-SELECT Investigator_Id FROM Investigator WHERE PiptUser_Id = :user_id
+SELECT PU.Investigator_Id FROM PiptUser PU
+    JOIN SaltAstronomers SA ON PU.Investigator_Id = SA.Investigator_Id
+WHERE SA.Investigator_Id = :user_id
 
         """
         )
@@ -2433,6 +2438,6 @@ SELECT Investigator_Id FROM Investigator WHERE PiptUser_Id = :user_id
         )
         investigator_id = result.one_or_none()
         if not investigator_id:
-            raise NotFoundError(f"Couldn't found the investigator with id `{user_id}`")
+            raise ValueError(f"User id not found: {user_id}")
 
         return cast(int, investigator_id[0])

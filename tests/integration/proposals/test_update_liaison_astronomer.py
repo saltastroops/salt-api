@@ -10,33 +10,31 @@ from tests.conftest import (
     misauthenticate,
     not_authenticated,
 )
-
-TEST_DATA = "integration/users/get_user.yaml"
-
+SALT_ASTRONOMER_ID = {'id', 494} # 494 is a valid SALT Astronomer Solohery
 
 def _url(proposal_code: str) -> str:
-    # 494 is a valid SALT Astronomer Solohery
-    return "/proposals/" + proposal_code + "/liaison-astronomer/494"
+
+    return "/proposals/" + proposal_code + "/liaison-astronomer"
 
 
-def test_update_liaison_astronomer_return_401_for_unauthenticated_user(
+def test_update_liaison_astronomer_returns_401_for_unauthenticated_user(
         client: TestClient,
 ) -> None:
     not_authenticated(client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code),
+        _url(proposal_code), json=SALT_ASTRONOMER_ID
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_update_liaison_astronomer_return_401_for_user_with_invalid_auth_token(
+def test_update_liaison_astronomer_returns_401_for_user_with_invalid_auth_token(
         client: TestClient,
 ) -> None:
     misauthenticate(client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code),
+        _url(proposal_code), json=SALT_ASTRONOMER_ID
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -52,12 +50,16 @@ def test_update_liaison_astronomer_return_401_for_user_with_invalid_auth_token(
         "2020-2-DDT-005",
     ],
 )
-def test_update_liaison_astronomer_should_allow_admins_to_update_liaison_astronomer(
+def test_update_liaison_astronomer_should_allow_admins_and_salt_astronomers_to_update_liaison_astronomer(
         proposal_code: str, client: TestClient
 ) -> None:
     admin = find_username("Administrator")
     authenticate(admin, client)
-    response = client.put(_url(proposal_code))
+    response = client.put(_url(proposal_code), json={'id':494})
+    assert response.status_code == status.HTTP_200_OK
+    sa = find_username("SALT Astronomer")
+    authenticate(sa, client)
+    response = client.put(_url(proposal_code), json={'id':494})
     assert response.status_code == status.HTTP_200_OK
 
 @pytest.mark.parametrize(
@@ -71,36 +73,36 @@ def test_update_liaison_astronomer_should_allow_admins_to_update_liaison_astrono
         "2020-2-DDT-005",
     ],
 )
-def test_update_liaison_astronomer_should_allow_salt_astronomers_to_update_liaison_astronomer(
+def test_update_liaison_astronomer_should_allow_admins_and_salt_astronomers_to_remove_liaison_astronomer(
         proposal_code: str, client: TestClient
 ) -> None:
+    admin = find_username("Administrator")
+    authenticate(admin, client)
+    response = client.put(_url(proposal_code), json={'id': None})
+    assert response.status_code == status.HTTP_200_OK
     sa = find_username("SALT Astronomer")
     authenticate(sa, client)
-    response = client.put(_url(proposal_code))
+    response = client.put(_url(proposal_code), json={'id': None})
     assert response.status_code == status.HTTP_200_OK
 
 def test_update_liaison_astronomer_should_not_allow_update_for_none_salt_astronomer(
         client: TestClient,
 ) -> None:
-    # Update should not happen for none astronomers
+    # Update should not happen for non-SALT Astronomers
     user = find_username("Administrator")
     authenticate(user, client)
-    url = "/proposals/2022-1-SCI-005/liaison-astronomer/231"
+    response = client.put(_url("2022-1-SCI-005"), json={'id':230})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    response = client.put(url)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-def test_update_liaison_astronomer_should_not_allow_update_for_none_users(
+def test_update_liaison_astronomer_should_not_allow_update_for_non_existing_users(
         client: TestClient,
 ) -> None:
-    # Update should not happen for not registers users
+    # Update should not happen for non-existing users
 
     user = find_username("Administrator")
     authenticate(user, client)
-    url = "/proposals/2022-1-SCI-005/liaison-astronomer/-1"
-
-    response = client.put(url)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    response = client.put(_url("2022-1-SCI-005"),  json={'id':-1})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 @pytest.mark.parametrize(
     "user_role, proposal_code",

@@ -338,7 +338,7 @@ class ProposalService:
     def is_self_activatable(self, proposal_code: str) -> bool:
         return self.repository.is_self_activatable(proposal_code)
 
-    def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: int) -> None:
+    def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
         self.repository.update_liaison_astronomer(proposal_code, liaison_astronomer_id)
 
     def get_liaison_astronomer(self, proposal_code: str):

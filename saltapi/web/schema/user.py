@@ -128,3 +128,12 @@ class ProposalPermission(BaseModel):
         title="Proposal code",
         description="Proposal code to which the permission applies",
     )
+
+class LiaisonAstronomerId(BaseModel):
+    """Item in a list of users."""
+
+    id: Optional[int] = Field(
+        ...,
+        title="Liaison astronomer user id",
+        description="The iaison astronomer user id."
+    )

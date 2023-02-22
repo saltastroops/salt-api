@@ -10,7 +10,6 @@ from tests.conftest import (
     misauthenticate,
     not_authenticated,
 )
-SALT_ASTRONOMER_ID = {'id', 494} # 494 is a valid SALT Astronomer Solohery
 
 def _url(proposal_code: str) -> str:
 
@@ -23,7 +22,7 @@ def test_update_liaison_astronomer_returns_401_for_unauthenticated_user(
     not_authenticated(client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code), json=SALT_ASTRONOMER_ID
+        _url(proposal_code), json={'id': 494}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -34,7 +33,7 @@ def test_update_liaison_astronomer_returns_401_for_user_with_invalid_auth_token(
     misauthenticate(client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code), json=SALT_ASTRONOMER_ID
+        _url(proposal_code), json={'id': 494}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -120,7 +119,7 @@ def test_update_liaison_astronomer_return_403_for_pi_pc_and_investigator(
     user = find_username(user_role, proposal_code)
     authenticate(user, client)
     response = client.put(
-        _url(proposal_code),
+        _url(proposal_code), json={'id': 494}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -139,7 +138,7 @@ def test_update_liaison_astronomer_return_403_for_tacs(
     authenticate(user, client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code),
+        _url(proposal_code), json={'id': 494}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -155,6 +154,6 @@ def test_update_liaison_astronomer_return_403_for_operator_and_board_member(
     authenticate(user, client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code),
+        _url(proposal_code), json={'id': 494}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN

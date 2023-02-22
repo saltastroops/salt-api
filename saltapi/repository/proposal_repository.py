@@ -2427,7 +2427,7 @@ WHERE ProposalCode_Id = :proposal_code_id
             """
 SELECT PU.Investigator_Id FROM PiptUser PU
     JOIN SaltAstronomers SA ON PU.Investigator_Id = SA.Investigator_Id
-WHERE SA.Investigator_Id = :user_id
+WHERE PU.PiptUser_Id = :user_id
 
         """
         )

@@ -1680,7 +1680,6 @@ FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner AS P ON (MP.Partner_Id = P.Partner_Id)
 WHERE PC.Proposal_Code = :proposal_code
-AND P.Virtual != 1
     """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})

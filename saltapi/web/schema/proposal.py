@@ -17,6 +17,7 @@ from saltapi.web.schema.user import FullName, UserListItem
 
 
 class ProposalUser(FullName):
+    id: int = Field(..., title="User id", description="User id.")
     email: EmailStr = Field(..., title="Email address", description="Email address")
 
 

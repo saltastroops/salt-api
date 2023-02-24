@@ -26,7 +26,8 @@ export class ProgressRequestFormComponent implements OnInit {
   proposalProgressForm!: UntypedFormGroup;
   loading = false;
   submitted = false;
-  error: string | undefined = undefined;
+  error?: string = undefined;
+  success?: string = undefined;
   currentSemester = currentSemester();
   nextSemester = getNextSemester();
   changeReasonError = false;
@@ -84,6 +85,7 @@ export class ProgressRequestFormComponent implements OnInit {
   submit(): void {
     this.loading = true;
     this.submitted = true;
+    this.success = undefined;
     this.validatePartnerRequestedPercentagesControls();
 
     // stop here if form is invalid
@@ -140,7 +142,12 @@ export class ProgressRequestFormComponent implements OnInit {
         (data) => {
           this.progressReport = { ...data };
           this.loading = false;
+          this.success = "The progress report has been submitted.";
           this.successfulSubmission.emit(data);
+
+          setTimeout(() => {
+            this.success = undefined;
+          }, 3000);
         },
         () => {
           this.error = GENERIC_ERROR_MESSAGE;

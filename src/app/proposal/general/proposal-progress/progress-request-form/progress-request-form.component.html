@@ -401,7 +401,12 @@
             >
               Submit
             </button>
-            <div *ngIf="error">
+            <div class="submission-message" *ngIf="success">
+              <p class="has-text-success" data-test="success">
+                {{ success }}
+              </p>
+            </div>
+            <div class="submission-message" *ngIf="error">
               <p class="has-text-danger" data-test="error">{{ error }}</p>
             </div>
           </td>

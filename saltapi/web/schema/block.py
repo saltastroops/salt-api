@@ -98,6 +98,11 @@ class Block(BaseModel):
         ..., title="Proposal code of the proposal to which the block belongs"
     )
     semester: Semester = Field(..., title="Semester to which the block belongs")
+    latest_submission_date: datetime = Field(
+        ...,
+        title="The date of the latest submission with significant changes",
+        description="The date of the latest submission with significant changes",
+    )
     status: BlockStatus = Field(..., title="Block status", description="Block status")
     priority: Priority = Field(
         ..., title="Priority", description="Priority of the block"
@@ -164,11 +169,6 @@ class Block(BaseModel):
             "List of observations in the block. With the exception of some legacy"
             " proposals, there is always a single observation in the block"
         ),
-    )
-    latest_submission_date: datetime = Field(
-        ...,
-        title="The date of the latest submission with significant changes",
-        description="The date of the latest submission with significant changes",
     )
 
 

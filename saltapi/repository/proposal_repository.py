@@ -1691,10 +1691,11 @@ WHERE PC.Proposal_Code = :proposal_code
         # which there is a time request percentage in any semester, and if a partner has
         # a time request for the semester under consideration, we store that request.
         for row in result:
-            tmp[row.partner_code] = {
-                "partner_name": row.partner_name,
-                "partner_code": row.partner_code,
-            }
+            if row.partner_code not in tmp:
+                tmp[row.partner_code] = {
+                    "partner_name": row.partner_name,
+                    "partner_code": row.partner_code,
+                }
             if semester == row.semester:
                 tmp[row.partner_code]["requested_percentage"] = row.requested_percentage
         prp = []

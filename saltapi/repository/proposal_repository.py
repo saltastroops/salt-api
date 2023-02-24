@@ -155,11 +155,13 @@ LIMIT :limit;
                 "status": {"value": row.status, "comment": row.comment},
                 "proposal_type": self._map_proposal_type(row.proposal_type),
                 "principal_investigator": {
+                    "id": row.pi_user_id,
                     "given_name": row.pi_given_name,
                     "family_name": row.pi_family_name,
                     "email": row.pi_email,
                 },
                 "principal_contact": {
+                    "id": row.pc_user_id,
                     "given_name": row.pc_given_name,
                     "family_name": row.pc_family_name,
                     "email": row.pc_email,
@@ -1680,15 +1682,14 @@ FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner AS P ON (MP.Partner_Id = P.Partner_Id)
 WHERE PC.Proposal_Code = :proposal_code
-AND P.Virtual != 1
     """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         tmp = dict()
-        # Some partners may have a time request for other semesters, but not for the
-        # one under consideration. We therefore collect the partners for which there
-        # is a time request percentage in any semester, and if a partner has a time
-        # request for the semester under consideration, we store that request.
+        # Some partners may have a time request (which may be 0) for other semesters,
+        # but not for the one under consideration. We therefore collect the partners for
+        # which there is a time request percentage in any semester, and if a partner has
+        # a time request for the semester under consideration, we store that request.
         for row in result:
             tmp[row.partner_code] = {
                 "partner_name": row.partner_name,

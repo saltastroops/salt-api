@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from starlette import status
 
@@ -109,8 +111,8 @@ def update_block_status(
     block_status: BlockStatusValue = Body(
         ..., alias="status", title="Block status", description="New block status."
     ),
-    status_reason: str = Body(
-        ...,
+    status_reason: Optional[str] = Body(
+        None,
         alias="reason",
         title="Block status reason",
         description="New block status reason.",

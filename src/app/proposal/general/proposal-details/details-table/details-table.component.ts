@@ -1,16 +1,33 @@
 import { Component, Input, OnChanges, OnInit } from "@angular/core";
 
+import { AuthenticationService } from "../../../../service/authentication.service";
 import { Proposal } from "../../../../types/proposal";
+import { User } from "../../../../types/user";
+import { AutoUnsubcribe, hasAnyRole } from "../../../../utils";
 
 @Component({
   selector: "wm-details-table",
   templateUrl: "./details-table.component.html",
   styleUrls: ["./details-table.component.scss"],
 })
+@AutoUnsubcribe()
 export class DetailsTableComponent implements OnChanges, OnInit {
   @Input() proposal!: Proposal;
   releaseDate!: Date;
+  user!: User;
+  showChangeButton = false;
+
+  constructor(private authService: AuthenticationService) {}
+
   ngOnInit(): void {
+    this.authService.getUser().subscribe((user) => {
+      this.user = user;
+      const isUserPcOrPi = this.proposal.investigators.some(
+        (i) => i.id === user.id && (i.isPc || i.isPi),
+      );
+      this.showChangeButton =
+        isUserPcOrPi || hasAnyRole(user, ["Administrator"]);
+    });
     this.updateReleaseDate();
   }
 
@@ -19,7 +36,6 @@ export class DetailsTableComponent implements OnChanges, OnInit {
   }
 
   updateReleaseDate(): void {
-    console.log("##: ", this.proposal.generalInfo.proprietaryPeriod.startDate);
     const tmpDate = new Date(
       this.proposal.generalInfo.proprietaryPeriod.startDate,
     );

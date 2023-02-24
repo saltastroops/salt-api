@@ -52,7 +52,7 @@
         <th>Proprietary period</th>
         <td class="proprietary-period">
           <div>{{ releaseDate | dfnsFormat: "d MMMM yyyy" }}</div>
-          <div>
+          <div *ngIf="showChangeButton">
             <button
               (click)="
                 proprietaryPeriodModal.openModal(

@@ -92,7 +92,10 @@ export class ProgressRequestFormComponent implements OnInit {
       return;
     }
     this.error = undefined;
-    const proposalProgressFormValues = this.proposalProgressForm.value;
+    // We use getRawValue() rather than just the value property, as the input field for
+    // the percentage requested from partner OTH (if there is one) is disabled, but we
+    // still need its value.
+    const proposalProgressFormValues = this.proposalProgressForm.getRawValue();
     const partnerRequestedPercentages =
       proposalProgressFormValues.partnerRequestedPercentages
         .map(
@@ -230,6 +233,8 @@ export class ProgressRequestFormComponent implements OnInit {
     return this.formBuilder.group({
       partnerCode: [partnerCode, Validators.required],
       requestedPercentage: [
+        // "readonly" would be more appropriate than "disabled", but this property is
+        // not supported by Angular Forms.
         { value: `${requestedPercentage}`, disabled: partnerCode === "OTH" },
         Validators.required,
       ],

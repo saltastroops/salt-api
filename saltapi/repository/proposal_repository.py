@@ -1437,7 +1437,7 @@ INSERT INTO ProposalProgress (
 )
 VALUES(
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :change_reason,
     :summary_of_proposal_status,
     :strategy_changes,
@@ -1470,6 +1470,29 @@ VALUES(
         )
         if not result.rowcount:
             raise NotFoundError()
+
+    def _reset_partner_requested_time_and_percentages(
+        self, proposal_code: str, semester: str, requested_time: int
+    ) -> None:
+        stmt = text(
+            """
+UPDATE MultiPartner
+SET ReqTimeAmount=:requested_time,
+    ReqTimePercent=0
+WHERE ProposalCode_Id =
+      (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code)
+  AND Semester_Id =
+      (SELECT Semester_Id FROM Semester WHERE CONCAT(Year, '-', semester) = :semester);
+              """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+                "requested_time": requested_time,
+            },
+        )
 
     def _insert_or_update_requested_time(
         self,
@@ -1889,6 +1912,9 @@ WHERE PC.Proposal_Code = :proposal_code
         Insert the proposal progress into the database, or update the existing one.
         """
         _next_semester = next_semester()
+        self._reset_partner_requested_time_and_percentages(
+            proposal_code, _next_semester, proposal_progress["requested_time"]
+        )
         for rp in proposal_progress["partner_requested_percentages"]:
             self._insert_or_update_requested_time(
                 proposal_code=proposal_code,

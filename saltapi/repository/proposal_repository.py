@@ -155,11 +155,13 @@ LIMIT :limit;
                 "status": {"value": row.status, "comment": row.comment},
                 "proposal_type": self._map_proposal_type(row.proposal_type),
                 "principal_investigator": {
+                    "id": row.pi_user_id,
                     "given_name": row.pi_given_name,
                     "family_name": row.pi_family_name,
                     "email": row.pi_email,
                 },
                 "principal_contact": {
+                    "id": row.pc_user_id,
                     "given_name": row.pc_given_name,
                     "family_name": row.pc_family_name,
                     "email": row.pc_email,

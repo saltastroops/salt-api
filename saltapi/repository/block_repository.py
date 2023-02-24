@@ -127,7 +127,7 @@ WHERE B.Block_Id = :block_id;
             "observing_windows": self._observing_windows(block_id),
             "block_visits": self._block_visits(block_id),
             "observations": self._pointings(block_id),
-            "latest_submission_date": pytz.utc.localize(row.latest_submission_date),
+            "latest_submission_date": pytz.utc.localize(row.latest_submission_date).isoformat('T'),
         }
 
         return block

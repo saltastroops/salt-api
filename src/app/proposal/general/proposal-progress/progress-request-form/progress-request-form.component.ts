@@ -88,7 +88,8 @@ export class ProgressRequestFormComponent implements OnInit {
 
     // stop here if form is invalid
     if (this.proposalProgressForm.invalid) {
-      this.error = "Please make sure that all required fields are filled.";
+      this.error =
+        "Please make sure that all required fields are filled correctly.";
       return;
     }
     this.error = undefined;

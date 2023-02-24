@@ -167,8 +167,8 @@ class Block(BaseModel):
     )
     latest_submission_date: datetime = Field(
         ...,
-        title="Latest block submission date",
-        description="Latest block submission date",
+        title="The date of the latest submission with significant changes",
+        description="The date of the latest submission with significant changes",
     )
 
 

@@ -1,3 +1,4 @@
+import enum
 import hashlib
 import secrets
 import uuid
@@ -14,6 +15,10 @@ from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
 )
+
+
+class ProposalPermission(enum.Enum):
+    VIEW = "View"
 
 
 class UserRepository:
@@ -779,6 +784,32 @@ WHERE ProposalPermission = :permission
             return cast(int, result.scalar_one())
         except NoResultFound:
             raise NotFoundError()
+
+    def user_has_proposal_permission(
+        self, user_id: int, permission_type: str, proposal_code: str
+    ) -> bool:
+        stmt = text(
+            """
+ SELECT COUNT(*)
+FROM ProposalPermissionGrant
+WHERE Grantee_Id = :grantee_id
+  AND ProposalCode_Id =
+      (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code)
+  AND ProposalPermission_Id = (SELECT ProposalPermission_Id
+                               FROM ProposalPermission
+                               WHERE ProposalPermission = :permission)
+        """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "grantee_id": user_id,
+                "proposal_code": proposal_code,
+                "permission": permission_type,
+            },
+        )
+
+        return cast(int, result.scalar_one()) > 0
 
     def _get_proposal_code_id(self, proposal_code: str) -> int:
         stmt = text(

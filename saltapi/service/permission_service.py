@@ -110,30 +110,48 @@ class PermissionService:
         * an investigator on the proposal
         * a TAC member for the proposal
         * an administrator
+        * a user who has been granted permission
+
+        Gravitational wave proposals are a special case; they can be viewed by anyone
+        belonging to a SALT partner.
         """
         username = user.username
-        proposal_type = self.proposal_repository.get_proposal_type(proposal_code)
+        try:
+            proposal_type = self.proposal_repository.get_proposal_type(proposal_code)
 
-        if proposal_type != "Gravitational Wave Event":
-            roles = [
-                Role.SALT_ASTRONOMER,
-                Role.SALT_OPERATOR,
-                Role.INVESTIGATOR,
-                Role.PROPOSAL_TAC_MEMBER,
-                Role.ADMINISTRATOR,
-            ]
-            self.check_role(username, roles, proposal_code)
-        else:
-            # Gravitational wave event proposals are a special case; they can be viewed
-            # by anyone who belongs to a SALT partner.
-            roles = [
-                Role.SALT_ASTRONOMER,
-                Role.SALT_OPERATOR,
-                Role.PARTNER_AFFILIATED,
-                Role.ADMINISTRATOR,
-            ]
+            if proposal_type != "Gravitational Wave Event":
+                roles = [
+                    Role.SALT_ASTRONOMER,
+                    Role.SALT_OPERATOR,
+                    Role.INVESTIGATOR,
+                    Role.PROPOSAL_TAC_MEMBER,
+                    Role.ADMINISTRATOR,
+                ]
+                self.check_role(username, roles, proposal_code)
+            else:
+                # Gravitational wave event proposals are a special case; they can be
+                # viewed by anyone who belongs to a SALT partner.
+                roles = [
+                    Role.SALT_ASTRONOMER,
+                    Role.SALT_OPERATOR,
+                    Role.PARTNER_AFFILIATED,
+                    Role.ADMINISTRATOR,
+                ]
 
-            self.check_role(username, roles, proposal_code)
+                self.check_role(username, roles, proposal_code)
+        except AuthorizationError:
+            try:
+                # Granting a proposal view permission should be the exception rather
+                # than the norm. We therefore only check for it (and incur an additional
+                # database query) if the user doesn't have the permission to view the
+                # proposal because of one of their roles already.
+                if self.user_repository.user_has_proposal_permission(
+                    user_id=user.id, permission_type="View", proposal_code=proposal_code
+                ):
+                    return
+            except Exception:
+                raise AuthorizationError()
+            raise
 
     def check_permission_to_update_proposal_status(
         self, user: User, proposal_code: str, proposal_status: str

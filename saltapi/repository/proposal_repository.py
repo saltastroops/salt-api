@@ -75,9 +75,9 @@ FROM Proposal P
          JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
          JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
          LEFT JOIN ProposalInactiveReason PIR
-            ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
+                   ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator Astronomer
-            ON C.Astronomer_Id = Astronomer.Investigator_Id
+                   ON C.Astronomer_Id = Astronomer.Investigator_Id
          JOIN Investigator Contact ON C.Contact_Id = Contact.Investigator_Id
          JOIN Investigator Leader ON C.Leader_Id = Leader.Investigator_Id
          JOIN ProposalInvestigator PI ON PC.ProposalCode_Id = PI.ProposalCode_Id
@@ -95,7 +95,7 @@ WHERE P.Current = 1
                                   BETWEEN :from_semester AND :to_semester)
   AND PS.Status != 'Deleted'
   AND (
-        -- The user is an investigator on the proposal
+    -- The user is an investigator on the proposal
             PU.Username = :username
         OR
         -- Proposal is requesting time from TAC to which the user belongs
@@ -113,8 +113,7 @@ WHERE P.Current = 1
                               JOIN PiptUser PUUser
                                    ON I2User.PiptUser_Id = PUUser.PiptUser_Id
                      WHERE PUUser.Username = :username
-                       AND PUser.Partner_Code != 'OTH'
-                    ) > 0)
+                       AND PUser.Partner_Code != 'OTH') > 0)
                 )
         OR
         -- The user is allowed to view all proposals
@@ -127,8 +126,19 @@ WHERE P.Current = 1
                                    ON PUSRights.PiptUser_Id = PURights.PiptUser_Id
                      WHERE PURights.Username = :username
                        AND PSRights.PiptSetting_Name = 'RightProposals'
-                       AND PUSRights.Value >= 2
-                    ) > 0
+                       AND PUSRights.Value >= 2) > 0
+                )
+        OR
+        -- The user has been granted permission to view the proposal
+            (
+                    (SELECT COUNT(*)
+                     FROM ProposalPermissionGrant PPG
+                              JOIN PiptUser U ON PPG.Grantee_Id = U.PiptUser_Id
+                              JOIN ProposalPermission PP ON PPG.ProposalPermission_Id =
+                                                            PP.ProposalPermission_Id
+                     WHERE U.Username = :username
+                       AND PPG.ProposalCode_Id = PC.ProposalCode_Id
+                        AND PP.ProposalPermission = 'View') > 0
                 )
     )
 ORDER BY P.Proposal_Id DESC

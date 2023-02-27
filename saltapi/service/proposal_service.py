@@ -15,7 +15,7 @@ from saltapi.service.create_proposal_progress_html import (
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.util import semester_start
+from saltapi.util import parse_partner_requested_percentages, semester_start
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgressInput
 
@@ -171,12 +171,9 @@ class ProposalService:
         semester: str,
         additional_pdf: Optional[UploadFile],
     ) -> None:
-        partner_requested_percentages = []
-        for p in proposal_progress_report.partner_requested_percentages.split(";"):
-            prp = p.split(":")
-            partner_requested_percentages.append(
-                {"partner_code": prp[0], "requested_percentage": prp[1]}
-            )
+        partner_requested_percentages = parse_partner_requested_percentages(
+            proposal_progress_report.partner_requested_percentages
+        )
         proposal_progress = {
             "semester": semester,
             "requested_time": proposal_progress_report.requested_time,

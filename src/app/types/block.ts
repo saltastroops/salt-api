@@ -26,6 +26,7 @@ export interface Block {
   observingWindows: TimeInterval[];
   observationProbabilities: ObservationProbabilities;
   observations: Observation[];
+  latestSubmissionDate: string;
 }
 
 export type BlockStatusValue =

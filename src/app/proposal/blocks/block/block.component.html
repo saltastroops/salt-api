@@ -12,10 +12,7 @@
       [overhead]="block.overheadTime"
       [totalObservationTime]="block.observationTime"
     ></wm-total-observation-time>
-    <wm-priority-comment
-      [comment]="block.comment"
-      [priority]="block.priority"
-    ></wm-priority-comment>
+    <wm-priority-comment [block]="block"></wm-priority-comment>
     <wm-observing-windows
       [observingWindows]="block.observingWindows"
     ></wm-observing-windows>

@@ -11,7 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
@@ -1286,21 +1286,24 @@ WHERE PIR.InactiveReason = :inactive_reason
         except NoResultFound:
             raise ValueError(f"Unknown proposal status: {status}")
 
+        try:
+            proposal_code_id = self._get_proposal_code_id(proposal_code)
+        except NoResultFound:
+            raise ValueError(f"Unknown proposal code: {proposal_code}")
+
         stmt = text(
             """
 UPDATE ProposalGeneralInfo  PGI
 SET
     PGI.ProposalStatus_Id = :status_id,
     PGI.StatusComment = :status_comment
-WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
-                         FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code);
+WHERE ProposalCode_Id = :proposal_code_id;
         """
         )
         result = self.connection.execute(
             stmt,
             {
-                "proposal_code": proposal_code,
+                "proposal_code_id": proposal_code_id,
                 "status_id": status_id,
                 "status_comment": status_comment,
             },
@@ -2351,7 +2354,7 @@ WHERE Proposal_Code = :proposal_code
             raise NotFoundError(f"Couldn't found  proposal code `{proposal_code}`")
 
         return cast(int, proposal_code_id[0])
-    def update_is_self_activatable(self, proposal_code, is_self_activatable) -> None:
+    def update_is_self_activatable(self, proposal_code: str, is_self_activatable: bool) -> None:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self._get_proposal_code_id(proposal_code)
@@ -2438,6 +2441,6 @@ WHERE PU.PiptUser_Id = :user_id
         )
         investigator_id = result.one_or_none()
         if not investigator_id:
-            raise ValueError(f"User id not found: {user_id}")
+            raise ValidationError(f"User id not found: {user_id}")
 
         return cast(int, investigator_id[0])

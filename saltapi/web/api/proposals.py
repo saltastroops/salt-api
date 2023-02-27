@@ -35,7 +35,7 @@ from saltapi.web.schema.proposal import (
     ProprietaryPeriodUpdateRequest,
     UpdateStatus, SelfActivation,
 )
-from saltapi.web.schema.user import LiaisonAstronomerId
+from saltapi.web.schema.user import UserId
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
 
@@ -478,7 +478,7 @@ def put_is_self_activatable(
                     "Proposal code of the proposal for which an observation comment is added."
             ),
         ),
-        allowed: bool = Body(
+        self_activation: SelfActivation = Body(
             ...,
             title="Allowed to self-activate",
             description=(
@@ -498,7 +498,7 @@ def put_is_self_activatable(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_is_self_activatable(
-            proposal_code=proposal_code, is_self_activatable=allowed
+            proposal_code=proposal_code, is_self_activatable=self_activation.allowed
         )
         unit_of_work.commit()
         return SelfActivation(
@@ -519,7 +519,7 @@ def update_liaison_astronomer(
                     "Proposal code of the proposal for which the liaison astronomer is updated."
             ),
         ),
-        liaison_astronomer_id: Optional[LiaisonAstronomerId] = Body(
+        liaison_astronomer_id: Optional[UserId] = Body(
             ...,
             title="Liaison astronomer id",
             description="The user id of the liaison astronomer."
@@ -530,7 +530,6 @@ def update_liaison_astronomer(
     Update the liaison astronomer of the proposal.
     """
     with UnitOfWork() as unit_of_work:
-        try:
             permission_service = services.permission_service(unit_of_work.connection)
             permission_service.check_permission_to_update_liaison_astronomer(user)
 
@@ -540,8 +539,4 @@ def update_liaison_astronomer(
             )
             unit_of_work.commit()
             return Message(message="Successful")
-        except ValueError:
-            HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="The SALT astronomer id not found: {user_id}",
-            )
+

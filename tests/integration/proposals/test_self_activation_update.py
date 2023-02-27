@@ -24,7 +24,7 @@ def test_update_is_self_activatable_returns_401_for_unauthenticated_user(
     not_authenticated(client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code), json=False
+        _url(proposal_code), json={'allowed': False}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -35,7 +35,7 @@ def test_update_is_self_activatable_returns_401_for_user_with_invalid_auth_token
     misauthenticate(client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code), json=False
+        _url(proposal_code), json={'allowed': False}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -57,11 +57,11 @@ def test_update_is_self_activatable_should_allow_admins_and_salt_astronomers_to_
 ) -> None:
     admin = find_username("Administrator")
     authenticate(admin, client)
-    response = client.put(_url(proposal_code), json=allowed)
+    response = client.put(_url(proposal_code), json={'allowed': allowed})
     assert response.status_code == status.HTTP_200_OK
     sa = find_username("SALT Astronomer")
     authenticate(sa, client)
-    response = client.put(_url(proposal_code), json=allowed)
+    response = client.put(_url(proposal_code), json={'allowed': allowed})
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -73,7 +73,7 @@ def test_update_is_self_activatable_should_not_allow_for_a_wrong_proposal_code(
     user = find_username("Administrator")
     authenticate(user, client)
 
-    response = client.put(_url(proposal_code), json=True)
+    response = client.put(_url(proposal_code), json={'allowed', True})
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 @pytest.mark.parametrize(
@@ -85,13 +85,13 @@ def test_update_is_self_activatable_should_not_allow_for_a_wrong_proposal_code(
         ("Investigator", "2019-2-SCI-006")
     ]
 )
-def test_update_is_self_activatable_return_403_for_pi_pc_and_investigator(
+def test_update_is_self_activatable_returns_403_for_pi_pc_and_investigator(
         user_role:str, proposal_code: Optional[str], client: TestClient,
 ) -> None:
     user = find_username(user_role, proposal_code)
     authenticate(user, client)
     response = client.put(
-        _url(proposal_code), json=True
+        _url(proposal_code), json={'allowed', True}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -109,7 +109,7 @@ def test_update_is_self_activatable_return_403_for_tacs(
     authenticate(user, client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code), json=True
+        _url(proposal_code), json={'allowed', True}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -124,6 +124,6 @@ def test_update_is_self_activatable_return_403_for_operator_and_board_member(
     authenticate(user, client)
     proposal_code = "2020-1-SCI-005"
     response = client.put(
-        _url(proposal_code), json=True
+        _url(proposal_code), json={'allowed', True}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN

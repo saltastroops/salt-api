@@ -213,7 +213,7 @@ class ProposalService:
 
         # Save the additional file to disk. This is done last as the file should not be
         # stored if the progress report cannot be stored in the database.
-        if additional_pdf:
+        if additional_pdf_filename:
             additional_pdf_path = (
                 ProposalService._included_dir(proposal_code) / additional_pdf_filename
             )
@@ -263,7 +263,7 @@ class ProposalService:
             "encoding": "UTF-8",
             "no-outline": None,
         }
-        return pdfkit.from_string(html_content, options=options)
+        return cast(bytes, pdfkit.from_string(html_content, options=options))
 
     def generate_proposal_progress_pdf(
         self,

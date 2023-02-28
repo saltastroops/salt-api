@@ -10,9 +10,9 @@ import {
   Proposal,
   ProposalProgress,
 } from "../../../types/proposal";
-import { AutoUnsubcribe, currentSemester } from "../../../utils";
+import { AutoUnsubscribe, currentSemester } from "../../../utils";
 
-@AutoUnsubcribe()
+@AutoUnsubscribe()
 @Component({
   selector: "wm-proposal-progress",
   templateUrl: "./proposal-progress.component.html",

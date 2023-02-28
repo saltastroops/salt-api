@@ -1,20 +1,21 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 
 import { parseISO } from "date-fns";
-import { take } from "rxjs/operators";
 
 import { AuthenticationService } from "../../../service/authentication.service";
 import { Sort } from "../../../sort";
 import { SortDirection } from "../../../sort.directive";
-import { BlockVisit } from "../../../types/common";
+import { BlockRejectionReason } from "../../../types/block";
+import { BlockVisit, BlockVisitStatus } from "../../../types/common";
 import { User } from "../../../types/user";
-import { hasAnyRole } from "../../../utils";
+import { AutoUnsubscribe, hasAnyRole } from "../../../utils";
 
 @Component({
   selector: "wm-summary-of-executed-observations",
   templateUrl: "./summary-of-executed-observations.component.html",
   styleUrls: ["./summary-of-executed-observations.component.scss"],
 })
+@AutoUnsubscribe()
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   selectAll = false;
   @Input() blockVisits!: BlockVisit[];
@@ -22,24 +23,18 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   observations!: Observation[];
   user!: User;
   showEditBlockButton = false;
-  columnsSortDirections: { [columnName: string]: string } = {};
-  sortedColumn = "";
   showObservationsList = false;
 
   constructor(private authService: AuthenticationService) {}
 
   ngOnInit(): void {
-    this.authService
-      .getUser()
-      .pipe(take(1))
-      .subscribe((user) => {
-        this.user = user;
-        this.showEditBlockButton = !hasAnyRole(user, [
-          "Administrator",
-          "SALT Astronomer",
-          "SALT Operator",
-        ]);
-      });
+    this.authService.getUser().subscribe((user) => {
+      this.user = user;
+      this.showEditBlockButton = hasAnyRole(user, [
+        "Administrator",
+        "SALT Astronomer",
+      ]);
+    });
     this.observations = this.blockVisits.map((o) => ({
       ...o,
       downloadObservation: this.selectAll,
@@ -96,8 +91,24 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
       element?.scrollIntoView();
     }
   }
+
+  updateBlockVisitStatus(blockVisitStatusUpdate: BlockVisitStatusUpdate): void {
+    const blockVisit = this.observations.find(
+      (o) => o.id === blockVisitStatusUpdate.blockVisitId,
+    );
+    if (blockVisit !== undefined) {
+      blockVisit.status = blockVisitStatusUpdate.blockVisitStatus;
+      blockVisit.rejectionReason = blockVisitStatusUpdate.rejectionReason;
+    }
+  }
 }
 
 interface Observation extends BlockVisit {
   downloadObservation: boolean;
+}
+
+interface BlockVisitStatusUpdate {
+  blockVisitId: number;
+  blockVisitStatus: BlockVisitStatus;
+  rejectionReason: BlockRejectionReason | null;
 }

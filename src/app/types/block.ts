@@ -67,3 +67,10 @@ export interface ObservingConditions {
 }
 
 export type Transparency = "Any" | "Clear" | "Thick cloud" | "Thin cloud";
+
+export type BlockRejectionReason =
+  | "Instrument technical problems"
+  | "Observing conditions not met"
+  | "Phase 2 problems"
+  | "Telescope technical problems"
+  | "Other";

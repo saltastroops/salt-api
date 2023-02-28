@@ -3,14 +3,14 @@ import { Component, Input, OnChanges, OnInit } from "@angular/core";
 import { AuthenticationService } from "../../../../service/authentication.service";
 import { Proposal } from "../../../../types/proposal";
 import { User } from "../../../../types/user";
-import { AutoUnsubcribe, hasAnyRole } from "../../../../utils";
+import { AutoUnsubscribe, hasAnyRole } from "../../../../utils";
 
 @Component({
   selector: "wm-details-table",
   templateUrl: "./details-table.component.html",
   styleUrls: ["./details-table.component.scss"],
 })
-@AutoUnsubcribe()
+@AutoUnsubscribe()
 export class DetailsTableComponent implements OnChanges, OnInit {
   @Input() proposal!: Proposal;
   releaseDate!: Date;

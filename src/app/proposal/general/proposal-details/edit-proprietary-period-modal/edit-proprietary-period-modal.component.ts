@@ -6,14 +6,14 @@ import {
   NewProprietaryPeriod,
   ProprietaryPeriod,
 } from "../../../../types/proposal";
-import { AutoUnsubcribe } from "../../../../utils";
+import { AutoUnsubscribe } from "../../../../utils";
 
 @Component({
   selector: "wm-edit-proprietary-period-modal",
   templateUrl: "./edit-proprietary-period-modal.component.html",
   styleUrls: ["./edit-proprietary-period-modal.component.scss"],
 })
-@AutoUnsubcribe()
+@AutoUnsubscribe()
 export class EditProprietaryPeriodModalComponent {
   @Output() updatePeriod = new EventEmitter<number>();
   isModalActive = false;

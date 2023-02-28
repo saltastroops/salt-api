@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 
 import * as camelcaseKeys from "camelcase-keys";
@@ -6,7 +6,8 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
-import { Block } from "../../types/block";
+import { Block, BlockRejectionReason } from "../../types/block";
+import { BlockVisit, BlockVisitStatus } from "../../types/common";
 import { BlockService } from "../block.service";
 
 @Injectable({
@@ -27,5 +28,29 @@ export class RealBlockService implements BlockService {
     return this.http
       .get<Block>(uri)
       .pipe(map((block: Block) => camelcaseKeys(block, { deep: true })));
+  }
+
+  /**
+   * Update a block visit status from the API server.
+   *
+   * @param blockVisitId Block visit id.
+   * @param blockVisitStatus Block visit status.
+   * @param rejectionReason Block rejection reason.
+   */
+  updateBlockVisitStatus(
+    blockVisitId: number,
+    blockVisitStatus: BlockVisitStatus,
+    rejectionReason: BlockRejectionReason | null,
+  ): Observable<void> {
+    const uri =
+      environment.apiUrl + "/block-visits/" + blockVisitId + "/status";
+    const headers = new HttpHeaders({
+      "Content-type": "application/json",
+    });
+    const data = {
+      status: blockVisitStatus,
+      reason: rejectionReason,
+    };
+    return this.http.patch<void>(uri, data, { headers });
   }
 }

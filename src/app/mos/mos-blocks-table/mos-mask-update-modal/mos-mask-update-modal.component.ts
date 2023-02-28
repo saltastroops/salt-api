@@ -4,14 +4,14 @@ import { format } from "date-fns";
 
 import { MosService } from "../../../service/mos.service";
 import { MosBlock } from "../../../types/mos";
-import { AutoUnsubcribe } from "../../../utils";
+import { AutoUnsubscribe } from "../../../utils";
 
 @Component({
   selector: "wm-mos-mask-update-modal",
   templateUrl: "./mos-mask-update-modal.component.html",
   styleUrls: ["./mos-mask-update-modal.component.scss"],
 })
-@AutoUnsubcribe()
+@AutoUnsubscribe()
 export class MosMaskUpdateModalComponent {
   @Input() selectedMosBlock!: MosBlock;
   @Input() error: {

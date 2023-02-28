@@ -40,6 +40,7 @@ import { PayloadConfigurationComponent } from "./proposal/blocks/block/payload-c
 import { PriorityCommentComponent } from "./proposal/blocks/block/priority-comment/priority-comment.component";
 import { TotalObservationTimeComponent } from "./proposal/blocks/block/total-observation-time/total-observation-time.component";
 import { ChargedTimeComponent } from "./proposal/general/charged-time/charged-time.component";
+import { EditBlockVisitStatusModalComponent } from "./proposal/general/edit-block-visit-status-modal/edit-block-visit-status-modal.component";
 import { GeneralProposalInfoComponent } from "./proposal/general/general-proposal-info/general-proposal-info.component";
 import { ObservationCommentsComponent } from "./proposal/general/observation-comments/observation-comments.component";
 import { DetailsTableComponent } from "./proposal/general/proposal-details/details-table/details-table.component";
@@ -203,6 +204,7 @@ import { SortDirective } from "./sort.directive";
     P1ConfigurationsComponent,
     StudentThesesComponent,
     EditProprietaryPeriodModalComponent,
+    EditBlockVisitStatusModalComponent,
   ],
   imports: [
     BrowserModule,

@@ -268,7 +268,7 @@ export function previousSemesterOf(semester: string): string {
 // reference https://blog.bitsrc.io/6-ways-to-unsubscribe-from-observables-in-angular-ab912819a78f
 // 5. Use Decorator to automate Unsubscription
 // This decorator can only work when there is a subscription property.
-export function AutoUnsubcribe() {
+export function AutoUnsubscribe() {
   // @ts-ignore: very generic, so any should be fine
   return function (constructor: any): void {
     const orig = constructor.prototype.ngOnDestroy;

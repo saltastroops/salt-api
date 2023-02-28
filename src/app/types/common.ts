@@ -1,10 +1,12 @@
+import { BlockRejectionReason } from "./block";
+
 export type BlockVisitStatus = "Accepted" | "In queue" | "Rejected";
 
 export interface BaseBlockVisit {
   id: number;
   night: string;
   status: BlockVisitStatus;
-  rejectionReason: string | null;
+  rejectionReason: BlockRejectionReason | null;
 }
 
 export interface BlockVisit extends BaseBlockVisit {

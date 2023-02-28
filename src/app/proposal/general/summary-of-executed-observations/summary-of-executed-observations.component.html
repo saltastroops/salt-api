@@ -2,159 +2,170 @@
   Summary of executed observations
 </h2>
 <hr class="heading-line summary-header" />
+<wm-edit-block-visit-status-modal
+  #blockStatusModal
+  (blockVisitStatusUpdate)="updateBlockVisitStatus($event)"
+></wm-edit-block-visit-status-modal>
 <p class="mb-2">
-  <a class="has-text-link" (click)="toggleObservationsList(false)">
-    {{ showObservationsList ? "Hide" : "Show" }} list of observations.
+  <a
+    data-test="show-executed-observations"
+    class="has-text-link"
+    (click)="toggleObservationsList(false)"
+  >
+    {{ showObservationsList ? "Hide" : "Show" }} list of observations
   </a>
 </p>
 <table class="table" [wmSort]="sort" *ngIf="showObservationsList">
-  <thead>
-    <tr>
-      <th
-        wmSortBy="blockName"
-        data-test="executed-observations-block-name-header"
-      >
-        Block
-      </th>
-      <th
-        wmSortBy="observationTime"
-        data-test="executed-observations-observation-time-header"
-      >
-        Observation Time (seconds)
-      </th>
-      <th wmSortBy="priority" data-test="executed-observations-priority-header">
-        Priority
-      </th>
-      <th
-        wmSortBy="maximumLunarPhase"
-        data-test="executed-observations-maximum-lunar-phase-header"
-      >
-        Max Lunar Phase
-      </th>
-      <th wmSortBy="targets" data-test="executed-observations-targets-header">
-        Target(s)
-      </th>
-      <th
-        wmSortBy="night"
-        data-test="executed-observations-observation-date-header"
-      >
-        Observation Date
-      </th>
-      <th
-        wmSortBy="status"
-        data-test="executed-observations-observation-status-header"
-      >
-        Accepted?
-      </th>
-      <th>Rejection Reason</th>
-      <!--      <th>Edit</th>-->
-      <th>Data</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td colspan="8"></td>
-      <td>
-        <label class="checkbox">
-          <input
-            #toggleSelectionAll
-            type="checkbox"
-            [checked]="selectAll"
-            (change)="selectDeselectAll(toggleSelectionAll.checked)"
-            data-test="select-all-observations-checkbox"
-          />
-          Select/Deselect all
-        </label>
-      </td>
-    </tr>
-    <tr *ngFor="let e of observations">
-      <td>
-        <div>
-          <a
-            data-test="executed-observations-block-name"
-            href="javascript:void(0)"
-            (click)="onClick(e.blockId)"
-          >
-            {{ e.blockName }}
-          </a>
-        </div>
-      </td>
-      <td
-        data-test="executed-observations-observation-time"
-        class="has-text-right"
-      >
-        {{ e.observationTime }}
-      </td>
-      <td data-test="executed-observations-priority">
-        {{ e.priority }}
-      </td>
-      <td data-test="executed-observations-maximum-lunar-phase">
-        {{ e.maximumLunarPhase }}
-      </td>
-      <td data-test="executed-observations-targets" class="targets-container">
-        <div *ngFor="let t of e.targets">
+  <table class="table" [wmSort]="sort">
+    <thead>
+      <tr>
+        <th
+          wmSortBy="blockName"
+          data-test="executed-observations-block-name-header"
+        >
+          Block
+        </th>
+        <th
+          wmSortBy="observationTime"
+          data-test="executed-observations-observation-time-header"
+        >
+          Observation Time (seconds)
+        </th>
+        <th
+          wmSortBy="priority"
+          data-test="executed-observations-priority-header"
+        >
+          Priority
+        </th>
+        <th
+          wmSortBy="maximumLunarPhase"
+          data-test="executed-observations-maximum-lunar-phase-header"
+        >
+          Max Lunar Phase
+        </th>
+        <th wmSortBy="targets" data-test="executed-observations-targets-header">
+          Target(s)
+        </th>
+        <th
+          wmSortBy="night"
+          data-test="executed-observations-observation-date-header"
+        >
+          Observation Date
+        </th>
+        <th
+          wmSortBy="status"
+          data-test="executed-observations-observation-status-header"
+        >
+          Accepted?
+        </th>
+        <th>Rejection Reason</th>
+        <th *ngIf="showEditBlockButton">Edit</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="8"></td>
+        <td *ngIf="showEditBlockButton"></td>
+        <td>
+          <label class="checkbox">
+            <input
+              #toggleSelectionAll
+              type="checkbox"
+              [checked]="selectAll"
+              (change)="selectDeselectAll(toggleSelectionAll.checked)"
+              data-test="select-all-observations-checkbox"
+            />
+            Select/Deselect all
+          </label>
+        </td>
+      </tr>
+      <tr *ngFor="let e of observations">
+        <td>
           <div>
-            <span>{{ t }}</span>
+            <a
+              data-test="executed-observations-block-name"
+              href="javascript:void(0)"
+              (click)="onClick(e.blockId)"
+            >
+              {{ e.blockName }}
+            </a>
           </div>
-        </div>
-      </td>
-      <td data-test="executed-observations-observation-date">
-        {{ observationDate(e.night) | dfnsFormat: "d MMMM yyyy" }}
-      </td>
-      <td
-        data-test="executed-observations-observation-status"
-        *ngIf="e.status === 'Accepted'"
-        class="is-green"
-      >
-        <img
-          class="icon"
-          src="/assets/icons/noun_tick_2836262-green.svg"
-          alt="block has been accepted"
-        />
-      </td>
-      <td
-        data-test="executed-observations-observation-status"
-        *ngIf="e.status === 'Rejected'"
-      >
-        <img
-          class="icon"
-          src="/assets/icons/noun_Cross_2120375.svg"
-          alt="block has been rejected"
-        />
-      </td>
-      <td>{{ e.rejectionReason }}</td>
-      <!--      <td *ngIf="e.status === 'Accepted'">-->
-      <!--        <button-->
-      <!--          class="button is-danger is-small"-->
-      <!--          [hidden]="showEditBlockButton"-->
-      <!--        >-->
-      <!--          Put block on hold-->
-      <!--        </button>-->
-      <!--      </td>-->
-      <!--      <td *ngIf="e.status === 'Rejected'">-->
-      <!--        <button-->
-      <!--          class="button is-success is-small"-->
-      <!--          [hidden]="showEditBlockButton"-->
-      <!--        >-->
-      <!--          Put block off hold-->
-      <!--        </button>-->
-      <!--      </td>-->
-      <td>
-        <label class="checkbox">
-          <input
-            type="checkbox"
-            [checked]="e.downloadObservation"
-            (change)="toggleRequestData(e.blockId)"
-            data-test="download-observation-checkbox"
+        </td>
+        <td
+          data-test="executed-observations-observation-time"
+          class="has-text-right"
+        >
+          {{ e.observationTime }}
+        </td>
+        <td data-test="executed-observations-priority">
+          {{ e.priority }}
+        </td>
+        <td data-test="executed-observations-maximum-lunar-phase">
+          {{ e.maximumLunarPhase }}
+        </td>
+        <td data-test="executed-observations-targets" class="targets-container">
+          <div *ngFor="let t of e.targets">
+            <div>
+              <span>{{ t }}</span>
+            </div>
+          </div>
+        </td>
+        <td data-test="executed-observations-observation-date">
+          {{ observationDate(e.night) | dfnsFormat: "d MMMM yyyy" }}
+        </td>
+        <td
+          data-test="executed-observations-observation-status"
+          *ngIf="e.status === 'Accepted'"
+          class="is-green"
+        >
+          <img
+            class="icon"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="block has been accepted"
           />
-          Request data
-        </label>
-      </td>
-    </tr>
-  </tbody>
+        </td>
+        <td
+          data-test="executed-observations-observation-status"
+          *ngIf="e.status === 'Rejected'"
+        >
+          <img
+            class="icon"
+            src="/assets/icons/noun_Cross_2120375.svg"
+            alt="block has been rejected"
+          />
+        </td>
+        <td data-test="executed-observations-block-rejection-reason">
+          {{ e.rejectionReason }}
+        </td>
+        <td *ngIf="showEditBlockButton">
+          <button
+            data-test="executed-observations-status-edit-button"
+            class="button is-small"
+            (click)="
+              blockStatusModal.openModal(e.id, e.status, e.rejectionReason)
+            "
+          >
+            Edit
+          </button>
+        </td>
+        <td>
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              [checked]="e.downloadObservation"
+              (change)="toggleRequestData(e.blockId)"
+              data-test="download-observation-checkbox"
+            />
+            Request data
+          </label>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="showObservationsList">
+    <a class="has-text-link" (click)="toggleObservationsList(true)">
+      Hide list of observations.
+    </a>
+  </p>
 </table>
-<p *ngIf="showObservationsList">
-  <a class="has-text-link" (click)="toggleObservationsList(true)">
-    Hide list of observations.
-  </a>
-</p>

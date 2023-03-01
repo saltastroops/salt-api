@@ -149,7 +149,7 @@ def test_submit_progress_report_repeatedly(
         "strategy_changes": (
             "Relax the observing conditions to increase the observation probability."
         ),
-        "partner_requested_percentages": "RSA:33;UKSC:1;RU:64",
+        "partner_requested_percentages": "RSA:33;UKSC:3;RU:64",
     }
     response = client.put(
         PROGRESS_REPORT_URL + "/" + proposal_code + "/2020-2", data=updated_data

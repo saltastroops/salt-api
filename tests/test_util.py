@@ -99,6 +99,16 @@ def test_semester_end_raises_error_for_incorrect_semester() -> None:
 
 
 @pytest.mark.parametrize(
+    "current_semester", ["invalid", "2020.4-2", "2022-1.9", "2023-3"]
+)
+def test_next_semester_raises_error_for_incorrect_semester(
+    current_semester: str,
+) -> None:
+    with pytest.raises(ValueError):
+        next_semester(current_semester)
+
+
+@pytest.mark.parametrize(
     "semester,d",
     [
         ("2019-2", "2019-09-05T12:00:00Z"),
@@ -127,9 +137,26 @@ def test_semester_end_raises_error_for_incorrect_semester() -> None:
         ("2022-2", "2022-10-31T12:00:01Z"),
     ],
 )
-def test_next_semester_returns_correct_semester(semester: str, d: str) -> None:
+def test_next_semester_returns_correct_semester_without_semester_argument(
+    semester: str, d: str
+) -> None:
     with freezegun.freeze_time(d):
         assert next_semester() == semester
+
+
+@pytest.mark.parametrize(
+    "semester,d,current_semester",
+    [
+        ("2018-2", "2019-09-05T12:00:00Z", "2018-1"),
+        ("2022-1", "2022-02-01T12:00:00Z", "2021-2"),
+        ("2022-1", "2024-02-01T12:00:00Z", "2021-2"),
+    ],
+)
+def test_next_semester_returns_correct_semester_with_semester_argument(
+    semester: str, d: str, current_semester: str
+) -> None:
+    with freezegun.freeze_time(d):
+        assert next_semester(current_semester) == semester
 
 
 @pytest.mark.parametrize(

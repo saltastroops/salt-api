@@ -239,7 +239,7 @@ class ProposalService:
         def previous_observed_time(semester: str) -> int:
             for ot in previous_observed_times:
                 if ot["semester"] == semester:
-                    return ot["observed_time"]
+                    return int(ot["observed_time"])
             return 0
 
         previous_requests = []

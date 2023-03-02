@@ -230,20 +230,24 @@ class ProposalService:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )
-        previous_observed_time = self.repository.get_observed_time(proposal_code)
+        previous_observed_times = self.repository.get_observed_time(proposal_code)
+
+        def previous_observed_time(semester: str) -> int:
+            for ot in previous_observed_times:
+                if ot["semester"] == semester:
+                    return ot["observed_time"]
+            return 0
 
         previous_requests = []
         for ar in previous_allocated_requested:
-            for ot in previous_observed_time:
-                if ot["semester"] == ar["semester"]:
-                    previous_requests.append(
-                        {
-                            "semester": ar["semester"],
-                            "requested_time": ar["requested_time"],
-                            "allocated_time": ar["allocated_time"],
-                            "observed_time": ot["observed_time"],
-                        }
-                    )
+            previous_requests.append(
+                {
+                    "semester": ar["semester"],
+                    "requested_time": ar["requested_time"],
+                    "allocated_time": ar["allocated_time"],
+                    "observed_time": previous_observed_time(ar["semester"]),
+                }
+            )
 
         html_content = create_proposal_progress_html(
             proposal_code=proposal_code,

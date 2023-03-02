@@ -133,7 +133,9 @@ def _previous_requests_section(
                 <td class="number">{p['allocated_time']} seconds</td>
                 <td class="number">{p['observed_time']} seconds</td>
                 <td class="number">
-                    {round((p['observed_time']/p['allocated_time'])*100, 1)} %
+                    {str(round((p['observed_time']/p['allocated_time'])*100, 1)) + "%"
+                    if p['allocated_time']
+                    else 'n/a'}
                 </td>
             </tr>
         """

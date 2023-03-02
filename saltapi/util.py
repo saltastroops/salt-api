@@ -1,7 +1,7 @@
 """Utility functions."""
 import inspect
 from datetime import datetime, timedelta
-from typing import Any, Dict, NamedTuple, Optional, Type
+from typing import Any, Dict, List, NamedTuple, Optional, Type, cast
 
 import pytz
 from astropy.coordinates import Angle
@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from fastapi import Form
 from pydantic import BaseModel
 
-from saltapi.web.schema.common import Semester
+from saltapi.web.schema.common import PartnerCode, Semester
 
 
 class TimeInterval(NamedTuple):
@@ -252,3 +252,43 @@ def normalised_hrs_mode(mode: str) -> str:
     }
 
     return modes[mode]
+
+
+def parse_partner_requested_percentages(value: str) -> List[Dict[str, Any]]:
+    """
+    Extract the partner requested percentages from a string.
+
+    The string must be of the form
+    "PartnerCode1:Percentage1;PartnerCode1:Percentage1;...", where PartnerCode is a
+    valid partner code and Percentage is a non-negative float. The percentages must add
+    up to 100%.
+
+    Examples of valid values are "RSA:100", "IUCAA:5.8;UKSC:94.2" and
+    " RSA : 0 ; DC : 90 ; IUCAA : 10".
+    """
+    partner_requested_percentages = []
+    partner_codes = [pc.value for pc in PartnerCode]
+    for p in value.split(";"):
+        prp = p.split(":", maxsplit=1)
+        if len(prp) != 2:
+            raise ValueError(f"Invalid value: {value}")
+
+        partner_code = prp[0].strip()
+        if partner_code not in partner_codes:
+            raise ValueError(f"Unknown partner code: {partner_code}")
+
+        percentage = float(prp[1])
+        if percentage < 0:
+            raise ValueError(f"Negative percentage: {percentage}")
+
+        partner_requested_percentages.append(
+            {"partner_code": partner_code, "requested_percentage": percentage}
+        )
+
+    percentages_total = cast(
+        float, sum(prp["requested_percentage"] for prp in partner_requested_percentages)
+    )
+    if percentages_total < 99.999 or percentages_total > 100.001:
+        raise ValueError(f"The percentages do not add up to 100%: {value}")
+
+    return partner_requested_percentages

@@ -2,9 +2,9 @@ from datetime import date, datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 
-from saltapi.util import as_form
+from saltapi.util import as_form, parse_partner_requested_percentages
 from saltapi.web.schema.common import (
     PartnerCode,
     PartnerName,
@@ -17,6 +17,7 @@ from saltapi.web.schema.user import FullName, UserListItem
 
 
 class ProposalUser(FullName):
+    id: int = Field(..., title="User id", description="User id.")
     email: EmailStr = Field(..., title="Email address", description="Email address")
 
 
@@ -626,7 +627,12 @@ class ProposalProgressInput(BaseProgressReport):
             "partner and requested percentages. E.g 'RSA:50;POL:50;OTH:0'."
         ),
     )
-
+    
+    @validator("partner_requested_percentages")
+    def partner_requested_percentages_valid(cls, v: str) -> str:
+        # If the value is invalid, parsing it will raise an error.
+        parse_partner_requested_percentages(v)
+        return v
 
 class SelfActivation(BaseModel):
     allowed: bool = Field(

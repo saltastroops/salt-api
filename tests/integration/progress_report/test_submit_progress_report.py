@@ -36,6 +36,29 @@ def _prepare_settings_and_summary(
     summary_pdf.write_bytes(fake_summary_pdf.read_bytes())
 
 
+def test_submitting_progress_report_is_impossible_with_invalid_percentages(
+    client: TestClient,
+) -> None:
+    proposal_code = "2018-2-SCI-020"
+    data = {
+        "requested_time": 4200,
+        "maximum_seeing": 2,
+        "transparency": "Thin cloud",
+        "description_of_observing_constraints": 'Thin/thick cloud and 2-3" seeing.',
+        "change_reason": "N/A",
+        "summary_of_proposal_status": "See attached.",
+        "strategy_changes": "None",
+        "partner_requested_percentages": "invalid",
+    }
+    username = find_username("administrator")
+    authenticate(username, client)
+
+    response = client.put(
+        PROGRESS_REPORT_URL + "/" + proposal_code + "/2020-2", data=data
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_submit_progress_report(
     check_data: Callable[[Any], None],
     client: TestClient,
@@ -126,7 +149,7 @@ def test_submit_progress_report_repeatedly(
         "strategy_changes": (
             "Relax the observing conditions to increase the observation probability."
         ),
-        "partner_requested_percentages": "RSA:33;UKSC:1;RU:64",
+        "partner_requested_percentages": "RSA:33;UKSC:3;RU:64",
     }
     response = client.put(
         PROGRESS_REPORT_URL + "/" + proposal_code + "/2020-2", data=updated_data

@@ -75,9 +75,9 @@ FROM Proposal P
          JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
          JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
          LEFT JOIN ProposalInactiveReason PIR
-            ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
+                   ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator Astronomer
-            ON C.Astronomer_Id = Astronomer.Investigator_Id
+                   ON C.Astronomer_Id = Astronomer.Investigator_Id
          JOIN Investigator Contact ON C.Contact_Id = Contact.Investigator_Id
          JOIN Investigator Leader ON C.Leader_Id = Leader.Investigator_Id
          JOIN ProposalInvestigator PI ON PC.ProposalCode_Id = PI.ProposalCode_Id
@@ -95,7 +95,7 @@ WHERE P.Current = 1
                                   BETWEEN :from_semester AND :to_semester)
   AND PS.Status != 'Deleted'
   AND (
-        -- The user is an investigator on the proposal
+    -- The user is an investigator on the proposal
             PU.Username = :username
         OR
         -- Proposal is requesting time from TAC to which the user belongs
@@ -113,8 +113,7 @@ WHERE P.Current = 1
                               JOIN PiptUser PUUser
                                    ON I2User.PiptUser_Id = PUUser.PiptUser_Id
                      WHERE PUUser.Username = :username
-                       AND PUser.Partner_Code != 'OTH'
-                    ) > 0)
+                       AND PUser.Partner_Code != 'OTH') > 0)
                 )
         OR
         -- The user is allowed to view all proposals
@@ -127,8 +126,19 @@ WHERE P.Current = 1
                                    ON PUSRights.PiptUser_Id = PURights.PiptUser_Id
                      WHERE PURights.Username = :username
                        AND PSRights.PiptSetting_Name = 'RightProposals'
-                       AND PUSRights.Value >= 2
-                    ) > 0
+                       AND PUSRights.Value >= 2) > 0
+                )
+        OR
+        -- The user has been granted permission to view the proposal
+            (
+                    (SELECT COUNT(*)
+                     FROM ProposalPermissionGrant PPG
+                              JOIN PiptUser U ON PPG.Grantee_Id = U.PiptUser_Id
+                              JOIN ProposalPermission PP ON PPG.ProposalPermission_Id =
+                                                            PP.ProposalPermission_Id
+                     WHERE U.Username = :username
+                       AND PPG.ProposalCode_Id = PC.ProposalCode_Id
+                        AND PP.ProposalPermission = 'View') > 0
                 )
     )
 ORDER BY P.Proposal_Id DESC
@@ -155,11 +165,13 @@ LIMIT :limit;
                 "status": {"value": row.status, "comment": row.comment},
                 "proposal_type": self._map_proposal_type(row.proposal_type),
                 "principal_investigator": {
+                    "id": row.pi_user_id,
                     "given_name": row.pi_given_name,
                     "family_name": row.pi_family_name,
                     "email": row.pi_email,
                 },
                 "principal_contact": {
+                    "id": row.pc_user_id,
                     "given_name": row.pc_given_name,
                     "family_name": row.pc_family_name,
                     "email": row.pc_email,
@@ -1438,7 +1450,7 @@ INSERT INTO ProposalProgress (
 )
 VALUES(
     (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code),
-    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, "-", Semester) = :semester),
+    (SELECT Semester_Id FROM Semester WHERE CONCAT(`Year`, '-', Semester) = :semester),
     :change_reason,
     :summary_of_proposal_status,
     :strategy_changes,
@@ -1471,6 +1483,29 @@ VALUES(
         )
         if not result.rowcount:
             raise NotFoundError()
+
+    def _reset_partner_requested_time_and_percentages(
+        self, proposal_code: str, semester: str, requested_time: int
+    ) -> None:
+        stmt = text(
+            """
+UPDATE MultiPartner
+SET ReqTimeAmount=:requested_time,
+    ReqTimePercent=0
+WHERE ProposalCode_Id =
+      (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code)
+  AND Semester_Id =
+      (SELECT Semester_Id FROM Semester WHERE CONCAT(Year, '-', semester) = :semester);
+              """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+                "requested_time": requested_time,
+            },
+        )
 
     def _insert_or_update_requested_time(
         self,
@@ -1683,20 +1718,20 @@ FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner AS P ON (MP.Partner_Id = P.Partner_Id)
 WHERE PC.Proposal_Code = :proposal_code
-AND P.Virtual != 1
     """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         tmp = dict()
-        # Some partners may have a time request for other semesters, but not for the
-        # one under consideration. We therefore collect the partners for which there
-        # is a time request percentage in any semester, and if a partner has a time
-        # request for the semester under consideration, we store that request.
+        # Some partners may have a time request (which may be 0) for other semesters,
+        # but not for the one under consideration. We therefore collect the partners for
+        # which there is a time request percentage in any semester, and if a partner has
+        # a time request for the semester under consideration, we store that request.
         for row in result:
-            tmp[row.partner_code] = {
-                "partner_name": row.partner_name,
-                "partner_code": row.partner_code,
-            }
+            if row.partner_code not in tmp:
+                tmp[row.partner_code] = {
+                    "partner_name": row.partner_name,
+                    "partner_code": row.partner_code,
+                }
             if semester == row.semester:
                 tmp[row.partner_code]["requested_percentage"] = row.requested_percentage
         prp = []
@@ -1890,6 +1925,9 @@ WHERE PC.Proposal_Code = :proposal_code
         Insert the proposal progress into the database, or update the existing one.
         """
         _next_semester = next_semester()
+        self._reset_partner_requested_time_and_percentages(
+            proposal_code, _next_semester, proposal_progress["requested_time"]
+        )
         for rp in proposal_progress["partner_requested_percentages"]:
             self._insert_or_update_requested_time(
                 proposal_code=proposal_code,

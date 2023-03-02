@@ -286,8 +286,5 @@ export function AutoUnsubscribe() {
 /* eslint-enable */
 
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {
-  if (user.roles.includes("Administrator")) {
-    return true;
-  }
   return user.roles.some((role) => roles.includes(role));
 }

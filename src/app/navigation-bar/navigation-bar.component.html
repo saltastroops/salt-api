@@ -13,7 +13,13 @@
         </a>
         <ng-container *ngIf="user$ | async as user">
           <a
-            *ngIf="hasAnyRole(user, ['SALT Astronomer', 'SALT Operator'])"
+            *ngIf="
+              hasAnyRole(user, [
+                'Administrator',
+                'SALT Astronomer',
+                'SALT Operator'
+              ])
+            "
             class="navbar-item"
             routerLink="so-pages"
             data-test="so-page-tab"
@@ -65,6 +71,7 @@
             (click)="toggleDropdownMenu($event)"
             *ngIf="
               hasAnyRole(user, [
+                'Administrator',
                 'SALT Astronomer',
                 'SALT Operator',
                 'Technician'

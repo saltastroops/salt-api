@@ -16,7 +16,11 @@ from saltapi.service.create_proposal_progress_html import (
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.util import parse_partner_requested_percentages, semester_start
+from saltapi.util import (
+    parse_partner_requested_percentages,
+    semester_start,
+    next_semester,
+)
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgressInput
 
@@ -281,7 +285,9 @@ class ProposalService:
         file (if there is one) and the phase 1 pdf summary. The progress description
         is generated on the fly from the database content.
         """
-        progress_report = self.repository.get_progress_report(proposal_code, semester)
+        progress_report = self.repository.get_progress_report(
+            proposal_code, next_semester(semester)
+        )
         progress_description = self._create_progress_description(
             proposal_code, semester, progress_report
         )

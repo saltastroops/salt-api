@@ -5,7 +5,6 @@ from typing import Any, Dict, List, NamedTuple, Optional, Type, cast
 
 import pytz
 from astropy.coordinates import Angle
-from dateutil.relativedelta import relativedelta
 from fastapi import Form
 from pydantic import BaseModel
 
@@ -151,9 +150,9 @@ def next_semester(current_semester: Optional[str] = None) -> str:
         current_semester = semester_of_datetime(datetime.now(tz=pytz.utc))
 
     try:
-        year, semester = current_semester.split("-")
-        year = int(year.strip())
-        semester = int(semester.strip())
+        year_str, semester_str = current_semester.split("-")
+        year = int(year_str.strip())
+        semester = int(semester_str.strip())
         if semester == 1:
             semester = 2
         elif semester == 2:

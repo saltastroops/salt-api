@@ -104,7 +104,7 @@ def _previous_requests_section(
     previous_requests: List[Dict[str, Any]],
     previous_conditions: Optional[Dict[str, Any]],
 ) -> str:
-    section = f"""\
+    section = """\
 <div class="section">
     <div class="heading">
         <h2>PREVIOUS REQUESTS, ALLOCATIONS, COMPLETENESS</h2>
@@ -139,7 +139,7 @@ def _previous_requests_section(
                 </td>
             </tr>
         """
-    section += f"""\
+    section += """\
         </table>
         <h3>Previously requested observing conditions</h3>
 """
@@ -282,7 +282,7 @@ def create_proposal_progress_html(
     html_content += _new_request_section(new_request)
     html_content += _status_summary_section(new_request)
     html_content += _strategy_changes_section(new_request)
-    html_content += f"""\
+    html_content += """\
     </body>
 </html>
 """

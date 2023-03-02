@@ -17,9 +17,9 @@ from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.util import (
+    next_semester,
     parse_partner_requested_percentages,
     semester_start,
-    next_semester,
 )
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgressInput

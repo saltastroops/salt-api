@@ -18,7 +18,10 @@
   <ng-container *ngIf="displayedBlock">
     <div [class.is-blurred]="isLoading">
       <div data-test="displayed-block-content" class="block">
-        <wm-block [block]="displayedBlock"></wm-block>
+        <wm-block
+          [block]="displayedBlock"
+          [investigators]="investigators"
+        ></wm-block>
       </div>
     </div>
   </ng-container>

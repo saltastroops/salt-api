@@ -1,3 +1,4 @@
+import { Investigator } from "./types/proposal";
 import { User, UserRole } from "./types/user";
 
 export const GENERIC_ERROR_MESSAGE =
@@ -287,4 +288,18 @@ export function AutoUnsubscribe() {
 
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {
   return user.roles.some((role) => roles.includes(role));
+}
+
+export function isUserPrincipalInvestigator(
+  user: User,
+  investigators: Investigator[],
+): boolean {
+  return investigators.some((i) => i.id == user.id && i.isPi);
+}
+
+export function isUserPrincipalContact(
+  user: User,
+  investigators: Investigator[],
+): boolean {
+  return investigators.some((i) => i.id == user.id && i.isPc);
 }

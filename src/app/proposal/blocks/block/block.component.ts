@@ -3,26 +3,51 @@ import { Component, Input, OnInit } from "@angular/core";
 import { parseISO } from "date-fns";
 
 import { environment } from "../../../../environments/environment";
-import { Block } from "../../../types/block";
+import { AuthenticationService } from "../../../service/authentication.service";
+import { Block, BlockStatus } from "../../../types/block";
 import { FinderChart } from "../../../types/observation";
+import { Investigator } from "../../../types/proposal";
+import { User } from "../../../types/user";
 import { currentJulianDay, finderChartURL } from "../../../util";
+import {
+  AutoUnsubscribe,
+  hasAnyRole,
+  isUserPrincipalContact,
+  isUserPrincipalInvestigator,
+} from "../../../utils";
 
 @Component({
   selector: "wm-block",
   templateUrl: "./block.component.html",
   styleUrls: ["./block.component.scss"],
 })
+@AutoUnsubscribe()
 export class BlockComponent implements OnInit {
   @Input() block!: Block;
+  @Input() investigators!: Investigator[];
 
   validFrom!: Date;
 
   validUntil!: Date;
 
+  latestSubmissionDate!: Date;
+  user!: User;
+  showEditBlockButton = false;
+
+  constructor(private authService: AuthenticationService) {}
+
   ngOnInit(): void {
     const jd = currentJulianDay();
     this.validFrom = jd.start;
     this.validUntil = jd.end;
+    this.authService.getUser().subscribe((user) => {
+      this.user = user;
+      this.showEditBlockButton =
+        isUserPrincipalInvestigator(this.user, this.investigators) ||
+        isUserPrincipalContact(this.user, this.investigators) ||
+        hasAnyRole(user, ["Administrator", "SALT Astronomer"]);
+    });
+    this.latestSubmissionDate = parseISO(this.block.latestSubmissionDate);
   }
 
   validSortedFinderCharts(finderCharts: FinderChart[]): FinderChart[] {
@@ -55,4 +80,13 @@ export class BlockComponent implements OnInit {
     );
     return url || "/assets/noun-missing-2181345.png";
   }
+
+  updateBlockStatus(blockStatusUpdate: BlockStatusUpdate): void {
+    this.block.status.value = blockStatusUpdate.value;
+    this.block.status.reason = blockStatusUpdate.reason;
+  }
+}
+
+interface BlockStatusUpdate extends BlockStatus {
+  blockId: number;
 }

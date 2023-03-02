@@ -32,12 +32,12 @@ import { BlockSummariesComponent } from "./proposal/blocks/block-summaries/block
 import { BlockSelectionComponent } from "./proposal/blocks/block-view/block-selection/block-selection.component";
 import { BlockViewComponent } from "./proposal/blocks/block-view/block-view.component";
 import { BlockComponent } from "./proposal/blocks/block/block.component";
+import { EditBlockStatusModalComponent } from "./proposal/blocks/block/edit-block-status-modal/edit-block-status-modal.component";
 import { IterationsComponent } from "./proposal/blocks/block/iterations/iterations.component";
 import { ObservationProbabilitiesComponent } from "./proposal/blocks/block/observation-probabilities/observation-probabilities.component";
 import { ObservingConditionsComponent } from "./proposal/blocks/block/observing-conditions/observing-conditions.component";
 import { ObservingWindowsComponent } from "./proposal/blocks/block/observing-windows/observing-windows.component";
 import { PayloadConfigurationComponent } from "./proposal/blocks/block/payload-configuration/payload-configuration.component";
-import { PriorityCommentComponent } from "./proposal/blocks/block/priority-comment/priority-comment.component";
 import { TotalObservationTimeComponent } from "./proposal/blocks/block/total-observation-time/total-observation-time.component";
 import { ChargedTimeComponent } from "./proposal/general/charged-time/charged-time.component";
 import { EditBlockVisitStatusModalComponent } from "./proposal/general/edit-block-visit-status-modal/edit-block-visit-status-modal.component";
@@ -143,7 +143,6 @@ import { SortDirective } from "./sort.directive";
     TotalObservationTimeComponent,
     ObservingWindowsComponent,
     ObservationProbabilitiesComponent,
-    PriorityCommentComponent,
     PayloadConfigurationComponent,
     HrsComponent,
     HrsGeneralInfoComponent,
@@ -204,6 +203,7 @@ import { SortDirective } from "./sort.directive";
     P1ConfigurationsComponent,
     StudentThesesComponent,
     EditProprietaryPeriodModalComponent,
+    EditBlockStatusModalComponent,
     EditBlockVisitStatusModalComponent,
   ],
   imports: [

@@ -6,8 +6,13 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
-import { Block, BlockRejectionReason } from "../../types/block";
-import { BlockVisit, BlockVisitStatus } from "../../types/common";
+import {
+  Block,
+  BlockRejectionReason,
+  BlockStatus,
+  BlockStatusValue,
+} from "../../types/block";
+import { BlockVisitStatus } from "../../types/common";
 import { BlockService } from "../block.service";
 
 @Injectable({
@@ -28,6 +33,31 @@ export class RealBlockService implements BlockService {
     return this.http
       .get<Block>(uri)
       .pipe(map((block: Block) => camelcaseKeys(block, { deep: true })));
+  }
+
+  /**
+   * Update a block status from the API server.
+   *
+   * @param id Block id.
+   * @param blockStatus Block status value.
+   * @param statusReason Block status reason.
+   */
+  updateBlockStatus(
+    id: number,
+    blockStatus: BlockStatusValue,
+    statusReason: string | number,
+  ): Observable<BlockStatus> {
+    const uri = environment.apiUrl + "/blocks/" + id + "/status";
+    const headers = new HttpHeaders({
+      "Content-type": "application/json",
+    });
+    const data = {
+      status: blockStatus,
+      reason: statusReason,
+    };
+    return this.http
+      .put<BlockStatus>(uri, data, { headers })
+      .pipe(map((s: BlockStatus) => camelcaseKeys(s, { deep: true })));
   }
 
   /**

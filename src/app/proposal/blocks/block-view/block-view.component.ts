@@ -18,6 +18,7 @@ import {
 
 import { BlockService } from "../../../service/block.service";
 import { Block, BlockSummary } from "../../../types/block";
+import { Investigator } from "../../../types/proposal";
 
 @Component({
   selector: "wm-block-view",
@@ -27,6 +28,7 @@ import { Block, BlockSummary } from "../../../types/block";
 export class BlockViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() blocks!: BlockSummary[];
   @Input() blockId!: number;
+  @Input() investigators!: Investigator[];
 
   readonly DEBOUNCE_TIME = 100;
 

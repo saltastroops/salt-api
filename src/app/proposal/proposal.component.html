@@ -62,7 +62,11 @@
 
     <!--  TODO: Allocation is semester dependent will fix it -->
 
-    <wm-block-view [blocks]="p.blocks" [blockId]="blockId"></wm-block-view>
+    <wm-block-view
+      [blocks]="p.blocks"
+      [blockId]="blockId"
+      [investigators]="p.investigators"
+    ></wm-block-view>
   </ng-template>
   <ng-template #phase1>
     <wm-p1-details [proposal]="p"></wm-p1-details>

@@ -68,6 +68,7 @@ def test_get_progress_report_returns_empty_report_for_nonexisting_progress_repor
     authenticate(USERNAME, client)
 
     response = client.get(PROGRESS_REPORT_URL + "/" + proposal_code + "/" + semester)
+    assert response.status_code == status.HTTP_200_OK
 
     proposal_progress_report = response.json()
 
@@ -138,7 +139,7 @@ def test_get_returns_correct_pdf_file(
         assert response.status_code == status.HTTP_200_OK
 
         assert (
-            "attachment; filename=ProposalProgressReport-"
+            "inline; filename=ProposalProgressReport-"
             in response.headers["content-disposition"]
         )
         assert response.headers["content-type"] == "application/pdf"

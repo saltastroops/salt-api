@@ -73,6 +73,11 @@ export class ProposalComponent implements OnInit {
       this.error = error;
     });
     this.isLoadingSubscription = isLoading$.subscribe((isLoading) => {
+      // For some reason in some browsers the loading event is fired only a second or
+      // two after the content one. For that reason, in the template the loading
+      // indicator should only be displayed if the loading flag is true and the proposal
+      // is defined. Otherwise, the loading indicator and the proposal content might be
+      // displayed at the same time for a short while.
       if (isLoading) {
         this.proposal = null;
       }

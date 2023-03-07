@@ -468,7 +468,9 @@ class PermissionService:
             roles=roles,
         )
 
-    def check_permission_to_update_investigator_proposal_approval_status(self, user: User, proposal_code: str) -> None:
+    def check_permission_to_update_investigator_proposal_approval_status(
+        self, user: User, proposal_code: str
+    ) -> None:
         roles = [Role.INVESTIGATOR]
 
         self.check_role(user.username, roles, proposal_code)

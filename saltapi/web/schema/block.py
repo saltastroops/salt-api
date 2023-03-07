@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
@@ -97,6 +98,11 @@ class Block(BaseModel):
         ..., title="Proposal code of the proposal to which the block belongs"
     )
     semester: Semester = Field(..., title="Semester to which the block belongs")
+    latest_submission_date: datetime = Field(
+        ...,
+        title="The date of the latest submission with significant changes",
+        description="The date of the latest submission with significant changes",
+    )
     status: BlockStatus = Field(..., title="Block status", description="Block status")
     priority: Priority = Field(
         ..., title="Priority", description="Priority of the block"

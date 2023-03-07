@@ -763,3 +763,85 @@ def test_get_progress_report_semesters(
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
     assert proposal_repository.get_progress_report_semesters(proposal_code) == semesters
+
+
+def test_put_progress_report_handles_missing_partners(
+    db_connection: Connection,
+) -> None:
+    def dict_to_requested_percentages(
+        percentages_dict: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        return [
+            {
+                "partner_code": partner_code,
+                "requested_percentage": percentages_dict[partner_code],
+            }
+            for partner_code in percentages_dict
+        ]
+
+    def requested_percentages_to_dict(
+        percentages: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        return {p["partner_code"]: p["requested_percentage"] for p in percentages}
+
+    # Initially request time from all partners
+    proposal_code = "2021-2-LSP-001"
+    semester = "2022-2"
+    initial_percentages_dict = {
+        "UW": 20.0,
+        "RSA": 20.0,
+        "UKSC": 20.0,
+        "POL": 20.0,
+        "IUCAA": 20.0,
+        "OTH": 0,
+    }
+    progress = {
+        "requested_time": 4200,
+        "maximum_seeing": 2,
+        "transparency": "Thin cloud",
+        "description_of_observing_constraints": 'Thin/thick cloud and 2-3" seeing.',
+        "change_reason": "N/A",
+        "summary_of_proposal_status": "See attached.",
+        "strategy_changes": "None",
+        "partner_requested_percentages": dict_to_requested_percentages(
+            initial_percentages_dict
+        ),
+    }
+    proposal_repository = ProposalRepository(db_connection)
+    proposal_repository.put_proposal_progress(
+        progress,
+        proposal_code,
+        semester,
+        {"proposal_progress_filename": None, "additional_pdf_filename": None},
+    )
+
+    # The percentages should have been stored
+    saved_progress = proposal_repository.get_progress_report(proposal_code, semester)
+    assert (
+        requested_percentages_to_dict(saved_progress["partner_requested_percentages"])
+        == initial_percentages_dict
+    )
+
+    # Now request time from two partners only
+    progress["partner_requested_percentages"] = dict_to_requested_percentages(
+        {"RSA": 50.0, "IUCAA": 50.0}
+    )
+    proposal_repository.put_proposal_progress(
+        progress,
+        proposal_code,
+        semester,
+        {"proposal_progress_filename": None, "additional_pdf_filename": None},
+    )
+
+    # The percentages should be 0 for all the "missing" partners
+    saved_progress = proposal_repository.get_progress_report(proposal_code, semester)
+    assert requested_percentages_to_dict(
+        saved_progress["partner_requested_percentages"]
+    ) == {
+        "UW": 0,
+        "RSA": 50.0,
+        "UKSC": 0,
+        "POL": 0,
+        "IUCAA": 50.0,
+        "OTH": 0,
+    }

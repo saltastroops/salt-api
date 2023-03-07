@@ -2405,4 +2405,4 @@ AND Investigator_Id = (SELECT PU.Investigator_Id
         )
 
         if not result.rowcount:
-            raise NotFoundError("Unknown block id")
+            raise NotFoundError()

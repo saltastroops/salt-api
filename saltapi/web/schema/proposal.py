@@ -629,6 +629,7 @@ class ProposalProgressInput(BaseProgressReport):
     )
 
 
+
 class SelfActivation(BaseModel):
     allowed: bool = Field(
         ...,
@@ -639,8 +640,8 @@ class SelfActivation(BaseModel):
         ),
     )
 
-    @validator("partner_requested_percentages")
-    def partner_requested_percentages_valid(cls, v: str) -> str:
-        # If the value is invalid, parsing it will raise an error.
-        parse_partner_requested_percentages(v)
-        return v
+@validator("partner_requested_percentages")
+def partner_requested_percentages_valid(cls, v: str) -> str:
+    # If the value is invalid, parsing it will raise an error.
+    parse_partner_requested_percentages(v)
+    return v

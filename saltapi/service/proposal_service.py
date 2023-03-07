@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, AuthorizationError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
@@ -334,3 +334,14 @@ class ProposalService:
         Set the proposal status for a proposal code.
         """
         self.repository.update_proposal_status(proposal_code, status, status_comment)
+
+    def update_investigator_proposal_approval_status(self, username: str, proposal_code: str, status: str) -> None:
+        """
+        Updates the investigator's approval status of the proposal with the given
+        proposal code.
+        """
+        allowed_status_list = ["Approve", "Reject"]
+        if status not in allowed_status_list:
+            raise AuthorizationError()
+        approved = status == "Approve"
+        self.repository.update_investigator_proposal_approval_status(username, proposal_code, approved)

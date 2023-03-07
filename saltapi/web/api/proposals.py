@@ -462,3 +462,46 @@ def get_data_release_date(
     public.
     """
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@router.put(
+    "/{proposal_code}/investigator-proposal-approval-status",
+    summary="Update the proposal status",
+    status_code=status.HTTP_200_OK,
+)
+def update_investigator_proposal_approval_status(
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description="Proposal code of the proposal whose status is updated.",
+    ),
+    approval_status: str = Body(
+        ...,
+        alias="status",
+        title="Proposal status and (optional) status comment",
+        description="New proposal status and (optional) status comment.",
+    ),
+    user: User = Depends(get_current_user),
+) -> None:
+    """
+    Updates the investigator's approval status of the proposal with the given proposal
+    code.
+
+    The following status values are possible.
+
+    Status | Description
+    --- | ---
+    Approve | The investigator approves the proposal.
+    Reject | The investigator rejects the proposal.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_investigator_proposal_approval_status(
+            user, proposal_code
+        )
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal_service.update_investigator_proposal_approval_status(
+            user.username, proposal_code, approval_status
+        )
+
+        unit_of_work.commit()

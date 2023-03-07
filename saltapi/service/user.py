@@ -33,6 +33,11 @@ class UserListItem:
     family_name: str
     given_name: str
 
+@dataclass()
+class UserGivenAndFamilyName:
+    id: int
+    family_name: str
+    given_name: str
 
 @dataclass()
 class Institution:

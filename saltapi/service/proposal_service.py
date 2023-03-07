@@ -341,5 +341,5 @@ class ProposalService:
     def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
         self.repository.update_liaison_astronomer(proposal_code, liaison_astronomer_id)
 
-    def get_liaison_astronomer(self, proposal_code: str):
+    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, any]]:
         return self.repository.get_liaison_astronomer(proposal_code)

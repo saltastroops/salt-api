@@ -1284,12 +1284,12 @@ WHERE PIR.InactiveReason = :inactive_reason
         try:
             status_id = self._proposal_status_id(status)
         except NoResultFound:
-            raise ValueError(f"Unknown proposal status: {status}")
+            raise ValidationError(f"Unknown proposal status: {status}")
 
         try:
             proposal_code_id = self._get_proposal_code_id(proposal_code)
         except NoResultFound:
-            raise ValueError(f"Unknown proposal code: {proposal_code}")
+            raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
         stmt = text(
             """
@@ -2351,7 +2351,7 @@ WHERE Proposal_Code = :proposal_code
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_code_id = result.one_or_none()
         if not proposal_code_id:
-            raise NotFoundError(f"Couldn't found  proposal code `{proposal_code}`")
+            raise NotFoundError(f"Couldn't find  proposal code `{proposal_code}`")
 
         return cast(int, proposal_code_id[0])
     def update_is_self_activatable(self, proposal_code: str, is_self_activatable: bool) -> None:
@@ -2375,18 +2375,20 @@ WHERE Proposal_Code = :proposal_code
             }
         )
 
-    def get_liaison_astronomer(self, proposal_code: str) -> Dict[str, any]:
+    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self._get_proposal_code_id(proposal_code)
         stmt = text(
             """
 SELECT
-    I.PiptUser_Id           AS id,
-    I.FirstName             AS given_name,
-    I.Surname               AS family_name
+    I2.PiptUser_Id           AS id,
+    I2.FirstName             AS given_name,
+    I2.Surname               AS family_name
 FROM ProposalContact PCon
     JOIN Investigator I ON I.Investigator_Id = PCon.Astronomer_Id
+    JOIN PiptUser PU ON PU.PiptUser_Id = I.PiptUser_Id
+    JOIN Investigator I2 ON I2.Investigator_Id = PU.Investigator_Id
     JOIN ProposalCode PC ON PC.ProposalCode_Id = PCon.ProposalCode_Id
 WHERE PCon.ProposalCode_Id = :proposal_code_id
         """
@@ -2398,7 +2400,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
         )
         sa = result.one_or_none()
         if not sa:
-            raise NotFoundError(f"No liaison astronomer for proposal code `{proposal_code}`")
+            return None
         return {
             "id": sa.id,
             "family_name": sa.family_name,

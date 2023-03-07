@@ -20,10 +20,10 @@ from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.proposal import ProposalStatus as _ProposalStatus
-from saltapi.service.user import User
+from saltapi.service.user import User, UserGivenAndFamilyName
 from saltapi.util import semester_start
 from saltapi.web import services
-from saltapi.web.schema.common import ProposalCode, Semester, Message
+from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.proposal import (
@@ -508,7 +508,7 @@ def put_is_self_activatable(
 @router.put(
     "/{proposal_code}/liaison-astronomer",
     summary="Set the liaison astronomer for the proposal",
-    response_model=Message,
+    response_model=Optional[UserGivenAndFamilyName],
     status_code=200,
 )
 def update_liaison_astronomer(
@@ -525,7 +525,7 @@ def update_liaison_astronomer(
             description="The user id of the liaison astronomer."
         ),
         user: User = Depends(get_current_user),
-) -> Message:
+) -> Optional[UserGivenAndFamilyName]:
     """
     Update the liaison astronomer of the proposal.
     """
@@ -538,5 +538,7 @@ def update_liaison_astronomer(
                 proposal_code=proposal_code, liaison_astronomer_id=liaison_astronomer_id.id
             )
             unit_of_work.commit()
-            return Message(message="Successful")
-
+            liaison_salt_astronomer = proposal_service.get_liaison_astronomer(proposal_code)
+            if liaison_salt_astronomer:
+                return UserGivenAndFamilyName(**liaison_salt_astronomer)
+            return None

@@ -2375,3 +2375,34 @@ WHERE PC.Proposal_Code = :proposal_code
         if len(configurations) == 0:
             return []
         return configurations
+
+    def update_investigator_proposal_approval_status(
+        self, username: str, proposal_code: str, approved: bool
+    ) -> None:
+        """
+        Update the investigator's approval status of the proposal with the given
+        proposal code.
+        """
+        stmt = text(
+            """
+UPDATE ProposalInvestigator
+SET InvestigatorOkay=:approved
+WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id 
+                         FROM ProposalCode PC
+                         WHERE PC.Proposal_Code = :proposal_code) 
+AND Investigator_Id = (SELECT PU.Investigator_Id
+                       FROM PiptUser PU
+                       WHERE PU.Username = :username)              
+        """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "approved": approved,
+                "username": username,
+            },
+        )
+
+        if not result.rowcount:
+            raise NotFoundError("Unknown block id")

@@ -342,10 +342,10 @@ class ProposalService:
         Updates the investigator's approval status of the proposal with the given
         proposal code.
         """
-        allowed_status_list = ["Approve", "Reject"]
+        allowed_status_list = ["Accept", "Reject"]
         if status not in allowed_status_list:
             raise AuthorizationError()
-        approved = status == "Approve"
+        approved = status == "Accept"
         self.repository.update_investigator_proposal_approval_status(
             user_id, proposal_code, approved
         )

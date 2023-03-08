@@ -65,6 +65,7 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 Astronomer.PiptUser_Id          AS la_user_id,
                 Astronomer.FirstName            AS la_given_name,
                 Astronomer.Surname              AS la_family_name
+                Astronomer.Email                AS la_emial
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
@@ -189,8 +190,10 @@ LIMIT :limit;
             return None
 
         astronomer = {
+            "id": row.la_user_id,
             "given_name": row.la_given_name,
             "family_name": row.la_family_name,
+            "email": row.la_email,
         }
 
         return astronomer

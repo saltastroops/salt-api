@@ -64,6 +64,12 @@ def test_update_liaison_astronomer_should_allow_admins_and_salt_astronomers_to_u
     proposal = proposal_response.json()
     assert proposal["general_info"]["liaison_salt_astronomer"]['id'] == 494
 
+    response = client.put(_url(proposal_code), json={'id': None})
+    assert response.status_code == status.HTTP_200_OK
+    proposal_response = client.get("proposals/" + proposal_code)
+    proposal = proposal_response.json()
+    assert proposal["general_info"]["liaison_salt_astronomer"] is None
+
 
 def test_update_liaison_astronomer_should_not_allow_update_for_none_salt_astronomer(
         client: TestClient,

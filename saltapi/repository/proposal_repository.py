@@ -2453,7 +2453,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
     def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
         # The ids could be retrieved within the SQL statement, but then a wrong proposal code or liaison id
         # would lead to more cryptic errors.
-        salt_astronomer_id = self.get_salt_astronomer_id(user_id=liaison_astronomer_id) if liaison_astronomer_id else None
+        salt_astronomer_id = self._salt_astronomer_investigator_id(salt_astronomer_user_id=liaison_astronomer_id) if liaison_astronomer_id else None
         proposal_code_id = self._get_proposal_code_id(proposal_code)
 
         stmt = text(
@@ -2470,22 +2470,23 @@ WHERE ProposalCode_Id = :proposal_code_id
             }
         )
 
-    def get_salt_astronomer_id(self, user_id: int):
+    def _salt_astronomer_investigator_id(self, salt_astronomer_user_id: int):
+        """Return the id of the preferred investigator entry for a SALT Astronomer."""
         stmt = text(
             """
 SELECT PU.Investigator_Id FROM PiptUser PU
     JOIN SaltAstronomers SA ON PU.Investigator_Id = SA.Investigator_Id
-WHERE PU.PiptUser_Id = :user_id
+WHERE PU.PiptUser_Id = :salt_astronomer_user_id
 
         """
         )
         result = self.connection.execute(
             stmt, {
-                "user_id": user_id
+                "salt_astronomer_user_id": salt_astronomer_user_id
             }
         )
         investigator_id = result.one_or_none()
         if not investigator_id:
-            raise ValidationError(f"User id not found: {user_id}")
+            raise ValidationError(f"SALT astronomer id not found: {salt_astronomer_user_id}")
 
         return cast(int, investigator_id[0])

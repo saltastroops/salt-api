@@ -75,7 +75,7 @@ def test_investigator_approval_proposal_status_update_requires_permissions(
 
 
 def test_investigator_approval_proposal_status_update(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Principal Contact", proposal_code="2019-2-SCI-006")
@@ -86,5 +86,5 @@ def test_investigator_approval_proposal_status_update(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
         json=data,
-        )
+    )
     assert response.status_code == status.HTTP_200_OK

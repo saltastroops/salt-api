@@ -64,8 +64,8 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 Contact.Email                   AS pc_email,
                 Astronomer.PiptUser_Id          AS la_user_id,
                 Astronomer.FirstName            AS la_given_name,
-                Astronomer.Surname              AS la_family_name
-                Astronomer.Email                AS la_emial
+                Astronomer.Surname              AS la_family_name,
+                Astronomer.Email                AS la_email
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id

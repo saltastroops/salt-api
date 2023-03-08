@@ -57,7 +57,7 @@ def test_investigator_approval_proposal_status_update_requires_valid_approval_st
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
-    data = {"status": "Wrong status", "user_id": 658}
+    data = {"status": "Wrong status", "user_id": 658}  # user id of the above user
 
     authenticate(username, client)
 
@@ -98,7 +98,7 @@ def test_investigator_approval_proposal_status_update(
     username = find_username("Principal Contact", proposal_code="2019-2-SCI-006")
     authenticate(username, client)
 
-    data = {"status": "Reject", "user_id": 1413}
+    data = {"status": "Reject", "user_id": 1413}  # user id of the above user
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",

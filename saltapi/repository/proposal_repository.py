@@ -2377,7 +2377,7 @@ WHERE PC.Proposal_Code = :proposal_code
         return configurations
 
     def update_investigator_proposal_approval_status(
-        self, username: str, proposal_code: str, approved: bool
+        self, user_id: int, proposal_code: str, approved: bool
     ) -> None:
         """
         Update the investigator's approval status of the proposal with the given
@@ -2392,7 +2392,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          WHERE PC.Proposal_Code = :proposal_code) 
 AND Investigator_Id = (SELECT PU.Investigator_Id
                        FROM PiptUser PU
-                       WHERE PU.Username = :username)              
+                       WHERE PU.PiptUser_Id = :user_id)              
         """
         )
         result = self.connection.execute(
@@ -2400,7 +2400,7 @@ AND Investigator_Id = (SELECT PU.Investigator_Id
             {
                 "proposal_code": proposal_code,
                 "approved": approved,
-                "username": username,
+                "user_id": user_id,
             },
         )
 

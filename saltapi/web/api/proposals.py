@@ -475,6 +475,11 @@ def update_investigator_proposal_approval_status(
         title="Proposal code",
         description="Proposal code of the proposal whose status is updated.",
     ),
+    user_id: int = Body(
+        ...,
+        title="User id",
+        description="Id of the user",
+    ),
     approval_status: str = Body(
         ...,
         alias="status",
@@ -496,12 +501,16 @@ def update_investigator_proposal_approval_status(
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
+        user_service = services.user_service(unit_of_work.connection)
+
         permission_service.check_permission_to_update_investigator_proposal_approval_status(
             user, proposal_code
         )
+        user_details = user if user_id == user.id else user_service.get_user(user_id)
+
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_investigator_proposal_approval_status(
-            user.username, proposal_code, approval_status
+            user_details.id, proposal_code, approval_status
         )
 
         unit_of_work.commit()

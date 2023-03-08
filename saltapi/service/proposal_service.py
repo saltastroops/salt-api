@@ -336,7 +336,7 @@ class ProposalService:
         self.repository.update_proposal_status(proposal_code, status, status_comment)
 
     def update_investigator_proposal_approval_status(
-        self, username: str, proposal_code: str, status: str
+        self, user_id: int, proposal_code: str, status: str
     ) -> None:
         """
         Updates the investigator's approval status of the proposal with the given
@@ -347,5 +347,5 @@ class ProposalService:
             raise AuthorizationError()
         approved = status == "Approve"
         self.repository.update_investigator_proposal_approval_status(
-            username, proposal_code, approved
+            user_id, proposal_code, approved
         )

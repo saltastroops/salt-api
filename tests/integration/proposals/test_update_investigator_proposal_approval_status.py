@@ -11,10 +11,7 @@ def test_investigator_approval_proposal_status_update_requires_authentication(
     client: TestClient,
 ) -> None:
     proposal_code = "2021-2-LSP-001"
-    data = {
-        "status": "Accept",
-        "user_id": 1006
-    }
+    data = {"status": "Accept", "user_id": 1006}
     not_authenticated(client)
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
@@ -24,20 +21,18 @@ def test_investigator_approval_proposal_status_update_requires_authentication(
 
 
 def test_investigator_approval_proposal_status_update_requires_user_id(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2021-2-LSP-001"
     username = find_username("administrator")
-    data = {
-        "status": "Reject"
-    }
+    data = {"status": "Reject"}
 
     authenticate(username, client)
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
         json=data,
-        )
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -46,9 +41,7 @@ def test_investigator_approval_proposal_status_update_requires_approval_status(
 ) -> None:
     proposal_code = "2021-2-LSP-001"
     username = find_username("administrator")
-    data = {
-        "user_id": 10
-    }
+    data = {"user_id": 10}
 
     authenticate(username, client)
 
@@ -64,10 +57,7 @@ def test_investigator_approval_proposal_status_update_requires_valid_approval_st
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
-    data = {
-        "status": "Wrong status",
-        "user_id": 658
-    }
+    data = {"status": "Wrong status", "user_id": 658}
 
     authenticate(username, client)
 
@@ -91,10 +81,7 @@ def test_investigator_approval_proposal_status_update_requires_permissions(
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
-    data = {
-        "status": "Reject",
-        "user_id": 658
-    }
+    data = {"status": "Reject", "user_id": 658}
     authenticate(username, client)
 
     response = client.put(
@@ -111,10 +98,7 @@ def test_investigator_approval_proposal_status_update(
     username = find_username("Principal Contact", proposal_code="2019-2-SCI-006")
     authenticate(username, client)
 
-    data = {
-        "status": "Reject",
-        "user_id": 1413
-    }
+    data = {"status": "Reject", "user_id": 1413}
 
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",

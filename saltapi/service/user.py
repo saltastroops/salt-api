@@ -38,6 +38,7 @@ class LiaisonAstronomer:
     id: int
     family_name: str
     given_name: str
+    email: str
 
 @dataclass()
 class Institution:

@@ -2422,7 +2422,8 @@ WHERE Proposal_Code = :proposal_code
 SELECT
     I2.PiptUser_Id           AS id,
     I2.FirstName             AS given_name,
-    I2.Surname               AS family_name
+    I2.Surname               AS family_name,
+    I2.Email                 AS email
 FROM ProposalContact PCon
     JOIN Investigator I ON I.Investigator_Id = PCon.Astronomer_Id
     JOIN PiptUser PU ON PU.PiptUser_Id = I.PiptUser_Id
@@ -2443,6 +2444,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
             "id": sa.id,
             "family_name": sa.family_name,
             "given_name": sa.given_name,
+            "email": sa.email
         }
 
     def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:

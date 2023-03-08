@@ -34,7 +34,7 @@ class UserListItem:
     given_name: str
 
 @dataclass()
-class UserGivenAndFamilyName:
+class LiaisonAstronomer:
     id: int
     family_name: str
     given_name: str

@@ -52,13 +52,10 @@ def test_update_is_self_activatable_should_allow_admins_and_salt_astronomers_to_
     authenticate(username, client)
     proposal_code = "2020-2-SCI-039"
 
-    # Test self activation part 1. Setting to `true`
     # Set self activation allowed to true
     response = client.put(_url(proposal_code), json={'allowed': True})
-    # Check status to be 200 OK
     assert response.status_code == status.HTTP_200_OK
     new_self_activation = response.json()
-    # Check response value to be `true`
     assert new_self_activation["allowed"] == True
     # Get this proposal
     proposal_response = client.get("proposals/" + proposal_code)
@@ -76,7 +73,7 @@ def test_update_is_self_activatable_should_allow_admins_and_salt_astronomers_to_
     assert proposal["general_info"]["is_self_activatable"] == False
 
 
-def test_update_is_self_activatable_should_not_allow_for_a_wrong_proposal_code(
+def test_update_is_self_activatable_should_not_be_allow_for_a_wrong_proposal_code(
         client: TestClient,
 ) -> None:
     # Administrators and SALT Astronomers can not update with a wrong proposal code

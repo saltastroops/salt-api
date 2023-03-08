@@ -2448,7 +2448,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
     def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
         # The ids could be retrieved within the SQL statement, but then a wrong proposal code or liaison id
         # would lead to more cryptic errors.
-        investigator_id = self.get_investigator_id(user_id=liaison_astronomer_id) if liaison_astronomer_id else None
+        salt_astronomer_id = self.get_salt_astronomer_id(user_id=liaison_astronomer_id) if liaison_astronomer_id else None
         proposal_code_id = self._get_proposal_code_id(proposal_code)
 
         stmt = text(
@@ -2461,11 +2461,11 @@ WHERE ProposalCode_Id = :proposal_code_id
         self.connection.execute(
             stmt, {
                 "proposal_code_id": proposal_code_id,
-                "liaison_astronomer_id": investigator_id,
+                "liaison_astronomer_id": salt_astronomer_id,
             }
         )
 
-    def get_investigator_id(self, user_id: int):
+    def get_salt_astronomer_id(self, user_id: int):
         stmt = text(
             """
 SELECT PU.Investigator_Id FROM PiptUser PU

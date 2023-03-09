@@ -598,6 +598,7 @@ ORDER BY I.Surname, I.FirstName
             elif (
                 investigator["approval_code"] is None
                 or investigator["approval_code"] == ""
+                or investigator["approval_code"] == 0
             ):
                 investigator["has_approved_proposal"] = False
             else:

@@ -102,7 +102,7 @@ def get_users(
 
 @router.get(
     "/salt-astronomers",
-    summary="Get the SALT astronomers",
+    summary="Get the SALT astronomers, sorted by their family name",
     response_model=List[UserListItem],
 )
 def get_salt_astronomers() -> List[Dict[str, Any]]:

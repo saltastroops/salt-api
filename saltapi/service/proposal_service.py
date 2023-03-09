@@ -16,7 +16,11 @@ from saltapi.service.create_proposal_progress_html import (
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.util import parse_partner_requested_percentages, semester_start
+from saltapi.util import (
+    next_semester,
+    parse_partner_requested_percentages,
+    semester_start,
+)
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import ProposalProgressInput
 
@@ -230,20 +234,24 @@ class ProposalService:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )
-        previous_observed_time = self.repository.get_observed_time(proposal_code)
+        previous_observed_times = self.repository.get_observed_time(proposal_code)
+
+        def previous_observed_time(semester: str) -> int:
+            for ot in previous_observed_times:
+                if ot["semester"] == semester:
+                    return int(ot["observed_time"])
+            return 0
 
         previous_requests = []
         for ar in previous_allocated_requested:
-            for ot in previous_observed_time:
-                if ot["semester"] == ar["semester"]:
-                    previous_requests.append(
-                        {
-                            "semester": ar["semester"],
-                            "requested_time": ar["requested_time"],
-                            "allocated_time": ar["allocated_time"],
-                            "observed_time": ot["observed_time"],
-                        }
-                    )
+            previous_requests.append(
+                {
+                    "semester": ar["semester"],
+                    "requested_time": ar["requested_time"],
+                    "allocated_time": ar["allocated_time"],
+                    "observed_time": previous_observed_time(ar["semester"]),
+                }
+            )
 
         html_content = create_proposal_progress_html(
             proposal_code=proposal_code,
@@ -277,7 +285,9 @@ class ProposalService:
         file (if there is one) and the phase 1 pdf summary. The progress description
         is generated on the fly from the database content.
         """
-        progress_report = self.repository.get_progress_report(proposal_code, semester)
+        progress_report = self.repository.get_progress_report(
+            proposal_code, next_semester(semester)
+        )
         progress_description = self._create_progress_description(
             proposal_code, semester, progress_report
         )

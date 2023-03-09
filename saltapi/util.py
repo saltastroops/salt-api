@@ -5,11 +5,10 @@ from typing import Any, Dict, List, NamedTuple, Optional, Type, cast
 
 import pytz
 from astropy.coordinates import Angle
-from dateutil.relativedelta import relativedelta
 from fastapi import Form
 from pydantic import BaseModel
 
-from saltapi.web.schema.common import PartnerCode, Semester
+from saltapi.web.schema.common import PartnerCode
 
 
 class TimeInterval(NamedTuple):
@@ -140,16 +139,30 @@ def semester_of_datetime(t: datetime) -> str:
     return f"{year}-{semester}"
 
 
-def next_semester() -> str:
+def next_semester(current_semester: Optional[str] = None) -> str:
     """
-    Get the next semester from the current date and time.
+    Get the next semester.
+
+    If the semester is specified, this is the semester following that semester.
+    Otherwise, it is the semester following the semester of the current dae and time.
     """
-    # Adding a month never crosses the month boundary. For example, 30 November plus 6
-    # months is 30 April, not 1 May. The semester_of_datetime function takes care of the
-    # fact that a semester starts at noon rather than at midnight.
-    return Semester(
-        semester_of_datetime(datetime.now(tz=pytz.utc) + relativedelta(months=+6))
-    )
+    if current_semester is None:
+        current_semester = semester_of_datetime(datetime.now(tz=pytz.utc))
+
+    try:
+        year_str, semester_str = current_semester.split("-")
+        year = int(year_str.strip())
+        semester = int(semester_str.strip())
+        if semester == 1:
+            semester = 2
+        elif semester == 2:
+            year += 1
+            semester = 1
+        else:
+            raise ValueError(f"No such semester: {semester}")
+        return f"{year}-{semester}"
+    except ValueError:
+        raise ValueError(f"Invalid semester string: {current_semester}")
 
 
 def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:

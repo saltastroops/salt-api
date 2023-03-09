@@ -473,7 +473,7 @@ def update_investigator_proposal_approval_status(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal whose status is updated.",
+        description="Proposal code of the proposal for which an investigator approval status is updated.",
     ),
     user_id: int = Path(
         ...,
@@ -483,14 +483,13 @@ def update_investigator_proposal_approval_status(
     approval_status: ProposalApprovalStatus = Body(
         ...,
         alias="status",
-        title="Proposal status and (optional) status comment",
-        description="New proposal status and (optional) status comment.",
+        title="Proposal approval status",
+        description="Proposal approval status.",
     ),
     user: User = Depends(get_current_user),
 ) -> None:
     """
-    Updates the investigator's approval status of the proposal with the given proposal
-    code.
+    Updates an investigator's approval status of the proposal.
 
     The following status values are possible.
 

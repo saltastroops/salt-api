@@ -643,7 +643,7 @@ WHERE PiptUser_Id = :user_id
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         """
-        Return the list of SALT Astronomers.
+        Return the list of SALT Astronomers, sorted by family name.
         """
         stmt = text(
             """
@@ -653,6 +653,7 @@ SELECT
     I.Surname               AS family_name
 FROM SaltAstronomers SA
     JOIN Investigator I ON SA.Investigator_Id = I.Investigator_Id
+    ORDER BY I.Surname
         """
         )
 

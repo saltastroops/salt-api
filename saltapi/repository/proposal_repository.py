@@ -2391,8 +2391,9 @@ SET InvestigatorOkay=:approved,
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id 
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code) 
-AND Investigator_Id = (SELECT PU.Investigator_Id
+AND Investigator_Id = (SELECT I.Investigator_Id
                        FROM PiptUser PU
+                       JOIN Investigator I ON PU.PiptUser_Id = I.PiptUser_Id
                        WHERE PU.PiptUser_Id = :user_id)              
         """
         )
@@ -2400,7 +2401,7 @@ AND Investigator_Id = (SELECT PU.Investigator_Id
             stmt,
             {
                 "proposal_code": proposal_code,
-                "approved": approved,
+                "approved": 1 if approved else 0,
                 "user_id": user_id,
             },
         )

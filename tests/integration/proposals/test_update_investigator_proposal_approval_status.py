@@ -11,29 +11,48 @@ def test_investigator_approval_proposal_status_update_requires_authentication(
     client: TestClient,
 ) -> None:
     proposal_code = "2021-2-LSP-001"
-    data = {"status": "Accept", "user_id": 1006}
+    user_id = 1006
+    data = {"status": "Accepted"}
     not_authenticated(client)
     response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
         json=data,
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_investigator_approval_proposal_status_update_requires_user_id(
-    client: TestClient,
+def test_investigator_approval_proposal_status_update_requires_an_existing_proposal_code(
+        client: TestClient,
 ) -> None:
-    proposal_code = "2021-2-LSP-001"
+    proposal_code = "2099-1-SCI-001"
+    user_id = 1006
     username = find_username("administrator")
-    data = {"status": "Reject"}
+    data = "Rejected"
 
     authenticate(username, client)
 
     response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
         json=data,
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_investigator_approval_proposal_status_update_requires_an_existing_user_id(
+    client: TestClient,
+) -> None:
+    proposal_code = "2021-2-LSP-001"
+    user_id = 100000000
+    username = find_username("administrator")
+    data = "Accepted"
+
+    authenticate(username, client)
+
+    response = client.put(
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
+        json=data,
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_investigator_approval_proposal_status_update_requires_approval_status(
@@ -41,13 +60,12 @@ def test_investigator_approval_proposal_status_update_requires_approval_status(
 ) -> None:
     proposal_code = "2021-2-LSP-001"
     username = find_username("administrator")
-    data = {"user_id": 10}
+    user_id = 10
 
     authenticate(username, client)
 
     response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
-        json=data,
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -57,15 +75,16 @@ def test_investigator_approval_proposal_status_update_requires_valid_approval_st
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
-    data = {"status": "Wrong status", "user_id": 658}  # user id of the above user
+    user_id = 658   # user id of the above user
+    data = "Wrong status"
 
     authenticate(username, client)
 
     response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
         json=data,
     )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.parametrize(
@@ -81,11 +100,30 @@ def test_investigator_approval_proposal_status_update_requires_permissions(
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
-    data = {"status": "Reject", "user_id": 658}
+    user_id = 658  # user id for investigator in proposal 2019-2-SCI-006
+    data = "Rejected"
     authenticate(username, client)
 
     response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
+        json=data,
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_from_updating_for_another_user(
+        client: TestClient,
+) -> None:
+    proposal_code = "2019-2-SCI-006"
+    username = find_username("Investigator", proposal_code="2019-2-SCI-006")
+    authenticate(username, client)
+
+    pc_user_id = 1413  # user id for the Principal Contact user in proposal 2019-2-SCI-006
+    data = "Rejected"
+    authenticate(username, client)
+
+    response = client.put(
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{pc_user_id}",
         json=data,
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -98,10 +136,11 @@ def test_investigator_approval_proposal_status_update(
     username = find_username("Principal Contact", proposal_code="2019-2-SCI-006")
     authenticate(username, client)
 
-    data = {"status": "Reject", "user_id": 1413}  # user id of the above user
+    user_id = 1413  # user id of the Principal Contact user
+    data = "Rejected"
 
     response = client.put(
-        PROPOSALS_URL + "/" + proposal_code + "/investigator-proposal-approval-status",
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
         json=data,
     )
     assert response.status_code == status.HTTP_200_OK

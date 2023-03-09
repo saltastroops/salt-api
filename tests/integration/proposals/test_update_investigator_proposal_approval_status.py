@@ -75,7 +75,7 @@ def test_investigator_approval_proposal_status_update_requires_valid_approval_st
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
-    user_id = 658   # user id of the above user
+    user_id = 656   # user id of the above user
     data = "Wrong status"
 
     authenticate(username, client)
@@ -100,7 +100,7 @@ def test_investigator_approval_proposal_status_update_requires_permissions(
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
-    user_id = 658  # user id for investigator in proposal 2019-2-SCI-006
+    user_id = 656  # user id for investigator in proposal 2019-2-SCI-006
     data = "Rejected"
     authenticate(username, client)
 
@@ -129,7 +129,34 @@ def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_f
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_investigator_approval_proposal_status_update(
+def test_investigator_approval_proposal_status_update_for_an_administrator(
+        client: TestClient,
+) -> None:
+    proposal_code = "2019-2-SCI-006"
+    username = find_username("Administrator")
+    authenticate(username, client)
+
+    user_id = 1413  # user id for the Principal Contact user in proposal 2019-2-SCI-006
+    data = "Accepted"
+
+    response = client.put(
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
+        json=data,
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
+
+    assert resp.status_code == status.HTTP_200_OK
+
+    proposal = resp.json()
+
+    investigator = [i for i in proposal["investigators"] if i["id"] == user_id]
+
+    assert investigator[0]["has_approved_proposal"] == 1
+
+
+def test_investigator_approval_proposal_status_update_for_pc(
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
@@ -144,3 +171,40 @@ def test_investigator_approval_proposal_status_update(
         json=data,
     )
     assert response.status_code == status.HTTP_200_OK
+
+    resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
+
+    assert resp.status_code == status.HTTP_200_OK
+
+    proposal = resp.json()
+
+    investigator = [i for i in proposal["investigators"] if i["id"] == user_id]
+
+    assert investigator[0]["has_approved_proposal"] == 0
+
+
+def test_investigator_approval_proposal_status_update_for_an_investigator(
+        client: TestClient,
+) -> None:
+    proposal_code = "2019-2-SCI-006"
+    username = find_username("Investigator", proposal_code="2019-2-SCI-006")
+    authenticate(username, client)
+
+    user_id = 656  # user id for investigator in proposal 2019-2-SCI-006
+    data = "Rejected"
+
+    response = client.put(
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
+        json=data,
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
+
+    assert resp.status_code == status.HTTP_200_OK
+
+    proposal = resp.json()
+
+    investigator = [i for i in proposal["investigators"] if i["id"] == user_id]
+
+    assert investigator[0]["has_approved_proposal"] == 0

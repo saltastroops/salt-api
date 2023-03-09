@@ -1,5 +1,5 @@
 <wm-loading-indicator
-  *ngIf="isLoading"
+  *ngIf="isLoading && !proposal"
   message="Loading proposal..."
 ></wm-loading-indicator>
 <wm-error-indicator *ngIf="error" message="Loading failed"></wm-error-indicator>

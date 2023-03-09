@@ -496,8 +496,8 @@ def update_investigator_proposal_approval_status(
 
     Status | Description
     --- | ---
-    Approve | The investigator approves the proposal.
-    Reject | The investigator rejects the proposal.
+    Accepted | The investigator accepted the proposal.
+    Rejected | The investigator rejected the proposal.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

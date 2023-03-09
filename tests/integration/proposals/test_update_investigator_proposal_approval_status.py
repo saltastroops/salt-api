@@ -22,7 +22,7 @@ def test_investigator_approval_proposal_status_update_requires_authentication(
 
 
 def test_investigator_approval_proposal_status_update_requires_an_existing_proposal_code(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2099-1-SCI-001"
     user_id = 1006
@@ -75,7 +75,7 @@ def test_investigator_approval_proposal_status_update_requires_valid_approval_st
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
-    user_id = 656   # user id of the above user
+    user_id = 656  # user id of the above user
     data = "Wrong status"
 
     authenticate(username, client)
@@ -112,13 +112,15 @@ def test_investigator_approval_proposal_status_update_requires_permissions(
 
 
 def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_from_updating_for_another_user(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
     authenticate(username, client)
 
-    pc_user_id = 1413  # user id for the Principal Contact user in proposal 2019-2-SCI-006
+    pc_user_id = (
+        1413  # user id for the Principal Contact user in proposal 2019-2-SCI-006
+    )
     data = "Rejected"
     authenticate(username, client)
 
@@ -130,7 +132,7 @@ def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_f
 
 
 def test_investigator_approval_proposal_status_update_for_an_administrator(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Administrator")
@@ -184,7 +186,7 @@ def test_investigator_approval_proposal_status_update_for_pc(
 
 
 def test_investigator_approval_proposal_status_update_for_an_investigator(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")

@@ -2388,13 +2388,13 @@ WHERE PC.Proposal_Code = :proposal_code
 UPDATE ProposalInvestigator
 SET InvestigatorOkay=:approved,
     ApprovalCode=NULL
-WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id 
-                         FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code) 
-AND Investigator_Id = (SELECT I.Investigator_Id
-                       FROM PiptUser PU
-                       JOIN Investigator I ON PU.PiptUser_Id = I.PiptUser_Id
-                       WHERE PU.PiptUser_Id = :user_id)              
+WHERE Investigator_Id = (SELECT * FROM(SELECT I.Investigator_Id
+                       FROM Investigator I
+                       JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+                       JOIN ProposalInvestigator PI ON I.Investigator_Id = PI.Investigator_Id 
+                       JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
+                       WHERE PC.Proposal_Code = :proposal_code
+                       AND PU.PiptUser_Id = :user_id)tblTmp)              
         """
         )
         result = self.connection.execute(

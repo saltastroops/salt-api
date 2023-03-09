@@ -475,7 +475,7 @@ def update_investigator_proposal_approval_status(
         title="Proposal code",
         description="Proposal code of the proposal whose status is updated.",
     ),
-    user_id: int = Body(
+    user_id: int = Path(
         ...,
         title="User id",
         description="Id of the user",

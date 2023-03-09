@@ -344,8 +344,8 @@ class ProposalService:
         """
         allowed_status_list = ["Accepted", "Rejected"]
         if status not in allowed_status_list:
-            raise AuthorizationError()
-        approved = status == "Accept"
+            raise ValidationError("Unknown proposal approval status.")
+        approved = status == "Accepted"
         self.repository.update_investigator_proposal_approval_status(
             user_id, proposal_code, approved
         )

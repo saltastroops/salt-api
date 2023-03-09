@@ -21,6 +21,9 @@ class ProposalUser(FullName):
     email: EmailStr = Field(..., title="Email address", description="Email address")
 
 
+ProposalApprovalStatus = Literal["Accepted", "Rejected"]
+
+
 class ProposalStatusValue(str, Enum):
     """Proposal status value."""
 

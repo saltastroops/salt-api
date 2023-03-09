@@ -33,7 +33,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus,
+    UpdateStatus, ProposalApprovalStatus,
 )
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
@@ -480,7 +480,7 @@ def update_investigator_proposal_approval_status(
         title="User id",
         description="Id of the user",
     ),
-    approval_status: str = Body(
+    approval_status: ProposalApprovalStatus = Body(
         ...,
         alias="status",
         title="Proposal status and (optional) status comment",

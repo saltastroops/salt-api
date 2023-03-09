@@ -465,7 +465,7 @@ def get_data_release_date(
 
 
 @router.put(
-    "/{proposal_code}/investigator-proposal-approval-status",
+    "/{proposal_code}/approvals/{user_id}",
     summary="Update the proposal status",
     status_code=status.HTTP_200_OK,
 )

@@ -2386,7 +2386,8 @@ WHERE PC.Proposal_Code = :proposal_code
         stmt = text(
             """
 UPDATE ProposalInvestigator
-SET InvestigatorOkay=:approved
+SET InvestigatorOkay=:approved,
+    ApprovalCode=NULL
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id 
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code) 

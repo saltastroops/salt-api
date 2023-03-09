@@ -506,11 +506,8 @@ def update_investigator_proposal_approval_status(
         permission_service.check_permission_to_update_investigator_proposal_approval_status(
             user, proposal_code
         )
-        if user.id != user_id:
-            permission_service.check_permission_to_update_user(user, user_id)
-            user_details = user_service.get_user(user_id)
-        else:
-            user_details = user
+
+        user_details = user if user.id == user_id else user_service.get_user(user_id)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_investigator_proposal_approval_status(

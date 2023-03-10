@@ -336,16 +336,11 @@ class ProposalService:
         self.repository.update_proposal_status(proposal_code, status, status_comment)
 
     def update_investigator_proposal_approval_status(
-        self, user_id: int, proposal_code: str, status: str
+        self, user_id: int, proposal_code: str, approved: bool
     ) -> None:
         """
-        Updates the investigator's approval status of the proposal with the given
-        proposal code.
+        Updates the investigator's approval status of the proposal.
         """
-        allowed_status_list = ["Accepted", "Rejected"]
-        if status not in allowed_status_list:
-            raise ValidationError("Unknown proposal approval status.")
-        approved = status == "Accepted"
         self.repository.update_investigator_proposal_approval_status(
             user_id, proposal_code, approved
         )

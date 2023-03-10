@@ -344,3 +344,15 @@ class ProposalService:
         Set the proposal status for a proposal code.
         """
         self.repository.update_proposal_status(proposal_code, status, status_comment)
+
+    def update_is_self_activatable(self, proposal_code: str, is_self_activatable: bool) -> None:
+        self.repository.update_is_self_activatable(proposal_code, is_self_activatable)
+
+    def is_self_activatable(self, proposal_code: str) -> bool:
+        return self.repository.is_self_activatable(proposal_code)
+
+    def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
+        self.repository.update_liaison_astronomer(proposal_code, liaison_astronomer_id)
+
+    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, any]]:
+        return self.repository.get_liaison_astronomer(proposal_code)

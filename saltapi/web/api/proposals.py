@@ -20,7 +20,7 @@ from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.proposal import ProposalStatus as _ProposalStatus
-from saltapi.service.user import User
+from saltapi.service.user import User, LiaisonAstronomer
 from saltapi.util import semester_start
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
@@ -33,8 +33,9 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    UpdateStatus,
+    UpdateStatus, SelfActivation,
 )
+from saltapi.web.schema.user import UserId
 
 router = APIRouter(prefix="/proposals", tags=["Proposals"])
 
@@ -462,3 +463,82 @@ def get_data_release_date(
     public.
     """
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@router.put(
+    "/{proposal_code}/self-activation",
+    summary="Change the status whether the proposal may be activated by the Principal Investigator and Principal Contact",
+    response_model=SelfActivation
+)
+def put_is_self_activatable(
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description=(
+                    "Proposal code of the proposal for which an observation comment is added."
+            ),
+        ),
+        self_activation: SelfActivation = Body(
+            ...,
+            title="Allowed to self-activate",
+            description=(
+                    "is the Principal Investigator or Principal Contact allowed to activate the proposal."
+            )
+        ),
+        user: User = Depends(get_current_user),
+) -> SelfActivation:
+    """
+    Change the self-activation status of the proposal.
+
+    A proposal is self-activatable if the Principal Investigator or Principal Contact are allowed to activate it.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_change_self_activatable(user)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal_service.update_is_self_activatable(
+            proposal_code=proposal_code, is_self_activatable=self_activation.allowed
+        )
+        unit_of_work.commit()
+        return SelfActivation(
+            allowed = proposal_service.is_self_activatable(proposal_code)
+        )
+
+@router.put(
+    "/{proposal_code}/liaison-astronomer",
+    summary="Set the liaison astronomer for the proposal",
+    response_model=Optional[LiaisonAstronomer],
+    status_code=200,
+)
+def update_liaison_astronomer(
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description=(
+                    "Proposal code of the proposal for which the liaison astronomer is updated."
+            ),
+        ),
+        liaison_astronomer_id: Optional[UserId] = Body(
+            ...,
+            title="Liaison astronomer id",
+            description="The user id of the liaison astronomer."
+        ),
+        user: User = Depends(get_current_user),
+) -> Optional[LiaisonAstronomer]:
+    """
+    Update the liaison astronomer of the proposal.
+    """
+    with UnitOfWork() as unit_of_work:
+            permission_service = services.permission_service(unit_of_work.connection)
+            permission_service.check_permission_to_update_liaison_astronomer(user)
+
+            proposal_service = services.proposal_service(unit_of_work.connection)
+            proposal_service.update_liaison_astronomer(
+                proposal_code=proposal_code, liaison_astronomer_id=liaison_astronomer_id.id
+            )
+            unit_of_work.commit()
+            liaison_salt_astronomer = proposal_service.get_liaison_astronomer(proposal_code)
+            if liaison_salt_astronomer:
+                return LiaisonAstronomer(**liaison_salt_astronomer)
+            return None

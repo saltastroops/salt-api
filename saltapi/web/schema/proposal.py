@@ -628,8 +628,20 @@ class ProposalProgressInput(BaseProgressReport):
         ),
     )
 
-    @validator("partner_requested_percentages")
-    def partner_requested_percentages_valid(cls, v: str) -> str:
-        # If the value is invalid, parsing it will raise an error.
-        parse_partner_requested_percentages(v)
-        return v
+
+
+class SelfActivation(BaseModel):
+    allowed: bool = Field(
+        ...,
+        title="Can the proposal be self-activated?",
+        description=(
+            "Can the proposal be activated by the Principal Investigator or Principal"
+            " Contact?"
+        ),
+    )
+
+@validator("partner_requested_percentages")
+def partner_requested_percentages_valid(cls, v: str) -> str:
+    # If the value is invalid, parsing it will raise an error.
+    parse_partner_requested_percentages(v)
+    return v

@@ -1,8 +1,36 @@
+import { Investigator } from "./types/proposal";
+import { User } from "./types/user";
 import {
   convertRightAscensionHMSToDegrees,
   degreesToDms,
   degreesToHms,
+  isPrincipalContact,
+  isPrincipalInvestigator,
 } from "./utils";
+
+const investigators = [
+  {
+    givenName: "Principal",
+    familyName: "Investigator",
+    email: "pi@email.yes",
+    isPi: true,
+    isPc: false,
+  } as Investigator,
+  {
+    givenName: "Principal",
+    familyName: "Contact",
+    email: "pc@email.yes",
+    isPi: false,
+    isPc: true,
+  } as Investigator,
+  {
+    givenName: "Just",
+    familyName: "Investigator",
+    email: "investigator@email.yes",
+    isPi: false,
+    isPc: false,
+  } as Investigator,
+];
 
 describe("degreesToDms", () => {
   it("should return 55.23456 degrees in degrees:minutes:seconds", () => {
@@ -161,5 +189,81 @@ describe("Unit test for hours:minutes:seconds to angle (degrees) conversion func
     expect(() => convertRightAscensionHMSToDegrees("aa:bb:cc")).toThrowError(
       /Right ascension is invalid/,
     );
+  });
+});
+
+describe("Unit test to check if user is a principal investigator", () => {
+  it("It should work", () => {
+    [
+      {
+        user: {
+          givenName: "Principal",
+          familyName: "Investigator",
+          email: "pi@email.yes",
+        } as User,
+        investigators,
+        expected: true,
+      },
+      {
+        user: {
+          givenName: "Principal",
+          familyName: "Investigator",
+          email: "pc@email.yes",
+        } as User,
+        investigators,
+        expected: false,
+      },
+      {
+        user: {
+          givenName: "Just",
+          familyName: "Investigator",
+          email: "investigator@email.yes",
+        } as User,
+        investigators,
+        expected: false,
+      },
+    ].forEach((e) => {
+      expect(() => isPrincipalInvestigator(e.user, e.investigators)).toEqual(
+        e.expected,
+      );
+    });
+  });
+});
+
+describe("Unit test to check if user is a principal contact", () => {
+  it("It should work", () => {
+    [
+      {
+        user: {
+          givenName: "Principal",
+          familyName: "Investigator",
+          email: "pi@email.yes",
+        } as User,
+        investigators,
+        expected: false,
+      },
+      {
+        user: {
+          givenName: "Principal",
+          familyName: "Investigator",
+          email: "pc@email.yes",
+        } as User,
+        investigators,
+        expected: true,
+      },
+      {
+        user: {
+          givenName: "Just",
+          familyName: "Investigator",
+          email: "investigator@email.yes",
+        } as User,
+        investigators,
+        expected: false,
+      },
+    ].forEach((e) => {
+      expect(() => isPrincipalContact(e.user, e.investigators)).toEqual(
+        e.expected,
+      );
+    });
   });
 });

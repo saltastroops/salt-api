@@ -4,19 +4,21 @@
     (updatePeriod)="onProprietaryPeriodUpdate($event)"
   ></wm-edit-proprietary-period-modal>
   <table class="table">
-    <tr class="secondary-header">
-      <th colspan="2" class="has-text-centered">Details</th>
-    </tr>
+    <thead>
+      <tr class="secondary-header">
+        <th colspan="2" class="has-text-centered">Details</th>
+      </tr>
+    </thead>
+
     <tbody>
       <tr>
         <th>Status</th>
-        <td>{{ proposal.generalInfo.status.value }}</td>
+        <td>
+          <wm-proposal-status [proposal]="proposal"></wm-proposal-status>
+        </td>
       </tr>
-      <tr
-        class="row proposal-details-row"
-        *ngIf="proposal.generalInfo.status.comment"
-      >
-        <th>Status comment</th>
+      <tr *ngIf="proposal.generalInfo.status.comment">
+        <th>Status Comment</th>
         <td>{{ proposal.generalInfo.status.comment }}</td>
       </tr>
       <tr>
@@ -51,21 +53,27 @@
       <tr>
         <th>Proprietary period</th>
         <td class="proprietary-period">
-          <div>{{ releaseDate | dfnsFormat: "d MMMM yyyy" }}</div>
-          <div *ngIf="showChangeButton">
-            <button
-              (click)="
-                proprietaryPeriodModal.openModal(
-                  proposal.generalInfo.proprietaryPeriod,
-                  proposal.proposalCode
-                )
-              "
-              class="button is-small"
-            >
-              change
-            </button>
-          </div>
+          {{ releaseDate | dfnsFormat: "d MMMM yyyy" }}
+          <button
+            (click)="
+              proprietaryPeriodModal.openModal(
+                proposal.generalInfo.proprietaryPeriod,
+                proposal.proposalCode
+              )
+            "
+            class="button is-pulled-right"
+          >
+            Change
+          </button>
         </td>
+      </tr>
+      <tr *ngIf="isAdminOrSa">
+        <th colspan="2">
+          <wm-self-activate
+            [proposalCode]="proposal.proposalCode"
+            [isSelfActivatable]="isSelfActivatable"
+          ></wm-self-activate>
+        </th>
       </tr>
     </tbody>
   </table>

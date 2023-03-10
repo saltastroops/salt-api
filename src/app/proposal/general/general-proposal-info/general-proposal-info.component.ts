@@ -3,7 +3,11 @@ import { UntypedFormControl } from "@angular/forms";
 
 import { parseISO } from "date-fns";
 
-import { Investigator, Proposal } from "../../../types/proposal";
+import {
+  Investigator,
+  Proposal,
+  ProposalStatusValue,
+} from "../../../types/proposal";
 
 @Component({
   selector: "wm-general-proposal-info",
@@ -15,8 +19,6 @@ export class GeneralProposalInfoComponent implements OnInit {
   semesterControl = new UntypedFormControl();
   currentSubmission!: Date;
   firstSubmission!: Date;
-  statusDescription = "";
-  backgroundColor = "";
   principalInvestigator: Investigator | undefined;
   principalContact: Investigator | undefined;
 
@@ -35,55 +37,68 @@ export class GeneralProposalInfoComponent implements OnInit {
     this.principalInvestigator = investigators.find(
       (investigator) => investigator.isPi,
     );
+  }
 
-    const status = this.proposal.generalInfo.status.value;
-
+  backgroundColor(status: ProposalStatusValue): string {
     switch (status) {
       case "Active":
-        this.statusDescription =
-          "This proposal has been added to the queue to be observed.";
-        this.backgroundColor = "has-background-success";
-        break;
+        return "has-background-success";
 
       case "Accepted":
-        this.statusDescription = "This proposal has been accepted.";
-        this.backgroundColor = "has-background-success";
-        break;
+        return "has-background-success";
 
       case "Completed":
-        this.statusDescription = "This proposal has been completed.";
-        this.backgroundColor = "has-background-success";
-        break;
+        return "has-background-success";
 
       case "Deleted":
-        this.statusDescription = "This proposal has been deleted.";
-        this.backgroundColor = "has-background-danger";
-        break;
+        return "has-background-danger";
 
       case "Expired":
-        this.statusDescription = "This proposal has expired.";
-        this.backgroundColor = "has-background-danger";
-        break;
+        return "has-background-danger";
 
       case "Inactive":
-        this.statusDescription = "This proposal is inactive.";
-        this.backgroundColor = "has-background-danger";
-        break;
+        return "has-background-danger";
 
       case "Superseded":
-        this.statusDescription = "This proposal has been superseded.";
-        this.backgroundColor = "has-background-danger";
-        break;
+        return "has-background-danger";
 
       case "Under technical review":
-        this.statusDescription = "This proposal is under technical review.";
-        this.backgroundColor = "has-background-danger";
-        break;
+        return "has-background-danger";
 
       case "Under scientific review":
-        this.statusDescription = "This proposal is under scientific review.";
-        this.backgroundColor = "has-background-danger";
-        break;
+        return "has-background-danger";
     }
+    return "";
+  }
+  statusDescription(status: ProposalStatusValue): string {
+    switch (status) {
+      case "Active":
+        return "This proposal has been added to the queue to be observed.";
+
+      case "Accepted":
+        return "This proposal has been accepted.";
+
+      case "Completed":
+        return "This proposal has been completed.";
+
+      case "Deleted":
+        return "This proposal has been deleted.";
+
+      case "Expired":
+        return "This proposal has expired.";
+
+      case "Inactive":
+        return "This proposal is inactive.";
+
+      case "Superseded":
+        return "This proposal has been superseded.";
+
+      case "Under technical review":
+        return "This proposal is under technical review.";
+
+      case "Under scientific review":
+        return "This proposal is under scientific review.";
+    }
+    return "";
   }
 }

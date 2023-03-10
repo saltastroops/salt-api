@@ -200,3 +200,7 @@ export type ProgressReportsUrls = { [key: string]: { [key: string]: string } };
 export interface NewProprietaryPeriod extends ProprietaryPeriod {
   status: string;
 }
+
+export interface SelfActivation {
+  allowed: boolean;
+}

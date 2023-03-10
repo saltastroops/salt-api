@@ -1,0 +1,26 @@
+<label
+  for="self-activatable"
+  class="checkbox"
+  [ngClass]="!isUpdated && updateMessage ? 'has-text-danger' : ''"
+>
+  <input
+    type="checkbox"
+    id="self-activatable"
+    (change)="changeSelfActivatable()"
+    [checked]="isSelfActivatable"
+    [attr.disabled]="loading ? true : null"
+  />
+  The PI/PC may activate the proposal
+</label>
+<div *ngIf="loading" class="control is-loading"></div>
+
+<p
+  [ngClass]="
+    isUpdated
+      ? 'invalid-feedback has-text-success'
+      : 'invalid-feedback has-text-danger'
+  "
+  *ngIf="updateMessage"
+>
+  {{ updateMessage }}
+</p>

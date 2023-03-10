@@ -294,12 +294,12 @@ export function isUserPrincipalInvestigator(
   user: User,
   investigators: Investigator[],
 ): boolean {
-  return investigators.some((i) => i.id == user.id && i.isPi);
+  return investigators.some((i) => i.id === user.id && i.isPi);
 }
 
 export function isUserPrincipalContact(
   user: User,
   investigators: Investigator[],
 ): boolean {
-  return investigators.some((i) => i.id == user.id && i.isPc);
+  return investigators.some((i) => i.id === user.id && i.isPc);
 }

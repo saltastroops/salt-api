@@ -1,0 +1,28 @@
+<wm-liaison-astronomer-modal
+  [proposal]="proposal"
+  #liaisonAstronomerModal
+></wm-liaison-astronomer-modal>
+<table class="table">
+  <tr class="secondary-header">
+    <th class="has-text-centered" colspan="2">Responsible SALT Astronomer:</th>
+  </tr>
+  <tr>
+    <td>
+      <div *ngIf="proposal.generalInfo.liaisonSaltAstronomer">
+        <a href="mailto:salthelp@salt.ac.za">
+          {{ proposal.generalInfo.liaisonSaltAstronomer.givenName }}
+          {{ proposal.generalInfo.liaisonSaltAstronomer.familyName }}
+        </a>
+      </div>
+      <div *ngIf="!proposal.generalInfo.liaisonSaltAstronomer">None</div>
+
+      <button
+        *ngIf="isAdminOrSa || isPiOrPc"
+        class="button is-pulled-right"
+        (click)="liaisonAstronomerModal.openModal()"
+      >
+        Change
+      </button>
+    </td>
+  </tr>
+</table>

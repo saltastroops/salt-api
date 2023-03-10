@@ -1,0 +1,71 @@
+<div *ngIf="isModalActive">
+  <div class="modal" [ngClass]="isModalActive ? 'is-active' : ''">
+    <div
+      *ngIf="astronomersError || updateError"
+      class="modal-background danger"
+      (click)="closeModal()"
+    ></div>
+    <div
+      *ngIf="!astronomersError && !updateError"
+      class="modal-background"
+      (click)="closeModal()"
+    ></div>
+    <div class="modal-card">
+      <form class="" [formGroup]="saltAstronomerForm" (submit)="submit()">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Change liaison SALT Astronomer</p>
+          <button
+            class="delete"
+            aria-label="close"
+            (click)="closeModal()"
+          ></button>
+        </header>
+        <section class="modal-card-body">
+          <div class="field is-grouped">
+            <div class="control">
+              <div class="select">
+                <select
+                  id="salt-astronomers"
+                  #saltAstronomer
+                  (change)="changeSaltAstronomer(saltAstronomer.value)"
+                  formControlName="selectedSaltAstronomer"
+                  [attr.disabled]="submitting ? '' : null"
+                >
+                  <option value="">None</option>
+                  <option *ngFor="let sa of saltAstronomers" [value]="sa.id">
+                    {{ sa.givenName + " " + sa.familyName }}
+                  </option>
+                </select>
+              </div>
+              <div *ngIf="loadingAstronomers" class="control is-loading"></div>
+            </div>
+          </div>
+        </section>
+        <footer class="modal-card-foot">
+          <div class="field is-grouped">
+            <div class="control">
+              <input class="button is-primary" type="submit" value="Submit" />
+            </div>
+            <div class="control">
+              <button class="button is-danger" (click)="closeModal()">
+                Cancel
+              </button>
+            </div>
+            <div
+              *ngIf="updateError"
+              class="invalid-feedback has-text-danger has-text-centered"
+            >
+              {{ updateError }}
+            </div>
+            <div
+              *ngIf="astronomersError"
+              class="invalid-feedback has-text-danger has-text-centered"
+            >
+              {{ astronomersError }}
+            </div>
+          </div>
+        </footer>
+      </form>
+    </div>
+  </div>
+</div>

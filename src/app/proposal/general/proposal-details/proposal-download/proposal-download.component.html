@@ -15,9 +15,7 @@
         <a [href]="summaryDownloadLink()">Download summary</a>
       </td>
     </tr>
-
-    <wm-responsible-astronomer
-      [generalProposalInfo]="proposal.generalInfo"
-    ></wm-responsible-astronomer>
   </table>
+
+  <wm-liaison-astronomer [proposal]="proposal"></wm-liaison-astronomer>
 </div>

@@ -44,11 +44,15 @@ import { EditBlockVisitStatusModalComponent } from "./proposal/general/edit-bloc
 import { GeneralProposalInfoComponent } from "./proposal/general/general-proposal-info/general-proposal-info.component";
 import { ObservationCommentsComponent } from "./proposal/general/observation-comments/observation-comments.component";
 import { DetailsTableComponent } from "./proposal/general/proposal-details/details-table/details-table.component";
+import { ProposalStatusModalComponent } from "./proposal/general/proposal-details/details-table/proposal-status/proposal-status-modal/proposal-status-modal.component";
+import { ProposalStatusComponent } from "./proposal/general/proposal-details/details-table/proposal-status/proposal-status.component";
+import { SelfActivateComponent } from "./proposal/general/proposal-details/details-table/self-activate/self-activate.component";
 import { EditProprietaryPeriodModalComponent } from "./proposal/general/proposal-details/edit-proprietary-period-modal/edit-proprietary-period-modal.component";
+import { LiaisonAstronomerModalComponent } from "./proposal/general/proposal-details/liaison-astronomer/liaison-astronomer-modal/liaison-astronomer-modal.component";
+import { LiaisonAstronomerComponent } from "./proposal/general/proposal-details/liaison-astronomer/liaison-astronomer.component";
 import { ProposalDetailsComponent } from "./proposal/general/proposal-details/proposal-details.component";
 import { ProposalDownloadComponent } from "./proposal/general/proposal-details/proposal-download/proposal-download.component";
 import { ProposalSummaryComponent } from "./proposal/general/proposal-details/proposal-summary/proposal-summary.component";
-import { ResponsibleAstronomerComponent } from "./proposal/general/proposal-details/responsible-astronomer/responsible-astronomer.component";
 import { ProgressRequestFormComponent } from "./proposal/general/proposal-progress/progress-request-form/progress-request-form.component";
 import { ProposalProgressComponent } from "./proposal/general/proposal-progress/proposal-progress.component";
 import { RequestedObservingConditionsComponent } from "./proposal/general/proposal-progress/requested-observing-conditions/requested-observing-conditions.component";
@@ -196,7 +200,7 @@ import { SortDirective } from "./sort.directive";
     PhaseOneProposalDetailsComponent,
     ProposalSummaryComponent,
     ProposalDownloadComponent,
-    ResponsibleAstronomerComponent,
+    LiaisonAstronomerComponent,
     DetailsTableComponent,
     PhaseOneProposalDetailsTableComponent,
     RequestedTimesComponent,
@@ -205,6 +209,10 @@ import { SortDirective } from "./sort.directive";
     EditProprietaryPeriodModalComponent,
     EditBlockStatusModalComponent,
     EditBlockVisitStatusModalComponent,
+    ProposalStatusModalComponent,
+    SelfActivateComponent,
+    ProposalStatusComponent,
+    LiaisonAstronomerModalComponent,
   ],
   imports: [
     BrowserModule,

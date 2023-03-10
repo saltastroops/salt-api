@@ -6,7 +6,10 @@ import {
   Proposal,
   ProposalListItem,
   ProposalProgress,
+  ProposalStatus,
+  SelfActivation,
 } from "../types/proposal";
+import { LiaisonAstronomer } from "../types/user";
 
 export abstract class ProposalService {
   /**
@@ -68,4 +71,20 @@ export abstract class ProposalService {
     period: number,
     motivation: string | null,
   ): Observable<NewProprietaryPeriod>;
+
+  public abstract submitProposalStatus(
+    proposalCode: string,
+    proposalStatus: string,
+    proposalStatusReason: string | null,
+  ): Observable<ProposalStatus>;
+
+  public abstract updateSelfActivatable(
+    proposalCode: string,
+    isSelfActivatable: boolean,
+  ): Observable<SelfActivation>;
+
+  public abstract updateLiaisonAstronomer(
+    proposalCode: string,
+    liaisonAstronomerId: number | null,
+  ): Observable<LiaisonAstronomer>;
 }

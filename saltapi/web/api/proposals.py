@@ -484,7 +484,7 @@ def update_investigator_proposal_approval_status(
         title="User id",
         description="Id of the user",
     ),
-    approval_status: bool = Body(
+    approval_status: ProposalApprovalStatus = Body(
         ...,
         alias="status",
         title="Proposal approval status",
@@ -494,13 +494,6 @@ def update_investigator_proposal_approval_status(
 ) -> None:
     """
     Updates an investigator's approval status of the proposal.
-
-    The following status values are possible.
-
-    Status | Description
-    --- | ---
-    True | The investigator accepted the proposal.
-    False | The investigator rejected the proposal.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
@@ -514,7 +507,7 @@ def update_investigator_proposal_approval_status(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_investigator_proposal_approval_status(
-            user_details.id, proposal_code, approval_status
+            user_details.id, proposal_code, approval_status.approved
         )
 
         unit_of_work.commit()

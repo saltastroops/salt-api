@@ -503,7 +503,11 @@ def update_investigator_proposal_approval_status(
             user, approval_user_id, proposal_code
         )
 
-        user_details = user if user.id == approval_user_id else user_service.get_user(approval_user_id)
+        user_details = (
+            user
+            if user.id == approval_user_id
+            else user_service.get_user(approval_user_id)
+        )
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_investigator_proposal_approval_status(

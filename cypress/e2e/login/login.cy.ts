@@ -92,7 +92,7 @@ describe("Login page", () => {
     });
   });
 
-  it.only("should handle logging in again after an error", () => {
+  it("should handle logging in again after an error", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // Ensure the inline login form is not hidden because of a small screen size
       cy.viewport(1500, 2000);

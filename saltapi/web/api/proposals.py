@@ -466,7 +466,7 @@ def get_data_release_date(
 
 
 @router.put(
-    "/{proposal_code}/approvals/{user_id}",
+    "/{proposal_code}/approvals/{approval_user_id}",
     summary="Update the proposal status",
     status_code=status.HTTP_200_OK,
 )
@@ -479,7 +479,7 @@ def update_investigator_proposal_approval_status(
             " updated."
         ),
     ),
-    user_id: int = Path(
+    approval_user_id: int = Path(
         ...,
         title="User id",
         description="Id of the user",
@@ -507,10 +507,10 @@ def update_investigator_proposal_approval_status(
         user_service = services.user_service(unit_of_work.connection)
 
         permission_service.check_permission_to_update_investigator_proposal_approval_status(
-            user, user_id, proposal_code
+            user, approval_user_id, proposal_code
         )
 
-        user_details = user if user.id == user_id else user_service.get_user(user_id)
+        user_details = user if user.id == approval_user_id else user_service.get_user(approval_user_id)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_investigator_proposal_approval_status(

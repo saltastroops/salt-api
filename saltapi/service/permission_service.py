@@ -469,7 +469,7 @@ class PermissionService:
         )
 
     def check_permission_to_update_investigator_proposal_approval_status(
-        self, user: User, user_id: int, proposal_code: str
+        self, user: User, approval_user_id: int, proposal_code: str
     ) -> None:
         if user.id != user_id:
             self.check_permission_to_view_user(user, user_id)

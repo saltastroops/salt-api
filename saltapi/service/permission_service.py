@@ -468,8 +468,16 @@ class PermissionService:
             roles=roles,
         )
 
+    def check_permission_to_change_self_activatable(self, user: User):
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+        self.check_role(user.username, roles)
+
+    def check_permission_to_update_liaison_astronomer(self, user):
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+        self.check_role(user.username, roles)
+
     def check_permission_to_update_investigator_proposal_approval_status(
-        self, user: User, approval_user_id: int, proposal_code: str
+            self, user: User, approval_user_id: int, proposal_code: str
     ) -> None:
         roles = (
             [Role.ADMINISTRATOR] if user.id != approval_user_id else [Role.INVESTIGATOR]

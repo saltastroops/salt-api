@@ -68,6 +68,37 @@ class Priority(IntEnum):
     P4 = 4
 
 
+class Semester(str):
+    """
+    A string denoting a semester, such as "2021-2" or "2022-1".
+
+    The string must consist of a four-digit year (between 2000 and 2099) followed by a
+    dash and "1" or "2".
+    """
+
+    # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
+    semester_regex = r"20\d{2}-[12]"
+
+    @classmethod
+    def __get_validators__(cls) -> Generator[Callable[[str], str], None, None]:
+        yield cls.validate
+
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[Any, Any]) -> None:
+        field_schema.update(
+            pattern=Semester.semester_regex, examples=["2021-2", "2022-1"]
+        )
+
+    @classmethod
+    def validate(cls, v: str) -> str:
+        if not isinstance(v, str):
+            raise TypeError("string required")
+        m = re.match(Semester.semester_regex, v)
+        if not m:
+            raise ValueError("incorrect semester format")
+        return v
+
+
 class BlockVisit(BaseBlockVisit):
     """An observation made."""
 
@@ -102,6 +133,11 @@ class BlockVisit(BaseBlockVisit):
         ),
         ge=0,
         le=100,
+    )
+    semester: Semester = Field(
+        ...,
+        title="Semester",
+        description="The semester which the block visit belong."
     )
 
 
@@ -275,37 +311,6 @@ class Ranking(str, Enum):
     HIGH = "High"
     LOW = "Low"
     MEDIUM = "Medium"
-
-
-class Semester(str):
-    """
-    A string denoting a semester, such as "2021-2" or "2022-1".
-
-    The string must consist of a four-digit year (between 2000 and 2099) followed by a
-    dash and "1" or "2".
-    """
-
-    # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-    semester_regex = r"20\d{2}-[12]"
-
-    @classmethod
-    def __get_validators__(cls) -> Generator[Callable[[str], str], None, None]:
-        yield cls.validate
-
-    @classmethod
-    def __modify_schema__(cls, field_schema: Dict[Any, Any]) -> None:
-        field_schema.update(
-            pattern=Semester.semester_regex, examples=["2021-2", "2022-1"]
-        )
-
-    @classmethod
-    def validate(cls, v: str) -> str:
-        if not isinstance(v, str):
-            raise TypeError("string required")
-        m = re.match(Semester.semester_regex, v)
-        if not m:
-            raise ValueError("incorrect semester format")
-        return v
 
 
 class TargetCoordinates(BaseModel):

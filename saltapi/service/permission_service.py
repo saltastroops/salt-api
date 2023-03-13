@@ -468,10 +468,10 @@ class PermissionService:
             roles=roles,
         )
 
-    def check_permission_to_change_self_activatable(self, user: User):
+    def check_permission_to_change_self_activatable(self, user: User) -> None:
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
         self.check_role(user.username, roles)
 
-    def check_permission_to_update_liaison_astronomer(self, user):
+    def check_permission_to_update_liaison_astronomer(self, user: User) -> None:
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
         self.check_role(user.username, roles)

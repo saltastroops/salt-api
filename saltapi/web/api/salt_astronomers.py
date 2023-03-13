@@ -1,11 +1,13 @@
 from typing import Any, Dict, List
 
 from fastapi import APIRouter
+
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.web import services
 from saltapi.web.schema.user import UserListItem
 
 router = APIRouter(prefix="/salt-astronomers", tags=["SALT Astronomers"])
+
 
 @router.get(
     "/",

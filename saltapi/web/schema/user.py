@@ -128,3 +128,9 @@ class ProposalPermission(BaseModel):
         title="Proposal code",
         description="Proposal code to which the permission applies",
     )
+
+
+class UserId(BaseModel):
+    """A user id."""
+
+    id: Optional[int] = Field(..., title="User id", description="A user id.")

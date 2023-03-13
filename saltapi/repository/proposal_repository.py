@@ -64,7 +64,8 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 Contact.Email                   AS pc_email,
                 Astronomer.PiptUser_Id          AS la_user_id,
                 Astronomer.FirstName            AS la_given_name,
-                Astronomer.Surname              AS la_family_name
+                Astronomer.Surname              AS la_family_name,
+                Astronomer.Email                AS la_email
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
@@ -189,8 +190,10 @@ LIMIT :limit;
             return None
 
         astronomer = {
+            "id": row.la_user_id,
             "given_name": row.la_given_name,
             "family_name": row.la_family_name,
+            "email": row.la_email,
         }
 
         return astronomer
@@ -739,24 +742,28 @@ WHERE BS.BlockStatus NOT IN :excluded_status_values
         """
         stmt = text(
             """
-SELECT BV.BlockVisit_Id                            AS id,
-       BV.Block_Id                                 AS block_id,
-       B.Block_Name                                AS block_name,
-       B.ObsTime                                   AS observation_time,
-       B.Priority                                  AS priority,
-       B.MaxLunarPhase                             AS maximum_lunar_phase,
-       NI.Date                                     AS night,
-       BVS.BlockVisitStatus                        AS status,
-       BRR.RejectedReason                          AS rejection_reason
+SELECT
+    BV.BlockVisit_Id                            AS id,
+    BV.Block_Id                                 AS block_id,
+    B.Block_Name                                AS block_name,
+    B.ObsTime                                   AS observation_time,
+    B.Priority                                  AS priority,
+    B.MaxLunarPhase                             AS maximum_lunar_phase,
+    NI.Date                                     AS night,
+    BVS.BlockVisitStatus                        AS status,
+    BRR.RejectedReason                          AS rejection_reason,
+    CONCAT(S.Year, '-', S.Semester)			    AS semester
 FROM BlockVisit BV
-         JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
-         LEFT JOIN BlockRejectedReason BRR
-                   ON BV.BlockRejectedReason_Id = BRR.BlockRejectedReason_Id
-         JOIN NightInfo NI ON BV.NightInfo_Id = NI.NightInfo_Id
-         JOIN Block B ON BV.Block_Id = B.Block_Id
-         JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
+    LEFT JOIN BlockRejectedReason BRR
+           ON BV.BlockRejectedReason_Id = BRR.BlockRejectedReason_Id
+    JOIN NightInfo NI ON BV.NightInfo_Id = NI.NightInfo_Id
+    JOIN Block B ON BV.Block_Id = B.Block_Id
+    JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Proposal P ON P.Proposal_Id = B.Proposal_Id
+    JOIN Semester S ON S.Semester_Id = P.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
-  AND BVS.BlockVisitStatus != 'Deleted'
+    AND BVS.BlockVisitStatus != 'Deleted'
 ORDER BY B.Block_Name, NI.Date
         """
         )
@@ -772,6 +779,7 @@ ORDER BY B.Block_Name, NI.Date
                 "night": row.night,
                 "status": row.status,
                 "rejection_reason": row.rejection_reason,
+                "semester": row.semester,
             }
             for row in result
         ]
@@ -1297,7 +1305,12 @@ WHERE PIR.InactiveReason = :inactive_reason
         try:
             status_id = self._proposal_status_id(status)
         except NoResultFound:
-            raise ValueError(f"Unknown proposal status: {status}")
+            raise ValidationError(f"Unknown proposal status: {status}")
+
+        try:
+            proposal_code_id = self._get_proposal_code_id(proposal_code)
+        except NoResultFound:
+            raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
         stmt = text(
             """
@@ -1305,15 +1318,13 @@ UPDATE ProposalGeneralInfo  PGI
 SET
     PGI.ProposalStatus_Id = :status_id,
     PGI.StatusComment = :status_comment
-WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
-                         FROM ProposalCode PC
-                         WHERE PC.Proposal_Code = :proposal_code);
+WHERE ProposalCode_Id = :proposal_code_id;
         """
         )
         result = self.connection.execute(
             stmt,
             {
-                "proposal_code": proposal_code,
+                "proposal_code_id": proposal_code_id,
                 "status_id": status_id,
                 "status_comment": status_comment,
             },
@@ -2377,10 +2388,10 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
-    def _get_proposal_code_id(self, proposal_code: str):
+    def _get_proposal_code_id(self, proposal_code: str) -> int:
         stmt = text(
             """
-SELECT ProposalCode_Id FROM ProposalCode 
+SELECT ProposalCode_Id FROM ProposalCode
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2401,7 +2412,7 @@ WHERE Proposal_Code = :proposal_code
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
         VALUE(
-            :proposal_code_id, 
+            :proposal_code_id,
             :is_self_activatable
         )
         ON DUPLICATE KEY UPDATE PiPcMayActivate = :is_self_activatable;
@@ -2415,7 +2426,7 @@ WHERE Proposal_Code = :proposal_code
             },
         )
 
-    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, any]]:
+    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, Any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self._get_proposal_code_id(proposal_code)
@@ -2479,7 +2490,7 @@ WHERE ProposalCode_Id = :proposal_code_id
             },
         )
 
-    def _salt_astronomer_investigator_id(self, salt_astronomer_user_id: int):
+    def _salt_astronomer_investigator_id(self, salt_astronomer_user_id: int) -> int:
         """Return the id of the preferred investigator entry for a SALT Astronomer."""
         stmt = text(
             """

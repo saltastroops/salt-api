@@ -35,6 +35,14 @@ class UserListItem:
 
 
 @dataclass()
+class LiaisonAstronomer:
+    id: int
+    family_name: str
+    given_name: str
+    email: str
+
+
+@dataclass()
 class Institution:
     institution_id: int
     institution: str

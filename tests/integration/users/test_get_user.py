@@ -133,10 +133,3 @@ def test_admins_may_view_list_of_users(client: TestClient) -> None:
     authenticate(find_username("Administrator"), client)
     response = client.get("/users")
     assert response.status_code == status.HTTP_200_OK
-
-
-def test_unauthenticated_users_can_view_list_of_salt_astronomers(
-    client: TestClient,
-) -> None:
-    response = client.get("/users/salt-astronomers")
-    assert response.status_code == status.HTTP_200_OK

@@ -2382,10 +2382,10 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
-    def _get_proposal_code_id(self, proposal_code: str):
+    def _get_proposal_code_id(self, proposal_code: str) -> int:
         stmt = text(
             """
-SELECT ProposalCode_Id FROM ProposalCode 
+SELECT ProposalCode_Id FROM ProposalCode
 WHERE Proposal_Code = :proposal_code
         """
         )
@@ -2395,7 +2395,10 @@ WHERE Proposal_Code = :proposal_code
             raise NotFoundError(f"Couldn't find  proposal code `{proposal_code}`")
 
         return cast(int, proposal_code_id[0])
-    def update_is_self_activatable(self, proposal_code: str, is_self_activatable: bool) -> None:
+
+    def update_is_self_activatable(
+        self, proposal_code: str, is_self_activatable: bool
+    ) -> None:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self._get_proposal_code_id(proposal_code)
@@ -2403,20 +2406,21 @@ WHERE Proposal_Code = :proposal_code
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
         VALUE(
-            :proposal_code_id, 
+            :proposal_code_id,
             :is_self_activatable
         )
         ON DUPLICATE KEY UPDATE PiPcMayActivate = :is_self_activatable;
         """
         )
         self.connection.execute(
-            stmt, {
+            stmt,
+            {
                 "proposal_code_id": proposal_code_id,
                 "is_self_activatable": 1 if is_self_activatable else 0,
-            }
+            },
         )
 
-    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, any]]:
+    def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, Any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self._get_proposal_code_id(proposal_code)
@@ -2436,9 +2440,10 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
         """
         )
         result = self.connection.execute(
-            stmt, {
+            stmt,
+            {
                 "proposal_code_id": proposal_code_id,
-            }
+            },
         )
         sa = result.one_or_none()
         if not sa:
@@ -2447,13 +2452,21 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
             "id": sa.id,
             "family_name": sa.family_name,
             "given_name": sa.given_name,
-            "email": sa.email
+            "email": sa.email,
         }
 
-    def update_liaison_astronomer(self, proposal_code: str, liaison_astronomer_id: Optional[int]) -> None:
+    def update_liaison_astronomer(
+        self, proposal_code: str, liaison_astronomer_id: Optional[int]
+    ) -> None:
         # The ids could be retrieved within the SQL statement, but then a wrong proposal code or liaison id
         # would lead to more cryptic errors.
-        salt_astronomer_id = self._salt_astronomer_investigator_id(salt_astronomer_user_id=liaison_astronomer_id) if liaison_astronomer_id else None
+        salt_astronomer_id = (
+            self._salt_astronomer_investigator_id(
+                salt_astronomer_user_id=liaison_astronomer_id
+            )
+            if liaison_astronomer_id
+            else None
+        )
         proposal_code_id = self._get_proposal_code_id(proposal_code)
 
         stmt = text(
@@ -2464,13 +2477,14 @@ WHERE ProposalCode_Id = :proposal_code_id
         """
         )
         self.connection.execute(
-            stmt, {
+            stmt,
+            {
                 "proposal_code_id": proposal_code_id,
                 "liaison_astronomer_id": salt_astronomer_id,
-            }
+            },
         )
 
-    def _salt_astronomer_investigator_id(self, salt_astronomer_user_id: int):
+    def _salt_astronomer_investigator_id(self, salt_astronomer_user_id: int) -> int:
         """Return the id of the preferred investigator entry for a SALT Astronomer."""
         stmt = text(
             """
@@ -2481,12 +2495,12 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
         """
         )
         result = self.connection.execute(
-            stmt, {
-                "salt_astronomer_user_id": salt_astronomer_user_id
-            }
+            stmt, {"salt_astronomer_user_id": salt_astronomer_user_id}
         )
         investigator_id = result.one_or_none()
         if not investigator_id:
-            raise ValidationError(f"SALT astronomer id not found: {salt_astronomer_user_id}")
+            raise ValidationError(
+                f"SALT astronomer id not found: {salt_astronomer_user_id}"
+            )
 
         return cast(int, investigator_id[0])

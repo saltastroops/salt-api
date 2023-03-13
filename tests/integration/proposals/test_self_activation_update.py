@@ -17,70 +17,64 @@ def _url(proposal_code: str) -> str:
 
 
 def test_update_is_self_activatable_returns_401_for_unauthenticated_user(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     not_authenticated(client)
     proposal_code = "2020-1-SCI-005"
-    response = client.put(
-        _url(proposal_code), json={'allowed': False}
-    )
+    response = client.put(_url(proposal_code), json={"allowed": False})
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_update_is_self_activatable_returns_401_for_user_with_invalid_auth_token(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     misauthenticate(client)
     proposal_code = "2020-1-SCI-005"
-    response = client.put(
-        _url(proposal_code), json={'allowed': False}
-    )
+    response = client.put(_url(proposal_code), json={"allowed": False})
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.parametrize(
     "user_role",
-    [
-        "Administrator",
-        "SALT Astronomer"
-    ],
+    ["Administrator", "SALT Astronomer"],
 )
-def test_update_is_self_activatable_should_allow_admins_and_salt_astronomers_to_change_self_activation(
-        user_role: str, client: TestClient
+def test_update_is_self_activatable_should_allow_admins_and_salt_astronomers_to_change(
+    user_role: str, client: TestClient
 ) -> None:
     username = find_username(user_role)
     authenticate(username, client)
     proposal_code = "2020-2-SCI-039"
 
     # Set self activation allowed to true
-    response = client.put(_url(proposal_code), json={'allowed': True})
+    response = client.put(_url(proposal_code), json={"allowed": True})
     assert response.status_code == status.HTTP_200_OK
     new_self_activation = response.json()
-    assert new_self_activation["allowed"] == True
+    assert new_self_activation["allowed"] is True
     # Get this proposal
     proposal_response = client.get("proposals/" + proposal_code)
     proposal = proposal_response.json()
-    assert proposal["general_info"]["is_self_activatable"] == True
+    assert proposal["general_info"]["is_self_activatable"] is True
 
-    response = client.put(_url(proposal_code), json={'allowed': False})
+    response = client.put(_url(proposal_code), json={"allowed": False})
     assert response.status_code == status.HTTP_200_OK
     new_self_activation = response.json()
-    assert new_self_activation["allowed"] == False
+    assert new_self_activation["allowed"] is False
     proposal_response = client.get("proposals/" + proposal_code)
     proposal = proposal_response.json()
-    assert proposal["general_info"]["is_self_activatable"] == False
+    assert proposal["general_info"]["is_self_activatable"] is False
 
 
 def test_update_is_self_activatable_should_not_be_allowed_for_a_wrong_proposal_code(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     # Administrators and SALT Astronomers can not update with a wrong proposal code
     proposal_code = "2022-1-NOT-CODE-099"
     user = find_username("Administrator")
     authenticate(user, client)
 
-    response = client.put(_url(proposal_code), json={'allowed': True})
+    response = client.put(_url(proposal_code), json={"allowed": True})
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
 
 @pytest.mark.parametrize(
     "username",
@@ -92,14 +86,13 @@ def test_update_is_self_activatable_should_not_be_allowed_for_a_wrong_proposal_c
         find_username("TAC Chair", partner_code="RSA"),
         find_username("TAC Member", partner_code="RSA"),
         find_username("SALT Operator"),
-        find_username("Board Member")
-    ]
+        find_username("Board Member"),
+    ],
 )
 def test_update_is_self_activatable_returns_403_for_unauthorized_users(
-        username:str, client: TestClient,
+    username: str,
+    client: TestClient,
 ) -> None:
     authenticate(username, client)
-    response = client.put(
-        _url('2022-2-SCI-039'), json={'allowed': True}
-    )
+    response = client.put(_url("2022-2-SCI-039"), json={"allowed": True})
     assert response.status_code == status.HTTP_403_FORBIDDEN

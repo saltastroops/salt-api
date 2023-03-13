@@ -137,7 +137,7 @@ class BlockVisit(BaseBlockVisit):
     semester: Semester = Field(
         ...,
         title="Semester",
-        description="The semester which the block visit belong."
+        description="The semester to which the block visit belongs."
     )
 
 

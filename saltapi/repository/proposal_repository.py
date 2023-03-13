@@ -741,24 +741,28 @@ WHERE BS.BlockStatus NOT IN :excluded_status_values
         """
         stmt = text(
             """
-SELECT BV.BlockVisit_Id                            AS id,
-       BV.Block_Id                                 AS block_id,
-       B.Block_Name                                AS block_name,
-       B.ObsTime                                   AS observation_time,
-       B.Priority                                  AS priority,
-       B.MaxLunarPhase                             AS maximum_lunar_phase,
-       NI.Date                                     AS night,
-       BVS.BlockVisitStatus                        AS status,
-       BRR.RejectedReason                          AS rejection_reason
+SELECT
+    BV.BlockVisit_Id                            AS id,
+    BV.Block_Id                                 AS block_id,
+    B.Block_Name                                AS block_name,
+    B.ObsTime                                   AS observation_time,
+    B.Priority                                  AS priority,
+    B.MaxLunarPhase                             AS maximum_lunar_phase,
+    NI.Date                                     AS night,
+    BVS.BlockVisitStatus                        AS status,
+    BRR.RejectedReason                          AS rejection_reason,
+    CONCAT(S.Year, '-', S.Semester)			    AS semester
 FROM BlockVisit BV
-         JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
-         LEFT JOIN BlockRejectedReason BRR
-                   ON BV.BlockRejectedReason_Id = BRR.BlockRejectedReason_Id
-         JOIN NightInfo NI ON BV.NightInfo_Id = NI.NightInfo_Id
-         JOIN Block B ON BV.Block_Id = B.Block_Id
-         JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
+    LEFT JOIN BlockRejectedReason BRR
+           ON BV.BlockRejectedReason_Id = BRR.BlockRejectedReason_Id
+    JOIN NightInfo NI ON BV.NightInfo_Id = NI.NightInfo_Id
+    JOIN Block B ON BV.Block_Id = B.Block_Id
+    JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Proposal P ON P.Proposal_Id = B.Proposal_Id
+    JOIN Semester S ON S.Semester_Id = P.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
-  AND BVS.BlockVisitStatus != 'Deleted'
+    AND BVS.BlockVisitStatus != 'Deleted'
 ORDER BY B.Block_Name, NI.Date
         """
         )
@@ -774,6 +778,7 @@ ORDER BY B.Block_Name, NI.Date
                 "night": row.night,
                 "status": row.status,
                 "rejection_reason": row.rejection_reason,
+                "semester": row.semester,
             }
             for row in result
         ]

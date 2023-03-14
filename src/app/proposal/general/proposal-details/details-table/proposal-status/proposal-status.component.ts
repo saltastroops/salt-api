@@ -19,7 +19,7 @@ import { ProposalStatusModalComponent } from "./proposal-status-modal/proposal-s
 @AutoUnsubscribe()
 export class ProposalStatusComponent implements OnInit {
   @Input() proposal!: Proposal;
-  proposalStatusModal!: any;
+  proposalStatusModal!: ProposalStatusModalComponent;
   @ViewChild(ProposalStatusModalComponent)
   set ProposalStatusCommentModalComponent(child: ProposalStatusModalComponent) {
     this.proposalStatusModal = child;

@@ -479,8 +479,9 @@ class PermissionService:
     def check_permission_to_update_investigator_proposal_approval_status(
             self, user: User, approval_user_id: int, proposal_code: str
     ) -> None:
-        roles = (
-            [Role.ADMINISTRATOR] if user.id != approval_user_id else [Role.INVESTIGATOR]
-        )
+        # Investigators can always change their own approval status,
+        # but changing someone else's status requires administrator rights
+        if user.id != approval_user_id:
+            self.check_role(user.username, roles, proposal_code)
 
         self.check_role(user.username, roles, proposal_code)

@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { LiaisonAstronomerModalComponent } from './liaison-astronomer-modal.component';
+import { LiaisonAstronomerModalComponent } from "./liaison-astronomer-modal.component";
 
-describe('LiaisonAstronomerModalComponent', () => {
+describe("LiaisonAstronomerModalComponent", () => {
   let component: LiaisonAstronomerModalComponent;
   let fixture: ComponentFixture<LiaisonAstronomerModalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LiaisonAstronomerModalComponent ]
-    })
-    .compileComponents();
+      declarations: [LiaisonAstronomerModalComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('LiaisonAstronomerModalComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

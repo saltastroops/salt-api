@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { SelfActivateComponent } from './self-activate.component';
+import { SelfActivateComponent } from "./self-activate.component";
 
-describe('SelfActivateComponent', () => {
+describe("SelfActivateComponent", () => {
   let component: SelfActivateComponent;
   let fixture: ComponentFixture<SelfActivateComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SelfActivateComponent ]
-    })
-    .compileComponents();
+      declarations: [SelfActivateComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('SelfActivateComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

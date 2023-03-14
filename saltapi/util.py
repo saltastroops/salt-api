@@ -222,14 +222,20 @@ def target_magnitude(row: Any) -> Optional[Dict[str, Any]]:
     }
 
 
-def target_type(row: Any) -> Optional[str]:
+def target_type(row: Any) -> Optional[Dict[str, str]]:
     if row.target_sub_type is None:
         return None
 
     if row.target_type != "Unknown":
-        return f"{row.target_type} - {row.target_sub_type}"
+        return {
+            "type": row.target_type,
+            "sub_type": row.target_sub_type
+        }
     else:
-        return "Unknown"
+        return {
+            "type": "Unknown",
+            "sub_type": "Unknown"
+        }
 
 
 def target_proper_motion(row: Any) -> Optional[Dict[str, Any]]:

@@ -46,7 +46,11 @@
           t.magnitude?.minimumMagnitude + " - " + t.magnitude?.maximumMagnitude
         }}
       </td>
-      <td>{{ t.targetType }}</td>
+      <td>
+        {{
+          t.targetType ? t.targetType.type + " - " + t.targetType.subType : ""
+        }}
+      </td>
       <td *ngIf="t.isOptional">
         <div>
           <img

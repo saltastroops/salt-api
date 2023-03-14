@@ -32,7 +32,7 @@ export interface ProperMotion {
 
 export interface TargetType {
   type: string;
-  subType: string;
+  subtype: string;
 }
 
 export interface Target {

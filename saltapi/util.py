@@ -227,9 +227,9 @@ def target_type(row: Any) -> Optional[Dict[str, str]]:
         return None
 
     if row.target_type != "Unknown":
-        return {"type": row.target_type, "sub_type": row.target_sub_type}
+        return {"type": row.target_type, "subtype": row.target_sub_type}
     else:
-        return {"type": "Unknown", "sub_type": "Unknown"}
+        return {"type": "Unknown", "subtype": "Unknown"}
 
 
 def target_proper_motion(row: Any) -> Optional[Dict[str, Any]]:

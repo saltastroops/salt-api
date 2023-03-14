@@ -83,12 +83,14 @@ class ProperMotion(BaseModel):
 
 
 class TargetType(BaseModel):
+    """A target type and subtype, based on the SIMBAD classification."""
+
     type: str = Field(
         ...,
         title="Target type",
-        description="The target type, based on the SIMBAD classification.",
+        description="Target type.",
     )
-    sub_type: str = Field(
+    subtype: str = Field(
         ..., title="Target sub type", description="The target sub type."
     )
 

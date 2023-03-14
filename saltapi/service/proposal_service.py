@@ -362,7 +362,7 @@ class ProposalService:
         return self.repository.get_liaison_astronomer(proposal_code)
 
     def update_investigator_proposal_approval_status(
-            self, approval_user_id: int, proposal_code: str, approved: bool
+        self, approval_user_id: int, proposal_code: str, approved: bool
     ) -> None:
         """
         Updates the investigator's approval status of the proposal.

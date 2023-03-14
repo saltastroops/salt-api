@@ -473,7 +473,7 @@ def get_data_release_date(
         "Change the status whether the proposal may be activated by the Principal"
         " Investigator and Principal Contact"
     ),
-    response_model=SelfActivation
+    response_model=SelfActivation,
 )
 def put_is_self_activatable(
     proposal_code: ProposalCode = Path(
@@ -481,7 +481,6 @@ def put_is_self_activatable(
         title="Proposal code",
         description=(
             "Proposal code of the proposal for which an observation comment is added."
-            ),
         ),
     ),
     self_activation: SelfActivation = Body(
@@ -525,7 +524,6 @@ def update_liaison_astronomer(
         title="Proposal code",
         description=(
             "Proposal code of the proposal for which the liaison astronomer is updated."
-            ),
         ),
     ),
     liaison_astronomer_id: UserId = Body(

@@ -91,7 +91,7 @@ class TargetType(BaseModel):
         description="Target type.",
     )
     subtype: str = Field(
-        ..., title="Target sub type", description="The target sub type."
+        ..., title="Target subtype", description="The target sub type."
     )
 
 

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from fastapi import (
     APIRouter,
@@ -35,6 +35,7 @@ from saltapi.web.schema.proposal import (
     ProprietaryPeriodUpdateRequest,
     SelfActivation,
     UpdateStatus,
+    ProposalApprovalStatus,
 )
 from saltapi.web.schema.user import UserId
 
@@ -548,3 +549,55 @@ def update_liaison_astronomer(
         if liaison_salt_astronomer:
             return LiaisonAstronomer(**liaison_salt_astronomer)
         return None
+
+
+@router.put(
+    "/{proposal_code}/approvals/{approval_user_id}",
+    summary="Update the proposal status",
+    status_code=status.HTTP_200_OK,
+)
+def update_investigator_proposal_approval_status(
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description=(
+            "Proposal code of the proposal for which an investigator approval status is"
+            " updated."
+        ),
+    ),
+    approval_user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id of the user",
+    ),
+    approval_status: ProposalApprovalStatus = Body(
+        ...,
+        alias="status",
+        title="Proposal approval status",
+        description="Proposal approval status.",
+    ),
+    user: User = Depends(get_current_user),
+) -> None:
+    """
+    Updates an investigator's approval status of the proposal.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        user_service = services.user_service(unit_of_work.connection)
+
+        permission_service.check_permission_to_update_investigator_proposal_approval_status(
+            user, approval_user_id, proposal_code
+        )
+
+        user_details = (
+            user
+            if user.id == approval_user_id
+            else user_service.get_user(approval_user_id)
+        )
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal_service.update_investigator_proposal_approval_status(
+            user_details.id, proposal_code, approval_status.approved
+        )
+
+        unit_of_work.commit()

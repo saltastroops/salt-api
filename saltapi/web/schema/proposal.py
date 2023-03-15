@@ -21,6 +21,14 @@ class ProposalUser(FullName):
     email: EmailStr = Field(..., title="Email address", description="Email address")
 
 
+class ProposalApprovalStatus(BaseModel):
+    approved: bool = Field(
+        ...,
+        title="Proposal approved?",
+        description="Has the investigator approved the proposal?",
+    )
+
+
 class ProposalStatusValue(str, Enum):
     """Proposal status value."""
 

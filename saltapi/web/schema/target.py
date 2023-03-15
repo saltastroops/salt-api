@@ -82,6 +82,19 @@ class ProperMotion(BaseModel):
     )
 
 
+class TargetType(BaseModel):
+    """A target type and subtype, based on the SIMBAD classification."""
+
+    type: str = Field(
+        ...,
+        title="Target type",
+        description="Target type.",
+    )
+    subtype: str = Field(
+        ..., title="Target subtype", description="The target sub type."
+    )
+
+
 class Target(BaseModel):
     """Base model for targets."""
 
@@ -100,7 +113,7 @@ class Target(BaseModel):
     magnitude: Optional[Magnitude] = Field(
         ..., title="Magnitude", description="Apparent magnitude (range) of the target"
     )
-    target_type: Optional[str] = Field(
+    target_type: Optional[TargetType] = Field(
         ...,
         title="Target",
         description="Target type, based on the SIMBAD classification",

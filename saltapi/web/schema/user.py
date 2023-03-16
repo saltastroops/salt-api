@@ -28,6 +28,7 @@ class UserListItem(BaseModel):
     """Item in a list of users."""
 
     id: int = Field(..., title="User id", description="User id.")
+    username: str = Field(..., title="Username", description="The PIPT username.")
     given_name: str = Field(..., title="Given name", description='Given ("first") name')
     family_name: str = Field(
         ..., title="Family name", description='Family ("last") name'
@@ -134,3 +135,12 @@ class UserId(BaseModel):
     """A user id."""
 
     id: Optional[int] = Field(..., title="User id", description="A user id.")
+
+class SaltAstronomer(BaseModel):
+    """The SALT Astronomers."""
+
+    id: int = Field(..., title="User id", description="User id.")
+    given_name: str = Field(..., title="Given name", description='Given ("first") name')
+    family_name: str = Field(
+        ..., title="Family name", description='Family ("last") name'
+    )

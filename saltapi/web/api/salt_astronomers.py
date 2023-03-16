@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.web import services
-from saltapi.web.schema.user import UserListItem
+from saltapi.web.schema.user import SaltAstronomer
 
 router = APIRouter(prefix="/salt-astronomers", tags=["SALT Astronomers"])
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/salt-astronomers", tags=["SALT Astronomers"])
 @router.get(
     "/",
     summary="Get the SALT astronomers",
-    response_model=List[UserListItem],
+    response_model=List[SaltAstronomer],
 )
 def get_salt_astronomers() -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:

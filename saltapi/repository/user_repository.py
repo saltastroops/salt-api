@@ -142,6 +142,7 @@ SELECT COUNT(*) AS user_count FROM PiptUser WHERE PiptUser_Id=:user_id
         stmt = text(
             """
 SELECT DISTINCT PU.PiptUser_Id          AS id,
+                PU.Username             AS username,
                 I.FirstName             AS given_name,
                 I.Surname               AS family_name
 FROM PiptUser PU
@@ -156,6 +157,7 @@ ORDER BY I.Surname, I.FirstName
         users = [
             {
                 "id": row.id,
+                "username": row.username,
                 "given_name": row.given_name,
                 "family_name": row.family_name,
             }

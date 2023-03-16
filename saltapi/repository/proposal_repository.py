@@ -2512,7 +2512,7 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
         return cast(int, investigator_id[0])
 
     def update_investigator_proposal_approval_status(
-            self, user_id: int, proposal_code: str, approved: bool
+        self, user_id: int, proposal_code: str, approved: bool
     ) -> None:
         """
         Update the investigator's approval status of the proposal with the given

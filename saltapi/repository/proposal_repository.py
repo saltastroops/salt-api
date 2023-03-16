@@ -75,8 +75,6 @@ FROM Proposal P
          JOIN ProposalStatus PS ON PGI.ProposalStatus_Id = PS.ProposalStatus_Id
          JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
          JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
-         LEFT JOIN ProposalInactiveReason PIR
-                   ON PGI.ProposalInactiveReason_Id = PIR.ProposalInactiveReason_Id
          LEFT JOIN Investigator Astronomer
                    ON C.Astronomer_Id = Astronomer.Investigator_Id
          JOIN Investigator Contact ON C.Contact_Id = Contact.Investigator_Id
@@ -1280,17 +1278,6 @@ WHERE PC.Proposal_Code = :proposal_code
 
         except NoResultFound:
             raise NotFoundError()
-
-    def _proposal_inactive_reason_id(self, inactive_reason: str) -> int:
-        stmt = text(
-            """
-SELECT PIR.ProposalInactiveReason_Id AS id
-FROM ProposalInactiveReason PIR
-WHERE PIR.InactiveReason = :inactive_reason
-        """
-        )
-        result = self.connection.execute(stmt, {"inactive_reason": inactive_reason})
-        return cast(int, result.scalar_one())
 
     def update_proposal_status(
         self, proposal_code: str, status: str, status_comment: Optional[str] = None

@@ -24,15 +24,7 @@ class UserRole(str, Enum):
     BOARD_MEMBER = "Board Member"
 
 
-class UserListItem(BaseModel):
-    """Item in a list of users."""
 
-    id: int = Field(..., title="User id", description="User id.")
-    username: str = Field(..., title="Username", description="The PIPT username.")
-    given_name: str = Field(..., title="Given name", description='Given ("first") name')
-    family_name: str = Field(
-        ..., title="Family name", description='Family ("last") name'
-    )
 
 
 class FullName(BaseModel):
@@ -44,6 +36,12 @@ class FullName(BaseModel):
     class Config:
         orm_mode = True
 
+
+class UserListItem(FullName):
+    """Item in a list of users."""
+
+    id: int = Field(..., title="User id", description="User id.")
+    username: str = Field(..., title="Username", description="The username.")
 
 class User(FullName):
     """User details."""
@@ -136,11 +134,7 @@ class UserId(BaseModel):
 
     id: Optional[int] = Field(..., title="User id", description="A user id.")
 
-class SaltAstronomer(BaseModel):
+class SaltAstronomer(FullName):
     """The SALT Astronomers."""
 
     id: int = Field(..., title="User id", description="User id.")
-    given_name: str = Field(..., title="Given name", description='Given ("first") name')
-    family_name: str = Field(
-        ..., title="Family name", description='Family ("last") name'
-    )

@@ -13,7 +13,7 @@ from saltapi.web.schema.common import (
     Semester,
 )
 from saltapi.web.schema.institution import Institution
-from saltapi.web.schema.user import FullName, UserListItem
+from saltapi.web.schema.user import FullName, SaltAstronomer
 
 
 class ProposalUser(FullName):
@@ -152,7 +152,7 @@ class GeneralProposalInfo(BaseModel):
         description="Total requested time, in seconds",
     )
 
-    liaison_salt_astronomer: Optional[UserListItem] = Field(
+    liaison_salt_astronomer: Optional[SaltAstronomer] = Field(
         ...,
         title="Liaison astronomer",
         description="SALT Astronomer who is the liaison astronomer for the proposal",

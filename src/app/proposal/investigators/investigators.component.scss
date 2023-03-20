@@ -4,7 +4,11 @@
   align-items: center;
 }
 
-.accept-reject {
+button {
+  width: 60px;
+}
+
+.null-approval-status {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;

@@ -239,4 +239,16 @@ export class RealProposalService implements ProposalService {
         }),
       );
   }
+
+  /**
+   * Submit an investigator's proposal approval status to the API server.
+   */
+  public updateInvestigatorProposalApprovalStatus(
+    investigatorId: number,
+    proposalCode: string,
+    approved: boolean,
+  ): Observable<void> {
+    const uri = `${environment.apiUrl}/proposals/${proposalCode}/approvals/${investigatorId}`;
+    return this.http.put<void>(uri, { approved: approved });
+  }
 }

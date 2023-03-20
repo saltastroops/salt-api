@@ -9,7 +9,10 @@
       <th>Partner</th>
       <th>Institution</th>
       <th>Department</th>
-      <!--      <th></th>-->
+      <th
+        data-test="proposal-approval-status"
+        *ngIf="showApprovalStatusButton"
+      ></th>
     </tr>
   </thead>
 
@@ -44,22 +47,43 @@
       <td>{{ i.affiliation.partnerName }}</td>
       <td>{{ i.affiliation.name }}</td>
       <td>{{ i.affiliation.department }}</td>
-      <!--      <ng-template [ngIf]="i.hasApprovedProposal === true">-->
-      <!--        <td>-->
-      <!--          <div><button class="button is-danger is-small">Reject</button></div>-->
-      <!--        </td>-->
-      <!--      </ng-template>-->
-      <!--      <ng-template [ngIf]="i.hasApprovedProposal === false">-->
-      <!--        <td>-->
-      <!--          <div><button class="button is-success is-small">Accept</button></div>-->
-      <!--        </td>-->
-      <!--      </ng-template>-->
-      <!--      <ng-template [ngIf]="i.hasApprovedProposal === null">-->
-      <!--        <td class="accept-reject">-->
-      <!--          <div><button class="button is-success is-small">Accept</button></div>-->
-      <!--          <div><button class="button is-danger is-small">Reject</button></div>-->
-      <!--        </td>-->
-      <!--      </ng-template>-->
+      <td
+        *ngIf="showApprovalStatusButton"
+        data-test="proposal-approval-status-button-accept"
+      >
+        <div
+          [ngClass]="{ 'null-approval-status': i.hasApprovedProposal === null }"
+        >
+          <div *ngIf="!i.hasApprovedProposal">
+            <button
+              class="button is-success is-small"
+              [ngClass]="{
+                'is-hidden': !(i.id === user.id || isAdministrator(user))
+              }"
+              (click)="
+                submitApprovalStatus($event, i.id, proposal.proposalCode, true)
+              "
+              data-test="proposal-approval-status-button"
+            >
+              Accept
+            </button>
+          </div>
+          <div *ngIf="i.hasApprovedProposal || i.hasApprovedProposal === null">
+            <button
+              class="button is-danger is-small"
+              [ngClass]="{
+                'is-hidden': !(i.id === user.id || isAdministrator(user))
+              }"
+              (click)="
+                submitApprovalStatus($event, i.id, proposal.proposalCode, false)
+              "
+              data-test="proposal-approval-status-button"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      </td>
     </tr>
   </tbody>
   <thead>

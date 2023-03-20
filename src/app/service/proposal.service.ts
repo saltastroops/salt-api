@@ -87,4 +87,13 @@ export abstract class ProposalService {
     proposalCode: string,
     liaisonAstronomerId: number | null,
   ): Observable<LiaisonAstronomer>;
+
+  /**
+   * Submit an investigator's proposal approval status to the API server.
+   */
+  public abstract updateInvestigatorProposalApprovalStatus(
+    investigatorId: number,
+    proposalCode: string,
+    approved: boolean,
+  ): Observable<void>;
 }

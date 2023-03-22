@@ -129,21 +129,30 @@ def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_f
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_investigator_approval_proposal_status_update_for_an_administrator(
+@pytest.mark.parametrize(
+    "username, user_id, approved",
+    [
+        (find_username("Administrator"), 1413, True),
+        (find_username("Investigator", proposal_code="2019-2-SCI-006"), 656, False),
+    ],
+)
+def test_investigator_approval_proposal_status_update(
+    username: str,
+    user_id: int,
+    approved: bool,
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
-    username = find_username("Administrator")
     authenticate(username, client)
 
-    user_id = 1413  # user id for the Principal Contact user in proposal 2019-2-SCI-006
-    data = {"approved": True}
+    # First status update
+    first_update_data = {"approved": approved}
 
-    response = client.put(
+    first_update_response = client.put(
         f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
-        json=data,
+        json=first_update_data,
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert first_update_response.status_code == status.HTTP_200_OK
 
     resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
 
@@ -151,28 +160,20 @@ def test_investigator_approval_proposal_status_update_for_an_administrator(
 
     proposal = resp.json()
 
-    investigator = [i for i in proposal["investigators"] if i["id"] == user_id]
+    investigators = [i for i in proposal["investigators"] if i["id"] == user_id]
 
-    has_approved_proposal = investigator[0]["has_approved_proposal"]
+    has_approved_proposal = investigators[0]["has_approved_proposal"]
 
-    assert has_approved_proposal
+    assert has_approved_proposal if approved else not has_approved_proposal
 
+    # Second status update
+    second_update_data = {"approved": not approved}
 
-def test_investigator_approval_proposal_status_update_for_an_investigator(
-    client: TestClient,
-) -> None:
-    proposal_code = "2019-2-SCI-006"
-    username = find_username("Investigator", proposal_code="2019-2-SCI-006")
-    authenticate(username, client)
-
-    user_id = 656  # user id for investigator in proposal 2019-2-SCI-006
-    data = {"approved": False}
-
-    response = client.put(
+    second_update_response = client.put(
         f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
-        json=data,
+        json=second_update_data,
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert second_update_response.status_code == status.HTTP_200_OK
 
     resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
 
@@ -180,8 +181,8 @@ def test_investigator_approval_proposal_status_update_for_an_investigator(
 
     proposal = resp.json()
 
-    investigator = [i for i in proposal["investigators"] if i["id"] == user_id]
+    investigators = [i for i in proposal["investigators"] if i["id"] == user_id]
 
-    has_approved_proposal = investigator[0]["has_approved_proposal"]
+    has_approved_proposal = investigators[0]["has_approved_proposal"]
 
-    assert not has_approved_proposal
+    assert has_approved_proposal if not approved else not has_approved_proposal

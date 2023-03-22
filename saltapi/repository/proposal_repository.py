@@ -599,6 +599,7 @@ ORDER BY I.Surname, I.FirstName
             elif (
                 investigator["approval_code"] is None
                 or investigator["approval_code"] == ""
+                or investigator["approval_code"] == 0
             ):
                 investigator["has_approved_proposal"] = False
             else:
@@ -2496,3 +2497,41 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
             )
 
         return cast(int, investigator_id[0])
+
+    def update_investigator_proposal_approval_status(
+        self, user_id: int, proposal_code: str, approved: bool
+    ) -> None:
+        """
+        Update the investigator's approval status of the proposal with the given
+        proposal code.
+        """
+        # The temporary table tmp is necessary as the ProposalInvestigator table
+        # cannot be included in the FROM statement.
+        stmt = text(
+            """
+UPDATE ProposalInvestigator
+SET InvestigatorOkay=:approved,
+    ApprovalCode=NULL
+WHERE Investigator_Id = (SELECT *
+                         FROM (SELECT I.Investigator_Id
+                               FROM Investigator I
+                                        JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+                                        JOIN ProposalInvestigator PI
+                                             ON I.Investigator_Id = PI.Investigator_Id
+                                        JOIN ProposalCode PC
+                                             ON PI.ProposalCode_Id = PC.ProposalCode_Id
+                               WHERE PC.Proposal_Code = :proposal_code
+                                 AND PU.PiptUser_Id = :user_id) tmp)             
+        """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "approved": 1 if approved else 0,
+                "user_id": user_id,
+            },
+        )
+
+        if not result.rowcount:
+            raise NotFoundError()

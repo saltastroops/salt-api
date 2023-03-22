@@ -130,7 +130,7 @@ def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_f
 
 
 @pytest.mark.parametrize(
-    "username, investigator_id, approved",
+    "username, user_id, approved",
     [
         (find_username("Administrator"), 1413, True),
         (find_username("Investigator", proposal_code="2019-2-SCI-006"), 656, False),
@@ -138,20 +138,21 @@ def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_f
 )
 def test_investigator_approval_proposal_status_update(
     username: str,
-    investigator_id: int,
+    user_id: int,
     approved: bool,
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"
     authenticate(username, client)
 
-    data = {"approved": approved}
+    # First status update
+    first_update_data = {"approved": approved}
 
-    response = client.put(
-        f"{PROPOSALS_URL}/{proposal_code}/approvals/{investigator_id}",
-        json=data,
+    first_update_response = client.put(
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
+        json=first_update_data,
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert first_update_response.status_code == status.HTTP_200_OK
 
     resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
 
@@ -159,8 +160,31 @@ def test_investigator_approval_proposal_status_update(
 
     proposal = resp.json()
 
-    investigators = [i for i in proposal["investigators"] if i["id"] == investigator_id]
+    investigators = [i for i in proposal["investigators"] if i["id"] == user_id]
 
     has_approved_proposal = investigators[0]["has_approved_proposal"]
 
     assert has_approved_proposal if approved else not has_approved_proposal
+
+    # Second status update
+    second_update_data = {"approved": not approved}
+
+    second_update_response = client.put(
+        f"{PROPOSALS_URL}/{proposal_code}/approvals/{user_id}",
+        json=second_update_data,
+    )
+    assert second_update_response.status_code == status.HTTP_200_OK
+
+    resp = client.get(f"{PROPOSALS_URL}/{proposal_code}")
+
+    assert resp.status_code == status.HTTP_200_OK
+
+    proposal = resp.json()
+
+    investigators = [i for i in proposal["investigators"] if i["id"] == user_id]
+
+    has_approved_proposal = investigators[0]["has_approved_proposal"]
+
+    assert has_approved_proposal if not approved else not has_approved_proposal
+
+

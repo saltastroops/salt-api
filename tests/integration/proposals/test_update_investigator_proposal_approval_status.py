@@ -186,5 +186,3 @@ def test_investigator_approval_proposal_status_update(
     has_approved_proposal = investigators[0]["has_approved_proposal"]
 
     assert has_approved_proposal if not approved else not has_approved_proposal
-
-

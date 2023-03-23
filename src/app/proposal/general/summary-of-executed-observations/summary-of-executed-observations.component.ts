@@ -17,13 +17,17 @@ import { AutoUnsubscribe, hasAnyRole } from "../../../utils";
 })
 @AutoUnsubscribe()
 export class SummaryOfExecutedObservationsComponent implements OnInit {
-  selectAll = false;
   @Input() blockVisits!: BlockVisit[];
   @Output() selectBlock = new EventEmitter<number>();
   observations!: Observation[];
+  groupedObservations: { [key: string]: Observation[] } = {};
   user!: User;
   showEditBlockButton = false;
   showObservationsList = false;
+  displayedSemesters = new Set<string>();
+  selectedSemesters = new Set<string>();
+
+  Object = Object; //Object is used in the template
 
   constructor(private authService: AuthenticationService) {}
 
@@ -37,25 +41,33 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
     });
     this.observations = this.blockVisits.map((o) => ({
       ...o,
-      downloadObservation: this.selectAll,
+      downloadObservation: false,
     }));
+    this.groupObservations();
   }
 
-  selectDeselectAll(selectAll: boolean): void {
-    this.selectAll = selectAll;
-    this.observations.forEach((e) => {
-      e.downloadObservation = this.selectAll;
-    });
-  }
-
-  toggleRequestData(observation_id: number): void {
-    this.selectAll = true;
+  selectAllData(selected: boolean): void {
     this.observations.forEach((o) => {
-      if (o.blockId === observation_id) {
-        o.downloadObservation = !o.downloadObservation;
+      o.downloadObservation = selected;
+    });
+    if (selected) {
+      this.selectedSemesters = this.allSemesters();
+    } else {
+      this.selectedSemesters = new Set<string>();
+    }
+  }
+
+  toggleRequestData(selected: boolean, observationId: number): void {
+    // Assume that all data is selected.
+    this.selectedSemesters = this.allSemesters();
+
+    this.observations.forEach((o) => {
+      if (o.id === observationId) {
+        o.downloadObservation = selected;
       }
       if (!o.downloadObservation) {
-        this.selectAll = false;
+        // Revoke assumption that any data is not requested for that semester.
+        this.selectedSemesters.delete(o.semester);
       }
     });
   }
@@ -63,7 +75,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
   sort = (key: string, direction: SortDirection): void => {
     const sort = new Sort();
     const isString = ["blockName", "status", "targets"].includes(key);
-    let sortFunc;
+    let sortFunc: any;
     if (key !== "targets") {
       sortFunc = sort.startSort(key, direction, isString);
     } else {
@@ -73,7 +85,9 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
         isString,
       );
     }
-    this.observations.sort(sortFunc);
+    this.allSemesters().forEach((semester) => {
+      this.groupedObservations[semester].sort(sortFunc);
+    });
   };
 
   observationDate(dateString: string): Date {
@@ -100,6 +114,66 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
       blockVisit.status = blockVisitStatusUpdate.blockVisitStatus;
       blockVisit.rejectionReason = blockVisitStatusUpdate.rejectionReason;
     }
+  }
+
+  addOrRemoveDisplayedSemester(semester: string): void {
+    if (this.displayedSemesters.has(semester)) {
+      this.displayedSemesters.delete(semester);
+    } else {
+      this.displayedSemesters.add(semester);
+    }
+  }
+
+  groupObservations(): void {
+    this.observations.forEach((o) => {
+      // eslint-disable-next-line no-prototype-builtins
+      if (!this.groupedObservations.hasOwnProperty(o.semester)) {
+        this.groupedObservations[o.semester] = [];
+      }
+      this.groupedObservations[o.semester].push(o);
+    });
+  }
+
+  selectAllSemesterData(selected: boolean, semester: string): void {
+    this.observations.forEach((o) => {
+      if (o.semester === semester) {
+        o.downloadObservation = selected;
+      }
+    });
+    selected
+      ? this.selectedSemesters.add(semester)
+      : this.selectedSemesters.delete(semester);
+  }
+
+  isAllDataSelected(): boolean {
+    return (
+      this.selectedSemesters.size === this.allSemesters().size &&
+      [...this.allSemesters()].every((value) =>
+        this.selectedSemesters.has(value),
+      )
+    );
+  }
+
+  isAllSemesterDataChecked(semester: string): boolean {
+    return this.selectedSemesters.has(semester);
+  }
+
+  isObservationSelected(observationId: number): boolean {
+    let isChecked: boolean | null = null;
+    this.observations.forEach((o) => {
+      if (o.id === observationId) {
+        isChecked = o.downloadObservation;
+      }
+    });
+    if (isChecked === null) {
+      throw new Error(`Observation Id ${observationId} is not found.`);
+    } else {
+      return isChecked;
+    }
+  }
+
+  allSemesters(): Set<string> {
+    return new Set<string>(Object.keys(this.groupedObservations));
   }
 }
 

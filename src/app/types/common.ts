@@ -7,6 +7,7 @@ export interface BaseBlockVisit {
   night: string;
   status: BlockVisitStatus;
   rejectionReason: BlockRejectionReason | null;
+  semester: string;
 }
 
 export interface BlockVisit extends BaseBlockVisit {

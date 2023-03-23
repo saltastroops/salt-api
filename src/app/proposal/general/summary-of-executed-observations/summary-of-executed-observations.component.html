@@ -15,72 +15,107 @@
     {{ showObservationsList ? "Hide" : "Show" }} list of observations
   </a>
 </p>
-<table class="table" [wmSort]="sort" *ngIf="showObservationsList">
-  <table class="table" [wmSort]="sort">
-    <thead>
-      <tr>
-        <th
-          wmSortBy="blockName"
-          data-test="executed-observations-block-name-header"
-        >
-          Block
-        </th>
-        <th
-          wmSortBy="observationTime"
-          data-test="executed-observations-observation-time-header"
-        >
-          Observation Time (seconds)
-        </th>
-        <th
-          wmSortBy="priority"
-          data-test="executed-observations-priority-header"
-        >
-          Priority
-        </th>
-        <th
-          wmSortBy="maximumLunarPhase"
-          data-test="executed-observations-maximum-lunar-phase-header"
-        >
-          Max Lunar Phase
-        </th>
-        <th wmSortBy="targets" data-test="executed-observations-targets-header">
-          Target(s)
-        </th>
-        <th
-          wmSortBy="night"
-          data-test="executed-observations-observation-date-header"
-        >
-          Observation Date
-        </th>
-        <th
-          wmSortBy="status"
-          data-test="executed-observations-observation-status-header"
-        >
-          Accepted?
-        </th>
-        <th>Rejection Reason</th>
-        <th *ngIf="showEditBlockButton">Edit</th>
-        <th>Data</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td colspan="8"></td>
-        <td *ngIf="showEditBlockButton"></td>
-        <td>
-          <label class="checkbox">
-            <input
-              #toggleSelectionAll
-              type="checkbox"
-              [checked]="selectAll"
-              (change)="selectDeselectAll(toggleSelectionAll.checked)"
-              data-test="select-all-observations-checkbox"
-            />
-            Select/Deselect all
-          </label>
-        </td>
-      </tr>
-      <tr *ngFor="let e of observations">
+<table class="table is-bordered" [wmSort]="sort" *ngIf="showObservationsList">
+  <thead>
+    <tr>
+      <th
+        wmSortBy="blockName"
+        data-test="executed-observations-block-name-header"
+      >
+        Block
+      </th>
+      <th
+        wmSortBy="observationTime"
+        data-test="executed-observations-observation-time-header"
+      >
+        Observation Time (seconds)
+      </th>
+      <th
+        class="priority-width"
+        wmSortBy="priority"
+        data-test="executed-observations-priority-header"
+      >
+        Priority
+      </th>
+      <th
+        wmSortBy="maximumLunarPhase"
+        data-test="executed-observations-maximum-lunar-phase-header"
+      >
+        Max Lunar Phase
+      </th>
+      <th wmSortBy="targets" data-test="executed-observations-targets-header">
+        Target(s)
+      </th>
+      <th
+        wmSortBy="night"
+        data-test="executed-observations-observation-date-header"
+      >
+        Observation Date
+      </th>
+      <th
+        wmSortBy="status"
+        data-test="executed-observations-observation-status-header"
+      >
+        Accepted?
+      </th>
+      <th>Rejection Reason</th>
+      <th *ngIf="showEditBlockButton">Edit</th>
+      <th class="data-width">Data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td [attr.colspan]="showEditBlockButton ? 9 : 8"></td>
+      <td>
+        <label class="checkbox">
+          <input
+            #toggleSelectionAll
+            type="checkbox"
+            [checked]="isAllDataSelected()"
+            (change)="selectAllData(toggleSelectionAll.checked)"
+            data-test="select-all-observations-checkbox"
+          />
+          Select/Deselect all
+        </label>
+      </td>
+    </tr>
+  </tbody>
+  <tbody
+    *ngFor="let semester of Object.keys(groupedObservations).sort().reverse()"
+  >
+    <tr>
+      <th
+        class="semester-header"
+        [attr.colspan]="showEditBlockButton ? 9 : 8"
+        (click)="addOrRemoveDisplayedSemester(semester)"
+      >
+        <span class="white-text is-pulled-left">{{ semester }}</span>
+        <span class="is-pulled-right">
+          <button class="button has-text-weight-bold is-outlined is-rounded">
+            {{ displayedSemesters.has(semester) ? "&#8689;" : "&#8690;" }}
+          </button>
+        </span>
+      </th>
+      <td>
+        <label class="checkbox">
+          <input
+            #toggleSelectAllForSemester
+            type="checkbox"
+            [checked]="isAllSemesterDataChecked(semester)"
+            (change)="
+              selectAllSemesterData(
+                toggleSelectAllForSemester.checked,
+                semester
+              )
+            "
+            data-test="select-all-observations-checkbox"
+          />
+          Select/Deselect all for {{ semester }}
+        </label>
+      </td>
+    </tr>
+    <ng-container *ngIf="displayedSemesters.has(semester)">
+      <tr *ngFor="let e of groupedObservations[semester]">
         <td>
           <div>
             <a
@@ -152,20 +187,21 @@
         <td>
           <label class="checkbox">
             <input
+              #observationData
               type="checkbox"
-              [checked]="e.downloadObservation"
-              (change)="toggleRequestData(e.blockId)"
+              [checked]="isObservationSelected(e.id)"
+              (change)="toggleRequestData(observationData.checked, e.id)"
               data-test="download-observation-checkbox"
             />
             Request data
           </label>
         </td>
       </tr>
-    </tbody>
-  </table>
-  <p *ngIf="showObservationsList">
-    <a class="has-text-link" (click)="toggleObservationsList(true)">
-      Hide list of observations.
-    </a>
-  </p>
+    </ng-container>
+  </tbody>
 </table>
+<p *ngIf="showObservationsList">
+  <a class="has-text-link" (click)="toggleObservationsList(true)">
+    Hide list of observations.
+  </a>
+</p>

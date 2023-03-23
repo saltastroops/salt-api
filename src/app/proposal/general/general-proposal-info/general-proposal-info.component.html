@@ -76,8 +76,12 @@
     </thead>
     <tbody>
       <tr>
-        <td colspan="5" class="{{ backgroundColor }}" id="proposal-comment">
-          {{ statusDescription }}
+        <td
+          colspan="5"
+          class="{{ backgroundColor(this.proposal.generalInfo.status.value) }}"
+          id="proposal-comment"
+        >
+          {{ statusDescription(this.proposal.generalInfo.status.value) }}
         </td>
       </tr>
     </tbody>

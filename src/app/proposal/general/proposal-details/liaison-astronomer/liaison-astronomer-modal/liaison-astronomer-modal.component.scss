@@ -1,0 +1,49 @@
+@import "src/styles";
+
+.modal-card {
+  max-width: 420px;
+}
+
+div {
+  display: inline-block;
+  padding-right: 0.1em;
+  padding-bottom: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+.modal-card-body {
+  padding-bottom: 0;
+  padding-top: 0.5em;
+}
+
+.modal-card-foot {
+  padding-bottom: 0.5em;
+  padding-top: 0.5em;
+}
+
+.section {
+  padding: 0;
+}
+
+.field {
+  padding: 0;
+}
+
+.control {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.danger {
+  background-color: $danger;
+  opacity: 0.5;
+}
+
+.has-text-centered {
+  margin-top: 0.66em;
+  padding-left: 0.5em;
+}
+
+.is-loading {
+  left: 2em;
+}

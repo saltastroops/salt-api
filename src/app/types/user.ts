@@ -25,6 +25,13 @@ export interface UserListItem {
   givenName: string;
 }
 
+export interface LiaisonAstronomer {
+  id: number;
+  familyName: string;
+  givenName: string;
+  email: string;
+}
+
 export interface NewUserDetails {
   familyName: string;
   givenName: string;

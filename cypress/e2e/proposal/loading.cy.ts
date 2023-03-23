@@ -2,10 +2,8 @@ import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
 import {
   forceNetworkError,
-  forceServerError,
   getApiUrl,
   interceptIndefinitely,
-  userDetailsAreStored,
 } from "../../support/utils";
 
 const apiUrl = getApiUrl();

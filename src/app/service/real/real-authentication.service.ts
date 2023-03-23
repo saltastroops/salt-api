@@ -5,7 +5,7 @@ import * as camelcaseKeys from "camelcase-keys";
 import { parseISO } from "date-fns";
 import { CookieService } from "ngx-cookie-service";
 import { BehaviorSubject, Observable, Subject, of } from "rxjs";
-import { map, switchMap, tap } from "rxjs/operators";
+import { catchError, map, switchMap, tap } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
 import { Message } from "../../types/common";
@@ -86,7 +86,13 @@ export class RealAuthenticationService implements AuthenticationService {
       whoAmITrigger$
         .pipe(
           switchMap(() => {
-            return this.isAuthenticated() ? this._user() : of(null);
+            return this.isAuthenticated()
+              ? this._user().pipe(
+                  catchError(() => {
+                    return of(null);
+                  }),
+                )
+              : of(null);
           }),
         )
         .subscribe((user) => {

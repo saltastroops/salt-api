@@ -2,12 +2,7 @@ import { currentSemester } from "../../../src/app/utils";
 import { HomeUser } from "../../support/components/home-user";
 import { HomePage } from "../../support/pages/home-page";
 import { LoginPage } from "../../support/pages/login/login-page";
-import {
-  freezeDate,
-  getApiUrl,
-  getEnvVariable,
-  userDetailsAreStored,
-} from "../../support/utils";
+import { freezeDate, getApiUrl, getEnvVariable } from "../../support/utils";
 
 const apiUrl = getApiUrl();
 
@@ -34,9 +29,6 @@ describe("Home User", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
-
-    // Then user details are stored
-    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();
@@ -422,9 +414,6 @@ describe("Home User - PI", () => {
       LoginPage.login(USERNAME, password);
     });
 
-    // Then user details are stored
-    userDetailsAreStored();
-
     // And I visit the home page
     HomePage.visit();
   });
@@ -450,9 +439,6 @@ describe("Home User - PC", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
-
-    // Then user details are stored
-    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();
@@ -490,9 +476,6 @@ describe("Home User - SALT Astronomer", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
-
-    // Then user details are stored
-    userDetailsAreStored();
 
     // And I visit the home page
     HomePage.visit();

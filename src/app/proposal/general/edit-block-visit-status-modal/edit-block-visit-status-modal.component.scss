@@ -1,0 +1,21 @@
+.label,
+select,
+input {
+  font-size: 1rem;
+}
+
+.label {
+  padding-top: 1rem;
+}
+
+select {
+  background-color: white;
+  height: 22px;
+  align-content: center;
+}
+
+.modal-card-head,
+.modal-card-body,
+.modal-card-foot {
+  width: 300px;
+}

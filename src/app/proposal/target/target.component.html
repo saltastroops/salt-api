@@ -16,7 +16,13 @@
     <tbody>
       <tr>
         <td>{{ target.name }}</td>
-        <td>{{ target.targetType }}</td>
+        <td>
+          {{
+            target.targetType
+              ? target.targetType.type + " - " + target.targetType.subtype
+              : ""
+          }}
+        </td>
         <td>{{ target.coordinates?.equinox }}</td>
         <td>
           {{ target.magnitude?.minimumMagnitude }} -

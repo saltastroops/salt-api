@@ -1,0 +1,29 @@
+.label,
+select,
+input {
+  font-size: 1rem;
+}
+
+.input-section {
+  width: 300px;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+select {
+  background-color: white;
+  height: 22px;
+  align-content: center;
+}
+.modal-content,
+.modal-card {
+  width: 400px;
+  padding: 0;
+}
+
+.modal-card-foot {
+  width: 400px;
+  height: 15px;
+  margin-left: -1.25rem;
+  padding: 1rem;
+}

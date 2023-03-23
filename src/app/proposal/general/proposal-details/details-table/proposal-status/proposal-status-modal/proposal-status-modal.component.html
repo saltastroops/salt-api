@@ -1,0 +1,134 @@
+<div *ngIf="isModalActive">
+  <div class="modal" [ngClass]="isModalActive ? 'is-active' : ''">
+    <div
+      *ngIf="updateMessage"
+      class="modal-background"
+      [ngClass]="isUpdated && updateMessage ? '' : 'danger'"
+      (click)="closeStatusModal()"
+    ></div>
+    <div
+      *ngIf="!updateMessage"
+      class="modal-background"
+      (click)="closeStatusModal()"
+    ></div>
+    <div class="modal-card">
+      <div>
+        <form
+          class="form"
+          [formGroup]="proposalStatusForm"
+          (ngSubmit)="submitProposalStatus()"
+        >
+          <header class="modal-card-head">
+            <p class="modal-card-title">Change proposal status</p>
+            <button
+              class="delete"
+              aria-label="close"
+              (click)="closeStatusModal()"
+            ></button>
+          </header>
+          <section class="modal-card-body">
+            <div *ngIf="isAdminOrSa" class="field">
+              <label class="label">Proposal Status</label>
+              <div class="control">
+                <div class="select">
+                  <select
+                    #statusSelector
+                    (change)="changeProposalStatus(statusSelector.value)"
+                    formControlName="proposalStatus"
+                    [attr.disabled]="loading ? '' : null"
+                  >
+                    <option
+                      *ngFor="let status of proposalStatus"
+                      [value]="status"
+                    >
+                      {{ status }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Proposal Status comment (optional)</label>
+              <div class="control">
+                <textarea
+                  class="textarea"
+                  [value]="statusComment"
+                  formControlName="proposalStatusComment"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+          <section class="modal-card-foot">
+            <div class="field is-grouped">
+              <div *ngIf="isAdminOrSa" class="control">
+                <button
+                  class="button is-primary"
+                  [disabled]="loading"
+                  [ngClass]="loading ? 'is-loading' : ''"
+                  type="submit"
+                  [value]="'Status value'"
+                >
+                  Submit
+                </button>
+              </div>
+              <div
+                *ngIf="isPiOrPc && statusValue === 'Under technical review'"
+                class="control"
+              >
+                <button
+                  class="button is-warning"
+                  [disabled]="loading"
+                  [ngClass]="loading ? 'is-loading' : ''"
+                  type="submit"
+                >
+                  Deactivate
+                </button>
+              </div>
+              <div
+                *ngIf="
+                  isPiOrPc &&
+                  statusValue === 'Active' &&
+                  proposal.generalInfo.isSelfActivatable
+                "
+                class="control"
+              >
+                <button
+                  type="submit"
+                  [disabled]="loading"
+                  [ngClass]="
+                    loading
+                      ? 'is-loading button is-primary'
+                      : 'button is-primary'
+                  "
+                >
+                  Activate
+                </button>
+              </div>
+              <div class="control">
+                <button
+                  class="button is-danger"
+                  [disabled]="loading"
+                  (click)="closeStatusModal()"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div
+                *ngIf="updateMessage"
+                class="has-text-centered invalid-feedback"
+                [ngClass]="isUpdated ? 'has-text-success ' : 'has-text-danger '"
+              >
+                {{ updateMessage }}
+              </div>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+    <button
+      class="modal-close is-large"
+      aria-label="close"
+      (click)="closeStatusModal()"
+    ></button>
+  </div>
+</div>

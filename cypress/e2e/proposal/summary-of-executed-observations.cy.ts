@@ -1,13 +1,12 @@
 import { SummaryOfExecutedObservations } from "../../support/components/summary-of-executed-observations";
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
-import { getApiUrl, userDetailsAreStored } from "../../support/utils";
+import { getApiUrl, getEnvVariable } from "../../support/utils";
 
 const apiUrl = getApiUrl();
 
-const USERNAME = "hettlage";
-
 describe("Block summaries", () => {
+  const USERNAME = getEnvVariable("administrator");
   const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
@@ -19,13 +18,13 @@ describe("Block summaries", () => {
 
     cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
 
+    cy.recordHttp(apiUrl + "/block-visits/**").as("block-visits");
+
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
-    // Then user details are stored
-    userDetailsAreStored();
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
@@ -130,5 +129,149 @@ describe("Block summaries", () => {
     SummaryOfExecutedObservations.blocksSortedBy("block-name", "descending");
     SummaryOfExecutedObservations.clickBlockNameColumn();
     SummaryOfExecutedObservations.blocksSortedBy("block-name", "ascending");
+  });
+
+  it("should show a button for editing block visit status", () => {
+    SummaryOfExecutedObservations.clickShowObservationsLink();
+    SummaryOfExecutedObservations.submitBlockVisitStatusButtonHidden(1, false);
+  });
+
+  it("should show a modal for editing block visit status when clicking on the edit block visit status button", () => {
+    SummaryOfExecutedObservations.clickShowObservationsLink();
+    SummaryOfExecutedObservations.editBlockStatusModalShown(false);
+    SummaryOfExecutedObservations.clickEditBlockVisitStatus(1);
+    SummaryOfExecutedObservations.editBlockStatusModalShown(true);
+  });
+
+  it(
+    "should show an error message the submit button is clicked when status is set to reject and no reason is" +
+      " selected",
+    () => {
+      SummaryOfExecutedObservations.clickShowObservationsLink();
+      SummaryOfExecutedObservations.editBlockStatusModalShown(false);
+      SummaryOfExecutedObservations.clickEditBlockVisitStatus(1);
+      SummaryOfExecutedObservations.editBlockStatusModalShown(true);
+      SummaryOfExecutedObservations.selectBlockVisitStatus(2);
+      SummaryOfExecutedObservations.clickSubmitBlockVisitStatus();
+      SummaryOfExecutedObservations.errorContainsMessage(
+        "The block rejection reason is required",
+      );
+    },
+  );
+
+  it(
+    "should show an updated status when the submit button is clicked and status is set to reject and reason is" +
+      " selected",
+    () => {
+      SummaryOfExecutedObservations.clickShowObservationsLink();
+      SummaryOfExecutedObservations.editBlockStatusModalShown(false);
+      SummaryOfExecutedObservations.clickEditBlockVisitStatus(1);
+      SummaryOfExecutedObservations.editBlockStatusModalShown(true);
+      // Select "Rejected" status
+      SummaryOfExecutedObservations.selectBlockVisitStatus(2);
+      // Select "Telescope technical problems" rejection reason
+      SummaryOfExecutedObservations.selectBlockRejectionReason(3);
+      SummaryOfExecutedObservations.clickSubmitBlockVisitStatus();
+      // Wait for the updates
+      cy.wait("@block-visits");
+      SummaryOfExecutedObservations.blockRejectionReasonUpdatedWithReason(
+        1,
+        "Telescope technical problems",
+      );
+    },
+  );
+});
+
+describe("Block summaries - edit block visit status (SA)", () => {
+  const USERNAME = getEnvVariable("saltAstronomerUsername");
+  const PROPOSAL_CODE = "2020-1-DDT-009";
+
+  beforeEach(() => {
+    cy.recordHttp(apiUrl + "/login").as("login");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // And I visit a proposal page
+    ProposalPage.visit(PROPOSAL_CODE);
+  });
+
+  it("should show a button for editing block visit status for a SA", () => {
+    SummaryOfExecutedObservations.clickShowObservationsLink();
+    SummaryOfExecutedObservations.submitBlockVisitStatusButtonHidden(1, false);
+  });
+
+  it("should show a modal for editing block visit status for a SA clicking on the edit block visit status button", () => {
+    SummaryOfExecutedObservations.clickShowObservationsLink();
+    SummaryOfExecutedObservations.editBlockStatusModalShown(false);
+    SummaryOfExecutedObservations.clickEditBlockVisitStatus(1);
+    SummaryOfExecutedObservations.editBlockStatusModalShown(true);
+  });
+});
+
+describe("Block summaries - edit block visit status (PI)", () => {
+  const USERNAME = getEnvVariable("piUsername");
+  const PROPOSAL_CODE = "2021-2-LSP-001";
+
+  beforeEach(() => {
+    cy.recordHttp(apiUrl + "/login").as("login");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // And I visit a proposal page
+    ProposalPage.visit(PROPOSAL_CODE);
+  });
+
+  it("should not show a button for editing block visit status for a PI", () => {
+    SummaryOfExecutedObservations.clickShowObservationsLink();
+    SummaryOfExecutedObservations.submitBlockVisitStatusButtonHidden(1, true);
+  });
+});
+
+describe("Block summaries - edit block visit status (PC)", () => {
+  const USERNAME = getEnvVariable("pcUsername");
+  const PROPOSAL_CODE = "2021-1-SCI-014";
+
+  beforeEach(() => {
+    cy.recordHttp(apiUrl + "/login").as("login");
+
+    cy.recordHttp(apiUrl + "/user").as("user");
+
+    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+
+    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    // And I visit a proposal page
+    ProposalPage.visit(PROPOSAL_CODE);
+  });
+
+  it("should not show a button for editing block visit status for a PC", () => {
+    SummaryOfExecutedObservations.clickShowObservationsLink();
+    SummaryOfExecutedObservations.submitBlockVisitStatusButtonHidden(1, true);
   });
 });

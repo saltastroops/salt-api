@@ -54,9 +54,13 @@
         </tr>
         <ng-container
           formArrayName="partnerRequestedPercentages"
-          *ngFor="let t of partnerRequestedPercentages.controls; let i = index"
+          *ngIf="progressReport.partnerRequestedPercentages.length > 0"
         >
           <tr
+            *ngFor="
+              let t of partnerRequestedPercentages.controls;
+              let i = index
+            "
             class="row"
             [formGroupName]="i"
             (keyup)="validatePartnerRequestedPercentagesControls()"
@@ -134,11 +138,9 @@
         <ng-container *ngIf="partnerRequestedPercentages.errors">
           <tr>
             <td colspan="3">
-              <p>
-                <label class="has-text-danger">{{
-                  partnerRequestedPercentages.errors.message
-                }}</label>
-              </p>
+              <label class="has-text-danger">{{
+                partnerRequestedPercentages.errors.message
+              }}</label>
             </td>
           </tr>
         </ng-container>
@@ -401,7 +403,12 @@
             >
               Submit
             </button>
-            <div *ngIf="error">
+            <div class="submission-message" *ngIf="success">
+              <p class="has-text-success" data-test="success">
+                {{ success }}
+              </p>
+            </div>
+            <div class="submission-message" *ngIf="error">
               <p class="has-text-danger" data-test="error">{{ error }}</p>
             </div>
           </td>

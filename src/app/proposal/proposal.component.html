@@ -1,5 +1,5 @@
 <wm-loading-indicator
-  *ngIf="isLoading"
+  *ngIf="isLoading && !proposal"
   message="Loading proposal..."
 ></wm-loading-indicator>
 <wm-error-indicator *ngIf="error" message="Loading failed"></wm-error-indicator>
@@ -35,7 +35,7 @@
     </div>
 
     <div class="block">
-      <wm-investigators [investigators]="p.investigators"></wm-investigators>
+      <wm-investigators [proposal]="p"></wm-investigators>
     </div>
 
     <div class="block">
@@ -62,7 +62,11 @@
 
     <!--  TODO: Allocation is semester dependent will fix it -->
 
-    <wm-block-view [blocks]="p.blocks" [blockId]="blockId"></wm-block-view>
+    <wm-block-view
+      [blocks]="p.blocks"
+      [blockId]="blockId"
+      [investigators]="p.investigators"
+    ></wm-block-view>
   </ng-template>
   <ng-template #phase1>
     <wm-p1-details [proposal]="p"></wm-p1-details>

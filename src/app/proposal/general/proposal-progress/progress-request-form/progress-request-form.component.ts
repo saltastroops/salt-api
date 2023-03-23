@@ -26,7 +26,8 @@ export class ProgressRequestFormComponent implements OnInit {
   proposalProgressForm!: UntypedFormGroup;
   loading = false;
   submitted = false;
-  error: string | undefined = undefined;
+  error?: string = undefined;
+  success?: string = undefined;
   currentSemester = currentSemester();
   nextSemester = getNextSemester();
   changeReasonError = false;
@@ -84,15 +85,21 @@ export class ProgressRequestFormComponent implements OnInit {
   submit(): void {
     this.loading = true;
     this.submitted = true;
+    this.success = undefined;
     this.validatePartnerRequestedPercentagesControls();
 
     // stop here if form is invalid
     if (this.proposalProgressForm.invalid) {
-      this.error = "Please make sure that all required fields are filled.";
+      this.error =
+        "Please make sure that all required fields are filled correctly.";
+      this.loading = false;
       return;
     }
     this.error = undefined;
-    const proposalProgressFormValues = this.proposalProgressForm.value;
+    // We use getRawValue() rather than just the value property, as the input field for
+    // the percentage requested from partner OTH (if there is one) is disabled, but we
+    // still need its value.
+    const proposalProgressFormValues = this.proposalProgressForm.getRawValue();
     const partnerRequestedPercentages =
       proposalProgressFormValues.partnerRequestedPercentages
         .map(
@@ -135,7 +142,12 @@ export class ProgressRequestFormComponent implements OnInit {
         (data) => {
           this.progressReport = { ...data };
           this.loading = false;
+          this.success = "The progress report has been submitted.";
           this.successfulSubmission.emit(data);
+
+          setTimeout(() => {
+            this.success = undefined;
+          }, 3000);
         },
         () => {
           this.error = GENERIC_ERROR_MESSAGE;
@@ -230,6 +242,8 @@ export class ProgressRequestFormComponent implements OnInit {
     return this.formBuilder.group({
       partnerCode: [partnerCode, Validators.required],
       requestedPercentage: [
+        // "readonly" would be more appropriate than "disabled", but this property is
+        // not supported by Angular Forms.
         { value: `${requestedPercentage}`, disabled: partnerCode === "OTH" },
         Validators.required,
       ],

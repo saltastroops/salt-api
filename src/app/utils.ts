@@ -1,3 +1,4 @@
+import { Investigator } from "./types/proposal";
 import { User, UserRole } from "./types/user";
 
 export const GENERIC_ERROR_MESSAGE =
@@ -268,7 +269,7 @@ export function previousSemesterOf(semester: string): string {
 // reference https://blog.bitsrc.io/6-ways-to-unsubscribe-from-observables-in-angular-ab912819a78f
 // 5. Use Decorator to automate Unsubscription
 // This decorator can only work when there is a subscription property.
-export function AutoUnsubcribe() {
+export function AutoUnsubscribe() {
   // @ts-ignore: very generic, so any should be fine
   return function (constructor: any): void {
     const orig = constructor.prototype.ngOnDestroy;
@@ -286,8 +287,19 @@ export function AutoUnsubcribe() {
 /* eslint-enable */
 
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {
-  if (user.roles.includes("Administrator")) {
-    return true;
-  }
   return user.roles.some((role) => roles.includes(role));
+}
+
+export function isUserPrincipalInvestigator(
+  user: User,
+  investigators: Investigator[],
+): boolean {
+  return investigators.some((i) => i.id === user.id && i.isPi);
+}
+
+export function isUserPrincipalContact(
+  user: User,
+  investigators: Investigator[],
+): boolean {
+  return investigators.some((i) => i.id === user.id && i.isPc);
 }

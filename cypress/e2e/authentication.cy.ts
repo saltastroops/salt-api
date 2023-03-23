@@ -113,7 +113,7 @@ describe("Authentication", () => {
       // Then the proposal page is loaded
       cy.url().should("contain", PROPOSAL_BASE_URL);
 
-      // And the user details are re-requested
+      // Then user details are stored
       userDetailsAreStored();
     });
   });

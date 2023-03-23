@@ -30,13 +30,18 @@ export interface ProperMotion {
   epoch: string;
 }
 
+export interface TargetType {
+  type: string;
+  subtype: string;
+}
+
 export interface Target {
   id: number;
   name: string;
   coordinates: TargetCoordinates | null;
   properMotion: ProperMotion | null;
   magnitude: Magnitude | null;
-  targetType: string | null;
+  targetType: TargetType | null;
   periodEphemeris: PeriodEphemeris | null;
   horizonsIdentifier: string | null;
   nonSidereal: boolean;

@@ -5,7 +5,7 @@ import { Subscription } from "rxjs";
 import { MosService } from "../service/mos.service";
 import { MosBlock } from "../types/mos";
 import {
-  AutoUnsubcribe,
+  AutoUnsubscribe,
   availableSemesters,
   convertRightAscensionHMSToDegrees,
   currentSemester,
@@ -18,7 +18,7 @@ import {
   templateUrl: "./mos.component.html",
   styleUrls: ["./mos.component.scss"],
 })
-@AutoUnsubcribe()
+@AutoUnsubscribe()
 export class MosComponent implements OnInit {
   @ViewChild("raMinimum") raMinimumEl!: ElementRef;
   @ViewChild("raMaximum") raMaximumEl!: ElementRef;

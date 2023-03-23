@@ -4,14 +4,14 @@ import { Subscription } from "rxjs";
 
 import { MosService } from "../../service/mos.service";
 import { MosBlock } from "../../types/mos";
-import { AutoUnsubcribe, degreesToHms } from "../../utils";
+import { AutoUnsubscribe, degreesToHms } from "../../utils";
 
 @Component({
   selector: "wm-mos-blocks-table",
   templateUrl: "./mos-blocks-table.component.html",
   styleUrls: ["./mos-blocks-table.component.scss"],
 })
-@AutoUnsubcribe()
+@AutoUnsubscribe()
 export class MosBlocksTableComponent implements OnInit {
   @Input() loading!: boolean;
   @Input() mosBlocks: MosBlock[] = [];

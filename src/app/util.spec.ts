@@ -64,7 +64,6 @@ describe("util", () => {
       const jd = currentJulianDay();
       expect(jd.start).toEqual(parseISO(expectedStart));
       expect(jd.end).toEqual(parseISO(expectedEnd));
-      console.log(parseISO("2022-09-09T12:00:00+02"));
     };
 
     checkJulianDay(

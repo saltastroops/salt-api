@@ -1,5 +1,7 @@
 const BLOCK_LINK = '[data-test="executed-observations-block-name"]';
 const DISPLAYED_BLOCK_CONTENT = '[data-test="displayed-block-content"]';
+const BLOCK_REJECTION_REASON =
+  '[data-test="executed-observations-block-rejection-reason"]';
 
 const SORT_BY_NAME_COLUMN =
   "[data-test=executed-observations-block-name-header]";
@@ -15,6 +17,23 @@ const SORT_BY_OBSERVATION_DATE_COLUMN =
   "[data-test=executed-observations-observation-date-header]";
 const SORT_BY_OBSERVATION_STATUS_COLUMN =
   "[data-test=executed-observations-observation-status-header]";
+
+const TOGGLE_EXECUTED_OBSERVATIONS_LINK =
+  "[data-test=show-executed-observations]";
+
+const EDIT_BLOCK_VISIT_STATUS_BUTTON =
+  "[data-test=executed-observations-status-edit-button]";
+
+const EDIT_BLOCK_VISIT_MODAL = "[data-test=block-visit-status-modal]";
+
+const ERROR = "[data-test=error]";
+
+const BLOCK_VISIT_STATUS_OPTIONS = "[data-test=block-visit-status-value]";
+
+const BLOCK_REJECTION_REASON_OPTIONS = "[data-test=block-rejection-reason]";
+
+const SUBMIT_BLOCK_VISIT_STATUS_BUTTON =
+  "[data-test=submit-block-visit-status]";
 
 export class SummaryOfExecutedObservations {
   static clickBlockNameLink(elementIndex: number): void {
@@ -87,6 +106,68 @@ export class SummaryOfExecutedObservations {
         .then(() => {
           expect(values).to.deep.equal(values.reverse());
         });
+    }
+  }
+
+  static clickShowObservationsLink(): void {
+    cy.get(TOGGLE_EXECUTED_OBSERVATIONS_LINK).click();
+  }
+
+  static editBlockStatusModalShown(shown: boolean): void {
+    if (shown) {
+      cy.get(EDIT_BLOCK_VISIT_MODAL).should("be.visible");
+    } else {
+      cy.get(EDIT_BLOCK_VISIT_MODAL).should("not.exist");
+    }
+  }
+
+  static clickEditBlockVisitStatus(elementIndex: number): void {
+    cy.get(EDIT_BLOCK_VISIT_STATUS_BUTTON).eq(elementIndex).click();
+  }
+
+  static errorContainsMessage(txt: string): void {
+    cy.get(ERROR).then(($el) => {
+      const text = $el.text().trim();
+
+      expect(text).to.eq(txt);
+    });
+  }
+
+  static blockRejectionReasonUpdatedWithReason(
+    elementIndex: number,
+    rejectionReason: string,
+  ): void {
+    cy.get(BLOCK_REJECTION_REASON)
+      .eq(elementIndex)
+      .then(($el) => {
+        const text = $el.text().trim();
+
+        expect(text).to.eq(rejectionReason);
+      });
+  }
+
+  static selectBlockVisitStatus(elementIndex: number): void {
+    cy.get(BLOCK_VISIT_STATUS_OPTIONS).select(elementIndex);
+  }
+
+  static selectBlockRejectionReason(elementIndex: number): void {
+    cy.get(BLOCK_REJECTION_REASON_OPTIONS).select(elementIndex);
+  }
+
+  static clickSubmitBlockVisitStatus(): void {
+    cy.get(SUBMIT_BLOCK_VISIT_STATUS_BUTTON).click();
+  }
+
+  static submitBlockVisitStatusButtonHidden(
+    elementIndex: number,
+    hidden: boolean,
+  ): void {
+    if (hidden) {
+      cy.get(EDIT_BLOCK_VISIT_STATUS_BUTTON).should("not.exist");
+    } else {
+      cy.get(EDIT_BLOCK_VISIT_STATUS_BUTTON)
+        .eq(elementIndex)
+        .should("not.be.hidden");
     }
   }
 }

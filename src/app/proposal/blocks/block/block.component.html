@@ -12,10 +12,69 @@
       [overhead]="block.overheadTime"
       [totalObservationTime]="block.observationTime"
     ></wm-total-observation-time>
-    <wm-priority-comment
-      [comment]="block.comment"
-      [priority]="block.priority"
-    ></wm-priority-comment>
+    <div class="priority-comment-status">
+      <wm-edit-block-status-modal
+        #blockStatusModal
+        (blockStatusUpdate)="updateBlockStatus($event)"
+      ></wm-edit-block-status-modal>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>Comments</th>
+            <th>Status</th>
+            <th
+              *ngIf="
+                showEditBlockButton &&
+                (block.status.value === 'Active' ||
+                  block.status.value === 'On hold')
+              "
+            >
+              Edit
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ block.priority }}</td>
+            <td>
+              <p [innerHTML]="block.comment | nl2br"></p>
+            </td>
+            <td data-test="block-status">{{ block.status.value }}</td>
+            <td
+              *ngIf="
+                showEditBlockButton &&
+                (block.status.value === 'Active' ||
+                  block.status.value === 'On hold')
+              "
+              class="has-text-centered"
+            >
+              <button
+                class="button"
+                (click)="
+                  blockStatusModal.openModal(
+                    block.id,
+                    block.status.value,
+                    block.status.reason
+                  )
+                "
+                data-test="edit-block-status-button"
+              >
+                Edit
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4">
+              <b>
+                The block was last submitted with major changes on
+                {{ latestSubmissionDate | dfnsFormat: "dd LLLL yyyy" }}.
+              </b>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <wm-observing-windows
       [observingWindows]="block.observingWindows"
     ></wm-observing-windows>

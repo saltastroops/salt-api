@@ -1,3 +1,21 @@
 .textarea {
   min-width: 300px;
 }
+div {
+  display: inline-block;
+  padding-right: 0.1em;
+  padding-bottom: 0.1em;
+  margin-bottom: 0.5em;
+}
+.modal-card-body {
+  padding-bottom: 0;
+  padding-top: 0.5em;
+}
+.modal-card-foot {
+  padding-bottom: 0;
+  padding-top: 0.5em;
+}
+.control {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}

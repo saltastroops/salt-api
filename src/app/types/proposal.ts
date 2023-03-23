@@ -67,7 +67,7 @@ export interface Investigator extends ProposalUser {
   affiliation: Affiliation;
   isPc: boolean;
   isPi: boolean;
-  hasApprovedProposal: boolean;
+  hasApprovedProposal: boolean | null;
   thesis: ThesisInfo | null;
 }
 
@@ -133,7 +133,7 @@ export type ProposalStatusValue =
 
 export interface ProposalStatus {
   value: ProposalStatusValue;
-  reason: string | null;
+  comment: string | null;
 }
 
 export type ProposalType =
@@ -199,4 +199,8 @@ export type ProgressReportsUrls = { [key: string]: { [key: string]: string } };
 
 export interface NewProprietaryPeriod extends ProprietaryPeriod {
   status: string;
+}
+
+export interface SelfActivation {
+  allowed: boolean;
 }

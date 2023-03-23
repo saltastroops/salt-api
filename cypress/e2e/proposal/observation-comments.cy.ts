@@ -12,7 +12,6 @@ import {
   forceNetworkError,
   forceServerError,
   getApiUrl,
-  userDetailsAreStored,
 } from "../../support/utils";
 
 const apiUrl = getApiUrl();
@@ -35,8 +34,6 @@ describe("Observation comments", () => {
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
-    // Then user details are stored
-    userDetailsAreStored();
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);

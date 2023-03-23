@@ -13,7 +13,10 @@ import {
   Proposal,
   ProposalListItem,
   ProposalProgress,
+  ProposalStatus,
+  SelfActivation,
 } from "../../types/proposal";
+import { LiaisonAstronomer } from "../../types/user";
 import { ProposalService } from "../proposal.service";
 
 @Injectable({
@@ -172,5 +175,80 @@ export class RealProposalService implements ProposalService {
           return throwError("Oops. Something is wrong.");
         }),
       );
+  }
+
+  public submitProposalStatus(
+    proposalCode: string,
+    proposalStatus: string,
+    proposalStatusComment: string | null,
+  ): Observable<ProposalStatus> {
+    const uri = environment.apiUrl + "/proposals/" + proposalCode + "/status";
+    return this.http
+      .put<ProposalStatus>(uri, {
+        value: proposalStatus,
+        comment: proposalStatusComment,
+      })
+      .pipe(
+        map((proposalStatus: ProposalStatus) => {
+          return camelcaseKeys(proposalStatus, { deep: true });
+        }),
+        catchError(() => {
+          return throwError("Oops. Something is wrong.");
+        }),
+      );
+  }
+
+  /**
+   * Update the proposal self activation.
+   */
+  public updateSelfActivatable(
+    proposalCode: string,
+    isSelfActivatable: boolean,
+  ): Observable<SelfActivation> {
+    const uri =
+      environment.apiUrl + "/proposals/" + proposalCode + "/self-activation";
+    return this.http
+      .put<SelfActivation>(uri, { allowed: isSelfActivatable })
+      .pipe(
+        map((selfActivatable: SelfActivation) => {
+          return camelcaseKeys(selfActivatable, { deep: true });
+        }),
+        catchError(() => {
+          return throwError("Oops. Something is wrong.");
+        }),
+      );
+  }
+
+  /**
+   * Update the liaison astronomer.
+   */
+  public updateLiaisonAstronomer(
+    proposalCode: string,
+    liaisonAstronomerId: number | null,
+  ): Observable<LiaisonAstronomer> {
+    const uri =
+      environment.apiUrl + "/proposals/" + proposalCode + "/liaison-astronomer";
+    return this.http
+      .put<LiaisonAstronomer>(uri, { id: liaisonAstronomerId })
+      .pipe(
+        map((liaisonAstronomer) => {
+          return camelcaseKeys(liaisonAstronomer, { deep: true });
+        }),
+        catchError(() => {
+          return throwError("Oops. Something is wrong.");
+        }),
+      );
+  }
+
+  /**
+   * Submit an investigator's proposal approval status to the API server.
+   */
+  public updateInvestigatorProposalApprovalStatus(
+    investigatorId: number,
+    proposalCode: string,
+    approved: boolean,
+  ): Observable<void> {
+    const uri = `${environment.apiUrl}/proposals/${proposalCode}/approvals/${investigatorId}`;
+    return this.http.put<void>(uri, { approved: approved });
   }
 }

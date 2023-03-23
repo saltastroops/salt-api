@@ -8,6 +8,10 @@
         <th>Status</th>
         <td>{{ generalProposalInfo.status.value }}</td>
       </tr>
+      <tr *ngIf="generalProposalInfo.status.comment">
+        <th>Status comment</th>
+        <td>{{ generalProposalInfo.status.comment }}</td>
+      </tr>
       <tr>
         <th>Target of Opportunity</th>
         <td *ngIf="generalProposalInfo.isTargetOfOpportunity">

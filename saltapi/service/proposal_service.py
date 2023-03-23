@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
-from saltapi.exceptions import NotFoundError, AuthorizationError, ValidationError
+from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
@@ -369,4 +369,21 @@ class ProposalService:
         """
         self.repository.update_investigator_proposal_approval_status(
             approval_user_id, proposal_code, approved
+        )
+
+    def request_observations(
+        self,
+        user_id: int,
+        proposal_code: str,
+        block_visits_ids: List[int],
+        data_format: str,
+    ):
+        """
+        Create an observations data request.
+        """
+        self.repository.request_observations(
+            user_id=user_id,
+            proposal_code=proposal_code,
+            block_visits_ids=block_visits_ids,
+            data_format=data_format,
         )

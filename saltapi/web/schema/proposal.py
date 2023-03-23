@@ -652,3 +652,16 @@ class SelfActivation(BaseModel):
             " Contact?"
         ),
     )
+
+
+class RequestedObservations(BaseModel):
+    """An Observation data request Body."""
+
+    observation_ids: List[int] = Field(
+        ..., title="Observation Id", description="The block visit Id."
+    )
+    data_format: str = Field(
+        ...,
+        title="Data format",
+        description="The requested data format.",
+    )

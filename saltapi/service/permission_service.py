@@ -484,3 +484,12 @@ class PermissionService:
         roles = [Role.ADMINISTRATOR]
         if user.id != approval_user_id:
             self.check_role(user.username, roles, proposal_code)
+
+    def check_permission_to_request_observations(self, user: User, proposal_code: str):
+        roles = [
+            Role.ADMINISTRATOR,
+            Role.SALT_ASTRONOMER,
+            Role.PRINCIPAL_INVESTIGATOR,
+            Role.PRINCIPAL_CONTACT,
+        ]
+        self.check_role(user.username, roles, proposal_code)

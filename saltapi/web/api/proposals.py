@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from fastapi import (
     APIRouter,
@@ -23,19 +23,20 @@ from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import LiaisonAstronomer, User
 from saltapi.util import semester_start
 from saltapi.web import services
-from saltapi.web.schema.common import ProposalCode, Semester
+from saltapi.web.schema.common import Message, ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     ObservationComment,
+    ProposalApprovalStatus,
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
+    RequestedObservations,
     SelfActivation,
     UpdateStatus,
-    ProposalApprovalStatus,
 )
 from saltapi.web.schema.user import UserId
 
@@ -549,6 +550,43 @@ def update_liaison_astronomer(
         if liaison_salt_astronomer:
             return LiaisonAstronomer(**liaison_salt_astronomer)
         return None
+
+
+@router.post(
+    "/{proposal_code}/request-observations",
+    summary="Request observations",
+    response_model=Optional[Message],
+    status_code=200,
+)
+def request_observations(
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description=("Proposal code of the proposal for which block visits belong to."),
+    ),
+    observations: RequestedObservations = Body(
+        ...,
+        title="Requested observations",
+        description="The requested data observations.",
+    ),
+    user: User = Depends(get_current_user),
+) -> Message:
+    """
+    Create an observations data request.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_request_observations(user, proposal_code)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal_service.request_observations(
+            user_id=user.id,
+            proposal_code=proposal_code,
+            block_visits_ids=observations.observation_ids,
+            data_format=observations.data_format,
+        )
+        unit_of_work.commit()
+
+        return Message(message="Successful")
 
 
 @router.put(

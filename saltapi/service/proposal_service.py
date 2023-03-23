@@ -370,3 +370,20 @@ class ProposalService:
         self.repository.update_investigator_proposal_approval_status(
             approval_user_id, proposal_code, approved
         )
+
+    def request_observations(
+        self,
+        user_id: int,
+        proposal_code: str,
+        block_visits_ids: List[int],
+        data_format: str,
+    ):
+        """
+        Create an observations data request.
+        """
+        self.repository.request_observations(
+            user_id=user_id,
+            proposal_code=proposal_code,
+            block_visits_ids=block_visits_ids,
+            data_format=data_format,
+        )

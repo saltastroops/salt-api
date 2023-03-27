@@ -577,12 +577,12 @@ def request_observations(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_request_observations(user, proposal_code)
-        proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal_service.request_observations(
+        data_service = services.data_service(unit_of_work.connection)
+        data_service.request_observations(
             user_id=user.id,
             proposal_code=proposal_code,
             block_visits_ids=observations.observation_ids,
-            data_format=observations.data_format,
+            data_formats=observations.data_formats,
         )
         unit_of_work.commit()
 

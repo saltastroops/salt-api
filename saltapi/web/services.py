@@ -4,6 +4,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.finder_chart_repository import FinderChartRepository
 from saltapi.repository.institution_repository import InstitutionRepository
 from saltapi.repository.instrument_repository import InstrumentRepository
+from saltapi.repository.data_repository import DataRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.target_repository import TargetRepository
@@ -15,6 +16,7 @@ from saltapi.service.institution_service import InstitutionService
 from saltapi.service.instrument_service import InstrumentService
 from saltapi.service.mail_service import MailService
 from saltapi.service.permission_service import PermissionService
+from saltapi.service.data_service import DataService
 from saltapi.service.proposal_service import ProposalService
 from saltapi.service.submission_service import SubmissionService
 from saltapi.service.user_service import UserService
@@ -57,6 +59,12 @@ def proposal_service(connection: Connection) -> ProposalService:
     """Return a proposal service instance."""
     proposal_repository = ProposalRepository(connection)
     return ProposalService(proposal_repository)
+
+
+def data_service(connection: Connection) -> DataService:
+    """Return a proposal service instance."""
+    data_repository = DataRepository(connection)
+    return DataService(data_repository)
 
 
 def user_service(connection: Connection) -> UserService:

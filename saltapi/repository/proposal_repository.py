@@ -1295,7 +1295,7 @@ WHERE PC.Proposal_Code = :proposal_code
             raise ValidationError(f"Unknown proposal status: {status}")
 
         try:
-            proposal_code_id = self._get_proposal_code_id(proposal_code)
+            proposal_code_id = self.get_proposal_code_id(proposal_code)
         except NoResultFound:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
@@ -2375,7 +2375,7 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
-    def _get_proposal_code_id(self, proposal_code: str) -> int:
+    def get_proposal_code_id(self, proposal_code: str) -> int:
         stmt = text(
             """
 SELECT ProposalCode_Id FROM ProposalCode
@@ -2394,7 +2394,7 @@ WHERE Proposal_Code = :proposal_code
     ) -> None:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
         stmt = text(
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
@@ -2416,7 +2416,7 @@ WHERE Proposal_Code = :proposal_code
     def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, Any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
         stmt = text(
             """
 SELECT
@@ -2460,7 +2460,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
             if liaison_astronomer_id
             else None
         )
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
 
         stmt = text(
             """
@@ -2531,70 +2531,6 @@ WHERE Investigator_Id = (SELECT *
                 "approved": 1 if approved else 0,
                 "user_id": user_id,
             },
-        )
-
-        if not result.rowcount:
-            raise NotFoundError()
-
-    def _get_data_format_id(self, data_format: str):
-        stmt = text(
-            """
-SELECT RequestDataFormat_Id FROM RequestDataFormat
-WHERE RequestDataFormat = :data_format
-        """
-        )
-        result = self.connection.execute(stmt, {"data_format": data_format})
-        data_format_id = result.one_or_none()
-        if not data_format_id:
-            raise NotFoundError(f"Couldn't find  requested data format `{data_format}`")
-
-        return cast(int, data_format_id[0])
-
-    def request_observations(
-        self,
-        user_id: int,
-        proposal_code: str,
-        block_visits_ids: List[int],
-        data_format: str,
-    ):
-        """
-        Create a observations data request
-        """
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
-        data_format_id = self._get_data_format_id(data_format)
-        insert_rows = []
-        for b in block_visits_ids:
-            insert_rows.append(
-                {
-                    "proposal_code_id": proposal_code_id,
-                    "block_visit_id": b,
-                    "user_id": user_id,
-                    "data_format_id": data_format_id,
-                }
-            )
-        stmt = text(
-            """
-INSERT INTO RequestData (
-    ProposalCode_Id,
-    BlockVisit_Id,
-    PiptUser_Id,
-    RequestDataFormat_Id,
-    Complete,
-    RequestDate
-)
-VALUES(
-    :proposal_code_id,
-    :block_visit_id,
-    :user_id,
-    :data_format_id,
-    0,
-    NOW()
-)
-        """
-        )
-        result = self.connection.execute(
-            stmt,
-            insert_rows,
         )
 
         if not result.rowcount:

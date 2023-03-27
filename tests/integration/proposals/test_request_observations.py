@@ -16,7 +16,7 @@ def _url(proposal_code: str) -> str:
 
 _request_body = {
     "observation_ids": [26766, 26981, 27101],
-    "data_format": "all",
+    "data_formats": ["all"],
 }
 
 

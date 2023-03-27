@@ -660,7 +660,7 @@ class RequestedObservations(BaseModel):
     observation_ids: List[int] = Field(
         ..., title="Observation Id", description="The block visit Id."
     )
-    data_format: str = Field(
+    data_formats: List[str] = Field(
         ...,
         title="Data format",
         description="The requested data format.",

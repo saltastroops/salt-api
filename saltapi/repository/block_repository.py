@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args
+from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args, Set
 
 import pytz
 from astropy.coordinates import Angle
@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
@@ -203,7 +203,7 @@ WHERE B.Block_Id = :block_id;
         try:
             return str(result.scalar_one())
         except NoResultFound:
-            raise NotFoundError()
+            raise ValidationError()
 
     def get_block_visit(self, block_visit_id: int) -> Dict[str, str]:
         """
@@ -876,3 +876,14 @@ WHERE TCOC.Pointing_Id = :pointing_id
         if block_id:
             return self.get(block_id)
         return None
+
+    def get_proposal_codes_for_block_visits(
+        self, block_visit_ids: List[int]
+    ) -> Set[str]:
+        """
+        Get proposal codes for block visit ids.
+        """
+        proposal_codes = set()
+        for block_visit_id in block_visit_ids:
+            proposal_codes.add(self.get_proposal_code_for_block_id(block_visit_id))
+        return proposal_codes

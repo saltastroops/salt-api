@@ -2376,6 +2376,9 @@ WHERE PC.Proposal_Code = :proposal_code
         return configurations
 
     def get_proposal_code_id(self, proposal_code: str) -> int:
+        """
+        Returns the proposal code id of a proposal code
+        """
         stmt = text(
             """
 SELECT ProposalCode_Id FROM ProposalCode

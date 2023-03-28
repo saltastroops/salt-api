@@ -7,7 +7,7 @@ class DataService:
     def __init__(self, repository: DataRepository):
         self.repository = repository
 
-    def request_observations(
+    def request_data(
         self,
         user_id: int,
         proposal_code: str,
@@ -15,9 +15,9 @@ class DataService:
         data_formats: List[str],
     ):
         """
-        Create an observations data request.
+        Create an observation data request.
         """
-        self.repository.request_observations(
+        self.repository.request_data(
             user_id=user_id,
             proposal_code=proposal_code,
             block_visits_ids=block_visits_ids,

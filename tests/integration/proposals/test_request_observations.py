@@ -11,7 +11,7 @@ from tests.conftest import (
 
 
 def _url(proposal_code: str) -> str:
-    return "/proposals/" + proposal_code + "/request-observations"
+    return "/proposals/" + proposal_code + "/request-data"
 
 
 _request_body = {
@@ -47,7 +47,7 @@ def test_request_observations_returns_401_for_user_with_invalid_auth_token(
         find_username("Principal Contact", "2019-2-SCI-006"),
     ],
 )
-def test_request_observations_should_allow_authenticate_users_to_request(
+def test_request_observations_should_allow_authorised_users_to_request(
     username: str, client: TestClient
 ) -> None:
     authenticate(username, client)
@@ -76,3 +76,54 @@ def test_request_observations_should_not_allow_request_for_unauthorized_users(
     authenticate(username, client)
     response = client.post(_url("2019-2-SCI-006"), json=_request_body)
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_request_observations_returns_400_for_block_visit_belonging_to_another_proposal(
+    client: TestClient,
+) -> None:
+    request_body = {
+        "observation_ids": [27101],
+        "data_formats": ["all"],
+    }
+
+    authenticate(find_username("Administrator"), client)
+    proposal_code = "2020-1-SCI-039"
+    response = client.post(_url(proposal_code), json=request_body)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_request_observations_returns_400_for_an_invalid_block_visit_id(
+    client: TestClient,
+) -> None:
+    request_body = {
+        "observation_ids": [-1],
+        "data_formats": ["all"],
+    }
+
+    authenticate(find_username("Administrator"), client)
+    proposal_code = "2019-2-SCI-006"
+    response = client.post(_url(proposal_code), json=request_body)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_request_observations_returns_400_for_an_invalid_data_format(
+    client: TestClient,
+) -> None:
+    request_body = {
+        "observation_ids": [26766],
+        "data_formats": ["not_format"],
+    }
+
+    authenticate(find_username("Administrator"), client)
+    proposal_code = "2019-2-SCI-006"
+    response = client.post(_url(proposal_code), json=request_body)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_request_observations_returns_400_for_an_invalid_proposal_code(
+    client: TestClient,
+) -> None:
+    authenticate(find_username("Administrator"), client)
+    proposal_code = "2019-2-NOT-CODE-001"
+    response = client.post(_url(proposal_code), json=_request_body)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -34,7 +34,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    RequestedObservations,
+    DataRequest,
     SelfActivation,
     UpdateStatus,
 )
@@ -553,36 +553,38 @@ def update_liaison_astronomer(
 
 
 @router.post(
-    "/{proposal_code}/request-observations",
-    summary="Request observations",
+    "/{proposal_code}/request-data",
+    summary="Request data for observations.",
     response_model=Optional[Message],
     status_code=200,
 )
-def request_observations(
+def request_data(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description=("Proposal code of the proposal for which block visits belong to."),
+        description="Proposal code of the proposal which block visits belong to.",
     ),
-    observations: RequestedObservations = Body(
+    data_request: DataRequest = Body(
         ...,
-        title="Requested observations",
-        description="The requested data observations.",
+        title="Data request",
+        description="The data request.",
     ),
     user: User = Depends(get_current_user),
 ) -> Message:
     """
-    Create an observations data request.
+    Create an observation data request.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_request_observations(user, proposal_code)
+        permission_service.check_permission_to_request_data(
+            user, proposal_code, data_request.observation_ids
+        )
         data_service = services.data_service(unit_of_work.connection)
-        data_service.request_observations(
+        data_service.request_data(
             user_id=user.id,
             proposal_code=proposal_code,
-            block_visits_ids=observations.observation_ids,
-            data_formats=observations.data_formats,
+            block_visits_ids=data_request.observation_ids,
+            data_formats=data_request.data_formats,
         )
         unit_of_work.commit()
 

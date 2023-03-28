@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.repository.proposal_repository import ProposalRepository
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 
 
 class DataRepository:
@@ -22,11 +22,11 @@ WHERE RequestDataFormat = :data_format
         result = self.connection.execute(stmt, {"data_format": data_format})
         data_format_id = result.one_or_none()
         if not data_format_id:
-            raise NotFoundError(f"Couldn't find  requested data format `{data_format}`")
+            raise NotFoundError(f"Couldn't find requested data format `{data_format}`")
 
         return cast(int, data_format_id[0])
 
-    def request_observations(
+    def request_data(
         self,
         user_id: int,
         proposal_code: str,
@@ -34,29 +34,33 @@ WHERE RequestDataFormat = :data_format
         data_formats: List[str],
     ):
         """
-        Create a observations data request
+        Create an observation data request.
         """
         proposal_code_id = self.proposal_repository.get_proposal_code_id(proposal_code)
-        data_format_id = self._get_data_format_id("all")
         insert_rows = []
-        for b in block_visits_ids:
-            insert_rows.append(
-                {
-                    "proposal_code_id": proposal_code_id,
-                    "block_visit_id": b,
-                    "user_id": user_id,
-                    "data_format_id": data_format_id,
-                }
-            )
-        if "calibration" in data_formats:
-            insert_rows.append(
-                {
-                    "proposal_code_id": proposal_code_id,
-                    "block_visit_id": None,
-                    "user_id": user_id,
-                    "data_format_id": self._get_data_format_id("calibration"),
-                }
-            )
+        for data_format in data_formats:
+            data_format_id = self._get_data_format_id(data_format)
+            if data_format == "all":
+                for block_visit_id in block_visits_ids:
+                    insert_rows.append(
+                        {
+                            "proposal_code_id": proposal_code_id,
+                            "block_visit_id": block_visit_id,
+                            "user_id": user_id,
+                            "data_format_id": data_format_id,
+                        }
+                    )
+            elif data_format == "calibrations":
+                insert_rows.append(
+                    {
+                        "proposal_code_id": proposal_code_id,
+                        "block_visit_id": None,
+                        "user_id": user_id,
+                        "data_format_id": self._get_data_format_id("calibration"),
+                    }
+                )
+            else:
+                raise ValidationError(f"Data format `{data_format}` is not supported.")
         stmt = text(
             """
 INSERT INTO RequestData (
@@ -67,7 +71,7 @@ INSERT INTO RequestData (
     Complete,
     RequestDate
 )
-VALUES(
+VALUES (
     :proposal_code_id,
     :block_visit_id,
     :user_id,
@@ -77,10 +81,7 @@ VALUES(
 )
         """
         )
-        result = self.connection.execute(
+        self.connection.execute(
             stmt,
             insert_rows,
         )
-
-        if not result.rowcount:
-            raise NotFoundError()

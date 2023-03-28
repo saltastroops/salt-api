@@ -654,14 +654,23 @@ class SelfActivation(BaseModel):
     )
 
 
-class RequestedObservations(BaseModel):
+class DataFormat(str, Enum):
+    ALL = "all"
+    CALIBRATION = "calibration"
+    DOCUMENTATION = "documentation"
+    PRODUCT = "product"
+    RAW = "raw"
+    RED = "red"
+
+
+class DataRequest(BaseModel):
     """An Observation data request Body."""
 
     observation_ids: List[int] = Field(
-        ..., title="Observation Id", description="The block visit Id."
+        ..., title="Observation Id", description="The observation (block visit) id."
     )
-    data_formats: List[str] = Field(
+    data_formats: List[DataFormat] = Field(
         ...,
-        title="Data format",
-        description="The requested data format.",
+        title="Data formats",
+        description="The requested data formats.",
     )

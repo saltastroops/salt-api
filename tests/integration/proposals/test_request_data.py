@@ -90,6 +90,8 @@ def test_request_observations_returns_400_for_block_visit_belonging_to_another_p
     proposal_code = "2020-1-SCI-039"
     response = client.post(_url(proposal_code), json=request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    message = response.json()["message"]
+    assert "Can't request data for" in message
 
 
 def test_request_observations_returns_400_for_an_invalid_block_visit_id(
@@ -104,6 +106,8 @@ def test_request_observations_returns_400_for_an_invalid_block_visit_id(
     proposal_code = "2019-2-SCI-006"
     response = client.post(_url(proposal_code), json=request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    message = response.json()["message"]
+    assert "Observation id: `-1` doesn't exist" in message
 
 
 def test_request_observations_returns_400_for_an_invalid_data_format(

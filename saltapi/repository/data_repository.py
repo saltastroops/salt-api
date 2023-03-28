@@ -50,7 +50,7 @@ WHERE RequestDataFormat = :data_format
                             "data_format_id": data_format_id,
                         }
                     )
-            elif data_format == "calibrations":
+            elif data_format == "calibration":
                 insert_rows.append(
                     {
                         "proposal_code_id": proposal_code_id,

@@ -203,7 +203,7 @@ WHERE B.Block_Id = :block_id;
         try:
             return str(result.scalar_one())
         except NoResultFound:
-            raise ValidationError()
+            raise NotFoundError()
 
     def get_block_visit(self, block_visit_id: int) -> Dict[str, str]:
         """
@@ -885,5 +885,12 @@ WHERE TCOC.Pointing_Id = :pointing_id
         """
         proposal_codes = set()
         for block_visit_id in block_visit_ids:
-            proposal_codes.add(self.get_proposal_code_for_block_id(block_visit_id))
+            try:
+                proposal_codes.add(
+                    self.get_proposal_code_for_block_visit_id(block_visit_id)
+                )
+            except Exception:
+                raise ValidationError(
+                    f"Observation id: `{block_visit_id}` doesn't exist"
+                )
         return proposal_codes

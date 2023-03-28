@@ -495,9 +495,12 @@ class PermissionService:
             Role.PRINCIPAL_CONTACT,
         ]
         self.check_role(user.username, roles, proposal_code)
+        if not observation_ids:
+            return
         proposal_codes = self.block_repository.get_proposal_codes_for_block_visits(
             observation_ids
         )
+        print(proposal_codes, observation_ids)
         if not proposal_codes:
             raise ValidationError(f"Can't request data for other proposals.")
         for pc in proposal_codes:

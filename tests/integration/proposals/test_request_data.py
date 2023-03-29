@@ -124,10 +124,10 @@ def test_request_observations_returns_400_for_an_invalid_data_format(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_request_observations_returns_400_for_an_invalid_proposal_code(
+def test_request_observations_returns_404_for_an_invalid_proposal_code(
     client: TestClient,
 ) -> None:
     authenticate(find_username("Administrator"), client)
-    proposal_code = "2019-2-NOT-CODE-001"
+    proposal_code = "2019-2-NOT-CODE-FFF--012-0011"
     response = client.post(_url(proposal_code), json=_request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST

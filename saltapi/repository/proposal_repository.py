@@ -2377,7 +2377,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
     def get_proposal_code_id(self, proposal_code: str) -> int:
         """
-        Returns the proposal code id of a proposal code
+        Return the proposal code id of a proposal code.
         """
         stmt = text(
             """

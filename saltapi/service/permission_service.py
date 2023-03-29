@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, cast
 
-from saltapi.exceptions import AuthorizationError, ValidationError
+from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
@@ -495,14 +495,3 @@ class PermissionService:
             Role.PRINCIPAL_CONTACT,
         ]
         self.check_role(user.username, roles, proposal_code)
-        if not observation_ids:
-            return
-        proposal_codes = self.block_repository.get_proposal_codes_for_block_visits(
-            observation_ids
-        )
-        print(proposal_codes, observation_ids)
-        if not proposal_codes:
-            raise ValidationError(f"Can't request data for other proposals.")
-        for pc in proposal_codes:
-            if pc != proposal_code:
-                raise ValidationError(f"Can't request data for other proposals.")

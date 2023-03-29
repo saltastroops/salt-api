@@ -562,7 +562,7 @@ def request_data(
     proposal_code: ProposalCode = Path(
         ...,
         title="Proposal code",
-        description="Proposal code of the proposal which block visits belong to.",
+        description="Proposal code of the proposal which the block visits belong to.",
     ),
     data_request: DataRequest = Body(
         ...,

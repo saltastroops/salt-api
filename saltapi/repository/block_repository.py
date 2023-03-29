@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import NotFoundError
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
@@ -881,7 +881,7 @@ WHERE TCOC.Pointing_Id = :pointing_id
         self, block_visit_ids: List[int]
     ) -> Set[str]:
         """
-        Get proposal codes for block visit ids.
+        Get the proposal codes for a list of block visit ids.
         """
         proposal_codes = set()
         for block_visit_id in block_visit_ids:
@@ -890,7 +890,7 @@ WHERE TCOC.Pointing_Id = :pointing_id
                     self.get_proposal_code_for_block_visit_id(block_visit_id)
                 )
             except Exception:
-                raise ValidationError(
-                    f"Observation id: `{block_visit_id}` doesn't exist"
+                raise NotFoundError(
+                    f"Observation id does not exist: '{block_visit_id}'"
                 )
         return proposal_codes

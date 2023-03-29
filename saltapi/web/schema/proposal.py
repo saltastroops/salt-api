@@ -655,8 +655,8 @@ class SelfActivation(BaseModel):
 
 
 class DataFormat(str, Enum):
-    ALL = "all"
-    CALIBRATION = "calibration"
+    ALL = "All"
+    CALIBRATION = "Calibration"
 
 
 class DataRequest(BaseModel):

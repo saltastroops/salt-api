@@ -14,7 +14,7 @@ def _url(proposal_code: str) -> str:
     return "/proposals/" + proposal_code + "/request-data"
 
 
-_request_body = {
+_valid_request_body = {
     "observation_ids": [26766, 26981, 27101],
     "data_formats": ["all"],
 }
@@ -25,7 +25,7 @@ def test_request_observations_returns_401_for_unauthenticated_user(
 ) -> None:
     not_authenticated(client)
     proposal_code = "2020-1-SCI-005"
-    response = client.post(_url(proposal_code), json=_request_body)
+    response = client.post(_url(proposal_code), json=_valid_request_body)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -34,7 +34,7 @@ def test_request_observations_returns_401_for_user_with_invalid_auth_token(
 ) -> None:
     misauthenticate(client)
     proposal_code = "2020-1-SCI-005"
-    response = client.post(_url(proposal_code), json=_request_body)
+    response = client.post(_url(proposal_code), json=_valid_request_body)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -53,7 +53,7 @@ def test_request_observations_should_allow_authorised_users_to_request(
     authenticate(username, client)
     proposal_code = "2019-2-SCI-006"
 
-    response = client.post(_url(proposal_code), json=_request_body)
+    response = client.post(_url(proposal_code), json=_valid_request_body)
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -74,7 +74,7 @@ def test_request_observations_should_not_allow_request_for_unauthorized_users(
     client: TestClient,
 ) -> None:
     authenticate(username, client)
-    response = client.post(_url("2019-2-SCI-006"), json=_request_body)
+    response = client.post(_url("2019-2-SCI-006"), json=_valid_request_body)
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -129,5 +129,5 @@ def test_request_observations_returns_404_for_an_invalid_proposal_code(
 ) -> None:
     authenticate(find_username("Administrator"), client)
     proposal_code = "2019-2-NOT-CODE-FFF--012-0011"
-    response = client.post(_url(proposal_code), json=_request_body)
+    response = client.post(_url(proposal_code), json=_valid_request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST

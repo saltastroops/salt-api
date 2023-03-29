@@ -62,7 +62,7 @@ WHERE RequestDataFormat = :data_format
         insert_rows = []
         for data_format in data_formats:
             data_format_id = self._get_data_format_id("all")
-            if data_format == "all":
+            if data_format == "All":
                 for block_visit_id in block_visits_ids:
                     insert_rows.append(
                         {
@@ -72,7 +72,7 @@ WHERE RequestDataFormat = :data_format
                             "data_format_id": data_format_id,
                         }
                     )
-            elif data_format == "calibration":
+            elif data_format == "Calibration":
                 insert_rows.append(
                     {
                         "proposal_code_id": proposal_code_id,

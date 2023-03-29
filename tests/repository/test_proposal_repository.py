@@ -862,7 +862,7 @@ def test_get_proposal_code_id_returns_correct_id(
     assert proposal_repository.get_proposal_code_id(proposal_code) == proposal_code_id
 
 
-def test_get_proposal_code_id_raise_error_for_none_existing_proposal_code(
+def test_get_proposal_code_id_raises_error_for_none_existing_proposal_code(
     db_connection: Connection,
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)

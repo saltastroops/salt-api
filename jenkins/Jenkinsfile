@@ -7,9 +7,9 @@ pipeline {
     }
   }
   stages {
-    stage("Test") {
+    stage("Run tests") {
       steps {
-        echo 'Hello World'
+        sh './jenkins/run-tests.sh'
       }
     }
   }

@@ -11,4 +11,7 @@ RUN sed -i "s@<policy domain=\"coder\" rights=\"none\" pattern=\"PDF\" />@<polic
 
 RUN pip install wheel
 
+RUN pip install flake8
+RUN pip install mypy
 RUN pip install poetry
+RUN pip install pytest

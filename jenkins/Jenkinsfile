@@ -3,6 +3,7 @@ pipeline {
     dockerfile {
       filename 'Dockerfile'
       dir 'jenkins'
+      args '-v salt-api-venv:/venv -u 0:0'
     }
   }
   stages {

@@ -9,14 +9,10 @@ from saltapi.exceptions import NotFoundError, ValidationError
 
 
 class DataRepository:
-    def __init__(
-        self,
-        connection: Connection,
-        block_repository: BlockRepository,
-    ) -> None:
+    def __init__(self, connection: Connection) -> None:
         self.connection = connection
         self.proposal_repository = ProposalRepository(connection)
-        self.block_repository = block_repository
+        self.block_repository = BlockRepository(connection)
 
     def _get_data_format_id(self, data_format: str):
         stmt = text(

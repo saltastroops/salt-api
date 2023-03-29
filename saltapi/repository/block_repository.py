@@ -19,12 +19,10 @@ from saltapi.settings import get_settings
 class BlockRepository:
     def __init__(
         self,
-        target_repository: TargetRepository,
-        instrument_repository: InstrumentRepository,
         connection: Connection,
     ) -> None:
-        self.target_repository = target_repository
-        self.instrument_repository = instrument_repository
+        self.target_repository = TargetRepository(connection)
+        self.instrument_repository = InstrumentRepository(connection)
         self.connection = connection
 
     def get(self, block_id: int) -> Block:

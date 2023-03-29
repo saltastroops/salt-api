@@ -7,7 +7,6 @@ from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.data_repository import DataRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
-from saltapi.repository.target_repository import TargetRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.block_service import BlockService
@@ -30,11 +29,7 @@ def authentication_service(connection: Connection) -> AuthenticationService:
 
 def block_service(connection: Connection) -> BlockService:
     """Return a block service instance."""
-    target_repository = TargetRepository(connection)
-    instrument_repository = InstrumentRepository(connection)
-    block_repository = BlockRepository(
-        target_repository, instrument_repository, connection
-    )
+    block_repository = BlockRepository(connection)
     return BlockService(block_repository)
 
 
@@ -47,11 +42,7 @@ def permission_service(connection: Connection) -> PermissionService:
     """Return a permission service instance."""
     user_repository = UserRepository(connection)
     proposal_repository = ProposalRepository(connection)
-    target_repository = TargetRepository(connection)
-    instrument_repository = InstrumentRepository(connection)
-    block_repository = BlockRepository(
-        target_repository, instrument_repository, connection
-    )
+    block_repository = BlockRepository(connection)
     return PermissionService(user_repository, proposal_repository, block_repository)
 
 

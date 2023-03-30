@@ -42,17 +42,15 @@ WHERE RequestDataFormat = :data_format
             proposal_code_id = self.proposal_repository.get_proposal_code_id(
                 proposal_code
             )
+        except Exception:
+            raise ValidationError(f"Couldn't find  proposal code '{proposal_code}'")
+        try:
             proposal_codes = self.block_repository.get_proposal_codes_for_block_visits(
                 block_visits_ids
             )
         except Exception:
-            raise ValidationError()
-        if block_visits_ids and not proposal_codes:
-            #  As this method checks permissions, in principle there should be no
-            #  validation. However, not ruling out observation ids of other proposals
-            #  would constitute a security loophole, and hence we should ensure there are
-            #  no such observation ids.
-            raise ValidationError(f"Can't request data for other proposals.")
+            raise ValidationError(f"Some observation id does not exist")
+
         for pc in proposal_codes:
             if pc != proposal_code:
                 raise ValidationError(
@@ -61,8 +59,9 @@ WHERE RequestDataFormat = :data_format
 
         insert_rows = []
         for data_format in data_formats:
-            data_format_id = self._get_data_format_id("all")
+
             if data_format == "All":
+                data_format_id = self._get_data_format_id("all")
                 for block_visit_id in block_visits_ids:
                     insert_rows.append(
                         {

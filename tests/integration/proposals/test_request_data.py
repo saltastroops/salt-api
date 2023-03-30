@@ -16,7 +16,7 @@ def _url(proposal_code: str) -> str:
 
 _valid_request_body = {
     "observation_ids": [26766, 26981, 27101],
-    "data_formats": ["all"],
+    "data_formats": ["All"],
 }
 
 
@@ -83,7 +83,7 @@ def test_request_observations_returns_400_for_block_visit_belonging_to_another_p
 ) -> None:
     request_body = {
         "observation_ids": [27101],
-        "data_formats": ["all"],
+        "data_formats": ["All"],
     }
 
     authenticate(find_username("Administrator"), client)
@@ -91,7 +91,7 @@ def test_request_observations_returns_400_for_block_visit_belonging_to_another_p
     response = client.post(_url(proposal_code), json=request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     message = response.json()["message"]
-    assert "Can't request data for" in message
+    assert "Couldn't find  proposal code '2020-1-SCI-039'" in message
 
 
 def test_request_observations_returns_400_for_an_invalid_block_visit_id(
@@ -99,7 +99,7 @@ def test_request_observations_returns_400_for_an_invalid_block_visit_id(
 ) -> None:
     request_body = {
         "observation_ids": [-1],
-        "data_formats": ["all"],
+        "data_formats": ["All"],
     }
 
     authenticate(find_username("Administrator"), client)
@@ -107,7 +107,7 @@ def test_request_observations_returns_400_for_an_invalid_block_visit_id(
     response = client.post(_url(proposal_code), json=request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     message = response.json()["message"]
-    assert "Observation id: `-1` doesn't exist" in message
+    assert "Some observation id does not exist" in message
 
 
 def test_request_observations_returns_400_for_an_invalid_data_format(
@@ -128,6 +128,6 @@ def test_request_observations_returns_404_for_an_invalid_proposal_code(
     client: TestClient,
 ) -> None:
     authenticate(find_username("Administrator"), client)
-    proposal_code = "2019-2-NOT-CODE-FFF--012-0011"
+    proposal_code = "2019-2-NOT_CODE-0011"
     response = client.post(_url(proposal_code), json=_valid_request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST

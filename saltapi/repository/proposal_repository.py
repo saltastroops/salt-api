@@ -2388,7 +2388,7 @@ WHERE Proposal_Code = :proposal_code
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_code_id = result.one_or_none()
         if not proposal_code_id:
-            raise NotFoundError(f"Couldn't find  proposal code `{proposal_code}`")
+            raise NotFoundError(f"Couldn't find  proposal code '{proposal_code}'")
 
         return cast(int, proposal_code_id[0])
 

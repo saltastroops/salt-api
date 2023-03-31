@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, cast
 
-from saltapi.exceptions import AuthorizationError
+from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
@@ -495,3 +495,9 @@ class PermissionService:
             Role.PRINCIPAL_CONTACT,
         ]
         self.check_role(user.username, roles, proposal_code)
+        block_visit_ids = [
+            o["id"] for o in self.proposal_repository.block_visits(proposal_code)
+        ]
+        for o in observation_ids:
+            if o not in block_visit_ids:
+                raise ValidationError(f"You can not request observation id: '{o}'")

@@ -247,7 +247,7 @@ LIMIT :limit;
         general_info = self._general_info(proposal_code, semester)
 
         # Replace the proprietary period with the data release date
-        block_visits = self._block_visits(proposal_code)
+        block_visits = self.block_visits(proposal_code)
         proprietary_period = general_info["proprietary_period"]
         general_info["proprietary_period"] = {
             "period": proprietary_period,
@@ -731,7 +731,7 @@ WHERE BS.BlockStatus NOT IN :excluded_status_values
 
         return blocks
 
-    def _block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
         """
         Return the executed observations (including observations in the queue) for all
         semesters.
@@ -2077,7 +2077,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          WHERE PC.Proposal_Code = :proposal_code)
     """
         )
-        block_visits = self._block_visits(proposal_code)
+        block_visits = self.block_visits(proposal_code)
         self.connection.execute(
             stmt,
             {

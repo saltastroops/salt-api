@@ -583,7 +583,7 @@ def request_data(
         data_service.request_data(
             user_id=user.id,
             proposal_code=proposal_code,
-            block_visits_ids=data_request.observation_ids,
+            observation_ids=data_request.observation_ids,
             data_formats=data_request.data_formats,
         )
         unit_of_work.commit()

@@ -11,7 +11,7 @@ class DataService:
         self,
         user_id: int,
         proposal_code: str,
-        block_visits_ids: List[int],
+        observation_ids: List[int],
         data_formats: List[str],
     ):
         """
@@ -20,6 +20,6 @@ class DataService:
         self.repository.request_data(
             user_id=user_id,
             proposal_code=proposal_code,
-            block_visits_ids=block_visits_ids,
+            observation_ids=observation_ids,
             data_formats=data_formats,
         )

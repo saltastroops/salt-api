@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from fastapi import (
     APIRouter,
@@ -30,12 +30,12 @@ from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
     ObservationComment,
+    ProposalApprovalStatus,
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
     SelfActivation,
     UpdateStatus,
-    ProposalApprovalStatus,
 )
 from saltapi.web.schema.user import UserId
 

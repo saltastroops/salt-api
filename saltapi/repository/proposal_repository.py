@@ -2521,7 +2521,7 @@ WHERE Investigator_Id = (SELECT *
                                         JOIN ProposalCode PC
                                              ON PI.ProposalCode_Id = PC.ProposalCode_Id
                                WHERE PC.Proposal_Code = :proposal_code
-                                 AND PU.PiptUser_Id = :user_id) tmp)             
+                                 AND PU.PiptUser_Id = :user_id) tmp)
         """
         )
         result = self.connection.execute(

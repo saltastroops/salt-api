@@ -37,7 +37,6 @@ pytest-mock = "^3.10.0"
 black = {extras = ["d"], version = "^22.10.0"}
 flake8 = "^3.8.4"
 flake8-print = "^4.0.0"
-tox = "^3.21.4"
 isort = "^5.7.0"
 pytest-cov = "^2.11.1"
 bandit = "^1.7.0"

@@ -18,5 +18,6 @@ python -m pip install pytest
 black --check || true
 isort --check-only saltapi tests  || true
 flake8 --exit-zero saltapi tests
+bandit saltapi
 mypy saltapi || true
 pytest || true

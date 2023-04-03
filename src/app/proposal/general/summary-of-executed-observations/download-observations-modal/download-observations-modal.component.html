@@ -1,0 +1,54 @@
+<div *ngIf="isModalActive">
+  <div class="modal" [ngClass]="isModalActive ? 'is-active' : ''">
+    <div class="modal-background" (click)="_closeModal()"></div>
+
+    <div class="modal-card">
+      <div>
+        <header class="modal-card-head">
+          <p class="modal-card-title">Requested Data</p>
+          <button
+            class="delete"
+            aria-label="close"
+            (click)="_closeModal()"
+          ></button>
+        </header>
+        <section class="modal-card-body">
+          <div *ngIf="includeCalibrations" class="calibration">
+            You have requested spectrophotometric standards.
+          </div>
+          <table
+            class="table is-fullwidth is-scrollable"
+            *ngIf="observations.length > 0"
+          >
+            <thead>
+              <tr>
+                <th>Observation Id</th>
+                <th>Observation Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let o of observations">
+                <td>{{ o.id }}</td>
+                <td>{{ o.blockName }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="modal-card-foot">
+          <div class="field">
+            <div class="control">
+              <button class="button is-danger" (click)="_closeModal()">
+                Close
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <button
+      class="modal-close is-large"
+      aria-label="close"
+      (click)="_closeModal()"
+    ></button>
+  </div>
+</div>

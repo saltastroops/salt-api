@@ -1,6 +1,8 @@
 import { Observable } from "rxjs";
 
+import { Message } from "../types/common";
 import {
+  DataFormat,
   NewProprietaryPeriod,
   ObservationComment,
   Proposal,
@@ -96,4 +98,10 @@ export abstract class ProposalService {
     proposalCode: string,
     approved: boolean,
   ): Observable<void>;
+
+  public abstract requestData(
+    proposalCode: string,
+    requestedObservationIds: number[],
+    requestedDataFormats: DataFormat[],
+  ): Observable<Message>;
 }

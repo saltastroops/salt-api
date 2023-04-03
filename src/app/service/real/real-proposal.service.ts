@@ -6,6 +6,7 @@ import { Observable, throwError } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 
 import { environment } from "../../../environments/environment";
+import { Message } from "../../types/common";
 import {
   NewProprietaryPeriod,
   ObservationComment,
@@ -250,5 +251,27 @@ export class RealProposalService implements ProposalService {
   ): Observable<void> {
     const uri = `${environment.apiUrl}/proposals/${proposalCode}/approvals/${investigatorId}`;
     return this.http.put<void>(uri, { approved: approved });
+  }
+
+  public requestData(
+    proposalCode: string,
+    requestedObservationIds: number[],
+    requestedDataFormats: string[],
+  ): Observable<Message> {
+    const uri =
+      environment.apiUrl + "/proposals/" + proposalCode + "/request-data";
+    return this.http
+      .post<Message>(uri, {
+        observation_ids: requestedObservationIds,
+        data_formats: requestedDataFormats,
+      })
+      .pipe(
+        map((message) => {
+          return camelcaseKeys(message, { deep: true });
+        }),
+        catchError(() => {
+          return throwError("Oops. Something is wrong.");
+        }),
+      );
   }
 }

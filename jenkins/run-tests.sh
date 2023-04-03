@@ -16,7 +16,7 @@ python -m pip install pytest
 
 # Run the tests
 black --check || true
-isort --check-only || true
+isort --check-only saltapi tests  || true
 flake8 --exit-zero saltapi tests
 mypy saltapi || true
 pytest || true

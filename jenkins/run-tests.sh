@@ -11,7 +11,7 @@ python -m pip install wheel
 python -m pip install -r requirements.txt
 
 # Run the tests
-black --check || true
+black --check saltapi tests || true
 isort --check-only saltapi tests  || true
 flake8 --exit-zero saltapi tests
 bandit saltapi

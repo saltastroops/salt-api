@@ -228,7 +228,6 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
             this.observations.filter((o) => o.downloadObservation),
             this.includeCalibrations,
           );
-          console.log(this.error);
         },
         () => {
           this.requestingData = false;
@@ -254,6 +253,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
       }
     });
   }
+
   allSemesters(): Set<string> {
     return new Set<string>(Object.keys(this.groupedObservations));
   }

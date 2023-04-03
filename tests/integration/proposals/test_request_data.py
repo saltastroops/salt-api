@@ -91,7 +91,7 @@ def test_request_observations_returns_400_for_block_visit_belonging_to_another_p
     response = client.post(_url(proposal_code), json=request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     message = response.json()["message"]
-    assert "You can not request observation id" in message
+    assert "27101" in message and proposal_code in message
 
 
 def test_request_observations_returns_400_for_an_invalid_block_visit_id(
@@ -107,7 +107,7 @@ def test_request_observations_returns_400_for_an_invalid_block_visit_id(
     response = client.post(_url(proposal_code), json=request_body)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     message = response.json()["message"]
-    assert "You can not request observation id: '-1'" in message
+    assert "-1" in message and proposal_code in message
 
 
 def test_request_observations_returns_400_for_an_invalid_data_format(

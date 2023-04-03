@@ -32,7 +32,7 @@ WHERE RequestDataFormat = :data_format
         self,
         user_id: int,
         proposal_code: str,
-        observation_ids: List[int],
+        block_visit_ids: List[int],
         data_formats: List[str],
     ):
         """
@@ -43,22 +43,23 @@ WHERE RequestDataFormat = :data_format
                 proposal_code
             )
         except NotFoundError:
-            raise ValidationError(f"Couldn't find  proposal code '{proposal_code}'")
+            raise ValidationError(f"Couldn't find proposal code '{proposal_code}'")
 
-        block_visit_ids = [
-            o["id"] for o in self.proposal_repository.block_visits(proposal_code)
+        proposal_block_visit_ids = [
+            bv["id"] for bv in self.proposal_repository.block_visits(proposal_code)
         ]
-        for o in observation_ids:
-            if o not in block_visit_ids:
+        for bv_id in block_visit_ids:
+            if bv_id not in proposal_block_visit_ids:
                 raise ValidationError(
-                    f"You can not request observation id '{o}' for proposal code: '{proposal_code}'"
+                    f"There exists no block visit with id {bv_id} for proposal "
+                    f"{proposal_code}."
                 )
 
         insert_rows = []
         for data_format in data_formats:
             if data_format == "All":
                 data_format_id = self._get_data_format_id("all")
-                for block_visit_id in observation_ids:
+                for block_visit_id in block_visit_ids:
                     insert_rows.append(
                         {
                             "proposal_code_id": proposal_code_id,

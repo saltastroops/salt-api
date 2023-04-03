@@ -9,9 +9,4 @@ RUN apt-get install -y wkhtmltopdf
 # Give ImageMagick access to pdf files
 RUN sed -i "s@<policy domain=\"coder\" rights=\"none\" pattern=\"PDF\" />@<policy domain=\"coder\" rights=\"read|write\" pattern=\"PDF\" />@g" /etc/ImageMagick-6/policy.xml
 
-RUN pip install wheel
-
-RUN pip install flake8
-RUN pip install mypy
-RUN pip install poetry
-RUN pip install pytest
+python -m pip install poetry

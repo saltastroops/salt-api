@@ -1652,17 +1652,44 @@ docs = ["pygments-github-lexers (>=0.0.5)", "sphinx (>=2.0.0)", "sphinxcontrib-a
 testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "pathlib2 (>=2.3.3)", "psutil (>=5.6.1)", "pytest (>=4.0.0)", "pytest-cov (>=2.5.1)", "pytest-mock (>=1.10.0)", "pytest-randomly (>=1.0.0)"]
 
 [[package]]
-name = "types-pytz"
-version = "2023.3.0.0"
-description = "Typing stubs for pytz"
+name = "types-python-dateutil"
+version = "2.8.19.11"
+description = "Typing stubs for python-dateutil"
 category = "main"
 optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-pytz"
+version = "2023.3.0.0"
+description = "Typing stubs for pytz"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "types-requests"
+version = "2.28.11.17"
+description = "Typing stubs for requests"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-urllib3 = "<1.27"
+
+[[package]]
 name = "types-toml"
 version = "0.10.8.1"
 description = "Typing stubs for toml"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.25.10"
+description = "Typing stubs for urllib3"
 category = "main"
 optional = false
 python-versions = "*"
@@ -1828,7 +1855,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "a50673899ebe88691621b82188ba3fd5b427ea97ed292ee75fcb6a2bbf230bc0"
+content-hash = "d996cab2e3db839ffc4c7e82c2dc560f477f83c2d83193768e9c2a1d84dd81da"
 
 [metadata.files]
 aiofiles = [
@@ -3113,13 +3140,25 @@ tox = [
     {file = "tox-3.27.1-py2.py3-none-any.whl", hash = "sha256:f52ca66eae115fcfef0e77ef81fd107133d295c97c52df337adedb8dfac6ab84"},
     {file = "tox-3.27.1.tar.gz", hash = "sha256:b2a920e35a668cc06942ffd1cf3a4fb221a4d909ca72191fb6d84b0b18a7be04"},
 ]
+types-python-dateutil = [
+    {file = "types-python-dateutil-2.8.19.11.tar.gz", hash = "sha256:de66222c54318c2e05ceb4956976d16696240a45fc2c98e54bfe9a56ce5e1eff"},
+    {file = "types_python_dateutil-2.8.19.11-py3-none-any.whl", hash = "sha256:357553f8056cfbb8ce8ea0ca4a6a3480268596748360df73a94c2b8c113a5b06"},
+]
 types-pytz = [
     {file = "types-pytz-2023.3.0.0.tar.gz", hash = "sha256:ecdc70d543aaf3616a7e48631543a884f74205f284cefd6649ddf44c6a820aac"},
     {file = "types_pytz-2023.3.0.0-py3-none-any.whl", hash = "sha256:4fc2a7fbbc315f0b6630e0b899fd6c743705abe1094d007b0e612d10da15e0f3"},
 ]
+types-requests = [
+    {file = "types-requests-2.28.11.17.tar.gz", hash = "sha256:0d580652ce903f643f8c3b494dd01d29367ea57cea0c7ad7f65cf3169092edb0"},
+    {file = "types_requests-2.28.11.17-py3-none-any.whl", hash = "sha256:cc1aba862575019306b2ed134eb1ea994cab1c887a22e18d3383e6dd42e9789b"},
+]
 types-toml = [
     {file = "types-toml-0.10.8.1.tar.gz", hash = "sha256:171bdb3163d79a520560f24ba916a9fc9bff81659c5448a9fea89240923722be"},
     {file = "types_toml-0.10.8.1-py3-none-any.whl", hash = "sha256:b7b5c4977f96ab7b5ac06d8a6590d17c0bf252a96efc03b109c2711fb3e0eafd"},
+]
+types-urllib3 = [
+    {file = "types-urllib3-1.26.25.10.tar.gz", hash = "sha256:c44881cde9fc8256d05ad6b21f50c4681eb20092552351570ab0a8a0653286d6"},
+    {file = "types_urllib3-1.26.25.10-py3-none-any.whl", hash = "sha256:12c744609d588340a07e45d333bf870069fc8793bcf96bae7a96d4712a42591d"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.4.0-py3-none-any.whl", hash = "sha256:16fa4864408f655d35ec496218b85f79b3437c829e93320c7c9215ccfd92489e"},

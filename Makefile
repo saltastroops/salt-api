@@ -35,7 +35,6 @@ black: ## format code with black
 	black saltapi tests
 
 clean: ## remove test and coverage artifacts
-	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
@@ -54,7 +53,7 @@ mkdocs: ## start development documentation server
 	mkdocs serve
 
 mypy: ## check types with mypy
-	mypy --config-file mypy.ini .
+	poetry run mypy --config-file mypy.ini saltapi
 
 pytest: ## run tests quickly with the default Python
 	poetry run pytest
@@ -69,6 +68,3 @@ test: ## run various tests (but no end-to-end tests)
 	poetry run isort --check .
 	poetry run black --check .
 	poetry run pytest
-
-tox: ## run tests on every Python version with tox
-	tox

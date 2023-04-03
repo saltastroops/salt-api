@@ -1,3 +1,5 @@
+@import "../../../../styles";
+
 .summary-row {
   display: grid;
   grid-template-columns: 16% repeat(3, 1fr) 15% repeat(2, 1fr) 10% 1fr 15%;
@@ -40,7 +42,6 @@
 th,
 td {
   width: 215px;
-
 }
 .data-width {
   min-width: 205px;
@@ -61,7 +62,7 @@ td {
 .request-control > div {
   width: 245px;
 }
-.invalid-feedback{
+.invalid-feedback {
   font-size: 1em;
   padding-bottom: 2em;
 }

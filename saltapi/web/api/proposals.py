@@ -29,12 +29,12 @@ from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
+    DataRequest,
     ObservationComment,
     ProposalApprovalStatus,
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodUpdateRequest,
-    DataRequest,
     SelfActivation,
     UpdateStatus,
 )
@@ -584,7 +584,9 @@ def request_data(
             user_id=user.id,
             proposal_code=proposal_code,
             block_visit_ids=data_request.observation_ids,
-            data_formats=data_request.data_formats,
+            data_formats=[
+                str(data_format.value) for data_format in data_request.data_formats
+            ],
         )
         unit_of_work.commit()
 

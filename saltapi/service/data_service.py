@@ -13,7 +13,7 @@ class DataService:
         proposal_code: str,
         block_visit_ids: List[int],
         data_formats: List[str],
-    ):
+    ) -> None:
         """
         Create an observation data request.
         """

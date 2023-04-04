@@ -487,7 +487,7 @@ class PermissionService:
 
     def check_permission_to_request_data(
         self, user: User, proposal_code: str, block_visit_ids: List[int]
-    ):
+    ) -> None:
         roles = [
             Role.ADMINISTRATOR,
             Role.SALT_ASTRONOMER,

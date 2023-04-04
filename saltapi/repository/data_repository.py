@@ -1,11 +1,11 @@
-from typing import List, cast
+from typing import Any, Dict, List, cast
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
-from saltapi.exceptions import NotFoundError, ValidationError
 
 
 class DataRepository:
@@ -14,7 +14,7 @@ class DataRepository:
         self.proposal_repository = ProposalRepository(connection)
         self.block_repository = BlockRepository(connection)
 
-    def _get_data_format_id(self, data_format: str):
+    def _get_data_format_id(self, data_format: str) -> int:
         stmt = text(
             """
 SELECT RequestDataFormat_Id FROM RequestDataFormat
@@ -34,7 +34,7 @@ WHERE RequestDataFormat = :data_format
         proposal_code: str,
         block_visit_ids: List[int],
         data_formats: List[str],
-    ):
+    ) -> None:
         """
         Create an observation data request.
         """
@@ -55,7 +55,7 @@ WHERE RequestDataFormat = :data_format
                     f"{proposal_code}."
                 )
 
-        insert_rows = []
+        insert_rows: List[Dict[str, Any]] = []
         for data_format in data_formats:
             if data_format == "All":
                 data_format_id = self._get_data_format_id("all")
@@ -99,7 +99,9 @@ VALUES (
 )
         """
         )
+        # While mypy and the SQLAlchemy documentation seem to suggest that you should
+        # pass *insert_rows rather than insert_rows, this gives an error.
         self.connection.execute(
             stmt,
-            insert_rows,
+            insert_rows,  # ignore: type
         )

@@ -1,6 +1,16 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args, Set
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Set,
+    cast,
+    get_args,
+)
 
 import pytz
 from astropy.coordinates import Angle
@@ -12,7 +22,6 @@ from saltapi.exceptions import NotFoundError
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
-from saltapi.service.proposal import ProposalCode
 from saltapi.settings import get_settings
 
 
@@ -305,7 +314,7 @@ SELECT COUNT(*) FROM BlockVisit WHERE BlockVisit_Id = :block_visit_id
 
         return cast(int, result.scalar_one()) > 0
 
-    def get_proposal_code_for_block_visit_id(self, block_visit_id: int) -> ProposalCode:
+    def get_proposal_code_for_block_visit_id(self, block_visit_id: int) -> str:
         """
         Return proposal code for a block visit id:
         """
@@ -326,7 +335,7 @@ WHERE BV.BlockVisit_Id = :block_visit_id
         )
 
         try:
-            return cast(ProposalCode, result.scalar_one())
+            return cast(str, result.scalar_one())
         except NoResultFound:
             raise NotFoundError()
 

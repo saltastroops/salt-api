@@ -845,3 +845,26 @@ def test_put_progress_report_handles_missing_partners(
         "IUCAA": 50.0,
         "OTH": 0,
     }
+
+
+@pytest.mark.parametrize(
+    "proposal_code,proposal_code_id",
+    [
+        ("2020-2-SCI-043", 2753),
+        ("2020-2-SCI-018", 2708),
+        ("2019-2-MLT-001", 2557),
+    ],
+)
+def test_get_proposal_code_id_returns_correct_id(
+    proposal_code: str, proposal_code_id: int, db_connection: Connection
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    assert proposal_repository.get_proposal_code_id(proposal_code) == proposal_code_id
+
+
+def test_get_proposal_code_id_raises_error_for_none_existing_proposal_code(
+    db_connection: Connection,
+) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    with pytest.raises(NotFoundError):
+        proposal_repository.get_proposal_code_id("2023-1-NOT-CODE-001")

@@ -247,7 +247,7 @@ LIMIT :limit;
         general_info = self._general_info(proposal_code, semester)
 
         # Replace the proprietary period with the data release date
-        block_visits = self._block_visits(proposal_code)
+        block_visits = self.block_visits(proposal_code)
         proprietary_period = general_info["proprietary_period"]
         general_info["proprietary_period"] = {
             "period": proprietary_period,
@@ -731,7 +731,7 @@ WHERE BS.BlockStatus NOT IN :excluded_status_values
 
         return blocks
 
-    def _block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
         """
         Return the executed observations (including observations in the queue) for all
         semesters.
@@ -1295,7 +1295,7 @@ WHERE PC.Proposal_Code = :proposal_code
             raise ValidationError(f"Unknown proposal status: {status}")
 
         try:
-            proposal_code_id = self._get_proposal_code_id(proposal_code)
+            proposal_code_id = self.get_proposal_code_id(proposal_code)
         except NoResultFound:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
@@ -2077,7 +2077,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          WHERE PC.Proposal_Code = :proposal_code)
     """
         )
-        block_visits = self._block_visits(proposal_code)
+        block_visits = self.block_visits(proposal_code)
         self.connection.execute(
             stmt,
             {
@@ -2375,7 +2375,10 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
-    def _get_proposal_code_id(self, proposal_code: str) -> int:
+    def get_proposal_code_id(self, proposal_code: str) -> int:
+        """
+        Return the proposal code id of a proposal code.
+        """
         stmt = text(
             """
 SELECT ProposalCode_Id FROM ProposalCode
@@ -2385,7 +2388,7 @@ WHERE Proposal_Code = :proposal_code
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_code_id = result.one_or_none()
         if not proposal_code_id:
-            raise NotFoundError(f"Couldn't find  proposal code `{proposal_code}`")
+            raise NotFoundError(f"Couldn't find  proposal code '{proposal_code}'")
 
         return cast(int, proposal_code_id[0])
 
@@ -2394,7 +2397,7 @@ WHERE Proposal_Code = :proposal_code
     ) -> None:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
         stmt = text(
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
@@ -2416,7 +2419,7 @@ WHERE Proposal_Code = :proposal_code
     def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, Any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
         stmt = text(
             """
 SELECT
@@ -2460,7 +2463,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
             if liaison_astronomer_id
             else None
         )
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
 
         stmt = text(
             """

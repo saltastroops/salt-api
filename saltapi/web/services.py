@@ -1,15 +1,16 @@
 from sqlalchemy.engine import Connection
 
 from saltapi.repository.block_repository import BlockRepository
+from saltapi.repository.data_repository import DataRepository
 from saltapi.repository.finder_chart_repository import FinderChartRepository
 from saltapi.repository.institution_repository import InstitutionRepository
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
-from saltapi.repository.target_repository import TargetRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.block_service import BlockService
+from saltapi.service.data_service import DataService
 from saltapi.service.finder_chart_service import FinderChartService
 from saltapi.service.institution_service import InstitutionService
 from saltapi.service.instrument_service import InstrumentService
@@ -28,11 +29,7 @@ def authentication_service(connection: Connection) -> AuthenticationService:
 
 def block_service(connection: Connection) -> BlockService:
     """Return a block service instance."""
-    target_repository = TargetRepository(connection)
-    instrument_repository = InstrumentRepository(connection)
-    block_repository = BlockRepository(
-        target_repository, instrument_repository, connection
-    )
+    block_repository = BlockRepository(connection)
     return BlockService(block_repository)
 
 
@@ -45,11 +42,7 @@ def permission_service(connection: Connection) -> PermissionService:
     """Return a permission service instance."""
     user_repository = UserRepository(connection)
     proposal_repository = ProposalRepository(connection)
-    target_repository = TargetRepository(connection)
-    instrument_repository = InstrumentRepository(connection)
-    block_repository = BlockRepository(
-        target_repository, instrument_repository, connection
-    )
+    block_repository = BlockRepository(connection)
     return PermissionService(user_repository, proposal_repository, block_repository)
 
 
@@ -57,6 +50,12 @@ def proposal_service(connection: Connection) -> ProposalService:
     """Return a proposal service instance."""
     proposal_repository = ProposalRepository(connection)
     return ProposalService(proposal_repository)
+
+
+def data_service(connection: Connection) -> DataService:
+    """Return a data service instance."""
+    data_repository = DataRepository(connection)
+    return DataService(data_repository)
 
 
 def user_service(connection: Connection) -> UserService:

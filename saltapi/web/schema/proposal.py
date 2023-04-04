@@ -652,3 +652,21 @@ class SelfActivation(BaseModel):
             " Contact?"
         ),
     )
+
+
+class DataFormat(str, Enum):
+    ALL = "All"
+    CALIBRATION = "Calibration"
+
+
+class DataRequest(BaseModel):
+    """An Observation data request Body."""
+
+    observation_ids: List[int] = Field(
+        ..., title="Observation Id", description="The observation (block visit) id."
+    )
+    data_formats: List[DataFormat] = Field(
+        ...,
+        title="Data formats",
+        description="The requested data formats.",
+    )

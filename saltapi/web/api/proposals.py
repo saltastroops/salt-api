@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import (
     APIRouter,
@@ -350,7 +350,7 @@ def update_proposal_status(
         description="New proposal status and (optional) status comment.",
     ),
     user: User = Depends(get_current_user),
-) -> ProposalStatus:
+) -> Dict[str, Any]:
     """
     Updates the status of the proposal with the given proposal code. See the
     corresponding GET request for a description of the available status values.
@@ -366,7 +366,7 @@ def update_proposal_status(
         )
 
         unit_of_work.commit()
-        return ProposalStatus(**proposal_service.get_proposal_status(proposal_code))
+        return proposal_service.get_proposal_status(proposal_code)
 
 
 @router.get(
@@ -383,7 +383,7 @@ def get_observation_comments(
         ),
     ),
     user: User = Depends(get_current_user),
-) -> List[ObservationComment]:
+) -> List[Dict[str, Any]]:
     """
     Lists all observation comments for a given proposal code.
     """
@@ -395,7 +395,7 @@ def get_observation_comments(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         return [
-            ObservationComment(**dict(row))
+            dict(row)
             for row in proposal_service.get_observation_comments(proposal_code)
         ]
 
@@ -416,7 +416,7 @@ def post_observation_comment(
     ),
     comment: Comment = Body(..., title="Comment", description="Text of the comment."),
     user: User = Depends(get_current_user),
-) -> ObservationComment:
+) -> Dict[str, Any]:
     """
     Adds a new comment related to an observation. The user submitting the request is
     recorded as the comment author.
@@ -432,7 +432,7 @@ def post_observation_comment(
             proposal_code=proposal_code, comment=comment.comment, user=user
         )
         unit_of_work.commit()
-        return ObservationComment(**observation_comment)
+        return observation_comment
 
 
 @router.get(

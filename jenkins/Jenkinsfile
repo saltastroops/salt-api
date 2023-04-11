@@ -6,6 +6,9 @@ pipeline {
       args '-v salt-api-venv:/venv -u 0:0'
     }
   }
+  environment {
+    ENV_FILE = credentials('salt-api-env')
+  }
   stages {
     stage("Run tests") {
       steps {

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+source $ENV_FILE
+echo "A: $A"
+echo "BGG_FFF: $BGG_FFF"
+
 # Create and activate the virtual environment
 # /venv should be a Docker volume to avoid installing libraries on every pipeline run
 python -m venv /venv

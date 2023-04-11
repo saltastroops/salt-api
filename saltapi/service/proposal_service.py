@@ -258,7 +258,7 @@ class ProposalService:
             semester=semester,
             previous_requests=previous_requests,
             previous_conditions=self.repository.get_latest_observing_conditions(
-                proposal_code, semester
+                proposal_code, next_semester(semester)
             ),
             new_request=progress_report,
         )
@@ -285,9 +285,7 @@ class ProposalService:
         file (if there is one) and the phase 1 pdf summary. The progress description
         is generated on the fly from the database content.
         """
-        progress_report = self.repository.get_progress_report(
-            proposal_code, next_semester(semester)
-        )
+        progress_report = self.repository.get_progress_report(proposal_code, semester)
         progress_description = self._create_progress_description(
             proposal_code, semester, progress_report
         )

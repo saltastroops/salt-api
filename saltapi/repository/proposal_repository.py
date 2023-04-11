@@ -1595,6 +1595,19 @@ VALUES
     def get_latest_observing_conditions(
         self, proposal_code: str, semester: str
     ) -> Optional[Dict[str, Any]]:
+        """
+        Return a proposal's latest observing conditions for a given semester.
+
+        These are the conditions for the greatest semester less than or equal to the
+        given one for which conditions exist in the database.
+
+        None is returned if there are no conditions defined for the given or any earlier
+        semester.
+        """
+        # It would be tempting to use a WHERE condition like "semester <= :semester".
+        # However, the alias "semester" is not known to the WHERE clause, and hence
+        # "semester" would be interpreted as the Semester column of the Semester table,
+        # leading to incorrect results.
         stmt = text(
             """
 SELECT
@@ -1607,12 +1620,13 @@ FROM P1ObservingConditions AS OC
     JOIN ProposalCode AS PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
     JOIN Semester AS S ON (OC.Semester_Id = S.Semester_Id)
 WHERE PC.Proposal_Code = :proposal_code
-    AND semester <= :semester
+    AND (S.`Year` < :year OR (S.`Year` = :year AND S.Semester <= :sem))
 ORDER BY semester DESC;
     """
         )
+        year, sem = semester.split("-")
         results = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "semester": semester}
+            stmt, {"proposal_code": proposal_code, "year": year, "sem": sem}
         )
         last = results.first()
         if last:
@@ -1829,26 +1843,27 @@ WHERE PC.Proposal_Code = :proposal_code;
         return sorted(row.semester for row in result)
 
     def get_progress_report(self, proposal_code: str, semester: str) -> Dict[str, Any]:
+        # Get the requested time for the next semester
+        requested_time = None
+        _next_semester = next_semester(semester)
+        time_statistics = self._get_time_statistics(proposal_code)
+        for t in time_statistics:
+            if _next_semester == t["semester"]:
+                requested_time = t["requested_time"]
+
+        # Get the progress details
         stmt = text(
             """
 SELECT
-    MaxSeeing							AS maximum_seeing,
-    Transparency						AS transparency,
-    ObservingConditionsDescription		AS description_of_observing_constraints,
     TimeRequestChangeReasons			AS change_reason,
     StatusSummary						AS summary_of_proposal_status,
     StrategyChanges						AS strategy_changes,
     CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     ReportPath                          AS proposal_progress_pdf,
     SupplementaryPath                   AS additional_pdf
-FROM P1ObservingConditions OC
-    JOIN Transparency T ON (OC.Transparency_Id = T.Transparency_Id)
-    JOIN ProposalCode PC ON (OC.ProposalCode_Id = PC.ProposalCode_Id)
-    JOIN Semester S ON (OC.Semester_Id = S.Semester_Id)
-    LEFT JOIN ProposalProgress PP ON (
-        OC.ProposalCode_Id = PP.ProposalCode_Id
-        AND OC.Semester_Id = PP.Semester_Id
-    )
+FROM ProposalProgress PP 
+    JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S ON PP.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
     AND CONCAT(S.`Year`, '-', S.Semester) = :semester
     """
@@ -1856,38 +1871,62 @@ WHERE PC.Proposal_Code = :proposal_code
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
-        time_statistics = self._get_time_statistics(proposal_code)
-        requested_time = None
-        _next_semester = next_semester()
-        for t in time_statistics:
-            if _next_semester == t["semester"]:
-                requested_time = t["requested_time"]
-        if result.rowcount > 0:
+
+        # Add the observing conditions and put everything together
+        report_from_db = result.one_or_none()
+        if report_from_db:
             progress_report = {}
-            for row in result:
-                progress_report["requested_time"] = requested_time
-                progress_report["semester"] = row.semester
-                progress_report["maximum_seeing"] = row.maximum_seeing
-                progress_report["transparency"] = row.transparency
-                progress_report["additional_pdf"] = row.additional_pdf
-                progress_report["proposal_progress_pdf"] = row.proposal_progress_pdf
-                progress_report[
-                    "description_of_observing_constraints"
-                ] = row.description_of_observing_constraints
-                progress_report["change_reason"] = row.change_reason
-                progress_report[
-                    "summary_of_proposal_status"
-                ] = row.summary_of_proposal_status
-                progress_report["strategy_changes"] = row.strategy_changes
-                progress_report["previous_time_requests"] = time_statistics
-                progress_report[
-                    "last_observing_constraints"
-                ] = self.get_latest_observing_conditions(proposal_code, semester)
-                progress_report[
-                    "partner_requested_percentages"
-                ] = self._get_partner_requested_percentages(
-                    proposal_code, _next_semester
-                )
+            progress_report["requested_time"] = requested_time
+            progress_report["semester"] = report_from_db.semester
+            progress_report["additional_pdf"] = report_from_db.additional_pdf
+            progress_report[
+                "proposal_progress_pdf"
+            ] = report_from_db.proposal_progress_pdf
+            progress_report["change_reason"] = report_from_db.change_reason
+            progress_report[
+                "summary_of_proposal_status"
+            ] = report_from_db.summary_of_proposal_status
+            progress_report["strategy_changes"] = report_from_db.strategy_changes
+            progress_report["previous_time_requests"] = time_statistics
+
+            # The last (i.e. previously requested) observing conditions are those
+            # of the current semester, as these were defined either in the original
+            # Phase 1 submission or in the progress report for the previous semester
+            # These are not guaranteed to exist if there is no Phase 1.
+            current_conditions = self.get_latest_observing_conditions(
+                proposal_code, semester
+            )
+            progress_report["last_observing_constraints"] = {
+                "seeing": current_conditions["seeing"] if current_conditions else None,
+                "transparency": current_conditions["transparency"]
+                if current_conditions
+                else None,
+                "description": current_conditions["description"]
+                if current_conditions
+                else None,
+            }
+
+            # The requested observing conditions, on the other hand, are those
+            # of the next semester. These should exist (as there exists a progress
+            # report), but we play it safe and also handle the case that they don't
+            # exist.
+            requested_conditions = self.get_latest_observing_conditions(
+                proposal_code, _next_semester
+            )
+            progress_report["maximum_seeing"] = (
+                requested_conditions["seeing"] if requested_conditions else None
+            )
+            progress_report["transparency"] = (
+                requested_conditions["transparency"] if requested_conditions else None
+            )
+            progress_report["description_of_observing_constraints"] = (
+                requested_conditions["description"] if requested_conditions else None
+            )
+
+            # self.get_latest_observing_conditions(proposal_code, _next_semester)
+            progress_report[
+                "partner_requested_percentages"
+            ] = self._get_partner_requested_percentages(proposal_code, _next_semester)
             return progress_report
         else:
             return {
@@ -1906,7 +1945,7 @@ WHERE PC.Proposal_Code = :proposal_code
                 ),
                 "previous_time_requests": time_statistics,
                 "last_observing_constraints": self.get_latest_observing_conditions(
-                    proposal_code, semester
+                    proposal_code, _next_semester
                 ),
             }
 
@@ -1920,7 +1959,7 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Insert the proposal progress into the database, or update the existing one.
         """
-        _next_semester = next_semester()
+        _next_semester = next_semester(semester)
         self._reset_partner_requested_time_and_percentages(
             proposal_code, _next_semester, proposal_progress["requested_time"]
         )

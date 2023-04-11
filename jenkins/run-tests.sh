@@ -21,4 +21,5 @@ isort --check-only saltapi tests  || true
 flake8 --exit-zero saltapi tests
 bandit saltapi
 mypy saltapi || true
+echo "TEST_DATA_DIR: $TEST_DATA_DIR"
 pytest || true

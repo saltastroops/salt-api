@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Load the environment variables
-set +a
+set -o allexport
 source $DEV_ENV_FILE
-set -a
+set +o allexport
 
 # Create and activate the virtual environment
 # /venv should be a Docker volume to avoid installing libraries on every pipeline run

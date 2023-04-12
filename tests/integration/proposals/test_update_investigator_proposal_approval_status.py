@@ -21,7 +21,7 @@ def test_investigator_approval_proposal_status_update_requires_authentication(
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_investigator_approval_proposal_status_update_requires_an_existing_proposal_code(
+def test_investigator_approval_proposal_status_update_requires_existing_proposal_code(
     client: TestClient,
 ) -> None:
     proposal_code = "2099-1-SCI-001"
@@ -111,7 +111,7 @@ def test_investigator_approval_proposal_status_update_requires_permissions(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_investigator_approval_proposal_status_update_forbids_a_permitted_user_from_updating_for_another_user(
+def test_investigator_approval_proposal_status_forbidden_for_other_investigator(
     client: TestClient,
 ) -> None:
     proposal_code = "2019-2-SCI-006"

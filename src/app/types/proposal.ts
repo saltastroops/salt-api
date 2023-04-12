@@ -204,3 +204,8 @@ export interface NewProprietaryPeriod extends ProprietaryPeriod {
 export interface SelfActivation {
   allowed: boolean;
 }
+
+export enum DataFormat {
+  ALL = "All",
+  CALIBRATION = "Calibration",
+}

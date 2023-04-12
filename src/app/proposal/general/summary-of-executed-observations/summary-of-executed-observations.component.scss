@@ -1,4 +1,4 @@
-@import "../../../../styles.scss";
+@import "../../../../styles";
 
 .summary-row {
   display: grid;
@@ -42,7 +42,6 @@
 th,
 td {
   width: 215px;
-
 }
 .data-width {
   min-width: 205px;
@@ -53,4 +52,17 @@ td {
 }
 .white-text {
   color: white;
+}
+.request-control {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.request-control > div {
+  width: 245px;
+}
+.invalid-feedback {
+  font-size: 1em;
+  padding-bottom: 2em;
 }

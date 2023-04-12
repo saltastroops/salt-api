@@ -114,6 +114,7 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
+import { DownloadObservationsModalComponent } from './proposal/general/summary-of-executed-observations/download-observations-modal/download-observations-modal.component';
 
 @NgModule({
   declarations: [
@@ -213,6 +214,7 @@ import { SortDirective } from "./sort.directive";
     SelfActivateComponent,
     ProposalStatusComponent,
     LiaisonAstronomerModalComponent,
+    DownloadObservationsModalComponent,
   ],
   imports: [
     BrowserModule,

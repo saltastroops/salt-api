@@ -1,14 +1,24 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+} from "@angular/core";
 
 import { parseISO } from "date-fns";
 
 import { AuthenticationService } from "../../../service/authentication.service";
+import { ProposalService } from "../../../service/proposal.service";
 import { Sort } from "../../../sort";
 import { SortDirection } from "../../../sort.directive";
 import { BlockRejectionReason } from "../../../types/block";
 import { BlockVisit, BlockVisitStatus } from "../../../types/common";
+import { DataFormat } from "../../../types/proposal";
 import { User } from "../../../types/user";
 import { AutoUnsubscribe, hasAnyRole } from "../../../utils";
+import { DownloadObservationsModalComponent } from "./download-observations-modal/download-observations-modal.component";
 
 @Component({
   selector: "wm-summary-of-executed-observations",
@@ -18,18 +28,32 @@ import { AutoUnsubscribe, hasAnyRole } from "../../../utils";
 @AutoUnsubscribe()
 export class SummaryOfExecutedObservationsComponent implements OnInit {
   @Input() blockVisits!: BlockVisit[];
+  @Input() proposalCode!: string;
   @Output() selectBlock = new EventEmitter<number>();
+  downloadObservationModal!: DownloadObservationsModalComponent;
+  @ViewChild(DownloadObservationsModalComponent)
+  set DownloadObservationsModalComponent(
+    child: DownloadObservationsModalComponent,
+  ) {
+    this.downloadObservationModal = child;
+  }
   observations!: Observation[];
   groupedObservations: { [key: string]: Observation[] } = {};
   user!: User;
   showEditBlockButton = false;
+  includeCalibrations = false;
   showObservationsList = false;
   displayedSemesters = new Set<string>();
   selectedSemesters = new Set<string>();
+  requestingData = false;
+  error: string | null = null;
 
   Object = Object; //Object is used in the template
 
-  constructor(private authService: AuthenticationService) {}
+  constructor(
+    private authService: AuthenticationService,
+    private proposalService: ProposalService,
+  ) {}
 
   ngOnInit(): void {
     this.authService.getUser().subscribe((user) => {
@@ -98,7 +122,7 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
     this.selectBlock.emit(blockId);
   }
 
-  toggleObservationsList(scrollToSection: boolean): void {
+  setObservationsList(scrollToSection: boolean): void {
     this.showObservationsList = !this.showObservationsList;
     if (scrollToSection) {
       const element = document.getElementById("executed-observations");
@@ -172,12 +196,70 @@ export class SummaryOfExecutedObservationsComponent implements OnInit {
     }
   }
 
+  requestData(): void {
+    this.error = null;
+    if (!this.includeCalibrations && !this.anySelectedData()) {
+      this.error =
+        "No data selected and no spectrophotometric standards requested.";
+      return;
+    }
+    this.requestingData = true;
+    const requestedObservationIds: number[] = [];
+    this.observations.forEach((o) => {
+      if (o.downloadObservation) {
+        requestedObservationIds.push(o.id);
+      }
+    });
+    const requestedDataFormats: DataFormat[] = [DataFormat.ALL];
+    if (this.includeCalibrations) {
+      requestedDataFormats.push(DataFormat.CALIBRATION);
+    }
+
+    this.proposalService
+      .requestData(
+        this.proposalCode,
+        requestedObservationIds,
+        requestedDataFormats,
+      )
+      .subscribe(
+        () => {
+          this.requestingData = false;
+          this.downloadObservationModal.openModal(
+            this.observations.filter((o) => o.downloadObservation),
+            this.includeCalibrations,
+          );
+        },
+        () => {
+          this.requestingData = false;
+          this.error = "Your data request has failed.";
+        },
+      );
+  }
+
+  anySelectedData(): boolean {
+    return this.observations.some((o) => o.downloadObservation);
+  }
+
+  setIncludeCalibrations(checked: boolean): void {
+    this.includeCalibrations = checked;
+  }
+
+  clearRequestedData(): void {
+    this.includeCalibrations = false;
+    this.observations.forEach((o) => {
+      if (o.downloadObservation) {
+        this.toggleRequestData(false, o.id);
+        o.downloadObservation = false;
+      }
+    });
+  }
+
   allSemesters(): Set<string> {
     return new Set<string>(Object.keys(this.groupedObservations));
   }
 }
 
-interface Observation extends BlockVisit {
+export interface Observation extends BlockVisit {
   downloadObservation: boolean;
 }
 

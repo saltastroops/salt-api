@@ -57,6 +57,7 @@ import { ProgressRequestFormComponent } from "./proposal/general/proposal-progre
 import { ProposalProgressComponent } from "./proposal/general/proposal-progress/proposal-progress.component";
 import { RequestedObservingConditionsComponent } from "./proposal/general/proposal-progress/requested-observing-conditions/requested-observing-conditions.component";
 import { SubmittedTimeRequestsComponent } from "./proposal/general/proposal-progress/submitted-time-requests/submitted-time-requests.component";
+import { DownloadObservationsModalComponent } from "./proposal/general/summary-of-executed-observations/download-observations-modal/download-observations-modal.component";
 import { SummaryOfExecutedObservationsComponent } from "./proposal/general/summary-of-executed-observations/summary-of-executed-observations.component";
 import { TimeAllocationsTableComponent } from "./proposal/general/time-allocations-table/time-allocations-table.component";
 import { BvitComponent } from "./proposal/instruments/bvit/bvit.component";
@@ -114,7 +115,6 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
-import { DownloadObservationsModalComponent } from './proposal/general/summary-of-executed-observations/download-observations-modal/download-observations-modal.component';
 
 @NgModule({
   declarations: [

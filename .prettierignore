@@ -1,5 +1,6 @@
 python/**/*.html
 docs/**/*
 src/test.ts
-cypress/salt-testdata/*
 .angular/*
+salt-api/*
+salt-testdata/*

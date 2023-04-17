@@ -12,7 +12,7 @@ pipeline {
     stage("Push the Docker image") {
       steps {
         script {
-          with docker.registry("https://ukulinga.com", "docker-registry-credentials") {
+          docker.withRegistry("https://ukulinga.com", "docker-registry-credentials") {
             dockerImage.push()
           }
         }

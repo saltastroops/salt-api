@@ -2,10 +2,19 @@ pipeline {
   agent any
 
   stages {
-    stage("Build and push a Docker image") {
+    stage("Build the Docker image") {
       steps {
         script {
-          img = docker.build("salt-api:latest")
+          dockerImage = docker.build("salt-api:latest")
+        }
+      }
+    }
+    stage("Push the Docker image") {
+      steps {
+        script {
+          with docker.registry("https://ukulinga.com", "docker-registry-credentials") {
+            dockerImage.push()
+          }
         }
       }
     }

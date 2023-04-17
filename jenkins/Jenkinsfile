@@ -15,6 +15,11 @@ pipeline {
         sh './jenkins/run-tests.sh'
       }
     }
+    stage("Build and push Docker image") {
+      script {
+        img = docker.build("salt-api:latest");
+      }
+    }
   }
   post {
     always {

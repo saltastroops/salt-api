@@ -17,9 +17,8 @@ pipeline {
     }
     stage("Build and push Docker image") {
       steps {
-        script {
-          img = docker.build("salt-api:latest");
-        }
+        sh "/usr/local/bin/docker --version"
+        sh "docker --version"
       }
     }
   }

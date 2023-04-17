@@ -1,0 +1,13 @@
+pipeline {
+  agent any
+
+  stages {
+    stage("Build and push a Docker image") {
+      steps {
+        script {
+          sh 'docker --version'
+        }
+      }
+    }
+  }
+}

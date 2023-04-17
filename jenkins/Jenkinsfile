@@ -16,8 +16,10 @@ pipeline {
       }
     }
     stage("Build and push Docker image") {
-      script {
-        img = docker.build("salt-api:latest");
+      steps {
+        script {
+          img = docker.build("salt-api:latest");
+        }
       }
     }
   }

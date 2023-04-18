@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  envioronment {
+    ENV_FILE = credentials('salt-api-dev-env')
+  }
+
   stages {
     stage("Build the Docker image") {
       steps {
@@ -21,7 +25,12 @@ pipeline {
     stage("Deploy the image and restart the server") {
       steps {
         script {
-          withCredentials([sshUserPrivateKey(credentialsId: 'salt-api-dev-server-credentials', keyFileVariable: 'identity', usernameVariable: 'username')]) {
+          def compose_file = sh returnStdout: true, script: 'jenkins/dev-deployment/prepare_docker_compose.sh'
+          echo "$compose_file"
+          sh "cat $compose_file}"
+          withCredentials(
+                  [sshUserPrivateKey(credentialsId: 'salt-api-dev-server-credentials', keyFileVariable: 'identity',
+                                     usernameVariable: 'username')]) {
             def remote = [:]
             remote.name = "${SALT_API_DEV_HOST}"
             remote.host = "${SALT_API_DEV_HOST}"

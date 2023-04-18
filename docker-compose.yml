@@ -6,8 +6,7 @@ version: "3"
 
 services:
   saltapi:
-    build:
-      context: .
+    image: ${DOCKER_REGISTRY}/saltastroops/salt-api:${TAG}
     env_file:
       - .env
     environment:

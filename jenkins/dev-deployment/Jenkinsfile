@@ -1,7 +1,7 @@
 pipeline {
   agent any
 
-  envioronment {
+  environment {
     ENV_FILE = credentials('salt-api-dev-env')
   }
 

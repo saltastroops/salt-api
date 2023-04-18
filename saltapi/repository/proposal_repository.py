@@ -69,7 +69,7 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 IF(PU.Username = :username,
                     1,
                     0
-                )                               AS user_is_an_investigator
+                )                               AS is_user_an_investigator
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
@@ -180,7 +180,7 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
-                "is_investigator": row.user_is_an_investigator > 0,
+                "is_user_an_investigator": row.is_user_an_investigator > 0,
             }
             for row in result
         ]

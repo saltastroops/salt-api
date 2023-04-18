@@ -368,10 +368,8 @@ def test_submission_log_entries_can_be_skipped(
     monkeypatch.setattr(saltapi.web.api.submissions, "TIME_BETWEEN_DB_QUERIES", 0)
 
     with client.websocket_connect(
-        (
-            f"/submissions/{submission_identifier}/progress/ws"
-            f"?from-entry-number={from_entry_number}"
-        ),
+        f"/submissions/{submission_identifier}/progress/ws"
+        f"?from-entry-number={from_entry_number}",
     ) as websocket:
         websocket.send_text("secret")
         for details in expected_details_sequence:

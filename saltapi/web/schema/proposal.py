@@ -487,6 +487,11 @@ class ProposalListItem(BaseModel):
     liaison_astronomer: Optional[FullName] = Field(
         ..., title="Liaison Astronomer", description="Liaison Astronomer"
     )
+    is_user_an_investigator: bool = Field(
+        ...,
+        title="Is the user an investigator?",
+        description="Is the currently logged in user an investigator on the proposal?",
+    )
 
 
 class ProposalStatusContent(BaseModel):

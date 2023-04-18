@@ -65,7 +65,11 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 Astronomer.PiptUser_Id          AS la_user_id,
                 Astronomer.FirstName            AS la_given_name,
                 Astronomer.Surname              AS la_family_name,
-                Astronomer.Email                AS la_email
+                Astronomer.Email                AS la_email,
+                IF(PU.Username = :username,
+                    1,
+                    0
+                )                               AS is_user_an_investigator
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
@@ -176,6 +180,7 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
+                "is_user_an_investigator": row.is_user_an_investigator > 0,
             }
             for row in result
         ]

@@ -25,7 +25,7 @@ pipeline {
     stage("Deploy the image and restart the server") {
       steps {
         script {
-          def compose_file = sh returnStdout: true, script: 'jenkins/dev-deployment/prepare_docker_compose.sh'
+          def compose_file = sh returnStdout: true, script: 'bash jenkins/dev-deployment/prepare_docker_compose.sh'
           echo "$compose_file"
           sh "cat $compose_file}"
           withCredentials(

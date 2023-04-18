@@ -18,5 +18,20 @@ pipeline {
         }
       }
     }
+    stage("Deploy the image and restart the server") {
+      steps {
+        script {
+          withCredentials([sshUserPrivateKey(credentialsId: 'salt-api-dev-server-credentials', keyFileVariable: 'identity', usernameVariable: 'username')]) {
+            def remote = [:]
+            remote.name = "${SALT_API_DEV_HOST}"
+            remote.host = "${SALT_API_DEV_HOST}"
+            remote.allowAnyHosts = true
+            remote.user = username
+            remote.identityFile = identity
+            sshCommand remote: remote, command: 'ls -l'
+          }
+        }
+      }
+    }
   }
 }

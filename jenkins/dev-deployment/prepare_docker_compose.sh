@@ -4,7 +4,7 @@
 # the generated file.
 
 # Generate a pseudo-unique file path with the current Unix timestamp.
-tmp_file="/tmp/docker-compose.$(date +%s).yml"
+tmp_file="docker-compose.$(date +%s).yml"
 
 # Replace the ${DOCKER_REGISTRY} and ${TAG} environment variables in the docker
 # compose file with the correct values, and save the result to the temporary file.

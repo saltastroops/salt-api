@@ -42,7 +42,7 @@ pipeline {
             sshCommand remote: remote, command: 'mkdir -p salt-api'
 
             // Prepare the docker compose file,
-            def a = sh 'bash jenkins/dev-deployment/prepare_docker_compose.yml'
+            def a = sh 'bash jenkins/dev-deployment/prepare_docker_compose.sh'
             echo "$a"
 
             // Copy the required files.

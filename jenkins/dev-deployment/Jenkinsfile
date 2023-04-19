@@ -46,7 +46,6 @@ pipeline {
             writeFile file: 'aaa.txt', text: 'AAA'
             sshPut remote: remote, from: 'docker-compose.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: 'aaa.txt', into: 'salt-api/docker-compose.yml'
-            sshPut remote: remote, from: "$compose_file", into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'
 
             // Update and restart the server.

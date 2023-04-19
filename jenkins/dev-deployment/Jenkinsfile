@@ -50,7 +50,8 @@ pipeline {
             sshPut remote: remote, from: 'docker-compose.dev.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'
 
-            // Update and restart the server.
+            // Deploy to the server.
+            sshScript remote: remote, script: 'jenkins/dev-deployment/deploy.sh'
           }
         }
       }

@@ -39,7 +39,11 @@ pipeline {
 
             // Create the necessary remote directory. The -p flag is used to avoid an
             // error if the directory exists already.
-            a = sshCommand remote: remote, command: 'mkdir -p salt-api'
+            sshCommand remote: remote, command: 'mkdir -p salt-api'
+
+            // Prepare the docxer compose file,
+            def a = sh 'jenkins/dev-deployment/bash prepare_docker_compose.yml'
+            echo "$a"
 
             // Copy the required files.
             sh "cat $a"

@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    REGISTRY_CREDENTIALS = credentials('docker-registry-credentials')
     ENV_FILE = credentials('salt-api-dev-env')
   }
 
@@ -44,13 +45,25 @@ pipeline {
             // Prepare the docker compose file,
             def compose = sh returnStdout: true, script: 'bash jenkins/dev-deployment/prepare_docker_compose.sh'
 
+            // Create a file with the Docker registry password
+            writeFile file: 'registry-password.txt', text: "$REGISTRY_CREDENTIALS_PSW"
+
             // Copy the required files.
             writeFile file: 'docker-compose.dev.yml', text: "$compose"
             sshPut remote: remote, from: 'docker-compose.dev.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'
+            sshPut remote: remote, from: 'registry-password.txt', into: 'salt-api/registry-password.txt'
+            sshCommand remote: remote, command: 'chmod go-rwx salt-api/.env salt-api/registry-password.txt'
+
+            // Remove the registry password file again.
+            sh 'rm registry-password.txt'
 
             // Deploy to the server.
             sshScript remote: remote, script: 'jenkins/dev-deployment/deploy.sh'
+
+            // Remove the remote registry password file again, if it still exists
+            sshRemove remote: remote, path: 'salt-api/.env', failOnError: false
+            sshRemove remote: remote, path: 'salt-api/registry-password.txt', failOnError: false
           }
         }
       }

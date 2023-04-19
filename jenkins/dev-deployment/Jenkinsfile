@@ -43,7 +43,7 @@ pipeline {
 
             // Copy the required files.
             sh "cat ocker-compose.yml"
-            writeFile file: 'ocker-compose.yml', text: 'AAA'
+            // writeFile file: 'ocker-compose.yml', text: 'AAA'
             sshPut remote: remote, from: 'docker-compose.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: 'ocker-compose.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'

@@ -46,8 +46,8 @@ pipeline {
             echo "$a"
 
             // Copy the required files.
-            sh "cat $a"
-            sshPut remote: remote, from: "$a", into: 'salt-api/docker-compose.yml'
+            writeFile file: 'docker-compose.dev.yml', text: "$a"
+            sshPut remote: remote, from: 'docker-compose.dev.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'
 
             // Update and restart the server.

@@ -43,6 +43,7 @@ pipeline {
 
             // Copy the required files.
             sh "ls -l docker-compose.1681904633.yml"
+            sh "cat docker-compose.1681904633.yml"
             sshPut remote: remote, from: 'docker-compose.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: 'docker-compose.1681904633.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$compose_file", into: 'salt-api/docker-compose.yml'

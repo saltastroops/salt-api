@@ -41,8 +41,8 @@ pipeline {
             // error if the directory exists already.
             sshCommand remote: remote, command: 'mkdir -p salt-api'
 
-            // Prepare the docxer compose file,
-            def a = sh 'jenkins/dev-deployment/bash prepare_docker_compose.yml'
+            // Prepare the docker compose file,
+            def a = sh 'bash jenkins/dev-deployment/prepare_docker_compose.yml'
             echo "$a"
 
             // Copy the required files.

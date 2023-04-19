@@ -42,10 +42,8 @@ pipeline {
             sshCommand remote: remote, command: 'mkdir -p salt-api'
 
             // Copy the required files.
-            sh "cat ocker-compose.yml"
-            // writeFile file: 'ocker-compose.yml', text: 'AAA'
-            sshPut remote: remote, from: 'docker-compose.yml', into: 'salt-api/docker-compose.yml'
-            sshPut remote: remote, from: 'ocker-compose.yml', into: 'salt-api/docker-compose.yml'
+            sh "cat docker-compose.dev.yml"
+            sshPut remote: remote, from: 'docker-compose.dev.yml', into: 'salt-api/docker-compose.yml'
             sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'
 
             // Update and restart the server.

@@ -4,7 +4,7 @@
 
 # The docker registry variable should have an "https://" or "http://" prefix, but this
 # must not be included in the pushed image name.
-registry=$(echo "http://aaa" | sed s#https://## | sed s#http://##)
+registry=$(echo ${DOCKER_REGISTRY} | sed s#https://## | sed s#http://##)
 
 # Replace the ${DOCKER_REGISTRY} and ${TAG} environment variables in the docker
 # compose file with the correct values, and save the result to the temporary file.

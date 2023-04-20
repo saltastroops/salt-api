@@ -5,7 +5,10 @@
 
 cd salt-api
 
-# Pull the docker image for the service, but don;t restart the service
+# Log into the docker registry
+cat registry-password | docker login -u ${DOCKER_REGISTRY_USERNAME} ${DOCKER_REGISTRY}
+
+# Pull the docker image for the service, but don't restart the service
 docker compose pull saltapi
 
 # Restart the service

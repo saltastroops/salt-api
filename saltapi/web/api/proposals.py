@@ -46,6 +46,11 @@ class PDFResponse(Response):
     media_type = "application/pdf"
 
 
+@router.get("/ping", summary="Ping")
+def ping():
+    return {"pong": True}
+
+
 @router.get("/", summary="List proposals", response_model=List[ProposalListItem])
 def get_proposals(
     user: User = Depends(get_current_user),

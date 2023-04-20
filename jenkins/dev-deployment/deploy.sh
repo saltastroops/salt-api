@@ -6,7 +6,7 @@
 cd salt-api
 
 # Log into the docker registry
-cat registry-password | docker login -u ${DOCKER_REGISTRY_USERNAME} ${DOCKER_REGISTRY}
+cat registry-password.txt | docker login -u ${DOCKER_REGISTRY_USERNAME} ${DOCKER_REGISTRY}
 
 # Pull the docker image for the service, but don't restart the service
 docker compose pull saltapi

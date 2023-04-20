@@ -10,7 +10,7 @@ pipeline {
     stage("Build the Docker image") {
       steps {
         script {
-          dockerImage = docker.build("salt-api:dev")
+          dockerImage = docker.build("$REGISTRY_CREDENTIALS_USR/salt-api:dev")
         }
       }
     }

@@ -11,6 +11,9 @@ cat registry-password.txt | docker login --password-stdin -u ${DOCKER_REGISTRY_U
 # Pull the docker image for the service, but don't restart the service
 docker compose pull saltapi
 
+# Log out from the Docker registry again
+docker logout ${DOCKER_REGISTRY}
+
 # Restart the service
 docker compose down || true
 docker compose up -d

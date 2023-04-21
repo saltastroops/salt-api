@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, cast
 
+from saltapi.util import next_semester
+
 
 def _style_rules() -> str:
     return """\
@@ -175,6 +177,7 @@ def _previous_requests_section(
 
 
 def _new_request_section(new_request: Dict[str, Any]) -> str:
+    _next_semester = next_semester(new_request["semester"])
     section = f"""\
 <div class="section">
     <div class="heading">
@@ -184,7 +187,7 @@ def _new_request_section(new_request: Dict[str, Any]) -> str:
         </div>
     </div>
     <div>
-        <h3>Request for semester {new_request['semester']}</h3>
+        <h3>Request for semester {_next_semester}</h3>
         <table role="presentation">
             <tr>
                 <td class="label">Requested time:</td>
@@ -210,7 +213,7 @@ def _new_request_section(new_request: Dict[str, Any]) -> str:
         </div>
         <div class="indented">{new_request['change_reason']}</div>
 """
-    if "additional_pdf" in new_request:
+    if "additional_pdf" in new_request and new_request["additional_pdf"]:
         section += """\
         <div class="important has-top-margin">
             A supplementary pdf is attached to this report.

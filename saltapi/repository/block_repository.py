@@ -1,6 +1,16 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Set,
+    cast,
+    get_args,
+)
 
 import pytz
 from astropy.coordinates import Angle
@@ -12,19 +22,16 @@ from saltapi.exceptions import NotFoundError
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
-from saltapi.service.proposal import ProposalCode
 from saltapi.settings import get_settings
 
 
 class BlockRepository:
     def __init__(
         self,
-        target_repository: TargetRepository,
-        instrument_repository: InstrumentRepository,
         connection: Connection,
     ) -> None:
-        self.target_repository = target_repository
-        self.instrument_repository = instrument_repository
+        self.target_repository = TargetRepository(connection)
+        self.instrument_repository = InstrumentRepository(connection)
         self.connection = connection
 
     def get(self, block_id: int) -> Block:
@@ -307,7 +314,7 @@ SELECT COUNT(*) FROM BlockVisit WHERE BlockVisit_Id = :block_visit_id
 
         return cast(int, result.scalar_one()) > 0
 
-    def get_proposal_code_for_block_visit_id(self, block_visit_id: int) -> ProposalCode:
+    def get_proposal_code_for_block_visit_id(self, block_visit_id: int) -> str:
         """
         Return proposal code for a block visit id:
         """
@@ -328,7 +335,7 @@ WHERE BV.BlockVisit_Id = :block_visit_id
         )
 
         try:
-            return cast(ProposalCode, result.scalar_one())
+            return cast(str, result.scalar_one())
         except NoResultFound:
             raise NotFoundError()
 
@@ -876,3 +883,21 @@ WHERE TCOC.Pointing_Id = :pointing_id
         if block_id:
             return self.get(block_id)
         return None
+
+    def get_proposal_codes_for_block_visits(
+        self, block_visit_ids: List[int]
+    ) -> Set[str]:
+        """
+        Get the proposal codes for a list of block visit ids.
+        """
+        proposal_codes = set()
+        for block_visit_id in block_visit_ids:
+            try:
+                proposal_codes.add(
+                    self.get_proposal_code_for_block_visit_id(block_visit_id)
+                )
+            except Exception:
+                raise NotFoundError(
+                    f"Observation id does not exist: '{block_visit_id}'"
+                )
+        return proposal_codes

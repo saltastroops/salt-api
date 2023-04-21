@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, cast
 
-from saltapi.exceptions import AuthorizationError
+from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
@@ -485,7 +485,9 @@ class PermissionService:
         if user.id != approval_user_id:
             self.check_role(user.username, roles, proposal_code)
 
-    def check_permission_to_request_observations(self, user: User, proposal_code: str):
+    def check_permission_to_request_data(
+        self, user: User, proposal_code: str, block_visit_ids: List[int]
+    ) -> None:
         roles = [
             Role.ADMINISTRATOR,
             Role.SALT_ASTRONOMER,
@@ -493,3 +495,18 @@ class PermissionService:
             Role.PRINCIPAL_CONTACT,
         ]
         self.check_role(user.username, roles, proposal_code)
+        proposal_block_visit_ids = [
+            bv["id"] for bv in self.proposal_repository.block_visits(proposal_code)
+        ]
+
+        for bv_id in block_visit_ids:
+            if bv_id not in proposal_block_visit_ids:
+                # Raising a validation error in a permission check may seem odd.
+                # However, it must be part of permission checking to ensure that the
+                # user is allowed to request all the block visit ids, and the easiest
+                # way to do this is to check that they all belong to the requested
+                # proposal code.
+                raise ValidationError(
+                    f"There exists no observation with id {bv_id} "
+                    f"for the proposal {proposal_code}."
+                )

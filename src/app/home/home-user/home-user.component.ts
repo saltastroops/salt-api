@@ -95,6 +95,8 @@ export class HomeUserComponent implements OnInit {
     this.filterFunctions["active"] = this.filterActiveProposals;
     this.filterFunctions["science"] = this.filterScienceProposals;
     this.filterFunctions["ddt"] = this.filterDDTProposals;
+    this.filterFunctions["gw"] = this.filterGWProposals;
+    this.filterFunctions["orp"] = this.filterORPProposals;
     this.filterFunctions["phase1"] = this.filterPhase12Proposals;
     this.filterFunctions["phase2"] = this.filterPhase12Proposals;
     this.filterFunctions["rejected_completed_expired"] =
@@ -350,6 +352,18 @@ export class HomeUserComponent implements OnInit {
   filterDDTProposals = (proposals: ProposalListItem[]): ProposalListItem[] => {
     return proposals.filter(
       (proposal) => proposal.proposalType === "Director's Discretionary Time",
+    );
+  };
+
+  filterGWProposals = (proposals: ProposalListItem[]): ProposalListItem[] => {
+    return proposals.filter(
+      (proposal) => proposal.proposalType === "Gravitational Wave Event",
+    );
+  };
+
+  filterORPProposals = (proposals: ProposalListItem[]): ProposalListItem[] => {
+    return proposals.filter(
+      (proposal) => proposal.proposalType === "OPTICON-Radionet Pilot",
     );
   };
 

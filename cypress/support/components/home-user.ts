@@ -18,6 +18,8 @@ const FILTER_ACTIVE_PROPOSALS = '[data-test="active"]';
 const FILTER_COMPLETED_PROPOSALS = '[data-test="completed"]';
 const FILTER_SCIENCE_PROPOSALS = '[data-test="science"]';
 const FILTER_DDT_PROPOSALS = '[data-test="ddt"]';
+const FILTER_GW_PROPOSALS = '[data-test="gw"]';
+const FILTER_ORP_PROPOSALS = '[data-test="orp"]';
 const FILTER_MY_PROPOSALS = '[data-test="my-proposals"]';
 const FILTER_REJECTED_COMPLETED_EXPIRED_PROPOSALS =
   '[data-test="rejected-completed-expired"]';
@@ -292,11 +294,34 @@ export class HomeUser {
     cy.get(FILTER_DDT_PROPOSALS).click();
   }
 
+  static clickGWCheckbox(): void {
+    cy.get(FILTER_GW_PROPOSALS).click();
+  }
+  static clickORPCheckbox(): void {
+    cy.get(FILTER_ORP_PROPOSALS).click();
+  }
+
   static ddtFilterCheckboxChecked(checked: boolean): void {
     if (checked) {
       cy.get(FILTER_DDT_PROPOSALS).should("be.checked");
     } else {
       cy.get(FILTER_DDT_PROPOSALS).should("not.be.checked");
+    }
+  }
+
+  static gwFilterCheckboxChecked(checked: boolean): void {
+    if (checked) {
+      cy.get(FILTER_GW_PROPOSALS).should("be.checked");
+    } else {
+      cy.get(FILTER_GW_PROPOSALS).should("not.be.checked");
+    }
+  }
+
+  static orpFilterCheckboxChecked(checked: boolean): void {
+    if (checked) {
+      cy.get(FILTER_ORP_PROPOSALS).should("be.checked");
+    } else {
+      cy.get(FILTER_ORP_PROPOSALS).should("not.be.checked");
     }
   }
 
@@ -416,6 +441,20 @@ export class HomeUser {
     cy.get(PROPOSAL_TYPES).each(($el) => {
       const proposal_type = $el.text();
       expect(proposal_type).to.equal("Director's Discretionary Time");
+    });
+  }
+
+  static filteredGWProposals(): void {
+    cy.get(PROPOSAL_TYPES).each(($el) => {
+      const proposal_type = $el.text();
+      expect(proposal_type).to.equal("Gravitational Wave Event");
+    });
+  }
+
+  static filteredORPProposals(): void {
+    cy.get(PROPOSAL_TYPES).each(($el) => {
+      const proposal_type = $el.text();
+      expect(proposal_type).to.equal("OPTICON-Radionet Pilot");
     });
   }
 

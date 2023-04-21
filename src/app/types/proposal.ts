@@ -144,6 +144,7 @@ export type ProposalType =
   | "Gravitational Wave Event"
   | "Key Science Program"
   | "Large Science Proposal"
+  | "OPTICON-Radionet Pilot"
   | "Science"
   | "Science - Long Term"
   | "Science Verification";

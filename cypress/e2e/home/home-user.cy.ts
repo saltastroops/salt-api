@@ -247,6 +247,48 @@ describe("Home User", () => {
     HomeUser.filteredDDTProposals();
   });
 
+  it("should show only GW proposals when the GW checkbox is clicked", () => {
+    const start_semester = "2019-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickGWCheckbox();
+    HomeUser.filteredGWProposals();
+  });
+
+  it("should show only GW proposals when the GW checkbox is clicked and the page is reloaded", () => {
+    const start_semester = "2019-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickGWCheckbox();
+    HomeUser.filteredGWProposals();
+    cy.reload();
+    HomeUser.gwFilterCheckboxChecked(true);
+    HomeUser.filteredGWProposals();
+  });
+
+  it("should show only ORP proposals when the ORP checkbox is clicked", () => {
+    const start_semester = "2021-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickORPCheckbox();
+    HomeUser.filteredORPProposals();
+  });
+
+  it("should show only ORP proposals when the ORP checkbox is clicked and the page is reloaded", () => {
+    const start_semester = "2019-1";
+    HomeUser.clickSemesterRangeRadioButton();
+    HomeUser.typeSemesterRanges(start_semester, "");
+    HomeUser.clickApplyButton();
+    HomeUser.clickORPCheckbox();
+    HomeUser.filteredORPProposals();
+    cy.reload();
+    HomeUser.orpFilterCheckboxChecked(true);
+    HomeUser.filteredORPProposals();
+  });
+
   it("should show only commissioning proposals when the commissioning checkbox is clicked", () => {
     const start_semester = "2006-1";
     HomeUser.clickSemesterRangeRadioButton();

@@ -180,7 +180,27 @@ Show
       (click)="filterProposals('ddt')"
       data-test="ddt"
     />
-    only director's discretionary time
+    only director's discretionary time proposals
+  </label>
+  <label for="gw"
+    ><input
+      type="checkbox"
+      id="gw"
+      [checked]="filterProposalsBy['gw'] === 'true'"
+      (click)="filterProposals('gw')"
+      data-test="gw"
+    />
+    only gravitational wave event proposals
+  </label>
+  <label for="orp"
+    ><input
+      type="checkbox"
+      id="orp"
+      [checked]="filterProposalsBy['orp'] === 'true'"
+      (click)="filterProposals('orp')"
+      data-test="orp"
+    />
+    only OPTICON-Radionet Pilot proposals
   </label>
   <label for="rejected_completed_expired"
     ><input

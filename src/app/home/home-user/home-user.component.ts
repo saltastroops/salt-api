@@ -297,10 +297,9 @@ export class HomeUserComponent implements OnInit {
   filterMyProposals = (proposals: ProposalListItem[]): ProposalListItem[] => {
     return proposals.filter(
       (proposal) =>
-        (proposal.principalInvestigator.givenName === this.user.givenName &&
-          proposal.principalInvestigator.familyName === this.user.familyName) ||
         (proposal.liaisonAstronomer?.givenName === this.user.givenName &&
-          proposal.liaisonAstronomer.familyName === this.user.familyName),
+          proposal.liaisonAstronomer.familyName === this.user.familyName) ||
+        proposal.isUserAnInvestigator,
     );
   };
 

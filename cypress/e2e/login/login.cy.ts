@@ -1,5 +1,3 @@
-import { passBoolean } from "protractor/built/util";
-
 import { NavigationBar } from "../../support/components/navigation-bar";
 import { FORGOT_PASSWORD_URL } from "../../support/pages/forgot-password-page";
 import { HomePage } from "../../support/pages/home-page";
@@ -12,7 +10,6 @@ import {
   forceNetworkError,
   forceServerError,
   getApiUrl,
-  randomPassword,
 } from "../../support/utils";
 
 const apiUrl = getApiUrl();
@@ -21,15 +18,7 @@ const USERNAME = "hettlage";
 
 describe("Login page", () => {
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/logout").as("logout");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+    cy.intercept(apiUrl + "/login").as("login");
     LoginPage.visit();
   });
 
@@ -158,7 +147,7 @@ describe("Login page", () => {
     // When I'm not logged in
     // And I go to a proposal page
     // Then I'm redirected to the login page
-    // And when I then login
+    // And when I then log in
     // Then I'm redirected to the originally requested proposal page
     ProposalPage.visit("2020-2-SCI-043");
     cy.url().should("not.contain", PROPOSAL_BASE_URL);

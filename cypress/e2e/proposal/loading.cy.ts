@@ -14,9 +14,9 @@ const PROPOSAL_CODE = "2020-1-DDT-009";
 
 describe("Proposal loading", () => {
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -34,8 +34,6 @@ describe("Proposal loading", () => {
   });
 
   it("should not be indicated any longer after loading is complete", () => {
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
     ProposalPage.visit(PROPOSAL_CODE);
     cy.wait("@proposals");
 

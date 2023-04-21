@@ -92,6 +92,7 @@
           class="semester-header"
           [attr.colspan]="showEditBlockButton ? 9 : 8"
           (click)="addOrRemoveDisplayedSemester(semester)"
+          data-test="toggle-semester"
         >
           <span class="white-text is-pulled-left">{{ semester }}</span>
           <span class="is-pulled-right">

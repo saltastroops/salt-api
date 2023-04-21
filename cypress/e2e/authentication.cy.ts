@@ -12,15 +12,9 @@ const USERNAME = "hettlage";
 
 describe("Authentication", () => {
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/logout").as("logout");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
   });
 
   it("should handle HTTP requests with a missing authentication cookie", () => {
@@ -34,6 +28,8 @@ describe("Authentication", () => {
 
       // And I can load a proposal page
       ProposalPage.visit("2020-2-SCI-043");
+
+      cy.wait("@proposals");
 
       cy.url().should("contain", PROPOSAL_BASE_URL);
 
@@ -65,6 +61,8 @@ describe("Authentication", () => {
 
       // And I can load a proposal page
       ProposalPage.visit("2020-2-SCI-043");
+
+      cy.wait("@proposals");
 
       // And when I then tamper with the authentication token
       cy.setCookie("secondary_auth_token", "asdf");
@@ -109,6 +107,8 @@ describe("Authentication", () => {
 
       // And go to a proposal page
       ProposalPage.visit("2020-2-SCI-043");
+
+      cy.wait("@proposals");
 
       // Then the proposal page is loaded
       cy.url().should("contain", PROPOSAL_BASE_URL);

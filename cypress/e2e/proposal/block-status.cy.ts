@@ -12,13 +12,12 @@ describe("Block", () => {
   const PROPOSAL_CODE = "2019-1-SCI-014";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
+    cy.intercept(apiUrl + "/blocks/**").as("blocks");
 
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -27,6 +26,8 @@ describe("Block", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.wait("@proposals");
   });
 
   it("should not show edit block status modal before clicking edit button", () => {
@@ -65,13 +66,9 @@ describe("Block - edit block status (SA)", () => {
   const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -81,6 +78,8 @@ describe("Block - edit block status (SA)", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.wait("@proposals");
   });
 
   it("should show a button for editing block status for a SA", () => {
@@ -94,13 +93,9 @@ describe("Block - edit block status (PI)", () => {
   const PROPOSAL_CODE = "2018-2-LSP-001";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -110,6 +105,8 @@ describe("Block - edit block status (PI)", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.wait("@proposals");
   });
 
   it("should show a button for editing block status for a PI", () => {
@@ -123,13 +120,9 @@ describe("Block - edit block status (PC)", () => {
   const PROPOSAL_CODE = "2021-1-SCI-014";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -139,6 +132,8 @@ describe("Block - edit block status (PC)", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.wait("@proposals");
   });
 
   it("should show a button for editing block status for a PC", () => {

@@ -27,8 +27,7 @@ pipeline {
           steps {
             dir('salt-testdata') {
               // Checkout the salt testdata repository
-              git branch: 'main', credentialsId: 'github-creds', url: 
-'https://github.com/saltastroops/salt-testdata.git'
+              git branch: 'main', credentialsId: 'github-creds', url: 'https://github.com/saltastroops/salt-testdata.git'
             }
 
             sh '''

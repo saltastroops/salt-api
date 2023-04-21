@@ -116,6 +116,7 @@ export interface ProposalListItem {
   principalInvestigator: ProposalUser;
   principalContact: ProposalUser;
   liaisonAstronomer: ProposalUser | null;
+  isUserAnInvestigator: boolean;
 }
 
 export type ProposalStatusValue =

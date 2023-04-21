@@ -440,26 +440,10 @@ export class HomeUser {
     });
   }
 
-  static filteredMyProposals(username: string): void {
-    const astronomers = [];
-    cy.task("getUser", username).then((user) => {
-      cy.get(LIAISON_ASTRONOMER).each(($el) => {
-        const astronomer = $el.text();
-        astronomers.push(astronomer);
-      });
-
-      cy.get(PRINCIPAL_INVESTIGATOR)
-        .each(($el, index, $elList) => {
-          return $elList;
-        })
-        .then((investigators) => {
-          investigators.each((index, investigator) => {
-            expect(
-              investigator.textContent.includes(user["givenName"]) ||
-                astronomers[index].includes(user["givenName"]),
-            ).to.be.true;
-          });
-        });
+  static filteredMyProposals(proposalCodes: string[]): void {
+    cy.get("[data-test=proposal-code]").each(($el, index) => {
+      const proposalCode = $el.text().trim();
+      cy.wrap(proposalCode).should("equal", proposalCodes[index]);
     });
   }
 

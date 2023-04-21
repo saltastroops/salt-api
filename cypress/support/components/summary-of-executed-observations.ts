@@ -35,7 +35,13 @@ const BLOCK_REJECTION_REASON_OPTIONS = "[data-test=block-rejection-reason]";
 const SUBMIT_BLOCK_VISIT_STATUS_BUTTON =
   "[data-test=submit-block-visit-status]";
 
+const TOGGLE_SEMESTER = "[data-test=toggle-semester]";
+
 export class SummaryOfExecutedObservations {
+  static showSemesterObservations(semesterIndex: number): void {
+    cy.get(TOGGLE_SEMESTER).eq(semesterIndex).click();
+  }
+
   static clickBlockNameLink(elementIndex: number): void {
     cy.get(BLOCK_LINK).eq(elementIndex).click();
   }

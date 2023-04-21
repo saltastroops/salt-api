@@ -8,21 +8,13 @@ const apiUrl = getApiUrl();
 
 let USERNAME = getEnvVariable("defaultUsername");
 
-// load and register the grep feature using "require" function
-// https://github.com/cypress-io/cypress-grep
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const registerCypressGrep = require("cypress-grep");
-registerCypressGrep();
-
 describe("Home User", () => {
   beforeEach(() => {
     freezeDate(2020, 6);
 
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -400,40 +392,14 @@ describe("Home User", () => {
   });
 });
 
-describe("Home User - PI", () => {
+describe("Home User - Investigator", () => {
   beforeEach(() => {
     USERNAME = getEnvVariable("piUsername");
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
+    cy.intercept(apiUrl + "/user").as("user");
 
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-    cy.task("updateUserPassword", USERNAME).then((password: string) => {
-      // When I login
-      LoginPage.visit();
-      LoginPage.login(USERNAME, password);
-    });
-
-    // And I visit the home page
-    HomePage.visit();
-  });
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  it("should show my proposals", { tags: "@skip" }, () => {
-    HomeUser.clickMyProposalsCheckbox();
-    HomeUser.filteredMyProposals(USERNAME);
-  });
-});
-
-describe("Home User - PC", () => {
-  beforeEach(() => {
-    USERNAME = getEnvVariable("pcUsername");
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // Given I am logged in
       LoginPage.visit();
@@ -444,33 +410,29 @@ describe("Home User - PC", () => {
     HomePage.visit();
   });
 
-  it(
-    "should show only proposals requiring principal contact's attention",
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    { tags: "@skip" },
-    () => {
-      HomeUser.clickRequiringAttentionCheckbox();
-      HomeUser.filteredProposalsRequiringAttention(USERNAME);
-    },
-  );
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  it("should show principal contact's proposals", { tags: "@skip" }, () => {
+  it("should show investigator's proposals only", () => {
+    const proposalCodes = [
+      "2016-2-LSP-001",
+      "2017-1-DDT-009",
+      "2017-1-SCI-012",
+      "2017-1-SCI-007",
+    ];
+    HomeUser.clickSingleSemesterRadioButton();
+    HomeUser.selectSemester("2017-1");
     HomeUser.clickMyProposalsCheckbox();
-    HomeUser.filteredMyProposals(USERNAME);
+    cy.wait(500);
+    HomeUser.filteredMyProposals(proposalCodes);
   });
 });
 
 describe("Home User - SALT Astronomer", () => {
   beforeEach(() => {
     USERNAME = getEnvVariable("saltAstronomerUsername");
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
+    cy.intercept(apiUrl + "/user").as("user");
 
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // Given I am logged in
       LoginPage.visit();
@@ -481,21 +443,23 @@ describe("Home User - SALT Astronomer", () => {
     HomePage.visit();
   });
 
-  it(
-    "should show only proposals requiring astronomer's attention",
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    { tags: "@skip" },
-    () => {
-      HomeUser.clickRequiringAttentionCheckbox();
-      HomeUser.filteredProposalsRequiringAttention(USERNAME);
-    },
-  );
+  it("should show only proposals requiring astronomer's attention", () => {
+    HomeUser.clickRequiringAttentionCheckbox();
+    HomeUser.filteredProposalsRequiringAttention(USERNAME);
+  });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  it("should show astronomer's proposals", { tags: "@skip" }, () => {
+  it("should show only astronomer's proposals", () => {
+    const proposalCodes = [
+      "2018-2-SCI-020",
+      "2018-2-MLT-007",
+      "2017-1-MLT-014",
+      "2017-2-MLT-003",
+      "2018-2-SCI-002",
+    ];
+    HomeUser.clickSingleSemesterRadioButton();
+    HomeUser.selectSemester("2018-2");
     HomeUser.clickMyProposalsCheckbox();
-    HomeUser.filteredMyProposals(USERNAME);
+    cy.wait(500);
+    HomeUser.filteredMyProposals(proposalCodes);
   });
 });

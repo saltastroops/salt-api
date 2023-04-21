@@ -1,18 +1,11 @@
-import { Chain } from "@angular/compiler";
-
 import "cypress-network-idle";
 import {
   HttpResponseInterceptor,
   RouteMatcher,
   StaticResponse,
 } from "cypress/types/net-stubbing";
-import { PathLike } from "fs";
-import * as path from "path";
 
 import Chainable = Cypress.Chainable;
-
-export let recordedResponses;
-export let recordedRequestsAliases;
 
 /**
  * Get an environment variable.
@@ -34,27 +27,6 @@ export function getEnvVariable(name: string): string {
     );
   }
   return value;
-}
-
-/**
- * Reset a dictionary of recorded responses.
- */
-export function resetRecordedResponse(): void {
-  recordedResponses = {};
-}
-
-/**
- * Reset a list of recorded aliases.
- */
-export function resetRecordedRequestsAliases(): void {
-  recordedRequestsAliases = [];
-}
-
-/**
- * Save alias to list.
- */
-export function saveAlias(key: string): void {
-  recordedRequestsAliases.push(key);
 }
 
 /**
@@ -153,44 +125,6 @@ export function freezeDate(year: number, month: number): void {
 }
 
 /**
- * Generate mock directory path.
- */
-export function generateMockPath(directoryPath: PathLike): string[] {
-  const currentTestTitle = Cypress.currentTest.title;
-  const currentTestFile = path
-    .basename(Cypress.spec.name.toString())
-    .split(".")[0];
-  const currentTestFileDirTree = path
-    .dirname(Cypress.spec.relative)
-    .split(path.sep)
-    .slice(2);
-  const mockFile =
-    "test-" + currentTestTitle.toString().split(" ").join("-") + ".json";
-  return [
-    path.join(
-      directoryPath.toString(),
-      currentTestFileDirTree.join(path.sep),
-      currentTestFile.toString().split(" ").join("-"),
-    ),
-    mockFile,
-  ];
-}
-
-/**
- * Save response to a dictionary.
- */
-export function saveResponse(key: string, response: string): void {
-  recordedResponses[key] = response;
-}
-
-/**
- * Get the next recorded/stored responses.
- */
-export function getResponse(key: string): string {
-  return recordedResponses[key];
-}
-
-/**
  * Get API Url.
  */
 export function getApiUrl(): string {
@@ -214,17 +148,6 @@ export function disableBrowserCache(): void {
       });
     },
   );
-}
-
-/**
- * Prepare to capture network calls.
- */
-export function prepareForNetworkIdle(): void {
-  cy.waitForNetworkIdlePrepare({
-    method: "*",
-    pattern: getApiUrl() + "/**",
-    alias: "recordHttp",
-  });
 }
 
 /**

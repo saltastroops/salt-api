@@ -22,13 +22,10 @@ describe("Observation comments", () => {
   const PROPOSAL_CODE = "2020-1-SCI-007";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -37,6 +34,8 @@ describe("Observation comments", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.wait("@proposals");
   });
 
   it("should show an error if all typed comment text is removed again", () => {

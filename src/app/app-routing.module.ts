@@ -5,6 +5,7 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { SwitchUserComponent } from "./login/switch-user/switch-user.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosComponent } from "./mos/mos.component";
 import { ProposalComponent } from "./proposal/proposal.component";
@@ -32,6 +33,11 @@ const routes: Routes = [
 
   { path: "so-pages", component: PageMissingComponent },
   { path: "investigators", component: PageMissingComponent },
+  {
+    path: "switch-user",
+    component: SwitchUserComponent,
+    canActivate: [AuthGuardService],
+  },
   { path: "page-missing", component: PageMissingComponent },
   { path: "**", redirectTo: "/page-missing", pathMatch: "full" },
 ];

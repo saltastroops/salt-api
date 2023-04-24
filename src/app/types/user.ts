@@ -23,6 +23,7 @@ export interface UserListItem {
   id: number;
   familyName: string;
   givenName: string;
+  username: string;
 }
 
 export interface LiaisonAstronomer {

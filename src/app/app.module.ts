@@ -18,6 +18,7 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { SwitchUserComponent } from "./login/switch-user/switch-user.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosLegendComponent } from "./mos/legend/mos-legend.component";
 import { MosBlocksTableComponent } from "./mos/mos-blocks-table/mos-blocks-table.component";
@@ -214,6 +215,7 @@ import { SortDirective } from "./sort.directive";
     SelfActivateComponent,
     ProposalStatusComponent,
     LiaisonAstronomerModalComponent,
+    SwitchUserComponent,
     DownloadObservationsModalComponent,
   ],
   imports: [

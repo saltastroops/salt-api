@@ -37,8 +37,8 @@ export class LoginPage {
     LoginPage.typeUsername(username);
     LoginPage.typePassword(password);
     LoginPage.submit();
-    // wait for login request to finish
-    cy.wait("@login");
+    // TODO: Should wait for a request alias
+    cy.wait(2000);
   }
 
   static logout(): void {

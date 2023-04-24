@@ -1,0 +1,47 @@
+<div>
+  <form>
+    <div class="field">
+      <div class="control">
+        <label class="label">Select User</label>
+        <div
+          class="select"
+          [ngClass]="{
+            'is-danger': submitError || loadError,
+            'is-loading': isFetchingUsers
+          }"
+        >
+          <select
+            #usersSelector
+            [attr.disabled]="loading ? '' : null"
+            data-test="switch-user-selector"
+          >
+            <option [disabled]="true" [value]="">Please select</option>
+            <option *ngFor="let user of displayedUsers" [value]="user.id">
+              {{ user.familyName + ", " + user.givenName }}
+              {{ user.displayUsername ? " (" + user.username + ")" : "" }}
+            </option>
+          </select>
+        </div>
+        <div *ngIf="loading" class="control is-loading control-loading"></div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="control">
+        <button
+          class="button is-primary"
+          (click)="switch(usersSelector.value)"
+          [ngClass]="loading ? 'is-loading' : ''"
+          [disabled]="loading || isFetchingUsers"
+          data-test="switch-button"
+        >
+          Switch
+        </button>
+      </div>
+      <div *ngIf="submitError || loadError" class="control" data-test="error">
+        <div class="invalid-feedback has-text-danger">
+          {{ submitError }}{{ loadError }}
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

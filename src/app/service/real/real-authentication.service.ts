@@ -2,7 +2,6 @@ import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 
 import * as camelcaseKeys from "camelcase-keys";
-import { parseISO } from "date-fns";
 import { CookieService } from "ngx-cookie-service";
 import { BehaviorSubject, Observable, Subject, of } from "rxjs";
 import { catchError, map, switchMap, tap } from "rxjs/operators";
@@ -129,14 +128,6 @@ export class RealAuthenticationService implements AuthenticationService {
     this.redirection = redirection;
   }
 
-  private static getExpiry(): Date | null {
-    const expiresAt = localStorage.getItem("accessTokenExpiresAt");
-    if (expiresAt) {
-      return parseISO(expiresAt);
-    }
-    return null;
-  }
-
   /**
    * Request password reset token to be sent.
    *
@@ -192,5 +183,14 @@ export class RealAuthenticationService implements AuthenticationService {
     return this.http
       .get<User>(uri)
       .pipe(map((user) => camelcaseKeys(user, { deep: true })));
+  }
+
+  switchUser(username: string): Observable<void> {
+    const uri = environment.apiUrl + "/switch-user";
+    return this.http.post<void>(uri, { username }).pipe(
+      tap(() => {
+        this.updateUser();
+      }),
+    );
   }
 }

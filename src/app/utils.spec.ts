@@ -4,8 +4,8 @@ import {
   convertRightAscensionHMSToDegrees,
   degreesToDms,
   degreesToHms,
-  isPrincipalContact,
-  isPrincipalInvestigator,
+  isUserPrincipalContact,
+  isUserPrincipalInvestigator,
 } from "./utils";
 
 const investigators = [
@@ -223,9 +223,9 @@ describe("Unit test to check if user is a principal investigator", () => {
         expected: false,
       },
     ].forEach((e) => {
-      expect(() => isPrincipalInvestigator(e.user, e.investigators)).toEqual(
-        e.expected,
-      );
+      expect(() =>
+        isUserPrincipalInvestigator(e.user, e.investigators),
+      ).toEqual(e.expected);
     });
   });
 });
@@ -261,7 +261,7 @@ describe("Unit test to check if user is a principal contact", () => {
         expected: false,
       },
     ].forEach((e) => {
-      expect(() => isPrincipalContact(e.user, e.investigators)).toEqual(
+      expect(() => isUserPrincipalContact(e.user, e.investigators)).toEqual(
         e.expected,
       );
     });

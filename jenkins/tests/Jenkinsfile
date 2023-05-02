@@ -4,7 +4,7 @@ pipeline {
   agent {
     dockerfile {
       filename 'Dockerfile'
-      dir 'jenkins'
+      dir 'jenkins/tests'
       args '-v salt-api-venv:/venv -u 0:0'
     }
   }

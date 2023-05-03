@@ -409,7 +409,7 @@ ORDER BY is_preferred_lamp DESC
             )
         return entries
 
-    def get_mask_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
+    def get_mask_in_magazine(self, mask_type: RssMaskType) -> List[str]:
         """
         The list of masks in the magazine, optionally filtered by a mask type.
         """
@@ -420,12 +420,10 @@ FROM RssCurrentMasks AS RCM
     JOIN RssMask AS RM ON RCM.RssMask_Id = RM.RssMask_Id
     JOIN RssMaskType AS RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
         """
-        if len(mask_types) > 0:
-            stmt += " WHERE RssMaskType IN :mask_type"
+        if mask_type:
+            stmt += " WHERE RssMaskType = :mask_type"
 
-        results = self.connection.execute(
-            text(stmt), {"mask_type": [m.value for m in mask_types]}
-        )
+        results = self.connection.execute(text(stmt), {"mask_type": mask_type.value})
         return [row.barcode for row in results]
 
     def _get_liaison_astronomers(self, proposal_code_ids: Set[int]) -> Dict[int, str]:
@@ -617,9 +615,7 @@ WHERE RssMask_Id = ( SELECT RssMask_Id FROM RssMask WHERE Barcode = :barcode )
 
         return self.get_mos_mask_metadata(mos_mask_metadata["barcode"])
 
-    def get_obsolete_rss_masks_in_magazine(
-        self, mask_types: List[RssMaskType]
-    ) -> List[str]:
+    def get_obsolete_rss_masks_in_magazine(self, mask_type: RssMaskType) -> List[str]:
         """
         The list of obsolete RSS masks, optionally filtered by a mask type.
         """
@@ -642,21 +638,21 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
     AND (BlockStatus = 'Active' OR BlockStatus = 'On Hold')
     AND NVisits >= NDone
 """
-        if len(mask_types) > 0:
-            stmt += " AND RssMaskType IN :mask_type"
+        if mask_type:
+            stmt += " AND RssMaskType = :mask_type"
         needed_masks = [
             m["barcode"]
             for m in self.connection.execute(
                 text(stmt),
                 {
                     "semester": semester_of_datetime(datetime.now().astimezone()),
-                    "mask_types": [m.value for m in mask_types],
+                    "mask_type": mask_type.value,
                 },
             )
         ]
 
         obsolete_masks = []
-        for m in self.get_mask_in_magazine(mask_types):
+        for m in self.get_mask_in_magazine(mask_type):
             if m not in needed_masks:
                 obsolete_masks.append(m)
         return obsolete_masks

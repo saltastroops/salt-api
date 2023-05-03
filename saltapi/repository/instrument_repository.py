@@ -39,9 +39,9 @@ class InstrumentRepository:
         """Return a NIR setup."""
         return self.nir_repository.get(nir_id)
 
-    def get_rss_masks_in_magazine(self, mask_types: List[RssMaskType]) -> List[str]:
+    def get_rss_masks_in_magazine(self, mask_type: RssMaskType) -> List[str]:
         """The list of masks in the magazine."""
-        return self.rss_repository.get_mask_in_magazine(mask_types)
+        return self.rss_repository.get_mask_in_magazine(mask_type)
 
     def get_mos_masks_metadata(
         self, from_semester: str, to_semester: str
@@ -55,8 +55,6 @@ class InstrumentRepository:
         """Update MOS mask metadata"""
         return self.rss_repository.update_mos_mask_metadata(mos_mask_metadata)
 
-    def get_obsolete_rss_masks_in_magazine(
-        self, mask_types: List[RssMaskType]
-    ) -> List[str]:
+    def get_obsolete_rss_masks_in_magazine(self, mask_type: RssMaskType) -> List[str]:
         """The list of obsolete RSS masks."""
-        return self.rss_repository.get_obsolete_rss_masks_in_magazine(mask_types)
+        return self.rss_repository.get_obsolete_rss_masks_in_magazine(mask_type)

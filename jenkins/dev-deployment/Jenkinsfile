@@ -1,0 +1,81 @@
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY_CREDENTIALS = credentials('docker-registry-credentials')
+    ENV_FILE = credentials('salt-api-dev-env')
+  }
+
+  stages {
+    stage("Build the Docker image") {
+      steps {
+        script {
+          dockerImage = docker.build("$REGISTRY_CREDENTIALS_USR/salt-api:dev")
+        }
+      }
+    }
+    stage("Push the Docker image") {
+      steps {
+        script {
+          docker.withRegistry("${DOCKER_REGISTRY}", "docker-registry-credentials") {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+    stage("Deploy the image and restart the server") {
+      steps {
+        script {
+          withCredentials(
+                  [sshUserPrivateKey(credentialsId: 'salt-api-dev-server-credentials', keyFileVariable: 'identity',
+                                     usernameVariable: 'username')]) {
+            // Define the remote connection parameters
+            def remote = [:]
+            remote.name = "${SALT_API_DEV_HOST}"
+            remote.host = "${SALT_API_DEV_HOST}"
+            remote.allowAnyHosts = true
+            remote.user = username
+            remote.identityFile = identity
+
+            // Create the necessary remote directory. The -p flag is used to avoid an
+            // error if the directory exists already.
+            sshCommand remote: remote, command: 'mkdir -p salt-api'
+
+            // Prepare the docker compose file,
+            def compose_file = sh returnStdout: true, script: 'bash jenkins/dev-deployment/prepare_docker_compose.sh'
+            writeFile file: 'docker-compose.dev.yml', text: "$compose_file"
+
+            // Prepare the deployment script.
+            def deploy_file = sh returnStdout: true, script: 'bash jenkins/dev-deployment/prepare_deploy_script.sh'
+            writeFile file: 'deploy.dev.sh', text: "$deploy_file"
+
+            // Create a file with the Docker registry password
+            writeFile file: 'registry-password.txt', text: "$REGISTRY_CREDENTIALS_PSW"
+
+            // Copy the required files.
+            sshPut remote: remote, from: 'docker-compose.dev.yml', into: 'salt-api/docker-compose.yml'
+            sshPut remote: remote, from: "$ENV_FILE", into: 'salt-api/.env'
+            sshPut remote: remote, from: 'registry-password.txt', into: 'salt-api/registry-password.txt'
+            sshCommand remote: remote, command: 'chmod go-rwx salt-api/.env salt-api/registry-password.txt'
+
+            // Remove the registry password file again.
+            sh 'rm registry-password.txt'
+
+            // Deploy to the server.
+            sshScript remote: remote, script: 'deploy.dev.sh'
+
+            // Remove the remote secret files again, if they still exist
+            sshRemove remote: remote, path: 'salt-api/.env', failOnError: false
+            sshRemove remote: remote, path: 'salt-api/registry-password.txt', failOnError: false
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

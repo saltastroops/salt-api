@@ -421,10 +421,10 @@ FROM RssCurrentMasks AS RCM
     JOIN RssMaskType AS RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
         """
         if len(mask_types) > 0:
-            stmt += " WHERE RssMaskType IN :mask_type"
+            stmt += " WHERE RssMaskType IN :mask_types"
 
         results = self.connection.execute(
-            text(stmt), {"mask_type": [m.value for m in mask_types]}
+            text(stmt), {"mask_types": tuple([m.value for m in mask_types])}
         )
         return [row.barcode for row in results]
 
@@ -643,14 +643,14 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
     AND NVisits >= NDone
 """
         if len(mask_types) > 0:
-            stmt += " AND RssMaskType IN :mask_type"
+            stmt += " AND RssMaskType IN :mask_types"
         needed_masks = [
             m["barcode"]
             for m in self.connection.execute(
                 text(stmt),
                 {
                     "semester": semester_of_datetime(datetime.now().astimezone()),
-                    "mask_types": [m.value for m in mask_types],
+                    "mask_types": tuple([m.value for m in mask_types]),
                 },
             )
         ]

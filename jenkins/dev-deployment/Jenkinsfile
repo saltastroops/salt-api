@@ -1,3 +1,5 @@
+@Library('saao-shared-library') _
+
 pipeline {
   agent any
 
@@ -7,6 +9,12 @@ pipeline {
   }
 
   stages {
+    stage("Run library function") {
+      steps {
+        saaoDeployContainer()
+        error 'BOOM!!!'
+      }
+    }
     stage("Build the Docker image") {
       steps {
         script {

@@ -5,7 +5,6 @@ from typing import Any, Callable, Optional, cast
 import pytest
 from pydantic import EmailStr
 from pytest import MonkeyPatch
-from pytest_pymysql_autorecord.util import DatabaseMock
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
@@ -82,16 +81,16 @@ def test_create_user_raisers_error_if_username_exists_already(
 
 @nodatabase
 def test_create_user_creates_a_new_user(
-    database_mock: DatabaseMock, db_connection: Connection
+    db_connection: Connection
 ) -> None:
-    username = database_mock.user_value(_random_string())
+    username = _random_string()
     new_user_details = NewUserDetails(
         username=username,
         password=_random_string(),
         email=EmailStr(f"{username}@example.com"),
         alternative_emails=[],
-        given_name=database_mock.user_value(_random_string()),
-        family_name=database_mock.user_value(_random_string()),
+        given_name=_random_string(),
+        family_name=_random_string(),
         institution_id=5,
     )
 

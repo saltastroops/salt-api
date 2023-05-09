@@ -6,7 +6,6 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
-from pytest_pymysql_autorecord.util import skip_for_db_mocking
 from sqlalchemy.engine import Connection
 from starlette import status
 
@@ -108,9 +107,6 @@ def test_submission(
     a while to ensure nothing has happened. As this would considerably slow down the
     test execution, we ignore this case.
     """
-    # The database access is potentially non-deterministic, and hence we cannot use
-    # database mocking.
-    skip_for_db_mocking()
 
     username = find_username("administrator")
     authenticate(username, client)

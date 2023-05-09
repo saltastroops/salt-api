@@ -424,7 +424,7 @@ FROM RssCurrentMasks AS RCM
             stmt += " WHERE RssMaskType IN :mask_types"
 
         results = self.connection.execute(
-            text(stmt), {"mask_types": tuple([m.value for m in mask_types])}
+            text(stmt), {"mask_types": [m.value for m in mask_types]}
         )
         return [row.barcode for row in results]
 

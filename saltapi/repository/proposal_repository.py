@@ -1797,7 +1797,7 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Return the path of the latest proposal zip file.
 
-        The proposal zip file for a submission  is stored in a folder
+        The proposal zip file for a submission is stored in a folder
         <proposal_code>/<submission_number> and has the name <proposal_code>/zip.
 
         Parameters
@@ -2432,7 +2432,7 @@ WHERE Proposal_Code = :proposal_code
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_code_id = result.one_or_none()
         if not proposal_code_id:
-            raise NotFoundError(f"Couldn't find  proposal code '{proposal_code}'")
+            raise NotFoundError(f"Couldn't find proposal code '{proposal_code}'")
 
         return cast(int, proposal_code_id[0])
 

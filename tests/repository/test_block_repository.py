@@ -33,11 +33,10 @@ class FakeInstrumentRepository:
 
 
 def create_block_repository(connection: Connection) -> BlockRepository:
-    return BlockRepository(
-        target_repository=cast(TargetRepository, FakeTargetRepository()),
-        instrument_repository=cast(InstrumentRepository, FakeInstrumentRepository()),
-        connection=connection,
-    )
+    block_repository = BlockRepository(connection)
+    block_repository.target_repository = cast(TargetRepository, FakeTargetRepository())
+    block_repository.instrument_repository = cast(InstrumentRepository, FakeInstrumentRepository())
+    return block_repository
 
 
 @nodatabase

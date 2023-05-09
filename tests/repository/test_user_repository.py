@@ -80,9 +80,7 @@ def test_create_user_raisers_error_if_username_exists_already(
 
 
 @nodatabase
-def test_create_user_creates_a_new_user(
-    db_connection: Connection
-) -> None:
+def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
     username = _random_string()
     new_user_details = NewUserDetails(
         username=username,

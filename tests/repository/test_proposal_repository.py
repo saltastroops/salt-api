@@ -369,7 +369,10 @@ def test_get_proposal_type_raises_not_found_error(db_connection: Connection) -> 
 
 @pytest.mark.parametrize(
     "proposal_code,expected_status,expected_reason",
-    [("2021-2-MLT-002", "Deleted", "Resubmitted as 2021-2-MLT-004"), ("2019-1-SCI-010", "Completed", "")],
+    [
+        ("2021-2-MLT-002", "Deleted", "Resubmitted as 2021-2-MLT-004"),
+        ("2019-1-SCI-010", "Completed", ""),
+    ],
 )
 def test_get_proposal_status(
     proposal_code: str,

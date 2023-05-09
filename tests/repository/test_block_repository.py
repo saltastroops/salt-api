@@ -35,7 +35,9 @@ class FakeInstrumentRepository:
 def create_block_repository(connection: Connection) -> BlockRepository:
     block_repository = BlockRepository(connection)
     block_repository.target_repository = cast(TargetRepository, FakeTargetRepository())
-    block_repository.instrument_repository = cast(InstrumentRepository, FakeInstrumentRepository())
+    block_repository.instrument_repository = cast(
+        InstrumentRepository, FakeInstrumentRepository()
+    )
     return block_repository
 
 

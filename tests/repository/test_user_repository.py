@@ -478,7 +478,7 @@ def test_grant_proposal_permission_raises_not_found_errors(
 def test_grant_proposal_permission(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Initially there are no granted permissions
@@ -496,7 +496,7 @@ def test_grant_proposal_permission(db_connection: Connection) -> None:
 def test_grant_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2022-2-SCI-007", "permission_type": "View"}
 
     # Initially there are no granted permissions
@@ -536,7 +536,7 @@ def test_revoke_proposal_permission_raises_not_found_errors(
 def test_revoke_proposal_permission(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Grant a permission
@@ -557,7 +557,7 @@ def test_revoke_proposal_permission(db_connection: Connection) -> None:
 def test_revoke_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Grant a permission

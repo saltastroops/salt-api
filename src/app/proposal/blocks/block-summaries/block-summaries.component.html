@@ -72,10 +72,10 @@
         columns must extend across their own row as well as the instrument setup
         rows; hence the need for a rowspan of b.instruments.length + 1.
         -->
-        <td data-test="block-id" [attr.rowspan]="b.instruments.length + 1">
+        <td data-test="block-id" [attr.rowspan]="b.instruments.length">
           {{ b.id }}
         </td>
-        <td [attr.rowspan]="b.instruments.length + 1">
+        <td [attr.rowspan]="b.instruments.length">
           <a
             data-test="block-name"
             href="javascript:void(0)"
@@ -86,23 +86,20 @@
         <td
           class="has-text-right"
           data-test="block-observation-time"
-          [attr.rowspan]="b.instruments.length + 1"
+          [attr.rowspan]="b.instruments.length"
         >
           {{ b.observationTime }}
         </td>
-        <td
-          data-test="block-priority"
-          [attr.rowspan]="b.instruments.length + 1"
-        >
+        <td data-test="block-priority" [attr.rowspan]="b.instruments.length">
           {{ b.priority }}
         </td>
-        <td [attr.rowspan]="b.instruments.length + 1">
+        <td [attr.rowspan]="b.instruments.length">
           {{ b.acceptedObservations }}/{{ b.requestedObservations }}
         </td>
         <td
           *ngIf="b.isObservableTonight"
           class="is-green"
-          [attr.rowspan]="b.instruments.length + 1"
+          [attr.rowspan]="b.instruments.length"
         >
           <img
             class="icon"
@@ -112,7 +109,7 @@
         </td>
         <td
           *ngIf="!b.isObservableTonight"
-          [attr.rowspan]="b.instruments.length + 1"
+          [attr.rowspan]="b.instruments.length"
         >
           <img
             class="icon"
@@ -122,17 +119,17 @@
         </td>
         <td
           data-test="block-remaining-nights"
-          [attr.rowspan]="b.instruments.length + 1"
+          [attr.rowspan]="b.instruments.length"
         >
           {{ b.remainingNights }}
         </td>
         <td
           data-test="block-maximum-seeing"
-          [attr.rowspan]="b.instruments.length + 1"
+          [attr.rowspan]="b.instruments.length"
         >
           {{ b.observingConditions.maximumSeeing }}
         </td>
-        <td [attr.rowspan]="b.instruments.length + 1">
+        <td [attr.rowspan]="b.instruments.length">
           <div>{{ b.observingConditions.transparency }}</div>
           <div *ngIf="b.observingConditions.transparency === 'Any'">
             <img
@@ -193,25 +190,45 @@
         </td>
         <td
           data-test="block-maximum-lunar-phase"
-          [attr.rowspan]="b.instruments.length + 1"
+          [attr.rowspan]="b.instruments.length"
         >
           {{ b.observingConditions.maximumLunarPhase }}
         </td>
+        <ng-container
+          *ngTemplateOutlet="
+            instrumentDetails;
+            context: { instrument: b.instruments[0] }
+          "
+        ></ng-container>
       </tr>
-      <tr *ngFor="let i of b.instruments" [ngClass]="blockClass(b)">
-        <td>{{ i.name }}</td>
-        <td>
-          <div *ngFor="let m of i.modes">
-            {{ m }}
-          </div>
-        </td>
-        <td>
-          <div *ngIf="i.gratings || i.filters">
-            <div *ngFor="let g of i.gratings">{{ g }}</div>
-            <div *ngFor="let t of i.filters">{{ t }}</div>
-          </div>
-        </td>
+      <tr
+        *ngFor="let i of b.instruments; let _index = index"
+        [ngClass]="blockClass(b)"
+      >
+        <ng-container *ngIf="_index">
+          <ng-container
+            *ngTemplateOutlet="
+              instrumentDetails;
+              context: { instrument: b.instruments[_index] }
+            "
+          ></ng-container>
+        </ng-container>
       </tr>
     </ng-container>
   </tbody>
 </table>
+
+<ng-template #instrumentDetails let-i="instrument">
+  <td>{{ i.name }}</td>
+  <td>
+    <div *ngFor="let m of i.modes">
+      {{ m }}
+    </div>
+  </td>
+  <td>
+    <div *ngIf="i.gratings || i.filters">
+      <div *ngFor="let g of i.gratings">{{ g }}</div>
+      <div *ngFor="let t of i.filters">{{ t }}</div>
+    </div>
+  </td>
+</ng-template>

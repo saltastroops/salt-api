@@ -369,7 +369,7 @@ def test_get_proposal_type_raises_not_found_error(db_connection: Connection) -> 
 
 @pytest.mark.parametrize(
     "proposal_code,expected_status,expected_reason",
-    [("2021-2-MLT-002", "Deleted", "Other"), ("2019-1-SCI-010", "Completed", "Other")],
+    [("2021-2-MLT-002", "Deleted", "Resubmitted as 2021-2-MLT-004"), ("2019-1-SCI-010", "Completed", "")],
 )
 def test_get_proposal_status(
     proposal_code: str,
@@ -559,8 +559,8 @@ def test_proprietary_period_start_date_returns_correct_start_date(
 @pytest.mark.parametrize(
     "proposal_code,proprietary_period,block_visits,expected_date",
     [
-        ("2020-2-SCI-005", 0, [], date(2023, 5, 1)),
-        ("2020-2-SCI-005", 10, [], date(2024, 3, 1)),
+        ("2020-2-SCI-005", 0, [], date(2023, 11, 1)),
+        ("2020-2-SCI-005", 10, [], date(2024, 9, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 2, 1)}], date(2021, 5, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 2, 1)}], date(2022, 3, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 4, 30)}], date(2021, 5, 1)),

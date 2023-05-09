@@ -1866,7 +1866,7 @@ SELECT
     CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     ReportPath                          AS proposal_progress_pdf,
     SupplementaryPath                   AS additional_pdf
-FROM ProposalProgress PP 
+FROM ProposalProgress PP
     JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON PP.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code

@@ -96,7 +96,7 @@ export class BlockSummariesComponent implements OnInit, OnChanges {
     if (this.isCompleted(block)) {
       return "completed-block";
     } else if (this.isUnobservable(block)) {
-      return "has-background-danger";
+      return "has-red-background";
     }
     return "";
   }

@@ -317,7 +317,7 @@ Authorization should be done with `Permission` instances, which in turn use `Rol
 
 ### Roles
 
-The `app.util.role` module provides an abstract  base class `Role`, which all user role classes should extend. The extending class should not make any database query itself, but rather call a function from the module `app.service.user`. As an example, here is the implementation of the `Investigator` role.
+The `app.util.role` module provides an abstract base class `Role`, which all user role classes should extend. The extending class should not make any database query itself, but rather call a function from the module `app.service.user`. As an example, here is the implementation of the `Investigator` role.
 
 ```python
 from aiomysql import Pool

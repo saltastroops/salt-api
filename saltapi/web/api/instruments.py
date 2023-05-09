@@ -24,7 +24,7 @@ router = APIRouter(tags=["Instrument"])
 )
 def get_rss_masks_in_magazine(
     mask_types: List[RssMaskType] = Query(
-        [], title="Mask type", description="The mask type."
+        [], title="Mask type", description="The mask type.", alias="mask-type"
     ),
 ) -> List[str]:
     """
@@ -114,7 +114,10 @@ def update_mos_mask_metadata(
 )
 def get_obsolete_rss_masks_in_magazine(
     mask_types: List[RssMaskType] = Query(
-        [], title="Mask types", description="The mask to types to include."
+        [],
+        title="Mask types",
+        description="The mask to types to include.",
+        alias="mask-type",
     ),
     user: User = Depends(get_current_user),
 ) -> List[str]:

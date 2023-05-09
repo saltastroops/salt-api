@@ -151,6 +151,7 @@ ORDER BY Rss_Id DESC;
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,
+                "is_in_magazine": self._is_mask_in_magazine(row.mask_barcode),
             }
         else:
             mask = {
@@ -161,6 +162,7 @@ ORDER BY Rss_Id DESC;
                 "cut_by": row.mos_cut_by,
                 "cut_date": row.mos_cut_date,
                 "comment": row.mos_comment,
+                "is_in_magazine": self._is_mask_in_magazine(row.mask_barcode),
             }
 
         return mask
@@ -660,3 +662,6 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
             if m not in needed_masks:
                 obsolete_masks.append(m)
         return obsolete_masks
+
+    def _is_mask_in_magazine(self, mask_barcode: str) -> bool:
+        return mask_barcode in self.get_mask_in_magazine([])

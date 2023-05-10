@@ -72,14 +72,14 @@ def test_should_return_422_for_invalid_semesters(
             find_username("TAC Chair", partner_code="RSA"),
             "2020-1",
             "2020-1",
-            35,
+            34,
             "many",
         ],
         [
             find_username("TAC Chair", partner_code="RU"),
             "2021-1",
             "2021-1",
-            8,
+            7,
             (
                 "2018-1-SCI-012, 2018-1-SCI-041, 2021-1-MLT-007, 2021-1-SCI-012, "
                 "2021-1-SCI-015, 2021-1-SCI-028, 2021-1-SCI-031"
@@ -89,7 +89,7 @@ def test_should_return_422_for_invalid_semesters(
             find_username("TAC Member", partner_code="UW"),
             "2021-1",
             "2021-1",
-            9,
+            8,
             (
                 "2018-2-LSP-001, 2018-2-MLT-005, 2020-1-MLT-005, 2020-1-MLT-009, "
                 "2020-2-MLT-009, 2021-1-SCI-016, 2021-1-SCI-023, 2021-1-SCI-025"
@@ -109,7 +109,7 @@ def test_should_return_422_for_invalid_semesters(
             35,
             "many",
         ],
-        [find_username("SALT Astronomer"), "2020-2", "2020-2", 82, "many"],
+        [find_username("SALT Astronomer"), "2020-2", "2020-2", 81, "many"],
         [find_username("Administrator"), "2018-2", "2018-2", 79, "many"],
         [
             find_username("Principal Investigator", proposal_code="2014-2-SCI-078"),

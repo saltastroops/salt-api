@@ -180,7 +180,7 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
-                "is_user_an_investigator": row.is_user_an_investigator > 0,
+                "is_user_an_investigator": self._is_user_an_investigator(username, row.proposal_code),
             }
             for row in result
         ]

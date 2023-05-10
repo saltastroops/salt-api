@@ -176,7 +176,9 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
-                "is_user_an_investigator": self._is_user_an_investigator(username, row.proposal_code),
+                "is_user_an_investigator": self._is_user_an_investigator(
+                    username, row.proposal_code
+                ),
             }
             for row in result
         ]
@@ -2557,7 +2559,9 @@ AND PU.Username = :username
         )
         investigator_id = result.one_or_none()
 
-        return bool(cast(int, investigator_id) if investigator_id is not None else 0 > 0)
+        return bool(
+            cast(int, investigator_id) if investigator_id is not None else 0 > 0
+        )
 
     def update_investigator_proposal_approval_status(
         self, user_id: int, proposal_code: str, approved: bool

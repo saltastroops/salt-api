@@ -2545,6 +2545,24 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
 
         return cast(int, investigator_id[0])
 
+    def _is_user_an_investigator(self, username: str, proposal_code: str) -> bool:
+        stmt = text(
+            """
+SELECT PU.Investigator_Id FROM PiptUser PU
+    JOIN Investigator I ON PU.PiptUser_Id = I.PiptUser_Id
+    JOIN ProposalInvestigator PI ON I.Investigator_Id = PI.Investigator_Id
+    JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+AND PU.Username = :username
+        """
+        )
+        result = self.connection.execute(
+            stmt, {"username": username, "proposal_code": proposal_code}
+        )
+        investigator_id = result.one_or_none()
+
+        return bool(cast(int, investigator_id) if investigator_id is not None else 0 > 0)
+
     def update_investigator_proposal_approval_status(
         self, user_id: int, proposal_code: str, approved: bool
     ) -> None:

@@ -116,7 +116,7 @@ def get_obsolete_rss_masks_in_magazine(
     mask_types: List[RssMaskType] = Query(
         [],
         title="Mask types",
-        description="The mask to types to include.",
+        description="The mask types to check.",
         alias="mask-type",
     ),
     user: User = Depends(get_current_user),

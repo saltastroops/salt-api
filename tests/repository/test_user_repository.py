@@ -331,9 +331,9 @@ def test_has_proposal_permission_returns_correct_result(
         proposal_code=proposal_code,
     )
 
-    non_grantee_username = find_usernames("proposal_view_non_grantee", True, proposal_code)[
-        0
-    ]
+    non_grantee_username = find_usernames(
+        "proposal_view_non_grantee", True, proposal_code
+    )[0]
     non_grantee_id = user_repository.get_by_username(non_grantee_username).id
     assert not user_repository.user_has_proposal_permission(
         user_id=non_grantee_id,

@@ -180,18 +180,24 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
-                "is_user_an_investigator": row.is_user_an_investigator > 0
+                "is_user_an_investigator": row.is_user_an_investigator > 0,
             }
             for row in result
         ]
-        
+
         unique_proposals = [
-            max(proposal, key=lambda x: x["is_user_an_investigator"])  # select the one with maximum value (True) from 
+            max(
+                proposal, key=lambda x: x["is_user_an_investigator"]
+            )  # select the one with maximum value (True) from
             # proposals with the id
             for proposal in (  # iterate in separated proposals
-                filter(lambda x: x["id"] == name, proposals)  # keep proposals with different IDs in different 
+                filter(
+                    lambda x: x["id"] == name, proposals
+                )  # keep proposals with different IDs in different
                 # iterables
-                for name in set(p["id"] for p in proposals)  # create a set of the names of proposals
+                for name in set(
+                    p["id"] for p in proposals
+                )  # create a set of the names of proposals
             )
         ]
 

@@ -65,7 +65,11 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 Astronomer.PiptUser_Id          AS la_user_id,
                 Astronomer.FirstName            AS la_given_name,
                 Astronomer.Surname              AS la_family_name,
-                Astronomer.Email                AS la_email
+                Astronomer.Email                AS la_email,
+                IF(PU.Username = :username,
+                    1,
+                    0
+                )                               AS is_user_an_investigator
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
@@ -176,14 +180,22 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
-                "is_user_an_investigator": self._is_user_an_investigator(
-                    username, row.proposal_code
-                ),
+                "is_user_an_investigator": row.is_user_an_investigator > 0
             }
             for row in result
         ]
+        
+        unique_proposals = [
+            max(proposal, key=lambda x: x["is_user_an_investigator"])  # select the one with maximum value (True) from 
+            # proposals with the id
+            for proposal in (  # iterate in separated proposals
+                filter(lambda x: x["id"] == name, proposals)  # keep proposals with different IDs in different 
+                # iterables
+                for name in set(p["id"] for p in proposals)  # create a set of the names of proposals
+            )
+        ]
 
-        return proposals
+        return unique_proposals
 
     @staticmethod
     def _liaison_astronomer(row: Any) -> Optional[Dict[str, str]]:
@@ -2542,26 +2554,6 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
             )
 
         return cast(int, investigator_id[0])
-
-    def _is_user_an_investigator(self, username: str, proposal_code: str) -> bool:
-        stmt = text(
-            """
-SELECT PU.Investigator_Id FROM PiptUser PU
-    JOIN Investigator I ON PU.PiptUser_Id = I.PiptUser_Id
-    JOIN ProposalInvestigator PI ON I.Investigator_Id = PI.Investigator_Id
-    JOIN ProposalCode PC ON PI.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
-AND PU.Username = :username
-        """
-        )
-        result = self.connection.execute(
-            stmt, {"username": username, "proposal_code": proposal_code}
-        )
-        investigator_id = result.one_or_none()
-
-        return bool(
-            cast(int, investigator_id) if investigator_id is not None else 0 > 0
-        )
 
     def update_investigator_proposal_approval_status(
         self, user_id: int, proposal_code: str, approved: bool

@@ -191,9 +191,12 @@ LIMIT :limit;
         # is_user_an_investigator=1.
         unique_proposals_dict: Dict[str, Dict[str, Any]] = dict()
         for p in proposals:
-            if p["id"] not in unique_proposals_dict or p["is_user_an_investigator"] == 1:
+            if (
+                p["id"] not in unique_proposals_dict
+                or p["is_user_an_investigator"] == 1
+            ):
                 unique_proposals_dict[p["id"]] = p
-                
+
         unique_proposals = list(unique_proposals_dict.values())
 
         return unique_proposals

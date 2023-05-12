@@ -185,21 +185,16 @@ LIMIT :limit;
             for row in result
         ]
 
-        unique_proposals = [
-            max(
-                proposal, key=lambda x: x["is_user_an_investigator"]
-            )  # select the one with maximum value (True) from
-            # proposals with the id
-            for proposal in (  # iterate in separated proposals
-                filter(
-                    lambda x: x["id"] == name, proposals
-                )  # keep proposals with different IDs in different
-                # iterables
-                for name in set(
-                    p["id"] for p in proposals
-                )  # create a set of the names of proposals
-            )
-        ]
+        # The list of proposals returned may contain proposals twice, once with
+        # is_user_an_investigator=0 and once with is_user_an_investigator=1. In this
+        # case only one of the two should be retained, and it should be the one with
+        # is_user_an_investigator=1.
+        unique_proposals_dict: Dict[str, Dict[str, Any]] = dict()
+        for p in proposals:
+            if p["id"] not in unique_proposals_dict or p["is_user_an_investigator"] == 1:
+                unique_proposals_dict[p["id"]] = p
+                
+        unique_proposals = list(unique_proposals_dict.values())
 
         return unique_proposals
 

@@ -1,0 +1,62 @@
+<tr *ngFor="let ex of [].constructor(numExposureTimes); let i = index">
+  <td [attr.rowspan]="numExposureTimes" *ngIf="i === 0">
+    {{ hrsConfig.instrumentName }}
+  </td>
+  <td [attr.rowspan]="numExposureTimes" *ngIf="i === 0">
+    {{ hrsConfig.configurationType }}
+  </td>
+  <td [attr.rowspan]="numExposureTimes" *ngIf="i === 0">
+    {{ hrsConfig.exposureType }}
+  </td>
+  <td>
+    <span class="is-blue">{{
+      hrsConfig.blueDetector.exposureTimes[i] || 0
+    }}</span>
+    |
+    <span class="is-red">{{
+      hrsConfig.redDetector.exposureTimes[i] || 0
+    }}</span>
+  </td>
+  <td>
+    <span class="is-blue">{{
+      secondsToHhMmSs(hrsConfig.blueDetector.exposureTimes[i] || 0)
+    }}</span>
+    |
+    <span class="is-red">
+      {{ secondsToHhMmSs(hrsConfig.redDetector.exposureTimes[i] || 0) }}
+    </span>
+  </td>
+  <td>
+    <span class="is-blue">{{ hrsConfig.blueDetector.iterations }}</span> |
+    <span class="is-red">{{ hrsConfig.redDetector.iterations }}</span>
+  </td>
+  <td>{{ hrsConfig.cycles }}</td>
+  <td></td>
+  <td></td>
+  <td>
+    <div class="wrapper">
+      <div>Binning (spatial × spectral):</div>
+      <div>
+        <span class="is-blue">{{
+          hrsConfig.redDetector.binning.preBinnedRows.toString() +
+            "×" +
+            hrsConfig.blueDetector.binning.preBinnedColumns.toString()
+        }}</span>
+        |
+        <span class="is-red">
+          {{
+            hrsConfig.redDetector.binning.preBinnedRows.toString() +
+              "×" +
+              hrsConfig.blueDetector.binning.preBinnedColumns.toString()
+          }}
+        </span>
+      </div>
+    </div>
+    <div *ngIf="hrsConfig.mode" class="wrapper">
+      <div>Mode:</div>
+      <div>
+        {{ hrsConfig.mode }}
+      </div>
+    </div>
+  </td>
+</tr>

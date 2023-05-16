@@ -1,0 +1,41 @@
+<table class="table is-bordered is-fullwidth is-vertical-align">
+  <thead>
+    <tr>
+      <th colspan="11" class="has-text-centered">Instrument Configurations</th>
+    </tr>
+    <tr class="secondary-header">
+      <th>Instrument</th>
+      <th>Type</th>
+      <th>Exposure Type</th>
+      <th>Single Exposure Time (sec)</th>
+      <th>Single Exposure Time (HH:MM:SS)</th>
+      <th>Iterations</th>
+      <th>Cycles</th>
+      <th>Grating</th>
+      <th>Gain</th>
+      <th>Other</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let ic of telescopeConfigurations">
+    <wm-rss-config-row
+      [instrumentConfig]="ic"
+      [ngClass]="{ 'light-strip': ic.payloadConfigIndex % 2 === 0 }"
+      *ngIf="ic.instrumentName === 'RSS'"
+    ></wm-rss-config-row>
+    <wm-salticam-config-row
+      [instrumentConfig]="ic"
+      *ngIf="ic.instrumentName === 'Salticam'"
+    ></wm-salticam-config-row>
+    <wm-hrs-config-row
+      [telescopeConfiguration]="ic"
+      [ngClass]="{ 'light-strip': ic.payloadConfigIndex % 2 === 0 }"
+      *ngIf="ic.instrumentName === 'HRS'"
+    ></wm-hrs-config-row>
+    <wm-nir-config-row
+      [telescopeConfiguration]="ic"
+      [ngClass]="{ 'light-strip': ic.payloadConfigIndex % 2 === 0 }"
+      *ngIf="ic.instrumentName === 'NIR'"
+      class="is-vertical-align"
+    ></wm-nir-config-row>
+  </tbody>
+</table>

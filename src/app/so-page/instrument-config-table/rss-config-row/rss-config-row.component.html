@@ -1,0 +1,63 @@
+<tr>
+  <td>
+    {{ rssConfig.instrumentName }}
+  </td>
+  <td>
+    {{ rssConfig.configurationType }}
+  </td>
+  <td>
+    {{ rssConfig.exposureType }}
+  </td>
+  <td>{{ rssConfig.exposureTime }}</td>
+  <td>{{ secondsToHhMmSs(rssConfig.exposureTime) }}</td>
+  <td>
+    {{ rssConfig.iterations }}
+  </td>
+  <td>
+    {{ rssConfig.cycles }}
+  </td>
+  <td>
+    {{ rssConfig.grating }}
+  </td>
+  <td>
+    {{ rssConfig.gain }}
+  </td>
+  <td>
+    <div class="wrapper">
+      <div>Mode:</div>
+      <div>{{ rssConfig.mode }}</div>
+    </div>
+    <div *ngIf="rssConfig.lamp" class="wrapper">
+      <div>Lamp:</div>
+      <div>{{ rssConfig.lamp }}</div>
+    </div>
+    <div *ngIf="rssConfig.filter" class="wrapper">
+      <div>Filter:</div>
+      <div>
+        {{ rssConfig.filter }}
+      </div>
+    </div>
+    <div *ngIf="rssConfig.maskType" class="wrapper">
+      <div>Mask Type:</div>
+      <div>
+        {{ rssConfig.maskType }}
+      </div>
+    </div>
+    <div *ngIf="rssConfig.mask" class="wrapper">
+      <div>Mask:</div>
+      <div>
+        {{ rssConfig.mask }}
+      </div>
+    </div>
+    <div class="wrapper">
+      <div>Binning (spatial × spectral):</div>
+      <div>
+        {{
+          rssConfig.binning.preBinnedRows.toString() +
+            "×" +
+            rssConfig.binning.preBinnedColumns.toString()
+        }}
+      </div>
+    </div>
+  </td>
+</tr>

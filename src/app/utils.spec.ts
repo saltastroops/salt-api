@@ -1,5 +1,6 @@
 import { Investigator } from "./types/proposal";
 import { User } from "./types/user";
+import { secondsToHhMmSs } from "./util";
 import {
   convertRightAscensionHMSToDegrees,
   degreesToDms,
@@ -81,7 +82,7 @@ describe("Unit test for angle (degrees) to hours:minutes:seconds conversion func
 });
 
 describe("Unit test for hours:minutes:seconds to angle (degrees) conversion functions ", () => {
-  it("It should work", () => {
+  it("should work", () => {
     expect(convertRightAscensionHMSToDegrees("0:10:10")).toBeCloseTo(
       2.541667,
       5,
@@ -96,6 +97,7 @@ describe("Unit test for hours:minutes:seconds to angle (degrees) conversion func
     );
     expect(convertRightAscensionHMSToDegrees("10:10:00")).toBeCloseTo(152.5, 5);
   });
+
   it("should return 0 degrees for 0:00:00", () => {
     expect(convertRightAscensionHMSToDegrees("0:00:00")).toBeCloseTo(0, 5);
   });
@@ -123,11 +125,12 @@ describe("Unit test for hours:minutes:seconds to angle (degrees) conversion func
     expect(convertRightAscensionHMSToDegrees("04")).toBeCloseTo(60, 5);
   });
 
-  it("should raise an error for a negative hours", () => {
+  it("should raise an error for negative hours", () => {
     expect(() =>
       convertRightAscensionHMSToDegrees("-04:00:00.00"),
     ).toThrowError(/less than 0/);
   });
+
   it("should raise an error for an invalid format", () => {
     [
       "::",
@@ -170,6 +173,7 @@ describe("Unit test for hours:minutes:seconds to angle (degrees) conversion func
       /not be greater than or equal to 60/,
     );
   });
+
   it("should raise an error for characters", () => {
     expect(() => convertRightAscensionHMSToDegrees("aa:30:60")).toThrowError(
       /Right ascension is invalid/,
@@ -193,7 +197,7 @@ describe("Unit test for hours:minutes:seconds to angle (degrees) conversion func
 });
 
 describe("Unit test to check if user is a principal investigator", () => {
-  it("It should work", () => {
+  it("should work", () => {
     [
       {
         user: {
@@ -265,5 +269,24 @@ describe("Unit test to check if user is a principal contact", () => {
         e.expected,
       );
     });
+  });
+});
+
+describe("Unit test for seconds to hours:minutes:seconds conversion functions ", () => {
+  [
+    { seconds: 1, expected: "00:00:01" },
+    { seconds: 60, expected: "00:01:00" },
+    { seconds: 3600, expected: "01:00:00" },
+    { seconds: 0.6, expected: "00:00:00.6" },
+    { seconds: 59, expected: "00:00:59" },
+    { seconds: 3599, expected: "00:59:59" },
+  ].forEach((time) => {
+    it("should work", () => {
+      expect(secondsToHhMmSs(time.seconds)).toEqual(time.expected);
+    });
+  });
+
+  it("should raise an error for negative seconds", () => {
+    expect(() => secondsToHhMmSs(-60)).toThrowError(/seconds: -60/);
   });
 });

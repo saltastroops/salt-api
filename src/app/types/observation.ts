@@ -3,7 +3,7 @@ import { Lamp, TargetCoordinates, TimeInterval } from "./common";
 import { Hrs } from "./hrs";
 import { Nir } from "./nir";
 import { Rss } from "./rss";
-import { Salticam } from "./salticam";
+import { Salticam, SalticamExposure } from "./salticam";
 import { Target } from "./target";
 
 export type CalibrationFilter =
@@ -63,7 +63,7 @@ export interface Observation {
 }
 
 export interface PayloadConfiguration {
-  payloadConfigurationType: PayloadConfigurationType | null;
+  payloadConfigurationType: PayloadConfigurationType;
   useCalibrationScreen: boolean | null;
   lamp: Lamp | null;
   calibrationFilter: CalibrationFilter | null;
@@ -98,4 +98,12 @@ export type FinderChartSize = "original" | "thumbnail";
 export interface FinderChartFile {
   size: FinderChartSize;
   url: string;
+}
+
+export interface Acquisition {
+  targetName: string;
+  finderCharts: FinderChart[];
+  guideChart: GuideStar | null;
+  maximumSeeing: number;
+  exposures: SalticamExposure[];
 }

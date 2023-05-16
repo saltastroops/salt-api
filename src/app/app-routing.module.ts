@@ -12,6 +12,7 @@ import { ProposalComponent } from "./proposal/proposal.component";
 import { RegisterUserComponent } from "./register-user/register-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
+import { SoPageComponent } from "./so-page/so-page.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: "forgot-password", component: ForgotPasswordComponent },
   { path: "change-password/:token", component: ChangePasswordComponent },
   { path: "mos", component: MosComponent, canActivate: [AuthGuardService] },
+  { path: "so-pages", component: SoPageComponent },
   {
     path: "manage-user-profile",
     component: ManageUserProfileComponent,

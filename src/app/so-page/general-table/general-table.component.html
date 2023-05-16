@@ -1,0 +1,69 @@
+<div>
+  <table class="table is-bordered">
+    <thead>
+      <tr>
+        <th colspan="5" class="has-text-centered">General</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="secondary-header">
+        <th>Proposal</th>
+        <th>Block ID</th>
+        <th>Block Name</th>
+        <th colspan="2">Title</th>
+      </tr>
+      <tr>
+        <td>{{ proposal.proposalCode }}</td>
+        <td>{{ block.id }}</td>
+        <td>{{ block.name }}</td>
+        <td colspan="2">{{ proposal.generalInfo.title }}</td>
+      </tr>
+      <tr class="secondary-header">
+        <th colspan="3">Principal Investigator</th>
+        <th>Principal Contact</th>
+        <th>SALT Astronomer</th>
+      </tr>
+      <tr>
+        <td colspan="3">
+          {{
+            principalInvestigator.givenName +
+              " " +
+              principalInvestigator.familyName
+          }}
+        </td>
+        <td>
+          {{ principalContact.givenName + " " + principalContact.familyName }}
+        </td>
+        <td>
+          {{
+            proposal.generalInfo.liaisonSaltAstronomer
+              ? proposal.generalInfo.liaisonSaltAstronomer.givenName +
+                " " +
+                proposal.generalInfo.liaisonSaltAstronomer.familyName
+              : "None"
+          }}
+        </td>
+      </tr>
+      <tr class="secondary-header">
+        <th colspan="5">Block comments</th>
+      </tr>
+      <tr>
+        <td colspan="5">{{ block.comment }}</td>
+      </tr>
+      <tr class="secondary-header">
+        <th colspan="5">Proposal summary for SALT Astronomer</th>
+      </tr>
+      <tr>
+        <td colspan="5">
+          <a class="has-text-link" (click)="toggleSummary()">
+            {{ isShowSummary ? "Hide summary" : "Show summary" }}
+          </a>
+          <p
+            *ngIf="isShowSummary"
+            [innerHTML]="proposal.generalInfo.summaryForSaltAstronomer | nl2br"
+          ></p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

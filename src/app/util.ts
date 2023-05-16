@@ -94,3 +94,25 @@ export function currentJulianDay(): { start: Date; end: Date } {
 
   return { start, end };
 }
+
+export function secondsToHhMmSs(time: number): string {
+  if (time < 0) {
+    throw Error(`Can't convert negative seconds: ${time}.`);
+  }
+  return (
+    Math.floor(time / 3600).toLocaleString("en-US", {
+      minimumIntegerDigits: 2,
+      useGrouping: false,
+    }) +
+    ":" +
+    Math.floor((time % 3600) / 60).toLocaleString("en-US", {
+      minimumIntegerDigits: 2,
+      useGrouping: false,
+    }) +
+    ":" +
+    ((time % 3600) % 60).toLocaleString("en-US", {
+      minimumIntegerDigits: 2,
+      useGrouping: false,
+    })
+  );
+}

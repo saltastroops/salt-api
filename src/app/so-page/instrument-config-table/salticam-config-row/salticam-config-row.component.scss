@@ -1,0 +1,28 @@
+@import "src/styles";
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.1em;
+  padding-bottom: 0;
+}
+
+.wrapper div {
+  display: inline-block;
+  padding-right: 1em;
+  padding-bottom: 0;
+  vertical-align: top;
+}
+
+td {
+  vertical-align: middle;
+  padding: 8px 12px;
+}
+
+.light-strip {
+  background: $light-strip;
+}
+
+:host {
+  display: contents;
+}

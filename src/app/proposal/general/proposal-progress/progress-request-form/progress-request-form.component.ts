@@ -30,7 +30,6 @@ export class ProgressRequestFormComponent implements OnInit {
   success?: string = undefined;
   currentSemester = currentSemester();
   nextSemester = getNextSemester();
-  changeReasonError = false;
   file: File | null = null;
   wrongFileType = false;
 

@@ -1,5 +1,8 @@
 import { Investigator } from "./types/proposal";
+import { environment } from "../environments/environment";
+import { FinderChart } from "./types/observation";
 import { User, UserRole } from "./types/user";
+import { finderChartURL } from "./util";
 
 export const GENERIC_ERROR_MESSAGE =
   "Sorry, something has gone wrong. Please try again later.";
@@ -7,6 +10,8 @@ export const GENERIC_ERROR_MESSAGE =
 export const NOT_LOGGED_IN_MESSAGE = "You are not logged in.";
 
 export const FORBIDDEN_MESSAGE = "You are not allowed to perform this action.";
+
+export const NOT_FOUND_MESSAGE = "Not found.";
 
 export function currentSemester(): string {
   const now = new Date();
@@ -302,4 +307,24 @@ export function isUserPrincipalContact(
   investigators: Investigator[],
 ): boolean {
   return investigators.some((i) => i.id === user.id && i.isPc);
+}
+
+export function thumbnailFinderChartURL(finderChart: FinderChart): string {
+  const url = finderChartURL(
+    finderChart,
+    ["thumbnail", "original"],
+    ["png", "jpg"],
+    environment.apiUrl,
+  );
+  return url || "/assets/noun-missing-2181345.png";
+}
+
+export function originalFinderChartURL(finderChart: FinderChart): string {
+  const url = finderChartURL(
+    finderChart,
+    ["original"],
+    ["pdf", "png", "jpg"],
+    environment.apiUrl,
+  );
+  return url || "/assets/noun-missing-2181345.png";
 }

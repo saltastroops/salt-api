@@ -185,7 +185,21 @@ LIMIT :limit;
             for row in result
         ]
 
-        return proposals
+        # The list of proposals returned may contain proposals twice, once with
+        # is_user_an_investigator=0 and once with is_user_an_investigator=1. In this
+        # case only one of the two should be retained, and it should be the one with
+        # is_user_an_investigator=1.
+        unique_proposals_dict: Dict[str, Dict[str, Any]] = dict()
+        for p in proposals:
+            if (
+                p["id"] not in unique_proposals_dict
+                or p["is_user_an_investigator"] == 1
+            ):
+                unique_proposals_dict[p["id"]] = p
+
+        unique_proposals = list(unique_proposals_dict.values())
+
+        return unique_proposals
 
     @staticmethod
     def _liaison_astronomer(row: Any) -> Optional[Dict[str, str]]:
@@ -1866,7 +1880,7 @@ SELECT
     CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     ReportPath                          AS proposal_progress_pdf,
     SupplementaryPath                   AS additional_pdf
-FROM ProposalProgress PP 
+FROM ProposalProgress PP
     JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON PP.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code

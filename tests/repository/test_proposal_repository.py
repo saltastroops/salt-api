@@ -369,7 +369,10 @@ def test_get_proposal_type_raises_not_found_error(db_connection: Connection) -> 
 
 @pytest.mark.parametrize(
     "proposal_code,expected_status,expected_reason",
-    [("2021-2-MLT-002", "Deleted", "Other"), ("2019-1-SCI-010", "Completed", "Other")],
+    [
+        ("2021-2-MLT-002", "Deleted", "Resubmitted as 2021-2-MLT-004"),
+        ("2019-1-SCI-010", "Completed", ""),
+    ],
 )
 def test_get_proposal_status(
     proposal_code: str,
@@ -381,7 +384,7 @@ def test_get_proposal_status(
     status = proposal_repository.get_proposal_status(proposal_code)
 
     assert status["value"] == expected_status
-    assert status["reason"] == expected_reason
+    assert status["comment"] == expected_reason
 
 
 def test_get_proposal_status_raises_error_for_wrong_proposal_code(
@@ -399,7 +402,7 @@ def test_update_proposal_status(db_connection: Connection) -> None:
     proposal_repository.update_proposal_status(proposal_code, "Active")
     status = proposal_repository.get_proposal_status(proposal_code)
     assert status["value"] == "Active"
-    assert status["reason"] is None
+    assert status["comment"] is None
 
     # Now set it to "Under technical review"
     proposal_repository.update_proposal_status(proposal_code, "Under technical review")
@@ -418,7 +421,7 @@ def test_update_proposal_status_for_not_none_status_reason(
     proposal_repository.update_proposal_status(proposal_code, "Expired")
     status = proposal_repository.get_proposal_status(proposal_code)
     assert status["value"] == "Expired"
-    assert status["reason"] == "Other"
+    assert status["comment"] is None
 
     # Now set it to "Deleted"
     proposal_repository.update_proposal_status(proposal_code, "Deleted")
@@ -559,8 +562,8 @@ def test_proprietary_period_start_date_returns_correct_start_date(
 @pytest.mark.parametrize(
     "proposal_code,proprietary_period,block_visits,expected_date",
     [
-        ("2020-2-SCI-005", 0, [], date(2023, 5, 1)),
-        ("2020-2-SCI-005", 10, [], date(2024, 3, 1)),
+        ("2020-2-SCI-005", 0, [], date(2023, 11, 1)),
+        ("2020-2-SCI-005", 10, [], date(2024, 9, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 2, 1)}], date(2021, 5, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 2, 1)}], date(2022, 3, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 4, 30)}], date(2021, 5, 1)),

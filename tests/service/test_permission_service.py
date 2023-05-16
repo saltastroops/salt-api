@@ -231,5 +231,8 @@ def test_check_permission_to_view_gravitational_wave_proposal() -> None:
 def test_check_permission_to_update_proposal_status() -> None:
     roles_with_permission = [SALT_ASTRONOMER, ADMINISTRATOR]
     _assert_role_based_permission(
-        "check_permission_to_update_proposal_status", roles_with_permission
+        "check_permission_to_update_proposal_status",
+        roles_with_permission,
+        proposal_code=PROPOSAL_CODE,
+        proposal_status="Accepted",
     )

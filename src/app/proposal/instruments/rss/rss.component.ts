@@ -11,5 +11,4 @@ import { Rss } from "../../../types/rss";
 export class RssComponent {
   @Input() rss!: Rss;
   @Input() payloadConfiguration!: PayloadConfiguration;
-  headerLine: string | null = null;
 }

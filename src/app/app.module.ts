@@ -75,8 +75,8 @@ import { NirComponent } from "./proposal/instruments/nir/nir.component";
 import { ArcBibleComponent } from "./proposal/instruments/rss/arc-bible/arc-bible.component";
 import { EtalonWavelengthsComponent } from "./proposal/instruments/rss/etalon-wavelengths/etalon-wavelengths.component";
 import { FabryPerotComponent } from "./proposal/instruments/rss/fabry-perot/fabry-perot.component";
+import { ImagingComponent } from "./proposal/instruments/rss/imaging/imaging.component";
 import { MosSlitMaskComponent } from "./proposal/instruments/rss/mos-slit-mask/mos-slit-mask.component";
-import { PolarimetricImagingComponent } from "./proposal/instruments/rss/polarimetric-imaging/polarimetric-imaging.component";
 import { PolarimetryComponent } from "./proposal/instruments/rss/polarimetry/polarimetry.component";
 import { RssCalibrationComponent } from "./proposal/instruments/rss/rss-calibration/rss-calibration.component";
 import { RssDetectorComponent } from "./proposal/instruments/rss/rss-detector/rss-detector.component";
@@ -172,7 +172,7 @@ import { HrsConfigRowComponent } from './so-page/instrument-config-table/hrs-con
     SalticamDetectorComponent,
     SalticamFiltersComponent,
     PolarimetryComponent,
-    PolarimetricImagingComponent,
+    ImagingComponent,
     EtalonWavelengthsComponent,
     FabryPerotComponent,
     LoginComponent,

@@ -1,21 +1,29 @@
 <div>
-  <table class="table">
-    <thead>
-      <tr class="secondary-header">
-        <th colspan="3" class="has-text-centered">{{ pattern.name }}</th>
-      </tr>
-      <tr>
-        <th>#</th>
-        <th>Half-Wave Pattern</th>
-        <th>Quarter-Wave Pattern</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of pattern.wavePlateAngles; let i = index">
-        <td>{{ i }}</td>
-        <td>{{ p.halfWave }}</td>
-        <td>{{ p.quarterWave }}</td>
-      </tr>
-    </tbody>
+  <table class="table is-bordered">
+    <tr class="secondary-header">
+      <th colspan="3" class="has-text-centered">Polarimetry</th>
+    </tr>
+    <tr>
+      <th colspan="2">Beam Splitter Orientation</th>
+      <td>{{ beamSplitterOrientation }}</td>
+    </tr>
+    <tr>
+      <th colspan="2">Pattern Name</th>
+      <td>{{ pattern.name }}</td>
+    </tr>
+    <tr class="secondary-header">
+      <th>#</th>
+      <th>Half-Wave Pattern</th>
+      <th>Quarter-Wave Pattern</th>
+    </tr>
+    <tr *ngFor="let p of pattern.wavePlateAngles; let i = index">
+      <td>{{ i }}</td>
+      <td>
+        <p class="is-pulled-right">{{ p.halfWave }}</p>
+      </td>
+      <td>
+        <p class="is-pulled-right">{{ p.quarterWave }}</p>
+      </td>
+    </tr>
   </table>
 </div>

@@ -1,3 +1,5 @@
-.has-two-columns {
-  grid-template-columns: 20% 1fr;
+@import "src/styles";
+
+.has-red-background {
+  background-color: $red-background;
 }

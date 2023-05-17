@@ -9,4 +9,5 @@ import { RssPolarimetryPattern } from "../../../../types/rss";
 })
 export class PolarimetryComponent {
   @Input() pattern!: RssPolarimetryPattern;
+  @Input() beamSplitterOrientation!: string;
 }

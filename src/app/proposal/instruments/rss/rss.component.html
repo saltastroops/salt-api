@@ -5,22 +5,36 @@
 <div class="inline-view">
   <wm-rss-general-info [rss]="rss"></wm-rss-general-info>
   <wm-rss-detector [detector]="rss.detector"></wm-rss-detector>
-  <div *ngIf="rss.configuration.spectroscopy">
-    <wm-rss-spectroscopy
-      [spectroscopy]="rss.configuration.spectroscopy"
-      [filter]="rss.configuration.filter"
-    ></wm-rss-spectroscopy>
-  </div>
-  <div *ngIf="payloadConfiguration.lamp">
-    <wm-rss-calibration
-      [filter]="payloadConfiguration.calibrationFilter"
-      [lamp]="payloadConfiguration.lamp"
-    ></wm-rss-calibration>
-  </div>
-  <div *ngIf="rss.configuration.mask">
-    <wm-rss-slit-mask [slitMask]="rss.configuration.mask"></wm-rss-slit-mask>
-  </div>
-  <div *ngIf="payloadConfiguration.lamp && rss.arcBibleEntries.length > 0">
-    <wm-arc-bible [arcBibleEntries]="rss.arcBibleEntries"></wm-arc-bible>
-  </div>
+  <wm-rss-spectroscopy
+    *ngIf="rss.configuration.spectroscopy"
+    [spectroscopy]="rss.configuration.spectroscopy"
+    [filter]="rss.configuration.filter"
+  ></wm-rss-spectroscopy>
+  <wm-imaging
+    *ngIf="
+      rss.configuration.mode === 'Polarimetric imaging' ||
+      rss.configuration.mode === 'Imaging'
+    "
+    [filter]="rss.configuration.filter"
+  ></wm-imaging>
+  <wm-rss-calibration
+    *ngIf="payloadConfiguration.lamp"
+    [filter]="payloadConfiguration.calibrationFilter"
+    [lamp]="payloadConfiguration.lamp"
+  ></wm-rss-calibration>
+  <wm-rss-slit-mask
+    *ngIf="rss.configuration.mask"
+    [slitMask]="rss.configuration.mask"
+  ></wm-rss-slit-mask>
+  <wm-arc-bible
+    *ngIf="payloadConfiguration.lamp && rss.arcBibleEntries.length > 0"
+    [arcBibleEntries]="rss.arcBibleEntries"
+  ></wm-arc-bible>
+  <wm-polarimetry
+    *ngIf="rss.configuration.polarimetry && rss.procedure.polarimetryPattern"
+    [pattern]="rss.procedure.polarimetryPattern"
+    [beamSplitterOrientation]="
+      rss.configuration.polarimetry.beamSplitterOrientation
+    "
+  ></wm-polarimetry>
 </div>

@@ -1,4 +1,5 @@
 package jenkins.tests
+@Library('saao-shared-library')
 
 pipeline {
   agent {

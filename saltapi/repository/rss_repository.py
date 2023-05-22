@@ -58,7 +58,8 @@ SELECT R.Rss_Id                                          AS rss_id,
        RPT.RssProcedureType                              AS procedure_type,
        RP.RssEtalonPattern_Id                            AS etalon_pattern_id,
        RP.RssPolarimetryPattern_Id                       AS polarimetry_pattern_id,
-       RPP.PatternName                                   AS polarimetry_pattern_name
+       RPP.PatternName                                   AS polarimetry_pattern_name,
+       IF(RCM.RssMask_Id IS NOT NULL, 1, 0) 			 AS mask_in_magazine
 FROM Rss R
          JOIN RssConfig RC ON R.RssConfig_Id = RC.RssConfig_Id
          JOIN RssMode RM ON RC.RssMode_Id = RM.RssMode_Id
@@ -90,6 +91,7 @@ FROM Rss R
                    ON RD.RssDetectorWindow_Id = RDW.RssDetectorWindow_Id
          LEFT JOIN RssPolarimetryPattern RPP
                    ON RP.RssPolarimetryPattern_Id = RPP.RssPolarimetryPattern_Id
+         LEFT JOIN RssCurrentMasks RCM ON RCM.RssMask_Id = RMA.RssMask_Id
 WHERE R.Rss_Id = :rss_id
 ORDER BY Rss_Id DESC;
         """
@@ -151,6 +153,7 @@ ORDER BY Rss_Id DESC;
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,
+                "is_in_magazine": row.mask_in_magazine,
             }
         else:
             mask = {
@@ -161,6 +164,7 @@ ORDER BY Rss_Id DESC;
                 "cut_by": row.mos_cut_by,
                 "cut_date": row.mos_cut_date,
                 "comment": row.mos_comment,
+                "is_in_magazine": row.mask_in_magazine,
             }
 
         return mask
@@ -421,10 +425,10 @@ FROM RssCurrentMasks AS RCM
     JOIN RssMaskType AS RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
         """
         if len(mask_types) > 0:
-            stmt += " WHERE RssMaskType IN :mask_type"
+            stmt += " WHERE RssMaskType IN :mask_types"
 
         results = self.connection.execute(
-            text(stmt), {"mask_type": [m.value for m in mask_types]}
+            text(stmt), {"mask_types": [m.value for m in mask_types]}
         )
         return [row.barcode for row in results]
 
@@ -643,14 +647,14 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
     AND NVisits >= NDone
 """
         if len(mask_types) > 0:
-            stmt += " AND RssMaskType IN :mask_type"
+            stmt += " AND RssMaskType IN :mask_types"
         needed_masks = [
             m["barcode"]
             for m in self.connection.execute(
                 text(stmt),
                 {
                     "semester": semester_of_datetime(datetime.now().astimezone()),
-                    "mask_types": [m.value for m in mask_types],
+                    "mask_types": tuple([m.value for m in mask_types]),
                 },
             )
         ]

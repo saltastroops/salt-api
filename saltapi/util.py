@@ -88,7 +88,7 @@ def semester_start(semester: str) -> datetime:
     if sem == 2:
         return datetime(year, 11, 1, 12, 0, 0, 0, tzinfo=pytz.utc)
 
-    raise ValueError(f"Unknown semester ({sem_str}:  The semester must be 1 or 2.")
+    raise ValueError(f"Unknown semester ({sem_str}: The semester must be 1 or 2.")
 
 
 def semester_end(semester: str) -> datetime:
@@ -108,7 +108,7 @@ def semester_end(semester: str) -> datetime:
     if sem == 2:
         return datetime(year + 1, 5, 1, 12, 0, 0, 0, tzinfo=pytz.utc)
 
-    raise ValueError(f"Unknown semester ({sem_str}:  The semester must be 1 or 2.")
+    raise ValueError(f"Unknown semester ({sem_str}: The semester must be 1 or 2.")
 
 
 def semester_of_datetime(t: datetime) -> str:

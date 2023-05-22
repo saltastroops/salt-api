@@ -1,5 +1,4 @@
 import os
-import pathlib
 import re
 import shutil
 import uuid
@@ -11,10 +10,6 @@ import dotenv
 
 os.environ["DOTENV_FILE"] = ".env.test"
 dotenv.load_dotenv(os.environ["DOTENV_FILE"])
-
-os.environ["PMSM_DATA_DIR"] = str(
-    pathlib.Path(os.environ["TEST_DATA_DIR"]) / "database"
-)
 
 
 from pathlib import Path

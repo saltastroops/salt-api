@@ -19,6 +19,6 @@ python -m pip install -r requirements.txt
 black --check saltapi tests || true
 isort --check-only saltapi tests  || true
 flake8 --exit-zero saltapi tests
-bandit saltapi
+bandit -r saltapi
 mypy saltapi || true
 pytest || true

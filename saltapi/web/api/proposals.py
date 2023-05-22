@@ -23,12 +23,13 @@ from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import LiaisonAstronomer, User
 from saltapi.util import semester_start
 from saltapi.web import services
-from saltapi.web.schema.common import ProposalCode, Semester
+from saltapi.web.schema.common import Message, ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
+    DataRequest,
     ObservationComment,
     ProposalApprovalStatus,
     ProposalListItem,
@@ -549,6 +550,47 @@ def update_liaison_astronomer(
         if liaison_salt_astronomer:
             return LiaisonAstronomer(**liaison_salt_astronomer)
         return None
+
+
+@router.post(
+    "/{proposal_code}/request-data",
+    summary="Request data for observations.",
+    response_model=Optional[Message],
+    status_code=200,
+)
+def request_data(
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description="Proposal code of the proposal which the block visits belong to.",
+    ),
+    data_request: DataRequest = Body(
+        ...,
+        title="Data request",
+        description="The data request.",
+    ),
+    user: User = Depends(get_current_user),
+) -> Message:
+    """
+    Create an observation data request.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_request_data(
+            user, proposal_code, data_request.observation_ids
+        )
+        data_service = services.data_service(unit_of_work.connection)
+        data_service.request_data(
+            user_id=user.id,
+            proposal_code=proposal_code,
+            block_visit_ids=data_request.observation_ids,
+            data_formats=[
+                str(data_format.value) for data_format in data_request.data_formats
+            ],
+        )
+        unit_of_work.commit()
+
+        return Message(message="Successful")
 
 
 @router.put(

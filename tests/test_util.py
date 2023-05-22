@@ -121,7 +121,7 @@ def test_next_semester_raises_error_for_incorrect_semester(
         ("2022-1", "2022-05-01T11:59:59Z"),
         ("2022-2", "2022-05-01T12:00:00Z"),
         ("2022-2", "2022-05-01T12:00:01Z"),
-        # Test if start of the second  semester is correct.
+        # Test if start of the second semester is correct.
         ("2022-2", "2022-11-01T00:00:01Z"),
         ("2022-2", "2022-11-01T11:59:59Z"),
         ("2023-1", "2022-11-01T12:00:00Z"),

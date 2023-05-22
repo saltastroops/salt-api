@@ -126,6 +126,11 @@ class RssMask(BaseModel):
         ..., title="Mask description", description="Description of the mask"
     )
     mask_type: RssMaskType = Field(..., title="Mask type", description="Mask type")
+    is_in_magazine: bool = Field(
+        ...,
+        title="Is the mask in the magazine?",
+        description="Is the mask in the magazine?",
+    )
 
 
 class RssMosMask(RssMask):

@@ -49,7 +49,7 @@ def test_should_return_proposal_status_when_requested_by_permitted_users(
 
     assert response.status_code == status.HTTP_200_OK
     assert "value" in [s for s in response.json()]
-    assert "reason" in [s for s in response.json()]
+    assert "comment" in [s for s in response.json()]
 
 
 @pytest.mark.parametrize(

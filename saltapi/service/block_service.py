@@ -72,7 +72,7 @@ class BlockService:
 
         None is returned if there is no currently observed block.
         """
-        file = requests.get(get_settings().tcs_icd_url)
+        file = requests.get(get_settings().tcs_icd_url, timeout=30)
         xml_file = minidom.parseString(file.text)
         elements = xml_file.getElementsByTagName("String")
         block_id = None

@@ -14,7 +14,7 @@ pipeline {
   stages {
     stage("Run tests") {
       steps {
-        sh './jenkins/run-tests.sh'
+        sh './jenkins/tests/run-tests.sh'
       }
     }
     stage("Build and push Docker image") {

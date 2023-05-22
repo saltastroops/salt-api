@@ -5,12 +5,12 @@ from starlette import status
 INSTITUTION_URL = "/institutions"
 
 
-def test_create_institution(client: TestClient, database_mock) -> None:
+def test_create_institution(client: TestClient) -> None:
     fake = Faker()
     institution = {
-        "institution_name": database_mock.user_value(f"{fake.name()} University"),
+        "institution_name": f"{fake.name()} University",
         "department": "Physics",
-        "address": database_mock.user_value(fake.address()),
+        "address": fake.address(),
         "url": "www.world-university.com",
     }
     response = client.post(INSTITUTION_URL + "/", json=institution)

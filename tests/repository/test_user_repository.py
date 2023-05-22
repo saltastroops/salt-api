@@ -5,7 +5,6 @@ from typing import Any, Callable, Optional, cast
 import pytest
 from pydantic import EmailStr
 from pytest import MonkeyPatch
-from pytest_pymysql_autorecord.util import DatabaseMock
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
@@ -81,17 +80,15 @@ def test_create_user_raisers_error_if_username_exists_already(
 
 
 @nodatabase
-def test_create_user_creates_a_new_user(
-    database_mock: DatabaseMock, db_connection: Connection
-) -> None:
-    username = database_mock.user_value(_random_string())
+def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
+    username = _random_string()
     new_user_details = NewUserDetails(
         username=username,
         password=_random_string(),
         email=EmailStr(f"{username}@example.com"),
         alternative_emails=[],
-        given_name=database_mock.user_value(_random_string()),
-        family_name=database_mock.user_value(_random_string()),
+        given_name=_random_string(),
+        family_name=_random_string(),
         institution_id=5,
     )
 
@@ -333,11 +330,12 @@ def test_has_proposal_permission_returns_correct_result(
         permission_type="View",
         proposal_code=proposal_code,
     )
-    non_grantee_username = find_usernames("proposal_view_grantee", True, proposal_code)[
-        0
-    ]
+
+    non_grantee_username = find_usernames(
+        "proposal_view_non_grantee", True, proposal_code
+    )[0]
     non_grantee_id = user_repository.get_by_username(non_grantee_username).id
-    assert user_repository.user_has_proposal_permission(
+    assert not user_repository.user_has_proposal_permission(
         user_id=non_grantee_id,
         permission_type="View",
         proposal_code=proposal_code,
@@ -478,7 +476,7 @@ def test_grant_proposal_permission_raises_not_found_errors(
 def test_grant_proposal_permission(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Initially there are no granted permissions
@@ -496,7 +494,7 @@ def test_grant_proposal_permission(db_connection: Connection) -> None:
 def test_grant_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2022-2-SCI-007", "permission_type": "View"}
 
     # Initially there are no granted permissions
@@ -536,7 +534,7 @@ def test_revoke_proposal_permission_raises_not_found_errors(
 def test_revoke_proposal_permission(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Grant a permission
@@ -557,7 +555,7 @@ def test_revoke_proposal_permission(db_connection: Connection) -> None:
 def test_revoke_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Grant a permission

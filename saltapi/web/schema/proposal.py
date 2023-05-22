@@ -487,6 +487,11 @@ class ProposalListItem(BaseModel):
     liaison_astronomer: Optional[FullName] = Field(
         ..., title="Liaison Astronomer", description="Liaison Astronomer"
     )
+    is_user_an_investigator: bool = Field(
+        ...,
+        title="Is the user an investigator?",
+        description="Is the currently logged in user an investigator on the proposal?",
+    )
 
 
 class ProposalStatusContent(BaseModel):
@@ -651,4 +656,22 @@ class SelfActivation(BaseModel):
             "Can the proposal be activated by the Principal Investigator or Principal"
             " Contact?"
         ),
+    )
+
+
+class DataFormat(str, Enum):
+    ALL = "All"
+    CALIBRATION = "Calibration"
+
+
+class DataRequest(BaseModel):
+    """An Observation data request Body."""
+
+    observation_ids: List[int] = Field(
+        ..., title="Observation Id", description="The observation (block visit) id."
+    )
+    data_formats: List[DataFormat] = Field(
+        ...,
+        title="Data formats",
+        description="The requested data formats.",
     )

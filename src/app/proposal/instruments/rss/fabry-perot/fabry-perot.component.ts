@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { RssMode } from "../../../../types/rss";
+import { RssFabryPerotMode } from "../../../../types/rss";
 
 @Component({
   selector: "wm-fabry-perot",
@@ -9,5 +9,5 @@ import { RssMode } from "../../../../types/rss";
 })
 export class FabryPerotComponent {
   @Input() filter!: string;
-  @Input() mode!: RssMode;
+  @Input() mode!: RssFabryPerotMode;
 }

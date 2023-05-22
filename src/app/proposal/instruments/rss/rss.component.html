@@ -17,6 +17,11 @@
     "
     [filter]="rss.configuration.filter"
   ></wm-imaging>
+  <wm-fabry-perot
+    *ngIf="rss.configuration.fabryPerot"
+    [filter]="rss.configuration.filter"
+    [mode]="rss.configuration.fabryPerot.mode"
+  ></wm-fabry-perot>
   <wm-rss-calibration
     *ngIf="payloadConfiguration.lamp"
     [filter]="payloadConfiguration.calibrationFilter"
@@ -37,4 +42,8 @@
       rss.configuration.polarimetry.beamSplitterOrientation
     "
   ></wm-polarimetry>
+  <wm-etalon-wavelengths
+    *ngIf="rss.procedure.etalonWavelengths"
+    [etalonConfiguration]="rss.procedure.etalonWavelengths"
+  ></wm-etalon-wavelengths>
 </div>

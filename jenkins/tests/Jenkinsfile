@@ -15,7 +15,7 @@ pipeline {
   stages {
     stage("Run tests") {
       steps {
-        sh './jenkins/tests/run-tests.sh'
+        sh 'poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev'
         saaoRunPythonTests()
       }
     }

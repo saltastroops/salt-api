@@ -1,5 +1,5 @@
 package jenkins.tests
-@Library('saao-shared-library')
+@Library('saao-shared-library') _
 
 pipeline {
   agent {
@@ -16,6 +16,7 @@ pipeline {
     stage("Run tests") {
       steps {
         sh './jenkins/tests/run-tests.sh'
+        saaoRunPythonTests()
       }
     }
     stage("Build and push Docker image") {

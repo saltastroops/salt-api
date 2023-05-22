@@ -17,7 +17,7 @@ pipeline {
       steps {
         sh 'poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev'
         script {
-           def tests = saao.runPythonTests()
+           runPythonTests()
         }
       }
     }

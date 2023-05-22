@@ -16,7 +16,7 @@ pipeline {
     stage("Run tests") {
       steps {
         sh 'poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev'
-        saaoRunPythonTests()
+        saao.RunPythonTests()
       }
     }
     stage("Build and push Docker image") {

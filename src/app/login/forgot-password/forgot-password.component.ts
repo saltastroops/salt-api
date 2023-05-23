@@ -51,8 +51,8 @@ export class ForgotPasswordComponent implements OnInit {
           // Switch form
           this.showSuccessMessage = true;
         },
-        (error: string) => {
-          this.error = error;
+        (error) => {
+          this.error = error.message;
           this.loading = false;
         },
       );

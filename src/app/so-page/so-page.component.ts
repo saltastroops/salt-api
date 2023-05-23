@@ -13,11 +13,7 @@ import { Acquisition, PayloadConfigurationType } from "../types/observation";
 import { Proposal } from "../types/proposal";
 import { Rss } from "../types/rss";
 import { Salticam } from "../types/salticam";
-import {
-  AutoUnsubscribe,
-  GENERIC_ERROR_MESSAGE,
-  NOT_FOUND_MESSAGE,
-} from "../utils";
+import { AutoUnsubscribe, GENERIC_ERROR_MESSAGE } from "../utils";
 
 @Component({
   selector: "wm-so-page",
@@ -77,7 +73,7 @@ export class SoPageComponent implements OnInit {
         }),
         catchError((err) => {
           this.loading = false;
-          if (err === NOT_FOUND_MESSAGE) {
+          if (err.status === 404) {
             if (this.loadBlock === "currentBlock") {
               this.error =
                 "There is no block that is being observed currently.";

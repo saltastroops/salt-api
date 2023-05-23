@@ -63,8 +63,8 @@ export class ChangePasswordComponent implements OnInit {
           this.loading = false;
           this.router.navigate(["/login"]);
         },
-        (error: string) => {
-          this.error = error;
+        (error) => {
+          this.error = error.message;
           this.loading = false;
         },
       );

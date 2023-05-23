@@ -60,7 +60,7 @@ export class HomeUserComponent implements OnInit {
           return this.proposalService.getProposals(data[0], data[1]);
         }),
         catchError((err) => {
-          window.alert(err);
+          window.alert(err.message);
           this.loading = false;
           return of([]);
         }),

@@ -75,8 +75,8 @@ export class ManageUserProfileComponent implements OnInit {
         switchMap((user_id) => {
           return this.userService.getUserById(user_id);
         }),
-        catchError((err) => {
-          window.alert(err);
+        catchError(() => {
+          window.alert("Failed to fetch user.");
           this.isLoadingForm = false;
           return of(null);
         }),

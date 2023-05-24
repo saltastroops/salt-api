@@ -13,6 +13,14 @@ from saltapi.service.user import NewUserDetails, UserUpdate
 from tests.conftest import find_usernames
 from tests.markers import nodatabase
 
+user_statistics = {
+    "legal_status": "South African citizen",
+    "gender": "Male",
+    "race": "African",
+    "is_phd": True,
+    "year_of_phd": 2020,
+}
+
 
 @nodatabase
 def test_get_user(db_connection: Connection, check_data: Callable[[Any], None]) -> None:
@@ -71,6 +79,7 @@ def test_create_user_raisers_error_if_username_exists_already(
         family_name=_random_string(),
         password="very_secret",
         institution_id=5,
+        **user_statistics,
     )
     user_repository = UserRepository(db_connection)
     with pytest.raises(ValueError) as excinfo:
@@ -90,6 +99,7 @@ def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
         given_name=_random_string(),
         family_name=_random_string(),
         institution_id=5,
+        **user_statistics,
     )
 
     user_repository = UserRepository(db_connection)
@@ -117,7 +127,9 @@ def test_get_user_by_email_raises_error_for_non_existing_user(
 def test_patch_raises_error_for_non_existing_user(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
     with pytest.raises(NotFoundError):
-        user_repository.update(0, UserUpdate(username=None, password=None))
+        user_repository.update(
+            0, UserUpdate(username=None, password=None, **user_statistics)
+        )
 
 
 @nodatabase
@@ -125,7 +137,9 @@ def test_patch_uses_existing_values_by_default(db_connection: Connection) -> Non
     user_repository = UserRepository(db_connection)
     user_id = 1602
     old_user_details = user_repository.get(user_id)
-    user_repository.update(user_id, UserUpdate(username=None, password=None))
+    user_repository.update(
+        user_id, UserUpdate(username=None, password=None, **user_statistics)
+    )
     new_user_details = user_repository.get(user_id)
 
     assert old_user_details == new_user_details
@@ -143,7 +157,8 @@ def test_patch_replaces_existing_values(db_connection: Connection) -> None:
     )
 
     user_repository.update(
-        user_id, UserUpdate(username=new_username, password=new_password)
+        user_id,
+        UserUpdate(username=new_username, password=new_password, **user_statistics),
     )
     new_user_details = user_repository.get(user_id)
 
@@ -158,12 +173,14 @@ def test_patch_is_idempotent(db_connection: Connection) -> None:
     new_password = "a_new_shiny_password"
 
     user_repository.update(
-        user_id, UserUpdate(username=new_username, password=new_password)
+        user_id,
+        UserUpdate(username=new_username, password=new_password, **user_statistics),
     )
     new_user_details_1 = user_repository.get_by_username(new_username)
 
     user_repository.update(
-        user_id, UserUpdate(username=new_username, password=new_password)
+        user_id,
+        UserUpdate(username=new_username, password=new_password, **user_statistics),
     )
     new_user_details_2 = user_repository.get_by_username(new_username)
 
@@ -177,7 +194,8 @@ def test_patch_cannot_use_existing_username(db_connection: Connection) -> None:
 
     with pytest.raises(ValueError):
         user_repository.update(
-            user_id, UserUpdate(username=existing_username, password=None)
+            user_id,
+            UserUpdate(username=existing_username, password=None, **user_statistics),
         )
 
 

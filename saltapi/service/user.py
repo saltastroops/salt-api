@@ -72,6 +72,11 @@ class NewUserDetails:
     username: str
     password: str
     institution_id: int
+    legal_status: str
+    gender: Optional[str]
+    race: Optional[str]
+    is_phd: bool
+    year_of_phd: Optional[int]
 
 
 class UserUpdate(NamedTuple):
@@ -81,3 +86,8 @@ class UserUpdate(NamedTuple):
     # family_name: Optional[str]
     # email: Optional[str]
     password: Optional[str]
+    legal_status: str
+    gender: Optional[str]
+    race: Optional[str]
+    is_phd: bool
+    year_of_phd: Optional[int]

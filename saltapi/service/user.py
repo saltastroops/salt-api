@@ -75,8 +75,8 @@ class NewUserDetails:
     legal_status: str
     gender: Optional[str]
     race: Optional[str]
-    is_phd: bool
-    year_of_phd: Optional[int]
+    has_phd: Optional[bool]
+    year_of_phd_completion: Optional[int]
 
 
 class UserUpdate(NamedTuple):
@@ -89,5 +89,5 @@ class UserUpdate(NamedTuple):
     legal_status: str
     gender: Optional[str]
     race: Optional[str]
-    is_phd: bool
-    year_of_phd: Optional[int]
+    has_phd: Optional[bool]
+    year_of_phd_completion: Optional[int]

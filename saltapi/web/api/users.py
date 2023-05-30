@@ -84,8 +84,8 @@ def create_user(
                 legal_status=user.legal_status,
                 race=user.race,
                 gender=user.gender,
-                is_phd=user.is_phd,
-                year_of_phd=user.year_of_phd,
+                has_phd=user.has_phd,
+                year_of_phd_completion=user.year_of_phd_completion,
             )
         )
         unit_of_work.commit()
@@ -143,8 +143,8 @@ def update_user(
             legal_status=user_update.legal_status,
             gender=update_user.gender,
             race=update_user.race,
-            is_phd=user_update.is_phd,
-            year_of_phd=user_update.year_of_phd,
+            has_phd=user_update.has_phd,
+            year_of_phd_completion=user_update.year_of_phd_completion,
         )
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_user(user_id, _user_update)

@@ -76,11 +76,13 @@ class UserStatistics(BaseModel):
     )
     gender: Optional[str] = Field(..., title="Gender", description="The gender.")
     race: Optional[str] = Field(..., title="Race", description="The race.")
-    is_phd: Optional[bool] = Field(
-        ..., title="PhD", description="Whether the user have a PhD"
+    has_phd: Optional[bool] = Field(
+        ..., title="PhD", description="Does the user has a PhD?"
     )
-    year_of_phd: Optional[int] = Field(
-        ..., title="Year of PhD", description="The year the PhD was completed."
+    year_of_phd_completion: Optional[int] = Field(
+        ...,
+        title="Year of PhD degree completion",
+        description="The year the PhD degree was completed",
     )
 
 

@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import NotFoundError
 from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
 
 pwd_context = CryptContext(
@@ -276,8 +276,8 @@ WHERE Investigator_Id = :investigator_id
             legal_status=user_update.legal_status,
             gender=user_update.gender,
             race=user_update.race,
-            is_phd=user_update.is_phd,
-            year_of_phd=user_update.year_of_phd,
+            has_phd=user_update.has_phd,
+            year_of_phd_completion=user_update.year_of_phd_completion,
         )
 
     def _update_username(self, user_id: int, new_username: str) -> None:
@@ -890,20 +890,10 @@ INSERT INTO Race (Race) VALUES (:race)
     def update_user_statistic(
         self, pipt_user_id: int, user_information: Union[NewUserDetails, UserUpdate]
     ) -> None:
-        if user_information.legal_status in [
-            "South African citizen",
-            "Permanent resident of South Africa",
-        ]:
-            if not user_information.gender:
-                raise ValidationError("Gender is missing.")
-            if not user_information.race:
-                raise ValidationError("Race is missing.")
-            if user_information.is_phd and not user_information.year_of_phd:
-                raise ValidationError("Year of completing PhD is missing.")
         stmt = text(
             """
 INSERT INTO UserStatistics (PiptUser_Id, SouthAfricanLegalStatus_Id, Gender_Id, Race_Id, PhD, YearOfPhD) 
-VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :is_phd, :year_of_phd ) 
+VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_of_phd ) 
             """
         )
         self.connection.execute(
@@ -915,7 +905,7 @@ VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :is_phd, :year_of
                 ),
                 "gender_id": self._get_gender_id(user_information.gender),
                 "race_id": self._get_race_id(user_information.race),
-                "is_phd": user_information.is_phd,
-                "year_of_phd": user_information.year_of_phd,
+                "has_phd": user_information.has_phd,
+                "year_of_phd": user_information.year_of_phd_completion,
             },
         )

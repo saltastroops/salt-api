@@ -1,0 +1,59 @@
+p {
+  margin-bottom: 1em;
+}
+
+div {
+  font-size: 11pt;
+}
+
+.why-collect {
+  max-width: 1200px;
+  margin-top: 10px;
+  padding:0.5em;
+  background-color: #dddddd;
+  border: 1px solid #222222;
+
+}
+
+.control{
+  display: grid;
+  margin-left: 1em;
+}
+.select{
+  display: block;
+  width: 90px;
+}
+
+.description {
+  font-style: italic;
+  margin-bottom: 0.5em;
+  max-width: 1200px;
+}
+
+.title {
+  margin-top: 1em;
+  margin-bottom: .1em;
+}
+
+.gender-support-input{
+  display: grid;
+  grid-template-columns: 11em 20%;
+  margin-left: 0;
+  align-items: center;
+}
+
+.phd-support-input{
+  display: grid;
+  grid-template-columns: 20em 12%;
+  margin-left: 0;
+  align-items: center;
+}
+
+.input {
+  margin-bottom: 0;
+}
+
+.label {
+  margin-top: 1em;
+
+}

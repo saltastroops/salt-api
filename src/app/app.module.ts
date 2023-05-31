@@ -124,6 +124,7 @@ import { NirConfigRowComponent } from './so-page/instrument-config-table/nir-con
 import { SalticamConfigRowComponent } from './so-page/instrument-config-table/salticam-config-row/salticam-config-row.component';
 import { RssConfigRowComponent } from './so-page/instrument-config-table/rss-config-row/rss-config-row.component';
 import { HrsConfigRowComponent } from './so-page/instrument-config-table/hrs-config-row/hrs-config-row.component';
+import { SaFormComponent } from './login/sa-form/sa-form.component';
 
 @NgModule({
   declarations: [
@@ -233,6 +234,7 @@ import { HrsConfigRowComponent } from './so-page/instrument-config-table/hrs-con
     SalticamConfigRowComponent,
     RssConfigRowComponent,
     HrsConfigRowComponent,
+    SaFormComponent,
   ],
   imports: [
     BrowserModule,

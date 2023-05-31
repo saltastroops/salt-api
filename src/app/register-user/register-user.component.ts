@@ -23,7 +23,7 @@ import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
 import { Partner, PartnerCode } from "../types/common";
 import { Institution, NewInstitutionDetails } from "../types/institution";
-import { NewUserDetails } from "../types/user";
+import { NewUserDetails, StatisticsError } from "../types/user";
 
 @Component({
   selector: "wm-register-user",
@@ -39,6 +39,12 @@ export class RegisterUserComponent implements OnInit {
   partners!: Partner[];
   partnerInstitutions!: Institution[];
   showAddNewInstitutionControls = false;
+  statisticsError: StatisticsError = {
+    legalStatus: undefined,
+    race: undefined,
+    gender: undefined,
+    phd: undefined,
+  };
   selectedInstitutionId!: number;
   institutionId$!: Observable<number>;
   DEBOUNCE_TIME = 100;
@@ -86,6 +92,11 @@ export class RegisterUserComponent implements OnInit {
         department: [null],
         url: [null],
         address: [null],
+        legalStatus: [null, Validators.required],
+        gender: [""],
+        race: [""],
+        phdYear: [""],
+        hasPhd: [""],
       },
       { validators: this.passwordMatchingValidator },
     );
@@ -99,6 +110,8 @@ export class RegisterUserComponent implements OnInit {
 
   registerNewUser(): void {
     this.registerNewUserForm.markAllAsTouched();
+
+    this.validateStatistics();
 
     // stop here if form is invalid
     if (this.registerNewUserForm.invalid) {
@@ -143,6 +156,11 @@ export class RegisterUserComponent implements OnInit {
             givenName: this.registerNewUserForm.get("givenName")?.value,
             familyName: this.registerNewUserForm.get("familyName")?.value,
             institutionId: this.registerNewUserForm.get("institutionId")?.value,
+            legalStatus: this.registerNewUserForm.get("legalStatus")?.value,
+            gender: this.registerNewUserForm.get("gender")?.value,
+            race: this.registerNewUserForm.get("race")?.value,
+            hasPhd: this.registerNewUserForm.get("hasPhd")?.value,
+            yearOfPhdCompletion: this.registerNewUserForm.get("phdYear")?.value,
           } as NewUserDetails;
 
           return this.userService.createUser(user);
@@ -235,5 +253,38 @@ export class RegisterUserComponent implements OnInit {
     partners.push(partners.splice(partners.indexOf("Other" as Partner), 1)[0]);
 
     return partners;
+  }
+  validateStatistics(): void {
+    if (this.registerNewUserForm.value.legalStatus === "") {
+      return;
+    }
+    if (!this.registerNewUserForm.value.legalStatus) {
+      this.statisticsError.legalStatus =
+        "You need to provide your legal status in South African";
+    }
+    if (
+      this.registerNewUserForm.value.legalStatus === "South African citizen" ||
+      this.registerNewUserForm.value.legalStatus ===
+        "Permanent resident of South Africa"
+    ) {
+      if (!this.registerNewUserForm.value.gender) {
+        this.statisticsError.gender = "You need to provide your gender.";
+      }
+      if (!this.registerNewUserForm.value.race) {
+        this.statisticsError.race = "You need to provide your race.";
+      }
+      if (this.registerNewUserForm.value.hasPhd === "") {
+        this.statisticsError.phd =
+          "You need to provide if you have a phd or not.";
+      }
+
+      if (
+        this.registerNewUserForm.value.hasPhd &&
+        !this.registerNewUserForm.value.phdYear
+      ) {
+        this.statisticsError.phd =
+          "You need to provide the year you obtained you PhD.";
+      }
+    }
   }
 }

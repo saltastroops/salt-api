@@ -13,7 +13,7 @@ import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
 import { Partner } from "../types/common";
 import { Institution } from "../types/institution";
-import { User, UserListItem } from "../types/user";
+import { StatisticsError, User, UserListItem } from "../types/user";
 
 @Component({
   selector: "wm-manage-user-profile",
@@ -33,6 +33,12 @@ export class ManageUserProfileComponent implements OnInit {
   isLoadingForm = false;
   showForm = true;
   error?: string;
+  statisticsError: StatisticsError = {
+    legalStatus: undefined,
+    race: undefined,
+    gender: undefined,
+    phd: undefined,
+  };
 
   constructor(
     private authService: AuthenticationService,
@@ -50,6 +56,11 @@ export class ManageUserProfileComponent implements OnInit {
       email: ["", [Validators.required, Validators.email]],
       password: [null],
       retypePassword: [null],
+      legalStatus: [""],
+      gender: [""],
+      race: [""],
+      phdYear: [""],
+      hasPhd: [""],
     });
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {
@@ -179,5 +190,57 @@ export class ManageUserProfileComponent implements OnInit {
       return institution.name + " (" + institution.department + ")";
     }
     return institution.name;
+  }
+
+  validateStatistics(): void {
+    if (this.userProfile.value.legalStatus === "") {
+      return;
+    }
+    if (!this.userProfile.value.legalStatus) {
+      this.statisticsError.legalStatus =
+        "You need to provide your legal status in South African";
+    }
+    if (
+      this.userProfile.value.legalStatus === "South African citizen" ||
+      this.userProfile.value.legalStatus ===
+        "Permanent resident of South Africa"
+    ) {
+      if (!this.userProfile.value.gender) {
+        this.statisticsError.gender = "You need to provide your gender.";
+      }
+      if (!this.userProfile.value.race) {
+        this.statisticsError.race = "You need to provide your race.";
+      }
+      if (this.userProfile.value.hasPhd === "") {
+        this.statisticsError.phd =
+          "You need to provide if you have a phd or not.";
+      }
+
+      if (this.userProfile.value.hasPhd && !this.userProfile.value.phdYear) {
+        this.statisticsError.phd =
+          "You need to provide the year you obtained you PhD.";
+      }
+    }
+  }
+
+  submit(): void {
+    this.clearErrors();
+    if (!this.userProfile.valid) {
+      this.error = "please make sure that the form filled correctly.";
+    }
+    this.validateStatistics();
+    console.log(this.userProfile.value);
+    console.log(this.statisticsError);
+    // TODO Submission not implemented
+  }
+
+  clearErrors(): void {
+    this.error = undefined;
+    this.statisticsError = {
+      legalStatus: undefined,
+      race: undefined,
+      gender: undefined,
+      phd: undefined,
+    };
   }
 }

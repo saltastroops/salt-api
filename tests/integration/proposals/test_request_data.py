@@ -45,6 +45,7 @@ def test_request_observations_returns_401_for_user_with_invalid_auth_token(
         find_username("SALT Astronomer"),
         find_username("Principal Investigator", "2019-2-SCI-006"),
         find_username("Principal Contact", "2019-2-SCI-006"),
+        find_username("Investigator", "2019-2-SCI-006"),
     ],
 )
 def test_request_observations_should_allow_authorised_users_to_request(
@@ -60,7 +61,6 @@ def test_request_observations_should_allow_authorised_users_to_request(
 @pytest.mark.parametrize(
     "username",
     [
-        find_username("Investigator", "2019-2-SCI-006"),
         find_username("Principal Investigator", "2018-2-LSP-001"),
         find_username("Principal Contact", "2018-2-LSP-001"),
         find_username("TAC Chair", partner_code="RSA"),

@@ -493,6 +493,7 @@ class PermissionService:
             Role.SALT_ASTRONOMER,
             Role.PRINCIPAL_INVESTIGATOR,
             Role.PRINCIPAL_CONTACT,
+            Role.INVESTIGATOR,
         ]
         self.check_role(user.username, roles, proposal_code)
         proposal_block_visit_ids = [

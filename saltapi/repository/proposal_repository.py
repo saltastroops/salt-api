@@ -271,7 +271,7 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": self.proprietary_period_start_date(block_visits),
+            "start_date": self._proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
         general_info["data_release_date"] = self._data_release_date(
@@ -293,8 +293,8 @@ LIMIT :limit;
             "investigators": self._investigators(proposal_code),
             "blocks": self._blocks(proposal_code, semester),
             "block_visits": block_visits,
-            "time_allocations": self.time_allocations(proposal_code, semester),
-            "charged_time": self.charged_time(proposal_code, semester),
+            "time_allocations": self._time_allocations(proposal_code, semester),
+            "charged_time": self._charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
             "targets": self._get_phase_one_targets(proposal_code),
             "requested_times": requested_times,
@@ -1029,7 +1029,7 @@ WHERE C.Proposal_Code = :proposal_code
             instruments[block_id].append({"name": "BVIT", "modes": c["modes"]})
         return instruments
 
-    def time_allocations(
+    def _time_allocations(
         self, proposal_code: str, semester: str
     ) -> List[Dict[str, Any]]:
         """
@@ -1123,7 +1123,7 @@ WHERE PC.Proposal_Code = :proposal_code
             for row in result
         }
 
-    def charged_time(self, proposal_code: str, semester: str) -> Dict[str, int]:
+    def _charged_time(self, proposal_code: str, semester: str) -> Dict[str, int]:
         year, sem = semester.split("-")
         stmt = text(
             """
@@ -1314,7 +1314,7 @@ WHERE PC.Proposal_Code = :proposal_code
             raise ValidationError(f"Unknown proposal status: {status}")
 
         try:
-            proposal_code_id = self.get_proposal_code_id(proposal_code)
+            proposal_code_id = self._get_proposal_code_id(proposal_code)
         except NoResultFound:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
@@ -1373,7 +1373,7 @@ WHERE PC.Proposal_Code = :proposal_code;
 
         return bool(cast(int, one) if one is not None else 0 > 0)
 
-    def get_current_version(self, proposal_code: str) -> int:
+    def _get_current_version(self, proposal_code: str) -> int:
         """
         Return the current version (number) of a proposal.
 
@@ -1402,7 +1402,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return cast(int, version)
 
-    def get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
+    def _get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
         """
         Return the current version (number) of a proposal.
 
@@ -1788,7 +1788,7 @@ WHERE PC.Proposal_Code = :proposal_code
            The file path.
 
         """
-        current_phase1_version = self.get_current_phase1_version(proposal_code)
+        current_phase1_version = self._get_current_phase1_version(proposal_code)
         if current_phase1_version is None:
             raise NotFoundError(
                 f"There exists no phase 1 proposal summary for proposal {proposal_code}"
@@ -1825,7 +1825,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         """
         proposals_dir = get_settings().proposals_dir
-        version = self.get_current_version(proposal_code)
+        version = self._get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
             raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
@@ -2040,7 +2040,7 @@ VALUES (
         )
 
     @staticmethod
-    def proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
+    def _proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
         # find the latest observation
 
         observation_night: Optional[date] = None
@@ -2070,14 +2070,14 @@ VALUES (
     def _data_release_date(
         self, proprietary_period: int, block_visits: List[dict[str, Any]]
     ) -> Optional[date]:
-        proprietary_period_start = self.proprietary_period_start_date(block_visits)
+        proprietary_period_start = self._proprietary_period_start_date(block_visits)
 
         if proprietary_period is None:
             return None
         # add the proprietary period to get the data release date
         return proprietary_period_start + relativedelta(months=proprietary_period)
 
-    def is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
+    def _is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
         stmt = text(
             """
 SELECT P.Partner_Code    AS partner_code,
@@ -2118,7 +2118,7 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
             "Science",
             "Science - Long Term",
         ]:
-            if self.is_partner_allocated(proposal_code, "RSA"):
+            if self._is_partner_allocated(proposal_code, "RSA"):
                 return 24
             return 1200
         raise ValueError("Unknown proposal type.")
@@ -2433,7 +2433,7 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
-    def get_proposal_code_id(self, proposal_code: str) -> int:
+    def _get_proposal_code_id(self, proposal_code: str) -> int:
         """
         Return the proposal code id of a proposal code.
         """
@@ -2455,7 +2455,7 @@ WHERE Proposal_Code = :proposal_code
     ) -> None:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self.get_proposal_code_id(proposal_code)
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
         stmt = text(
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
@@ -2477,7 +2477,7 @@ WHERE Proposal_Code = :proposal_code
     def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, Any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self.get_proposal_code_id(proposal_code)
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
         stmt = text(
             """
 SELECT
@@ -2521,7 +2521,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
             if liaison_astronomer_id
             else None
         )
-        proposal_code_id = self.get_proposal_code_id(proposal_code)
+        proposal_code_id = self._get_proposal_code_id(proposal_code)
 
         stmt = text(
             """

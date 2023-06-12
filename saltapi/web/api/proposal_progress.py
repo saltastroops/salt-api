@@ -1,5 +1,5 @@
 from os.path import exists
-from typing import Dict, List, Optional, cast
+from typing import List, Optional
 
 from fastapi import (
     APIRouter,
@@ -11,7 +11,6 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic.networks import AnyUrl
 from starlette import status
 
 from saltapi.repository.unit_of_work import UnitOfWork

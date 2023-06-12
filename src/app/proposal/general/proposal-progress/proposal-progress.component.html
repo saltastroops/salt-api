@@ -56,11 +56,7 @@
     >
     <div *ngIf="showReports">
       <ul>
-        <li
-          *ngFor="
-            let u of progressReportsUrlsMap(otherProgressReportsUrls)
-          "
-        >
+        <li *ngFor="let u of progressReportsUrlsMap(otherProgressReportsUrls)">
           <a class="has-text-link" href="{{ u['proposalProgressPdf'] }}">
             View the progress report for semester {{ u["semester"] }}
           </a>

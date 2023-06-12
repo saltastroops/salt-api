@@ -1,12 +1,16 @@
-import {Component, Input, OnInit} from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 
-import {of} from "rxjs";
-import {catchError, switchMap, tap} from "rxjs/operators";
+import { of } from "rxjs";
+import { catchError, switchMap, tap } from "rxjs/operators";
 
-import {environment} from "../../../../environments/environment";
-import {ProposalService} from "../../../service/proposal.service";
-import {Proposal, ProposalProgress, ProposalProgressReportPdfUrl,} from "../../../types/proposal";
-import {AutoUnsubscribe, currentSemester} from "../../../utils";
+import { environment } from "../../../../environments/environment";
+import { ProposalService } from "../../../service/proposal.service";
+import {
+  Proposal,
+  ProposalProgress,
+  ProposalProgressReportPdfUrl,
+} from "../../../types/proposal";
+import { AutoUnsubscribe, currentSemester } from "../../../utils";
 
 @AutoUnsubscribe()
 @Component({
@@ -51,7 +55,9 @@ export class ProposalProgressComponent implements OnInit {
       .subscribe((p: ProposalProgressReportPdfUrl[]) => {
         const _currentSemester = currentSemester();
         this.otherProgressReportsUrls = this.otherProgressReports(p);
-        this.currentProgressReportExists = p.some(report => report.semester === _currentSemester);
+        this.currentProgressReportExists = p.some(
+          (report) => report.semester === _currentSemester,
+        );
       });
   }
 
@@ -76,10 +82,15 @@ export class ProposalProgressComponent implements OnInit {
   otherProgressReports(
     progressReportsUrls: ProposalProgressReportPdfUrl[],
   ): ProposalProgressReportPdfUrl[] | null {
-    let otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null = progressReportsUrls;
+    let otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null =
+      progressReportsUrls;
     const _currentSemester = currentSemester();
-    if (progressReportsUrls.some(report => report.semester === _currentSemester)) {
-      otherProgressReportsUrls = progressReportsUrls.filter((report) => report.semester !== _currentSemester);
+    if (
+      progressReportsUrls.some((report) => report.semester === _currentSemester)
+    ) {
+      otherProgressReportsUrls = progressReportsUrls.filter(
+        (report) => report.semester !== _currentSemester,
+      );
     }
 
     if (progressReportsUrls.length == 0) {
@@ -97,7 +108,7 @@ export class ProposalProgressComponent implements OnInit {
       const noOriginUrl = url.href.replace(url.origin, "");
       r.proposalProgressPdf = this.apiUrl + noOriginUrl;
 
-      return r
+      return r;
     });
   }
 

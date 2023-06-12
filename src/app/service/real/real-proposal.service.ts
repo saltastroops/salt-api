@@ -10,10 +10,10 @@ import { Message } from "../../types/common";
 import {
   NewProprietaryPeriod,
   ObservationComment,
-  ProposalProgressReportPdfUrl,
   Proposal,
   ProposalListItem,
   ProposalProgress,
+  ProposalProgressReportPdfUrl,
   ProposalStatus,
   SelfActivation,
 } from "../../types/proposal";
@@ -143,9 +143,7 @@ export class RealProposalService implements ProposalService {
     const uri = environment.apiUrl + `/progress/${proposalCode}/`;
     return this.http.get<ProposalProgressReportPdfUrl[]>(uri).pipe(
       map((reports) => {
-        return reports.map((report) =>
-          camelcaseKeys(report, { deep: true }),
-        );
+        return reports.map((report) => camelcaseKeys(report, { deep: true }));
       }),
     );
   }

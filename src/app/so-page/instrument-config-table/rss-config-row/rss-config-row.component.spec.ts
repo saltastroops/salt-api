@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { RssConfigRowComponent } from './rss-config-row.component';
+import { RssConfigRowComponent } from "./rss-config-row.component";
 
-describe('RssConfigRowComponent', () => {
+describe("RssConfigRowComponent", () => {
   let component: RssConfigRowComponent;
   let fixture: ComponentFixture<RssConfigRowComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ RssConfigRowComponent ]
-    })
-    .compileComponents();
+      declarations: [RssConfigRowComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('RssConfigRowComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

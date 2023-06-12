@@ -138,13 +138,14 @@ class ProposalService:
                 semester=semester,
             )
 
-            progress_reports.append({
-                "semester": semester,
-                "proposal_progress_pdf": cast(
-                    AnyUrl, generate_route_url(request, progress_report_pdf_url)
-                ),
-            })
-
+            progress_reports.append(
+                {
+                    "semester": semester,
+                    "proposal_progress_pdf": cast(
+                        AnyUrl, generate_route_url(request, progress_report_pdf_url)
+                    ),
+                }
+            )
 
         return progress_reports
 

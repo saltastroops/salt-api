@@ -22,7 +22,7 @@ from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import (
     ProposalProgress,
     ProposalProgressInput,
-    ProposalProgressReports,
+    ProposalProgressReportPdf,
 )
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
@@ -31,7 +31,7 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
 @router.get(
     "/{proposal_code}/",
     summary="Get URLs for all proposal progress report pdfs",
-    response_model=List[ProposalProgressReports],
+    response_model=List[ProposalProgressReportPdf],
 )
 def get_urls_for_proposal_progress_report_pdfs(
     request: Request,

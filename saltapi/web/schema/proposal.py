@@ -631,7 +631,7 @@ class ProposalProgress(BaseProgressReport):
     )
 
 
-class ProposalProgressReports(BaseModel):
+class ProposalProgressReportPdf(BaseModel):
     semester: str = Field(
         ...,
         title="Semester",

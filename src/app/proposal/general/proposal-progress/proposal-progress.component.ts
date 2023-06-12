@@ -85,15 +85,11 @@ export class ProposalProgressComponent implements OnInit {
     let otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null =
       progressReportsUrls;
     const _currentSemester = currentSemester();
-    if (
-      progressReportsUrls.some((report) => report.semester === _currentSemester)
-    ) {
+    if ( progressReportsUrls !== undefined && progressReportsUrls.some((report) => report.semester === _currentSemester) ) {
       otherProgressReportsUrls = progressReportsUrls.filter(
         (report) => report.semester !== _currentSemester,
       );
-    }
-
-    if (progressReportsUrls.length == 0) {
+    } else {
       otherProgressReportsUrls = null;
     }
 

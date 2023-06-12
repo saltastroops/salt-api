@@ -1,7 +1,8 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, DefaultDict, List, Optional, cast
+from pydantic.networks import AnyUrl
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -126,23 +127,25 @@ class ProposalService:
 
     def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
-    ) -> Dict[str, Dict[str, str]]:
+    ) -> List[Dict[str, str]]:
         semesters = self.repository.get_progress_report_semesters(proposal_code)
-
-        progress_report_urls = dict()
+        
+        progress_reports: Dict[str, Dict[str, Any]] = {}
         for semester in semesters:
             progress_report_pdf_url = router.url_path_for(
                 "get_proposal_progress_report_pdf",
                 proposal_code=proposal_code,
                 semester=semester,
             )
-            progress_report_urls[semester] = {
-                "proposal_progress_pdf": generate_route_url(
-                    request, progress_report_pdf_url
+            
+            progress_reports[semester] = {
+                "semester": semester,
+                "proposal_progress_pdf": cast(
+                    AnyUrl, generate_route_url(request, progress_report_pdf_url)
                 ),
             }
 
-        return progress_report_urls
+        return list(progress_reports.values())
 
     def get_progress_report(
         self,

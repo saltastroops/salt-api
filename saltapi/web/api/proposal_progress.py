@@ -15,6 +15,7 @@ from starlette import status
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
+from saltapi.service.proposal import ProposalProgressReportPdf as _ProposalProgressReportPdf
 from saltapi.service.proposal_service import generate_pdf_path
 from saltapi.service.user import User
 from saltapi.web import services
@@ -44,7 +45,7 @@ def get_urls_for_proposal_progress_report_pdfs(
         ),
     ),
     user: User = Depends(get_current_user),
-) -> List[ProposalProgressReports]:
+) -> List[_ProposalProgressReportPdf]:
     """
     Return URLs for all proposal progress report pdfs of a given proposal.
     """

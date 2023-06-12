@@ -8,3 +8,5 @@ ProposalStatus = Any
 ProposalCode = NewType("ProposalCode", str)
 
 ProposalListItem = Any
+
+ProposalProgressReportPdf = Any

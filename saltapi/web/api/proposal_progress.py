@@ -16,7 +16,7 @@ from starlette import status
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import \
-    ProposalProgressReportPdf as _ProposalProgressReportPdf
+    ProposalProgressReportPdfUrl as _ProposalProgressReportPdfUrl
 from saltapi.service.proposal_service import generate_pdf_path
 from saltapi.service.user import User
 from saltapi.web import services
@@ -24,7 +24,7 @@ from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.proposal import (
     ProposalProgress,
     ProposalProgressInput,
-    ProposalProgressReportPdf,
+    ProposalProgressReportPdfUrl,
 )
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
@@ -33,7 +33,7 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
 @router.get(
     "/{proposal_code}/",
     summary="Get URLs for all proposal progress report pdfs",
-    response_model=List[ProposalProgressReportPdf],
+    response_model=List[ProposalProgressReportPdfUrl],
 )
 def get_urls_for_proposal_progress_report_pdfs(
     request: Request,
@@ -46,7 +46,7 @@ def get_urls_for_proposal_progress_report_pdfs(
         ),
     ),
     user: User = Depends(get_current_user),
-) -> List[_ProposalProgressReportPdf]:
+) -> List[_ProposalProgressReportPdfUrl]:
     """
     Return URLs for all proposal progress report pdfs of a given proposal.
     """

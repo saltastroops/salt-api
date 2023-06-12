@@ -2,7 +2,7 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, cast, Union
+from typing import Any, Dict, List, Union, cast
 
 from passlib.context import CryptContext
 from sqlalchemy import text
@@ -903,8 +903,12 @@ VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_o
                 "legal_status_id": self._get_legal_status_id(
                     user_information.legal_status
                 ),
-                "gender_id": self._get_gender_id(user_information.gender),
-                "race_id": self._get_race_id(user_information.race),
+                "gender_id": self._get_gender_id(user_information.gender)
+                if user_information.gender
+                else None,
+                "race_id": self._get_race_id(user_information.race)
+                if user_information.race
+                else None,
                 "has_phd": user_information.has_phd,
                 "year_of_phd": user_information.year_of_phd_completion,
             },

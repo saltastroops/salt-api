@@ -74,8 +74,8 @@ class UserStatistics(BaseModel):
     legal_status: LegalStatus = Field(
         ..., title="Legal status", description="The legal status in South Africa"
     )
-    gender: Optional[str] = Field(..., title="Gender", description="The gender.")
-    race: Optional[str] = Field(..., title="Race", description="The race.")
+    gender: Optional[str] = Field(..., title="Gender", description="Gender.")
+    race: Optional[str] = Field(..., title="Race", description="Race.")
     has_phd: Optional[bool] = Field(
         ..., title="PhD", description="Does the user has a PhD?"
     )

@@ -58,11 +58,11 @@
       <ul>
         <li
           *ngFor="
-            let u of progressReportsUrlsMap(otherProgressReportsUrls) | keyvalue
+            let u of progressReportsUrlsMap(otherProgressReportsUrls)
           "
         >
-          <a class="has-text-link" href="{{ u.value['proposalProgressPdf'] }}">
-            View the progress report for semester {{ u.key }}
+          <a class="has-text-link" href="{{ u['proposalProgressPdf'] }}">
+            View the progress report for semester {{ u["semester"] }}
           </a>
         </li>
       </ul>

@@ -1,16 +1,12 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {Component, Input, OnInit} from "@angular/core";
 
-import { of } from "rxjs";
-import { catchError, switchMap, tap } from "rxjs/operators";
+import {of} from "rxjs";
+import {catchError, switchMap, tap} from "rxjs/operators";
 
-import { environment } from "../../../../environments/environment";
-import { ProposalService } from "../../../service/proposal.service";
-import {
-  ProgressReportsUrls,
-  Proposal,
-  ProposalProgress,
-} from "../../../types/proposal";
-import { AutoUnsubscribe, currentSemester } from "../../../utils";
+import {environment} from "../../../../environments/environment";
+import {ProposalService} from "../../../service/proposal.service";
+import {Proposal, ProposalProgress, ProposalProgressReportPdfUrl,} from "../../../types/proposal";
+import {AutoUnsubscribe, currentSemester} from "../../../utils";
 
 @AutoUnsubscribe()
 @Component({
@@ -27,7 +23,7 @@ export class ProposalProgressComponent implements OnInit {
   apiUrl = environment.apiUrl;
   currentSemester = currentSemester();
   currentProgressReportExists!: boolean;
-  otherProgressReportsUrls: ProgressReportsUrls | null = null;
+  otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null = null;
   showReports = false;
   reportsLinksText = "Show progress reports for other semesters";
 
@@ -52,10 +48,10 @@ export class ProposalProgressComponent implements OnInit {
           return of({});
         }),
       )
-      .subscribe((p: ProgressReportsUrls) => {
+      .subscribe((p: ProposalProgressReportPdfUrl[]) => {
         const _currentSemester = currentSemester();
         this.otherProgressReportsUrls = this.otherProgressReports(p);
-        this.currentProgressReportExists = p[_currentSemester] !== undefined;
+        this.currentProgressReportExists = p.some(report => report.semester === _currentSemester);
       });
   }
 
@@ -78,17 +74,15 @@ export class ProposalProgressComponent implements OnInit {
   }
 
   otherProgressReports(
-    progressReportsUrls: ProgressReportsUrls,
-  ): ProgressReportsUrls | null {
-    let otherProgressReportsUrls: ProgressReportsUrls | null = {
-      ...progressReportsUrls,
-    };
+    progressReportsUrls: ProposalProgressReportPdfUrl[],
+  ): ProposalProgressReportPdfUrl[] | null {
+    let otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null = progressReportsUrls;
     const _currentSemester = currentSemester();
-    if (progressReportsUrls[_currentSemester]) {
-      delete otherProgressReportsUrls[currentSemester()];
+    if (progressReportsUrls.some(report => report.semester === _currentSemester)) {
+      otherProgressReportsUrls = progressReportsUrls.filter((report) => report.semester !== _currentSemester);
     }
 
-    if (Object.keys(otherProgressReportsUrls).length == 0) {
+    if (progressReportsUrls.length == 0) {
       otherProgressReportsUrls = null;
     }
 
@@ -96,17 +90,15 @@ export class ProposalProgressComponent implements OnInit {
   }
 
   progressReportsUrlsMap(
-    progressReports: ProgressReportsUrls,
-  ): Map<string, { [key: string]: string }> {
-    const reportUrlsMap = new Map(Object.entries(progressReports));
-    for (const [key, value] of reportUrlsMap) {
-      const url = new URL(value["proposalProgressPdf"]);
+    progressReports: ProposalProgressReportPdfUrl[],
+  ): ProposalProgressReportPdfUrl[] {
+    return progressReports.map((r) => {
+      const url = new URL(r.proposalProgressPdf);
       const noOriginUrl = url.href.replace(url.origin, "");
-      reportUrlsMap.set(key, {
-        proposalProgressPdf: this.apiUrl + noOriginUrl,
-      });
-    }
-    return reportUrlsMap;
+      r.proposalProgressPdf = this.apiUrl + noOriginUrl;
+
+      return r
+    });
   }
 
   onClick(): void {

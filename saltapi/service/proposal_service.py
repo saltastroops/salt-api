@@ -1,11 +1,11 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, DefaultDict, List, Optional, cast
-from pydantic.networks import AnyUrl
+from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
+from pydantic.networks import AnyUrl
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 

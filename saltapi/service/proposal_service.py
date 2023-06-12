@@ -129,7 +129,7 @@ class ProposalService:
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
     ) -> List[Dict[str, str]]:
         semesters = self.repository.get_progress_report_semesters(proposal_code)
-        
+
         progress_reports: Dict[str, Dict[str, Any]] = {}
         for semester in semesters:
             progress_report_pdf_url = router.url_path_for(
@@ -137,7 +137,7 @@ class ProposalService:
                 proposal_code=proposal_code,
                 semester=semester,
             )
-            
+
             progress_reports[semester] = {
                 "semester": semester,
                 "proposal_progress_pdf": cast(

@@ -20,7 +20,11 @@ from saltapi.service.proposal_service import generate_pdf_path
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
-from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressInput, ProposalProgressReports
+from saltapi.web.schema.proposal import (
+    ProposalProgress,
+    ProposalProgressInput,
+    ProposalProgressReports,
+)
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
 
@@ -51,10 +55,8 @@ def get_urls_for_proposal_progress_report_pdfs(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
 
-        progress_reports = (
-            proposal_service.get_urls_for_proposal_progress_report_pdfs(
-                proposal_code, request, router
-            )
+        progress_reports = proposal_service.get_urls_for_proposal_progress_report_pdfs(
+            proposal_code, request, router
         )
 
         return progress_reports

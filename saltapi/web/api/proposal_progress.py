@@ -1,5 +1,5 @@
 from os.path import exists
-from typing import Dict, Optional, cast
+from typing import Dict, Optional, cast, List
 
 from fastapi import (
     APIRouter,
@@ -20,7 +20,7 @@ from saltapi.service.proposal_service import generate_pdf_path
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
-from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressInput
+from saltapi.web.schema.proposal import ProposalProgress, ProposalProgressInput, ProposalProgressReports
 
 router = APIRouter(prefix="/progress", tags=["Proposals"])
 
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/progress", tags=["Proposals"])
 @router.get(
     "/{proposal_code}/",
     summary="Get URLs for all proposal progress report pdfs",
-    response_model=Dict[str, Dict[str, AnyUrl]],
+    response_model=List[ProposalProgressReports],
 )
 def get_urls_for_proposal_progress_report_pdfs(
     request: Request,
@@ -41,7 +41,7 @@ def get_urls_for_proposal_progress_report_pdfs(
         ),
     ),
     user: User = Depends(get_current_user),
-) -> Dict[str, Dict[str, AnyUrl]]:
+) -> List[ProposalProgressReports]:
     """
     Return URLs for all proposal progress report pdfs of a given proposal.
     """
@@ -51,20 +51,13 @@ def get_urls_for_proposal_progress_report_pdfs(
 
         proposal_service = services.proposal_service(unit_of_work.connection)
 
-        progress_report_urls = (
+        progress_reports = (
             proposal_service.get_urls_for_proposal_progress_report_pdfs(
                 proposal_code, request, router
             )
         )
-        progress_report_pdfs = dict()
-        for semester in progress_report_urls:
-            progress_report_pdfs[semester] = {
-                "proposal_progress_pdf": cast(
-                    AnyUrl, progress_report_urls[semester]["proposal_progress_pdf"]
-                )
-            }
 
-        return progress_report_pdfs
+        return progress_reports
 
 
 @router.get(

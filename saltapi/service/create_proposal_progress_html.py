@@ -1,6 +1,6 @@
-from jinja2 import Template
-
 from typing import Any, Dict, List, Optional, cast
+
+from jinja2 import Template
 
 from saltapi.util import next_semester
 
@@ -12,10 +12,13 @@ def create_proposal_progress_html(
     previous_conditions: Optional[Dict[str, Any]],
     new_request: Dict[str, Any],
 ) -> str:
-    sorted_previous_requests = sorted(previous_requests, key=lambda i: cast(str, i["semester"]))
+    sorted_previous_requests = sorted(
+        previous_requests, key=lambda i: cast(str, i["semester"])
+    )
     _next_semester = next_semester(new_request["semester"])
 
-    template = Template('''
+    template = Template(
+        """
     <!DOCTYPE html>
     <html lang="en">
         <head>
@@ -113,18 +116,16 @@ def create_proposal_progress_html(
                 Multisemester Proposal Progress Report:<br>
                 {{ proposal_code }}
             </h1>
-            
             <div class="section">
                 <div>This report is for semester {{ semester }}.</div>
             </div>
-            
             <div class="section">
                 <div class="heading">
                     <h2>PREVIOUS REQUESTS, ALLOCATIONS, COMPLETENESS</h2>
                     <div class="description">
-                        This section lists the originally requested times, as well as the allocated
-                        times and the completion. It also gives the originally requested observing
-                        conditions.
+                        This section lists the originally requested times, as well
+                        as the allocatedtimes and the completion. It also gives
+                        the originally requested observing conditions.
                     </div>
                 </div>
                 <div>
@@ -169,13 +170,12 @@ def create_proposal_progress_html(
                     <div class="indented">{{ previous_conditions['description'] }}</div>
                     {% else %}
                     <div>
-                        There is no Phase 1 proposal and hence there are no previously requested
-                        observing conditions.
+                        There is no Phase 1 proposal and hence there are no
+                        previously requested observing conditions.
                     </div>
                     {% endif %}
                 </div>
             </div>
-            
             <div class="section">
                 <div class="heading">
                     <h2>REQUEST FOR THE NEXT SEMESTER</h2>
@@ -216,7 +216,6 @@ def create_proposal_progress_html(
                     {% endif %}
                 </div>
             </div>
-            
             <div class="section">
                 <div class="heading">
                     <h2>STATUS SUMMARY</h2>
@@ -226,20 +225,20 @@ def create_proposal_progress_html(
                 </div>
                 <div>{{ new_request['summary_of_proposal_status'] }}</div>
             </div>
-            
             <div class="section">
                 <div class="heading">
                     <h2>STRATEGY CHANGES</h2>
                     <div class="description">
-                        This section outlines how the TAC suggestions regarding a change of strategy
-                        will be addressed.
+                        This section outlines how the TAC suggestions regarding
+                        a change of strategy will be addressed.
                     </div>
                 </div>
                 <div>{{ new_request['strategy_changes'] }}</div>
             </div>
         </body>
     </html>
-    ''')
+    """
+    )
 
     html = template.render(
         sorted_previous_requests=sorted_previous_requests,
@@ -248,7 +247,7 @@ def create_proposal_progress_html(
         previous_requests=previous_requests,
         previous_conditions=previous_conditions,
         _next_semester=_next_semester,
-        new_request=new_request
+        new_request=new_request,
     )
 
     return html

@@ -139,7 +139,7 @@ class Target(BaseModel):
     )
 
 
-class Phase1Target(Target):
+class Phase1Observation(BaseModel):
     """A target in a Phase 1 proposal."""
 
     observing_time: int = Field(
@@ -199,4 +199,9 @@ class Phase1Target(Target):
         ...,
         title="Observing probabilities",
         description="Probabilities related to observing the block",
+    )
+    target: Target = Field(
+        ...,
+        title="Target",
+        description="Target of observations.",
     )

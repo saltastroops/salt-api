@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from saltapi.web.schema.proposal import GeneralProposalInfo, Proposal
-from saltapi.web.schema.target import Phase1Target
+from saltapi.web.schema.target import Phase1Observation
 
 
 class Simulation(BaseModel):
@@ -59,7 +59,7 @@ class P1Proposal(Proposal):
         title="General information",
         description="General proposal information for a semester",
     )
-    targets: Optional[List[Phase1Target]] = Field(
+    observations: Optional[List[Phase1Observation]] = Field(
         ...,
         title="Targets",
         description="Targets for which observations are requested.",

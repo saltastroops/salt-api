@@ -8,3 +8,4 @@ per-file-ignores =
     saltapi/web/api/*.py:E501
     saltapi/web/schema/*.py:E501
     tests/conftest.py:E402
+    saltapi/service/create_proposal_progress_html.py:E501

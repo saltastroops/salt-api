@@ -2,7 +2,7 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, cast
 
 from passlib.context import CryptContext
 from sqlalchemy import text
@@ -177,7 +177,16 @@ ORDER BY I.Surname, I.FirstName
         investigator_id = self._create_investigator_details(new_user_details)
         pipt_user_id = self._create_pipt_user(new_user_details, investigator_id)
         self._add_investigator_to_pipt_user(pipt_user_id, investigator_id)
-        self.update_user_statistic(pipt_user_id, new_user_details)
+        self.update_user_statistic(
+            pipt_user_id,
+            dict(
+                legal_status=new_user_details.legal_status,
+                gender=new_user_details.gender,
+                race=new_user_details.race,
+                has_phd=new_user_details.has_phd,
+                year_of_phd_completion=new_user_details.year_of_phd_completion,
+            ),
+        )
 
     def _create_investigator_details(self, new_user_details: NewUserDetails) -> int:
         """
@@ -260,7 +269,16 @@ WHERE Investigator_Id = :investigator_id
         new_user_details = self._new_user_details(user_id, user_update)
         new_username = cast(str, new_user_details.username)
         self._update_username(user_id=user_id, new_username=new_username)
-        self.update_user_statistic(user_id, new_user_details)
+        self.update_user_statistic(
+            user_id,
+            dict(
+                legal_status=new_user_details.legal_status,
+                gender=new_user_details.gender,
+                race=new_user_details.race,
+                has_phd=new_user_details.has_phd,
+                year_of_phd_completion=new_user_details.year_of_phd_completion,
+            ),
+        )
 
     def _new_user_details(self, user_id: int, user_update: UserUpdate) -> UserUpdate:
         """
@@ -888,12 +906,18 @@ INSERT INTO Race (Race) VALUES (:race)
         return cast(int, result.scalar_one())
 
     def update_user_statistic(
-        self, pipt_user_id: int, user_information: Union[NewUserDetails, UserUpdate]
+        self, pipt_user_id: int, user_information: Dict[str, any]
     ) -> None:
         stmt = text(
             """
 INSERT INTO UserStatistics (PiptUser_Id, SouthAfricanLegalStatus_Id, Gender_Id, Race_Id, PhD, YearOfPhD) 
-VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_of_phd ) 
+VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_of_phd )
+ON DUPLICATE KEY UPDATE 
+    SouthAfricanLegalStatus_Id = :legal_status_id,
+    Gender_Id = :gender_id,
+    Race_Id = :race_id,
+    PhD = :has_phd,
+    YearOfPhD = :year_of_phd
             """
         )
         self.connection.execute(
@@ -901,15 +925,15 @@ VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_o
             {
                 "pipt_user_id": pipt_user_id,
                 "legal_status_id": self._get_legal_status_id(
-                    user_information.legal_status
+                    user_information["legal_status"]
                 ),
-                "gender_id": self._get_gender_id(user_information.gender)
-                if user_information.gender
+                "gender_id": self._get_gender_id(user_information["gender"])
+                if user_information["gender"]
                 else None,
-                "race_id": self._get_race_id(user_information.race)
-                if user_information.race
+                "race_id": self._get_race_id(user_information["race"])
+                if user_information["race"]
                 else None,
-                "has_phd": user_information.has_phd,
-                "year_of_phd": user_information.year_of_phd_completion,
+                "has_phd": user_information["has_phd"],
+                "year_of_phd": user_information["year_of_phd_completion"],
             },
         )

@@ -5,6 +5,8 @@ import uuid
 
 import dotenv
 
+from saltapi.web.schema.user import LegalStatus
+
 # Make sure that the test database etc. are used.
 # IMPORTANT: These lines must be executed before any server-related package is imported.
 
@@ -244,6 +246,11 @@ def create_user(client: TestClient) -> Dict[str, Any]:
         family_name=_random_string(),
         password="very_secret",
         institution_id=5,
+        legal_status=LegalStatus.OTHER,
+        race=None,
+        gender=None,
+        has_phd=None,
+        year_of_phd_completion=None,
     )
     response = client.post("/users/", json=new_user_details)
     return dict(response.json())

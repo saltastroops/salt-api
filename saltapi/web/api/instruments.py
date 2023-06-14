@@ -51,7 +51,7 @@ def get_rss_masks_in_magazine(
     response_model=List[MosBlock],
     status_code=200,
 )
-def get_mos_mask_metadata(
+def get_mos_masks_metadata(
     user: User = Depends(get_current_user),
     from_semester: Semester = Query(
         "2000-1",
@@ -80,7 +80,7 @@ def get_mos_mask_metadata(
         permission_service.check_permission_to_view_mos_mask_metadata(user)
 
         instrument_service = services.instrument_service(unit_of_work.connection)
-        mos_blocks = instrument_service.get_mos_mask_metadata(
+        mos_blocks = instrument_service.get_mos_masks_metadata(
             from_semester, to_semester
         )
         return [MosBlock(**md) for md in mos_blocks]
@@ -109,9 +109,12 @@ def update_mos_mask_metadata(
         instrument_service = services.instrument_service(unit_of_work.connection)
         args = dict(mos_mask_metadata)
         args["barcode"] = barcode
-        response = instrument_service.update_mos_mask_metadata(args)
+        instrument_service.update_mos_mask_metadata(args)
+        
         unit_of_work.connection.commit()
-        return MosMaskMetadata(**response)
+        
+        mos_block = instrument_service.get_mos_mask_metadata(barcode)
+        return MosMaskMetadata(**mos_block)
 
 
 @router.get(

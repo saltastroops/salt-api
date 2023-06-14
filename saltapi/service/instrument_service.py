@@ -20,6 +20,12 @@ class InstrumentService:
             from_semester, to_semester
         )
 
+    def get_mos_mask_metadata(self, barcode: str) -> Dict[str, Any]:
+        """Get MOS mask metadata."""
+        return self.instrument_repository.get_mos_mask_metadata(
+            barcode
+        )
+
     def update_mos_mask_metadata(
         self, mos_mask_metadata: Dict[str, Any]
     ) -> Dict[str, Any]:

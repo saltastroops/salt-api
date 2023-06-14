@@ -1,10 +1,11 @@
 from typing import List
 
-from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
+from saltapi.util import semester_start
 from saltapi.web import services
 from saltapi.web.schema.common import Semester
 from saltapi.web.schema.rss import (
@@ -13,7 +14,6 @@ from saltapi.web.schema.rss import (
     RssMaskType,
     UpdateMosMaskMetadata,
 )
-from saltapi.util import semester_start
 
 router = APIRouter(tags=["Instrument"])
 
@@ -70,7 +70,6 @@ def get_mos_masks_metadata(
     Get the list of blocks using MOS.
     """
     with UnitOfWork() as unit_of_work:
-        
         if semester_start(from_semester) > semester_start(to_semester):
             raise HTTPException(
                 status_code=400,
@@ -110,9 +109,9 @@ def update_mos_mask_metadata(
         args = dict(mos_mask_metadata)
         args["barcode"] = barcode
         instrument_service.update_mos_mask_metadata(args)
-        
+
         unit_of_work.connection.commit()
-        
+
         mos_block = instrument_service.get_mos_mask_metadata(barcode)
         return MosMaskMetadata(**mos_block)
 

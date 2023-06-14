@@ -1,13 +1,11 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, cast
+from typing import Any, Dict, List, Optional, Set
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound
 
 from saltapi.exceptions import NotFoundError
-
 from saltapi.service.instrument import RSS
 from saltapi.util import semester_end, semester_of_datetime
 from saltapi.web.schema.rss import RssMaskType
@@ -609,9 +607,7 @@ WHERE Barcode = :barcode
         row = result.one()
         return {**row}
 
-    def update_mos_mask_metadata(
-        self, mos_mask_metadata: Dict[str, Any]
-    ) -> None:
+    def update_mos_mask_metadata(self, mos_mask_metadata: Dict[str, Any]) -> None:
         """Update MOS mask metadata"""
         stmt = text(
             """
@@ -622,7 +618,7 @@ WHERE RssMask_Id = ( SELECT RssMask_Id FROM RssMask WHERE Barcode = :barcode )
         )
 
         result = self.connection.execute(stmt, mos_mask_metadata)
-        
+
         if not result.rowcount:
             raise NotFoundError()
 

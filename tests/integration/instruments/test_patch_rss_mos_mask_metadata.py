@@ -2,13 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
-from tests.conftest import authenticate, not_authenticated, find_username
+from tests.conftest import authenticate, find_username, not_authenticated
 
 RSS_MOS_MASK_METADATA_URL = "/rss/mos-mask-metadata"
 
 
 def test_mos_mask_update_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     barcode = "P000127N03"
 
@@ -16,12 +16,12 @@ def test_mos_mask_update_requires_authentication(
     response = client.patch(
         RSS_MOS_MASK_METADATA_URL + "/" + barcode,
         json={"cut_by": "Chaka", "cut_date": None, "mask_comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_mos_mask_update_requires_valid_barcode(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     barcode = "P000000N00"
 
@@ -30,7 +30,7 @@ def test_mos_mask_update_requires_valid_barcode(
     response = client.patch(
         RSS_MOS_MASK_METADATA_URL + "/" + barcode,
         json={"cut_by": "Chaka", "cut_date": None, "mask_comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -45,7 +45,7 @@ def test_mos_mask_update_requires_valid_barcode(
     ],
 )
 def test_mos_mask_update_requires_requires_permissions(
-        username: str, client: TestClient
+    username: str, client: TestClient
 ) -> None:
     barcode = "P000127N03"
 
@@ -53,12 +53,12 @@ def test_mos_mask_update_requires_requires_permissions(
     response = client.patch(
         RSS_MOS_MASK_METADATA_URL + "/" + barcode,
         json={"cut_by": "Chaka", "cut_date": None, "mask_comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_mos_mask_update(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     barcode = "P000127N01"
     cut_by = "Chaka"
@@ -68,9 +68,9 @@ def test_mos_mask_update(
     response = client.patch(
         RSS_MOS_MASK_METADATA_URL + "/" + barcode,
         json={"cut_by": cut_by, "cut_date": None, "mask_comment": None},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
-    
+
     metadata = response.json()
     assert metadata["barcode"] == barcode
     assert metadata["cut_by"] == cut_by

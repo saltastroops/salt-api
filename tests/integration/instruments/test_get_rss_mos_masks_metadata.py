@@ -2,18 +2,17 @@ import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
-from tests.conftest import authenticate, not_authenticated, find_username
+from tests.conftest import authenticate, find_username, not_authenticated
 
 RSS_MOS_MASKS_METADATA_URL = "/rss/mos-mask-metadata"
 
-def test_get_mos_masks_metadata_requires_authentication(
-        client: TestClient,
-) -> None:
-    barcode = "P000127N03"
 
+def test_get_mos_masks_metadata_requires_authentication(
+    client: TestClient,
+) -> None:
     not_authenticated(client)
     response = client.get(RSS_MOS_MASKS_METADATA_URL + "/")
-    
+
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -26,14 +25,17 @@ def test_get_mos_masks_metadata_requires_authentication(
     ],
 )
 def test_get_mos_masks_metadata_requires_start_semester_not_later_than_end_semester(
-        from_semester: str, to_semester: str, client: TestClient
+    from_semester: str, to_semester: str, client: TestClient
 ) -> None:
     username = find_username("Administrator")
     authenticate(username, client)
-    response = client.get(RSS_MOS_MASKS_METADATA_URL + "/", params={
-        "from": from_semester,
-        "to": to_semester,
-    })
+    response = client.get(
+        RSS_MOS_MASKS_METADATA_URL + "/",
+        params={
+            "from": from_semester,
+            "to": to_semester,
+        },
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -48,26 +50,24 @@ def test_get_mos_masks_metadata_requires_start_semester_not_later_than_end_semes
     ],
 )
 def test_get_mos_masks_metadata_requires_valid_semesters(
-        from_semester: str, to_semester: str, client: TestClient
+    from_semester: str, to_semester: str, client: TestClient
 ) -> None:
     username = find_username("Administrator")
     authenticate(username, client)
-    response = client.get(RSS_MOS_MASKS_METADATA_URL + "/", params={
-        "from": from_semester,
-        "to": to_semester,
-    })
+    response = client.get(
+        RSS_MOS_MASKS_METADATA_URL + "/",
+        params={
+            "from": from_semester,
+            "to": to_semester,
+        },
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.parametrize(
     "username,from_semester,to_semester,mos_masks_count",
     [
-        [
-            find_username("TAC Chair", partner_code="RSA"),
-            "2020-1",
-            "2020-1",
-            114
-        ],
+        [find_username("TAC Chair", partner_code="RSA"), "2020-1", "2020-1", 114],
         [
             find_username("TAC Chair", partner_code="RU"),
             "2021-1",
@@ -103,13 +103,12 @@ def test_get_mos_masks_metadata(
     mos_masks_count: int,
     client: TestClient,
 ) -> None:
-
     username = find_username("Administrator")
     authenticate(username, client)
-    response = client.get(RSS_MOS_MASKS_METADATA_URL + "/", params={
-        "from": from_semester,
-        "to": to_semester
-    })
+    response = client.get(
+        RSS_MOS_MASKS_METADATA_URL + "/",
+        params={"from": from_semester, "to": to_semester},
+    )
     assert response.status_code == status.HTTP_200_OK
 
     mos_masks_metadata = response.json()

@@ -1314,7 +1314,7 @@ WHERE PC.Proposal_Code = :proposal_code
             raise ValidationError(f"Unknown proposal status: {status}")
 
         try:
-            proposal_code_id = self._get_proposal_code_id(proposal_code)
+            proposal_code_id = self.get_proposal_code_id(proposal_code)
         except NoResultFound:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
@@ -2433,7 +2433,7 @@ WHERE PC.Proposal_Code = :proposal_code
             return []
         return configurations
 
-    def _get_proposal_code_id(self, proposal_code: str) -> int:
+    def get_proposal_code_id(self, proposal_code: str) -> int:
         """
         Return the proposal code id of a proposal code.
         """
@@ -2455,7 +2455,7 @@ WHERE Proposal_Code = :proposal_code
     ) -> None:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
         stmt = text(
             """
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
@@ -2477,7 +2477,7 @@ WHERE Proposal_Code = :proposal_code
     def get_liaison_astronomer(self, proposal_code: str) -> Optional[Dict[str, Any]]:
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
         stmt = text(
             """
 SELECT
@@ -2521,7 +2521,7 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
             if liaison_astronomer_id
             else None
         )
-        proposal_code_id = self._get_proposal_code_id(proposal_code)
+        proposal_code_id = self.get_proposal_code_id(proposal_code)
 
         stmt = text(
             """

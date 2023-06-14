@@ -1,15 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    cast,
-    get_args,
-)
+from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args
 
 import pytz
 from astropy.coordinates import Angle

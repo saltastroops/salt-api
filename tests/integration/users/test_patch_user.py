@@ -35,18 +35,6 @@ def _patch_data(
     }
 
 
-def _update_user(new_username: str) -> Dict[str, any]:
-    return {
-        "username": new_username,
-        "password": "very_very_secret",
-        "legal_status": LegalStatus.OTHER,
-        "race": None,
-        "gender": None,
-        "has_phd": None,
-        "year_of_phd_completion": None,
-    }
-
-
 def test_patch_user_should_return_401_for_unauthenticated_user(
     client: TestClient,
 ) -> None:
@@ -106,7 +94,7 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     new_username = str(uuid.uuid4())[:8]
     authenticate(user["username"], client)
 
-    user_update = _update_user(new_username)
+    user_update = _patch_data(new_username, "very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
@@ -130,7 +118,7 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     user = create_user(client)
     authenticate(user["username"], client)
 
-    user_update = _update_user(str(uuid.uuid4())[:8])
+    user_update = _patch_data(str(uuid.uuid4())[:8], "very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
@@ -151,7 +139,7 @@ def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) 
     user = create_user(client)
     authenticate(find_username("Administrator"), client)
 
-    user_update = _update_user(str(uuid.uuid4())[:8])
+    user_update = _patch_data(str(uuid.uuid4())[:8], "very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]

@@ -58,7 +58,35 @@ class User(FullName):
     )
 
 
-class NewUserDetails(FullName):
+class LegalStatus(str, Enum):
+    """
+    South African legal status.
+    """
+
+    SOUTH_AFRICAN_CITIZEN = "South African citizen"
+    PERMANENT_RESIDENT_OF_SOUTH_AFRICA = "Permanent resident of South Africa"
+    OTHER = "Other"
+
+
+class UserStatistics(BaseModel):
+    """The User statistics."""
+
+    legal_status: LegalStatus = Field(
+        ..., title="Legal status", description="The legal status in South Africa"
+    )
+    gender: Optional[str] = Field(..., title="Gender", description="Gender.")
+    race: Optional[str] = Field(..., title="Race", description="Race.")
+    has_phd: Optional[bool] = Field(
+        ..., title="PhD", description="Does the user has a PhD?"
+    )
+    year_of_phd_completion: Optional[int] = Field(
+        ...,
+        title="Year of PhD degree completion",
+        description="The year the PhD degree was completed",
+    )
+
+
+class NewUserDetails(FullName, UserStatistics):
     """Details for creating a user."""
 
     email: EmailStr = Field(..., title="Email address", description="Email address")
@@ -73,7 +101,7 @@ class NewUserDetails(FullName):
     )
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(UserStatistics):
     """
     New user details.
 

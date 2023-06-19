@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
+from saltapi.web.schema.user import LegalStatus
 from tests.conftest import (
     authenticate,
     create_user,
@@ -23,7 +24,15 @@ def _url(user_id: int) -> str:
 def _patch_data(
     username: Optional[str] = None, password: Optional[str] = None
 ) -> Dict[str, Optional[str]]:
-    return {"username": username, "password": password}
+    return {
+        "username": username,
+        "password": password,
+        "legal_status": LegalStatus.OTHER,
+        "race": None,
+        "gender": None,
+        "has_phd": None,
+        "year_of_phd_completion": None,
+    }
 
 
 def test_patch_user_should_return_401_for_unauthenticated_user(
@@ -85,10 +94,15 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     new_username = str(uuid.uuid4())[:8]
     authenticate(user["username"], client)
 
-    user_update = {"username": new_username, "password": "very_very_secret"}
+    user_update = _patch_data(new_username, "very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
+    del expected_updated_user_details["legal_status"]
+    del expected_updated_user_details["gender"]
+    del expected_updated_user_details["race"]
+    del expected_updated_user_details["has_phd"]
+    del expected_updated_user_details["year_of_phd_completion"]
 
     # the endpoint returns the correct response...
     response = client.patch(_url(user["id"]), json=user_update)
@@ -102,13 +116,17 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
 
 def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     user = create_user(client)
-    new_username = str(uuid.uuid4())[:8]
     authenticate(user["username"], client)
 
-    user_update = {"username": new_username, "password": "very_very_secret"}
+    user_update = _patch_data(str(uuid.uuid4())[:8], "very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
+    del expected_updated_user_details["legal_status"]
+    del expected_updated_user_details["gender"]
+    del expected_updated_user_details["race"]
+    del expected_updated_user_details["has_phd"]
+    del expected_updated_user_details["year_of_phd_completion"]
 
     client.patch(_url(user["id"]), json=user_update)
     client.patch(_url(user["id"]), json=user_update)
@@ -119,14 +137,17 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
 
 def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) -> None:
     user = create_user(client)
-    new_username = str(uuid.uuid4())[:8]
     authenticate(find_username("Administrator"), client)
 
-    user_update = {"username": new_username, "password": "very_very_secret"}
+    user_update = _patch_data(str(uuid.uuid4())[:8], "very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
-
+    del expected_updated_user_details["legal_status"]
+    del expected_updated_user_details["gender"]
+    del expected_updated_user_details["race"]
+    del expected_updated_user_details["has_phd"]
+    del expected_updated_user_details["year_of_phd_completion"]
     response = client.patch(_url(user["id"]), json=user_update)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_updated_user_details

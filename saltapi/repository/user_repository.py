@@ -177,6 +177,16 @@ ORDER BY I.Surname, I.FirstName
         investigator_id = self._create_investigator_details(new_user_details)
         pipt_user_id = self._create_pipt_user(new_user_details, investigator_id)
         self._add_investigator_to_pipt_user(pipt_user_id, investigator_id)
+        self.update_user_statistic(
+            pipt_user_id,
+            dict(
+                legal_status=new_user_details.legal_status,
+                gender=new_user_details.gender,
+                race=new_user_details.race,
+                has_phd=new_user_details.has_phd,
+                year_of_phd_completion=new_user_details.year_of_phd_completion,
+            ),
+        )
 
     def _create_investigator_details(self, new_user_details: NewUserDetails) -> int:
         """
@@ -259,6 +269,16 @@ WHERE Investigator_Id = :investigator_id
         new_user_details = self._new_user_details(user_id, user_update)
         new_username = cast(str, new_user_details.username)
         self._update_username(user_id=user_id, new_username=new_username)
+        self.update_user_statistic(
+            user_id,
+            dict(
+                legal_status=new_user_details.legal_status,
+                gender=new_user_details.gender,
+                race=new_user_details.race,
+                has_phd=new_user_details.has_phd,
+                year_of_phd_completion=new_user_details.year_of_phd_completion,
+            ),
+        )
 
     def _new_user_details(self, user_id: int, user_update: UserUpdate) -> UserUpdate:
         """
@@ -271,6 +291,11 @@ WHERE Investigator_Id = :investigator_id
         return UserUpdate(
             username=user_update.username if user_update.username else user.username,
             password=user_update.password,
+            legal_status=user_update.legal_status,
+            gender=user_update.gender,
+            race=user_update.race,
+            has_phd=user_update.has_phd,
+            year_of_phd_completion=user_update.year_of_phd_completion,
         )
 
     def _update_username(self, user_id: int, new_username: str) -> None:
@@ -793,7 +818,7 @@ WHERE ProposalPermission = :permission
     ) -> bool:
         stmt = text(
             """
- SELECT COUNT(*)
+SELECT COUNT(*)
 FROM ProposalPermissionGrant
 WHERE Grantee_Id = :grantee_id
   AND ProposalCode_Id =
@@ -827,3 +852,88 @@ WHERE Proposal_Code = :proposal_code
             return cast(int, result.scalar_one())
         except NoResultFound:
             raise NotFoundError()
+
+    @staticmethod
+    def _normalize_gender(gender: str) -> str:
+        gender = gender.strip().lower()
+        return gender[:1] + gender[1:]
+
+    def _add_gender(self, gender: str) -> int:
+        stmt = text(
+            """
+INSERT INTO Gender (Gender) VALUES (:gender) 
+            """
+        )
+        result = self.connection.execute(
+            stmt, {"gender": self._normalize_gender(gender)}
+        )
+        return cast(int, result.lastrowid)
+
+    def _get_gender_id(self, gender: str) -> int:
+        stmt = text("""SELECT Gender_Id FROM Gender Where Gender = :gender""")
+        result = self.connection.execute(
+            stmt, {"gender": self._normalize_gender(gender)}
+        )
+        try:
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            return self._add_gender(gender)
+
+    def _add_race(self, race: str) -> int:
+        stmt = text(
+            """
+INSERT INTO Race (Race) VALUES (:race) 
+            """
+        )
+        result = self.connection.execute(stmt, {"race": self._normalize_gender(race)})
+        return cast(int, result.lastrowid)
+
+    def _get_race_id(self, race: str) -> int:
+        stmt = text("""SELECT Race_Id FROM Race Where Race = :race""")
+        result = self.connection.execute(stmt, {"race": self._normalize_gender(race)})
+        try:
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            return self._add_race(race)
+
+    def _get_legal_status_id(self, legal_status: str) -> int:
+        stmt = text(
+            """SELECT SouthAfricanLegalStatus_Id FROM SouthAfricanLegalStatus Where SouthAfricanLegalStatus = :legal_status"""
+        )
+        result = self.connection.execute(
+            stmt, {"legal_status": self._normalize_gender(legal_status)}
+        )
+        return cast(int, result.scalar_one())
+
+    def update_user_statistic(
+        self, pipt_user_id: int, user_information: Dict[str, any]
+    ) -> None:
+        stmt = text(
+            """
+INSERT INTO UserStatistics (PiptUser_Id, SouthAfricanLegalStatus_Id, Gender_Id, Race_Id, PhD, YearOfPhD) 
+VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_of_phd )
+ON DUPLICATE KEY UPDATE 
+    SouthAfricanLegalStatus_Id = :legal_status_id,
+    Gender_Id = :gender_id,
+    Race_Id = :race_id,
+    PhD = :has_phd,
+    YearOfPhD = :year_of_phd
+            """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "pipt_user_id": pipt_user_id,
+                "legal_status_id": self._get_legal_status_id(
+                    user_information["legal_status"]
+                ),
+                "gender_id": self._get_gender_id(user_information["gender"])
+                if user_information["gender"]
+                else None,
+                "race_id": self._get_race_id(user_information["race"])
+                if user_information["race"]
+                else None,
+                "has_phd": user_information["has_phd"],
+                "year_of_phd": user_information["year_of_phd_completion"],
+            },
+        )

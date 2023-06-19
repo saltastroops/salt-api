@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from fastapi.testclient import TestClient
 from starlette import status
 
+from saltapi.web.schema.user import LegalStatus
 from tests.conftest import (
     authenticate,
     find_username,
@@ -39,6 +40,11 @@ def _new_user_details(username: Optional[str] = None) -> Dict[str, Any]:
                 "department": " ",
             }
         ],
+        legal_status=LegalStatus.OTHER,
+        race=None,
+        gender=None,
+        has_phd=None,
+        year_of_phd_completion=None,
     )
 
 
@@ -86,6 +92,11 @@ def test_post_user_should_create_a_new_user(client: TestClient) -> None:
     expected_user = new_user_details.copy()
     del expected_user["password"]
     del expected_user["institution_id"]
+    del expected_user["legal_status"]
+    del expected_user["gender"]
+    del expected_user["race"]
+    del expected_user["has_phd"]
+    del expected_user["year_of_phd_completion"]
     expected_user["roles"] = []
 
     response = client.post(USERS_URL, json=new_user_details)

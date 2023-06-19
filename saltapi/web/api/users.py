@@ -81,6 +81,11 @@ def create_user(
                 given_name=user.given_name,
                 family_name=user.family_name,
                 institution_id=user.institution_id,
+                legal_status=user.legal_status,
+                race=user.race,
+                gender=user.gender,
+                has_phd=user.has_phd,
+                year_of_phd_completion=user.year_of_phd_completion,
             )
         )
         unit_of_work.commit()
@@ -131,9 +136,14 @@ def update_user(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
-
         _user_update = _UserUpdate(
-            username=user_update.username, password=user_update.password
+            username=user_update.username,
+            password=user_update.password,
+            legal_status=user_update.legal_status,
+            gender=user_update.gender,
+            race=user_update.race,
+            has_phd=user_update.has_phd,
+            year_of_phd_completion=user_update.year_of_phd_completion,
         )
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_user(user_id, _user_update)

@@ -631,17 +631,17 @@ class ProposalProgress(BaseProgressReport):
     )
 
 
-class ProposalProgressReportPdfUrl(BaseModel):
+class ProposalProgressReport(BaseModel):
     semester: str = Field(
         ...,
         title="Semester",
         description="The semester for this progress report.",
     )
 
-    proposal_progress_pdf: AnyUrl = Field(
+    url: AnyUrl = Field(
         ...,
-        title="Proposal progress report pdf",
-        description="Proposal progress report pdf",
+        title="Proposal progress report url",
+        description="Proposal progress report url",
     )
 
 

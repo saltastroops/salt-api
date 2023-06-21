@@ -9,4 +9,4 @@ ProposalCode = NewType("ProposalCode", str)
 
 ProposalListItem = Any
 
-ProposalProgressReportPdfUrl = Any
+ProposalProgressReport = Any

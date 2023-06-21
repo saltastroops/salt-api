@@ -47,7 +47,7 @@
       Edit
     </button>
   </div>
-  <div *ngIf="otherProgressReportsUrls">
+  <div *ngIf="progressReports.length > 0">
     <a
       data-test="other-reports-links"
       href="javascript:void(0)"
@@ -56,9 +56,9 @@
     >
     <div *ngIf="showReports">
       <ul>
-        <li *ngFor="let u of progressReportsUrlsMap(otherProgressReportsUrls)">
-          <a class="has-text-link" href="{{ u['proposalProgressPdf'] }}">
-            View the progress report for semester {{ u["semester"] }}
+        <li *ngFor="let u of progressReportsUrlsMap(progressReports)">
+          <a class="has-text-link" href="{{ u.url }}">
+            View the progress report for semester {{ u.semester }}
           </a>
         </li>
       </ul>

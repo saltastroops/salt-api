@@ -8,7 +8,7 @@ import { ProposalService } from "../../../service/proposal.service";
 import {
   Proposal,
   ProposalProgress,
-  ProposalProgressReportPdfUrl,
+  ProposalProgressReport,
 } from "../../../types/proposal";
 import { AutoUnsubscribe, currentSemester } from "../../../utils";
 
@@ -27,7 +27,7 @@ export class ProposalProgressComponent implements OnInit {
   apiUrl = environment.apiUrl;
   currentSemester = currentSemester();
   currentProgressReportExists!: boolean;
-  otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null = null;
+  progressReports: ProposalProgressReport[] | null = null;
   showReports = false;
   reportsLinksText = "Show progress reports for other semesters";
 
@@ -52,9 +52,9 @@ export class ProposalProgressComponent implements OnInit {
           return of({});
         }),
       )
-      .subscribe((p: ProposalProgressReportPdfUrl[]) => {
+      .subscribe((p: ProposalProgressReport[]) => {
         const _currentSemester = currentSemester();
-        this.otherProgressReportsUrls = this.otherProgressReports(p);
+        this.progressReports = this.allProgressReports(p);
         this.currentProgressReportExists = p.some(
           (report) => report.semester === _currentSemester,
         );
@@ -79,30 +79,26 @@ export class ProposalProgressComponent implements OnInit {
     }
   }
 
-  otherProgressReports(
-    progressReportsUrls: ProposalProgressReportPdfUrl[],
-  ): ProposalProgressReportPdfUrl[] | null {
-    let otherProgressReportsUrls: ProposalProgressReportPdfUrl[] | null =
-      progressReportsUrls;
+  allProgressReports(
+    progressReportsUrls: ProposalProgressReport[],
+  ): ProposalProgressReport[] {
+    let otherProgressReportsUrls: ProposalProgressReport[] = progressReportsUrls;
     const _currentSemester = currentSemester();
     if ( progressReportsUrls !== undefined && progressReportsUrls.some((report) => report.semester === _currentSemester) ) {
       otherProgressReportsUrls = progressReportsUrls.filter(
         (report) => report.semester !== _currentSemester,
       );
-    } else {
-      otherProgressReportsUrls = null;
     }
-
     return otherProgressReportsUrls;
   }
 
   progressReportsUrlsMap(
-    progressReports: ProposalProgressReportPdfUrl[],
-  ): ProposalProgressReportPdfUrl[] {
+    progressReports: ProposalProgressReport[],
+  ): ProposalProgressReport[] {
     return progressReports.map((r) => {
-      const url = new URL(r.proposalProgressPdf);
+      const url = new URL(r.url);
       const noOriginUrl = url.href.replace(url.origin, "");
-      r.proposalProgressPdf = this.apiUrl + noOriginUrl;
+      r.url = this.apiUrl + noOriginUrl;
 
       return r;
     });

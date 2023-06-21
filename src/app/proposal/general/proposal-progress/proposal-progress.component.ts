@@ -82,9 +82,13 @@ export class ProposalProgressComponent implements OnInit {
   allProgressReports(
     progressReportsUrls: ProposalProgressReport[],
   ): ProposalProgressReport[] {
-    let otherProgressReportsUrls: ProposalProgressReport[] = progressReportsUrls;
+    let otherProgressReportsUrls: ProposalProgressReport[] =
+      progressReportsUrls;
     const _currentSemester = currentSemester();
-    if ( progressReportsUrls !== undefined && progressReportsUrls.some((report) => report.semester === _currentSemester) ) {
+    if (
+      progressReportsUrls !== undefined &&
+      progressReportsUrls.some((report) => report.semester === _currentSemester)
+    ) {
       otherProgressReportsUrls = progressReportsUrls.filter(
         (report) => report.semester !== _currentSemester,
       );

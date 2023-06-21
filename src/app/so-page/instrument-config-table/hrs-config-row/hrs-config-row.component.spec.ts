@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { HrsConfigRowComponent } from './hrs-config-row.component';
+import { HrsConfigRowComponent } from "./hrs-config-row.component";
 
-describe('HrsConfigRowComponent', () => {
+describe("HrsConfigRowComponent", () => {
   let component: HrsConfigRowComponent;
   let fixture: ComponentFixture<HrsConfigRowComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ HrsConfigRowComponent ]
-    })
-    .compileComponents();
+      declarations: [HrsConfigRowComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('HrsConfigRowComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

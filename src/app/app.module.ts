@@ -116,14 +116,14 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { AcquisitionTableComponent } from "./so-page/aquisition-table/acquisition-table.component";
 import { GeneralTableComponent } from "./so-page/general-table/general-table.component";
+import { HrsConfigRowComponent } from "./so-page/instrument-config-table/hrs-config-row/hrs-config-row.component";
 import { InstrumentConfigTableComponent } from "./so-page/instrument-config-table/instrument-config-table.component";
+import { NirConfigRowComponent } from "./so-page/instrument-config-table/nir-config-row/nir-config-row.component";
+import { RssConfigRowComponent } from "./so-page/instrument-config-table/rss-config-row/rss-config-row.component";
+import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/salticam-config-row/salticam-config-row.component";
 import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
-import { NirConfigRowComponent } from './so-page/instrument-config-table/nir-config-row/nir-config-row.component';
-import { SalticamConfigRowComponent } from './so-page/instrument-config-table/salticam-config-row/salticam-config-row.component';
-import { RssConfigRowComponent } from './so-page/instrument-config-table/rss-config-row/rss-config-row.component';
-import { HrsConfigRowComponent } from './so-page/instrument-config-table/hrs-config-row/hrs-config-row.component';
 
 @NgModule({
   declarations: [

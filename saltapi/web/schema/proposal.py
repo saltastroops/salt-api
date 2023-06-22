@@ -640,8 +640,8 @@ class ProposalProgressReport(BaseModel):
 
     url: AnyUrl = Field(
         ...,
-        title="Proposal progress report url",
-        description="Proposal progress report url",
+        title="Proposal progress report URL",
+        description="Proposal progress report URL",
     )
 
 

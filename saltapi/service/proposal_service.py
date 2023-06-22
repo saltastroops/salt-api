@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
-from pydantic.networks import AnyUrl
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
@@ -141,9 +140,7 @@ class ProposalService:
             progress_reports.append(
                 {
                     "semester": semester,
-                    "proposal_progress_pdf": cast(
-                        AnyUrl, generate_route_url(request, progress_report_pdf_url)
-                    ),
+                    "url": generate_route_url(request, progress_report_pdf_url),
                 }
             )
 

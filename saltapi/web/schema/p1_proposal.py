@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from saltapi.web.schema.common import  Ranking,ObservationProbabilities
+from saltapi.web.schema.common import ObservationProbabilities, Ranking
 from saltapi.web.schema.proposal import GeneralProposalInfo, Proposal
 from saltapi.web.schema.target import Target
 
@@ -50,6 +50,7 @@ class ScienceConfiguration(BaseModel):
     simulations: List[Simulation] = Field(
         ..., title="Simulations", description="The simulations for the proposal."
     )
+
 
 class P1Observation(BaseModel):
     """A target in a Phase 1 proposal."""

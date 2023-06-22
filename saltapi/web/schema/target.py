@@ -5,11 +5,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from saltapi.web.schema.common import (
-    ObservationProbabilities,
-    Ranking,
-    TargetCoordinates,
-)
+from saltapi.web.schema.common import TargetCoordinates
 
 
 class Magnitude(BaseModel):
@@ -136,72 +132,4 @@ class Target(BaseModel):
         ...,
         title="Is the target non-sidereal?",
         description="Is the target a non-sidereal target?",
-    )
-
-
-class Phase1Observation(BaseModel):
-    """A target in a Phase 1 proposal."""
-
-    observing_time: int = Field(
-        ...,
-        title="The requested time",
-        description=" The total time requested to observe this target.",
-    )
-
-    is_optional: bool = Field(
-        ...,
-        title="Optional?",
-        description=(
-            "Whether the target is optional, i.e. whether it is part of a pool of"
-            " targets from which only a subset needs to be observed."
-        ),
-    )
-    requested_observations: int = Field(
-        ...,
-        title="Number of requested observations",
-        description="Number of observations requested for the target",
-    )
-    max_lunar_phase: float = Field(
-        ...,
-        title="Maximum lunar phase",
-        description=(
-            "Maximum lunar phase which was allowed for the observation, as the"
-            " percentage of lunar illumination"
-        ),
-        ge=0,
-        le=100,
-    )
-    ranking: Ranking = Field(
-        ...,
-        title="Ranking",
-        description=(
-            "Importance attributed by the Principal Investigator to observations of"
-            " this target relative to other observations for the same proposal."
-        ),
-    )
-    track_count: int = Field(
-        ...,
-        title="Number of tracks",
-        description=(
-            "The number of tracks in which the observation can be made, given the"
-            " requested observation time and observation constraints."
-        ),
-    )
-    night_count: int = Field(
-        ...,
-        title="Number of nights",
-        description=(
-            "The number of nights in which the observation can be made, given the"
-            " requested observation time and observation constraints."
-        ),
-    )
-    observing_probabilities: ObservationProbabilities = Field(
-        ...,
-        title="Observing probabilities",
-        description="Probabilities related to observing the block",
-    )
-    target: Target = Field(
-        ...,
-        title="Target",
-        description="Target of observations.",
     )

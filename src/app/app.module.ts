@@ -92,9 +92,9 @@ import { SalticamComponent } from "./proposal/instruments/salticam/salticam.comp
 import { InvestigatorsComponent } from "./proposal/investigators/investigators.component";
 import { P1ConfigurationsComponent } from "./proposal/p1-details/p1-configurations/p1-configurations.component";
 import { P1DetailsComponent } from "./proposal/p1-details/p1-details.component";
+import { P1ObservationsComponent } from "./proposal/p1-details/p1-observations/p1-observations.component";
 import { PhaseOneProposalDetailsTableComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details-table/phase-one-proposal-details-table.component";
 import { PhaseOneProposalDetailsComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details.component";
-import { PhaseOneTargetComponent } from "./proposal/p1-details/phase-one-target/phase-one-target.component";
 import { StudentThesesComponent } from "./proposal/p1-details/students-theses/student-theses.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RequestedTimesComponent } from "./proposal/requested-time/requested-times.component";
@@ -210,7 +210,6 @@ import { SortDirective } from "./sort.directive";
     SortDirective,
     SortByDirective,
     P1DetailsComponent,
-    PhaseOneTargetComponent,
     PhaseOneProposalDetailsComponent,
     ProposalSummaryComponent,
     ProposalDownloadComponent,
@@ -233,6 +232,7 @@ import { SortDirective } from "./sort.directive";
     SalticamConfigRowComponent,
     RssConfigRowComponent,
     HrsConfigRowComponent,
+    P1ObservationsComponent,
   ],
   imports: [
     BrowserModule,

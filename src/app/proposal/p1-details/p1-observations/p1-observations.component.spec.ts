@@ -1,4 +1,4 @@
-describe("PhaseOneTargetComponent", () => {
+describe("P1ObservationsComponent", () => {
   it("should be a passing placeholder test", () => {
     expect(true).toBeTruthy();
   });

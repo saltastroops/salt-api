@@ -13,7 +13,7 @@ export interface PeriodEphemeris {
   timeBase: TimeBase;
 }
 
-export interface Phase1Target extends Target {
+export interface Phase1Observation {
   observingTime: number;
   isOptional: boolean;
   requestedObservations: number;
@@ -22,6 +22,7 @@ export interface Phase1Target extends Target {
   nightCount: number;
   observingProbabilities: ObservationProbabilities;
   trackCount: number;
+  target: Target;
 }
 
 export interface ProperMotion {

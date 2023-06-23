@@ -1,6 +1,6 @@
 import { BlockSummary, Transparency } from "./block";
 import { BlockVisit, PartnerCode, PartnerName } from "./common";
-import { Phase1Target } from "./target";
+import { Phase1Observation } from "./target";
 
 export interface Affiliation {
   partnerName: PartnerName;
@@ -93,7 +93,7 @@ export interface Proposal {
   semester: string;
   generalInfo: GeneralProposalInfo;
   investigators: Investigator[];
-  targets: Phase1Target[] | null;
+  observations: Phase1Observation[] | null;
   requestedTimes: RequestedTime[];
   blocks: BlockSummary[];
   blockVisits: BlockVisit[];

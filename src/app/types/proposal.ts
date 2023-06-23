@@ -199,9 +199,9 @@ export interface TimeStatistics {
 
 export type ProgressReportsUrls = { [key: string]: { [key: string]: string } };
 
-export interface ProposalProgressReport {
+export interface ProposalProgressReportPdfUrl {
   semester: string;
-  url: string;
+  proposalProgressPdf: string;
 }
 
 export interface NewProprietaryPeriod extends ProprietaryPeriod {

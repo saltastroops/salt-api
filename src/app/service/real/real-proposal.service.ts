@@ -13,7 +13,7 @@ import {
   Proposal,
   ProposalListItem,
   ProposalProgress,
-  ProposalProgressReportPdfUrl,
+  ProposalProgressReport,
   ProposalStatus,
   SelfActivation,
 } from "../../types/proposal";
@@ -139,9 +139,9 @@ export class RealProposalService implements ProposalService {
    */
   getProgressReportsUrls(
     proposalCode: string,
-  ): Observable<ProposalProgressReportPdfUrl[]> {
+  ): Observable<ProposalProgressReport[]> {
     const uri = environment.apiUrl + `/progress/${proposalCode}/`;
-    return this.http.get<ProposalProgressReportPdfUrl[]>(uri).pipe(
+    return this.http.get<ProposalProgressReport[]>(uri).pipe(
       map((reports) => {
         return reports.map((report) => camelcaseKeys(report, { deep: true }));
       }),

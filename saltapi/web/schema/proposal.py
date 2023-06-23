@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic.networks import AnyUrl
 
 from saltapi.util import as_form, parse_partner_requested_percentages
 from saltapi.web.schema.common import (
@@ -627,6 +628,20 @@ class ProposalProgress(BaseProgressReport):
         ...,
         title="Proposal progress report pdf",
         description="Proposal progress report pdf",
+    )
+
+
+class ProposalProgressReport(BaseModel):
+    semester: str = Field(
+        ...,
+        title="Semester",
+        description="The semester for this progress report.",
+    )
+
+    url: AnyUrl = Field(
+        ...,
+        title="Proposal progress report URL",
+        description="Proposal progress report URL",
     )
 
 

@@ -1,6 +1,6 @@
-import pytest
-import pytz
 from datetime import date
+
+import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
@@ -81,7 +81,7 @@ def test_mos_mask_update_cut_by(
 
 
 def test_mos_mask_update_cut_date_and_mask_comment(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     barcode = "P000127N01"
     cut_by = "Chaka"
@@ -93,7 +93,7 @@ def test_mos_mask_update_cut_date_and_mask_comment(
     response = client.patch(
         RSS_MOS_MASK_METADATA_URL + "/" + barcode,
         json={"cut_by": cut_by, "cut_date": cut_date, "mask_comment": mask_comment},
-        )
+    )
     assert response.status_code == status.HTTP_200_OK
 
     metadata = response.json()

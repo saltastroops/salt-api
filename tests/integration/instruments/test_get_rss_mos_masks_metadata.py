@@ -1,7 +1,8 @@
+from typing import Any, Callable
+
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
-from typing import Any, Callable
 
 from tests.conftest import authenticate, find_username, not_authenticated
 
@@ -103,7 +104,7 @@ def test_get_mos_masks_metadata(
     to_semester: str,
     mos_masks_count: int,
     client: TestClient,
-    check_data: Callable[[Any], None]
+    check_data: Callable[[Any], None],
 ) -> None:
     username = find_username("Administrator")
     authenticate(username, client)

@@ -53,9 +53,7 @@ class InstrumentRepository:
         """Get MOS mask metadata."""
         return self.rss_repository.get_mos_mask_metadata(barcode)
 
-    def update_mos_mask_metadata(
-        self, mos_mask_metadata: Dict[str, Any]
-    ) -> None:
+    def update_mos_mask_metadata(self, mos_mask_metadata: Dict[str, Any]) -> None:
         """Update MOS mask metadata"""
         return self.rss_repository.update_mos_mask_metadata(mos_mask_metadata)
 

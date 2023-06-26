@@ -53,7 +53,9 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, traceback.format_exc())
         return JSONResponse(
-            content={"message": str(exc)},
+            content={
+                "message": "Sorry, something has gone wrong. Please try again later."
+            },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

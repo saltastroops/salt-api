@@ -296,7 +296,7 @@ LIMIT :limit;
             "time_allocations": self._time_allocations(proposal_code, semester),
             "charged_time": self._charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
-            "targets": self._get_phase_one_targets(proposal_code),
+            "observations": self._get_phase_one_observations(proposal_code),
             "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
             "phase1_proposal_summary": summary_url,
@@ -2147,7 +2147,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             },
         )
 
-    def _get_phase_one_targets(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_phase_one_observations(self, proposal_code: str) -> List[Dict[str, Any]]:
         # The phase 1 targets.
         stmt = text(
             """
@@ -2214,13 +2214,18 @@ WHERE Proposal_Code = :proposal_code
         )
         return [
             {
-                "id": row.id,
-                "name": row.name,
+                "target": {
+                    "id": row.id,
+                    "name": row.name,
+                    "coordinates": target_coordinates(row),
+                    "proper_motion": target_proper_motion(row),
+                    "magnitude": target_magnitude(row),
+                    "target_type": target_type(row),
+                    "period_ephemeris": target_period_ephemeris(row),
+                    "horizons_identifier": row.horizons_identifier,
+                    "non_sidereal": row.non_sidereal == 1,
+                },
                 "observing_time": row.observing_time,
-                "coordinates": target_coordinates(row),
-                "proper_motion": target_proper_motion(row),
-                "magnitude": target_magnitude(row),
-                "target_type": target_type(row),
                 "is_optional": row.optional,
                 "requested_observations": row.requested_observations,
                 "max_lunar_phase": row.max_luner_phase,
@@ -2234,9 +2239,6 @@ WHERE Proposal_Code = :proposal_code
                     "seeing": row.seeing_probability,
                     "total": row.total_probability,
                 },
-                "period_ephemeris": target_period_ephemeris(row),
-                "horizons_identifier": row.horizons_identifier,
-                "non_sidereal": row.non_sidereal == 1,
             }
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]

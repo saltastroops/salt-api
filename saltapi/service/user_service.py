@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.user_repository import UserRepository
@@ -79,9 +79,25 @@ SALT Team
 
         return True
 
+    @staticmethod
+    def _validate_user_statistics(
+        user_details: Union[NewUserDetails, UserUpdate]
+    ) -> None:
+        if user_details.legal_status in [
+            "South African citizen",
+            "Permanent resident of South Africa",
+        ]:
+            if not user_details.gender:
+                raise ValidationError("Gender is missing.")
+            if not user_details.race:
+                raise ValidationError("Race is missing.")
+            if user_details.has_phd and not user_details.year_of_phd_completion:
+                raise ValidationError("Year of completing PhD is missing.")
+
     def create_user(self, user: NewUserDetails) -> None:
         if self._does_user_exist(user.username):
             raise ValidationError(f"The username {user.username} exists already.")
+        self._validate_user_statistics(user)
         self.repository.create(user)
 
     def get_user(self, user_id: int) -> User:
@@ -109,6 +125,7 @@ SALT Team
     def update_user(self, user_id: int, user: UserUpdate) -> None:
         if user.username and self._does_user_exist(user.username):
             raise ValidationError(f"The username {user.username} exists already.")
+        self._validate_user_statistics(user)
         self.repository.update(user_id, user)
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:

@@ -10,10 +10,10 @@ import { Message } from "../../types/common";
 import {
   NewProprietaryPeriod,
   ObservationComment,
-  ProgressReportsUrls,
   Proposal,
   ProposalListItem,
   ProposalProgress,
+  ProposalProgressReport,
   ProposalStatus,
   SelfActivation,
 } from "../../types/proposal";
@@ -139,15 +139,11 @@ export class RealProposalService implements ProposalService {
    */
   getProgressReportsUrls(
     proposalCode: string,
-  ): Observable<ProgressReportsUrls> {
+  ): Observable<ProposalProgressReport[]> {
     const uri = environment.apiUrl + `/progress/${proposalCode}/`;
-    return this.http.get<ProgressReportsUrls>(uri).pipe(
-      map((progressReportsUrls: ProgressReportsUrls) => {
-        const reportsUrls: ProgressReportsUrls = {};
-        for (const [k, v] of Object.entries(progressReportsUrls)) {
-          reportsUrls[k] = camelcaseKeys(v, { deep: true });
-        }
-        return reportsUrls;
+    return this.http.get<ProposalProgressReport[]>(uri).pipe(
+      map((reports) => {
+        return reports.map((report) => camelcaseKeys(report, { deep: true }));
       }),
     );
   }

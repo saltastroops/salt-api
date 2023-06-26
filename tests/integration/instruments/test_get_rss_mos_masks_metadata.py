@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
+from typing import Any, Callable
 
 from tests.conftest import authenticate, find_username, not_authenticated
 
@@ -102,6 +103,7 @@ def test_get_mos_masks_metadata(
     to_semester: str,
     mos_masks_count: int,
     client: TestClient,
+    check_data: Callable[[Any], None]
 ) -> None:
     username = find_username("Administrator")
     authenticate(username, client)
@@ -114,7 +116,4 @@ def test_get_mos_masks_metadata(
     mos_masks_metadata = response.json()
     assert len(mos_masks_metadata) == mos_masks_count
 
-    for mos in mos_masks_metadata:
-        assert "cut_by" in mos
-        assert "cut_date" in mos
-        assert "mask_comment" in mos
+    check_data(mos_masks_metadata)

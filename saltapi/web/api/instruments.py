@@ -5,7 +5,6 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
-from saltapi.util import semester_start
 from saltapi.web import services
 from saltapi.web.schema.common import Semester
 from saltapi.web.schema.rss import (
@@ -70,7 +69,7 @@ def get_mos_masks_metadata(
     Get the list of blocks using MOS.
     """
     with UnitOfWork() as unit_of_work:
-        if semester_start(from_semester) > semester_start(to_semester):
+        if from_semester > to_semester:
             raise HTTPException(
                 status_code=400,
                 detail="The from semester must not be later than the to semester.",
@@ -112,8 +111,8 @@ def update_mos_mask_metadata(
 
         unit_of_work.connection.commit()
 
-        mos_block = instrument_service.get_mos_mask_metadata(barcode)
-        return MosMaskMetadata(**mos_block)
+        mask_metadata = instrument_service.get_mos_mask_metadata(barcode)
+        return MosMaskMetadata(**mask_metadata)
 
 
 @router.get(

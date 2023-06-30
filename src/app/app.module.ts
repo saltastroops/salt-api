@@ -92,9 +92,9 @@ import { SalticamComponent } from "./proposal/instruments/salticam/salticam.comp
 import { InvestigatorsComponent } from "./proposal/investigators/investigators.component";
 import { P1ConfigurationsComponent } from "./proposal/p1-details/p1-configurations/p1-configurations.component";
 import { P1DetailsComponent } from "./proposal/p1-details/p1-details.component";
+import { P1ObservationsComponent } from "./proposal/p1-details/p1-observations/p1-observations.component";
 import { PhaseOneProposalDetailsTableComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details-table/phase-one-proposal-details-table.component";
 import { PhaseOneProposalDetailsComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details.component";
-import { PhaseOneTargetComponent } from "./proposal/p1-details/phase-one-target/phase-one-target.component";
 import { StudentThesesComponent } from "./proposal/p1-details/students-theses/student-theses.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RequestedTimesComponent } from "./proposal/requested-time/requested-times.component";
@@ -116,14 +116,14 @@ import { PageMissingComponent } from "./shared/page-missing/page-missing.compone
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { AcquisitionTableComponent } from "./so-page/aquisition-table/acquisition-table.component";
 import { GeneralTableComponent } from "./so-page/general-table/general-table.component";
+import { HrsConfigRowComponent } from "./so-page/instrument-config-table/hrs-config-row/hrs-config-row.component";
 import { InstrumentConfigTableComponent } from "./so-page/instrument-config-table/instrument-config-table.component";
+import { NirConfigRowComponent } from "./so-page/instrument-config-table/nir-config-row/nir-config-row.component";
+import { RssConfigRowComponent } from "./so-page/instrument-config-table/rss-config-row/rss-config-row.component";
+import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/salticam-config-row/salticam-config-row.component";
 import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
-import { NirConfigRowComponent } from './so-page/instrument-config-table/nir-config-row/nir-config-row.component';
-import { SalticamConfigRowComponent } from './so-page/instrument-config-table/salticam-config-row/salticam-config-row.component';
-import { RssConfigRowComponent } from './so-page/instrument-config-table/rss-config-row/rss-config-row.component';
-import { HrsConfigRowComponent } from './so-page/instrument-config-table/hrs-config-row/hrs-config-row.component';
 import { SaFormComponent } from './login/sa-form/sa-form.component';
 
 @NgModule({
@@ -211,7 +211,6 @@ import { SaFormComponent } from './login/sa-form/sa-form.component';
     SortDirective,
     SortByDirective,
     P1DetailsComponent,
-    PhaseOneTargetComponent,
     PhaseOneProposalDetailsComponent,
     ProposalSummaryComponent,
     ProposalDownloadComponent,
@@ -234,6 +233,7 @@ import { SaFormComponent } from './login/sa-form/sa-form.component';
     SalticamConfigRowComponent,
     RssConfigRowComponent,
     HrsConfigRowComponent,
+    P1ObservationsComponent,
     SaFormComponent,
   ],
   imports: [

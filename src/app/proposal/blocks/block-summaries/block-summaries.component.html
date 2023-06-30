@@ -201,19 +201,16 @@
           "
         ></ng-container>
       </tr>
-      <tr
-        *ngFor="let i of b.instruments; let _index = index"
-        [ngClass]="blockClass(b)"
-      >
-        <ng-container *ngIf="_index">
+      <ng-container *ngFor="let i of b.instruments; let _index = index">
+        <tr *ngIf="_index !== 0" [ngClass]="blockClass(b)">
           <ng-container
             *ngTemplateOutlet="
               instrumentDetails;
               context: { instrument: b.instruments[_index] }
             "
           ></ng-container>
-        </ng-container>
-      </tr>
+        </tr>
+      </ng-container>
     </ng-container>
   </tbody>
 </table>

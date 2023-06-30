@@ -50,6 +50,15 @@ export class BlockComponent implements OnInit {
     this.latestSubmissionDate = parseISO(this.block.latestSubmissionDate);
   }
 
+  blockClass(block: Block): string {
+    if (block.status.value === "Completed") {
+      return "completed-block";
+    } else if (block.status.value === "Active") {
+      return "";
+    }
+    return "inactive-block";
+  }
+
   validSortedFinderCharts(finderCharts: FinderChart[]): FinderChart[] {
     const isValid = (fc: FinderChart) =>
       (fc.validFrom === null || parseISO(fc.validFrom) <= this.validUntil) &&

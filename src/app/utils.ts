@@ -1,6 +1,6 @@
-import { Investigator } from "./types/proposal";
 import { environment } from "../environments/environment";
 import { FinderChart } from "./types/observation";
+import { Investigator } from "./types/proposal";
 import { User, UserRole } from "./types/user";
 import { finderChartURL } from "./util";
 

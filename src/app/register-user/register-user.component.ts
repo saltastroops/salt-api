@@ -261,27 +261,42 @@ export class RegisterUserComponent implements OnInit {
     if (!this.registerNewUserForm.value.legalStatus) {
       this.statisticsError.legalStatus =
         "You need to provide your legal status in South African";
+      this.registerNewUserForm.controls["legalStatus"].setErrors({
+        incorrect: true,
+      });
     }
     if (
       this.registerNewUserForm.value.legalStatus === "South African citizen" ||
       this.registerNewUserForm.value.legalStatus ===
         "Permanent resident of South Africa"
     ) {
-      if (!this.registerNewUserForm.value.gender) {
+      if (this.registerNewUserForm.value.gender === "") {
         this.statisticsError.gender = "You need to provide your gender.";
+        this.registerNewUserForm.controls["gender"].setErrors({
+          incorrect: true,
+        });
       }
-      if (!this.registerNewUserForm.value.race) {
+      if (this.registerNewUserForm.value.race === "") {
         this.statisticsError.race = "You need to provide your race.";
+        this.registerNewUserForm.controls["race"].setErrors({
+          incorrect: true,
+        });
       }
       if (this.registerNewUserForm.value.hasPhd === "") {
         this.statisticsError.phd =
           "You need to provide if you have a phd or not.";
+        this.registerNewUserForm.controls["hasPhd"].setErrors({
+          incorrect: true,
+        });
       }
 
       if (
         this.registerNewUserForm.value.hasPhd &&
         !this.registerNewUserForm.value.phdYear
       ) {
+        this.registerNewUserForm.controls["phdYear"].setErrors({
+          incorrect: true,
+        });
         this.statisticsError.phd =
           "You need to provide the year you obtained you PhD.";
       }

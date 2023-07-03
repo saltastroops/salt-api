@@ -68,7 +68,7 @@
         Please select "I'd prefer not to say" if you don't want to divulge your
         gender.
       </p>
-      <div class="control">
+      <div class="control" (click)="clearError('gender')">
         <label>
           <input
             class="radio"
@@ -133,7 +133,7 @@
         The options are specific for official reporting in South Africa. Please
         select "I'd prefer not to say" if you don't want to divulge your race.
       </p>
-      <div class="control">
+      <div class="control" (click)="clearError('race')">
         <label>
           <input
             class="radio"

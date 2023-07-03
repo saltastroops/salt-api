@@ -205,10 +205,10 @@ export class ManageUserProfileComponent implements OnInit {
       this.userProfile.value.legalStatus ===
         "Permanent resident of South Africa"
     ) {
-      if (!this.userProfile.value.gender) {
+      if (this.userProfile.value.gender === "") {
         this.statisticsError.gender = "You need to provide your gender.";
       }
-      if (!this.userProfile.value.race) {
+      if (this.userProfile.value.race === "") {
         this.statisticsError.race = "You need to provide your race.";
       }
       if (this.userProfile.value.hasPhd === "") {
@@ -229,8 +229,6 @@ export class ManageUserProfileComponent implements OnInit {
       this.error = "please make sure that the form filled correctly.";
     }
     this.validateStatistics();
-    console.log(this.userProfile.value);
-    console.log(this.statisticsError);
     // TODO Submission not implemented
   }
 

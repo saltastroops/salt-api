@@ -1,9 +1,5 @@
-import { Component, Input, OnInit } from "@angular/core";
-import {
-  FormGroup,
-  UntypedFormBuilder,
-  UntypedFormControl,
-} from "@angular/forms";
+import { Component, Input } from "@angular/core";
+import { FormGroup, UntypedFormControl } from "@angular/forms";
 
 import { StatisticsError } from "../../types/user";
 
@@ -12,7 +8,7 @@ import { StatisticsError } from "../../types/user";
   templateUrl: "./sa-form.component.html",
   styleUrls: ["./sa-form.component.scss"],
 })
-export class SaFormComponent implements OnInit {
+export class SaFormComponent {
   @Input() userDetailsForm!: FormGroup;
   @Input() error!: StatisticsError;
   phdYearControl = new UntypedFormControl();
@@ -20,11 +16,6 @@ export class SaFormComponent implements OnInit {
   isSelfDefinedGender: boolean | undefined = undefined;
   isTypePhdYear = false;
   years = [...Array(101).keys()].map((i) => new Date().getFullYear() - 100 + i);
-
-  constructor(private formBuilder: UntypedFormBuilder) {}
-  ngOnInit(): void {
-    console.log(this.userDetailsForm);
-  }
 
   collectMoreDetails(collect: boolean, legalStatus: string): void {
     this.collect = collect;
@@ -49,10 +40,12 @@ export class SaFormComponent implements OnInit {
   }
 
   setPhdYear(phdYear: string | null): void {
+    this.error.phd = undefined;
     this.userDetailsForm.patchValue({ phdYear });
   }
 
   hasPhd(isPhd: boolean): void {
+    this.error.phd = undefined;
     this.isTypePhdYear = isPhd;
     this.phdYearControl.setValue(null);
     this.userDetailsForm.patchValue({ hasPhd: isPhd });
@@ -60,5 +53,9 @@ export class SaFormComponent implements OnInit {
 
   typeDefinedGender(isSelfDefined: boolean): void {
     this.isSelfDefinedGender = isSelfDefined;
+  }
+
+  clearError(name: "phd" | "race" | "gender" | "legalStatus"): void {
+    this.error[name] = undefined;
   }
 }

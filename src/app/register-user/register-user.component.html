@@ -185,18 +185,20 @@
     <div *ngIf="partnerInstitutions">
       <div class="form-group input-section">
         <label class="label">Institute</label>
-        <select formControlName="institutionId">
-          <option value="null">please select institute</option>
-          <option
-            *ngFor="let institute of partnerInstitutions"
-            [value]="institute.institutionId"
-          >
-            {{ institutionString(institute) }}
-          </option>
-          <option *ngIf="showAddNewInstitutionControls" value="0">
-            ADD NEW INSTITUTE
-          </option>
-        </select>
+        <div class="select">
+          <select formControlName="institutionId">
+            <option value="null">please select institute</option>
+            <option
+              *ngFor="let institute of partnerInstitutions"
+              [value]="institute.institutionId"
+            >
+              {{ institutionString(institute) }}
+            </option>
+            <option *ngIf="showAddNewInstitutionControls" value="0">
+              ADD NEW INSTITUTE
+            </option>
+          </select>
+        </div>
         <div
           *ngIf="f.institutionId.touched && f.institutionId.errors"
           class="invalid-feedback"
@@ -354,7 +356,7 @@
     <div class="form-group input-section">
       <input
         type="submit"
-        class="button is-small"
+        class="button is-small is-info"
         [ngClass]="{ 'is-loading': loading }"
         id="register-new-user"
         value="Register new user"

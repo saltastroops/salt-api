@@ -906,7 +906,7 @@ INSERT INTO Race (Race) VALUES (:race)
         return cast(int, result.scalar_one())
 
     def update_user_statistic(
-        self, pipt_user_id: int, user_information: Dict[str, any]
+        self, pipt_user_id: int, user_information: Dict[str, Any]
     ) -> None:
         stmt = text(
             """

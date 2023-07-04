@@ -85,7 +85,7 @@ def test_mos_mask_update_cut_date_and_mask_comment(
 ) -> None:
     barcode = "P000127N01"
     cut_by = "Chaka"
-    cut_date = date.today().isoformat()
+    cut_date = date(2021, 1, 1).isoformat()
     mask_comment = "Mask re-cut, first one bad."
 
     user = find_username("SALT Astronomer")

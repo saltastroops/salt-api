@@ -1,7 +1,7 @@
 <div class="user-statistics">
   <form [formGroup]="userDetailsForm">
     <label class="label">Legal status in South Africa</label>
-    <div class="control collects-buttons">
+    <div class="control collects-buttons" (click)="clearError('legalStatus')">
       <label>
         <input
           class="radio"
@@ -117,7 +117,7 @@
           <input
             class="radio"
             type="radio"
-            [value]="null"
+            [value]="'Prefer not to say'"
             (change)="typeDefinedGender(false)"
             formControlName="gender"
             name="gender"
@@ -175,7 +175,7 @@
             class="radio"
             type="radio"
             formControlName="race"
-            [value]="null"
+            [value]="'Prefer not to say'"
           />
           I'd prefer not to say
         </label>
@@ -183,49 +183,52 @@
           error.race
         }}</label>
       </div>
+
       <label class="label">PhD</label>
-      <div class="phd-support-input">
+      <div class="control">
+        <div class="phd-support-input">
+          <div>
+            <label>
+              <input
+                class="radio"
+                type="radio"
+                (change)="hasPhd(true)"
+                name="phdYear"
+              />
+              I have a PhD and I completed it in the year
+            </label>
+          </div>
+          <div class="select">
+            <select
+              #phdYearSelector
+              (change)="setPhdYear(phdYearSelector.value)"
+              [attr.disabled]="!isTypePhdYear ? '' : null"
+            >
+              <option [value]="null">Select</option>
+              <option *ngFor="let year of years" [value]="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+        </div>
         <div>
           <label>
             <input
               class="radio"
               type="radio"
-              (change)="hasPhd(true)"
+              formControlName="phdYear"
               name="phdYear"
+              [value]="null"
+              (change)="hasPhd(false)"
             />
-            I have a PhD and I completed it in the year
+            I do not have a PhD
           </label>
         </div>
-        <div class="select">
-          <select
-            #phdYearSelector
-            (change)="setPhdYear(phdYearSelector.value)"
-            [attr.disabled]="!isTypePhdYear ? '' : null"
-          >
-            <option [value]="null">Select</option>
-            <option *ngFor="let year of years" [value]="year">
-              {{ year }}
-            </option>
-          </select>
+        <div>
+          <label class="invalid-feedback" *ngIf="error.phd">{{
+            error.phd
+          }}</label>
         </div>
-      </div>
-      <div>
-        <label>
-          <input
-            class="radio"
-            type="radio"
-            formControlName="phdYear"
-            name="phdYear"
-            [value]="null"
-            (change)="hasPhd(false)"
-          />
-          I do not have a PhD
-        </label>
-      </div>
-      <div>
-        <label class="invalid-feedback" *ngIf="error.phd">{{
-          error.phd
-        }}</label>
       </div>
     </div>
   </form>

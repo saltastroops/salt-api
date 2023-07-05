@@ -30,14 +30,10 @@
       <div class="form-group">
         <label class="label">Password</label>
         <input
-          (ngModelChange)="clearError()"
           type="password"
           formControlName="password"
           class="input"
           data-test="password"
-          [ngClass]="{
-            'is-danger': f.password.touched && f.password.errors
-          }"
         />
         <div
           *ngIf="f.password.touched && f.password.errors"
@@ -72,11 +68,7 @@
           }"
         />
         <div
-          *ngIf="
-            f.confirmPassword.touched &&
-            f.confirmPassword.errors &&
-            registerNewUserForm.errors
-          "
+          *ngIf="f.confirmPassword.touched && registerNewUserForm.errors"
           class="invalid-feedback"
         >
           <div
@@ -87,7 +79,7 @@
             Confirmation password is required
           </div>
           <div
-            *ngIf="f.confirmPassword.touched && registerNewUserForm.errors?.['notMatched']"
+            *ngIf="f.confirmPassword.dirty && registerNewUserForm.errors?.['notMatched']"
             class="has-text-danger"
             data-test="error"
           >

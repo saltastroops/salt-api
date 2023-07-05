@@ -81,7 +81,7 @@ export class RegisterUserComponent implements OnInit {
     this.registerNewUserForm = this.formBuilder.group(
       {
         username: ["", Validators.required],
-        password: ["", Validators.required, Validators.minLength(6)],
+        password: ["", [Validators.required, Validators.minLength(6)]],
         confirmPassword: ["", Validators.required],
         givenName: ["", Validators.required],
         familyName: ["", Validators.required],
@@ -114,71 +114,81 @@ export class RegisterUserComponent implements OnInit {
     this.validateStatistics();
 
     // stop here if form is invalid
-    if (this.registerNewUserForm.invalid) {
-      return;
-    }
+    if (this.registerNewUserForm.valid) {
+      this.loading = true;
 
-    this.loading = true;
+      const newInstitution = {
+        institutionName: this.registerNewUserForm.get("institutionName")?.value,
+        department: this.registerNewUserForm.get("department")?.value,
+        address: this.registerNewUserForm.get("address")?.value,
+        url: this.registerNewUserForm.get("url")?.value,
+      } as NewInstitutionDetails;
 
-    const newInstitution = {
-      institutionName: this.registerNewUserForm.get("institutionName")?.value,
-      department: this.registerNewUserForm.get("department")?.value,
-      address: this.registerNewUserForm.get("address")?.value,
-      url: this.registerNewUserForm.get("url")?.value,
-    } as NewInstitutionDetails;
+      const newInstitutionId$ = this.institutionService
+        .createInstitution(newInstitution)
+        .pipe(map((institution) => institution.institutionId));
 
-    const newInstitutionId$ = this.institutionService
-      .createInstitution(newInstitution)
-      .pipe(map((institution) => institution.institutionId));
-
-    const institutionId$ = interval(1000).pipe(
-      mergeMap(() =>
-        iif(
-          () => this.showAddNewInstitutionControls,
-          newInstitutionId$,
-          of(parseInt(this.registerNewUserForm.get("institutionId")?.value)),
+      const institutionId$ = interval(1000).pipe(
+        mergeMap(() =>
+          iif(
+            () => this.showAddNewInstitutionControls,
+            newInstitutionId$,
+            of(parseInt(this.registerNewUserForm.get("institutionId")?.value)),
+          ),
         ),
-      ),
-    );
+      );
 
-    institutionId$
-      .pipe(
-        tap((institutionId) =>
-          this.registerNewUserForm.patchValue({
-            institutionId: institutionId,
+      institutionId$
+        .pipe(
+          tap((institutionId) =>
+            this.registerNewUserForm.patchValue({
+              institutionId: institutionId,
+            }),
+          ),
+          switchMap(() => {
+            const user = {
+              username: this.registerNewUserForm.get("username")?.value,
+              password: this.registerNewUserForm.get("password")?.value,
+              email: this.registerNewUserForm.get("email")?.value,
+              givenName: this.registerNewUserForm.get("givenName")?.value,
+              familyName: this.registerNewUserForm.get("familyName")?.value,
+              institutionId:
+                this.registerNewUserForm.get("institutionId")?.value,
+              legalStatus: this.registerNewUserForm.get("legalStatus")?.value,
+              gender:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("gender")?.value,
+              race:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("race")?.value,
+              hasPhd:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("hasPhd")?.value,
+              yearOfPhdCompletion:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("phdYear")?.value,
+            } as NewUserDetails;
+            return this.userService.createUser(user);
           }),
-        ),
-        switchMap(() => {
-          const user = {
-            username: this.registerNewUserForm.get("username")?.value,
-            password: this.registerNewUserForm.get("password")?.value,
-            email: this.registerNewUserForm.get("email")?.value,
-            givenName: this.registerNewUserForm.get("givenName")?.value,
-            familyName: this.registerNewUserForm.get("familyName")?.value,
-            institutionId: this.registerNewUserForm.get("institutionId")?.value,
-            legalStatus: this.registerNewUserForm.get("legalStatus")?.value,
-            gender: this.registerNewUserForm.get("gender")?.value,
-            race: this.registerNewUserForm.get("race")?.value,
-            hasPhd: this.registerNewUserForm.get("hasPhd")?.value,
-            yearOfPhdCompletion: this.registerNewUserForm.get("phdYear")?.value,
-          } as NewUserDetails;
-
-          return this.userService.createUser(user);
-        }),
-        catchError((err) => {
-          this.error = err.message;
-          this.loading = false;
-          return of(null);
-        }),
-      )
-      .subscribe((user) => {
-        if (user) {
-          window.alert(
-            "You have successfully registered.\nYou may to proceed to log in.",
-          );
-          this.loading = false;
-        }
-      });
+          catchError((err) => {
+            this.error = err.message;
+            this.loading = false;
+            return of(null);
+          }),
+        )
+        .subscribe((user) => {
+          if (user) {
+            window.alert(
+              "You have successfully registered.\nYou may to proceed to log in.",
+            );
+            this.loading = false;
+          }
+        });
+    }
   }
 
   clearError(): void {

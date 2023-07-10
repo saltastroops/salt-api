@@ -1,8 +1,8 @@
-def dockerAgent() {
-  return dockerfile {
+def dockerfileConfig() {
+  return {
     filename 'Dockerfile'
     dir 'jenkins'
-    args '-v saltapi-pipcache:/root/.cache/pip -u 0:0'
+    args '-v saltapi-pipcache:/root/.cache -u 0:0'
   }
 }
 
@@ -12,7 +12,7 @@ pipeline {
   stages {
     stage('Perform linting tests') {
       agent {
-        dockerAgent()
+        dockerfile dockerfileConfig()
       }
       steps {
         echo 'Linting...'

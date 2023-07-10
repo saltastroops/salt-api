@@ -3,6 +3,13 @@ pipeline {
 
   stages {
     stage('Perform linting tests') {
+      agent {
+        dockerfile {
+          filename 'Dockerfile'
+          dir 'jenkins'
+          args '-v saltapi-pipcache:/root/.cache/pip -u 0:0'
+        }
+      }
       steps {
         echo 'Linting...'
       }

@@ -1,6 +1,6 @@
 def dockerfileConfig() {
   return {
-    filename 'Dockerfile'
+    filename 'Dockerfile2'
     dir 'jenkins'
     args '-v saltapi-pipcache:/root/.cache -u 0:0'
   }

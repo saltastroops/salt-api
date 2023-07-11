@@ -9,13 +9,13 @@ pipeline {
         dockerfile {
           filename 'Dockerfile'
           dir 'jenkins'
-          args '-v saltapi-pipcache:/root/.cache/pip -u 0:0'
+          args '-v saltapi-pipcache:/root/.cache/pypoetry -u 0:0'
         }
       }
 
       steps {
         sh '''
-        . /venv/bin/activate
+        poetry add --group=dev allure-pytest
         poetry install
         '''
         script {

@@ -15,7 +15,7 @@ pipeline {
 
       steps {
         sh '''
-        poetry add --group=dev allure-pytest bandit black mypy pytest ruff'
+        poetry add --group=dev allure-pytest bandit black mypy pytest ruff
         poetry install
         '''
         script {
@@ -25,7 +25,7 @@ pipeline {
                   // 'mypy': ['src'],
                   // 'pytest': ['tests'],
                   'ruff': ['src', 'tests'],
-
+                  'usePoetry': true
           )
           if (!success) {
             error('Linting and/or testing was unsuccessful.')

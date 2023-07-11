@@ -14,12 +14,15 @@ pipeline {
       }
 
       steps {
+        sh 'poetry add --group=dev allure-pytest bandit black mypy pytest ruff'
         script {
           success = saao.runPythonTests(
+                  'bandit': ['src'],
                   'black': ['src', 'tests'],
                   // 'mypy': ['src'],
                   // 'pytest': ['tests'],
-                  'ruff': ['src', 'tests']
+                  'ruff': ['src', 'tests'],
+                  'usePoetry': true
           )
           if (!success) {
             error('Linting and/or testing was unsuccessful.')

@@ -4,7 +4,7 @@ import saltapi
 from saltapi.web.schema.proposal import ProposalProgressInput
 
 
-def test_proposal_progress_validates_values(mocker: MockerFixture):
+def test_proposal_progress_validates_values(mocker: MockerFixture) -> None:
     mocker.patch("saltapi.web.schema.proposal.parse_partner_requested_percentages")
     value = "RSA:100"
     ppi = ProposalProgressInput(

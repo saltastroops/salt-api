@@ -2,6 +2,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 from unittest.mock import patch
+from pytest_mock import MockerFixture
 
 import freezegun
 import pytest
@@ -485,13 +486,13 @@ def test_get_current_version_returns_correct_version(
     proposal_code: str, version: int, db_connection: Connection
 ) -> None:
     proposal_repository = ProposalRepository(db_connection)
-    assert proposal_repository.get_current_version(proposal_code) == version
+    assert proposal_repository._get_current_version(proposal_code) == version
 
 
 def test_get_current_version_raises_not_found_error(db_connection: Connection) -> None:
     proposal_repository = ProposalRepository(db_connection)
     with pytest.raises(NotFoundError):
-        proposal_repository.get_current_version("idontexist")
+        proposal_repository._get_current_version("idontexist")
 
 
 @pytest.mark.parametrize(
@@ -547,14 +548,14 @@ def test_proprietary_period_start_date_returns_correct_start_date(
     block_visits: List[Dict[str, Any]],
     expected_date: datetime,
     db_connection: Connection,
-    monkeypatch,
+    monkeypatch: MockerFixture,
 ) -> None:
     with patch("saltapi.repository.proposal_repository.datetime") as mock_datetime:
         mock_datetime.today.return_value = mock_now
         mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
         proposal_repository = ProposalRepository(db_connection)
         assert (
-            proposal_repository.proprietary_period_start_date(block_visits)
+            proposal_repository._proprietary_period_start_date(block_visits)
             == expected_date
         )
 
@@ -645,7 +646,7 @@ def test_current_phase1_version(
     proposal_repository = ProposalRepository(db_connection)
 
     assert (
-        proposal_repository.get_current_phase1_version(proposal_code)
+        proposal_repository._get_current_phase1_version(proposal_code)
         == expected_current_version
     )
 

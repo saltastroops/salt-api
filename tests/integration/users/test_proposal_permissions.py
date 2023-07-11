@@ -9,7 +9,7 @@ BASE_URL = "/users/42/"
 PROPOSAL_CODE = "2018-2-LSP-001"
 
 
-def test_unauthenticated_users_cannot_view_proposal_permissions(client: TestClient):
+def test_unauthenticated_users_cannot_view_proposal_permissions(client: TestClient) -> None:
     not_authenticated(client)
     response = client.get(BASE_URL + "proposal-permissions")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -36,7 +36,7 @@ def test_unauthenticated_users_cannot_view_proposal_permissions(client: TestClie
 )
 def test_unauthorized_users_cannot_view_proposal_permissions(
     username: str, client: TestClient
-):
+) -> None:
     authenticate(username, client)
     response = client.get(BASE_URL + "proposal-permissions")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -57,7 +57,7 @@ def test_proposal_permissions_for_unknown_user_are_not_found(
         find_username("Administrator"),
     ],
 )
-def test_proposal_permission_can_be_viewed(username: str, client: TestClient):
+def test_proposal_permission_can_be_viewed(username: str, client: TestClient) -> None:
     authenticate(username, client)
     response = client.get(BASE_URL + "proposal-permissions")
 
@@ -67,7 +67,7 @@ def test_proposal_permission_can_be_viewed(username: str, client: TestClient):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_unauthenticated_users_cannot_grant_proposal_permissions(client: TestClient):
+def test_unauthenticated_users_cannot_grant_proposal_permissions(client: TestClient) -> None:
     not_authenticated(client)
     permission = {"proposal_code": PROPOSAL_CODE, "permission_type": "View"}
     response = client.post(BASE_URL + "grant-proposal-permission", json=permission)
@@ -93,7 +93,7 @@ def test_unauthenticated_users_cannot_grant_proposal_permissions(client: TestCli
 )
 def test_unauthorized_users_cannot_grant_proposal_permissions(
     username: str, client: TestClient
-):
+) -> None:
     authenticate(username, client)
     permission = {"proposal_code": PROPOSAL_CODE, "permission_type": "View"}
     response = client.post(BASE_URL + "grant-proposal-permission", json=permission)
@@ -127,7 +127,7 @@ def test_granting_permission_for_unknown_permission_type_gives_unprocessable_err
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_unauthenticated_users_cannot_revoke_proposal_permissions(client: TestClient):
+def test_unauthenticated_users_cannot_revoke_proposal_permissions(client: TestClient) -> None:
     not_authenticated(client)
     permission = {"proposal_code": PROPOSAL_CODE, "permission_type": "View"}
     response = client.post(BASE_URL + "revoke-proposal-permission", json=permission)
@@ -153,7 +153,7 @@ def test_unauthenticated_users_cannot_revoke_proposal_permissions(client: TestCl
 )
 def test_unauthorized_users_cannot_revoke_proposal_permissions(
     username: str, client: TestClient
-):
+) -> None:
     authenticate(username, client)
     permission = {"proposal_code": PROPOSAL_CODE, "permission_type": "View"}
     response = client.post(BASE_URL + "revoke-proposal-permission", json=permission)
@@ -202,7 +202,7 @@ def test_revoking_permission_for_unknown_permission_type_gives_unprocessable_err
 )
 def test_proposal_permission_can_be_granted_and_revoked(
     username: str, client: TestClient
-):
+) -> None:
     admin = find_username("Administrator")
 
     authenticate(username, client)
@@ -246,7 +246,7 @@ def test_proposal_permission_can_be_granted_and_revoked(
     assert len(response.json()) == 0
 
 
-def test_granting_and_revoking_proposal_permission_is_idempotent(client: TestClient):
+def test_granting_and_revoking_proposal_permission_is_idempotent(client: TestClient) -> None:
     authenticate(find_username("Administrator"), client)
     permission = {"proposal_code": PROPOSAL_CODE, "permission_type": "View"}
 

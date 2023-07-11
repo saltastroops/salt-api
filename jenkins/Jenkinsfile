@@ -4,17 +4,27 @@ pipeline {
   agent any
 
   stages {
-    agent {
-      dockerfile {
-        filename 'Dockerfile2'
-        dir 'jenkins'
-        args '-v saltapi-pipcache:/root/.cache -u 0:0'
+    stage('Perform linting and testing') {
+      agent {
+        dockerfile {
+          filename 'Dockerfile2'
+          dir 'jenkins'
+          args '-v saltapi-pipcache:/root/.cache -u 0:0'
+        }
       }
-    }
 
-    stage('Perform linting tests') {
       steps {
-        echo 'Linting...'
+        script {
+          success = saao.runPythonTests(
+                  'black': ['src', 'tests'],
+                  // 'mypy': ['src'],
+                  // 'pytest': ['tests'],
+                  'ruff': ['src', 'tests']
+          )
+          if (!success) {
+            error('Linting and/or testing was unsuccessful.')
+          }
+        }
       }
     }
   }

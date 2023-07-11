@@ -9,12 +9,15 @@ pipeline {
         dockerfile {
           filename 'Dockerfile'
           dir 'jenkins'
-          args '-v saltapi-pipcache:/root/.cache -u 0:0'
+          args '-v saltapi-pipcache:/root/.cache/pip -u 0:0'
         }
       }
 
       steps {
-        sh 'poetry add --group=dev allure-pytest bandit black mypy pytest ruff'
+        sh '''
+        poetry add --group=dev allure-pytest bandit black mypy pytest ruff'
+        poetry install
+        '''
         script {
           success = saao.runPythonTests(
                   'bandit': ['src'],
@@ -22,7 +25,7 @@ pipeline {
                   // 'mypy': ['src'],
                   // 'pytest': ['tests'],
                   'ruff': ['src', 'tests'],
-                  'usePoetry': true
+
           )
           if (!success) {
             error('Linting and/or testing was unsuccessful.')

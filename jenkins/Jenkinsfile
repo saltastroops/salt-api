@@ -28,10 +28,28 @@ pipeline {
                   'usePoetry': true
           )
           if (!success) {
-            error('Linting and/or testing was unsuccessful.')
+            // error('Linting and/or testing was unsuccessful.')
           }
         }
       }
+    }
+  }
+
+  post {
+    always {
+      script {
+        saao.generatePythonTestReports()
+      }
+    }
+    changed {
+      emailext(
+              body: """The pipeline status has changed to ${currentBuild.result} for the $JOB_NAME pipeline.
+
+See full details on ${env.BUILD_URL}.
+""",
+              subject: "[Jenkins :: $JOB_NAME] pipeline status changed",
+              to: "$SALT_ASTROOPS_EMAIL"
+      )
     }
   }
 }

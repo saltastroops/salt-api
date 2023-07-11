@@ -15,7 +15,7 @@ pipeline {
 
       steps {
         sh '''
-        poetry add --group=dev allure-pytest bandit black mypy pytest ruff
+        
         poetry install
         '''
         script {

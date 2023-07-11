@@ -1,19 +1,18 @@
-def dockerfileConfig() {
-  return {
-    filename 'Dockerfile2'
-    dir 'jenkins'
-    args '-v saltapi-pipcache:/root/.cache -u 0:0'
-  }
-}
+@Library('saao-shared-library') _
 
 pipeline {
   agent any
 
   stages {
-    stage('Perform linting tests') {
-      agent {
-        dockerfile dockerfileConfig()
+    agent {
+      dockerfile {
+        filename 'Dockerfile2'
+        dir 'jenkins'
+        args '-v saltapi-pipcache:/root/.cache -u 0:0'
       }
+    }
+
+    stage('Perform linting tests') {
       steps {
         echo 'Linting...'
       }

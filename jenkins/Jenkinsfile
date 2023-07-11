@@ -15,6 +15,7 @@ pipeline {
 
       steps {
         sh '''
+        . /venv/bin/activate
         poetry install
         '''
         script {

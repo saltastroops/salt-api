@@ -15,16 +15,15 @@ pipeline {
 
       steps {
         sh '''
-        
         poetry install
         '''
         script {
           success = saao.runPythonTests(
-                  'bandit': ['src'],
-                  'black': ['src', 'tests'],
-                  // 'mypy': ['src'],
+                  'bandit': ['saltapi'],
+                  'black': ['saltapi', 'tests'],
+                  // 'mypy': ['saltapi'],
                   // 'pytest': ['tests'],
-                  'ruff': ['src', 'tests'],
+                  'ruff': ['saltapi', 'tests'],
                   'usePoetry': true
           )
           if (!success) {

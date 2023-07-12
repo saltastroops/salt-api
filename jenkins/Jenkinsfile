@@ -22,13 +22,13 @@ pipeline {
           success = saao.runPythonTests(
                   'bandit': ['saltapi'],
                   'black': ['saltapi', 'tests'],
-                  // 'mypy': ['saltapi'],
-                  // 'pytest': ['tests'],
+                   'mypy': ['saltapi'],
+                   'pytest': ['tests'],
                   'ruff': ['saltapi', 'tests'],
                   'usePoetry': true
           )
           if (!success) {
-            // error('Linting and/or testing was unsuccessful.')
+            error('Linting and/or testing was unsuccessful.')
           }
         }
       }

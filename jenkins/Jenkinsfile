@@ -46,7 +46,7 @@ pipeline {
                   'host': 'ssdadev.cape.saao.ac.za',
                   'hostCredentialsId': 'saltapi_dev_host',
                   'imageName': 'saltapi',
-                  'registryCredentialsId': 'saltapi_dev_registry',
+                  'registryCredentialsId': 'saltapi_registry',
                   'registryUrl': 'http://ukulinga.com',
                   'secretFiles': ['saltapi_dev_env': '.env']
           )

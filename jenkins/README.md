@@ -42,13 +42,13 @@ Environment variables can be set via Manage Jenkins - Configure System (cf. [thi
 
 The following credentials need to be defined.
 
-| Credentials id | Credentials type              | Description                                            |
-|--------------|-------------------------------|--------------------------------------------------------|
-| registryCredentialsId | Username with password | Username and password for the container registry       |
-| saltapi_dev_env | Secret file | `.env` file for the development server (see below)     |
+| Credentials id   | Credentials type              | Description                                            |
+|------------------|-------------------------------|--------------------------------------------------------|
+| saltapi_dev_env  | Secret file | `.env` file for the development server (see below)     |
 | saltapi_dev_host | SSH username with private key | Username on the development server and private SSH key |
-| saltapi_env | Secret file | `.env` file for the production server (see below)      |
-| saltapi_host | SSH username with private key | Username on the production server and private SSH key  |
+| saltapi_env      | Secret file | `.env` file for the production server (see below)      |
+| saltapi_host     | SSH username with private key | Username on the production server and private SSH key  |
+| saltapi_registry | Username with password | Username and password for the container registry       |
 
 See the section "SSH keys" above for details regarding the SSH keys.
 

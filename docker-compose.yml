@@ -6,7 +6,7 @@ version: "3"
 
 services:
   saltapi:
-    image: ${DOCKER_REGISTRY}/${DOCKER_REGISTRY_USERNAME}/salt-api:${TAG}
+    image: ${REGISTRY}/${REGISTRY_USERNAME}/salt-api:${TAG}
     env_file:
       - .env
     environment:

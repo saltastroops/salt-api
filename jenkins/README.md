@@ -24,13 +24,17 @@ You need to create credentials of type "GitHub App" for this GitHub App. The App
 
 ![GitHub App credentials](img/github_app_credentials.png)
 
+### Remote servers
+
+The workflow connects via SSH to the development and the production server. This requires that a public SSH key is stored in the `authorized_keys` file of the user on these servers and that the corresponding private key is stored along with the username in the Jenkins credentials. See [this Stack Overflow entry](https://stackoverflow.com/questions/37331571/how-to-setup-ssh-keys-for-jenkins-to-publish-via-ssh) for more details.
+
 ### Environment variables
 
 The following environment variable needs to be defined.
 
-| Environment variable | Description                                                                                   | Example value        |
-|----------------------|-----------------------------------------------------------------------------------------------|----------------------|
-| SALT_ASTROOPS_EMAIL  | Email address for SALT Astronomy Operations. This is used for pipeline failure notifications. | astroops@example.com |
+| Environment variable | Description                                                                           | Example value        |
+|----------------------|---------------------------------------------------------------------------------------|----------------------|
+| SALT_ASTROOPS_EMAIL  | Email address for SALT Astronomy Operations. This is used for pipeline notifications. | astroops@example.com |
 
 Environment variables can be set via Manage Jenkins - Configure System (cf. [this Stack Overflow entry](https://stackoverflow.com/questions/54207815/does-jenkins-have-a-feature-like-credentials-for-non-secrets)).
 
@@ -38,10 +42,19 @@ Environment variables can be set via Manage Jenkins - Configure System (cf. [thi
 
 The following credentials need to be defined.
 
-| Credentials id          | Credentials type       | Description                                                                                   |
-|-------------------------|------------------------|-----------------------------------------------------------------------------------------------|
-| saltastroops_dev_pypi   | Username with password | Credentials for authenticating on the development PyPI server (https://pypi.cape.saao.ac.za). | 
-| saltastroops_pypi_token | Secret string          | Token for authenticating the user `saltastroops` on the PyPI server (https://pypi.org).       | 
+| Credentials id | Credentials type              | Description                                            |
+|--------------|-------------------------------|--------------------------------------------------------|
+| registryCredentialsId | Username with password | Username and password for the container registry       |
+| saltapi_dev_env | Secret file | `.env` file for the development server (see below)     |
+| saltapi_dev_host | SSH username with private key | Username on the development server and private SSH key |
+| saltapi_env | Secret file | `.env` file for the production server (see below)      |
+| saltapi_host | SSH username with private key | Username on the production server and private SSH key  |
+
+See the section "SSH keys" above for details regarding the SSH keys.
+
+The `.env` files define the various environment variables required for running the respective SALT API server. The settings defined in the module `saltapi.settings` must be defined as environment variables in the `.env` file. Note that the setting names are case-insensitive; so you may use all-uppercase for environment variable names.
+
+In addition, the `.env` files must define an environment variable `PORT`, which sets the port number on which the deployed Docker container is listening. As an example, if `PORT` is `8002` and the host URL is saltapi.example.com, then the deployed API can be reached at saltapi.example.com:8002.
 
 ### Email Extension plugin
 

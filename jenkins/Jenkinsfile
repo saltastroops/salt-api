@@ -33,6 +33,26 @@ pipeline {
         }
       }
     }
+
+    stage('Deploy to development server') {
+      when {
+        branch: 'jenkins'
+      }
+      steps {
+        script {
+          saao.deployContainer(
+                  'dockerComposeFile': 'docker-compose.yml',
+                  'dockerFile': 'Dockerfile',
+                  'host': 'ssdadev.cape.saao.ac.za',
+                  'hostCredentialsId': 'saltapi_dev_host',
+                  'imageName': 'saltapi',
+                  'registryCredentialsId': 'saltapi_dev_registry',
+                  'registryUrl': 'http://ukulinga.com',
+                  'secretFiles': ['saltapi_dev_env': '.env']
+          )
+        }
+      }
+    }
   }
 
   post {

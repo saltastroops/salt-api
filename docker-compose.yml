@@ -6,10 +6,11 @@ version: "3"
 
 services:
   saltapi:
-    image: ${DOCKER_REGISTRY}/${DOCKER_REGISTRY_USERNAME}/salt-api:${TAG}
+    image: ${REGISTRY}/${REGISTRY_USERNAME}/saltapi:${TAG}
     env_file:
       - .env
     environment:
+      - PORT
       - PROPOSALS_DIR=/proposals
       - SECRET_KEY
       - SDB_DSN

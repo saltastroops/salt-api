@@ -1,5 +1,4 @@
 black saltapi tests --preview && \
-isort saltapi tests && \
-flake8 saltapi tests && \
+ruff saltapi tests && \
 mypy saltapi && \
 pytest

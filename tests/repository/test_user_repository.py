@@ -17,8 +17,8 @@ user_statistics = {
     "legal_status": "South African citizen",
     "gender": "Male",
     "race": "African",
-    "is_phd": True,
-    "year_of_phd": 2020,
+    "has_phd": True,
+    "year_of_phd_completion": 2020,
 }
 
 

@@ -271,7 +271,7 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": self._proprietary_period_start_date(block_visits),
+            "start_date": self.proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
         general_info["data_release_date"] = self._data_release_date(
@@ -1373,7 +1373,7 @@ WHERE PC.Proposal_Code = :proposal_code;
 
         return bool(cast(int, one) if one is not None else 0 > 0)
 
-    def _get_current_version(self, proposal_code: str) -> int:
+    def get_current_version(self, proposal_code: str) -> int:
         """
         Return the current version (number) of a proposal.
 
@@ -1402,7 +1402,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return cast(int, version)
 
-    def _get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
+    def get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
         """
         Return the current version (number) of a proposal.
 
@@ -1788,7 +1788,7 @@ WHERE PC.Proposal_Code = :proposal_code
            The file path.
 
         """
-        current_phase1_version = self._get_current_phase1_version(proposal_code)
+        current_phase1_version = self.get_current_phase1_version(proposal_code)
         if current_phase1_version is None:
             raise NotFoundError(
                 f"There exists no phase 1 proposal summary for proposal {proposal_code}"
@@ -1825,7 +1825,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         """
         proposals_dir = get_settings().proposals_dir
-        version = self._get_current_version(proposal_code)
+        version = self.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
             raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
@@ -2036,7 +2036,7 @@ VALUES (
         )
 
     @staticmethod
-    def _proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
+    def proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
         # find the latest observation
 
         observation_night: Optional[date] = None
@@ -2066,7 +2066,7 @@ VALUES (
     def _data_release_date(
         self, proprietary_period: int, block_visits: List[dict[str, Any]]
     ) -> Optional[date]:
-        proprietary_period_start = self._proprietary_period_start_date(block_visits)
+        proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
         if proprietary_period is None:
             return None

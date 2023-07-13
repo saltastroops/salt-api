@@ -1916,14 +1916,10 @@ WHERE PC.Proposal_Code = :proposal_code
                 proposal_code, semester
             )
             progress_report["last_observing_constraints"] = {
-                "seeing": current_conditions["seeing"] if current_conditions else None,
-                "transparency": current_conditions["transparency"]
-                if current_conditions
-                else None,
-                "description": current_conditions["description"]
-                if current_conditions
-                else None,
-            }
+                "seeing": current_conditions["seeing"],
+                "transparency": current_conditions["transparency"],
+                "description": current_conditions["description"],
+            } if current_conditions else None
 
             # The requested observing conditions, on the other hand, are those
             # of the next semester. These should exist (as there exists a progress

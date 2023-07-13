@@ -333,10 +333,8 @@ def test_should_return_phase1_proposal_summary_file(
     proposal_dir = tmp_path / proposal_code
     proposal_dir.mkdir()
     (proposal_dir / "1").mkdir()
-    (proposal_dir / "2").mkdir()
-    (proposal_dir / "3").mkdir()
     summary_content = b"This is a summary."
-    proposal_file = proposal_dir / "3" / "Summary.pdf"
+    proposal_file = proposal_dir / "1" / "Summary.pdf"
     proposal_file.write_bytes(summary_content)
 
     class MockSettings(NamedTuple):
@@ -347,7 +345,7 @@ def test_should_return_phase1_proposal_summary_file(
 
     # Request the summary file
     monkeypatch.setattr(
-        saltapi.repository.proposal_repository, "get_settings", mock_get_settings
+        "saltapi.repository.proposal_repository.get_settings", mock_get_settings
     )
     username = find_username("SALT Astronomer")
     authenticate(username, client)
@@ -384,7 +382,7 @@ def test_should_return_proposal_file(
 
     # Request the proposal file
     monkeypatch.setattr(
-        "saltapi.service.proposal_service.get_settings", mock_get_settings
+        "saltapi.repository.proposal_repository.get_settings", mock_get_settings
     )
     username = find_username("SALT Astronomer")
     authenticate(username, client)

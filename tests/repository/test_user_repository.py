@@ -9,7 +9,7 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.user_repository import UserRepository
-from saltapi.service.user import NewUserDetails, UserUpdate, UserStatistics
+from saltapi.service.user import NewUserDetails, UserStatistics, UserUpdate
 from tests.conftest import find_usernames
 from tests.markers import nodatabase
 
@@ -136,11 +136,16 @@ def test_patch_raises_error_for_non_existing_user(db_connection: Connection) -> 
     user_repository = UserRepository(db_connection)
     with pytest.raises(NotFoundError):
         user_repository.update(
-            0, UserUpdate(username=None, password=None,legal_status=user_statistics.legal_status,
-                          gender=user_statistics.gender,
-                          race=user_statistics.race,
-                          has_phd=user_statistics.has_phd,
-                          year_of_phd_completion=user_statistics.year_of_phd_completion,)
+            0,
+            UserUpdate(
+                username=None,
+                password=None,
+                legal_status=user_statistics.legal_status,
+                gender=user_statistics.gender,
+                race=user_statistics.race,
+                has_phd=user_statistics.has_phd,
+                year_of_phd_completion=user_statistics.year_of_phd_completion,
+            ),
         )
 
 
@@ -150,11 +155,16 @@ def test_patch_uses_existing_values_by_default(db_connection: Connection) -> Non
     user_id = 1602
     old_user_details = user_repository.get(user_id)
     user_repository.update(
-        user_id, UserUpdate(username=None, password=None,legal_status=user_statistics.legal_status,
-                            gender=user_statistics.gender,
-                            race=user_statistics.race,
-                            has_phd=user_statistics.has_phd,
-                            year_of_phd_completion=user_statistics.year_of_phd_completion,)
+        user_id,
+        UserUpdate(
+            username=None,
+            password=None,
+            legal_status=user_statistics.legal_status,
+            gender=user_statistics.gender,
+            race=user_statistics.race,
+            has_phd=user_statistics.has_phd,
+            year_of_phd_completion=user_statistics.year_of_phd_completion,
+        ),
     )
     new_user_details = user_repository.get(user_id)
 
@@ -174,11 +184,15 @@ def test_patch_replaces_existing_values(db_connection: Connection) -> None:
 
     user_repository.update(
         user_id,
-        UserUpdate(username=new_username, password=new_password,legal_status=user_statistics.legal_status,
-                   gender=user_statistics.gender,
-                   race=user_statistics.race,
-                   has_phd=user_statistics.has_phd,
-                   year_of_phd_completion=user_statistics.year_of_phd_completion,),
+        UserUpdate(
+            username=new_username,
+            password=new_password,
+            legal_status=user_statistics.legal_status,
+            gender=user_statistics.gender,
+            race=user_statistics.race,
+            has_phd=user_statistics.has_phd,
+            year_of_phd_completion=user_statistics.year_of_phd_completion,
+        ),
     )
     new_user_details = user_repository.get(user_id)
 
@@ -194,21 +208,29 @@ def test_patch_is_idempotent(db_connection: Connection) -> None:
 
     user_repository.update(
         user_id,
-        UserUpdate(username=new_username, password=new_password,legal_status=user_statistics.legal_status,
-                   gender=user_statistics.gender,
-                   race=user_statistics.race,
-                   has_phd=user_statistics.has_phd,
-                   year_of_phd_completion=user_statistics.year_of_phd_completion,),
+        UserUpdate(
+            username=new_username,
+            password=new_password,
+            legal_status=user_statistics.legal_status,
+            gender=user_statistics.gender,
+            race=user_statistics.race,
+            has_phd=user_statistics.has_phd,
+            year_of_phd_completion=user_statistics.year_of_phd_completion,
+        ),
     )
     new_user_details_1 = user_repository.get_by_username(new_username)
 
     user_repository.update(
         user_id,
-        UserUpdate(username=new_username, password=new_password,legal_status=user_statistics.legal_status,
-                   gender=user_statistics.gender,
-                   race=user_statistics.race,
-                   has_phd=user_statistics.has_phd,
-                   year_of_phd_completion=user_statistics.year_of_phd_completion,),
+        UserUpdate(
+            username=new_username,
+            password=new_password,
+            legal_status=user_statistics.legal_status,
+            gender=user_statistics.gender,
+            race=user_statistics.race,
+            has_phd=user_statistics.has_phd,
+            year_of_phd_completion=user_statistics.year_of_phd_completion,
+        ),
     )
     new_user_details_2 = user_repository.get_by_username(new_username)
 
@@ -223,11 +245,15 @@ def test_patch_cannot_use_existing_username(db_connection: Connection) -> None:
     with pytest.raises(ValueError):
         user_repository.update(
             user_id,
-            UserUpdate(username=existing_username, password=None,legal_status=user_statistics.legal_status,
-                       gender=user_statistics.gender,
-                       race=user_statistics.race,
-                       has_phd=user_statistics.has_phd,
-                       year_of_phd_completion=user_statistics.year_of_phd_completion,),
+            UserUpdate(
+                username=existing_username,
+                password=None,
+                legal_status=user_statistics.legal_status,
+                gender=user_statistics.gender,
+                race=user_statistics.race,
+                has_phd=user_statistics.has_phd,
+                year_of_phd_completion=user_statistics.year_of_phd_completion,
+            ),
         )
 
 

@@ -1,12 +1,14 @@
 from pytest_mock import MockerFixture
 
-import saltapi
 from saltapi.web.schema.proposal import ProposalProgressInput
 
 
 def test_proposal_progress_validates_values(mocker: MockerFixture) -> None:
     value = "RSA:100"
-    mocked_parser = mocker.patch("saltapi.web.schema.proposal.parse_partner_requested_percentages", return_value=value)
+    mocked_parser = mocker.patch(
+        "saltapi.web.schema.proposal.parse_partner_requested_percentages",
+        return_value=value,
+    )
     ppi = ProposalProgressInput(
         requested_time=3456,
         maximum_seeing=3,

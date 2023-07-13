@@ -2,10 +2,10 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 from unittest.mock import patch
-from pytest_mock import MockerFixture
 
 import freezegun
 import pytest
+from pytest_mock import MockerFixture
 from sqlalchemy.engine import Connection
 
 import saltapi.repository.proposal_repository

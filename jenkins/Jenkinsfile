@@ -52,25 +52,26 @@ pipeline {
           )
         }
       }
+    }
 
-      stage('Deploy to production server') {
-        when {
-          branch 'main'
+    stage('Deploy to production server') {
+      when {
+        branch 'main'
+      }
+      steps {
+        script {
+          saao.deployContainer(
+                  'dockerComposeFile': 'docker-compose.yml',
+                  'dockerFile': 'Dockerfile',
+                  'host': 'sdbsubmit.cape.saao.ac.za',
+                  'hostCredentialsId': 'saltapi_host',
+                  'imageName': 'saltapi',
+                  'registryCredentialsId': 'saltapi_registry',
+                  'registryUrl': 'http://ukulinga.com',
+                  'secretFiles': ['saltapi_env': '.env']
+          )
         }
-        steps {
-          script {
-            saao.deployContainer(
-                    'dockerComposeFile': 'docker-compose.yml',
-                    'dockerFile': 'Dockerfile',
-                    'host': 'sdbsubmit.cape.saao.ac.za',
-                    'hostCredentialsId': 'saltapi_host',
-                    'imageName': 'saltapi',
-                    'registryCredentialsId': 'saltapi_registry',
-                    'registryUrl': 'http://ukulinga.com',
-                    'secretFiles': ['saltapi_env': '.env']
-            )
-          }
-        }
+      }
     }
   }
 

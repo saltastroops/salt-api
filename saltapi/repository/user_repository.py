@@ -861,7 +861,7 @@ WHERE Proposal_Code = :proposal_code
     def _add_gender(self, gender: str) -> int:
         stmt = text(
             """
-INSERT INTO Gender (Gender) VALUES (:gender) 
+INSERT INTO Gender (Gender) VALUES (:gender)
             """
         )
         result = self.connection.execute(
@@ -882,7 +882,7 @@ INSERT INTO Gender (Gender) VALUES (:gender)
     def _add_race(self, race: str) -> int:
         stmt = text(
             """
-INSERT INTO Race (Race) VALUES (:race) 
+INSERT INTO Race (Race) VALUES (:race)
             """
         )
         result = self.connection.execute(stmt, {"race": self._normalize_gender(race)})
@@ -910,9 +910,9 @@ INSERT INTO Race (Race) VALUES (:race)
     ) -> None:
         stmt = text(
             """
-INSERT INTO UserStatistics (PiptUser_Id, SouthAfricanLegalStatus_Id, Gender_Id, Race_Id, PhD, YearOfPhD) 
+INSERT INTO UserStatistics (PiptUser_Id, SouthAfricanLegalStatus_Id, Gender_Id, Race_Id, PhD, YearOfPhD)
 VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_of_phd )
-ON DUPLICATE KEY UPDATE 
+ON DUPLICATE KEY UPDATE
     SouthAfricanLegalStatus_Id = :legal_status_id,
     Gender_Id = :gender_id,
     Race_Id = :race_id,

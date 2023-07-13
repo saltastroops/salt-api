@@ -7,7 +7,6 @@ from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
 from starlette import status
 
-import saltapi.repository.proposal_repository
 from saltapi.repository.user_repository import UserRepository
 from tests.conftest import authenticate, find_username, not_authenticated
 

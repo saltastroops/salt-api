@@ -9,7 +9,7 @@ pipeline {
         dockerfile {
           filename 'Dockerfile'
           dir 'jenkins'
-          args '-v saltapi-pipcache:/root/.cache/pypoetry -u 0:0'
+          args '-v saltapi-poetry-cache:/root/.cache/pypoetry -u 0:0'
         }
       }
 
@@ -22,8 +22,8 @@ pipeline {
           success = saao.runPythonTests(
                   'bandit': ['saltapi'],
                   'black': ['saltapi', 'tests'],
-                   'mypy': ['saltapi', 'tests'],
-                   'pytest': ['tests'],
+                  'mypy': ['saltapi', 'tests'],
+                  'pytest': ['tests'],
                   'ruff': ['saltapi', 'tests'],
                   'usePoetry': true
           )

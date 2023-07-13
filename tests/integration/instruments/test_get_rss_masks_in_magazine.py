@@ -16,25 +16,25 @@ def test_should_return_list_of_rss_masks_in_magazine(
     assert response_all_masks.status_code == status.HTTP_200_OK
 
     response_longslit_masks = client.get(
-        RSS_MASKS_IN_MAGAZINE_URL + "/", params={"mask_types": ["Longslit"]}
+        RSS_MASKS_IN_MAGAZINE_URL + "/", params={"mask-type": ["Longslit"]}
     )
     assert response_longslit_masks.status_code == status.HTTP_200_OK
 
     response_mos_masks = client.get(
         RSS_MASKS_IN_MAGAZINE_URL + "/",
-        params={"mask_types": ["MOS"]},
+        params={"mask-type": ["MOS"]},
     )
     assert response_mos_masks.status_code == status.HTTP_200_OK
 
     response_imaging_masks = client.get(
         RSS_MASKS_IN_MAGAZINE_URL + "/",
-        params={"mask_types": ["Imaging"]},
+        params={"mask-type": ["Imaging"]},
     )
     assert response_imaging_masks.status_code == status.HTTP_200_OK
 
     response_engineering_masks = client.get(
         RSS_MASKS_IN_MAGAZINE_URL + "/",
-        params={"mask_types": ["Engineering"]},
+        params={"mask-type": ["Engineering"]},
     )
     assert response_engineering_masks.status_code == status.HTTP_200_OK
     assert len(response_all_masks.json()) == sum(

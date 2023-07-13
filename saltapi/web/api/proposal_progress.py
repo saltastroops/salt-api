@@ -15,8 +15,7 @@ from starlette import status
 
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
-from saltapi.service.proposal import \
-    ProposalProgressReport as _ProposalProgressReport
+from saltapi.service.proposal import ProposalProgressReport as _ProposalProgressReport
 from saltapi.service.proposal_service import generate_pdf_path
 from saltapi.service.user import User
 from saltapi.web import services

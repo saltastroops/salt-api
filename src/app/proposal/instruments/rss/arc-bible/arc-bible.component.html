@@ -17,11 +17,11 @@
           {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
         </td>
         <td *ngIf="ab.originalExposureTime; else elseBlock">
-          {{ ab.originalExposureTime }}
+          {{ ab.originalExposureTime | number: "1.1-2" }}
         </td>
         <ng-template #elseBlock><td>n/a</td></ng-template>
-        <td>{{ ab.originalExposureTime }}</td>
-        <td>{{ ab.preferredExposureTime }}</td>
+        <td>{{ ab.originalExposureTime | number: "1.1-2" }}</td>
+        <td>{{ ab.preferredExposureTime | number: "1.1-2" }}</td>
       </tr>
     </tbody>
   </table>

@@ -22,7 +22,7 @@ pipeline {
           success = saao.runPythonTests(
                   'bandit': ['saltapi'],
                   'black': ['saltapi', 'tests'],
-                   'mypy': ['saltapi'],
+                   'mypy': ['saltapi', 'tests'],
                    'pytest': ['tests'],
                   'ruff': ['saltapi', 'tests'],
                   'usePoetry': true

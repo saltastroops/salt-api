@@ -1,0 +1,94 @@
+@Library('saao-shared-library') _
+
+pipeline {
+  agent any
+
+  stages {
+    stage('Perform linting and testing') {
+      agent {
+        dockerfile {
+          filename 'Dockerfile'
+          dir 'jenkins'
+          args '-v saltapi-pipcache:/root/.cache/pypoetry -u 0:0'
+        }
+      }
+
+      steps {
+        sh '''
+        poetry add --group=dev allure-pytest
+        poetry install
+        '''
+        script {
+          success = saao.runPythonTests(
+                  'bandit': ['saltapi'],
+                  'black': ['saltapi', 'tests'],
+                   'mypy': ['saltapi'],
+                   'pytest': ['tests'],
+                  'ruff': ['saltapi', 'tests'],
+                  'usePoetry': true
+          )
+          if (!success) {
+            error('Linting and/or testing was unsuccessful.')
+          }
+        }
+      }
+    }
+
+    stage('Deploy to development server') {
+      when {
+        branch 'development'
+      }
+      steps {
+        script {
+          saao.deployContainer(
+                  'dockerComposeFile': 'docker-compose.yml',
+                  'dockerFile': 'Dockerfile',
+                  'host': 'ssdadev.cape.saao.ac.za',
+                  'hostCredentialsId': 'saltapi_dev_host',
+                  'imageName': 'saltapi',
+                  'registryCredentialsId': 'saltapi_registry',
+                  'registryUrl': 'http://ukulinga.com',
+                  'secretFiles': ['saltapi_dev_env': '.env']
+          )
+        }
+      }
+
+      stage('Deploy to production server') {
+        when {
+          branch 'main'
+        }
+        steps {
+          script {
+            saao.deployContainer(
+                    'dockerComposeFile': 'docker-compose.yml',
+                    'dockerFile': 'Dockerfile',
+                    'host': 'sdbsubmit.cape.saao.ac.za',
+                    'hostCredentialsId': 'saltapi_host',
+                    'imageName': 'saltapi',
+                    'registryCredentialsId': 'saltapi_registry',
+                    'registryUrl': 'http://ukulinga.com',
+                    'secretFiles': ['saltapi_env': '.env']
+            )
+          }
+        }
+    }
+  }
+
+  post {
+    always {
+      script {
+        saao.generatePythonTestReports()
+      }
+    }
+    changed {
+      emailext(
+              body: """The pipeline status has changed to ${currentBuild.result} for the $JOB_NAME pipeline.
+
+See full details on ${env.BUILD_URL}.
+""",
+              subject: "[Jenkins :: $JOB_NAME] pipeline status changed",
+              to: "$SALT_ASTROOPS_EMAIL"
+      )
+    }
+  }
+}

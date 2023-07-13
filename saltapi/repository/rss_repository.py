@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Set
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
+from saltapi.exceptions import NotFoundError
 from saltapi.service.instrument import RSS
 from saltapi.util import semester_end, semester_of_datetime
 from saltapi.web.schema.rss import RssMaskType
@@ -606,9 +607,7 @@ WHERE Barcode = :barcode
         row = result.one()
         return {**row}
 
-    def update_mos_mask_metadata(
-        self, mos_mask_metadata: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def update_mos_mask_metadata(self, mos_mask_metadata: Dict[str, Any]) -> None:
         """Update MOS mask metadata"""
         stmt = text(
             """
@@ -617,9 +616,11 @@ SET CutBy = :cut_by, CutDate = :cut_date, saComment = :mask_comment
 WHERE RssMask_Id = ( SELECT RssMask_Id FROM RssMask WHERE Barcode = :barcode )
     """
         )
-        self.connection.execute(stmt, mos_mask_metadata)
 
-        return self.get_mos_mask_metadata(mos_mask_metadata["barcode"])
+        result = self.connection.execute(stmt, mos_mask_metadata)
+
+        if not result.rowcount:
+            raise NotFoundError()
 
     def get_obsolete_rss_masks_in_magazine(
         self, mask_types: List[RssMaskType]

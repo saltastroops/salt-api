@@ -30,14 +30,10 @@
       <div class="form-group">
         <label class="label">Password</label>
         <input
-          (ngModelChange)="clearError()"
           type="password"
           formControlName="password"
           class="input"
           data-test="password"
-          [ngClass]="{
-            'is-danger': f.password.touched && f.password.errors
-          }"
         />
         <div
           *ngIf="f.password.touched && f.password.errors"
@@ -72,11 +68,7 @@
           }"
         />
         <div
-          *ngIf="
-            f.confirmPassword.touched &&
-            f.confirmPassword.errors &&
-            registerNewUserForm.errors
-          "
+          *ngIf="f.confirmPassword.touched && registerNewUserForm.errors"
           class="invalid-feedback"
         >
           <div
@@ -87,7 +79,7 @@
             Confirmation password is required
           </div>
           <div
-            *ngIf="f.confirmPassword.touched && registerNewUserForm.errors?.['notMatched']"
+            *ngIf="f.confirmPassword.dirty && registerNewUserForm.errors?.['notMatched']"
             class="has-text-danger"
             data-test="error"
           >
@@ -151,16 +143,18 @@
 
     <div class="form-group input-section">
       <label class="label">Partner</label>
-      <select
-        #partner
-        formControlName="partner"
-        (change)="onSelectPartner(partner.value)"
-      >
-        <option value="null">please select partner</option>
-        <option *ngFor="let partner of partners" [value]="partner">
-          {{ partner }}
-        </option>
-      </select>
+      <div class="select">
+        <select
+          #partner
+          formControlName="partner"
+          (change)="onSelectPartner(partner.value)"
+        >
+          <option value="null">please select partner</option>
+          <option *ngFor="let partner of partners" [value]="partner">
+            {{ partner }}
+          </option>
+        </select>
+      </div>
       <div
         *ngIf="f.partner.touched && f.partner.errors"
         class="invalid-feedback"
@@ -183,18 +177,20 @@
     <div *ngIf="partnerInstitutions">
       <div class="form-group input-section">
         <label class="label">Institute</label>
-        <select formControlName="institutionId">
-          <option value="null">please select institute</option>
-          <option
-            *ngFor="let institute of partnerInstitutions"
-            [value]="institute.institutionId"
-          >
-            {{ institutionString(institute) }}
-          </option>
-          <option *ngIf="showAddNewInstitutionControls" value="0">
-            ADD NEW INSTITUTE
-          </option>
-        </select>
+        <div class="select">
+          <select formControlName="institutionId">
+            <option value="null">please select institute</option>
+            <option
+              *ngFor="let institute of partnerInstitutions"
+              [value]="institute.institutionId"
+            >
+              {{ institutionString(institute) }}
+            </option>
+            <option *ngIf="showAddNewInstitutionControls" value="0">
+              ADD NEW INSTITUTE
+            </option>
+          </select>
+        </div>
         <div
           *ngIf="f.institutionId.touched && f.institutionId.errors"
           class="invalid-feedback"
@@ -343,10 +339,16 @@
       </div>
     </div>
 
+    <div class="user-statistics">
+      <wm-sa-form
+        [userDetailsForm]="registerNewUserForm"
+        [error]="statisticsError"
+      ></wm-sa-form>
+    </div>
     <div class="form-group input-section">
       <input
         type="submit"
-        class="button is-small"
+        class="button is-small is-info"
         [ngClass]="{ 'is-loading': loading }"
         id="register-new-user"
         value="Register new user"

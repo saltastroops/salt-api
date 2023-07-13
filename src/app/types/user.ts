@@ -40,4 +40,16 @@ export interface NewUserDetails {
   password: string;
   email: string;
   institutionId: number;
+  legalStatus: string;
+  gender: string | null;
+  race: string | null;
+  hasPhd: string | null;
+  yearOfPhdCompletion: number | null;
+}
+
+export interface StatisticsError {
+  legalStatus: string | undefined;
+  gender: string | undefined;
+  race: string | undefined;
+  phd: string | undefined;
 }

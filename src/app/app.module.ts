@@ -124,6 +124,7 @@ import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/sa
 import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
+import { SaFormComponent } from './login/sa-form/sa-form.component';
 
 @NgModule({
   declarations: [
@@ -233,6 +234,7 @@ import { SortDirective } from "./sort.directive";
     RssConfigRowComponent,
     HrsConfigRowComponent,
     P1ObservationsComponent,
+    SaFormComponent,
   ],
   imports: [
     BrowserModule,

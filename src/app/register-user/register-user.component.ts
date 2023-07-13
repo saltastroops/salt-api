@@ -23,7 +23,7 @@ import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
 import { Partner, PartnerCode } from "../types/common";
 import { Institution, NewInstitutionDetails } from "../types/institution";
-import { NewUserDetails } from "../types/user";
+import { NewUserDetails, StatisticsError } from "../types/user";
 
 @Component({
   selector: "wm-register-user",
@@ -39,6 +39,12 @@ export class RegisterUserComponent implements OnInit {
   partners!: Partner[];
   partnerInstitutions!: Institution[];
   showAddNewInstitutionControls = false;
+  statisticsError: StatisticsError = {
+    legalStatus: undefined,
+    race: undefined,
+    gender: undefined,
+    phd: undefined,
+  };
   selectedInstitutionId!: number;
   institutionId$!: Observable<number>;
   DEBOUNCE_TIME = 100;
@@ -75,7 +81,7 @@ export class RegisterUserComponent implements OnInit {
     this.registerNewUserForm = this.formBuilder.group(
       {
         username: ["", Validators.required],
-        password: ["", Validators.required, Validators.minLength(6)],
+        password: ["", [Validators.required, Validators.minLength(6)]],
         confirmPassword: ["", Validators.required],
         givenName: ["", Validators.required],
         familyName: ["", Validators.required],
@@ -86,6 +92,11 @@ export class RegisterUserComponent implements OnInit {
         department: [null],
         url: [null],
         address: [null],
+        legalStatus: [null, Validators.required],
+        gender: [""],
+        race: [""],
+        phdYear: [""],
+        hasPhd: [""],
       },
       { validators: this.passwordMatchingValidator },
     );
@@ -100,67 +111,84 @@ export class RegisterUserComponent implements OnInit {
   registerNewUser(): void {
     this.registerNewUserForm.markAllAsTouched();
 
+    this.validateStatistics();
+
     // stop here if form is invalid
-    if (this.registerNewUserForm.invalid) {
-      return;
-    }
+    if (this.registerNewUserForm.valid) {
+      this.loading = true;
 
-    this.loading = true;
+      const newInstitution = {
+        institutionName: this.registerNewUserForm.get("institutionName")?.value,
+        department: this.registerNewUserForm.get("department")?.value,
+        address: this.registerNewUserForm.get("address")?.value,
+        url: this.registerNewUserForm.get("url")?.value,
+      } as NewInstitutionDetails;
 
-    const newInstitution = {
-      institutionName: this.registerNewUserForm.get("institutionName")?.value,
-      department: this.registerNewUserForm.get("department")?.value,
-      address: this.registerNewUserForm.get("address")?.value,
-      url: this.registerNewUserForm.get("url")?.value,
-    } as NewInstitutionDetails;
+      const newInstitutionId$ = this.institutionService
+        .createInstitution(newInstitution)
+        .pipe(map((institution) => institution.institutionId));
 
-    const newInstitutionId$ = this.institutionService
-      .createInstitution(newInstitution)
-      .pipe(map((institution) => institution.institutionId));
-
-    const institutionId$ = interval(1000).pipe(
-      mergeMap(() =>
-        iif(
-          () => this.showAddNewInstitutionControls,
-          newInstitutionId$,
-          of(parseInt(this.registerNewUserForm.get("institutionId")?.value)),
+      const institutionId$ = interval(1000).pipe(
+        mergeMap(() =>
+          iif(
+            () => this.showAddNewInstitutionControls,
+            newInstitutionId$,
+            of(parseInt(this.registerNewUserForm.get("institutionId")?.value)),
+          ),
         ),
-      ),
-    );
+      );
 
-    institutionId$
-      .pipe(
-        tap((institutionId) =>
-          this.registerNewUserForm.patchValue({
-            institutionId: institutionId,
+      institutionId$
+        .pipe(
+          tap((institutionId) =>
+            this.registerNewUserForm.patchValue({
+              institutionId: institutionId,
+            }),
+          ),
+          switchMap(() => {
+            const user = {
+              username: this.registerNewUserForm.get("username")?.value,
+              password: this.registerNewUserForm.get("password")?.value,
+              email: this.registerNewUserForm.get("email")?.value,
+              givenName: this.registerNewUserForm.get("givenName")?.value,
+              familyName: this.registerNewUserForm.get("familyName")?.value,
+              institutionId:
+                this.registerNewUserForm.get("institutionId")?.value,
+              legalStatus: this.registerNewUserForm.get("legalStatus")?.value,
+              gender:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("gender")?.value,
+              race:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("race")?.value,
+              hasPhd:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("hasPhd")?.value,
+              yearOfPhdCompletion:
+                this.registerNewUserForm.get("legalStatus")?.value === "Other"
+                  ? null
+                  : this.registerNewUserForm.get("phdYear")?.value,
+            } as NewUserDetails;
+            return this.userService.createUser(user);
           }),
-        ),
-        switchMap(() => {
-          const user = {
-            username: this.registerNewUserForm.get("username")?.value,
-            password: this.registerNewUserForm.get("password")?.value,
-            email: this.registerNewUserForm.get("email")?.value,
-            givenName: this.registerNewUserForm.get("givenName")?.value,
-            familyName: this.registerNewUserForm.get("familyName")?.value,
-            institutionId: this.registerNewUserForm.get("institutionId")?.value,
-          } as NewUserDetails;
-
-          return this.userService.createUser(user);
-        }),
-        catchError((err) => {
-          this.error = err.message;
-          this.loading = false;
-          return of(null);
-        }),
-      )
-      .subscribe((user) => {
-        if (user) {
-          window.alert(
-            "You have successfully registered.\nYou may to proceed to log in.",
-          );
-          this.loading = false;
-        }
-      });
+          catchError((err) => {
+            this.error = err.message;
+            this.loading = false;
+            return of(null);
+          }),
+        )
+        .subscribe((user) => {
+          if (user) {
+            window.alert(
+              "You have successfully registered.\nYou may to proceed to log in.",
+            );
+            this.loading = false;
+          }
+        });
+    }
   }
 
   clearError(): void {
@@ -235,5 +263,53 @@ export class RegisterUserComponent implements OnInit {
     partners.push(partners.splice(partners.indexOf("Other" as Partner), 1)[0]);
 
     return partners;
+  }
+  validateStatistics(): void {
+    if (this.registerNewUserForm.value.legalStatus === "") {
+      return;
+    }
+    if (!this.registerNewUserForm.value.legalStatus) {
+      this.statisticsError.legalStatus =
+        "You need to provide your legal status in South African";
+      this.registerNewUserForm.controls["legalStatus"].setErrors({
+        incorrect: true,
+      });
+    }
+    if (
+      this.registerNewUserForm.value.legalStatus === "South African citizen" ||
+      this.registerNewUserForm.value.legalStatus ===
+        "Permanent resident of South Africa"
+    ) {
+      if (this.registerNewUserForm.value.gender === "") {
+        this.statisticsError.gender = "You need to provide your gender.";
+        this.registerNewUserForm.controls["gender"].setErrors({
+          incorrect: true,
+        });
+      }
+      if (this.registerNewUserForm.value.race === "") {
+        this.statisticsError.race = "You need to provide your race.";
+        this.registerNewUserForm.controls["race"].setErrors({
+          incorrect: true,
+        });
+      }
+      if (this.registerNewUserForm.value.hasPhd === "") {
+        this.statisticsError.phd =
+          "You need to provide if you have a phd or not.";
+        this.registerNewUserForm.controls["hasPhd"].setErrors({
+          incorrect: true,
+        });
+      }
+
+      if (
+        this.registerNewUserForm.value.hasPhd &&
+        !this.registerNewUserForm.value.phdYear
+      ) {
+        this.registerNewUserForm.controls["phdYear"].setErrors({
+          incorrect: true,
+        });
+        this.statisticsError.phd =
+          "You need to provide the year you obtained you PhD.";
+      }
+    }
   }
 }

@@ -7,15 +7,17 @@
         <span class="title is-5">Select user</span>
       </div>
       <div>
-        <select (change)="onSelectUser($event)">
-          <option
-            *ngFor="let u of users"
-            [value]="u.id"
-            [selected]="u.id === selectedUserId"
-          >
-            {{ u.familyName }}, {{ u.givenName }}
-          </option>
-        </select>
+        <div class="select">
+          <select (change)="onSelectUser($event)">
+            <option
+              *ngFor="let u of users"
+              [value]="u.id"
+              [selected]="u.id === selectedUserId"
+            >
+              {{ u.familyName }}, {{ u.givenName }}
+            </option>
+          </select>
+        </div>
       </div>
       <div *ngIf="!users" class="users-loading">
         <div class="loading-spinner">
@@ -63,12 +65,13 @@
       </ng-container>
       <ng-container *ngIf="showForm && selectedUserId">
         <div class="user-profile" [ngClass]="isLoadingForm ? 'is-blurred' : {}">
-          <form [formGroup]="userProfile">
+          <form [formGroup]="userProfile" (submit)="submit()">
             <table>
               <tr>
-                <td>Name:</td>
+                <td><label class="label">Name:</label></td>
                 <td>
                   <input
+                    class="input"
                     type="text"
                     id="givenName"
                     formControlName="givenName"
@@ -76,9 +79,10 @@
                 </td>
               </tr>
               <tr>
-                <td>Surname:</td>
+                <td><label class="label">Surname:</label></td>
                 <td>
                   <input
+                    class="input"
                     type="text"
                     id="familyName"
                     formControlName="familyName"
@@ -86,46 +90,56 @@
                 </td>
               </tr>
               <tr>
-                <td>Partner:</td>
+                <td><label class="label">Partner:</label></td>
                 <td>
-                  <select
-                    (change)="onSelectPartner($event)"
-                    formControlName="partner"
-                  >
-                    <option
-                      *ngFor="let partner of partners"
-                      [value]="Partner[partner]"
-                      [selected]="partner === selectedPartnerCode"
+                  <div class="select">
+                    <select
+                      (change)="onSelectPartner($event)"
+                      formControlName="partner"
                     >
-                      {{ Partner[partner] }}
-                    </option>
-                  </select>
+                      <option
+                        *ngFor="let partner of partners"
+                        [value]="Partner[partner]"
+                        [selected]="partner === selectedPartnerCode"
+                      >
+                        {{ Partner[partner] }}
+                      </option>
+                    </select>
+                  </div>
                 </td>
               </tr>
               <tr>
-                <td>Institution:</td>
+                <td><label class="label">Institution:</label></td>
                 <td>
-                  <select formControlName="institutionName">
-                    <option
-                      *ngFor="let institution of partnerInstitutions"
-                      [value]="institution.name"
-                      [selected]="institution.name === selectedInstitution"
-                    >
-                      {{ institutionString(institution) }}
-                    </option>
-                  </select>
+                  <div class="select">
+                    <select formControlName="institutionName">
+                      <option
+                        *ngFor="let institution of partnerInstitutions"
+                        [value]="institution.name"
+                        [selected]="institution.name === selectedInstitution"
+                      >
+                        {{ institutionString(institution) }}
+                      </option>
+                    </select>
+                  </div>
                 </td>
               </tr>
               <tr>
-                <td>Email:</td>
-                <td>
-                  <input type="text" id="email" formControlName="email" />
-                </td>
-              </tr>
-              <tr>
-                <td>Password:</td>
+                <td><label class="label">Email:</label></td>
                 <td>
                   <input
+                    class="input"
+                    type="text"
+                    id="email"
+                    formControlName="email"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td><label class="label">Password:</label></td>
+                <td>
+                  <input
+                    class="input"
                     type="password"
                     id="password"
                     formControlName="password"
@@ -133,9 +147,10 @@
                 </td>
               </tr>
               <tr>
-                <td>Retype password:</td>
+                <td><label class="label">Retype password:</label></td>
                 <td>
                   <input
+                    class="input"
                     type="password"
                     id="retypePassword"
                     formControlName="retypePassword"
@@ -143,11 +158,18 @@
                 </td>
               </tr>
             </table>
-            <div id="manage-user">
+            <div class="user-statistics">
+              <wm-sa-form
+                [userDetailsForm]="userProfile"
+                [error]="statisticsError"
+              ></wm-sa-form>
+            </div>
+
+            <div>
               <table>
                 <tr>
                   <td>
-                    <button>Submit</button>
+                    <button class="button is-primary">Submit</button>
                   </td>
                 </tr>
               </table>

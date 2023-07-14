@@ -98,7 +98,7 @@ def test_update_liaison_astronomer_should_not_allow_update_for_non_existing_user
     ],
 )
 def test_update_liaison_astronomer_returns_403_for_unauthorized_users(
-    username,
+    username: str,
     client: TestClient,
 ) -> None:
     authenticate(username, client)

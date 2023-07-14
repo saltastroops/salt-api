@@ -898,7 +898,11 @@ INSERT INTO Race (Race) VALUES (:race)
 
     def _get_legal_status_id(self, legal_status: str) -> int:
         stmt = text(
-            """SELECT SouthAfricanLegalStatus_Id FROM SouthAfricanLegalStatus Where SouthAfricanLegalStatus = :legal_status"""
+            """
+SELECT SouthAfricanLegalStatus_Id
+FROM SouthAfricanLegalStatus
+Where SouthAfricanLegalStatus = :legal_status
+            """
         )
         result = self.connection.execute(
             stmt, {"legal_status": self._normalize_gender(legal_status)}
@@ -906,11 +910,18 @@ INSERT INTO Race (Race) VALUES (:race)
         return cast(int, result.scalar_one())
 
     def update_user_statistic(
-        self, pipt_user_id: int, user_information: Dict[str, any]
+        self, pipt_user_id: int, user_information: Dict[str, Any]
     ) -> None:
         stmt = text(
             """
-INSERT INTO UserStatistics (PiptUser_Id, SouthAfricanLegalStatus_Id, Gender_Id, Race_Id, PhD, YearOfPhD)
+INSERT INTO UserStatistics (
+                PiptUser_Id, 
+                SouthAfricanLegalStatus_Id, 
+                Gender_Id, 
+                Race_Id, 
+                PhD, 
+                YearOfPhD
+                )
 VALUES (:pipt_user_id, :legal_status_id, :gender_id, :race_id, :has_phd, :year_of_phd )
 ON DUPLICATE KEY UPDATE
     SouthAfricanLegalStatus_Id = :legal_status_id,

@@ -194,18 +194,20 @@ def find_usernames(
         "partner_affiliated_user",
         "salt_astronomer",
     ]:
-        return (
+        usernames = (
             users[normalized_role]["with_role"]
             if has_role
             else users[normalized_role]["without_role"]
         )
+        return list(usernames)
 
     if normalized_role in users:
-        return (
+        usernames = (
             users[normalized_role][proposal_code]["with_role"]
             if has_role
             else users[normalized_role][proposal_code]["without_role"]
         )
+        return list(usernames)
 
     raise ValueError(f"Unknown user role: {role}")
 

@@ -9,7 +9,7 @@ pipeline {
         dockerfile {
           filename 'Dockerfile'
           dir 'jenkins'
-          args '-v saltapi-pipcache:/root/.cache/pypoetry -u 0:0'
+          args '-v saltapi-poetry-cache:/root/.cache/pypoetry -u 0:0'
         }
       }
 
@@ -22,8 +22,8 @@ pipeline {
           success = saao.runPythonTests(
                   'bandit': ['saltapi'],
                   'black': ['saltapi', 'tests'],
-                   'mypy': ['saltapi'],
-                   'pytest': ['tests'],
+                  'mypy': ['saltapi', 'tests'],
+                  'pytest': ['tests'],
                   'ruff': ['saltapi', 'tests'],
                   'usePoetry': true
           )
@@ -52,25 +52,26 @@ pipeline {
           )
         }
       }
+    }
 
-      stage('Deploy to production server') {
-        when {
-          branch 'main'
+    stage('Deploy to production server') {
+      when {
+        branch 'main'
+      }
+      steps {
+        script {
+          saao.deployContainer(
+                  'dockerComposeFile': 'docker-compose.yml',
+                  'dockerFile': 'Dockerfile',
+                  'host': 'sdbsubmit.cape.saao.ac.za',
+                  'hostCredentialsId': 'saltapi_host',
+                  'imageName': 'saltapi',
+                  'registryCredentialsId': 'saltapi_registry',
+                  'registryUrl': 'http://ukulinga.com',
+                  'secretFiles': ['saltapi_env': '.env']
+          )
         }
-        steps {
-          script {
-            saao.deployContainer(
-                    'dockerComposeFile': 'docker-compose.yml',
-                    'dockerFile': 'Dockerfile',
-                    'host': 'sdbsubmit.cape.saao.ac.za',
-                    'hostCredentialsId': 'saltapi_host',
-                    'imageName': 'saltapi',
-                    'registryCredentialsId': 'saltapi_registry',
-                    'registryUrl': 'http://ukulinga.com',
-                    'secretFiles': ['saltapi_env': '.env']
-            )
-          }
-        }
+      }
     }
   }
 

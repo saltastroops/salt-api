@@ -1657,7 +1657,13 @@ ORDER BY semester DESC;
         else:
             return None
 
-    def get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def get_observed_p0_to_p3_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+        """
+        Get the charged times for priority 0 to 3, summed per semester.
+
+        Priority 4 observations are not included. Rejected observations are not included
+        either.
+        """
         stmt = text(
             """
 SELECT
@@ -1670,6 +1676,7 @@ FROM Proposal		    AS P
     JOIN BlockVisitStatus AS BVS USING (BlockVisitStatus_Id)
     JOIN Semester 		AS S ON (P.Semester_Id = S.Semester_Id)
 WHERE BlockVisitStatus = 'Accepted'
+    AND B.Priority < 4
     AND Proposal_Code = :proposal_code
     GROUP BY S.Semester_Id
     """
@@ -1717,7 +1724,7 @@ WHERE Proposal_Code=:proposal_code
 
     def _get_time_statistics(self, proposal_code: str) -> List[Dict[str, Any]]:
         allocated_requested = self.get_allocated_and_requested_time(proposal_code)
-        observed_time = self.get_observed_time(proposal_code)
+        observed_time = self.get_observed_p0_to_p3_time(proposal_code)
         time_statistics = []
         for ar in allocated_requested:
             tmp = {
@@ -1950,7 +1957,7 @@ WHERE PC.Proposal_Code = :proposal_code
         else:
             return {
                 "requested_time": requested_time,
-                "semester": None,
+                "semester": semester,
                 "maximum_seeing": None,
                 "transparency": None,
                 "additional_pdf": None,

@@ -32,6 +32,9 @@ def test_get_user(db_connection: Connection, check_data: Callable[[Any], None]) 
         user["roles"] = [
             str(role) for role in user["roles"]
         ]  # allow YAML representation
+
+        del user["password_hash"]
+
         users.append(user)
     check_data(users)
 
@@ -58,7 +61,11 @@ def test_get_user_by_email_returns_correct_user(
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = asdict(user_repository.get_by_email("hettlage@saao.ac.za"))
+
     user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
+
+    del user["password_hash"]
+
     check_data(user)
 
 
@@ -398,7 +405,7 @@ def test_has_proposal_permission_returns_correct_result(
     db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
-    proposal_code = "2022-2-COM-001"
+    proposal_code = "2022-1-COM-003"
     grantee_username = find_usernames("proposal_view_grantee", True, proposal_code)[0]
     grantee_id = user_repository.get_by_username(grantee_username).id
     assert user_repository.user_has_proposal_permission(
@@ -408,7 +415,7 @@ def test_has_proposal_permission_returns_correct_result(
     )
 
     non_grantee_username = find_usernames(
-        "proposal_view_non_grantee", True, proposal_code
+        "proposal_view_grantee", False, proposal_code
     )[0]
     non_grantee_id = user_repository.get_by_username(non_grantee_username).id
     assert not user_repository.user_has_proposal_permission(
@@ -436,6 +443,8 @@ def test_find_by_username_and_password_returns_correct_user(
         user_repository.find_user_with_username_and_password(username, "some_password")
     )
     user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
+
+    del user["password_hash"]
 
     assert user["username"] == username
     check_data(user)

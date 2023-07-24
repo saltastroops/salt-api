@@ -236,7 +236,9 @@ class ProposalService:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )
-        previous_observed_times = self.repository.get_observed_time(proposal_code)
+        previous_observed_times = self.repository.get_observed_p0_to_p3_time(
+            proposal_code
+        )
 
         def previous_observed_time(semester: str) -> int:
             for ot in previous_observed_times:

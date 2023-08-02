@@ -33,13 +33,7 @@ export interface LiaisonAstronomer {
   email: string;
 }
 
-export interface NewUserDetails {
-  familyName: string;
-  givenName: string;
-  username: string;
-  password: string;
-  email: string;
-  institutionId: number;
+export interface UserStatistics {
   legalStatus: string;
   gender: string | null;
   race: string | null;
@@ -47,9 +41,25 @@ export interface NewUserDetails {
   yearOfPhdCompletion: number | null;
 }
 
+export interface NewUserDetails extends UserStatistics{
+  familyName: string;
+  givenName: string;
+  username: string;
+  password: string;
+  email: string;
+  institutionId: number;
+}
+
 export interface StatisticsError {
   legalStatus: string | undefined;
   gender: string | undefined;
   race: string | undefined;
   phd: string | undefined;
+}
+
+export interface UserUpdate extends UserStatistics {
+  familyName: string;
+  givenName: string;
+  email: string;
+  password: string;
 }

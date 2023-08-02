@@ -51,8 +51,8 @@ export class ManageUserProfileComponent implements OnInit {
     this.userProfile = this.formBuilder.group({
       givenName: ["", Validators.required],
       familyName: ["", Validators.required],
-      partner: [null, Validators.required],
-      institutionName: [null, Validators.required],
+      partner: [null],
+      institutionName: [null],
       email: ["", [Validators.required, Validators.email]],
       password: [null],
       retypePassword: [null],
@@ -62,6 +62,10 @@ export class ManageUserProfileComponent implements OnInit {
       phdYear: [""],
       hasPhd: [""],
     });
+
+    this.userProfile.get("partner")?.disable();
+    this.userProfile.get("institutionName")?.disable();
+
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {
         this.selectedUserId$.next(user.id);

@@ -1,7 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import {
+  AbstractControl,
   UntypedFormBuilder,
-  UntypedFormGroup,
+  UntypedFormGroup, ValidationErrors, ValidatorFn,
   Validators,
 } from "@angular/forms";
 
@@ -12,8 +13,8 @@ import { AuthenticationService } from "../service/authentication.service";
 import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
 import { Partner } from "../types/common";
-import { Institution } from "../types/institution";
-import { StatisticsError, User, UserListItem } from "../types/user";
+import {Institution} from "../types/institution";
+import {StatisticsError, User, UserListItem, UserUpdate} from "../types/user";
 
 @Component({
   selector: "wm-manage-user-profile",
@@ -38,6 +39,21 @@ export class ManageUserProfileComponent implements OnInit {
     race: undefined,
     gender: undefined,
     phd: undefined,
+  };
+
+  loading = false;
+
+  // cross-validation to ensure that password
+  // and confirm password values match
+  passwordMatchingValidator: ValidatorFn = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
+    const password = control.get("password");
+    const confirmPassword = control.get("confirmPassword");
+
+    return password?.value === confirmPassword?.value
+      ? null
+      : { notMatched: true };
   };
 
   constructor(
@@ -65,6 +81,8 @@ export class ManageUserProfileComponent implements OnInit {
 
     this.userProfile.get("partner")?.disable();
     this.userProfile.get("institutionName")?.disable();
+
+    this.setControlsValidators();
 
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {
@@ -143,6 +161,10 @@ export class ManageUserProfileComponent implements OnInit {
       });
   }
 
+  get f(): { [key: string]: AbstractControl } {
+    return this.userProfile.controls;
+  }
+
   filterInstitutions(): Institution[] {
     const partnerCode = this.selectedPartnerCode;
     if (partnerCode) {
@@ -197,7 +219,7 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   validateStatistics(): void {
-    if (this.userProfile.value.legalStatus === "") {
+    if (this.userProfile.value.legalStatus === null) {
       return;
     }
     if (!this.userProfile.value.legalStatus) {
@@ -209,13 +231,13 @@ export class ManageUserProfileComponent implements OnInit {
       this.userProfile.value.legalStatus ===
         "Permanent resident of South Africa"
     ) {
-      if (this.userProfile.value.gender === "") {
+      if (this.userProfile.value.gender === null) {
         this.statisticsError.gender = "You need to provide your gender.";
       }
-      if (this.userProfile.value.race === "") {
+      if (this.userProfile.value.race === null) {
         this.statisticsError.race = "You need to provide your race.";
       }
-      if (this.userProfile.value.hasPhd === "") {
+      if (this.userProfile.value.hasPhd === null) {
         this.statisticsError.phd =
           "You need to provide if you have a phd or not.";
       }
@@ -244,5 +266,59 @@ export class ManageUserProfileComponent implements OnInit {
       gender: undefined,
       phd: undefined,
     };
+  }
+
+  setControlsValidators(): void {
+    //
+    const passwordControl = this.userProfile.get("password");
+    const confirmPasswordControl = this.userProfile.get("confirmPassword");
+    const legalStatusControl = this.userProfile.get("legalStatus");
+    const genderControl = this.userProfile.get("gender");
+    const raceControl = this.userProfile.get("race");
+    const phdCompletionYearControl = this.userProfile.get("phdYear");
+    const hasPhdControl = this.userProfile.get("hasPhd");
+
+    // Validate password controls
+    passwordControl
+      ?.valueChanges.subscribe((value) => {
+      if (value === null) {
+        confirmPasswordControl?.clearValidators();
+      } else {
+        passwordControl?.setValidators([Validators.minLength(6)])
+        confirmPasswordControl?.setValidators([Validators.required]);
+        this.userProfile.setValidators([this.passwordMatchingValidator]);
+      }
+      // Update the form validity
+      passwordControl?.updateValueAndValidity();
+      confirmPasswordControl?.updateValueAndValidity();
+    });
+
+    // Validate legal status controls
+    legalStatusControl?.valueChanges.subscribe((value) => {
+      if (value !== null && value !== "Other") {
+        genderControl?.setValidators([Validators.required]);
+        raceControl?.setValidators([Validators.required]);
+        hasPhdControl?.setValidators([Validators.required]);
+      } else {
+        genderControl?.clearValidators();
+        raceControl?.clearValidators();
+        hasPhdControl?.clearValidators();
+      }
+
+      genderControl?.updateValueAndValidity();
+      raceControl?.updateValueAndValidity();
+      hasPhdControl?.updateValueAndValidity();
+    });
+
+    // Validate PhD controls
+    hasPhdControl?.valueChanges.subscribe((value) => {
+      if (value) {
+        phdCompletionYearControl?.setValidators([Validators.required]);
+      } else {
+        phdCompletionYearControl?.clearValidators();
+      }
+
+      phdCompletionYearControl?.updateValueAndValidity();
+    })
   }
 }

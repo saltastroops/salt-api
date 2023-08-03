@@ -15,7 +15,9 @@ import { UserService } from "../service/user.service";
 import { Partner } from "../types/common";
 import {Institution} from "../types/institution";
 import {StatisticsError, User, UserListItem, UserUpdate} from "../types/user";
+import {AutoUnsubscribe} from "../utils";
 
+@AutoUnsubscribe()
 @Component({
   selector: "wm-manage-user-profile",
   templateUrl: "./manage-user-profile.component.html",
@@ -250,7 +252,7 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   submit(): void {
-    this.validateStatistics();
+    this.userProfile.markAsPending();
 
     if (this.userProfile.valid) {
       this.loading = true;
@@ -290,7 +292,6 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   setControlsValidators(): void {
-    //
     const passwordControl = this.userProfile.get("password");
     const confirmPasswordControl = this.userProfile.get("confirmPassword");
     const legalStatusControl = this.userProfile.get("legalStatus");
@@ -301,9 +302,11 @@ export class ManageUserProfileComponent implements OnInit {
 
     // Validate password controls
     passwordControl
-      ?.valueChanges.subscribe((value) => {
-      if (value === null) {
-        confirmPasswordControl?.clearValidators();
+      ?.valueChanges.pipe(debounceTime(1000)).subscribe((value) => {
+      if (value === null || value === "") {
+        passwordControl?.setValidators(null);
+        confirmPasswordControl?.setValidators(null);
+        this.userProfile.setValidators(null);
       } else {
         passwordControl?.setValidators([Validators.minLength(6)])
         confirmPasswordControl?.setValidators([Validators.required]);
@@ -321,9 +324,9 @@ export class ManageUserProfileComponent implements OnInit {
         raceControl?.setValidators([Validators.required]);
         hasPhdControl?.setValidators([Validators.required]);
       } else {
-        genderControl?.clearValidators();
-        raceControl?.clearValidators();
-        hasPhdControl?.clearValidators();
+        genderControl?.setValidators(null);
+        raceControl?.setValidators(null);
+        hasPhdControl?.setValidators(null);
       }
 
       genderControl?.updateValueAndValidity();

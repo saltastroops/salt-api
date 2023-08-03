@@ -17,6 +17,10 @@ export class SaFormComponent {
   isTypePhdYear = false;
   years = [...Array(101).keys()].map((i) => new Date().getFullYear() - 100 + i);
 
+  get f(): { [key: string]: AbstractControl } {
+    return this.userDetailsForm.controls;
+  }
+
   collectMoreDetails(collect: boolean, legalStatus: string): void {
     this.collect = collect;
     this.setLegalStatus(legalStatus);

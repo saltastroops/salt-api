@@ -250,12 +250,33 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   submit(): void {
-    this.clearErrors();
-    if (!this.userProfile.valid) {
-      this.error = "please make sure that the form filled correctly.";
-    }
     this.validateStatistics();
-    // TODO Submission not implemented
+
+    if (this.userProfile.valid) {
+      this.loading = true;
+
+      const userUpdate = {
+        givenName: this.userProfile.get("name")?.value,
+        familyName: this.userProfile.get("surname")?.value,
+        password: this.userProfile.get("password")?.value,
+        email: this.userProfile.get("email")?.value,
+        legalStatus: this.userProfile.get("legalStatus")?.value,
+        gender: this.userProfile.get("gender")?.value,
+        race: this.userProfile.get("race")?.value,
+        hasPhd: this.userProfile.get("hasPhd")?.value,
+        yearOfPhdCompletion: this.userProfile.get("phdYear")?.value,
+      } as UserUpdate;
+
+
+      this.userService.updateUser(this.selectedUser.id, userUpdate).subscribe((user) => {
+        if (user) {
+          window.alert(
+            "User details successfully updated.",
+          );
+          this.loading = false;
+        }
+      })
+    }
   }
 
   clearErrors(): void {

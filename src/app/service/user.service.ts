@@ -80,7 +80,6 @@ export class UserService {
     });
 
     const newUserDetails = {
-      // username: userUpdate.username,
       password: userUpdate.password,
       email: userUpdate.email,
       given_name: userUpdate.givenName,

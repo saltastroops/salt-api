@@ -204,7 +204,7 @@
               (change)="setPhdYear(phdYearSelector.value)"
               [attr.disabled]="!isTypePhdYear ? '' : null"
             >
-              <option [value]="null">Select</option>
+              <option value="null">Select</option>
               <option *ngFor="let year of years" [value]="year">
                 {{ year }}
               </option>
@@ -218,7 +218,6 @@
               type="radio"
               formControlName="phdYear"
               name="phdYear"
-              [value]="null"
               (change)="hasPhd(false)"
             />
             I do not have a PhD

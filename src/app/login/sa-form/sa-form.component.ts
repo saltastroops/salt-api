@@ -21,9 +21,9 @@ export class SaFormComponent {
     this.collect = collect;
     this.setLegalStatus(legalStatus);
     if (legalStatus === "Other") {
-      this.setGender("");
-      this.setRace("");
-      this.setPhdYear("");
+      this.setGender(null);
+      this.setRace(null);
+      this.setPhdYear(null);
     }
   }
 

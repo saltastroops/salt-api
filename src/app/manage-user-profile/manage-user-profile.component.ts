@@ -71,12 +71,12 @@ export class ManageUserProfileComponent implements OnInit {
       institutionName: [null],
       email: ["", [Validators.required, Validators.email]],
       password: [null],
-      retypePassword: [null],
-      legalStatus: [""],
-      gender: [""],
-      race: [""],
-      phdYear: [""],
-      hasPhd: [""],
+      confirmPassword: [null],
+      legalStatus: ["",Validators.required],
+      gender: [null],
+      race: [null],
+      phdYear: [null],
+      hasPhd: [null],
     });
 
     this.userProfile.get("partner")?.disable();

@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 import { environment } from "../../environments/environment";
-import {NewUserDetails, User, UserListItem, UserUpdate} from "../types/user";
+import { NewUserDetails, User, UserListItem, UserUpdate } from "../types/user";
 
 @Injectable({
   providedIn: "root",
@@ -94,6 +94,5 @@ export class UserService {
     return this.http
       .patch<User>(uri, newUserDetails, { headers })
       .pipe(map((user) => camelcaseKeys(user, { deep: true })));
-
   }
 }

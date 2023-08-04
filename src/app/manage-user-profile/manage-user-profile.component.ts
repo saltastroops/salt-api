@@ -2,7 +2,9 @@ import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
   UntypedFormBuilder,
-  UntypedFormGroup, ValidationErrors, ValidatorFn,
+  UntypedFormGroup,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from "@angular/forms";
 
@@ -13,9 +15,9 @@ import { AuthenticationService } from "../service/authentication.service";
 import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
 import { Partner } from "../types/common";
-import {Institution} from "../types/institution";
-import {StatisticsError, User, UserListItem, UserUpdate} from "../types/user";
-import {AutoUnsubscribe} from "../utils";
+import { Institution } from "../types/institution";
+import { StatisticsError, User, UserListItem, UserUpdate } from "../types/user";
+import { AutoUnsubscribe } from "../utils";
 
 @AutoUnsubscribe()
 @Component({
@@ -58,23 +60,35 @@ export class ManageUserProfileComponent implements OnInit {
       : { notMatched: true };
   };
 
-  passwordValidators: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  passwordValidators: ValidatorFn = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
     const password = control.get("password");
 
-    return (password?.value !== null && password?.value !== "") && password?.value?.length < 6 ? { minlength: true} : null
-  }
+    return password?.value !== null &&
+      password?.value !== "" &&
+      password?.value?.length < 6
+      ? { minlength: true }
+      : null;
+  };
 
-  legalStatusValidator : ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-    const legalStatus= control.get("legalStatus");
+  legalStatusValidator: ValidatorFn = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
+    const legalStatus = control.get("legalStatus");
 
-    return (legalStatus?.value !== null && legalStatus?.value !== "Other") ? { legalStatusFieldRequired: true } : null
-  }
+    return legalStatus?.value !== null && legalStatus?.value !== "Other"
+      ? { legalStatusFieldRequired: true }
+      : null;
+  };
 
-  phdValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  phdValidator: ValidatorFn = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
     const hasPhd = control.get("hasPhd");
 
-    return hasPhd?.value ? Validators.required : null
-  }
+    return hasPhd?.value ? Validators.required : null;
+  };
 
   constructor(
     private authService: AuthenticationService,
@@ -84,21 +98,29 @@ export class ManageUserProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.userProfile = this.formBuilder.group({
-      givenName: ["", Validators.required],
-      familyName: ["", Validators.required],
-      partner: [null],
-      institutionName: [null],
-      email: ["", [Validators.required, Validators.email]],
-      password: [null],
-      confirmPassword: [null],
-      legalStatus: ["",Validators.required],
-      gender: [null],
-      race: [null],
-      phdYear: [null],
-      hasPhd: [null],
-    },
-      { validators: [this.passwordMatchingValidator, this.passwordValidators, this.legalStatusValidator, this.phdValidator], },
+    this.userProfile = this.formBuilder.group(
+      {
+        givenName: ["", Validators.required],
+        familyName: ["", Validators.required],
+        partner: [null],
+        institutionName: [null],
+        email: ["", [Validators.required, Validators.email]],
+        password: [null],
+        confirmPassword: [null],
+        legalStatus: ["", Validators.required],
+        gender: [null],
+        race: [null],
+        phdYear: [null],
+        hasPhd: [null],
+      },
+      {
+        validators: [
+          this.passwordMatchingValidator,
+          this.passwordValidators,
+          this.legalStatusValidator,
+          this.phdValidator,
+        ],
+      },
     );
 
     this.userProfile.get("partner")?.disable();
@@ -287,15 +309,14 @@ export class ManageUserProfileComponent implements OnInit {
         yearOfPhdCompletion: this.userProfile.get("phdYear")?.value,
       } as UserUpdate;
 
-
-      this.userService.updateUser(this.selectedUser.id, userUpdate).subscribe((user) => {
-        if (user) {
-          window.alert(
-            "User details successfully updated.",
-          );
-          this.loading = false;
-        }
-      })
+      this.userService
+        .updateUser(this.selectedUser.id, userUpdate)
+        .subscribe((user) => {
+          if (user) {
+            window.alert("User details successfully updated.");
+            this.loading = false;
+          }
+        });
     }
   }
 

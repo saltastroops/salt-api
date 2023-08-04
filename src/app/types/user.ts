@@ -41,7 +41,7 @@ export interface UserStatistics {
   yearOfPhdCompletion: number | null;
 }
 
-export interface NewUserDetails extends UserStatistics{
+export interface NewUserDetails extends UserStatistics {
   familyName: string;
   givenName: string;
   username: string;

@@ -18,6 +18,7 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { SaFormComponent } from "./login/sa-form/sa-form.component";
 import { SwitchUserComponent } from "./login/switch-user/switch-user.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosLegendComponent } from "./mos/legend/mos-legend.component";
@@ -124,7 +125,6 @@ import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/sa
 import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
-import { SaFormComponent } from './login/sa-form/sa-form.component';
 
 @NgModule({
   declarations: [

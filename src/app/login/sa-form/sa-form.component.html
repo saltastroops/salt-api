@@ -37,7 +37,10 @@
         />
         I'm neither a South African citizen nor a permanent resident
       </label>
-      <label class="invalid-feedback" *ngIf="userDetailsForm.pending && f.legalStatus.errors?.required">
+      <label
+        class="invalid-feedback"
+        *ngIf="userDetailsForm.pending && f.legalStatus.errors?.required"
+      >
         Legal status is required
       </label>
     </div>
@@ -124,7 +127,10 @@
           />
           I'd prefer not to say
         </label>
-        <label class="invalid-feedback" *ngIf="userDetailsForm.pending && f.gender.errors?.required">
+        <label
+          class="invalid-feedback"
+          *ngIf="userDetailsForm.pending && f.gender.errors?.required"
+        >
           Gender is required
         </label>
       </div>
@@ -179,7 +185,10 @@
           />
           I'd prefer not to say
         </label>
-        <label class="invalid-feedback" *ngIf="userDetailsForm.pending && f.race.errors">
+        <label
+          class="invalid-feedback"
+          *ngIf="userDetailsForm.pending && f.race.errors"
+        >
           Race is required
         </label>
       </div>
@@ -224,10 +233,16 @@
           </label>
         </div>
         <div>
-          <label class="invalid-feedback" *ngIf="userDetailsForm.pending && f.hasPhd.errors?.required">
+          <label
+            class="invalid-feedback"
+            *ngIf="userDetailsForm.pending && f.hasPhd.errors?.required"
+          >
             PhD status is required
           </label>
-          <label class="invalid-feedback" *ngIf="userDetailsForm.pending && f.phdYear.errors?.required">
+          <label
+            class="invalid-feedback"
+            *ngIf="userDetailsForm.pending && f.phdYear.errors?.required"
+          >
             PhD completion year is required
           </label>
         </div>

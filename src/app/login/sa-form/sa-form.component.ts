@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import {AbstractControl, FormGroup, UntypedFormControl} from "@angular/forms";
+import { AbstractControl, FormGroup, UntypedFormControl } from "@angular/forms";
 
 import { StatisticsError } from "../../types/user";
 

@@ -58,6 +58,24 @@ export class ManageUserProfileComponent implements OnInit {
       : { notMatched: true };
   };
 
+  passwordValidators: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const password = control.get("password");
+
+    return (password?.value !== null && password?.value !== "") && password?.value?.length < 6 ? { minlength: true} : null
+  }
+
+  legalStatusValidator : ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const legalStatus= control.get("legalStatus");
+
+    return (legalStatus?.value !== null && legalStatus?.value !== "Other") ? { legalStatusFieldRequired: true } : null
+  }
+
+  phdValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const hasPhd = control.get("hasPhd");
+
+    return hasPhd?.value ? Validators.required : null
+  }
+
   constructor(
     private authService: AuthenticationService,
     private userService: UserService,
@@ -79,12 +97,14 @@ export class ManageUserProfileComponent implements OnInit {
       race: [null],
       phdYear: [null],
       hasPhd: [null],
-    });
+    },
+      { validators: [this.passwordMatchingValidator, this.passwordValidators, this.legalStatusValidator, this.phdValidator], },
+    );
 
     this.userProfile.get("partner")?.disable();
     this.userProfile.get("institutionName")?.disable();
 
-    this.setControlsValidators();
+    // this.setControlsValidators();
 
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {

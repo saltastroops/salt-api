@@ -104,8 +104,6 @@ export class ManageUserProfileComponent implements OnInit {
     this.userProfile.get("partner")?.disable();
     this.userProfile.get("institutionName")?.disable();
 
-    // this.setControlsValidators();
-
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {
         this.selectedUserId$.next(user.id);
@@ -309,60 +307,5 @@ export class ManageUserProfileComponent implements OnInit {
       gender: undefined,
       phd: undefined,
     };
-  }
-
-  setControlsValidators(): void {
-    const passwordControl = this.userProfile.get("password");
-    const confirmPasswordControl = this.userProfile.get("confirmPassword");
-    const legalStatusControl = this.userProfile.get("legalStatus");
-    const genderControl = this.userProfile.get("gender");
-    const raceControl = this.userProfile.get("race");
-    const phdCompletionYearControl = this.userProfile.get("phdYear");
-    const hasPhdControl = this.userProfile.get("hasPhd");
-
-    // Validate password controls
-    passwordControl
-      ?.valueChanges.pipe(debounceTime(1000)).subscribe((value) => {
-      if (value === null || value === "") {
-        passwordControl?.setValidators(null);
-        confirmPasswordControl?.setValidators(null);
-        this.userProfile.setValidators(null);
-      } else {
-        passwordControl?.setValidators([Validators.minLength(6)])
-        confirmPasswordControl?.setValidators([Validators.required]);
-        this.userProfile.setValidators([this.passwordMatchingValidator]);
-      }
-      // Update the form validity
-      passwordControl?.updateValueAndValidity();
-      confirmPasswordControl?.updateValueAndValidity();
-    });
-
-    // Validate legal status controls
-    legalStatusControl?.valueChanges.subscribe((value) => {
-      if (value !== null && value !== "Other") {
-        genderControl?.setValidators([Validators.required]);
-        raceControl?.setValidators([Validators.required]);
-        hasPhdControl?.setValidators([Validators.required]);
-      } else {
-        genderControl?.setValidators(null);
-        raceControl?.setValidators(null);
-        hasPhdControl?.setValidators(null);
-      }
-
-      genderControl?.updateValueAndValidity();
-      raceControl?.updateValueAndValidity();
-      hasPhdControl?.updateValueAndValidity();
-    });
-
-    // Validate PhD controls
-    hasPhdControl?.valueChanges.subscribe((value) => {
-      if (value) {
-        phdCompletionYearControl?.setValidators([Validators.required]);
-      } else {
-        phdCompletionYearControl?.clearValidators();
-      }
-
-      phdCompletionYearControl?.updateValueAndValidity();
-    })
   }
 }

@@ -8,7 +8,7 @@
       </div>
       <div>
         <div class="select">
-          <select (change)="onSelectUser($event)">
+          <select (change)="onSelectUser($event)" data-test="select-user">
             <option
               *ngFor="let u of users"
               [value]="u.id"
@@ -27,7 +27,7 @@
     </div>
     <div *ngIf="selectedUserId">
       <hr class="section-line" />
-      <h2 class="title is-4">
+      <h2 class="title is-4" data-test="selected-user">
         Edit contacts for '{{ selectedUser.givenName }}
         {{ selectedUser.familyName }}'
       </h2>
@@ -75,6 +75,7 @@
                     type="text"
                     id="givenName"
                     formControlName="givenName"
+                    data-test="given-name"
                   />
                 </td>
               </tr>
@@ -86,6 +87,7 @@
                     type="text"
                     id="familyName"
                     formControlName="familyName"
+                    data-test="family-name"
                   />
                 </td>
               </tr>
@@ -96,6 +98,7 @@
                     <select
                       (change)="onSelectPartner($event)"
                       formControlName="partner"
+                      data-test="partner"
                     >
                       <option
                         *ngFor="let partner of partners"
@@ -117,6 +120,7 @@
                         *ngFor="let institution of partnerInstitutions"
                         [value]="institution.name"
                         [selected]="institution.name === selectedInstitution"
+                        data-test="institution"
                       >
                         {{ institutionString(institution) }}
                       </option>
@@ -143,13 +147,13 @@
                     type="password"
                     id="password"
                     formControlName="password"
-                    [ngClass]="{
-                    'is-danger': userProfile.errors?.['minlength']
-                    }"
+                    [ngClass]="{'is-danger': userProfile.errors?.['minlength']}"
+                    data-test="password"
                   />
                   <div
                     *ngIf="userProfile.errors?.['minlength']"
                     class="invalid-feedback ml-6 pl-1"
+                    data-test="password-error"
                   >
                     <div *ngIf="userProfile.errors?.['minlength']">
                       Password must have at least 6 characters
@@ -166,9 +170,8 @@
                     type="password"
                     id="confirmPassword"
                     formControlName="confirmPassword"
-                    [ngClass]="{
-                    'is-danger': f.confirmPassword.dirty && userProfile.errors?.['notMatched']
-                    }"
+                    [ngClass]="{'is-danger': f.confirmPassword.dirty && userProfile.errors?.['notMatched']}"
+                    data-test="confirmPassword"
                   />
                   <div
                     *ngIf="f.confirmPassword.dirty && userProfile.errors?.['notMatched']"
@@ -177,7 +180,7 @@
                     <div
                       *ngIf="userProfile.errors?.['notMatched']"
                       class="has-text-danger"
-                      data-test="error"
+                      data-test="confirm-password-error"
                     >
                       Password mismatch
                     </div>
@@ -209,7 +212,7 @@
           </form>
         </div>
       </ng-container>
-      <ng-container *ngIf="error">
+      <ng-container *ngIf="error" data-test="submission-error">
         <div class="message is-danger">
           <div class="message-header">Error</div>
           <div class="message-body">{{ error }}</div>

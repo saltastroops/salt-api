@@ -47,47 +47,24 @@ export class ManageUserProfileComponent implements OnInit {
 
   loading = false;
 
-  // cross-validation to ensure that password
-  // and confirm password values match
-  passwordMatchingValidator: ValidatorFn = (
+  // cross-validation to ensure that password has the required
+  // character length, and matches the confirm password value
+  passwordValidators: ValidatorFn = (
     control: AbstractControl,
   ): ValidationErrors | null => {
     const password = control.get("password");
     const confirmPassword = control.get("confirmPassword");
 
-    return password?.value === confirmPassword?.value
-      ? null
-      : { notMatched: true };
-  };
+    const errors: {[key: string]: boolean} = {}
+    if (password?.value !== null && password?.value !== "" && password?.value?.length < 6) {
+      errors.minLength = true;
+    }
 
-  passwordValidators: ValidatorFn = (
-    control: AbstractControl,
-  ): ValidationErrors | null => {
-    const password = control.get("password");
+    if (password?.value !== confirmPassword?.value) {
+      errors.notMatched = true;
+    }
 
-    return password?.value !== null &&
-      password?.value !== "" &&
-      password?.value?.length < 6
-      ? { minlength: true }
-      : null;
-  };
-
-  legalStatusValidator: ValidatorFn = (
-    control: AbstractControl,
-  ): ValidationErrors | null => {
-    const legalStatus = control.get("legalStatus");
-
-    return legalStatus?.value !== null && legalStatus?.value !== "Other"
-      ? { legalStatusFieldRequired: true }
-      : null;
-  };
-
-  phdValidator: ValidatorFn = (
-    control: AbstractControl,
-  ): ValidationErrors | null => {
-    const hasPhd = control.get("hasPhd");
-
-    return hasPhd?.value ? Validators.required : null;
+    return Object.keys(errors).length > 0 ? errors : null
   };
 
   constructor(
@@ -115,10 +92,7 @@ export class ManageUserProfileComponent implements OnInit {
       },
       {
         validators: [
-          this.passwordMatchingValidator,
           this.passwordValidators,
-          this.legalStatusValidator,
-          this.phdValidator,
         ],
       },
     );
@@ -293,6 +267,8 @@ export class ManageUserProfileComponent implements OnInit {
 
   submit(): void {
     this.userProfile.markAsPending();
+
+    this.validateStatistics();
 
     if (this.userProfile.valid) {
       this.loading = true;

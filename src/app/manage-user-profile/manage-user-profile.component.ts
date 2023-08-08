@@ -266,7 +266,7 @@ export class ManageUserProfileComponent implements OnInit {
     }
     if (!this.userProfile.value.legalStatus) {
       this.statisticsError.legalStatus =
-        "You need to provide your legal status in South African";
+        "Legal status in South Africa is required";
     }
     if (
       this.userProfile.value.legalStatus === "South African citizen" ||
@@ -274,19 +274,19 @@ export class ManageUserProfileComponent implements OnInit {
         "Permanent resident of South Africa"
     ) {
       if (this.userProfile.value.gender === null) {
-        this.statisticsError.gender = "You need to provide your gender.";
+        this.statisticsError.gender = "Gender is required.";
       }
       if (this.userProfile.value.race === null) {
-        this.statisticsError.race = "You need to provide your race.";
+        this.statisticsError.race = "Race is required.";
       }
       if (this.userProfile.value.hasPhd === null) {
         this.statisticsError.phd =
-          "You need to provide if you have a phd or not.";
+          "PhD status is required.";
       }
 
       if (this.userProfile.value.hasPhd && !this.userProfile.value.phdYear) {
         this.statisticsError.phd =
-          "You need to provide the year you obtained you PhD.";
+          "PhD year of completion is required.";
       }
     }
   }

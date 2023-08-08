@@ -9,15 +9,8 @@ import {
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { Observable, iif, interval, of } from "rxjs";
-import {
-  catchError,
-  map,
-  mergeMap,
-  switchMap,
-  take,
-  tap,
-} from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { catchError, map, switchMap, take, tap } from "rxjs/operators";
 
 import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
@@ -62,6 +55,51 @@ export class RegisterUserComponent implements OnInit {
       : { notMatched: true };
   };
 
+  institutionValidator: ValidatorFn = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
+    // Some institution fields are only validated if the user selects "Other" partner,
+    // and "ADD NEW INSTITUTION" option from institutions list.
+    const institutionIdControl = control.get("institutionId");
+    const institutionNameControl = control.get("institutionName");
+    const institutionDepartmentControl = control.get("department");
+    const institutionAddressControl = control.get("address");
+    const institutionURLControl = control.get("url");
+
+    const errors: { [key: string]: boolean } = {};
+    if (institutionIdControl?.value === "0") {
+      if (
+        institutionNameControl?.value === null ||
+        institutionNameControl?.value.trim() === ""
+      ) {
+        errors.institutionNameRequired = true;
+      }
+
+      if (
+        institutionDepartmentControl?.value === null ||
+        institutionDepartmentControl?.value.trim() === ""
+      ) {
+        errors.institutionDepartmentRequired = true;
+      }
+
+      if (
+        institutionAddressControl?.value === null ||
+        institutionAddressControl?.value.trim() === ""
+      ) {
+        errors.institutionAddressRequired = true;
+      }
+
+      if (
+        institutionURLControl?.value === null ||
+        institutionURLControl?.value.trim() === ""
+      ) {
+        errors.institutionURLRequired = true;
+      }
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  };
+
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -98,9 +136,10 @@ export class RegisterUserComponent implements OnInit {
         phdYear: [""],
         hasPhd: [""],
       },
-      { validators: this.passwordMatchingValidator },
+      {
+        validators: [this.passwordMatchingValidator, this.institutionValidator],
+      },
     );
-    this.setInstitutionValidators();
   }
 
   // convenience getter for easy access to form fields
@@ -128,15 +167,9 @@ export class RegisterUserComponent implements OnInit {
         .createInstitution(newInstitution)
         .pipe(map((institution) => institution.institutionId));
 
-      const institutionId$ = interval(1000).pipe(
-        mergeMap(() =>
-          iif(
-            () => this.showAddNewInstitutionControls,
-            newInstitutionId$,
-            of(parseInt(this.registerNewUserForm.get("institutionId")?.value)),
-          ),
-        ),
-      );
+      const institutionId$ = this.showAddNewInstitutionControls
+        ? newInstitutionId$
+        : of(parseInt(this.registerNewUserForm.get("institutionId")?.value));
 
       institutionId$
         .pipe(
@@ -183,7 +216,7 @@ export class RegisterUserComponent implements OnInit {
         .subscribe((user) => {
           if (user) {
             window.alert(
-              "You have successfully registered.\nYou may to proceed to log in.",
+              "You have successfully registered.\nYou may proceed to log in.",
             );
             this.loading = false;
           }
@@ -206,35 +239,6 @@ export class RegisterUserComponent implements OnInit {
     const partnerCode =
       Object.keys(Partner)[Object.values(Partner).indexOf(selectedPartner)];
     this.partnerInstitutions = this.institutionsMapping.get(partnerCode);
-  }
-
-  setInstitutionValidators(): void {
-    // Some institution fields are only validated if the user selects "Other" partner,
-    // and "ADD NEW INSTITUTION" option from institutions list.
-    const institutionNameControl =
-      this.registerNewUserForm.get("institutionName");
-    const institutionDepartmentControl =
-      this.registerNewUserForm.get("department");
-    const institutionUrlControl = this.registerNewUserForm.get("url");
-    const institutionAddressControl = this.registerNewUserForm.get("address");
-
-    // Use our control and subscribe institutionId value changes
-    this.registerNewUserForm
-      .get("institutionId")
-      ?.valueChanges.subscribe((value) => {
-        // If "ADD NEW INSTITUTION" option is selected validate controls
-        if (value === "0") {
-          institutionNameControl?.setValidators([Validators.required]);
-          institutionDepartmentControl?.setValidators([Validators.required]);
-          institutionUrlControl?.setValidators([Validators.required]);
-          institutionAddressControl?.setValidators([Validators.required]);
-        }
-        // Update the form validity
-        institutionNameControl?.updateValueAndValidity();
-        institutionDepartmentControl?.updateValueAndValidity();
-        institutionUrlControl?.updateValueAndValidity();
-        institutionAddressControl?.updateValueAndValidity();
-      });
   }
 
   institutionString(institution: Institution): string {
@@ -270,7 +274,7 @@ export class RegisterUserComponent implements OnInit {
     }
     if (!this.registerNewUserForm.value.legalStatus) {
       this.statisticsError.legalStatus =
-        "You need to provide your legal status in South African";
+        "Your legal status in South Africa is required";
       this.registerNewUserForm.controls["legalStatus"].setErrors({
         incorrect: true,
       });
@@ -281,20 +285,19 @@ export class RegisterUserComponent implements OnInit {
         "Permanent resident of South Africa"
     ) {
       if (this.registerNewUserForm.value.gender === "") {
-        this.statisticsError.gender = "You need to provide your gender.";
+        this.statisticsError.gender = "Gender is required.";
         this.registerNewUserForm.controls["gender"].setErrors({
           incorrect: true,
         });
       }
       if (this.registerNewUserForm.value.race === "") {
-        this.statisticsError.race = "You need to provide your race.";
+        this.statisticsError.race = "Race is required.";
         this.registerNewUserForm.controls["race"].setErrors({
           incorrect: true,
         });
       }
       if (this.registerNewUserForm.value.hasPhd === "") {
-        this.statisticsError.phd =
-          "You need to provide if you have a phd or not.";
+        this.statisticsError.phd = "PhD status is required.";
         this.registerNewUserForm.controls["hasPhd"].setErrors({
           incorrect: true,
         });
@@ -307,8 +310,7 @@ export class RegisterUserComponent implements OnInit {
         this.registerNewUserForm.controls["phdYear"].setErrors({
           incorrect: true,
         });
-        this.statisticsError.phd =
-          "You need to provide the year you obtained you PhD.";
+        this.statisticsError.phd = "Year of PhD completion is required.";
       }
     }
   }

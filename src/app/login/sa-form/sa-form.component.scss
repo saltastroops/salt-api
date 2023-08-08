@@ -9,17 +9,16 @@ div {
 .why-collect {
   max-width: 1200px;
   margin-top: 10px;
-  padding:0.5em;
+  padding: 0.5em;
   background-color: #dddddd;
   border: 1px solid #222222;
-
 }
 
-.control{
+.control {
   display: grid;
   margin-left: 1em;
 }
-.select{
+.select {
   display: block;
   width: 90px;
 }
@@ -32,17 +31,17 @@ div {
 
 .title {
   margin-top: 1em;
-  margin-bottom: .1em;
+  margin-bottom: 0.1em;
 }
 
-.gender-support-input{
+.gender-support-input {
   display: grid;
   grid-template-columns: 11em 20%;
   margin-left: 0;
   align-items: center;
 }
 
-.phd-support-input{
+.phd-support-input {
   display: grid;
   grid-template-columns: 21em 15%;
   margin-left: 0;
@@ -55,5 +54,4 @@ div {
 
 .label {
   margin-top: 1em;
-
 }

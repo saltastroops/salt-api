@@ -4,6 +4,10 @@ input {
   background-color: white;
 }
 
+.select {
+  margin-bottom: 0.5rem;
+}
+
 textarea {
   width: 500px;
   height: 150px;
@@ -22,4 +26,9 @@ textarea {
 
 .user-statistics {
   margin-bottom: 1em;
+}
+
+.invalid-feedback {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
 }

@@ -10,6 +10,7 @@
           (change)="collectMoreDetails(true, 'South African citizen')"
           name="legalStatus"
           formControlName="legalStatus"
+          data-test="legal-status-sa-citizen"
         />
         I'm a South African citizen
       </label>
@@ -23,6 +24,7 @@
           "
           name="legalStatus"
           formControlName="legalStatus"
+          data-test="legal-status-permanent-resident"
         />
         I'm a permanent resident in South Africa
       </label>
@@ -34,15 +36,16 @@
           (change)="collectMoreDetails(false, 'Other')"
           name="legalStatus"
           formControlName="legalStatus"
+          data-test="legal-status-other"
         />
         I'm neither a South African citizen nor a permanent resident
       </label>
       <label
         class="invalid-feedback"
-        *ngIf="userDetailsForm.pending && f.legalStatus.errors?.required"
+        *ngIf="error.legalStatus"
+        data-test="legal-status-error"
+      >{{ error.legalStatus }}</label
       >
-        Legal status is required
-      </label>
     </div>
     <div *ngIf="collect">
       <div class="why-collect">
@@ -80,6 +83,7 @@
             formControlName="gender"
             name="gender"
             (change)="typeDefinedGender(false)"
+            data-test="gender-female"
           />
           Female
         </label>
@@ -91,6 +95,7 @@
             formControlName="gender"
             name="gender"
             (change)="typeDefinedGender(false)"
+            data-test="gender-male"
           />
           Male
         </label>
@@ -102,6 +107,7 @@
                 type="radio"
                 name="gender"
                 (change)="typeDefinedGender(true)"
+                data-test="gender-define-type"
               />
               I'd rather type myself
             </label>
@@ -113,6 +119,7 @@
               type="text"
               #selfDefinedGender
               (change)="setGender(selfDefinedGender.value)"
+              data-test="gender-type-input"
             />
           </div>
         </div>
@@ -124,15 +131,16 @@
             (change)="typeDefinedGender(false)"
             formControlName="gender"
             name="gender"
+            data-test="gender-prefer-not-to-say"
           />
           I'd prefer not to say
         </label>
         <label
           class="invalid-feedback"
-          *ngIf="userDetailsForm.pending && f.gender.errors?.required"
+          *ngIf="error.gender"
+          data-test="gender-error"
+        >{{ error.gender }}</label
         >
-          Gender is required
-        </label>
       </div>
       <label class="label">Race</label>
       <p class="description">
@@ -146,6 +154,7 @@
             type="radio"
             formControlName="race"
             value="African"
+            data-test="race-african"
           />
           African
         </label>
@@ -155,6 +164,7 @@
             type="radio"
             formControlName="race"
             value="Coloured"
+            data-test="race-coloured"
           />
           Coloured
         </label>
@@ -164,6 +174,7 @@
             type="radio"
             formControlName="race"
             value="Indian"
+            data-test="race-indian"
           />
           Indian
         </label>
@@ -173,6 +184,7 @@
             type="radio"
             formControlName="race"
             value="White"
+            data-test="race-white"
           />
           White
         </label>
@@ -182,15 +194,16 @@
             type="radio"
             formControlName="race"
             [value]="'Prefer not to say'"
+            data-test="race-prefer-not-to-say"
           />
           I'd prefer not to say
         </label>
         <label
           class="invalid-feedback"
-          *ngIf="userDetailsForm.pending && f.race.errors"
+          *ngIf="error.race"
+          data-test="race-error"
+        >{{ error.race }}</label
         >
-          Race is required
-        </label>
       </div>
 
       <label class="label">PhD</label>
@@ -203,6 +216,7 @@
                 type="radio"
                 (change)="hasPhd(true)"
                 name="phdYear"
+                data-test="has-phd"
               />
               I have a PhD and I completed it in the year
             </label>
@@ -212,8 +226,9 @@
               #phdYearSelector
               (change)="setPhdYear(phdYearSelector.value)"
               [attr.disabled]="!isTypePhdYear ? '' : null"
+              data-test="phd-year"
             >
-              <option value="null">Select</option>
+              <option [value]="null">Select</option>
               <option *ngFor="let year of years" [value]="year">
                 {{ year }}
               </option>
@@ -228,6 +243,7 @@
               formControlName="phdYear"
               name="phdYear"
               (change)="hasPhd(false)"
+              data-test="has-no-phd"
             />
             I do not have a PhD
           </label>
@@ -235,16 +251,10 @@
         <div>
           <label
             class="invalid-feedback"
-            *ngIf="userDetailsForm.pending && f.hasPhd.errors?.required"
+            *ngIf="error.phd"
+            data-test="has-phd-error"
+          >{{ error.phd }}</label
           >
-            PhD status is required
-          </label>
-          <label
-            class="invalid-feedback"
-            *ngIf="userDetailsForm.pending && f.phdYear.errors?.required"
-          >
-            PhD completion year is required
-          </label>
         </div>
       </div>
     </div>

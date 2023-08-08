@@ -10,7 +10,6 @@
           (change)="collectMoreDetails(true, 'South African citizen')"
           name="legalStatus"
           formControlName="legalStatus"
-          data-test="legal-status-sa-citizen"
         />
         I'm a South African citizen
       </label>
@@ -36,7 +35,6 @@
           (change)="collectMoreDetails(false, 'Other')"
           name="legalStatus"
           formControlName="legalStatus"
-          data-test="legal-status-other"
         />
         I'm neither a South African citizen nor a permanent resident
       </label>
@@ -139,7 +137,7 @@
           class="invalid-feedback"
           *ngIf="error.gender"
           data-test="gender-error"
-        >{{ error.gender }}</label
+          >{{ error.gender }}</label
         >
       </div>
       <label class="label">Race</label>
@@ -202,7 +200,7 @@
           class="invalid-feedback"
           *ngIf="error.race"
           data-test="race-error"
-        >{{ error.race }}</label
+          >{{ error.race }}</label
         >
       </div>
 
@@ -253,7 +251,7 @@
             class="invalid-feedback"
             *ngIf="error.phd"
             data-test="has-phd-error"
-          >{{ error.phd }}</label
+            >{{ error.phd }}</label
           >
         </div>
       </div>

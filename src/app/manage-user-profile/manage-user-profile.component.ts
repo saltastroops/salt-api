@@ -55,8 +55,12 @@ export class ManageUserProfileComponent implements OnInit {
     const password = control.get("password");
     const confirmPassword = control.get("confirmPassword");
 
-    const errors: {[key: string]: boolean} = {}
-    if (password?.value !== null && password?.value !== "" && password?.value?.length < 6) {
+    const errors: { [key: string]: boolean } = {};
+    if (
+      password?.value !== null &&
+      password?.value !== "" &&
+      password?.value?.length < 6
+    ) {
       errors.minLength = true;
     }
 
@@ -64,7 +68,7 @@ export class ManageUserProfileComponent implements OnInit {
       errors.notMatched = true;
     }
 
-    return Object.keys(errors).length > 0 ? errors : null
+    return Object.keys(errors).length > 0 ? errors : null;
   };
 
   constructor(
@@ -91,9 +95,7 @@ export class ManageUserProfileComponent implements OnInit {
         hasPhd: [null],
       },
       {
-        validators: [
-          this.passwordValidators,
-        ],
+        validators: [this.passwordValidators],
       },
     );
 
@@ -254,13 +256,11 @@ export class ManageUserProfileComponent implements OnInit {
         this.statisticsError.race = "Race is required.";
       }
       if (this.userProfile.value.hasPhd === null) {
-        this.statisticsError.phd =
-          "PhD status is required.";
+        this.statisticsError.phd = "PhD status is required.";
       }
 
       if (this.userProfile.value.hasPhd && !this.userProfile.value.phdYear) {
-        this.statisticsError.phd =
-          "PhD year of completion is required.";
+        this.statisticsError.phd = "PhD year of completion is required.";
       }
     }
   }

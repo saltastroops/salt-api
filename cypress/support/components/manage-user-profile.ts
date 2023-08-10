@@ -18,7 +18,7 @@ const LEGAL_STATUS_OTHER = '[data-test="legal-status-other"]';
 const HAS_PHD_RADIO_BUTTON = '[data-test="has-phd"]';
 const HAS_NO_PHD_RADIO_BUTTON = '[data-test="has-no-phd"]';
 
-const SUBMIT_BUTTON = '[data-test="update-user-details"]'
+const SUBMIT_BUTTON = '[data-test="update-user-details"]';
 
 export class ManageUserProfile {
   static typeGivenName(givenName: string): void {
@@ -72,7 +72,9 @@ export class ManageUserProfile {
   }
 
   static displayedDetailsForUser(familyName: string, givenName: string): void {
-    cy.get(SELECTED_USER).should("be.visible").and("contain.text", `Edit contacts for '${givenName} ${familyName}'`);
+    cy.get(SELECTED_USER)
+      .should("be.visible")
+      .and("contain.text", `Edit contacts for '${givenName} ${familyName}'`);
     cy.get(GIVEN_NAME).should("be.visible").and("have.value", givenName);
     cy.get(FAMILY_NAME).should("be.visible").and("have.value", familyName);
     cy.get(EMAIL).invoke("val").should("not.be.empty");

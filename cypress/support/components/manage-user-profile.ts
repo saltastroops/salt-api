@@ -7,6 +7,9 @@ const PASSWORD = '[data-test="password"]';
 const CONFIRM_PASSWORD = '[data-test="confirm-password"]';
 const EMAIL = '[data-test="email"]';
 
+const PARTNER_INSTITUTIONS = '[data-test="partner-institutions"]';
+const INSTITUTIONS = '[data-test="institutions"]';
+
 const LEGAL_STATUS_SA_CITIZEN = '[data-test="legal-status-sa-citizen"]';
 const LEGAL_STATUS_PERMANENT_RESIDENT =
   '[data-test="legal-status-permanent-resident"]';
@@ -14,6 +17,8 @@ const LEGAL_STATUS_OTHER = '[data-test="legal-status-other"]';
 
 const HAS_PHD_RADIO_BUTTON = '[data-test="has-phd"]';
 const HAS_NO_PHD_RADIO_BUTTON = '[data-test="has-no-phd"]';
+
+const SUBMIT_BUTTON = '[data-test="update-user-details"]'
 
 export class ManageUserProfile {
   static typeGivenName(givenName: string): void {
@@ -28,16 +33,49 @@ export class ManageUserProfile {
     cy.get(PASSWORD).type(password);
   }
 
+  static clearPassword(): void {
+    cy.get(PASSWORD).clear();
+  }
+
   static typeConfirmPassword(confirmPassword: string): void {
     cy.get(CONFIRM_PASSWORD).type(confirmPassword);
+  }
+
+  static clickSubmit(): void {
+    cy.get(SUBMIT_BUTTON).click();
+  }
+
+  static clearConfirmPassword(): void {
+    cy.get(CONFIRM_PASSWORD).clear();
+  }
+
+  static isSelectUserDropdownDisplayed(displayed: boolean): void {
+    if (displayed) {
+      cy.get(SELECT_USER).should("be.visible");
+    } else {
+      cy.get(SELECT_USER).should("not.exist");
+    }
+  }
+
+  static isUserDemographicsDisplayed(displayed: boolean): void {
+    if (displayed) {
+      cy.get('[data-test="gender-male"]').should("exist").and("be.visible");
+      cy.get('[data-test="gender-female"]').should("exist").and("be.visible");
+    } else {
+      cy.get('[data-test="gender-male"]').should("not.exist");
+      cy.get('[data-test="gender-female"]').should("not.exist");
+    }
   }
 
   static selectUser(familyName: string, givenName: string): void {
     cy.get(SELECT_USER).select(`${familyName}, ${givenName}`);
   }
 
-  static isUserSelected(familyName: string, givenName: string): void {
-    cy.get(SELECTED_USER).should("be.visible").and("contain.text", `Edit contacts for '${givenName} ${familyName}'`)
+  static displayedDetailsForUser(familyName: string, givenName: string): void {
+    cy.get(SELECTED_USER).should("be.visible").and("contain.text", `Edit contacts for '${givenName} ${familyName}'`);
+    cy.get(GIVEN_NAME).should("be.visible").and("have.value", givenName);
+    cy.get(FAMILY_NAME).should("be.visible").and("have.value", familyName);
+    cy.get(EMAIL).invoke("val").should("not.be.empty");
   }
 
   static checkSACitizenLegalStatus(): void {
@@ -111,6 +149,16 @@ export class ManageUserProfile {
       this.isErrorRaisedWithMessage(true, dataTestAttribute, errorMessage);
       cy.get(`[data-test="${dataTestAttribute}"]`).type(validValue);
       this.isErrorRaisedWithMessage(false, dataTestAttribute, null);
+    }
+  }
+
+  static isInstitutionControlsDisabled(disabled: boolean): void {
+    if (disabled) {
+      cy.get(PARTNER_INSTITUTIONS).should("be.disabled");
+      cy.get(INSTITUTIONS).should("be.disabled");
+    } else {
+      cy.get(PARTNER_INSTITUTIONS).should("not.be.disabled");
+      cy.get(INSTITUTIONS).should("not.be.disabled");
     }
   }
 }

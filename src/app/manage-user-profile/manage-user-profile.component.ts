@@ -240,7 +240,7 @@ export class ManageUserProfileComponent implements OnInit {
     }
     if (!this.userProfile.value.legalStatus) {
       this.statisticsError.legalStatus =
-        "Legal status in South Africa is required";
+        "Your legal status in South Africa is required";
     }
     if (
       this.userProfile.value.legalStatus === "South African citizen" ||

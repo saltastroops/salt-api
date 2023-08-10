@@ -118,7 +118,7 @@
                     <select
                       (change)="onSelectPartner($event)"
                       formControlName="partner"
-                      data-test="partner"
+                      data-test="partner-institutions"
                     >
                       <option
                         *ngFor="let partner of partners"
@@ -135,12 +135,11 @@
                 <td><label class="label">Institution:</label></td>
                 <td>
                   <div class="select">
-                    <select formControlName="institutionName">
+                    <select formControlName="institutionName" data-test="institutions">
                       <option
                         *ngFor="let institution of partnerInstitutions"
                         [value]="institution.name"
                         [selected]="institution.name === selectedInstitution"
-                        data-test="institution"
                       >
                         {{ institutionString(institution) }}
                       </option>

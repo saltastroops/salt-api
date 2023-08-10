@@ -15,7 +15,6 @@ const LEGAL_STATUS_PERMANENT_RESIDENT =
   '[data-test="legal-status-permanent-resident"]';
 const LEGAL_STATUS_OTHER = '[data-test="legal-status-other"]';
 
-const HAS_PHD_RADIO_BUTTON = '[data-test="has-phd"]';
 const HAS_NO_PHD_RADIO_BUTTON = '[data-test="has-no-phd"]';
 
 const SUBMIT_BUTTON = '[data-test="update-user-details"]';
@@ -94,10 +93,6 @@ export class ManageUserProfile {
 
   static checkGender(gender: "male" | "female" | "define-type"): void {
     cy.get('[data-test="gender-' + gender + '"]').check();
-  }
-
-  static checkHasPhd(): void {
-    cy.get(HAS_PHD_RADIO_BUTTON).check();
   }
 
   static checkHasNoPhd(): void {

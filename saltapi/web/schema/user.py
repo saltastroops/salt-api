@@ -109,10 +109,9 @@ class UserUpdate(UserStatistics):
     """
 
     username: Optional[str] = Field(None, title="Username", description="Username.")
-    # Not implemented yet
-    # given_name: Optional[str]
-    # family_name: Optional[str]
-    # email: Optional[str]
+    given_name: Optional[str]
+    family_name: Optional[str]
+    email: Optional[str]
     password: Optional[str] = Field(None, title="Password", description="Password.")
 
 

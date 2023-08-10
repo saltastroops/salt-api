@@ -76,6 +76,7 @@
                     id="givenName"
                     formControlName="givenName"
                     data-test="given-name"
+                    [ngClass]="{'is-danger': f.givenName.touched && f.givenName.errors}"
                   />
                   <div
                     *ngIf="f.givenName.errors"
@@ -97,6 +98,7 @@
                     id="familyName"
                     formControlName="familyName"
                     data-test="family-name"
+                    [ngClass]="{'is-danger': f.familyName.touched && f.familyName.errors}"
                   />
                   <div
                     *ngIf="f.familyName.errors"
@@ -155,14 +157,22 @@
                     id="email"
                     formControlName="email"
                     data-test="email"
+                    [ngClass]="{'is-danger': f.email.touched && f.email.errors}"
                   />
                   <div
-                    *ngIf="f.email.errors?.required"
+                    *ngIf="f.email.touched && f.email.errors"
                     class="invalid-feedback ml-6 pl-1"
                     data-test="email-error"
                   >
-                    <div *ngIf="f.email.errors?.required">
+                    <div *ngIf="f.email.errors?.required" data-test="email-error">
                       Email is required
+                    </div>
+                    <div
+                      *ngIf="f.email.errors.email"
+                      class="has-text-danger"
+                      data-test="email-error"
+                    >
+                      Invalid email address
                     </div>
                   </div>
                 </td>

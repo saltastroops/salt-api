@@ -24,8 +24,16 @@ export class ManageUserProfile {
     cy.get(GIVEN_NAME).type(givenName);
   }
 
+  static clearGivenName(): void {
+    cy.get(GIVEN_NAME).clear();
+  }
+
   static typeFamilyName(familyName: string): void {
     cy.get(FAMILY_NAME).type(familyName);
+  }
+
+  static clearFamilyName(): void {
+    cy.get(FAMILY_NAME).clear();
   }
 
   static typePassword(password: string): void {

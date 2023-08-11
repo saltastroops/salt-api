@@ -138,7 +138,6 @@ def test_patch_raises_error_for_non_existing_user(db_connection: Connection) -> 
         user_repository.update(
             0,
             UserUpdate(
-                username=None,
                 password=None,
                 legal_status=user_statistics.legal_status,
                 gender=user_statistics.gender,
@@ -157,7 +156,6 @@ def test_patch_uses_existing_values_by_default(db_connection: Connection) -> Non
     user_repository.update(
         user_id,
         UserUpdate(
-            username=None,
             password=None,
             legal_status=user_statistics.legal_status,
             gender=user_statistics.gender,
@@ -185,7 +183,6 @@ def test_patch_replaces_existing_values(db_connection: Connection) -> None:
     user_repository.update(
         user_id,
         UserUpdate(
-            username=new_username,
             password=new_password,
             legal_status=user_statistics.legal_status,
             gender=user_statistics.gender,
@@ -209,7 +206,6 @@ def test_patch_is_idempotent(db_connection: Connection) -> None:
     user_repository.update(
         user_id,
         UserUpdate(
-            username=new_username,
             password=new_password,
             legal_status=user_statistics.legal_status,
             gender=user_statistics.gender,
@@ -246,7 +242,6 @@ def test_patch_cannot_use_existing_username(db_connection: Connection) -> None:
         user_repository.update(
             user_id,
             UserUpdate(
-                username=existing_username,
                 password=None,
                 legal_status=user_statistics.legal_status,
                 gender=user_statistics.gender,

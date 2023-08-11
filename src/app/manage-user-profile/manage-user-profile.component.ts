@@ -309,4 +309,8 @@ export class ManageUserProfileComponent implements OnInit {
   onFamilyNameChange(surname: string): void {
     this.userProfile.get("familyName")?.patchValue(surname);
   }
+
+  onEmailChange(email: string): void {
+    this.userProfile.get("email")?.patchValue(email);
+  }
 }

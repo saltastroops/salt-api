@@ -162,12 +162,13 @@
                   <input
                     class="input"
                     type="text"
-                    id="email"
+                    #email
                     formControlName="email"
                     data-test="email"
                     [ngClass]="{
                       'is-danger': f.email.touched && f.email.errors
                     }"
+                    (change)="onEmailChange(email.value)"
                   />
                   <div
                     *ngIf="f.email.touched && f.email.errors"

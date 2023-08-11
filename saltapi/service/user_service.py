@@ -123,8 +123,6 @@ SALT Team
         return user
 
     def update_user(self, user_id: int, user: UserUpdate) -> None:
-        if user.username and self._does_user_exist(user.username):
-            raise ValidationError(f"The username {user.username} exists already.")
         self._validate_user_statistics(user)
         self.repository.update(user_id, user)
 

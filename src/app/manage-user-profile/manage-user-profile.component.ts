@@ -266,12 +266,9 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   submit(): void {
-    // this.userProfile.markAsPending();
-
     this.validateStatistics();
 
     if (this.userProfile.valid) {
-      console.log(this.userProfile);
       this.loading = true;
 
       const userUpdate = {
@@ -298,22 +295,11 @@ export class ManageUserProfileComponent implements OnInit {
         .subscribe((user) => {
           if (user) {
             window.alert("User details successfully updated.");
-            console.log(user);
             this.selectedUser = user;
             this.loading = false;
           }
         });
     }
-  }
-
-  clearErrors(): void {
-    this.error = undefined;
-    this.statisticsError = {
-      legalStatus: undefined,
-      race: undefined,
-      gender: undefined,
-      phd: undefined,
-    };
   }
 
   onGivenNameChange(name: string): void {

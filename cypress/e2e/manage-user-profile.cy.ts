@@ -5,75 +5,7 @@ import {getApiUrl, getEnvVariable} from "../support/utils";
 import {HOME_URL} from "../support/pages/home-page";
 
 const apiUrl = getApiUrl();
-describe("Manage user profile - administrator", () => {
-  const USERNAME = getEnvVariable("defaultUsername");
-  beforeEach(() => {
-    cy.intercept("PATCH", apiUrl + "/users/**").as("users");
-    cy.task("updateUserPassword", USERNAME).then((password: string) => {
-      // When I login
-      LoginPage.visit();
-      LoginPage.login(USERNAME, password);
-    });
-
-    ManageUserProfilePage.visit();
-  });
-
-  it("should show all users dropdown", function () {
-    ManageUserProfile.isSelectUserDropdownDisplayed(true);
-  });
-
-  it("should show selected user's details", function () {
-    const defaultUserGivenName = "Chaka";
-    const defaultUserFamilyName = "Mofokeng";
-    ManageUserProfile.displayedDetailsForUser(
-      defaultUserFamilyName,
-      defaultUserGivenName,
-    );
-
-    const givenName = "Xola";
-    const familyName = "Ndaliso";
-    ManageUserProfile.selectUser(familyName, givenName);
-    ManageUserProfile.displayedDetailsForUser(familyName, givenName);
-  });
-
-  it("should update selected user's details", function () {
-    const givenName = "Orapeleng";
-    const familyName = "Mogawana";
-    ManageUserProfile.selectUser(familyName, givenName);
-    ManageUserProfile.displayedDetailsForUser(familyName, givenName);
-
-    const newGivenName = "Oraps";
-    const newFamilyName = "Mokgawana";
-    ManageUserProfile.clearGivenName();
-    ManageUserProfile.typeGivenName(newGivenName);
-    ManageUserProfile.clearFamilyName();
-    ManageUserProfile.typeFamilyName(newFamilyName);
-
-    ManageUserProfile.checkPermanentResidentLegalStatus();
-    ManageUserProfile.checkGender("male");
-    ManageUserProfile.checkRace("african");
-    ManageUserProfile.checkHasNoPhd();
-
-    ManageUserProfile.clickSubmit();
-
-    cy.wait('@users').its('response.statusCode').should('eq', 200);
-
-    cy.on("window:alert", (text) => {
-      expect(text).contains(
-        "User details successfully updated",
-      );
-    });
-
-    // cy.wait(500);
-
-    cy.reload();
-    ManageUserProfile.selectUser(newFamilyName, newGivenName);
-    ManageUserProfile.displayedDetailsForUser(newFamilyName, newGivenName);
-
-  });
-});
-
-describe("Manage user profile - investigator", () => {
+describe("Manage user profile - other users (investigator)", () => {
   const USERNAME = getEnvVariable("investigator");
   beforeEach(() => {
     cy.intercept(apiUrl + "/users/**").as("users");
@@ -198,5 +130,85 @@ describe("Manage user profile - investigator", () => {
     LoginPage.login(USERNAME, NEW_PASSWORD);
 
     cy.url().should("contain", HOME_URL);
+  });
+});
+
+describe("Manage user profile - administrator", () => {
+  const USERNAME = getEnvVariable("defaultUsername");
+  beforeEach(() => {
+    cy.intercept("PATCH", apiUrl + "/users/**").as("users");
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      // When I login
+      LoginPage.visit();
+      LoginPage.login(USERNAME, password);
+    });
+
+    ManageUserProfilePage.visit();
+  });
+
+  it("should show all users dropdown", function () {
+    ManageUserProfile.isSelectUserDropdownDisplayed(true);
+  });
+
+  it("should show selected user's details", function () {
+    const defaultUserGivenName = "Chaka";
+    const defaultUserFamilyName = "Mofokeng";
+    ManageUserProfile.displayedDetailsForUser(
+      defaultUserFamilyName,
+      defaultUserGivenName,
+    );
+
+    const givenName = "Xola";
+    const familyName = "Ndaliso";
+    ManageUserProfile.selectUser(familyName, givenName);
+    ManageUserProfile.displayedDetailsForUser(familyName, givenName);
+  });
+
+  it("should update selected user's details", function () {
+    const givenName = "Orapeleng";
+    const familyName = "Mogawana";
+    ManageUserProfile.selectUser(familyName, givenName);
+    ManageUserProfile.displayedDetailsForUser(familyName, givenName);
+
+    const newGivenName = "Oraps";
+    const newFamilyName = "Mokgawana";
+    ManageUserProfile.clearGivenName();
+    ManageUserProfile.typeGivenName(newGivenName);
+    ManageUserProfile.clearFamilyName();
+    ManageUserProfile.typeFamilyName(newFamilyName);
+
+    ManageUserProfile.checkPermanentResidentLegalStatus();
+    ManageUserProfile.checkGender("male");
+    ManageUserProfile.checkRace("african");
+    ManageUserProfile.checkHasNoPhd();
+
+    ManageUserProfile.clickSubmit();
+
+    cy.wait('@users').its('response.statusCode').should('eq', 200);
+
+    cy.on("window:alert", (text) => {
+      expect(text).contains(
+        "User details successfully updated",
+      );
+    });
+
+    cy.reload();
+
+    ManageUserProfile.selectUser(newFamilyName, newGivenName);
+    ManageUserProfile.displayedDetailsForUser(newFamilyName, newGivenName);
+
+    ManageUserProfile.clearGivenName();
+    ManageUserProfile.typeGivenName(givenName);
+    ManageUserProfile.clearFamilyName();
+    ManageUserProfile.typeFamilyName(familyName);
+
+    ManageUserProfile.checkPermanentResidentLegalStatus();
+    ManageUserProfile.checkGender("male");
+    ManageUserProfile.checkRace("african");
+    ManageUserProfile.checkHasNoPhd();
+
+    ManageUserProfile.clickSubmit();
+
+    cy.wait('@users').its('response.statusCode').should('eq', 200);
   });
 });

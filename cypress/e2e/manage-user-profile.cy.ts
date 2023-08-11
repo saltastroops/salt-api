@@ -1,11 +1,14 @@
 import { ManageUserProfile } from "../support/components/manage-user-profile";
 import { LoginPage } from "../support/pages/login/login-page";
 import { ManageUserProfilePage } from "../support/pages/manage-user-profile-page";
-import { getEnvVariable } from "../support/utils";
+import {getApiUrl, getEnvVariable} from "../support/utils";
+import {HOME_URL} from "../support/pages/home-page";
 
-let USERNAME = getEnvVariable("defaultUsername");
+const apiUrl = getApiUrl();
 describe("Manage user profile - administrator", () => {
+  const USERNAME = getEnvVariable("defaultUsername");
   beforeEach(() => {
+    cy.intercept("PATCH", apiUrl + "/users/**").as("users");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -32,11 +35,48 @@ describe("Manage user profile - administrator", () => {
     ManageUserProfile.selectUser(familyName, givenName);
     ManageUserProfile.displayedDetailsForUser(familyName, givenName);
   });
+
+  it("should update selected user's details", function () {
+    const givenName = "Orapeleng";
+    const familyName = "Mogawana";
+    ManageUserProfile.selectUser(familyName, givenName);
+    ManageUserProfile.displayedDetailsForUser(familyName, givenName);
+
+    const newGivenName = "Oraps";
+    const newFamilyName = "Mokgawana";
+    ManageUserProfile.clearGivenName();
+    ManageUserProfile.typeGivenName(newGivenName);
+    ManageUserProfile.clearFamilyName();
+    ManageUserProfile.typeFamilyName(newFamilyName);
+
+    ManageUserProfile.checkPermanentResidentLegalStatus();
+    ManageUserProfile.checkGender("male");
+    ManageUserProfile.checkRace("african");
+    ManageUserProfile.checkHasNoPhd();
+
+    ManageUserProfile.clickSubmit();
+
+    cy.wait('@users').its('response.statusCode').should('eq', 200);
+
+    cy.on("window:alert", (text) => {
+      expect(text).contains(
+        "User details successfully updated",
+      );
+    });
+
+    // cy.wait(500);
+
+    cy.reload();
+    ManageUserProfile.selectUser(newFamilyName, newGivenName);
+    ManageUserProfile.displayedDetailsForUser(newFamilyName, newGivenName);
+
+  });
 });
 
 describe("Manage user profile - investigator", () => {
+  const USERNAME = getEnvVariable("investigator");
   beforeEach(() => {
-    USERNAME = getEnvVariable("investigator");
+    cy.intercept(apiUrl + "/users/**").as("users");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -128,5 +168,35 @@ describe("Manage user profile - investigator", () => {
       null,
       "PhD status is required",
     );
+  });
+
+  it("should update logged in user's details", function () {
+    // Ensure the inline login form is not hidden because of a small screen size
+    cy.viewport(1500, 2000);
+
+    const NEW_PASSWORD = "very-secret-1234-pass";
+
+    ManageUserProfile.typePassword(NEW_PASSWORD);
+    ManageUserProfile.typeConfirmPassword(NEW_PASSWORD);
+
+    ManageUserProfile.checkOtherLegalStatus();
+
+    ManageUserProfile.clickSubmit();
+
+    cy.wait("@users");
+
+    cy.on("window:alert", (text) => {
+      expect(text).contains(
+        "User details successfully updated",
+      );
+    });
+    cy.wait(1000);
+
+    LoginPage.logout()
+
+    LoginPage.visit();
+    LoginPage.login(USERNAME, NEW_PASSWORD);
+
+    cy.url().should("contain", HOME_URL);
   });
 });

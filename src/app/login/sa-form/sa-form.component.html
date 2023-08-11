@@ -228,7 +228,7 @@
               [attr.disabled]="!isTypePhdYear ? '' : null"
               data-test="phd-year"
             >
-              <option [value]="null">Select</option>
+              <option value="null">Select</option>
               <option *ngFor="let year of years" [value]="year">
                 {{ year }}
               </option>

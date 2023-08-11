@@ -1,8 +1,8 @@
 import { ManageUserProfile } from "../support/components/manage-user-profile";
+import { HOME_URL } from "../support/pages/home-page";
 import { LoginPage } from "../support/pages/login/login-page";
 import { ManageUserProfilePage } from "../support/pages/manage-user-profile-page";
-import {getApiUrl, getEnvVariable} from "../support/utils";
-import {HOME_URL} from "../support/pages/home-page";
+import { getApiUrl, getEnvVariable } from "../support/utils";
 
 const apiUrl = getApiUrl();
 describe("Manage user profile - other users (investigator)", () => {
@@ -118,13 +118,11 @@ describe("Manage user profile - other users (investigator)", () => {
     cy.wait("@users");
 
     cy.on("window:alert", (text) => {
-      expect(text).contains(
-        "User details successfully updated",
-      );
+      expect(text).contains("User details successfully updated");
     });
     cy.wait(1000);
 
-    LoginPage.logout()
+    LoginPage.logout();
 
     LoginPage.visit();
     LoginPage.login(USERNAME, NEW_PASSWORD);
@@ -184,12 +182,10 @@ describe("Manage user profile - administrator", () => {
 
     ManageUserProfile.clickSubmit();
 
-    cy.wait('@users').its('response.statusCode').should('eq', 200);
+    cy.wait("@users").its("response.statusCode").should("eq", 200);
 
     cy.on("window:alert", (text) => {
-      expect(text).contains(
-        "User details successfully updated",
-      );
+      expect(text).contains("User details successfully updated");
     });
 
     cy.reload();
@@ -209,6 +205,6 @@ describe("Manage user profile - administrator", () => {
 
     ManageUserProfile.clickSubmit();
 
-    cy.wait('@users').its('response.statusCode').should('eq', 200);
+    cy.wait("@users").its("response.statusCode").should("eq", 200);
   });
 });

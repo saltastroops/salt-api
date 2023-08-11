@@ -52,7 +52,7 @@ export class SaFormComponent {
     this.error.phd = undefined;
     this.isTypePhdYear = isPhd;
     if (!isPhd) {
-      this.userDetailsForm.patchValue({ phdYear: null});
+      this.userDetailsForm.patchValue({ phdYear: null });
     }
     this.userDetailsForm.patchValue({ hasPhd: isPhd });
   }

@@ -272,11 +272,11 @@ WHERE Investigator_Id = :investigator_id
         self.update_user_statistic(
             user_id,
             dict(
-                legal_status=new_user_details.legal_status,
-                gender=new_user_details.gender,
-                race=new_user_details.race,
-                has_phd=new_user_details.has_phd,
-                year_of_phd_completion=new_user_details.year_of_phd_completion,
+                legal_status=user_update.legal_status,
+                gender=user_update.gender,
+                race=user_update.race,
+                has_phd=user_update.has_phd,
+                year_of_phd_completion=user_update.year_of_phd_completion,
             ),
         )
 
@@ -289,7 +289,10 @@ WHERE Investigator_Id = :investigator_id
         """
         user = self.get(user_id)
         return UserUpdate(
-            username=user_update.username if user_update.username else user.username,
+            username=user.username,
+            email=user_update.email,
+            given_name=user_update.given_name,
+            family_name=user_update.family_name,
             password=user_update.password,
             legal_status=user_update.legal_status,
             gender=user_update.gender,

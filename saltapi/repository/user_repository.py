@@ -626,7 +626,15 @@ WHERE PiptUser_Id = :user_id
             """
         )
 
-        self.connection.execute(stmt, {"user_id": user_id, "given_name": user_update.given_name, "family_name": user_update.family_name, "email": user_update.email})
+        self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+                "given_name": user_update.given_name,
+                "family_name": user_update.family_name,
+                "email": user_update.email,
+            },
+        )
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:

@@ -266,16 +266,17 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   submit(): void {
-    this.userProfile.markAsPending();
+    // this.userProfile.markAsPending();
 
     this.validateStatistics();
 
     if (this.userProfile.valid) {
+      console.log(this.userProfile);
       this.loading = true;
 
       const userUpdate = {
-        givenName: this.userProfile.get("name")?.value,
-        familyName: this.userProfile.get("surname")?.value,
+        givenName: this.userProfile.get("givenName")?.value,
+        familyName: this.userProfile.get("familyName")?.value,
         password: this.userProfile.get("password")?.value,
         email: this.userProfile.get("email")?.value,
         legalStatus: this.userProfile.get("legalStatus")?.value,
@@ -287,9 +288,18 @@ export class ManageUserProfileComponent implements OnInit {
 
       this.userService
         .updateUser(this.selectedUser.id, userUpdate)
+        .pipe(
+          catchError((err) => {
+            this.error = err.message;
+            this.loading = false;
+            return of(null);
+          }),
+        )
         .subscribe((user) => {
           if (user) {
             window.alert("User details successfully updated.");
+            console.log(user);
+            this.selectedUser = user;
             this.loading = false;
           }
         });
@@ -304,5 +314,13 @@ export class ManageUserProfileComponent implements OnInit {
       gender: undefined,
       phd: undefined,
     };
+  }
+
+  onGivenNameChange(name: string): void {
+    this.userProfile.get("givenName")?.patchValue(name);
+  }
+
+  onFamilyNameChange(surname: string): void {
+    this.userProfile.get("familyName")?.patchValue(surname);
   }
 }

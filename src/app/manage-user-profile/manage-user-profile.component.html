@@ -73,12 +73,13 @@
                   <input
                     class="input"
                     type="text"
-                    id="givenName"
+                    #givenName
                     formControlName="givenName"
                     data-test="given-name"
                     [ngClass]="{
                       'is-danger': f.givenName.touched && f.givenName.errors
                     }"
+                    (change)="onGivenNameChange(givenName.value)"
                   />
                   <div
                     *ngIf="f.givenName.errors"
@@ -97,12 +98,13 @@
                   <input
                     class="input"
                     type="text"
-                    id="familyName"
+                    #familyName
                     formControlName="familyName"
                     data-test="family-name"
                     [ngClass]="{
                       'is-danger': f.familyName.touched && f.familyName.errors
                     }"
+                    (change)="onFamilyNameChange(familyName.value)"
                   />
                   <div
                     *ngIf="f.familyName.errors"

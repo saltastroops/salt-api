@@ -266,9 +266,9 @@ WHERE Investigator_Id = :investigator_id
         """Updates a user's details."""
         if user_update.password:
             self._update_password(user_id, user_update.password)
-        new_user_details = self._new_user_details(user_id, user_update)
-        new_username = cast(str, new_user_details.username)
-        self._update_username(user_id=user_id, new_username=new_username)
+
+        self._update_user_details(user_id, user_update)
+
         self.update_user_statistic(
             user_id,
             dict(
@@ -611,6 +611,19 @@ WHERE PiptUser_Id = :user_id
         """
         )
         self.connection.execute(stmt, {"user_id": user_id, "password": password_hash})
+
+    def _update_user_details(self, user_id: int, user_update: UserUpdate) -> None:
+        stmt = text(
+            """
+UPDATE Investigator 
+SET FirstName = :given_name, 
+    Surname = :family_name, 
+    Email = :email
+WHERE PiptUser_Id = :user_id
+            """
+        )
+
+        self.connection.execute(stmt, {"user_id": user_id, "given_name": user_update.given_name, "family_name": user_update.family_name, "email": user_update.email})
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:

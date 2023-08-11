@@ -51,7 +51,9 @@ export class SaFormComponent {
   hasPhd(isPhd: boolean): void {
     this.error.phd = undefined;
     this.isTypePhdYear = isPhd;
-    this.phdYearControl.setValue(null);
+    if (!isPhd) {
+      this.userDetailsForm.patchValue({ phdYear: null});
+    }
     this.userDetailsForm.patchValue({ hasPhd: isPhd });
   }
 

@@ -22,7 +22,10 @@ def _url(user_id: int) -> str:
 
 
 def _patch_data(
-    given_name: Optional[str], family_name: Optional[str], email: Optional[str], password: Optional[str] = None
+    given_name: Optional[str],
+    family_name: Optional[str],
+    email: Optional[str],
+    password: Optional[str] = None,
 ) -> Dict[str, Optional[str]]:
     return {
         "given_name": given_name,
@@ -42,7 +45,9 @@ def test_patch_user_should_return_401_for_unauthenticated_user(
 ) -> None:
     not_authenticated(client)
 
-    response = client.patch(_url(1072), json=_patch_data("Chaka", "Mofokeng","cmofokeng@saao.ac.za"))
+    response = client.patch(
+        _url(1072), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za")
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -51,7 +56,9 @@ def test_patch_user_should_return_401_for_user_with_invalid_auth_token(
 ) -> None:
     misauthenticate(client)
 
-    response = client.patch(_url(1072), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za"))
+    response = client.patch(
+        _url(1072), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za")
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -59,7 +66,9 @@ def test_patch_user_should_return_404_for_non_existing_user(client: TestClient) 
     username = find_username("Administrator")
     authenticate(username, client)
 
-    response = client.patch(_url(0), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za"))
+    response = client.patch(
+        _url(0), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za")
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -77,7 +86,10 @@ def test_patch_user_should_return_403_if_non_admin_tries_to_update_other_user(
     other_user_id = 6
     authenticate(username, client)
 
-    response = client.patch(_url(other_user_id), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za"))
+    response = client.patch(
+        _url(other_user_id),
+        json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za"),
+    )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 

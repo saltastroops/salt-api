@@ -7,7 +7,7 @@ from typing import Any, Dict, List, cast
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from saltapi.exceptions import NotFoundError
 from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
@@ -626,15 +626,19 @@ WHERE PiptUser_Id = :user_id
             """
         )
 
-        self.connection.execute(
-            stmt,
-            {
-                "user_id": user_id,
-                "given_name": user_update.given_name,
-                "family_name": user_update.family_name,
-                "email": user_update.email,
-            },
-        )
+        try:
+            self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "given_name": user_update.given_name,
+                    "family_name": user_update.family_name,
+                    "email": user_update.email,
+                },
+            )
+
+        except IntegrityError:
+            raise NotFoundError(f"No such user id: {user_id}")
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:
@@ -955,20 +959,24 @@ ON DUPLICATE KEY UPDATE
     YearOfPhD = :year_of_phd
             """
         )
-        self.connection.execute(
-            stmt,
-            {
-                "pipt_user_id": pipt_user_id,
-                "legal_status_id": self._get_legal_status_id(
-                    user_information["legal_status"]
-                ),
-                "gender_id": self._get_gender_id(user_information["gender"])
-                if user_information["gender"]
-                else None,
-                "race_id": self._get_race_id(user_information["race"])
-                if user_information["race"]
-                else None,
-                "has_phd": user_information["has_phd"],
-                "year_of_phd": user_information["year_of_phd_completion"],
-            },
-        )
+
+        try:
+            self.connection.execute(
+                stmt,
+                {
+                    "pipt_user_id": pipt_user_id,
+                    "legal_status_id": self._get_legal_status_id(
+                        user_information["legal_status"]
+                    ),
+                    "gender_id": self._get_gender_id(user_information["gender"])
+                    if user_information["gender"]
+                    else None,
+                    "race_id": self._get_race_id(user_information["race"])
+                    if user_information["race"]
+                    else None,
+                    "has_phd": user_information["has_phd"],
+                    "year_of_phd": user_information["year_of_phd_completion"],
+                },
+            )
+        except IntegrityError:
+            raise NotFoundError(f"No such user id: {pipt_user_id}")

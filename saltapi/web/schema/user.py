@@ -80,7 +80,7 @@ class UserStatistics(BaseModel):
         ..., title="PhD", description="Does the user has a PhD?"
     )
     year_of_phd_completion: Optional[int] = Field(
-        ...,
+        None,
         title="Year of PhD degree completion",
         description="The year the PhD degree was completed",
     )
@@ -108,10 +108,9 @@ class UserUpdate(UserStatistics):
     A None value means that the existing value should be kept.
     """
 
-    username: Optional[str] = Field(None, title="Username", description="Username.")
-    given_name: Optional[str]
-    family_name: Optional[str]
-    email: Optional[str]
+    given_name: str = Field(..., title="Given name", description="Given name.")
+    family_name: str = Field(..., title="Family name", description="Family name.")
+    email: str = Field(..., title="Email", description="Email.")
     password: Optional[str] = Field(None, title="Password", description="Password.")
 
 

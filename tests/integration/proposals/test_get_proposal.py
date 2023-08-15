@@ -332,6 +332,7 @@ def test_should_return_phase1_proposal_summary_file(
     proposal_code = "2019-2-SCI-045"
     proposal_dir = tmp_path / proposal_code
     proposal_dir.mkdir()
+    # The latest version of the proposal summary should be returned.
     (proposal_dir / "1").mkdir()
     summary_content = b"This is a summary."
     proposal_file = proposal_dir / "1" / "Summary.pdf"

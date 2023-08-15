@@ -103,9 +103,7 @@ class NewUserDetails(FullName, UserStatistics):
 
 class UserUpdate(UserStatistics):
     """
-    New user details.
-
-    A None value means that the existing value should be kept.
+    Update user details.
     """
 
     given_name: str = Field(..., title="Given name", description="Given name.")

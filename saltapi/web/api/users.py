@@ -148,7 +148,7 @@ def update_user(
             year_of_phd_completion=user_update.year_of_phd_completion,
         )
         user_service = services.user_service(unit_of_work.connection)
-        user_service.update_user(user_id, _user_update)
+        user_service.update_user(user_id, vars(_user_update))
         unit_of_work.commit()
 
         return user_service.get_user(user_id)

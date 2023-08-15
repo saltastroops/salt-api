@@ -68,6 +68,15 @@ def setup_exception_handler(app: FastAPI) -> None:
             status_code=status.HTTP_404_NOT_FOUND, content={"message": "Not Found"}
         )
 
+    @app.exception_handler(ValueError)
+    async def value_error_handler(request: Request, exc: ValueError) -> Response:
+        """Catch a ValueError."""
+
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(exc)}
+        )
+
     @app.exception_handler(PydanticValidationError)
     async def pydantic_validation_error_handler(
         request: Request, exc: PydanticValidationError

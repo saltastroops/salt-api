@@ -72,20 +72,20 @@ def test_create_user_raisers_error_if_username_exists_already(
     db_connection: Connection,
 ) -> None:
     username = "hettlage"
-    new_user_details = NewUserDetails(
-        username=username,
-        email=EmailStr(f"{username}@example.com"),
-        alternative_emails=[],
-        given_name=_random_string(),
-        family_name=_random_string(),
-        password="very_secret",
-        institution_id=5,
-        legal_status=user_statistics.legal_status,
-        gender=user_statistics.gender,
-        race=user_statistics.race,
-        has_phd=user_statistics.has_phd,
-        year_of_phd_completion=user_statistics.year_of_phd_completion,
-    )
+    new_user_details = {
+        "username": username,
+        "email": EmailStr(f"{username}@example.com"),
+        "alternative_emails": [],
+        "given_name": _random_string(),
+        "family_name": _random_string(),
+        "password": "very_secret",
+        "institution_id": 5,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
     user_repository = UserRepository(db_connection)
     with pytest.raises(ValueError) as excinfo:
         user_repository.create(new_user_details)
@@ -96,20 +96,20 @@ def test_create_user_raisers_error_if_username_exists_already(
 @nodatabase
 def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
     username = _random_string()
-    new_user_details = NewUserDetails(
-        username=username,
-        password=_random_string(),
-        email=EmailStr(f"{username}@example.com"),
-        alternative_emails=[],
-        given_name=_random_string(),
-        family_name=_random_string(),
-        institution_id=5,
-        legal_status=user_statistics.legal_status,
-        gender=user_statistics.gender,
-        race=user_statistics.race,
-        has_phd=user_statistics.has_phd,
-        year_of_phd_completion=user_statistics.year_of_phd_completion,
-    )
+    new_user_details = {
+        "username": username,
+        "email": EmailStr(f"{username}@example.com"),
+        "alternative_emails": [],
+        "given_name": _random_string(),
+        "family_name": _random_string(),
+        "password": "very_secret",
+        "institution_id": 5,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
 
     user_repository = UserRepository(db_connection)
     user_repository.create(new_user_details)
@@ -117,9 +117,9 @@ def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
     created_user = user_repository.get_by_username(username)
     assert created_user.username == username
     assert created_user.password_hash is not None
-    assert created_user.email == new_user_details.email
-    assert created_user.given_name == new_user_details.given_name
-    assert created_user.family_name == new_user_details.family_name
+    assert created_user.email == new_user_details["email"]
+    assert created_user.given_name == new_user_details["given_name"]
+    assert created_user.family_name == new_user_details["family_name"]
     assert created_user.roles == []
 
 
@@ -152,7 +152,7 @@ def test_patch_raises_error_for_non_existing_user(db_connection: Connection) -> 
         "year_of_phd_completion": user_statistics.year_of_phd_completion,
     }
 
-    with pytest.raises(IntegrityError):
+    with pytest.raises(NotFoundError):
         user_repository.update(0, user_update)
 
 
@@ -169,6 +169,7 @@ def test_patch_user(db_connection: Connection) -> None:
         "family_name": new_family_name,
         "given_name": new_given_name,
         "email": new_email,
+        "password": None,
         "legal_status": user_statistics.legal_status,
         "gender": user_statistics.gender,
         "race": user_statistics.race,
@@ -186,6 +187,7 @@ def test_patch_user(db_connection: Connection) -> None:
         "family_name": old_user_details.family_name,
         "given_name": old_user_details.given_name,
         "email": old_user_details.email,
+        "password": None,
         "legal_status": user_statistics.legal_status,
         "gender": user_statistics.gender,
         "race": user_statistics.race,

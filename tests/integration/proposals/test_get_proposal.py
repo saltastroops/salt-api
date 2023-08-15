@@ -2,6 +2,7 @@ import pathlib
 from typing import Any, NamedTuple
 
 import pytest
+import saltapi.repository.proposal_repository
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
@@ -381,7 +382,7 @@ def test_should_return_proposal_file(
 
     # Request the proposal file
     monkeypatch.setattr(
-        "saltapi.repository.proposal_repository.get_settings", mock_get_settings
+        saltapi.repository.proposal_repository, "get_settings", mock_get_settings
     )
     username = find_username("SALT Astronomer")
     authenticate(username, client)

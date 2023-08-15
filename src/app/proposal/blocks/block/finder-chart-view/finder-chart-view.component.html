@@ -1,0 +1,79 @@
+<div class="components" data-test="finder-chart-view">
+  <div class="is-horizontal">
+    <div>
+      <label class="label">Rotation angle</label>
+    </div>
+    <div>
+      <input
+        #rotationValue
+        data-test="position-angle"
+        type="text"
+        class="input"
+        [value]="positionAngle"
+        (keyup)="
+          setFinderChartTransform({
+            transform: 'rotate',
+            value: parseFloat(rotationValue.value)
+          })
+        "
+      />
+    </div>
+    <div>
+      <button
+        data-test="zoom-in"
+        class="button"
+        (click)="setFinderChartTransform({ transform: 'zoom', value: 0.1 })"
+      >
+        Zoom In
+      </button>
+    </div>
+    <div>
+      <button
+        data-test="zoom-out"
+        class="button"
+        (click)="setFinderChartTransform({ transform: 'zoom', value: -0.1 })"
+      >
+        Zoom Out
+      </button>
+    </div>
+    <label
+      ><input
+        data-test="mirror-x"
+        type="checkbox"
+        (change)="setFinderChartTransform({ transform: 'mirrorX', value: 0 })"
+        [checked]="mirrorX === -1"
+      />
+      Mirror Vertically
+    </label>
+    <label
+      ><input
+        data-test="mirror-y"
+        type="checkbox"
+        (change)="setFinderChartTransform({ transform: 'mirrorY', value: 0 })"
+        [checked]="mirrorY === -1"
+      />
+      Mirror Horizontally
+    </label>
+  </div>
+  <div
+    class="image-container"
+    (wheel)="onWheelZoom($event)"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp()"
+    (mousemove)="onMouseMove($event)"
+  >
+    <div
+      #image
+      id="finder-chart-image"
+      class="image image-wrapper"
+      [style.transform]="getTransform()"
+      data-test="image-wrapper"
+    >
+      <img
+        src="{{ finderChartUrl }}"
+        alt="finder-chat"
+        data-test="finder-chart-image"
+      />
+    </div>
+  </div>
+</div>

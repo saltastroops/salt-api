@@ -19,13 +19,27 @@
       <ng-container *ngFor="let f of acquisition.finderCharts">
         <tr>
           <td>
-            <a href="{{ originalFinderChartURL(f) }}">
+            <a
+              *ngIf="originalFinderChartURL(f); else finderChartNotFound"
+              [routerLink]="['/finder-chart-view']"
+              [queryParams]="{
+                finderChart: originalFinderChartURL(f),
+                positionAngle: this.positionAngle
+              }"
+            >
               <img
-                src="{{ originalFinderChartURL(f) }}"
+                src="{{ thumbnailFinderChartURL(f) }}"
                 alt="Finding chart"
                 class="image is-128x128"
               />
             </a>
+            <ng-template #finderChartNotFound>
+              <img
+                src="{{ thumbnailFinderChartURL(f) }}"
+                alt="Finding chart"
+                class="image is-128x128"
+              />
+            </ng-template>
           </td>
 
           <td colspan="2">{{ f.comment || "None" }}</td>

@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from "@angular/common";
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { APP_INITIALIZER, ErrorHandler, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -35,6 +36,7 @@ import { BlockSelectionComponent } from "./proposal/blocks/block-view/block-sele
 import { BlockViewComponent } from "./proposal/blocks/block-view/block-view.component";
 import { BlockComponent } from "./proposal/blocks/block/block.component";
 import { EditBlockStatusModalComponent } from "./proposal/blocks/block/edit-block-status-modal/edit-block-status-modal.component";
+import { FinderChartViewComponent } from "./proposal/blocks/block/finder-chart-view/finder-chart-view.component";
 import { IterationsComponent } from "./proposal/blocks/block/iterations/iterations.component";
 import { ObservationProbabilitiesComponent } from "./proposal/blocks/block/observation-probabilities/observation-probabilities.component";
 import { ObservingConditionsComponent } from "./proposal/blocks/block/observing-conditions/observing-conditions.component";
@@ -234,6 +236,7 @@ import { SortDirective } from "./sort.directive";
     RssConfigRowComponent,
     HrsConfigRowComponent,
     P1ObservationsComponent,
+    FinderChartViewComponent,
     SaFormComponent,
   ],
   imports: [
@@ -245,6 +248,7 @@ import { SortDirective } from "./sort.directive";
     ReactiveFormsModule,
     TooltipModule,
     DateFnsModule.forRoot(),
+    NgOptimizedImage,
   ],
   providers: [
     CookieService,

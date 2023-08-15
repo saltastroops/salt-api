@@ -319,12 +319,17 @@ export function thumbnailFinderChartURL(finderChart: FinderChart): string {
   return url || "/assets/noun-missing-2181345.png";
 }
 
-export function originalFinderChartURL(finderChart: FinderChart): string {
-  const url = finderChartURL(
+export function originalFinderChartURL(
+  finderChart: FinderChart,
+): string | null {
+  const chartUrl = finderChartURL(
     finderChart,
     ["original"],
-    ["pdf", "png", "jpg"],
+    ["png", "jpg", "pdf"],
     environment.apiUrl,
   );
-  return url || "/assets/noun-missing-2181345.png";
+  if (chartUrl) {
+    return chartUrl || null;
+  }
+  return null;
 }

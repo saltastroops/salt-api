@@ -8,6 +8,7 @@ import { LoginComponent } from "./login/login.component";
 import { SwitchUserComponent } from "./login/switch-user/switch-user.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosComponent } from "./mos/mos.component";
+import { FinderChartViewComponent } from "./proposal/blocks/block/finder-chart-view/finder-chart-view.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RegisterUserComponent } from "./register-user/register-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
@@ -41,6 +42,10 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
   { path: "page-missing", component: PageMissingComponent },
+  {
+    path: "finder-chart-view",
+    component: FinderChartViewComponent,
+  },
   { path: "**", redirectTo: "/page-missing", pathMatch: "full" },
 ];
 

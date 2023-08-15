@@ -14,6 +14,7 @@ import {
   hasAnyRole,
   isUserPrincipalContact,
   isUserPrincipalInvestigator,
+  originalFinderChartURL,
 } from "../../../utils";
 
 @Component({
@@ -25,6 +26,7 @@ import {
 export class BlockComponent implements OnInit {
   @Input() block!: Block;
   @Input() investigators!: Investigator[];
+  originalFinderChartURL = originalFinderChartURL;
 
   validFrom!: Date;
 
@@ -75,16 +77,6 @@ export class BlockComponent implements OnInit {
       finderChart,
       ["thumbnail", "original"],
       ["png", "jpg"],
-      environment.apiUrl,
-    );
-    return url || "/assets/noun-missing-2181345.png";
-  }
-
-  originalFinderChartURL(finderChart: FinderChart): string {
-    const url = finderChartURL(
-      finderChart,
-      ["original"],
-      ["pdf", "png", "jpg"],
       environment.apiUrl,
     );
     return url || "/assets/noun-missing-2181345.png";

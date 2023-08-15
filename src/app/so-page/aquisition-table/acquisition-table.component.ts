@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
 
 import { Acquisition } from "../../types/observation";
-import { originalFinderChartURL } from "../../utils";
+import { originalFinderChartURL, thumbnailFinderChartURL } from "../../utils";
 
 @Component({
   selector: "wm-acquisition-table",
@@ -10,5 +10,7 @@ import { originalFinderChartURL } from "../../utils";
 })
 export class AcquisitionTableComponent {
   @Input() acquisition!: Acquisition;
+  @Input() positionAngle: number | null = null;
   originalFinderChartURL = originalFinderChartURL;
+  thumbnailFinderChartURL = thumbnailFinderChartURL;
 }

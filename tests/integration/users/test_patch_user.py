@@ -128,7 +128,9 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     assert updated_user_details == expected_updated_user_details
 
 
-def test_patch_user_should_return_400_for_using_existing_email(client: TestClient) -> None:
+def test_patch_user_should_return_400_for_using_existing_email(
+    client: TestClient,
+) -> None:
     user = create_user(client)
     authenticate(user["username"], client)
     existing_email = "hettlage@saao.ac.za"

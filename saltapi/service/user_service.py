@@ -80,9 +80,7 @@ SALT Team
         return True
 
     @staticmethod
-    def _validate_user_statistics(
-        user_details: Dict[str, Any]
-    ) -> None:
+    def _validate_user_statistics(user_details: Dict[str, Any]) -> None:
         if user_details["legal_status"] in [
             "South African citizen",
             "Permanent resident of South Africa",

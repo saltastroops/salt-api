@@ -303,7 +303,9 @@ WHERE Investigator_Id = :investigator_id
             ),
         )
 
-    def _new_user_details(self, user_id: int, user_update: Dict[str, Any]) -> Dict[str, Any]:
+    def _new_user_details(
+        self, user_id: int, user_update: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Returns the new user details of a user.
         """
@@ -318,7 +320,7 @@ WHERE Investigator_Id = :investigator_id
             "gender": user_update["gender"],
             "race": user_update["race"],
             "has_phd": user_update["has_phd"],
-            "year_of_phd_completion": user_update["year_of_phd_completion"]
+            "year_of_phd_completion": user_update["year_of_phd_completion"],
         }
 
         return new_user_details

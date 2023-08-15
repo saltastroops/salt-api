@@ -81,24 +81,24 @@ SALT Team
 
     @staticmethod
     def _validate_user_statistics(
-        user_details: Union[NewUserDetails, UserUpdate]
+        user_details: Dict[str, Any]
     ) -> None:
-        if user_details.legal_status in [
+        if user_details["legal_status"] in [
             "South African citizen",
             "Permanent resident of South Africa",
         ]:
-            if not user_details.gender:
+            if not user_details["gender"]:
                 raise ValidationError("Gender is missing.")
-            if not user_details.race:
+            if not user_details["race"]:
                 raise ValidationError("Race is missing.")
-            if user_details.has_phd and not user_details.year_of_phd_completion:
+            if user_details["has_phd"] and not user_details["year_of_phd_completion"]:
                 raise ValidationError("Year of completing PhD is missing.")
 
     def create_user(self, user: NewUserDetails) -> None:
         if self._does_user_exist(user.username):
             raise ValidationError(f"The username {user.username} exists already.")
-        self._validate_user_statistics(user)
-        self.repository.create(user)
+        self._validate_user_statistics(vars(user))
+        self.repository.create(vars(user))
 
     def get_user(self, user_id: int) -> User:
         user = self.repository.get(user_id)
@@ -122,7 +122,7 @@ SALT Team
         user.password_hash = "***"  # nosec
         return user
 
-    def update_user(self, user_id: int, user: UserUpdate) -> None:
+    def update_user(self, user_id: int, user: Dict[str, Any]) -> None:
         self._validate_user_statistics(user)
         self.repository.update(user_id, user)
 

@@ -165,13 +165,13 @@ ORDER BY I.Surname, I.FirstName
         ]
         return users
 
-    def create(self, new_user_details: NewUserDetails) -> None:
+    def create(self, new_user_details: Dict[str, Any]) -> None:
         """Creates a new user."""
 
         # Make sure the username is still available
-        if self._does_username_exist(new_user_details.username):
+        if self._does_username_exist(new_user_details["username"]):
             raise ValueError(
-                f"The username {new_user_details.username} exists already."
+                f"The username {new_user_details['username']} exists already."
             )
 
         investigator_id = self._create_investigator_details(new_user_details)
@@ -180,15 +180,15 @@ ORDER BY I.Surname, I.FirstName
         self.update_user_statistic(
             pipt_user_id,
             dict(
-                legal_status=new_user_details.legal_status,
-                gender=new_user_details.gender,
-                race=new_user_details.race,
-                has_phd=new_user_details.has_phd,
-                year_of_phd_completion=new_user_details.year_of_phd_completion,
+                legal_status=new_user_details["legal_status"],
+                gender=new_user_details["gender"],
+                race=new_user_details["race"],
+                has_phd=new_user_details["has_phd"],
+                year_of_phd_completion=new_user_details["year_of_phd_completion"],
             ),
         )
 
-    def _create_investigator_details(self, new_user_details: NewUserDetails) -> int:
+    def _create_investigator_details(self, new_user_details: Dict[str, Any]) -> int:
         """
         Create investigator details.
 
@@ -204,20 +204,20 @@ VALUES (:institution_id, :given_name, :family_name, :email)
         result = self.connection.execute(
             stmt,
             {
-                "institution_id": new_user_details.institution_id,
-                "given_name": new_user_details.given_name,
-                "family_name": new_user_details.family_name,
-                "email": new_user_details.email,
+                "institution_id": new_user_details["institution_id"],
+                "given_name": new_user_details["given_name"],
+                "family_name": new_user_details["family_name"],
+                "email": new_user_details["email"],
             },
         )
 
         return cast(int, result.lastrowid)
 
     def _create_pipt_user(
-        self, new_user_details: NewUserDetails, investigator_id: int
+        self, new_user_details: Dict[str, Any], investigator_id: int
     ) -> int:
         # TODO: Uncomment once the Password table exists.
-        password = new_user_details.password
+        password = new_user_details["password"]
         # self._update_password_hash(username, password)
         password_hash = self.get_password_hash(password)
 
@@ -230,7 +230,7 @@ VALUES (:username, :password_hash, :investigator_id, :email_validation, 0)
         result = self.connection.execute(
             stmt,
             {
-                "username": new_user_details.username,
+                "username": new_user_details["username"],
                 "password_hash": password_hash,
                 "investigator_id": investigator_id,
                 "email_validation": str(uuid.uuid4())[:8],
@@ -262,44 +262,66 @@ WHERE Investigator_Id = :investigator_id
 
         return True
 
-    def update(self, user_id: int, user_update: UserUpdate) -> None:
-        """Updates a user's details."""
-        if user_update.password:
-            self._update_password(user_id, user_update.password)
+    def _does_email_exist(self, email: str) -> bool:
+        """Check whether a username exists already."""
+        try:
+            self.get_by_email(email)
+        except NotFoundError:
+            return False
+
+        return True
+
+    def update(self, user_id: int, user_update: Dict[str, Any]) -> None:
+        """
+        Updates a user's details.
+
+        If the user id does not exist, a NotFoundError is raised.
+        If the email exists already and belongs to another, a ValueError is raised.
+
+        """
+        if not self.is_existing_user_id(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        if self._does_email_exist(user_update["email"]):
+            user = self.get_by_email(user_update["email"])
+            if user.id != user_id:
+                raise ValueError(f"The email {user_update['email']} exists already.")
+
+        if user_update["password"]:
+            self._update_password(user_id, user_update["password"])
 
         self._update_user_details(user_id, user_update)
 
         self.update_user_statistic(
             user_id,
             dict(
-                legal_status=user_update.legal_status,
-                gender=user_update.gender,
-                race=user_update.race,
-                has_phd=user_update.has_phd,
-                year_of_phd_completion=user_update.year_of_phd_completion,
+                legal_status=user_update["legal_status"],
+                gender=user_update["gender"],
+                race=user_update["race"],
+                has_phd=user_update["has_phd"],
+                year_of_phd_completion=user_update["year_of_phd_completion"],
             ),
         )
 
-    def _new_user_details(self, user_id: int, user_update: UserUpdate) -> UserUpdate:
+    def _new_user_details(self, user_id: int, user_update: Dict[str, Any]) -> Dict[str, Any]:
         """
         Returns the new user details of a user.
-
-        If the given user update has a non-None value for a property, that value should
-        replace the existing value; otherwise the existing value is kept.
         """
         user = self.get(user_id)
-        return UserUpdate(
-            username=user.username,
-            email=user_update.email,
-            given_name=user_update.given_name,
-            family_name=user_update.family_name,
-            password=user_update.password,
-            legal_status=user_update.legal_status,
-            gender=user_update.gender,
-            race=user_update.race,
-            has_phd=user_update.has_phd,
-            year_of_phd_completion=user_update.year_of_phd_completion,
-        )
+
+        new_user_details = {
+            "email": user.email,
+            "given_name": user.given_name,
+            "family_name": user.family_name,
+            "password": user_update["password"],
+            "legal_status": user_update["legal_status"],
+            "gender": user_update["gender"],
+            "race": user_update["race"],
+            "has_phd": user_update["has_phd"],
+            "year_of_phd_completion": user_update["year_of_phd_completion"]
+        }
+
+        return new_user_details
 
     def _update_username(self, user_id: int, new_username: str) -> None:
         """
@@ -615,7 +637,7 @@ WHERE PiptUser_Id = :user_id
         )
         self.connection.execute(stmt, {"user_id": user_id, "password": password_hash})
 
-    def _update_user_details(self, user_id: int, user_update: UserUpdate) -> None:
+    def _update_user_details(self, user_id: int, user_update: Dict[str, str]) -> None:
         stmt = text(
             """
 UPDATE Investigator 
@@ -626,19 +648,19 @@ WHERE PiptUser_Id = :user_id
             """
         )
 
-        try:
-            self.connection.execute(
-                stmt,
-                {
-                    "user_id": user_id,
-                    "given_name": user_update.given_name,
-                    "family_name": user_update.family_name,
-                    "email": user_update.email,
-                },
-            )
+        # try:
+        self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+                "given_name": user_update["given_name"],
+                "family_name": user_update["family_name"],
+                "email": user_update["email"],
+            },
+        )
 
-        except IntegrityError:
-            raise NotFoundError(f"No such user id: {user_id}")
+        # except IntegrityError:
+        #     raise NotFoundError(f"No such user id: {user_id}")
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:
@@ -960,23 +982,20 @@ ON DUPLICATE KEY UPDATE
             """
         )
 
-        try:
-            self.connection.execute(
-                stmt,
-                {
-                    "pipt_user_id": pipt_user_id,
-                    "legal_status_id": self._get_legal_status_id(
-                        user_information["legal_status"]
-                    ),
-                    "gender_id": self._get_gender_id(user_information["gender"])
-                    if user_information["gender"]
-                    else None,
-                    "race_id": self._get_race_id(user_information["race"])
-                    if user_information["race"]
-                    else None,
-                    "has_phd": user_information["has_phd"],
-                    "year_of_phd": user_information["year_of_phd_completion"],
-                },
-            )
-        except IntegrityError:
-            raise NotFoundError(f"No such user id: {pipt_user_id}")
+        self.connection.execute(
+            stmt,
+            {
+                "pipt_user_id": pipt_user_id,
+                "legal_status_id": self._get_legal_status_id(
+                    user_information["legal_status"]
+                ),
+                "gender_id": self._get_gender_id(user_information["gender"])
+                if user_information["gender"]
+                else None,
+                "race_id": self._get_race_id(user_information["race"])
+                if user_information["race"]
+                else None,
+                "has_phd": user_information["has_phd"],
+                "year_of_phd": user_information["year_of_phd_completion"],
+            },
+        )

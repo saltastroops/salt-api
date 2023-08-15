@@ -67,7 +67,7 @@ def test_patch_user_should_return_404_for_non_existing_user(client: TestClient) 
     authenticate(username, client)
 
     response = client.patch(
-        _url(0), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za")
+        _url(0), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@example.com")
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -152,7 +152,7 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
 def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) -> None:
     other_user_id = 1593
     authenticate(find_username("Administrator"), client)
-    user_update = _patch_data("Xola", "Ndaliso", "xola.ndaliso@gmail.com")
+    user_update = _patch_data("Xola", "Ndaliso", "xola.ndaliso@example.com")
     expected_updated_user_details = client.get(_url(other_user_id)).json()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]

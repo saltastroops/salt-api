@@ -128,11 +128,12 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     assert updated_user_details == expected_updated_user_details
 
 
-def test_patch_user_should_be_idempotent(client: TestClient) -> None:
+def test_patch_user_should_return_400_for_using_existing_email(client: TestClient) -> None:
     user = create_user(client)
     authenticate(user["username"], client)
+    existing_email = "hettlage@saao.ac.za"
 
-    user_update = _patch_data(user["given_name"], user["family_name"], user["email"])
+    user_update = _patch_data(user["given_name"], user["family_name"], existing_email)
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
@@ -142,11 +143,9 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     del expected_updated_user_details["has_phd"]
     del expected_updated_user_details["year_of_phd_completion"]
 
-    client.patch(_url(user["id"]), json=user_update)
-    client.patch(_url(user["id"]), json=user_update)
+    response = client.patch(_url(user["id"]), json=user_update)
 
-    updated_user_details = client.get(_url(user["id"])).json()
-    assert updated_user_details == expected_updated_user_details
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) -> None:

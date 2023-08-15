@@ -135,119 +135,94 @@ def test_get_user_by_email_raises_error_for_non_existing_user(
 @nodatabase
 def test_patch_raises_error_for_non_existing_user(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
+
+    new_family_name = "Motaung"
+    new_given_name = "Thato"
+    new_email = "motaung.thato@gmail.com"
+
+    user_update = {
+        "family_name": new_family_name,
+        "given_name": new_given_name,
+        "email": new_email,
+        "password": None,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
+
     with pytest.raises(IntegrityError):
-        user_repository.update(
-            0,
-            UserUpdate(
-                password=None,
-                family_name=None,
-                given_name=None,
-                email=None,
-                legal_status=user_statistics.legal_status,
-                gender=user_statistics.gender,
-                race=user_statistics.race,
-                has_phd=user_statistics.has_phd,
-                year_of_phd_completion=user_statistics.year_of_phd_completion,
-            ),
-        )
+        user_repository.update(0, user_update)
 
 
-@nodatabase
-def test_patch_uses_existing_values_by_default(db_connection: Connection) -> None:
-    user_repository = UserRepository(db_connection)
-    user_id = 1602
-    old_user_details = user_repository.get(user_id)
-    user_repository.update(
-        user_id,
-        UserUpdate(
-            password=None,
-            family_name="Mofokeng",
-            given_name="Chaka",
-            email="cmofokeng@saao.ac.za",
-            legal_status=user_statistics.legal_status,
-            gender=user_statistics.gender,
-            race=user_statistics.race,
-            has_phd=user_statistics.has_phd,
-            year_of_phd_completion=user_statistics.year_of_phd_completion,
-        ),
-    )
-    new_user_details = user_repository.get(user_id)
-
-    assert old_user_details == new_user_details
-
-
-def test_patch_replaces_existing_values(db_connection: Connection) -> None:
+def test_patch_user(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
     user_id = 1602
     old_user_details = user_repository.get(user_id)
 
     new_family_name = "Motaung"
     new_given_name = "Thato"
-    new_password = "a_new_shiny_password"
-    assert not user_repository.verify_password(
-        new_password, old_user_details.password_hash
-    )
+    new_email = "motaung.thato@gmail.com"
 
-    user_repository.update(
-        user_id,
-        UserUpdate(
-            family_name=new_family_name,
-            given_name=new_given_name,
-            email="cmofokeng@saao.ac.za",
-            password=new_password,
-            legal_status=user_statistics.legal_status,
-            gender=user_statistics.gender,
-            race=user_statistics.race,
-            has_phd=user_statistics.has_phd,
-            year_of_phd_completion=user_statistics.year_of_phd_completion,
-        ),
-    )
+    user_update = {
+        "family_name": new_family_name,
+        "given_name": new_given_name,
+        "email": new_email,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
+    user_repository.update(user_id, user_update)
     new_user_details = user_repository.get(user_id)
 
     assert new_user_details.family_name == new_family_name
     assert new_user_details.given_name == new_given_name
-    assert user_repository.verify_password(new_password, new_user_details.password_hash)
+    assert new_user_details.email == new_email
+
+    old_user_update = {
+        "family_name": old_user_details.family_name,
+        "given_name": old_user_details.given_name,
+        "email": old_user_details.email,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
+    user_repository.update(user_id, old_user_update)
+    new_user_details = user_repository.get(user_id)
+
+    assert new_user_details.family_name == old_user_details.family_name
+    assert new_user_details.given_name == old_user_details.given_name
+    assert new_user_details.email == old_user_details.email
 
 
-def test_patch_is_idempotent(db_connection: Connection) -> None:
+def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
     user_id = 1602
     username = "cmofokeng"
-    new_password = "a_new_shiny_password"
 
-    user_repository.update(
-        user_id,
-        UserUpdate(
-            family_name="Chaka",
-            given_name="Mofokeng",
-            email="cmofokeng@saao.ac.za",
-            password=new_password,
-            legal_status=user_statistics.legal_status,
-            gender=user_statistics.gender,
-            race=user_statistics.race,
-            has_phd=user_statistics.has_phd,
-            year_of_phd_completion=user_statistics.year_of_phd_completion,
-        ),
-    )
-    new_user_details_1 = user_repository.get_by_username(username)
+    family_name = "Chaka"
+    given_name = "Mofokeng"
+    existing_other_user_email = "hettlage@saao.ac.za"
 
-    user_repository.update(
-        user_id,
-        UserUpdate(
-            family_name="Chaka",
-            given_name="Mofokeng",
-            email="cmofokeng@saao.ac.za",
-            password=new_password,
-            legal_status=user_statistics.legal_status,
-            gender=user_statistics.gender,
-            race=user_statistics.race,
-            has_phd=user_statistics.has_phd,
-            year_of_phd_completion=user_statistics.year_of_phd_completion,
-        ),
-    )
-    new_user_details_2 = user_repository.get_by_username(username)
+    user_update = {
+        "family_name": family_name,
+        "given_name": given_name,
+        "email": existing_other_user_email,
+        "password": None,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
 
-    assert new_user_details_1 == new_user_details_2
+    with pytest.raises(ValueError):
+        user_repository.update(user_id, user_update)
 
 
 def _check_user_has_role(

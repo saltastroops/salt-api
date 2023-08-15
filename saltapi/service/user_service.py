@@ -1,11 +1,11 @@
 from datetime import timedelta
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
-from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
+from saltapi.service.user import NewUserDetails, Role, User
 from saltapi.settings import get_settings
 from saltapi.web.schema.user import ProposalPermissionType
 

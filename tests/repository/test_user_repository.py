@@ -6,11 +6,10 @@ import pytest
 from pydantic import EmailStr
 from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import IntegrityError
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.user_repository import UserRepository
-from saltapi.service.user import NewUserDetails, UserStatistics, UserUpdate
+from saltapi.service.user import UserStatistics
 from tests.conftest import find_usernames
 from tests.markers import nodatabase
 
@@ -205,7 +204,6 @@ def test_patch_user(db_connection: Connection) -> None:
 def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
     user_id = 1602
-    username = "cmofokeng"
 
     family_name = "Chaka"
     given_name = "Mofokeng"

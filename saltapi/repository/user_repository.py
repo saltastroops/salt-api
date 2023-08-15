@@ -7,10 +7,10 @@ from typing import Any, Dict, List, cast
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import NoResultFound
 
 from saltapi.exceptions import NotFoundError
-from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
+from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"

@@ -14,10 +14,11 @@ from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     NewUserDetails,
     PasswordResetRequest,
+    PasswordUpdate,
     ProposalPermission,
     User,
     UserListItem,
-    UserUpdate, PasswordUpdate,
+    UserUpdate,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -254,9 +255,7 @@ def revoke_proposal_permission(
 
 
 @router.post(
-    "/{user_id}/update-password",
-    summary="Update user's password",
-    response_model=User
+    "/{user_id}/update-password", summary="Update user's password", response_model=User
 )
 def update_password(
     user_id: int = Path(
@@ -265,9 +264,7 @@ def update_password(
         description="Id of the user for whom the permission is revoked",
     ),
     password: PasswordUpdate = Body(
-        ...,
-        title="Password",
-        description="Password to replace the old one."
+        ..., title="Password", description="Password to replace the old one."
     ),
     user: _User = Depends(get_current_user),
 ) -> _User:
@@ -283,4 +280,3 @@ def update_password(
         unit_of_work.commit()
 
         return user_service.get_user(user_id)
-

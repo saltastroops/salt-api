@@ -2,27 +2,26 @@ import pytest
 from starlette import status
 from starlette.testclient import TestClient
 
-from tests.conftest import not_authenticated, find_username, authenticate
+from tests.conftest import authenticate, find_username, not_authenticated
 
 USERS_URL = "/users"
 LOGIN_URL = "/login"
 
 
 def test_password_update_requires_authentication(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     user_id = 1062
 
     not_authenticated(client)
     response = client.post(
-        f"{USERS_URL}/{user_id}/update-password",
-        json={"password": "very-very0-secret"}
-        )
+        f"{USERS_URL}/{user_id}/update-password", json={"password": "very-very0-secret"}
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_password_update_requires_proposal_status(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     user_id = 1072
     username = find_username("administrator")
@@ -43,8 +42,8 @@ def test_password_update_requires_proposal_status(
     ],
 )
 def test_password_update_requires_permissions(
-        username: str,
-        client: TestClient,
+    username: str,
+    client: TestClient,
 ) -> None:
     other_user_id = 1072
 
@@ -52,13 +51,13 @@ def test_password_update_requires_permissions(
 
     response = client.post(
         f"{USERS_URL}/{other_user_id}/update-password",
-        json={"password": "very-very0-secret"}
+        json={"password": "very-very0-secret"},
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_password_update(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     user_id = 1062
     username = "cmofokeng"
@@ -67,16 +66,13 @@ def test_password_update(
     authenticate(username, client)
 
     response = client.post(
-        f"{USERS_URL}/{user_id}/update-password",
-        json={"password": password}
+        f"{USERS_URL}/{user_id}/update-password", json={"password": password}
     )
 
     assert response.status_code == status.HTTP_200_OK
 
     client.post("/logout")
 
-    response = client.post(
-        "/login", data={"username": username, "password": password}
-    )
+    response = client.post("/login", data={"username": username, "password": password})
 
     assert response.status_code == status.HTTP_204_NO_CONTENT

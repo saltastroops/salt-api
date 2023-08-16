@@ -7,7 +7,7 @@ from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType, PasswordUpdate
+from saltapi.web.schema.user import PasswordUpdate, ProposalPermissionType
 
 
 class UserService:

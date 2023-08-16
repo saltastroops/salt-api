@@ -7,7 +7,7 @@ from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType
+from saltapi.web.schema.user import ProposalPermissionType, PasswordUpdate
 
 
 class UserService:
@@ -127,6 +127,9 @@ SALT Team
             raise ValidationError(f"The username {user.username} exists already.")
         self._validate_user_statistics(user)
         self.repository.update(user_id, user)
+
+    def update_password(self, user_id: int, password_update: PasswordUpdate) -> None:
+        self.repository.update_password(user_id, password_update.password)
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         return self.repository.get_salt_astronomers()

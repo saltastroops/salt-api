@@ -165,3 +165,7 @@ class SaltAstronomer(FullName):
     """The SALT Astronomers."""
 
     id: int = Field(..., title="User id", description="User id.")
+
+
+class PasswordUpdate(BaseModel):
+    password: str = Field(..., title="Password", description="Password.")

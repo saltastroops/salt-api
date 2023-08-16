@@ -265,7 +265,7 @@ WHERE Investigator_Id = :investigator_id
     def update(self, user_id: int, user_update: UserUpdate) -> None:
         """Updates a user's details."""
         if user_update.password:
-            self._update_password(user_id, user_update.password)
+            self.update_password(user_id, user_update.password)
         new_user_details = self._new_user_details(user_id, user_update)
         new_username = cast(str, new_user_details.username)
         self._update_username(user_id=user_id, new_username=new_username)
@@ -599,7 +599,7 @@ ON DUPLICATE KEY UPDATE Password = :password
             stmt, {"username": username, "password": new_password_hash}
         )
 
-    def _update_password(self, user_id: int, password: str) -> None:
+    def update_password(self, user_id: int, password: str) -> None:
         # TODO: Uncomment once the Password table exists.
         # self._update_password_hash(username, password)
         password_hash = self.get_password_hash(password)

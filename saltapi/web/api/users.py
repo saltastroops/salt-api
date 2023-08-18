@@ -261,7 +261,7 @@ def update_password(
     user_id: int = Path(
         ...,
         title="User id",
-        description="Id of the user for whom the permission is revoked",
+        description="Id for whom the password is updated",
     ),
     password: PasswordUpdate = Body(
         ..., title="Password", description="Password to replace the old one."

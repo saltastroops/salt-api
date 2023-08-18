@@ -20,7 +20,7 @@ def test_password_update_requires_authentication(
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_password_update_requires_proposal_status(
+def test_password_update_requires_password(
     client: TestClient,
 ) -> None:
     user_id = 1072
@@ -31,6 +31,20 @@ def test_password_update_requires_proposal_status(
         f"{USERS_URL}/{user_id}/update-password",
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_password_update_requires_valid_user_id(
+        client: TestClient,
+) -> None:
+    user_id = 0
+    username = find_username("administrator")
+    authenticate(username, client)
+
+    response = client.post(
+        f"{USERS_URL}/{user_id}/update-password",
+        json={"password": "very-very-secret"},
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.parametrize(

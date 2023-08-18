@@ -271,7 +271,7 @@ LIMIT :limit;
         general_info["proprietary_period"] = {
             "period": proprietary_period,
             "maximum_period": self.maximum_proprietary_period(proposal_code),
-            "start_date": self._proprietary_period_start_date(block_visits),
+            "start_date": self.proprietary_period_start_date(block_visits),
         }
         general_info["current_submission"] = self._latest_submission_date(proposal_code)
         general_info["data_release_date"] = self._data_release_date(
@@ -1373,7 +1373,7 @@ WHERE PC.Proposal_Code = :proposal_code;
 
         return bool(cast(int, one) if one is not None else 0 > 0)
 
-    def _get_current_version(self, proposal_code: str) -> int:
+    def get_current_version(self, proposal_code: str) -> int:
         """
         Return the current version (number) of a proposal.
 
@@ -1402,7 +1402,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return cast(int, version)
 
-    def _get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
+    def get_current_phase1_version(self, proposal_code: str) -> Optional[int]:
         """
         Return the current version (number) of a proposal.
 
@@ -1657,7 +1657,13 @@ ORDER BY semester DESC;
         else:
             return None
 
-    def get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def get_observed_p0_to_p3_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+        """
+        Get the charged times for priority 0 to 3, summed per semester.
+
+        Priority 4 observations are not included. Rejected observations are not included
+        either.
+        """
         stmt = text(
             """
 SELECT
@@ -1670,6 +1676,7 @@ FROM Proposal		    AS P
     JOIN BlockVisitStatus AS BVS USING (BlockVisitStatus_Id)
     JOIN Semester 		AS S ON (P.Semester_Id = S.Semester_Id)
 WHERE BlockVisitStatus = 'Accepted'
+    AND B.Priority < 4
     AND Proposal_Code = :proposal_code
     GROUP BY S.Semester_Id
     """
@@ -1717,7 +1724,7 @@ WHERE Proposal_Code=:proposal_code
 
     def _get_time_statistics(self, proposal_code: str) -> List[Dict[str, Any]]:
         allocated_requested = self.get_allocated_and_requested_time(proposal_code)
-        observed_time = self.get_observed_time(proposal_code)
+        observed_time = self.get_observed_p0_to_p3_time(proposal_code)
         time_statistics = []
         for ar in allocated_requested:
             tmp = {
@@ -1788,7 +1795,7 @@ WHERE PC.Proposal_Code = :proposal_code
            The file path.
 
         """
-        current_phase1_version = self._get_current_phase1_version(proposal_code)
+        current_phase1_version = self.get_current_phase1_version(proposal_code)
         if current_phase1_version is None:
             raise NotFoundError(
                 f"There exists no phase 1 proposal summary for proposal {proposal_code}"
@@ -1825,7 +1832,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         """
         proposals_dir = get_settings().proposals_dir
-        version = self._get_current_version(proposal_code)
+        version = self.get_current_version(proposal_code)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
             raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
@@ -1915,15 +1922,15 @@ WHERE PC.Proposal_Code = :proposal_code
             current_conditions = self.get_latest_observing_conditions(
                 proposal_code, semester
             )
-            progress_report["last_observing_constraints"] = {
-                "seeing": current_conditions["seeing"] if current_conditions else None,
-                "transparency": current_conditions["transparency"]
+            progress_report["last_observing_constraints"] = (
+                {
+                    "seeing": current_conditions["seeing"],
+                    "transparency": current_conditions["transparency"],
+                    "description": current_conditions["description"],
+                }
                 if current_conditions
-                else None,
-                "description": current_conditions["description"]
-                if current_conditions
-                else None,
-            }
+                else None
+            )
 
             # The requested observing conditions, on the other hand, are those
             # of the next semester. These should exist (as there exists a progress
@@ -1950,7 +1957,7 @@ WHERE PC.Proposal_Code = :proposal_code
         else:
             return {
                 "requested_time": requested_time,
-                "semester": None,
+                "semester": semester,
                 "maximum_seeing": None,
                 "transparency": None,
                 "additional_pdf": None,
@@ -2040,7 +2047,7 @@ VALUES (
         )
 
     @staticmethod
-    def _proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
+    def proprietary_period_start_date(block_visits: List[Dict[str, Any]]) -> date:
         # find the latest observation
 
         observation_night: Optional[date] = None
@@ -2070,7 +2077,7 @@ VALUES (
     def _data_release_date(
         self, proprietary_period: int, block_visits: List[dict[str, Any]]
     ) -> Optional[date]:
-        proprietary_period_start = self._proprietary_period_start_date(block_visits)
+        proprietary_period_start = self.proprietary_period_start_date(block_visits)
 
         if proprietary_period is None:
             return None

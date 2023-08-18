@@ -2,12 +2,12 @@ import pathlib
 from typing import Any, NamedTuple
 
 import pytest
+import saltapi.repository.proposal_repository
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
 from starlette import status
 
-import saltapi.repository.proposal_repository
 from saltapi.repository.user_repository import UserRepository
 from tests.conftest import authenticate, find_username, not_authenticated
 
@@ -86,7 +86,7 @@ def test_should_return_proposal_when_requesting_science_proposal_for_permitted_u
         find_username("TAC Member", partner_code="UW"),
         find_username("TAC Chair", partner_code="UW"),
         find_username("Board Member"),
-        find_username("Proposal View Grantee", proposal_code="2023-1-SCI-031"),
+        find_username("Proposal View Grantee", proposal_code="2022-1-COM-003"),
     ],
 )
 def test_should_return_403_when_requesting_science_proposal_for_non_permitted_users(
@@ -132,7 +132,7 @@ def test_should_return_proposal_when_requesting_ddt_proposal_for_permitted_users
         find_username("TAC Member", partner_code="POL"),
         find_username("TAC Chair", partner_code="POL"),
         find_username("Board Member"),
-        find_username("Proposal View Grantee", proposal_code="2023-1-SCI-031"),
+        find_username("Proposal View Grantee", proposal_code="2022-1-COM-003"),
     ],
 )
 def test_should_return_403_when_requesting_ddt_proposal_for_non_permitted_user(
@@ -178,7 +178,7 @@ def test_should_return_proposal_when_requesting_com_proposal_for_permitted_user(
         find_username("TAC Member", partner_code="POL"),
         find_username("TAC Chair", partner_code="POL"),
         find_username("Board Member"),
-        find_username("Proposal View Grantee", proposal_code="2023-1-SCI-031"),
+        find_username("Proposal View Grantee", proposal_code="2022-1-COM-003"),
     ],
 )
 def test_should_return_403_when_requesting_com_proposal_for_non_permitted_user(
@@ -224,7 +224,7 @@ def test_should_return_proposal_when_requesting_sv_proposal_for_permitted_users(
         find_username("TAC Member", partner_code="POL"),
         find_username("TAC Chair", partner_code="POL"),
         find_username("Board Member"),
-        find_username("Proposal View Grantee", proposal_code="2023-1-SCI-031"),
+        find_username("Proposal View Grantee", proposal_code="2022-1-COM-003"),
     ],
 )
 def test_should_return_403_when_requesting_sv_proposal_for_non_permitted_user(
@@ -265,7 +265,7 @@ def test_should_return_403_when_requesting_gwe_proposal_for_non_permitted_user(
 def test_should_honour_proposal_grant_view_permission(
     client: TestClient, db_connection: Connection
 ) -> None:
-    proposal_code = "2023-1-SCI-031"
+    proposal_code = "2022-1-COM-003"
     username = find_username("Principal Investigator", "2018-2-LSP-001")
     user = UserRepository(db_connection).get_by_username(username)
 
@@ -280,7 +280,7 @@ def test_should_honour_proposal_grant_view_permission(
 
     # The user should not have access to the proposal
     authenticate(username, client)
-    response = client.get(PROPOSALS_URL + "/2023-1-SCI-031")
+    response = client.get(PROPOSALS_URL + "/2022-1-COM-003")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
     # Now grant the proposal view permission to the user
@@ -293,7 +293,7 @@ def test_should_honour_proposal_grant_view_permission(
 
     # Now the user should have access to the proposal
     authenticate(username, client)
-    response = client.get(PROPOSALS_URL + "/2023-1-SCI-031")
+    response = client.get(PROPOSALS_URL + "/2022-1-COM-003")
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -313,7 +313,7 @@ def test_should_return_401_when_requesting_summary_for_unauthorized_user(
         find_username("TAC Member", partner_code="UW"),
         find_username("TAC Chair", partner_code="UW"),
         find_username("Board Member"),
-        find_username("Proposal View Grantee", proposal_code="2023-1-SCI-031"),
+        find_username("Proposal View Grantee", proposal_code="2022-1-COM-003"),
     ],
 )
 def test_should_return_403_when_requesting_summary_for_non_permitted_user(
@@ -332,11 +332,10 @@ def test_should_return_phase1_proposal_summary_file(
     proposal_code = "2019-2-SCI-045"
     proposal_dir = tmp_path / proposal_code
     proposal_dir.mkdir()
+    # The latest version of the proposal summary should be returned.
     (proposal_dir / "1").mkdir()
-    (proposal_dir / "2").mkdir()
-    (proposal_dir / "3").mkdir()
     summary_content = b"This is a summary."
-    proposal_file = proposal_dir / "3" / "Summary.pdf"
+    proposal_file = proposal_dir / "1" / "Summary.pdf"
     proposal_file.write_bytes(summary_content)
 
     class MockSettings(NamedTuple):
@@ -347,7 +346,7 @@ def test_should_return_phase1_proposal_summary_file(
 
     # Request the summary file
     monkeypatch.setattr(
-        saltapi.repository.proposal_repository, "get_settings", mock_get_settings
+        "saltapi.repository.proposal_repository.get_settings", mock_get_settings
     )
     username = find_username("SALT Astronomer")
     authenticate(username, client)
@@ -384,7 +383,7 @@ def test_should_return_proposal_file(
 
     # Request the proposal file
     monkeypatch.setattr(
-        "saltapi.service.proposal_service.get_settings", mock_get_settings
+        saltapi.repository.proposal_repository, "get_settings", mock_get_settings
     )
     username = find_username("SALT Astronomer")
     authenticate(username, client)

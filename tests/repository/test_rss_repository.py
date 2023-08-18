@@ -39,4 +39,8 @@ def test_rss(
 ) -> None:
     rss_repository = RssRepository(db_connection)
     rss = rss_repository.get(rss_id)
+    # Don't include the information whether the mask is in the magazine, as this changes
+    # over time
+    if rss["configuration"].get("mask") is not None:
+        del rss["configuration"]["mask"]["is_in_magazine"]
     check_data(rss)

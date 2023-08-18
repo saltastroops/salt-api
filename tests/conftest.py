@@ -33,7 +33,7 @@ from saltapi.service.user_service import UserService
 
 def get_user_authentication_function() -> Callable[[str, str], User]:
     def authenticate_user(username: str, password: str) -> User:
-        if password != USER_PASSWORD:
+        if password != USER_PASSWORD and password != USER_PASSWORD_UPDATE:
             raise NotFoundError("No user found for username and password")
 
         with cast(Engine, _create_engine()).connect() as connection:
@@ -57,6 +57,7 @@ TEST_DATA = "users.yaml"
 # password "secret".
 
 USER_PASSWORD = "secret"
+USER_PASSWORD_UPDATE = "my-shiny-very-very-secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 

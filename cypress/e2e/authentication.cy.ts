@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { ObservationComments } from "../support/components/observation-comments";
 import { LoginPage } from "../support/pages/login/login-page";
 import {
@@ -11,25 +13,16 @@ const apiUrl = getApiUrl();
 const USERNAME = "hettlage";
 
 describe("Authentication", () => {
-  beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-  });
-
   it("should handle HTTP requests with a missing authentication cookie", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
-
-      // Then user details are stored
-      userDetailsAreStored();
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // And I can load a proposal page
       ProposalPage.visit("2020-2-SCI-043");
-
-      cy.wait("@proposals");
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       cy.url().should("contain", PROPOSAL_BASE_URL);
 
@@ -38,6 +31,7 @@ describe("Authentication", () => {
 
       // And try to add an observation comment
       ObservationComments.addComment("This is a test comment.");
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // Then I get an error message
       ObservationComments.hasSubmissionError("logged in");
@@ -55,20 +49,18 @@ describe("Authentication", () => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
-
-      // Then user details are stored
-      userDetailsAreStored();
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // And I can load a proposal page
       ProposalPage.visit("2020-2-SCI-043");
-
-      cy.wait("@proposals");
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // And when I then tamper with the authentication token
       cy.setCookie("secondary_auth_token", "asdf");
 
       // And try to add an observation comment
       ObservationComments.addComment("This is a test comment.");
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // Then I get an error message
       ObservationComments.hasSubmissionError("logged in");
@@ -86,9 +78,7 @@ describe("Authentication", () => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
-
-      // Then user details are stored
-      userDetailsAreStored();
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     });
   });
 
@@ -97,6 +87,7 @@ describe("Authentication", () => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // And remove the user details again after they have been saved
       cy.window()
@@ -107,8 +98,7 @@ describe("Authentication", () => {
 
       // And go to a proposal page
       ProposalPage.visit("2020-2-SCI-043");
-
-      cy.wait("@proposals");
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // Then the proposal page is loaded
       cy.url().should("contain", PROPOSAL_BASE_URL);
@@ -126,6 +116,7 @@ describe("Authentication", () => {
       // When I login
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
       // Then the authentication cookie and user details are stored
       cy.getCookie("secondary_auth_token").should("not.be.null");

@@ -3,19 +3,18 @@ import { SwitchUserPage } from "../../support/pages/login/switch-user-page";
 import { SWITCH_USER_URL } from "../../support/pages/login/switch-user-page";
 import { getEnvVariable } from "../../support/utils";
 
-let USERNAME: string = getEnvVariable("defaultUsername");
-
 describe("Switch user page", () => {
   beforeEach(() => {
     cy.viewport(1500, 2000);
   });
+
   it("should redirect if user not logged in", () => {
     SwitchUserPage.visit();
     cy.url().should("not.contain", SWITCH_USER_URL);
   });
 
   it("should fail to load users if user is an Investigator", () => {
-    USERNAME = getEnvVariable("investigator");
+    const USERNAME = getEnvVariable("investigator");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -26,7 +25,7 @@ describe("Switch user page", () => {
   });
 
   it("should fail to load users if the user is not an administrator", () => {
-    USERNAME = getEnvVariable("pcUsername");
+    const USERNAME = getEnvVariable("pcUsername");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -37,6 +36,7 @@ describe("Switch user page", () => {
   });
 
   it("should switch to the selected user", () => {
+    const USERNAME = getEnvVariable("administrator");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();

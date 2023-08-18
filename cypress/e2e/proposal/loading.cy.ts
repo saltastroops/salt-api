@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
 import {
@@ -35,7 +37,7 @@ describe("Proposal loading", () => {
 
   it("should not be indicated any longer after loading is complete", () => {
     ProposalPage.visit(PROPOSAL_CODE);
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     cy.get(".loading").should("not.exist");
   });

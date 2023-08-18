@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
 import { getApiUrl } from "../../support/utils";
@@ -8,10 +10,6 @@ describe("Finder charts", () => {
   const USERNAME = "hettlage";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // Login
       LoginPage.visit();
@@ -24,7 +22,7 @@ describe("Finder charts", () => {
 
   it("should show the correct finder chart validity date range", () => {
     ProposalPage.visit("2020-1-DDT-009");
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     cy.get('[data-test="finder-chart-validity"]')
       .contains("27 April 2021")
       .and("contain", "28 April 2021");
@@ -32,13 +30,13 @@ describe("Finder charts", () => {
 
   it("should show finder charts with no specific validity range", () => {
     ProposalPage.visit("2020-1-DDT-009");
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     cy.get('[data-test="finder-chart"]').should("have.length", 2);
   });
 
   it("should show only valid finder charts", () => {
     ProposalPage.visit("2020-2-SCI-043");
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     cy.get('[data-test="finder-chart"]').should("have.length", 2);
     cy.get(
       '[data-test="finder-chart"]:nth-of-type(1) td:nth-of-type(2)',

@@ -7,6 +7,8 @@ import {
 
 import Chainable = Cypress.Chainable;
 
+const apiUrl = getApiUrl();
+
 /**
  * Get an environment variable.
  *
@@ -129,25 +131,6 @@ export function freezeDate(year: number, month: number): void {
  */
 export function getApiUrl(): string {
   return getEnvVariable("apiUrl");
-}
-
-/**
- * Disable and/or clear the browser cache.
- */
-export function disableBrowserCache(): void {
-  // Taken from https://docs.cypress.io/api/commands/intercept#Stubbing-a-response
-  cy.intercept(
-    { url: getApiUrl() + "/**/*", middleware: true },
-    // Delete 'if-none-match' header from all outgoing requests
-    (req) => {
-      delete req.headers["if-none-match"];
-
-      req.on("before:response", (res) => {
-        // force all API responses to not be cached
-        res.headers["cache-control"] = "no-store";
-      });
-    },
-  );
 }
 
 /**

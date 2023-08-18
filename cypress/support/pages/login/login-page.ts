@@ -1,5 +1,9 @@
-import { GENERIC_ERROR_MESSAGE } from "../../../../src/app/utils";
+import "cypress-network-idle";
 
+import { GENERIC_ERROR_MESSAGE } from "../../../../src/app/utils";
+import { getApiUrl } from "../../utils";
+
+const apiUrl = getApiUrl();
 export const LOGIN_URL = "/login";
 
 const USERNAME_INPUT = "[data-test='login-username']";
@@ -9,6 +13,7 @@ const ERROR = "[data-test='error']";
 export class LoginPage {
   static visit(): void {
     cy.visit(LOGIN_URL);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   }
 
   static typeUsername(username: string): void {

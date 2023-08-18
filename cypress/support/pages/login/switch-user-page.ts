@@ -8,7 +8,7 @@ export class SwitchUserPage {
   static hasLoadingError(): void {
     cy.get("[data-test='error']")
       .should("be.visible")
-      .and("contains.text", /Failed to fetch users/i);
+      .and("contain.text", "Failed to fetch users");
   }
 
   static hasSelector(): void {

@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { Block } from "../../support/components/block";
 import { BlockSummaries } from "../../support/components/block-summaries";
 import { LoginPage } from "../../support/pages/login/login-page";
@@ -12,12 +14,6 @@ describe("Block", () => {
   const PROPOSAL_CODE = "2019-1-SCI-014";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/blocks/**").as("blocks");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -27,7 +23,7 @@ describe("Block", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should not show edit block status modal before clicking edit button", () => {
@@ -54,7 +50,7 @@ describe("Block", () => {
     Block.selectBlockStatus("On hold");
     Block.typeBlockStatusReason("Time not available");
     Block.clickSubmitButton();
-    cy.wait("@blocks");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     Block.blockStatusUpdatedWithStatus("On hold");
     Block.clickEditBlockStatusButton();
     Block.blockStatusReasonUpdatedWithReason("Time not available");
@@ -66,10 +62,6 @@ describe("Block - edit block status (SA)", () => {
   const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -79,7 +71,7 @@ describe("Block - edit block status (SA)", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should show a button for editing block status for a SA", () => {
@@ -93,10 +85,6 @@ describe("Block - edit block status (PI)", () => {
   const PROPOSAL_CODE = "2018-2-LSP-001";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -106,7 +94,7 @@ describe("Block - edit block status (PI)", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should show a button for editing block status for a PI", () => {
@@ -120,10 +108,6 @@ describe("Block - edit block status (PC)", () => {
   const PROPOSAL_CODE = "2021-1-SCI-014";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -133,7 +117,7 @@ describe("Block - edit block status (PC)", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should show a button for editing block status for a PC", () => {

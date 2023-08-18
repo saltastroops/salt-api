@@ -7,11 +7,8 @@ import { Email, User } from "../support/types";
 import {
   forceNetworkError,
   forceServerError,
-  getApiUrl,
   randomPassword,
 } from "../support/utils";
-
-const apiUrl = getApiUrl();
 
 describe("Forgot password page", () => {
   beforeEach(() => {
@@ -65,7 +62,6 @@ describe("Forgot password page", () => {
   });
 
   it("should send an email with the correct password reset link", () => {
-    cy.intercept(apiUrl + "/login").as("login");
     // When I request a password reset email
     const USERNAME = "hettlage";
     ForgotPasswordPage.typeUsernameOrEmail(USERNAME);

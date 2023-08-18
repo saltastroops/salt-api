@@ -168,8 +168,8 @@ export class RealAuthenticationService implements AuthenticationService {
         .pipe(
           // ... and update their password
           switchMap((user) => {
-            return this.http.patch<Message>(
-              `${environment.apiUrl}/users/${user.id}`,
+            return this.http.post<Message>(
+              `${environment.apiUrl}/users/${user.id}/update-password`,
               { password },
               options,
             );

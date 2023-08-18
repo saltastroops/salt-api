@@ -15,7 +15,7 @@ def test_password_update_requires_authentication(
 
     not_authenticated(client)
     response = client.post(
-        f"{USERS_URL}/{user_id}/update-password", json={"password": "very-very0-secret"}
+        f"{USERS_URL}/{user_id}/update-password", json={"password": "very-very-secret"}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -51,7 +51,7 @@ def test_password_update_requires_permissions(
 
     response = client.post(
         f"{USERS_URL}/{other_user_id}/update-password",
-        json={"password": "very-very0-secret"},
+        json={"password": "very-very-secret"},
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 

@@ -34,7 +34,7 @@ def test_password_update_requires_password(
 
 
 def test_password_update_requires_valid_user_id(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     user_id = 0
     username = find_username("administrator")

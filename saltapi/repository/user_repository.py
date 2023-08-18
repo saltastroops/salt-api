@@ -609,7 +609,6 @@ SELECT COUNT(*) FROM PiptUser WHERE PiptUser_Id = :user_id
 
         return cast(int, result.scalar_one()) > 0
 
-
     def update_password(self, user_id: int, password: str) -> None:
         # TODO: Uncomment once the Password table exists.
         # self._update_password_hash(username, password)

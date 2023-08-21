@@ -7,7 +7,7 @@ from typing import Any, Dict, List, cast
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from saltapi.exceptions import NotFoundError
 from saltapi.service.user import Role, User
@@ -177,7 +177,7 @@ ORDER BY I.Surname, I.FirstName
         investigator_id = self._create_investigator_details(new_user_details)
         pipt_user_id = self._create_pipt_user(new_user_details, investigator_id)
         self._add_investigator_to_pipt_user(pipt_user_id, investigator_id)
-        self.update_user_statistics(
+        self._update_user_statistics(
             pipt_user_id,
             dict(
                 legal_status=new_user_details["legal_status"],
@@ -282,7 +282,7 @@ WHERE Investigator_Id = :investigator_id
 
         self._update_user_details(user_id, user_update)
 
-        self.update_user_statistics(
+        self._update_user_statistics(
             user_id,
             dict(
                 legal_status=user_update["legal_status"],
@@ -305,7 +305,6 @@ WHERE Investigator_Id = :investigator_id
             "email": user.email,
             "given_name": user.given_name,
             "family_name": user.family_name,
-            "password": user_update["password"],
             "legal_status": user_update["legal_status"],
             "gender": user_update["gender"],
             "race": user_update["race"],
@@ -640,19 +639,19 @@ WHERE PiptUser_Id = :user_id
             """
         )
 
-        # try:
-        self.connection.execute(
-            stmt,
-            {
-                "user_id": user_id,
-                "given_name": user_update["given_name"],
-                "family_name": user_update["family_name"],
-                "email": user_update["email"],
-            },
-        )
+        try:
+            self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "given_name": user_update["given_name"],
+                    "family_name": user_update["family_name"],
+                    "email": user_update["email"],
+                },
+            )
 
-        # except IntegrityError:
-        #     raise NotFoundError(f"No such user id: {user_id}")
+        except IntegrityError:
+            raise NotFoundError(f"No such user id: {user_id}")
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:
@@ -951,7 +950,7 @@ Where SouthAfricanLegalStatus = :legal_status
         )
         return cast(int, result.scalar_one())
 
-    def update_user_statistics(
+    def _update_user_statistics(
         self, pipt_user_id: int, user_information: Dict[str, Any]
     ) -> None:
         stmt = text(

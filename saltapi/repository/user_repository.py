@@ -262,15 +262,6 @@ WHERE Investigator_Id = :investigator_id
 
         return True
 
-    def _does_email_exist(self, email: str) -> bool:
-        """Check whether a username exists already."""
-        try:
-            self.get_by_email(email)
-        except NotFoundError:
-            return False
-
-        return True
-
     def update(self, user_id: int, user_update: Dict[str, Any]) -> None:
         """
         Updates a user's details.
@@ -282,10 +273,9 @@ WHERE Investigator_Id = :investigator_id
         if not self.is_existing_user_id(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
 
-        if self._does_email_exist(user_update["email"]):
-            user = self.get_by_email(user_update["email"])
-            if user.id != user_id:
-                raise ValueError(f"The email {user_update['email']} exists already.")
+        user = self.get_by_email(user_update["email"])
+        if user.id != user_id:
+            raise ValueError(f"The email {user_update['email']} exists already.")
 
         if user_update["password"]:
             self._update_password(user_id, user_update["password"])

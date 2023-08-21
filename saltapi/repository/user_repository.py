@@ -267,7 +267,7 @@ WHERE Investigator_Id = :investigator_id
         Updates a user's details.
 
         If the user id does not exist, a NotFoundError is raised.
-        If the email exists already and belongs to another, a ValueError is raised.
+        If the email exists already and belongs to another user, a ValueError is raised.
 
         """
         if not self.is_existing_user_id(user_id):

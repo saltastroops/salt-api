@@ -162,7 +162,7 @@ def test_patch_user(db_connection: Connection) -> None:
 
     new_family_name = "Motaung"
     new_given_name = "Thato"
-    new_email = "motaung.thato@gmail.com"
+    new_email = "motaung.thato@example.com"
 
     user_update = {
         "family_name": new_family_name,

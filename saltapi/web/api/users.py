@@ -19,6 +19,7 @@ from saltapi.web.schema.user import (
     User,
     UserListItem,
     UserUpdate,
+    UserDetails
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -122,7 +123,7 @@ def get_user(
         return user_service.get_user(user_id)
 
 
-@router.patch("/{user_id}", summary="Update user details", response_model=User)
+@router.patch("/{user_id}", summary="Update user details", response_model=UserDetails)
 def update_user(
     user_id: int = Path(
         ...,
@@ -150,6 +151,7 @@ def update_user(
         )
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_user(user_id, vars(_user_update))
+
         unit_of_work.commit()
 
         updated_user_details = user_service.get_user_details(user_id)

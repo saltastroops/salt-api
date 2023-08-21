@@ -1,3 +1,4 @@
+import uuid
 from typing import Dict, Optional
 
 import pytest
@@ -21,10 +22,10 @@ def _url(user_id: int) -> str:
 
 
 def _patch_data(
-    given_name: Optional[str],
-    family_name: Optional[str],
-    email: Optional[str],
-    password: Optional[str] = None,
+        given_name: Optional[str],
+        family_name: Optional[str],
+        email: Optional[str],
+        password: Optional[str] = None,
 ) -> Dict[str, Optional[str]]:
     return {
         "given_name": given_name,
@@ -40,7 +41,7 @@ def _patch_data(
 
 
 def test_patch_user_should_return_401_for_unauthenticated_user(
-    client: TestClient,
+        client: TestClient,
 ) -> None:
     not_authenticated(client)
 
@@ -51,7 +52,7 @@ def test_patch_user_should_return_401_for_unauthenticated_user(
 
 
 def test_patch_user_should_return_401_for_user_with_invalid_auth_token(
-    client: TestClient,
+        client: TestClient,
 ) -> None:
     misauthenticate(client)
 
@@ -80,7 +81,7 @@ def test_patch_user_should_return_404_for_non_existing_user(client: TestClient) 
     ],
 )
 def test_patch_user_should_return_403_if_non_admin_tries_to_update_other_user(
-    username: str, client: TestClient
+        username: str, client: TestClient
 ) -> None:
     other_user_id = 6
     authenticate(username, client)
@@ -127,8 +128,29 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     assert updated_user_details == expected_updated_user_details
 
 
+def test_patch_user_should_be_idempotent(client: TestClient) -> None:
+    user = create_user(client)
+    authenticate(user["username"], client)
+
+    user_update = _patch_data(str(uuid.uuid4())[:8], "very_very_secret", user["email"])
+    expected_updated_user_details = user.copy()
+    expected_updated_user_details.update(user_update)
+    del expected_updated_user_details["password"]
+    del expected_updated_user_details["legal_status"]
+    del expected_updated_user_details["gender"]
+    del expected_updated_user_details["race"]
+    del expected_updated_user_details["has_phd"]
+    del expected_updated_user_details["year_of_phd_completion"]
+
+    client.patch(_url(user["id"]), json=user_update)
+    client.patch(_url(user["id"]), json=user_update)
+
+    updated_user_details = client.get(_url(user["id"])).json()
+    assert updated_user_details == expected_updated_user_details
+
+
 def test_patch_user_should_return_400_for_using_existing_email(
-    client: TestClient,
+        client: TestClient,
 ) -> None:
     user = create_user(client)
     authenticate(user["username"], client)

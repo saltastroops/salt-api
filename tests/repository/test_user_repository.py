@@ -7,7 +7,7 @@ from pydantic import EmailStr
 from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import UserStatistics
 from tests.conftest import find_usernames
@@ -183,14 +183,14 @@ def test_patch_user(db_connection: Connection) -> None:
     user_repository.update(user_id, user_update)
     new_user_details = user_repository.get_user_details(user_id)
 
-    assert new_user_details.family_name == new_family_name
-    assert new_user_details.given_name == new_given_name
-    assert new_user_details.email == new_email
-    assert user_statistics["legal_status"] == new_legal_status
-    assert user_statistics["gender"] == new_gender
-    assert user_statistics["race"] == new_race
-    assert user_statistics["has_phd"] == has_phd
-    assert user_statistics["year_of_phd_completion"] is None
+    assert new_user_details["family_name"] == new_family_name
+    assert new_user_details["given_name"] == new_given_name
+    assert new_user_details["email"] == new_email
+    assert new_user_details["legal_status"] == new_legal_status
+    assert new_user_details["gender"] == new_gender
+    assert new_user_details["race"] == new_race
+    assert new_user_details["has_phd"] == has_phd
+    assert new_user_details["year_of_phd_completion"] is None
 
     user_update = {
         "family_name": old_user_details.family_name,
@@ -206,14 +206,14 @@ def test_patch_user(db_connection: Connection) -> None:
     user_repository.update(user_id, user_update)
     new_user_details = user_repository.get_user_details(user_id)
 
-    assert new_user_details.family_name == old_user_details.family_name
-    assert new_user_details.given_name == old_user_details.given_name
-    assert new_user_details.email == old_user_details.email
-    assert user_statistics["legal_status"] == new_legal_status
-    assert user_statistics["gender"] == new_gender
-    assert user_statistics["race"] == new_race
-    assert user_statistics["has_phd"] == has_phd
-    assert user_statistics["year_of_phd_completion"] is None
+    assert new_user_details["family_name"] == old_user_details.family_name
+    assert new_user_details["given_name"] == old_user_details.given_name
+    assert new_user_details["email"] == old_user_details.email
+    assert new_user_details["legal_status"] == new_legal_status
+    assert new_user_details["gender"] == new_gender
+    assert new_user_details["race"] == new_race
+    assert new_user_details["has_phd"] == has_phd
+    assert new_user_details["year_of_phd_completion"] is None
 
 
 def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
@@ -236,10 +236,8 @@ def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
         "year_of_phd_completion": user_statistics.year_of_phd_completion,
     }
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ResourceExistsError, match="exists already"):
         user_repository.update(user_id, user_update)
-
-    assert "exists already" in str(excinfo.value).lower()
 
 
 def _check_user_has_role(

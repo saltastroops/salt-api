@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -276,7 +276,7 @@ WHERE Investigator_Id = :investigator_id
         try:
             user = self.get_by_email(user_update["email"])
             if user.id != user_id:
-                raise ValueError(f"The email {user_update['email']} exists already.")
+                raise ResourceExistsError(f"The email {user_update['email']} exists already.")
         except NotFoundError:
             pass
 

@@ -303,8 +303,42 @@ WHERE Investigator_Id = :investigator_id
         """
         Returns the updated user details of a user.
         """
+        stmt = text(
+            """
+SELECT  SL.SouthAfricanLegalStatus  AS legal_status,
+        G.Gender                       AS gender,
+        R.Race                         AS race,
+        US.PhD                            AS has_phd,
+        US.YearOfPhD                      AS year_of_phd
+FROM UserStatistics US
+    JOIN SouthAfricanLegalStatus SL ON US.SouthAfricanLegalStatus_Id = SL.SouthAfricanLegalStatus_Id
+    JOIN Race R ON US.Race_Id = R.Race_Id
+    JOIN Gender G ON US.Gender_Id = G.Gender_Id
+WHERE PiptUser_Id = :user_id
+                """
+        )
 
-        new_user_details = self._get_user_statistics(user_id)
+        result = self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+            },
+        )
+
+        user = self.get(user_id)
+
+        row = result.one()
+
+        new_user_details = {
+            "email": user.email,
+            "given_name": user.given_name,
+            "family_name": user.family_name,
+            "legal_status": row["legal_status"],
+            "gender": row["gender"],
+            "race": row["race"],
+            "has_phd": row["has_phd"],
+            "year_of_phd_completion": row["year_of_phd"],
+        }
 
         return new_user_details
 
@@ -1012,39 +1046,3 @@ ON DUPLICATE KEY UPDATE
             },
         )
 
-    def _get_user_statistics(self, user_id: int) -> Dict[str, Any]:
-        stmt = text(
-            """
-SELECT  SouthAfricanLegalStatus_Id  AS legal_status_id, 
-        Gender_Id                   AS gender_id, 
-        Race_Id                     AS race_id, 
-        PhD                         AS has_phd, 
-        YearOfPhD                   AS year_of_phd
-FROM UserStatistics
-WHERE PiptUser_Id = :user_id
-                """
-        )
-
-        result = self.connection.execute(
-            stmt,
-            {
-                "user_id": user_id,
-            },
-        )
-
-        user = self.get(user_id)
-
-        row = result.one()
-
-        new_user_details = {
-            "email": user.email,
-            "given_name": user.given_name,
-            "family_name": user.family_name,
-            "legal_status": self._get_legal_status_by_id(row["legal_status_id"]),
-            "gender": self._get_gender_by_id(row["gender_id"]),
-            "race": self._get_race_by_id(row["race_id"]),
-            "has_phd": row["has_phd"],
-            "year_of_phd_completion": row["year_of_phd"],
-        }
-
-        return new_user_details

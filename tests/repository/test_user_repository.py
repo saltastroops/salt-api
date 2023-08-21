@@ -221,8 +221,10 @@ def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
         "year_of_phd_completion": user_statistics.year_of_phd_completion,
     }
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as excinfo:
         user_repository.update(user_id, user_update)
+
+    assert "exists already" in str(excinfo.value).lower()
 
 
 def _check_user_has_role(

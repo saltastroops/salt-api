@@ -164,34 +164,45 @@ def test_patch_user(db_connection: Connection) -> None:
     new_given_name = "Thato"
     new_email = "motaung.thato@example.com"
 
+    new_legal_status = "Other"
+    new_race = "Indian"
+    new_gender = "Male"
+    has_phd = False
+
     user_update = {
         "family_name": new_family_name,
         "given_name": new_given_name,
         "email": new_email,
         "password": None,
-        "legal_status": user_statistics.legal_status,
-        "gender": user_statistics.gender,
-        "race": user_statistics.race,
-        "has_phd": user_statistics.has_phd,
-        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+        "legal_status": new_legal_status,
+        "gender": new_gender,
+        "race": new_race,
+        "has_phd": has_phd,
+        "year_of_phd_completion": None,
     }
     user_repository.update(user_id, user_update)
     new_user_details = user_repository.get(user_id)
+    user_statistics = user_repository.get_user_statistics(user_id)
 
     assert new_user_details.family_name == new_family_name
     assert new_user_details.given_name == new_given_name
     assert new_user_details.email == new_email
+    assert user_statistics["legal_status"] == new_legal_status
+    assert user_statistics["gender"] == new_gender
+    assert user_statistics["race"] == new_race
+    assert user_statistics["has_phd"] == has_phd
+    assert user_statistics["year_of_phd_completion"] is None
 
     user_update = {
         "family_name": old_user_details.family_name,
         "given_name": old_user_details.given_name,
         "email": old_user_details.email,
         "password": None,
-        "legal_status": user_statistics.legal_status,
-        "gender": user_statistics.gender,
-        "race": user_statistics.race,
-        "has_phd": user_statistics.has_phd,
-        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+        "legal_status": new_legal_status,
+        "gender": new_gender,
+        "race": new_race,
+        "has_phd": has_phd,
+        "year_of_phd_completion": None,
     }
     user_repository.update(user_id, user_update)
     new_user_details = user_repository.get(user_id)
@@ -199,6 +210,11 @@ def test_patch_user(db_connection: Connection) -> None:
     assert new_user_details.family_name == old_user_details.family_name
     assert new_user_details.given_name == old_user_details.given_name
     assert new_user_details.email == old_user_details.email
+    assert user_statistics["legal_status"] == new_legal_status
+    assert user_statistics["gender"] == new_gender
+    assert user_statistics["race"] == new_race
+    assert user_statistics["has_phd"] == has_phd
+    assert user_statistics["year_of_phd_completion"] is None
 
 
 def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:

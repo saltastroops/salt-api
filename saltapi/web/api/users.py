@@ -152,8 +152,9 @@ def update_user(
         user_service.update_user(user_id, vars(_user_update))
         unit_of_work.commit()
 
-        return user_service.get_user(user_id)
+        updated_user_details = user_service.get_user_details(user_id)
 
+        return _UserDetails(**updated_user_details)
 
 @router.get(
     "/{user_id}/proposal-permissions",

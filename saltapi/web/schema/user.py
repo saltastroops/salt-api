@@ -103,7 +103,7 @@ class NewUserDetails(FullName, UserStatistics):
 
 class UserUpdate(UserStatistics):
     """
-    Update user details.
+    Details for updating a user.
     """
 
     given_name: str = Field(..., title="Given name", description="Given name.")

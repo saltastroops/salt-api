@@ -137,7 +137,12 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     user = create_user(client)
     authenticate(user["username"], client)
 
-    user_update = _patch_data(given_name=user["given_name"], family_name=user["family_name"], email=user["email"], password="very_very_secret")
+    user_update = _patch_data(
+        given_name=user["given_name"],
+        family_name=user["family_name"],
+        email=user["email"],
+        password="very_very_secret",
+    )
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
 
@@ -150,7 +155,6 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
 
     first_update_response = client.patch(_url(user["id"]), json=user_update)
     second_update_response = client.patch(_url(user["id"]), json=user_update)
-
 
     assert first_update_response.json() == expected_updated_user_details
     assert second_update_response.json() == expected_updated_user_details

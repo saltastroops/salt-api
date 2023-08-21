@@ -19,7 +19,7 @@ from saltapi.web.schema.user import (
     User,
     UserListItem,
     UserUpdate,
-    UserDetails
+    UserDetails,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])

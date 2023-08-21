@@ -276,7 +276,9 @@ WHERE Investigator_Id = :investigator_id
         try:
             user = self.get_by_email(user_update["email"])
             if user.id != user_id:
-                raise ResourceExistsError(f"The email {user_update['email']} exists already.")
+                raise ResourceExistsError(
+                    f"The email {user_update['email']} exists already."
+                )
         except NotFoundError:
             pass
 
@@ -1056,4 +1058,3 @@ ON DUPLICATE KEY UPDATE
                 "year_of_phd": user_information["year_of_phd_completion"],
             },
         )
-

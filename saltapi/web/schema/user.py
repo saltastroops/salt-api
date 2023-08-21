@@ -115,6 +115,7 @@ class UserUpdate(UserDetails):
     """
     Details for updating a user.
     """
+
     password: Optional[str] = Field(None, title="Password", description="Password.")
 
 

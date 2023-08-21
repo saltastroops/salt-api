@@ -132,21 +132,23 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     user = create_user(client)
     authenticate(user["username"], client)
 
-    user_update = _patch_data(str(uuid.uuid4())[:8], "very_very_secret", user["email"])
+    user_update = _patch_data(given_name=user["given_name"], family_name=user["family_name"], email=user["email"], password="very_very_secret")
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
+
+    del expected_updated_user_details["affiliations"]
+    del expected_updated_user_details["alternative_emails"]
+    del expected_updated_user_details["id"]
     del expected_updated_user_details["password"]
-    del expected_updated_user_details["legal_status"]
-    del expected_updated_user_details["gender"]
-    del expected_updated_user_details["race"]
-    del expected_updated_user_details["has_phd"]
-    del expected_updated_user_details["year_of_phd_completion"]
+    del expected_updated_user_details["roles"]
+    del expected_updated_user_details["username"]
 
-    client.patch(_url(user["id"]), json=user_update)
-    client.patch(_url(user["id"]), json=user_update)
+    first_update_response = client.patch(_url(user["id"]), json=user_update)
+    second_update_response = client.patch(_url(user["id"]), json=user_update)
 
-    updated_user_details = client.get(_url(user["id"])).json()
-    assert updated_user_details == expected_updated_user_details
+
+    assert first_update_response.json() == expected_updated_user_details
+    assert second_update_response.json() == expected_updated_user_details
 
 
 def test_patch_user_should_return_400_for_using_existing_email(

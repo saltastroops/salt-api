@@ -177,7 +177,7 @@ ORDER BY I.Surname, I.FirstName
         investigator_id = self._create_investigator_details(new_user_details)
         pipt_user_id = self._create_pipt_user(new_user_details, investigator_id)
         self._add_investigator_to_pipt_user(pipt_user_id, investigator_id)
-        self.update_user_statistic(
+        self.update_user_statistics(
             pipt_user_id,
             dict(
                 legal_status=new_user_details["legal_status"],
@@ -282,7 +282,7 @@ WHERE Investigator_Id = :investigator_id
 
         self._update_user_details(user_id, user_update)
 
-        self.update_user_statistic(
+        self.update_user_statistics(
             user_id,
             dict(
                 legal_status=user_update["legal_status"],
@@ -951,7 +951,7 @@ Where SouthAfricanLegalStatus = :legal_status
         )
         return cast(int, result.scalar_one())
 
-    def update_user_statistic(
+    def update_user_statistics(
         self, pipt_user_id: int, user_information: Dict[str, Any]
     ) -> None:
         stmt = text(

@@ -181,8 +181,7 @@ def test_patch_user(db_connection: Connection) -> None:
         "year_of_phd_completion": None,
     }
     user_repository.update(user_id, user_update)
-    new_user_details = user_repository.get(user_id)
-    user_statistics = user_repository.get_user_statistics(user_id)
+    new_user_details = user_repository.get_user_details(user_id)
 
     assert new_user_details.family_name == new_family_name
     assert new_user_details.given_name == new_given_name
@@ -205,7 +204,7 @@ def test_patch_user(db_connection: Connection) -> None:
         "year_of_phd_completion": None,
     }
     user_repository.update(user_id, user_update)
-    new_user_details = user_repository.get(user_id)
+    new_user_details = user_repository.get_user_details(user_id)
 
     assert new_user_details.family_name == old_user_details.family_name
     assert new_user_details.given_name == old_user_details.given_name

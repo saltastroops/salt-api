@@ -296,7 +296,7 @@ WHERE Investigator_Id = :investigator_id
             ),
         )
 
-    def get_user_statistics(
+    def get_user_details(
         self,
         user_id: int,
     ) -> Dict[str, Any]:

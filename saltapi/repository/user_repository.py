@@ -297,7 +297,8 @@ WHERE Investigator_Id = :investigator_id
         )
 
     def get_user_statistics(
-            self, user_id: int,
+        self,
+        user_id: int,
     ) -> Dict[str, Any]:
         """
         Returns the updated user details of a user.
@@ -915,9 +916,7 @@ INSERT INTO Gender (Gender) VALUES (:gender)
 
     def _get_gender_by_id(self, gender_id: int) -> str:
         stmt = text("""SELECT Gender FROM Gender Where Gender_Id = :gender_id""")
-        result = self.connection.execute(
-            stmt, {"gender_id": gender_id}
-        )
+        result = self.connection.execute(stmt, {"gender_id": gender_id})
         try:
             return cast(str, result.scalar_one())
         except NoResultFound:
@@ -969,9 +968,7 @@ FROM SouthAfricanLegalStatus
 Where SouthAfricanLegalStatus_Id = :legal_status_id
             """
         )
-        result = self.connection.execute(
-            stmt, {"legal_status_id": legal_status_id}
-        )
+        result = self.connection.execute(stmt, {"legal_status_id": legal_status_id})
         return cast(str, result.scalar_one())
 
     def _update_user_statistics(
@@ -1015,9 +1012,7 @@ ON DUPLICATE KEY UPDATE
             },
         )
 
-    def _get_user_statistics(
-            self, user_id: int
-    ) -> Dict[str, Any]:
+    def _get_user_statistics(self, user_id: int) -> Dict[str, Any]:
         stmt = text(
             """
 SELECT  SouthAfricanLegalStatus_Id  AS legal_status_id, 

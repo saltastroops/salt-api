@@ -156,6 +156,7 @@ def update_user(
 
         return _UserDetails(**updated_user_details)
 
+
 @router.get(
     "/{user_id}/proposal-permissions",
     summary="Get proposal permissions",

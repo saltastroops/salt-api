@@ -88,7 +88,6 @@ class UserDetails(UserStatistics):
     given_name: str
     family_name: str
     email: str
-    password: Optional[str]
 
 
 @dataclass(frozen=True)

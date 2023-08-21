@@ -128,7 +128,6 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     del updated_user_details["affiliations"]
     del updated_user_details["alternative_emails"]
     del updated_user_details["id"]
-    del updated_user_details["password"]
     del updated_user_details["roles"]
     del updated_user_details["username"]
     assert updated_user_details == expected_updated_user_details

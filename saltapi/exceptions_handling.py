@@ -74,7 +74,7 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(exc)}
+            status_code=status.HTTP_400_BAD_REQUEST, content={"message": "Bad Request"}
         )
 
     @app.exception_handler(PydanticValidationError)

@@ -293,24 +293,14 @@ WHERE Investigator_Id = :investigator_id
             ),
         )
 
-    def _new_user_details(
-        self, user_id: int, user_update: Dict[str, Any]
+    def get_user_statistics(
+            self, user_id: int,
     ) -> Dict[str, Any]:
         """
-        Returns the new user details of a user.
+        Returns the updated user details of a user.
         """
-        user = self.get(user_id)
 
-        new_user_details = {
-            "email": user.email,
-            "given_name": user.given_name,
-            "family_name": user.family_name,
-            "legal_status": user_update["legal_status"],
-            "gender": user_update["gender"],
-            "race": user_update["race"],
-            "has_phd": user_update["has_phd"],
-            "year_of_phd_completion": user_update["year_of_phd_completion"],
-        }
+        new_user_details = self._get_user_statistics(user_id)
 
         return new_user_details
 
@@ -920,6 +910,16 @@ INSERT INTO Gender (Gender) VALUES (:gender)
         except NoResultFound:
             return self._add_gender(gender)
 
+    def _get_gender_by_id(self, gender_id: int) -> str:
+        stmt = text("""SELECT Gender FROM Gender Where Gender_Id = :gender_id""")
+        result = self.connection.execute(
+            stmt, {"gender_id": gender_id}
+        )
+        try:
+            return cast(str, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError(f"Unknown gender id {gender_id}")
+
     def _add_race(self, race: str) -> int:
         stmt = text(
             """
@@ -937,6 +937,14 @@ INSERT INTO Race (Race) VALUES (:race)
         except NoResultFound:
             return self._add_race(race)
 
+    def _get_race_by_id(self, race_id: int) -> str:
+        stmt = text("""SELECT Race FROM Race Where Race_Id = :race_id""")
+        result = self.connection.execute(stmt, {"race_id": race_id})
+        try:
+            return cast(str, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError(f"Unknown race id {race_id}")
+
     def _get_legal_status_id(self, legal_status: str) -> int:
         stmt = text(
             """
@@ -949,6 +957,19 @@ Where SouthAfricanLegalStatus = :legal_status
             stmt, {"legal_status": self._normalize_gender(legal_status)}
         )
         return cast(int, result.scalar_one())
+
+    def _get_legal_status_by_id(self, legal_status_id: int) -> str:
+        stmt = text(
+            """
+SELECT SouthAfricanLegalStatus
+FROM SouthAfricanLegalStatus
+Where SouthAfricanLegalStatus_Id = :legal_status_id
+            """
+        )
+        result = self.connection.execute(
+            stmt, {"legal_status_id": legal_status_id}
+        )
+        return cast(str, result.scalar_one())
 
     def _update_user_statistics(
         self, pipt_user_id: int, user_information: Dict[str, Any]
@@ -990,3 +1011,42 @@ ON DUPLICATE KEY UPDATE
                 "year_of_phd": user_information["year_of_phd_completion"],
             },
         )
+
+    def _get_user_statistics(
+            self, user_id: int
+    ) -> Dict[str, Any]:
+        stmt = text(
+            """
+SELECT  SouthAfricanLegalStatus_Id  AS legal_status_id, 
+        Gender_Id                   AS gender_id, 
+        Race_Id                     AS race_id, 
+        PhD                         AS has_phd, 
+        YearOfPhD                   AS year_of_phd
+FROM UserStatistics
+WHERE PiptUser_Id = :user_id
+                """
+        )
+
+        result = self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+            },
+        )
+
+        user = self.get(user_id)
+
+        row = result.one()
+
+        new_user_details = {
+            "email": user.email,
+            "given_name": user.given_name,
+            "family_name": user.family_name,
+            "legal_status": self._get_legal_status_by_id(row["legal_status_id"]),
+            "gender": self._get_gender_by_id(row["gender_id"]),
+            "race": self._get_race_by_id(row["race_id"]),
+            "has_phd": row["has_phd"],
+            "year_of_phd_completion": row["year_of_phd"],
+        }
+
+        return new_user_details

@@ -111,12 +111,12 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     user_update = _patch_data("Chaka", "Mofokeng", "mofokeng.chk@gmail.com")
     expected_updated_user_details = client.get(_url(user_id)).json()
     expected_updated_user_details.update(user_update)
+    del expected_updated_user_details["affiliations"]
+    del expected_updated_user_details["alternative_emails"]
+    del expected_updated_user_details["id"]
     del expected_updated_user_details["password"]
-    del expected_updated_user_details["legal_status"]
-    del expected_updated_user_details["gender"]
-    del expected_updated_user_details["race"]
-    del expected_updated_user_details["has_phd"]
-    del expected_updated_user_details["year_of_phd_completion"]
+    del expected_updated_user_details["roles"]
+    del expected_updated_user_details["username"]
 
     # the endpoint returns the correct response...
     response = client.patch(_url(user_id), json=user_update)
@@ -125,6 +125,12 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
 
     # ... and the user is indeed updated
     updated_user_details = client.get(_url(user_id)).json()
+    del updated_user_details["affiliations"]
+    del updated_user_details["alternative_emails"]
+    del updated_user_details["id"]
+    del updated_user_details["password"]
+    del updated_user_details["roles"]
+    del updated_user_details["username"]
     assert updated_user_details == expected_updated_user_details
 
 
@@ -179,12 +185,12 @@ def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) 
     user_update = _patch_data("Xola", "Ndaliso", "xola.ndaliso@example.com")
     expected_updated_user_details = client.get(_url(other_user_id)).json()
     expected_updated_user_details.update(user_update)
+    del expected_updated_user_details["affiliations"]
+    del expected_updated_user_details["alternative_emails"]
+    del expected_updated_user_details["id"]
     del expected_updated_user_details["password"]
-    del expected_updated_user_details["legal_status"]
-    del expected_updated_user_details["gender"]
-    del expected_updated_user_details["race"]
-    del expected_updated_user_details["has_phd"]
-    del expected_updated_user_details["year_of_phd_completion"]
+    del expected_updated_user_details["roles"]
+    del expected_updated_user_details["username"]
     response = client.patch(_url(other_user_id), json=user_update)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_updated_user_details

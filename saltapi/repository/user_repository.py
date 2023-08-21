@@ -314,7 +314,7 @@ FROM UserStatistics US
     JOIN SouthAfricanLegalStatus SL ON US.SouthAfricanLegalStatus_Id = SL.SouthAfricanLegalStatus_Id
     JOIN Race R ON US.Race_Id = R.Race_Id
     JOIN Gender G ON US.Gender_Id = G.Gender_Id
-WHERE PiptUser_Id = :user_id
+WHERE US.PiptUser_Id = :user_id
                 """
         )
 
@@ -326,19 +326,30 @@ WHERE PiptUser_Id = :user_id
         )
 
         user = self.get(user_id)
+        try:
+            row = result.one()
 
-        row = result.one()
-
-        new_user_details = {
-            "email": user.email,
-            "given_name": user.given_name,
-            "family_name": user.family_name,
-            "legal_status": row["legal_status"],
-            "gender": row["gender"],
-            "race": row["race"],
-            "has_phd": row["has_phd"],
-            "year_of_phd_completion": row["year_of_phd"],
-        }
+            new_user_details = {
+                "email": user.email,
+                "given_name": user.given_name,
+                "family_name": user.family_name,
+                "legal_status": row["legal_status"],
+                "gender": row["gender"],
+                "race": row["race"],
+                "has_phd": row["has_phd"],
+                "year_of_phd_completion": row["year_of_phd"],
+            }
+        except NoResultFound:
+            new_user_details = {
+                "email": user.email,
+                "given_name": user.given_name,
+                "family_name": user.family_name,
+                "legal_status": "Other",
+                "gender": None,
+                "race": None,
+                "has_phd": None,
+                "year_of_phd_completion": None,
+            }
 
         return new_user_details
 

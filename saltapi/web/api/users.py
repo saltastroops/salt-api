@@ -8,6 +8,7 @@ from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import NewUserDetails as _NewUserDetails
 from saltapi.service.user import User as _User
+from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
 from saltapi.web import services
 from saltapi.web.schema.common import Message
@@ -132,7 +133,7 @@ def update_user(
         ..., title="User Details", description="User details to update"
     ),
     user: _User = Depends(get_current_user),
-) -> _User:
+) -> _UserDetails:
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)

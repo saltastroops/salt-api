@@ -84,8 +84,13 @@ class NewUserDetails(UserStatistics):
 
 
 @dataclass(frozen=True)
-class UserUpdate(UserStatistics):
-    given_name: Optional[str]
-    family_name: Optional[str]
-    email: Optional[str]
+class UserDetails(UserStatistics):
+    given_name: str
+    family_name: str
+    email: str
+    password: Optional[str]
+
+
+@dataclass(frozen=True)
+class UserUpdate(UserDetails):
     password: Optional[str]

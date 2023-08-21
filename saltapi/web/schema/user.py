@@ -101,7 +101,7 @@ class NewUserDetails(FullName, UserStatistics):
     )
 
 
-class UserUpdate(UserStatistics):
+class UserDetails(UserStatistics):
     """
     Details for updating a user.
     """
@@ -109,6 +109,12 @@ class UserUpdate(UserStatistics):
     given_name: str = Field(..., title="Given name", description="Given name.")
     family_name: str = Field(..., title="Family name", description="Family name.")
     email: str = Field(..., title="Email", description="Email.")
+
+
+class UserUpdate(UserDetails):
+    """
+    Details for updating a user.
+    """
     password: Optional[str] = Field(None, title="Password", description="Password.")
 
 

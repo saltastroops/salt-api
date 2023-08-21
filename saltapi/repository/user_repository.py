@@ -273,9 +273,12 @@ WHERE Investigator_Id = :investigator_id
         if not self.is_existing_user_id(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
 
-        user = self.get_by_email(user_update["email"])
-        if user.id != user_id:
-            raise ValueError(f"The email {user_update['email']} exists already.")
+        try:
+            user = self.get_by_email(user_update["email"])
+            if user.id != user_id:
+                raise ValueError(f"The email {user_update['email']} exists already.")
+        except NotFoundError:
+            pass
 
         if user_update["password"]:
             self._update_password(user_id, user_update["password"])

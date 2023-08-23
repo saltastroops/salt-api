@@ -656,6 +656,16 @@ ON DUPLICATE KEY UPDATE Password = :password
             stmt, {"username": username, "password": new_password_hash}
         )
 
+    def _does_user_id_exist(self, user_id: int) -> bool:
+        stmt = text(
+            """
+SELECT COUNT(*) FROM PiptUser WHERE PiptUser_Id = :user_id
+        """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+
+        return cast(int, result.scalar_one()) > 0
+
     def _update_password(self, user_id: int, password: str) -> None:
         # TODO: Uncomment once the Password table exists.
         # self._update_password_hash(username, password)
@@ -667,6 +677,10 @@ SET Password = :password
 WHERE PiptUser_Id = :user_id
         """
         )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
         self.connection.execute(stmt, {"user_id": user_id, "password": password_hash})
 
     def _update_user_details(self, user_id: int, user_update: Dict[str, str]) -> None:
@@ -1040,7 +1054,6 @@ ON DUPLICATE KEY UPDATE
     YearOfPhD = :year_of_phd
             """
         )
-
         self.connection.execute(
             stmt,
             {

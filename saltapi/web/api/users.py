@@ -15,6 +15,7 @@ from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     NewUserDetails,
     PasswordResetRequest,
+    PasswordUpdate,
     ProposalPermission,
     User,
     UserListItem,
@@ -258,3 +259,31 @@ def revoke_proposal_permission(
         # Querying the database for the permission is somewhat pointless, so we just
         # return the permission submitted by the user.
         return permission
+
+
+@router.post(
+    "/{user_id}/update-password", summary="Update user's password", response_model=User
+)
+def update_password(
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id for whom the password is updated",
+    ),
+    password: PasswordUpdate = Body(
+        ..., title="Password", description="Password to replace the old one."
+    ),
+    user: _User = Depends(get_current_user),
+) -> _User:
+    """
+    Update user's password.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_user(user, user_id)
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.update_password(user_id, password)
+
+        unit_of_work.commit()
+
+        return user_service.get_user(user_id)

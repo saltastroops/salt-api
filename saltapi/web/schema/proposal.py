@@ -598,7 +598,7 @@ class ProposalProgress(BaseProgressReport):
     the 2021-2 semester.
     """
 
-    semester: Optional[str] = Field(
+    semester: str = Field(
         ...,
         title="Semester",
         description="The semester for this progress report.",

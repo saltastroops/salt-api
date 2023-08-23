@@ -67,31 +67,27 @@ def test_get_mos_masks_metadata_requires_valid_semesters(
 
 
 @pytest.mark.parametrize(
-    "username,from_semester,to_semester,mos_masks_count",
+    "from_semester,to_semester,mos_masks_count",
     [
-        [find_username("TAC Chair", partner_code="RSA"), "2020-1", "2020-1", 114],
+        ["2020-1", "2020-1", 114],
         [
-            find_username("TAC Chair", partner_code="RU"),
             "2021-1",
             "2021-1",
             119,
         ],
         [
-            find_username("Principal Investigator", proposal_code="2014-2-SCI-078"),
             "2020-2",
             "2020-2",
             127,
         ],
         [
-            find_username("Principal Investigator", proposal_code="2018-2-LSP-001"),
             "2017-2",
             "2021-1",
             756,
         ],
-        [find_username("SALT Astronomer"), "2016-1", "2022-2", 1193],
-        [find_username("Administrator"), "2018-2", "2018-2", 56],
+        ["2016-1", "2022-2", 1193],
+        ["2018-2", "2018-2", 56],
         [
-            find_username("Principal Investigator", proposal_code="2014-2-SCI-078"),
             "2018-2",
             "2019-1",
             106,
@@ -99,7 +95,6 @@ def test_get_mos_masks_metadata_requires_valid_semesters(
     ],
 )
 def test_get_mos_masks_metadata(
-    username: str,
     from_semester: str,
     to_semester: str,
     mos_masks_count: int,

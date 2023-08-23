@@ -283,7 +283,7 @@ WHERE Investigator_Id = :investigator_id
             pass
 
         if user_update["password"]:
-            self._update_password(user_id, user_update["password"])
+            self.update_password(user_id, user_update["password"])
 
         self._update_user_details(user_id, user_update)
 
@@ -666,7 +666,7 @@ SELECT COUNT(*) FROM PiptUser WHERE PiptUser_Id = :user_id
 
         return cast(int, result.scalar_one()) > 0
 
-    def _update_password(self, user_id: int, password: str) -> None:
+    def update_password(self, user_id: int, password: str) -> None:
         # TODO: Uncomment once the Password table exists.
         # self._update_password_hash(username, password)
         password_hash = self.get_password_hash(password)

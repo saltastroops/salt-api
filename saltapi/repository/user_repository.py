@@ -975,14 +975,6 @@ INSERT INTO Gender (Gender) VALUES (:gender)
         except NoResultFound:
             return self._add_gender(gender)
 
-    def _get_gender_by_id(self, gender_id: int) -> str:
-        stmt = text("""SELECT Gender FROM Gender Where Gender_Id = :gender_id""")
-        result = self.connection.execute(stmt, {"gender_id": gender_id})
-        try:
-            return cast(str, result.scalar_one())
-        except NoResultFound:
-            raise NotFoundError(f"Unknown gender id {gender_id}")
-
     def _add_race(self, race: str) -> int:
         stmt = text(
             """
@@ -1000,14 +992,6 @@ INSERT INTO Race (Race) VALUES (:race)
         except NoResultFound:
             return self._add_race(race)
 
-    def _get_race_by_id(self, race_id: int) -> str:
-        stmt = text("""SELECT Race FROM Race Where Race_Id = :race_id""")
-        result = self.connection.execute(stmt, {"race_id": race_id})
-        try:
-            return cast(str, result.scalar_one())
-        except NoResultFound:
-            raise NotFoundError(f"Unknown race id {race_id}")
-
     def _get_legal_status_id(self, legal_status: str) -> int:
         stmt = text(
             """
@@ -1020,17 +1004,6 @@ Where SouthAfricanLegalStatus = :legal_status
             stmt, {"legal_status": self._normalize_gender(legal_status)}
         )
         return cast(int, result.scalar_one())
-
-    def _get_legal_status_by_id(self, legal_status_id: int) -> str:
-        stmt = text(
-            """
-SELECT SouthAfricanLegalStatus
-FROM SouthAfricanLegalStatus
-Where SouthAfricanLegalStatus_Id = :legal_status_id
-            """
-        )
-        result = self.connection.execute(stmt, {"legal_status_id": legal_status_id})
-        return cast(str, result.scalar_one())
 
     def _update_user_statistics(
         self, pipt_user_id: int, user_information: Dict[str, Any]

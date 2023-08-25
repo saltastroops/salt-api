@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input } from "@angular/core";
 
 import { Block } from "../../../../types/block";
 
@@ -7,19 +7,11 @@ import { Block } from "../../../../types/block";
   templateUrl: "./iterations.component.html",
   styleUrls: ["./iterations.component.scss"],
 })
-export class IterationsComponent implements OnInit {
+export class IterationsComponent {
   @Input() block!: Block;
 
-  acceptedObservations!: number;
-
-  rejectedObservations!: number;
-
-  ngOnInit(): void {
-    this.acceptedObservations = this.block.blockVisits.filter(
-      (o) => o.status === "Accepted",
-    ).length;
-    this.rejectedObservations = this.block.blockVisits.filter(
-      (o) => o.status === "Rejected",
-    ).length;
-  }
+  acceptedObservations = (): number =>
+    this.block.blockVisits.filter((o) => o.status === "Accepted").length;
+  rejectedObservations = (): number =>
+    this.block.blockVisits.filter((o) => o.status === "Rejected").length;
 }

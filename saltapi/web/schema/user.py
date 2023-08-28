@@ -86,10 +86,31 @@ class UserStatistics(BaseModel):
     )
 
 
-class NewUserDetails(FullName, UserStatistics):
+class BaseUserDetails(BaseModel):
+    """
+    Details for creating/updating a user.
+    """
+    given_name: str = Field(..., title="Given name", description="Given name.")
+    family_name: str = Field(..., title="Family name", description="Family name.")
+    email: str = Field(..., title="Email", description="Email.")
+    legal_status: LegalStatus = Field(
+        ..., title="Legal status", description="The legal status in South Africa"
+    )
+    gender: Optional[str] = Field(..., title="Gender", description="Gender.")
+    race: Optional[str] = Field(..., title="Race", description="Race.")
+    has_phd: Optional[bool] = Field(
+        ..., title="PhD", description="Does the user has a PhD?"
+    )
+    year_of_phd_completion: Optional[int] = Field(
+        None,
+        title="Year of PhD degree completion",
+        description="The year the PhD degree was completed",
+    )
+
+
+class NewUserDetails(BaseUserDetails):
     """Details for creating a user."""
 
-    email: EmailStr = Field(..., title="Email address", description="Email address")
     username: str = Field(..., title="Username", description="Username.")
     password: str = Field(..., title="Password", description="Password.")
     institution_id: int = Field(
@@ -101,17 +122,7 @@ class NewUserDetails(FullName, UserStatistics):
     )
 
 
-class UserDetails(UserStatistics):
-    """
-    Details for updating a user.
-    """
-
-    given_name: str = Field(..., title="Given name", description="Given name.")
-    family_name: str = Field(..., title="Family name", description="Family name.")
-    email: str = Field(..., title="Email", description="Email.")
-
-
-class UserUpdate(UserDetails):
+class UserUpdate(BaseUserDetails):
     """
     Details for updating a user.
     """

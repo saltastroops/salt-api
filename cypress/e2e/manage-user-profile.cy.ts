@@ -26,13 +26,13 @@ describe("Manage user profile - other users (investigator)", () => {
     ManageUserProfile.isInstitutionControlsDisabled(true);
   });
 
-  it("should show logged in user's details", function () {
+  it("should show details of the logged user", function () {
     const givenName = "Rajeev";
     const familyName = "Manick";
     ManageUserProfile.displayedDetailsForUser(familyName, givenName);
   });
 
-  it("should raise an error when the password has less than 6 characters", function () {
+  it("should raise an error when the password has fewer than 6 characters", function () {
     ManageUserProfile.typePassword("sca");
     ManageUserProfile.isErrorRaisedWithMessage(
       true,

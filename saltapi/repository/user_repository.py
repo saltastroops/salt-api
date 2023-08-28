@@ -303,7 +303,7 @@ WHERE Investigator_Id = :investigator_id
         user_id: int,
     ) -> Dict[str, Any]:
         """
-        Returns the updated user details of a user.
+        Returns the details of a user.
         """
         stmt = text(
             """

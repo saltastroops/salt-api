@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 import { environment } from "../../environments/environment";
-import { NewUserDetails, User, UserListItem, UserUpdate } from "../types/user";
+import {BaseUserDetails, NewUserDetails, User, UserListItem, UserUpdate} from "../types/user";
 
 @Injectable({
   providedIn: "root",
@@ -72,7 +72,7 @@ export class UserService {
   /**
    * Update user details for given user
    */
-  updateUser(userId: number, userUpdate: UserUpdate): Observable<User> {
+  updateUser(userId: number, userUpdate: UserUpdate): Observable<BaseUserDetails> {
     const uri = environment.apiUrl + "/users/" + userId.toString();
 
     const headers = new HttpHeaders({
@@ -92,7 +92,7 @@ export class UserService {
     };
 
     return this.http
-      .patch<User>(uri, newUserDetails, { headers })
+      .patch<BaseUserDetails>(uri, newUserDetails, { headers })
       .pipe(map((user) => camelcaseKeys(user, { deep: true })));
   }
 }

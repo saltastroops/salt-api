@@ -90,6 +90,7 @@ class BaseUserDetails(BaseModel):
     """
     Details for creating/updating a user.
     """
+
     given_name: str = Field(..., title="Given name", description="Given name.")
     family_name: str = Field(..., title="Family name", description="Family name.")
     email: str = Field(..., title="Email", description="Email.")

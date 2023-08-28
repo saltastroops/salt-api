@@ -124,7 +124,9 @@ def get_user(
         return user_service.get_user(user_id)
 
 
-@router.patch("/{user_id}", summary="Update user details", response_model=BaseUserDetails)
+@router.patch(
+    "/{user_id}", summary="Update user details", response_model=BaseUserDetails
+)
 def update_user(
     user_id: int = Path(
         ...,

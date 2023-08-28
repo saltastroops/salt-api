@@ -125,8 +125,14 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     # ... and the user is indeed updated
     updated_user_details = client.get(_url(user_id)).json()
 
-    assert updated_user_details["given_name"] == expected_updated_user_details["given_name"]
-    assert updated_user_details["family_name"] == expected_updated_user_details["family_name"]
+    assert (
+        updated_user_details["given_name"]
+        == expected_updated_user_details["given_name"]
+    )
+    assert (
+        updated_user_details["family_name"]
+        == expected_updated_user_details["family_name"]
+    )
     assert updated_user_details["email"] == expected_updated_user_details["email"]
 
 

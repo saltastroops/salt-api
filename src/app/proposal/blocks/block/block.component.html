@@ -120,13 +120,30 @@
             data-test="finder-chart"
           >
             <td>
-              <a href="{{ originalFinderChartURL(c) }}">
+              <a
+                *ngIf="originalFinderChartURL(c); else finderChartNotFound"
+                [routerLink]="['/finder-chart-view']"
+                [queryParams]="{
+                  finderChart: originalFinderChartURL(c),
+                  positionAngle:
+                    block.observations[0].telescopeConfigurations[0]
+                      .positionAngle || 0
+                }"
+                target="_blank"
+              >
                 <img
                   src="{{ thumbnailFinderChartURL(c) }}"
                   alt="Finding chart"
                   class="image is-128x128"
                 />
               </a>
+              <ng-template #finderChartNotFound>
+                <img
+                  src="{{ thumbnailFinderChartURL(c) }}"
+                  alt="Finding chart"
+                  class="image is-128x128"
+                />
+              </ng-template>
             </td>
             <td>
               <p

@@ -10,6 +10,4 @@ import { Block } from "../../../../types/block";
 export class ObservingConditionsComponent {
   @Input() block!: Block;
   @Input() observationTime!: number;
-
-  showObservingWindows = false;
 }

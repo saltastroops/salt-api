@@ -27,6 +27,7 @@ export class SoPageComponent implements OnInit {
   error: string | undefined = "This is fake error";
   acquisition!: Acquisition;
   telescopeConfigurations!: SoInstrumentConfiguration[];
+  positionAngle: number | null = null;
   loading = false;
   automaticallyUpdate = false;
   loadBlock = "currentBlock";
@@ -115,6 +116,7 @@ export class SoPageComponent implements OnInit {
       acquisition["finderCharts"] = o.finderCharts;
       o.telescopeConfigurations.forEach((tc) => {
         acquisition["guideStar"] = tc.guideStar;
+        this.positionAngle = tc.positionAngle;
         tc.payloadConfigurations.forEach((pc, payloadConfigIndex) => {
           const telescopeConfig = {
             configurationType: pc.payloadConfigurationType,

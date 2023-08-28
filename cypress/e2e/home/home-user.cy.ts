@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { currentSemester } from "../../../src/app/utils";
 import { HomeUser } from "../../support/components/home-user";
 import { HomePage } from "../../support/pages/home-page";
@@ -13,8 +15,6 @@ describe("Home User", () => {
     freezeDate(2020, 6);
 
     cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -45,6 +45,7 @@ describe("Home User", () => {
 
   it("should show proposals for the current semester when the page is reloaded after clicking the current semester filter", () => {
     HomeUser.clickCurrentSemesterRadioButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySingleSemester(currentSemester());
     cy.reload();
     HomeUser.currentSemesterRadioButtonChecked(true);
@@ -53,11 +54,13 @@ describe("Home User", () => {
 
   it("should show proposals for the current and next semester", () => {
     HomeUser.clickCurrentAndNextSemesterRadioButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredByCurrentAndNextSemester();
   });
 
   it("should show proposals for the current and next semester when the page is reloaded after clicking the current and next semester filter", () => {
     HomeUser.clickCurrentAndNextSemesterRadioButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredByCurrentAndNextSemester();
     cy.reload();
     HomeUser.currentAndNextSemesterRadioButtonChecked(true);
@@ -72,6 +75,7 @@ describe("Home User", () => {
     HomeUser.semesterSelectDisabled(true);
     HomeUser.typeSemesterRanges(start_semester, end_semester);
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySemesterRange(start_semester, end_semester);
   });
 
@@ -81,6 +85,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, end_semester);
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySemesterRange(start_semester, end_semester);
     cy.reload();
     HomeUser.semesterRangeRadioButtonChecked(true);
@@ -90,6 +95,7 @@ describe("Home User", () => {
   it("should show an error message when no input semester is provided", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.noInputSemesterError();
   });
 
@@ -98,6 +104,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.wrongInputSemesterError(start_semester);
   });
 
@@ -106,6 +113,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.wrongInputSemesterError(start_semester);
     cy.reload();
     HomeUser.wrongInputSemesterError(start_semester);
@@ -117,6 +125,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySemesterRange(start_semester, "");
   });
 
@@ -125,6 +134,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges("", end_semester);
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySemesterRange("", end_semester);
   });
 
@@ -134,6 +144,7 @@ describe("Home User", () => {
     HomeUser.semesterRangeInputsDisabled(true);
     HomeUser.semesterSelectDisabled(false);
     HomeUser.selectSemester(select_semester);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySingleSemester(select_semester);
   });
 
@@ -141,6 +152,7 @@ describe("Home User", () => {
     const select_semester = "2020-1";
     HomeUser.clickSingleSemesterRadioButton();
     HomeUser.selectSemester(select_semester);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySingleSemester(select_semester);
     cy.reload();
     HomeUser.singleSemesterRadioButtonChecked(true);
@@ -153,16 +165,18 @@ describe("Home User", () => {
     HomeUser.filteredBySingleSemester(currentSemester());
     HomeUser.clickSingleSemesterRadioButton();
     HomeUser.selectSemester(select_semester);
-    cy.wait(1500);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredBySingleSemester(select_semester);
   });
 
   it("should show only unchecked proposals", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickUncheckedCheckbox();
     HomeUser.filteredUncheckedProposals();
   });
 
   it("should show only unchecked proposals when the unchecked checkbox is checked and the page is reloaded", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickUncheckedCheckbox();
     HomeUser.filteredUncheckedProposals();
     cy.reload();
@@ -171,11 +185,13 @@ describe("Home User", () => {
   });
 
   it("should show only unassigned proposals", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickUnassignedCheckbox();
     HomeUser.filteredUnassignedProposals();
   });
 
   it("should show only unassigned proposals when the unassigned checkbox is checked and the page is reloaded", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickUnassignedCheckbox();
     HomeUser.filteredUnassignedProposals();
     cy.reload();
@@ -188,6 +204,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickCompletedCheckbox();
     HomeUser.filteredCompletedProposals();
   });
@@ -197,6 +214,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickCompletedCheckbox();
     HomeUser.filteredCompletedProposals();
     cy.reload();
@@ -209,16 +227,19 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickRejectedCompletedExpiredCheckbox();
     HomeUser.filteredRejectedCompletedExpiredProposals();
   });
 
   it("should show only active proposals when the active checkbox is clicked", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickActiveCheckbox();
     HomeUser.filteredActiveProposals();
   });
 
   it("should show only active proposals when the active checkbox is clicked and the page is reloaded", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickActiveCheckbox();
     HomeUser.filteredActiveProposals();
     cy.reload();
@@ -231,6 +252,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickDDTCheckbox();
     HomeUser.filteredDDTProposals();
   });
@@ -240,6 +262,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickDDTCheckbox();
     HomeUser.filteredDDTProposals();
     cy.reload();
@@ -252,6 +275,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickGWCheckbox();
     HomeUser.filteredGWProposals();
   });
@@ -261,6 +285,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickGWCheckbox();
     HomeUser.filteredGWProposals();
     cy.reload();
@@ -273,6 +298,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickORPCheckbox();
     HomeUser.filteredORPProposals();
   });
@@ -282,6 +308,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickORPCheckbox();
     HomeUser.filteredORPProposals();
     cy.reload();
@@ -294,6 +321,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickCommissioningCheckbox();
     HomeUser.filteredCommissioningProposals();
   });
@@ -303,6 +331,7 @@ describe("Home User", () => {
     HomeUser.clickSemesterRangeRadioButton();
     HomeUser.typeSemesterRanges(start_semester, "");
     HomeUser.clickApplyButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickCommissioningCheckbox();
     HomeUser.filteredCommissioningProposals();
     cy.reload();
@@ -328,17 +357,20 @@ describe("Home User", () => {
     HomeUser.semesterSelectDisabled(true);
     freezeDate(2021, 6);
     HomeUser.clickCurrentAndNextSemesterRadioButton();
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.filteredByCurrentAndNextSemester();
     HomeUser.clickUncheckedCheckbox();
     HomeUser.filteredUncheckedProposals();
   });
 
   it("should show only phase 1 proposals", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickPhase1Checkbox();
     HomeUser.filteredPhase1Proposals();
   });
 
   it("should show only phase 1 proposals when phase 1 checkbox is checked and the page is reloaded", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickPhase1Checkbox();
     HomeUser.filteredPhase1Proposals();
     cy.reload();
@@ -347,11 +379,13 @@ describe("Home User", () => {
   });
 
   it("should show only phase 2 proposals", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickPhase2Checkbox();
     HomeUser.filteredPhase2Proposals();
   });
 
   it("should show only phase 2 proposals when phase 2 checkbox is checked and the page is reloaded", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickPhase2Checkbox();
     HomeUser.filteredPhase2Proposals();
     cy.reload();
@@ -360,7 +394,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by ids when the proposal id column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalIdColumn();
     HomeUser.proposalsSortedBy("id", "ascending");
     HomeUser.clickProposalIdColumn();
@@ -368,7 +402,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by codes when the proposal code column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalCodeColumn();
     HomeUser.proposalsSortedBy("code", "ascending");
     HomeUser.clickProposalCodeColumn();
@@ -376,7 +410,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by titles when the proposal title column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalTitleColumn();
     HomeUser.proposalsSortedBy("title", "ascending");
     HomeUser.clickProposalTitleColumn();
@@ -384,7 +418,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by semesters when the proposal semester column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalSemesterColumn();
     HomeUser.proposalsSortedBy("semester", "ascending");
     HomeUser.clickProposalSemesterColumn();
@@ -392,7 +426,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by phases when the proposal phase column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalPhaseColumn();
     HomeUser.proposalsSortedBy("phase", "ascending");
     HomeUser.clickProposalPhaseColumn();
@@ -400,7 +434,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by statuses when the proposal status column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalStatusColumn();
     HomeUser.proposalsSortedBy("status", "ascending");
     HomeUser.clickProposalStatusColumn();
@@ -408,7 +442,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by types when the proposal type column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalTypeColumn();
     HomeUser.proposalsSortedBy("type", "ascending");
     HomeUser.clickProposalTypeColumn();
@@ -416,7 +450,7 @@ describe("Home User", () => {
   });
 
   it("should have the table sorted by astronomers when the proposal astronomer column is clicked", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalAstronomerColumn();
     HomeUser.proposalsSortedBy("astronomer", "ascending");
     HomeUser.clickProposalAstronomerColumn();
@@ -424,7 +458,7 @@ describe("Home User", () => {
   });
 
   it("should have the table correctly sorted when the proposal id column is clicked three times", () => {
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickProposalIdColumn();
     HomeUser.proposalsSortedBy("id", "ascending");
     HomeUser.clickProposalIdColumn();
@@ -461,8 +495,8 @@ describe("Home User - Investigator", () => {
     ];
     HomeUser.clickSingleSemesterRadioButton();
     HomeUser.selectSemester("2017-1");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickMyProposalsCheckbox();
-    cy.wait(500);
     HomeUser.filteredMyProposals(proposalCodes);
   });
 });
@@ -486,6 +520,7 @@ describe("Home User - SALT Astronomer", () => {
   });
 
   it("should show only proposals requiring astronomer's attention", () => {
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickRequiringAttentionCheckbox();
     HomeUser.filteredProposalsRequiringAttention(USERNAME);
   });
@@ -500,8 +535,8 @@ describe("Home User - SALT Astronomer", () => {
     ];
     HomeUser.clickSingleSemesterRadioButton();
     HomeUser.selectSemester("2018-2");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     HomeUser.clickMyProposalsCheckbox();
-    cy.wait(500);
     HomeUser.filteredMyProposals(proposalCodes);
   });
 });

@@ -8,28 +8,22 @@ import { degreesToDms, degreesToHms } from "../../utils";
   templateUrl: "./target.component.html",
   styleUrls: ["./target.component.scss"],
 })
-export class TargetComponent implements OnInit {
+export class TargetComponent {
   @Input() target!: Target;
 
-  rightAscension!: string;
-  declination!: string;
+  rightAscension = (): string => {
+    return !this.target.nonSidereal
+      ? degreesToHms(this.target.coordinates?.rightAscension as number, 2)
+      : "N/A";
+  };
 
-  ngOnInit(): void {
+  declination = (): string => {
     if (!this.target.nonSidereal) {
-      this.rightAscension = degreesToHms(
-        this.target.coordinates?.rightAscension as number,
-        2,
-      );
-      this.declination = degreesToDms(
-        this.target.coordinates?.declination as number,
-        2,
-      );
+      return degreesToDms(this.target.coordinates?.declination as number, 2);
     } else if (this.target.horizonsIdentifier) {
-      this.rightAscension = "N/A";
-      this.declination = "N/A (" + this.target.horizonsIdentifier + ")";
+      return "N/A (" + this.target.horizonsIdentifier + ")";
     } else {
-      this.rightAscension = "N/A";
-      this.declination = "N/A (Non-sidereal)";
+      return "N/A (Non-sidereal)";
     }
-  }
+  };
 }

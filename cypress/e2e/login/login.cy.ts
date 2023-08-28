@@ -18,7 +18,6 @@ const USERNAME = "hettlage";
 
 describe("Login page", () => {
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
     LoginPage.visit();
   });
 

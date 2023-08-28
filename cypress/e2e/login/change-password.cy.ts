@@ -2,17 +2,10 @@ import { ChangePasswordPage } from "../../support/pages/login/change-password-pa
 import {
   forceNetworkError,
   forceServerError,
-  getApiUrl,
   interceptIndefinitely,
 } from "../../support/utils";
 
-const apiUrl = getApiUrl();
-
 describe("Change password page", () => {
-  beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-  });
-
   it("should show an error if the form is submitted without any input", () => {
     ChangePasswordPage.visit("some-token");
     ChangePasswordPage.submit();

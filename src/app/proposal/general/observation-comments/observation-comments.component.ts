@@ -62,8 +62,8 @@ export class ObservationCommentsComponent implements OnInit {
           this.f.comment.reset("");
           this.closeCommentInput();
         },
-        (error: string) => {
-          this.error = error;
+        (error: Error) => {
+          this.error = error.message;
           this.loading = false;
         },
       );

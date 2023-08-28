@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { BlockSummaries } from "../../support/components/block-summaries";
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
@@ -11,10 +13,6 @@ describe("Block summaries", () => {
   const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -24,7 +22,7 @@ describe("Block summaries", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should have checkboxes deselected initially", () => {

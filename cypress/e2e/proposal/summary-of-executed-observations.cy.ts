@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { SummaryOfExecutedObservations } from "../../support/components/summary-of-executed-observations";
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
@@ -10,12 +12,6 @@ describe("Block summaries", () => {
   const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
-    cy.intercept(apiUrl + "/block-visits/**").as("block-visits");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -25,7 +21,7 @@ describe("Block summaries", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     // Show executed observations list
     SummaryOfExecutedObservations.clickShowObservationsLink();
@@ -173,7 +169,7 @@ describe("Block summaries", () => {
       SummaryOfExecutedObservations.selectBlockRejectionReason(3);
       SummaryOfExecutedObservations.clickSubmitBlockVisitStatus();
       // Wait for the updates
-      cy.wait("@block-visits");
+      cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
       SummaryOfExecutedObservations.blockRejectionReasonUpdatedWithReason(
         1,
         "Telescope technical problems",
@@ -187,10 +183,6 @@ describe("Block summaries - edit block visit status (SA)", () => {
   const PROPOSAL_CODE = "2020-1-DDT-009";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -200,7 +192,7 @@ describe("Block summaries - edit block visit status (SA)", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     // Show executed observations list
     SummaryOfExecutedObservations.clickShowObservationsLink();
@@ -225,10 +217,6 @@ describe("Block summaries - edit block visit status (PI)", () => {
   const PROPOSAL_CODE = "2021-2-LSP-001";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -238,7 +226,7 @@ describe("Block summaries - edit block visit status (PI)", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     // Show executed observations list
     SummaryOfExecutedObservations.clickShowObservationsLink();
@@ -257,10 +245,6 @@ describe("Block summaries - edit block visit status (PC)", () => {
   const PROPOSAL_CODE = "2021-1-SCI-014";
 
   beforeEach(() => {
-    cy.intercept(apiUrl + "/login").as("login");
-
-    cy.intercept(apiUrl + "/proposals/**").as("proposals");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -270,7 +254,7 @@ describe("Block summaries - edit block visit status (PC)", () => {
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
 
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     // Show executed observations list
     SummaryOfExecutedObservations.clickShowObservationsLink();

@@ -5,12 +5,9 @@ import { User } from "../support/types";
 import {
   forceNetworkError,
   forceServerError,
-  getApiUrl,
   getEnvVariable,
   interceptIndefinitely,
 } from "../support/utils";
-
-const apiUrl = getApiUrl();
 
 const USERNAME = getEnvVariable("defaultUsername");
 const ADMINISTRATOR = getEnvVariable("administrator");
@@ -22,8 +19,6 @@ describe("Inline login form", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
-
-    cy.intercept(apiUrl + "/login").as("login");
   });
 
   it("should give an error if the username is missing", () => {
@@ -114,8 +109,6 @@ describe("Navigation bar", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
-
-    cy.intercept(apiUrl + "/login").as("login");
   });
 
   it("should show all tabs for admin", () => {
@@ -199,8 +192,6 @@ describe("Go to proposal form", () => {
   beforeEach(() => {
     // Ensure the form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
-
-    cy.intercept(apiUrl + "/login").as("login");
 
     cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
       // When I login

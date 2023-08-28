@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { RegisterUser } from "../support/components/register-user";
 import { HOME_URL } from "../support/pages/home-page";
 import { LoginPage } from "../support/pages/login/login-page";
@@ -8,8 +10,6 @@ const apiUrl = getApiUrl();
 
 describe("Register new user", () => {
   beforeEach(() => {
-    cy.intercept(apiUrl + "/users/**").as("users");
-
     RegisterUserPage.visit();
   });
 
@@ -208,7 +208,7 @@ describe("Register new user", () => {
     RegisterUser.checkHasNoPhd();
 
     RegisterUser.clickRegisterNewUserButton();
-    cy.wait("@users");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     RegisterUser.isErrorRaisedWithMessage(true, "submission", "exists already");
   });
 
@@ -235,7 +235,7 @@ describe("Register new user", () => {
 
     RegisterUser.clickRegisterNewUserButton();
 
-    cy.wait("@users");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     cy.on("window:alert", (text) => {
       expect(text).contains(

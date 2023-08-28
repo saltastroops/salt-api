@@ -295,7 +295,10 @@ export class ManageUserProfileComponent implements OnInit {
         .subscribe((user) => {
           if (user) {
             window.alert("User details successfully updated.");
-            this.selectedUser = user;
+            const updatedUser = this.users.find((u) => u.givenName === user.givenName && u.familyName === user.familyName);
+            if (updatedUser) {
+              this.selectedUserId$.next(updatedUser.id);
+            }
             this.loading = false;
           }
         });

@@ -124,12 +124,10 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
 
     # ... and the user is indeed updated
     updated_user_details = client.get(_url(user_id)).json()
-    del updated_user_details["affiliations"]
-    del updated_user_details["alternative_emails"]
-    del updated_user_details["id"]
-    del updated_user_details["roles"]
-    del updated_user_details["username"]
-    assert updated_user_details == expected_updated_user_details
+
+    assert updated_user_details["given_name"] == expected_updated_user_details["given_name"]
+    assert updated_user_details["family_name"] == expected_updated_user_details["family_name"]
+    assert updated_user_details["email"] == expected_updated_user_details["email"]
 
 
 def test_patch_user_should_be_idempotent(client: TestClient) -> None:

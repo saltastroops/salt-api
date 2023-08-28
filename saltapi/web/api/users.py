@@ -8,6 +8,7 @@ from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import NewUserDetails as _NewUserDetails
 from saltapi.service.user import User as _User
+from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
 from saltapi.web import services
 from saltapi.web.schema.common import Message
@@ -19,6 +20,7 @@ from saltapi.web.schema.user import (
     User,
     UserListItem,
     UserUpdate,
+    BaseUserDetails,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -122,7 +124,9 @@ def get_user(
         return user_service.get_user(user_id)
 
 
-@router.patch("/{user_id}", summary="Update user details", response_model=User)
+@router.patch(
+    "/{user_id}", summary="Update user details", response_model=BaseUserDetails
+)
 def update_user(
     user_id: int = Path(
         ...,
@@ -133,12 +137,14 @@ def update_user(
         ..., title="User Details", description="User details to update"
     ),
     user: _User = Depends(get_current_user),
-) -> _User:
+) -> _UserDetails:
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
         _user_update = _UserUpdate(
-            username=user_update.username,
+            email=user_update.email,
+            family_name=user_update.family_name,
+            given_name=user_update.given_name,
             password=user_update.password,
             legal_status=user_update.legal_status,
             gender=user_update.gender,
@@ -147,10 +153,13 @@ def update_user(
             year_of_phd_completion=user_update.year_of_phd_completion,
         )
         user_service = services.user_service(unit_of_work.connection)
-        user_service.update_user(user_id, _user_update)
+        user_service.update_user(user_id, vars(_user_update))
+
         unit_of_work.commit()
 
-        return user_service.get_user(user_id)
+        updated_user_details = user_service.get_user_details(user_id)
+
+        return _UserDetails(**updated_user_details)
 
 
 @router.get(

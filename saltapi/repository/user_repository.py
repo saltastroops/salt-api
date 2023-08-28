@@ -7,10 +7,10 @@ from typing import Any, Dict, List, cast
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError
-from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
+from saltapi.exceptions import NotFoundError, ResourceExistsError
+from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
@@ -165,30 +165,30 @@ ORDER BY I.Surname, I.FirstName
         ]
         return users
 
-    def create(self, new_user_details: NewUserDetails) -> None:
+    def create(self, new_user_details: Dict[str, Any]) -> None:
         """Creates a new user."""
 
         # Make sure the username is still available
-        if self._does_username_exist(new_user_details.username):
+        if self._does_username_exist(new_user_details["username"]):
             raise ValueError(
-                f"The username {new_user_details.username} exists already."
+                f"The username {new_user_details['username']} exists already."
             )
 
         investigator_id = self._create_investigator_details(new_user_details)
         pipt_user_id = self._create_pipt_user(new_user_details, investigator_id)
         self._add_investigator_to_pipt_user(pipt_user_id, investigator_id)
-        self.update_user_statistic(
+        self._update_user_statistics(
             pipt_user_id,
             dict(
-                legal_status=new_user_details.legal_status,
-                gender=new_user_details.gender,
-                race=new_user_details.race,
-                has_phd=new_user_details.has_phd,
-                year_of_phd_completion=new_user_details.year_of_phd_completion,
+                legal_status=new_user_details["legal_status"],
+                gender=new_user_details["gender"],
+                race=new_user_details["race"],
+                has_phd=new_user_details["has_phd"],
+                year_of_phd_completion=new_user_details["year_of_phd_completion"],
             ),
         )
 
-    def _create_investigator_details(self, new_user_details: NewUserDetails) -> int:
+    def _create_investigator_details(self, new_user_details: Dict[str, Any]) -> int:
         """
         Create investigator details.
 
@@ -204,20 +204,20 @@ VALUES (:institution_id, :given_name, :family_name, :email)
         result = self.connection.execute(
             stmt,
             {
-                "institution_id": new_user_details.institution_id,
-                "given_name": new_user_details.given_name,
-                "family_name": new_user_details.family_name,
-                "email": new_user_details.email,
+                "institution_id": new_user_details["institution_id"],
+                "given_name": new_user_details["given_name"],
+                "family_name": new_user_details["family_name"],
+                "email": new_user_details["email"],
             },
         )
 
         return cast(int, result.lastrowid)
 
     def _create_pipt_user(
-        self, new_user_details: NewUserDetails, investigator_id: int
+        self, new_user_details: Dict[str, Any], investigator_id: int
     ) -> int:
         # TODO: Uncomment once the Password table exists.
-        password = new_user_details.password
+        password = new_user_details["password"]
         # self._update_password_hash(username, password)
         password_hash = self.get_password_hash(password)
 
@@ -230,7 +230,7 @@ VALUES (:username, :password_hash, :investigator_id, :email_validation, 0)
         result = self.connection.execute(
             stmt,
             {
-                "username": new_user_details.username,
+                "username": new_user_details["username"],
                 "password_hash": password_hash,
                 "investigator_id": investigator_id,
                 "email_validation": str(uuid.uuid4())[:8],
@@ -262,41 +262,98 @@ WHERE Investigator_Id = :investigator_id
 
         return True
 
-    def update(self, user_id: int, user_update: UserUpdate) -> None:
-        """Updates a user's details."""
-        if user_update.password:
-            self.update_password(user_id, user_update.password)
-        new_user_details = self._new_user_details(user_id, user_update)
-        new_username = cast(str, new_user_details.username)
-        self._update_username(user_id=user_id, new_username=new_username)
-        self.update_user_statistic(
+    def update(self, user_id: int, user_update: Dict[str, Any]) -> None:
+        """
+        Updates a user's details.
+
+        If the user id does not exist, a NotFoundError is raised.
+        If the email exists already and belongs to another user, a ValueError is raised.
+
+        """
+        if not self.is_existing_user_id(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        try:
+            user = self.get_by_email(user_update["email"])
+            if user.id != user_id:
+                raise ResourceExistsError(
+                    f"The email {user_update['email']} exists already."
+                )
+        except NotFoundError:
+            pass
+
+        if user_update["password"]:
+            self.update_password(user_id, user_update["password"])
+
+        self._update_user_details(user_id, user_update)
+
+        self._update_user_statistics(
             user_id,
             dict(
-                legal_status=new_user_details.legal_status,
-                gender=new_user_details.gender,
-                race=new_user_details.race,
-                has_phd=new_user_details.has_phd,
-                year_of_phd_completion=new_user_details.year_of_phd_completion,
+                legal_status=user_update["legal_status"],
+                gender=user_update["gender"],
+                race=user_update["race"],
+                has_phd=user_update["has_phd"],
+                year_of_phd_completion=user_update["year_of_phd_completion"],
             ),
         )
 
-    def _new_user_details(self, user_id: int, user_update: UserUpdate) -> UserUpdate:
+    def get_user_details(
+        self,
+        user_id: int,
+    ) -> Dict[str, Any]:
         """
-        Returns the new user details of a user.
-
-        If the given user update has a non-None value for a property, that value should
-        replace the existing value; otherwise the existing value is kept.
+        Returns the details of a user.
         """
-        user = self.get(user_id)
-        return UserUpdate(
-            username=user_update.username if user_update.username else user.username,
-            password=user_update.password,
-            legal_status=user_update.legal_status,
-            gender=user_update.gender,
-            race=user_update.race,
-            has_phd=user_update.has_phd,
-            year_of_phd_completion=user_update.year_of_phd_completion,
+        stmt = text(
+            """
+SELECT  SL.SouthAfricanLegalStatus  AS legal_status,
+        G.Gender                       AS gender,
+        R.Race                         AS race,
+        US.PhD                            AS has_phd,
+        US.YearOfPhD                      AS year_of_phd
+FROM UserStatistics US
+    JOIN SouthAfricanLegalStatus SL ON US.SouthAfricanLegalStatus_Id = SL.SouthAfricanLegalStatus_Id
+    JOIN Race R ON US.Race_Id = R.Race_Id
+    JOIN Gender G ON US.Gender_Id = G.Gender_Id
+WHERE US.PiptUser_Id = :user_id
+                """
         )
+
+        result = self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+            },
+        )
+
+        user = self.get(user_id)
+        try:
+            row = result.one()
+
+            new_user_details = {
+                "email": user.email,
+                "given_name": user.given_name,
+                "family_name": user.family_name,
+                "legal_status": row["legal_status"],
+                "gender": row["gender"],
+                "race": row["race"],
+                "has_phd": row["has_phd"],
+                "year_of_phd_completion": row["year_of_phd"],
+            }
+        except NoResultFound:
+            new_user_details = {
+                "email": user.email,
+                "given_name": user.given_name,
+                "family_name": user.family_name,
+                "legal_status": "Other",
+                "gender": None,
+                "race": None,
+                "has_phd": None,
+                "year_of_phd_completion": None,
+            }
+
+        return new_user_details
 
     def _update_username(self, user_id: int, new_username: str) -> None:
         """
@@ -626,6 +683,31 @@ WHERE PiptUser_Id = :user_id
 
         self.connection.execute(stmt, {"user_id": user_id, "password": password_hash})
 
+    def _update_user_details(self, user_id: int, user_update: Dict[str, str]) -> None:
+        stmt = text(
+            """
+UPDATE Investigator 
+SET FirstName = :given_name, 
+    Surname = :family_name, 
+    Email = :email
+WHERE PiptUser_Id = :user_id
+            """
+        )
+
+        try:
+            self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "given_name": user_update["given_name"],
+                    "family_name": user_update["family_name"],
+                    "email": user_update["email"],
+                },
+            )
+
+        except IntegrityError:
+            raise NotFoundError(f"No such user id: {user_id}")
+
     @staticmethod
     def get_new_password_hash(password: str) -> str:
         """Hash a plain text password."""
@@ -923,7 +1005,7 @@ Where SouthAfricanLegalStatus = :legal_status
         )
         return cast(int, result.scalar_one())
 
-    def update_user_statistic(
+    def _update_user_statistics(
         self, pipt_user_id: int, user_information: Dict[str, Any]
     ) -> None:
         stmt = text(

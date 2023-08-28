@@ -83,7 +83,7 @@
                   />
                   <div
                     *ngIf="f.givenName.errors"
-                    class="invalid-feedback ml-6 pl-1"
+                    class="invalid-feedback"
                     data-test="given-name-error"
                   >
                     <div *ngIf="f.givenName.errors?.required">
@@ -108,7 +108,7 @@
                   />
                   <div
                     *ngIf="f.familyName.errors"
-                    class="invalid-feedback ml-6 pl-1"
+                    class="invalid-feedback"
                     data-test="family-name-error"
                   >
                     <div *ngIf="f.familyName.errors?.required">
@@ -172,7 +172,7 @@
                   />
                   <div
                     *ngIf="f.email.touched && f.email.errors"
-                    class="invalid-feedback ml-6 pl-1"
+                    class="invalid-feedback"
                     data-test="email-error"
                   >
                     <div
@@ -204,7 +204,7 @@
                   />
                   <div
                     *ngIf="userProfile.errors?.['minLength']"
-                    class="invalid-feedback ml-6 pl-1"
+                    class="invalid-feedback"
                     data-test="password-error"
                   >
                     <div *ngIf="userProfile.errors?.['minLength']">
@@ -227,7 +227,7 @@
                   />
                   <div
                     *ngIf="f.confirmPassword.dirty && userProfile.errors?.['notMatched']"
-                    class="invalid-feedback ml-6 pl-1"
+                    class="invalid-feedback"
                   >
                     <div
                       *ngIf="userProfile.errors?.['notMatched']"

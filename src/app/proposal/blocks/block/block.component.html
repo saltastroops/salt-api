@@ -23,8 +23,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td [ngClass]="blockClass(block)" data-test="block-status">
+        <tr [ngClass]="blockClass(block)">
+          <td data-test="block-status">
             {{ block.status.value }}
           </td>
           <td
@@ -45,16 +45,26 @@
                 )
               "
               data-test="edit-block-status-button"
+              [ngClass]="blockClass(block)"
             >
               Edit
             </button>
           </td>
         </tr>
         <tr [ngClass]="blockClass(block)">
-          <b>
-            The block was last submitted with major changes on
-            {{ latestSubmissionDate | dfnsFormat: "dd LLLL yyyy" }}.
-          </b>
+          <td>
+            <b>
+              The block was last submitted with major changes on
+              {{ latestSubmissionDate | dfnsFormat: "dd LLLL yyyy" }}.
+            </b>
+          </td>
+          <td
+            *ngIf="
+              showEditBlockButton &&
+              (block.status.value === 'Active' ||
+                block.status.value === 'On hold')
+            "
+          ></td>
         </tr>
       </tbody>
     </table>

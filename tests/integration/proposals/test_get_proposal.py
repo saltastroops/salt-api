@@ -37,6 +37,17 @@ def test_should_return_401_when_requesting_proposal_for_unauthorized_user(
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+def test_should_return_422_when_requesting_proposal_with_a_wrong_proposal_code_format(
+    client: TestClient,
+) -> None:
+    proposal_code = "2021-3-ABC-123"
+
+    user = find_username("Administrator")
+    authenticate(user, client)
+    response = client.get(PROPOSALS_URL + "/" + proposal_code)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
 def test_should_return_404_when_requesting_non_existing_proposal(
     client: TestClient,
 ) -> None:

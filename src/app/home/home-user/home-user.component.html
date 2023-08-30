@@ -182,16 +182,6 @@ Show
     />
     only director's discretionary time proposals
   </label>
-  <label for="gw"
-    ><input
-      type="checkbox"
-      id="gw"
-      [checked]="filterProposalsBy['gw'] === 'true'"
-      (click)="filterProposals('gw')"
-      data-test="gw"
-    />
-    only gravitational wave event proposals
-  </label>
   <label for="orp"
     ><input
       type="checkbox"
@@ -251,6 +241,16 @@ Show
       data-test="commissioning"
     />
     only commissioning proposals
+  </label>
+  <label for="non-gw"
+    ><input
+      type="checkbox"
+      id="non-gw"
+      [checked]="filterProposalsBy['non-gw'] === 'true'"
+      (click)="filterProposals('non-gw')"
+      data-test="non-gw"
+    />
+    only non-gravitational wave event proposals
   </label>
 </div>
 <br /><br />

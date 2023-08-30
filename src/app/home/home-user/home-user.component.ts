@@ -95,7 +95,7 @@ export class HomeUserComponent implements OnInit {
     this.filterFunctions["active"] = this.filterActiveProposals;
     this.filterFunctions["science"] = this.filterScienceProposals;
     this.filterFunctions["ddt"] = this.filterDDTProposals;
-    this.filterFunctions["gw"] = this.filterGWProposals;
+    this.filterFunctions["non-gw"] = this.filterNonGWProposals;
     this.filterFunctions["orp"] = this.filterORPProposals;
     this.filterFunctions["phase1"] = this.filterPhase12Proposals;
     this.filterFunctions["phase2"] = this.filterPhase12Proposals;
@@ -120,6 +120,12 @@ export class HomeUserComponent implements OnInit {
 
     this.otherFilterByProperties =
       this.filterProposalsBy["other_filter_by_properties"] || {};
+
+    if (!("non-gw" in this.otherFilterByProperties)) {
+      // add "non-gw" key if not loaded already and then
+      // exclude GW proposals when the page is loaded
+      this.otherFilterByProperties["non-gw"] = "true";
+    }
   }
 
   storeFilters(): void {
@@ -219,7 +225,6 @@ export class HomeUserComponent implements OnInit {
 
   filterProposalsBySemesters(
     start_semester: string,
-
     end_semester: string,
   ): void {
     this.semesterErrorMessage = "";
@@ -237,13 +242,6 @@ export class HomeUserComponent implements OnInit {
       this.semesterErrorMessage = e.message;
       this.isValidSemester = false;
     }
-  }
-
-  filterByCurrentSemester(): void {
-    this.filterProposalsBy["semester_filter"] = this.semesterFilter;
-    this.storeFilters();
-    const current_semester = currentSemester();
-    this.filterProposalsBySemesters(current_semester, current_semester);
   }
 
   filterByCurrentAndNextSemester(): void {
@@ -355,9 +353,11 @@ export class HomeUserComponent implements OnInit {
     );
   };
 
-  filterGWProposals = (proposals: ProposalListItem[]): ProposalListItem[] => {
+  filterNonGWProposals = (
+    proposals: ProposalListItem[],
+  ): ProposalListItem[] => {
     return proposals.filter(
-      (proposal) => proposal.proposalType === "Gravitational Wave Event",
+      (proposal) => proposal.proposalType !== "Gravitational Wave Event",
     );
   };
 

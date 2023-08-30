@@ -115,6 +115,7 @@ import { RealProposalService } from "./service/real/real-proposal.service";
 import { ErrorIndicatorComponent } from "./shared/error-indicator/error-indicator.component";
 import { LoadingIndicatorComponent } from "./shared/loading-indicator/loading-indicator.component";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
+import { ModalComponent } from "./shared/modal/modal.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
 import { AcquisitionTableComponent } from "./so-page/aquisition-table/acquisition-table.component";
@@ -238,6 +239,7 @@ import { SortDirective } from "./sort.directive";
     P1ObservationsComponent,
     FinderChartViewComponent,
     SaFormComponent,
+    ModalComponent,
   ],
   imports: [
     BrowserModule,

@@ -15,9 +15,16 @@ import { AutoUnsubscribe } from "../../../../utils";
 })
 @AutoUnsubscribe()
 export class EditProprietaryPeriodModalComponent {
+  readonly modalTitle = "Edit proprietary period";
   @Output() updatePeriod = new EventEmitter<number>();
   isModalActive = false;
-  proprietaryPeriod!: ProprietaryPeriod;
+  loading = false;
+  proprietaryPeriod: ProprietaryPeriod = {
+    period: 0,
+    maximumPeriod: 0,
+    startDate: "",
+    motivation: null,
+  };
   proposalCode!: string;
   error: string | undefined = undefined;
   motivationNeeded = false;
@@ -27,10 +34,12 @@ export class EditProprietaryPeriodModalComponent {
   ) {}
 
   closeModal(): void {
+    this.loading = false;
     this.isModalActive = false;
   }
   openModal(proprietaryPeriod: ProprietaryPeriod, proposalCode: string): void {
     this.isModalActive = true;
+    this.loading = false;
     this.proprietaryPeriod = proprietaryPeriod;
     this.proposalCode = proposalCode;
     this.checkForMotivation();
@@ -49,6 +58,7 @@ export class EditProprietaryPeriodModalComponent {
   submitProprietaryPeriod(): void {
     this.checkForMotivation();
     if (!this.motivationNeeded || this.proprietaryPeriod.motivation) {
+      this.loading = true;
       this.proposalService
         .submitProprietaryPeriod(
           this.proposalCode,
@@ -67,10 +77,12 @@ export class EditProprietaryPeriodModalComponent {
             this.closeModal();
           },
           () => {
+            this.loading = false;
             this.error = "Opps, Something went wrong.";
           },
         );
     } else {
+      this.loading = false;
       this.error = "The motivation is needed.";
     }
   }

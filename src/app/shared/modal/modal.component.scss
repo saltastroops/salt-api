@@ -1,0 +1,17 @@
+.modal-content,
+.modal-card-body,
+.modal-card-head,
+.modal-card-foot {
+  width: 450px;
+}
+
+.modal-content {
+  overflow: clip;
+}
+
+.modal-card-body {
+  padding: 1.2rem;
+}
+.modal-card-foot {
+  padding: 1.5rem;
+}

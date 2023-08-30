@@ -14,14 +14,13 @@ import { AutoUnsubscribe } from "../../../../../utils";
 })
 @AutoUnsubscribe()
 export class LiaisonAstronomerModalComponent implements OnInit {
+  readonly modalTitle = "Change liaison SALT Astronomer";
   @Input() proposal!: Proposal;
-  loadingAstronomers = false;
+  loading = false;
   submitting = false;
-  astronomersError: string | null = null;
-  updateError: string | null = null;
+  error: string | undefined = undefined;
   saltAstronomers!: UserListItem[] | null;
   initialSaltAstronomerId: string | null = null;
-  isUpdated = false;
   isModalActive = false;
   saltAstronomerForm = this.fb.group({
     selectedSaltAstronomer: [{ value: "", disabled: false }],
@@ -34,7 +33,7 @@ export class LiaisonAstronomerModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadingAstronomers = true;
+    this.loading = true;
     this.saltAstronomersService.getSaltAstronomers().subscribe(
       (saltAstronomers) => {
         this.saltAstronomers = saltAstronomers;
@@ -46,11 +45,11 @@ export class LiaisonAstronomerModalComponent implements OnInit {
         this.selectedSaltAstronomer.setValue(this.initialSaltAstronomerId, {
           onlySelf: true,
         });
-        this.loadingAstronomers = false;
+        this.loading = false;
       },
       () => {
-        this.loadingAstronomers = false;
-        this.astronomersError = "Failed to fetch SALT Astronomers.";
+        this.loading = false;
+        this.error = "Failed to fetch SALT Astronomers.";
       },
     );
   }
@@ -72,8 +71,7 @@ export class LiaisonAstronomerModalComponent implements OnInit {
   closeModal(): void {
     if (!this.submitting) {
       this.isModalActive = false;
-      this.astronomersError = null;
-      this.updateError = null;
+      this.error = undefined;
     }
   }
 
@@ -88,15 +86,13 @@ export class LiaisonAstronomerModalComponent implements OnInit {
       .updateLiaisonAstronomer(this.proposal.proposalCode, saltAstronomerId)
       .subscribe(
         (liaisonAstronomer) => {
-          this.isUpdated = true;
           this.initialSaltAstronomerId = saltAstronomerId;
           this.submitting = false;
           this.proposal.generalInfo.liaisonSaltAstronomer = liaisonAstronomer;
           this.closeModal();
         },
         () => {
-          this.isUpdated = false;
-          this.updateError = "Failed to update the liaison SALT astronomer!";
+          this.error = "Failed to update the liaison SALT astronomer!";
           this.submitting = false;
         },
       );

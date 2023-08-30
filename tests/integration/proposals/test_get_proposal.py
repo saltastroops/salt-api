@@ -38,7 +38,7 @@ def test_should_return_401_when_requesting_proposal_for_unauthorized_user(
 
 
 def test_should_return_422_when_requesting_proposal_with_a_wrong_proposal_code_format(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2021-3-ABC-123"
 

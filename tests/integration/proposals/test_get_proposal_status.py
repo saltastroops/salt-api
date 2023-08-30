@@ -17,7 +17,7 @@ def test_should_return_401_when_requesting_proposal_status_for_unauthenticated_u
 
 
 def test_should_return_422_when_requesting_proposal_status_with_a_wrong_proposal_code_format(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "20a1-1-ABC-123"
 

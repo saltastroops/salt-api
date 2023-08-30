@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime
 from enum import Enum, IntEnum
-from typing import Any, Callable, Dict, Generator, List, Optional
+from typing import Any, Callable, Dict, Generator, List, Optional, Annotated
 
 from pydantic import BaseModel, Field
 
@@ -274,7 +274,7 @@ class PartnerName(str, Enum):
 
 class ProposalCode(str):
     """
-    A string denoting a semester, such as "2021-2-SCI-017".
+    A string denoting a proposal code, such as "2021-2-SCI-017".
 
     The string must consist of a four-digit year (between 2000 and 2099) followed by a
     dash, the semester ("1" or "2"), another dash, a combination of uppercase letters
@@ -299,7 +299,7 @@ class ProposalCode(str):
     def validate(cls, v: str) -> str:
         if not isinstance(v, str):
             raise TypeError("string required")
-        m = re.match(Semester.semester_regex, v)
+        m = re.match(ProposalCode.proposal_code_regex, v)
         if not m:
             raise ValueError("incorrect proposal code format")
         return v

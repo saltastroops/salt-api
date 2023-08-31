@@ -5,9 +5,9 @@ from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
-from saltapi.service.user import NewUserDetails, Role, User, UserUpdate
+from saltapi.service.user import NewUserDetails, Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType
+from saltapi.web.schema.user import PasswordUpdate, ProposalPermissionType
 
 
 class UserService:
@@ -79,15 +79,33 @@ SALT Team
 
         return True
 
+    @staticmethod
+    def _validate_user_statistics(user_details: Dict[str, Any]) -> None:
+        if user_details["legal_status"] in [
+            "South African citizen",
+            "Permanent resident of South Africa",
+        ]:
+            if not user_details["gender"]:
+                raise ValidationError("Gender is missing.")
+            if not user_details["race"]:
+                raise ValidationError("Race is missing.")
+            if user_details["has_phd"] and not user_details["year_of_phd_completion"]:
+                raise ValidationError("Year of completing PhD is missing.")
+
     def create_user(self, user: NewUserDetails) -> None:
         if self._does_user_exist(user.username):
             raise ValidationError(f"The username {user.username} exists already.")
-        self.repository.create(user)
+        self._validate_user_statistics(vars(user))
+        self.repository.create(vars(user))
 
     def get_user(self, user_id: int) -> User:
         user = self.repository.get(user_id)
         # Just in case the password hash ends up somewhere
         user.password_hash = "***"  # nosec
+        return user
+
+    def get_user_details(self, user_id: int) -> Dict[str, Any]:
+        user = self.repository.get_user_details(user_id)
         return user
 
     def get_users(self) -> List[Dict[str, Any]]:
@@ -106,10 +124,12 @@ SALT Team
         user.password_hash = "***"  # nosec
         return user
 
-    def update_user(self, user_id: int, user: UserUpdate) -> None:
-        if user.username and self._does_user_exist(user.username):
-            raise ValidationError(f"The username {user.username} exists already.")
+    def update_user(self, user_id: int, user: Dict[str, Any]) -> None:
+        self._validate_user_statistics(user)
         self.repository.update(user_id, user)
+
+    def update_password(self, user_id: int, password_update: PasswordUpdate) -> None:
+        self.repository.update_password(user_id, password_update.password)
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         return self.repository.get_salt_astronomers()

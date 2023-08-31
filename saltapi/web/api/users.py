@@ -8,16 +8,19 @@ from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import NewUserDetails as _NewUserDetails
 from saltapi.service.user import User as _User
+from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
 from saltapi.web import services
 from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     NewUserDetails,
     PasswordResetRequest,
+    PasswordUpdate,
     ProposalPermission,
     User,
     UserListItem,
     UserUpdate,
+    BaseUserDetails,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -81,6 +84,11 @@ def create_user(
                 given_name=user.given_name,
                 family_name=user.family_name,
                 institution_id=user.institution_id,
+                legal_status=user.legal_status,
+                race=user.race,
+                gender=user.gender,
+                has_phd=user.has_phd,
+                year_of_phd_completion=user.year_of_phd_completion,
             )
         )
         unit_of_work.commit()
@@ -116,7 +124,9 @@ def get_user(
         return user_service.get_user(user_id)
 
 
-@router.patch("/{user_id}", summary="Update user details", response_model=User)
+@router.patch(
+    "/{user_id}", summary="Update user details", response_model=BaseUserDetails
+)
 def update_user(
     user_id: int = Path(
         ...,
@@ -127,19 +137,29 @@ def update_user(
         ..., title="User Details", description="User details to update"
     ),
     user: _User = Depends(get_current_user),
-) -> _User:
+) -> _UserDetails:
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
-
         _user_update = _UserUpdate(
-            username=user_update.username, password=user_update.password
+            email=user_update.email,
+            family_name=user_update.family_name,
+            given_name=user_update.given_name,
+            password=user_update.password,
+            legal_status=user_update.legal_status,
+            gender=user_update.gender,
+            race=user_update.race,
+            has_phd=user_update.has_phd,
+            year_of_phd_completion=user_update.year_of_phd_completion,
         )
         user_service = services.user_service(unit_of_work.connection)
-        user_service.update_user(user_id, _user_update)
+        user_service.update_user(user_id, vars(_user_update))
+
         unit_of_work.commit()
 
-        return user_service.get_user(user_id)
+        updated_user_details = user_service.get_user_details(user_id)
+
+        return _UserDetails(**updated_user_details)
 
 
 @router.get(
@@ -241,3 +261,31 @@ def revoke_proposal_permission(
         # Querying the database for the permission is somewhat pointless, so we just
         # return the permission submitted by the user.
         return permission
+
+
+@router.post(
+    "/{user_id}/update-password", summary="Update user's password", response_model=User
+)
+def update_password(
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id for whom the password is updated",
+    ),
+    password: PasswordUpdate = Body(
+        ..., title="Password", description="Password to replace the old one."
+    ),
+    user: _User = Depends(get_current_user),
+) -> _User:
+    """
+    Update user's password.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_user(user, user_id)
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.update_password(user_id, password)
+
+        unit_of_work.commit()
+
+        return user_service.get_user(user_id)

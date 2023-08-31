@@ -148,9 +148,9 @@ def test_get_returns_correct_pdf_file(
 @pytest.mark.parametrize(
     "proposal_code,semester",
     [
-        ("2019-2-SCI-003", "2019-2"),
-        ("2017-1-SCI-031", "2017-1"),
-        ("2020-2-SCI-035", "2020-2"),
+        ("2019-2-SCI-003", "2019-2"),  # no progress submitted whatsoever
+        ("2020-2-SCI-018", "2020-2"),  # no progress reported for this semester
+        ("2020-2-SCI-018", "2021-1"),  # progress report submitted
     ],
 )
 def test_get_returns_progress_report(

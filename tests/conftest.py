@@ -1,20 +1,17 @@
 import os
-import pathlib
 import re
 import shutil
 import uuid
 
 import dotenv
 
+from saltapi.web.schema.user import LegalStatus
+
 # Make sure that the test database etc. are used.
 # IMPORTANT: These lines must be executed before any server-related package is imported.
 
 os.environ["DOTENV_FILE"] = ".env.test"
 dotenv.load_dotenv(os.environ["DOTENV_FILE"])
-
-os.environ["PMSM_DATA_DIR"] = str(
-    pathlib.Path(os.environ["TEST_DATA_DIR"]) / "database"
-)
 
 
 from pathlib import Path
@@ -36,7 +33,7 @@ from saltapi.service.user_service import UserService
 
 def get_user_authentication_function() -> Callable[[str, str], User]:
     def authenticate_user(username: str, password: str) -> User:
-        if password != USER_PASSWORD:
+        if password != USER_PASSWORD and password != USER_PASSWORD_UPDATE:
             raise NotFoundError("No user found for username and password")
 
         with cast(Engine, _create_engine()).connect() as connection:
@@ -60,6 +57,7 @@ TEST_DATA = "users.yaml"
 # password "secret".
 
 USER_PASSWORD = "secret"
+USER_PASSWORD_UPDATE = "my-shiny-very-very-secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = 7 * 24
 
@@ -197,18 +195,20 @@ def find_usernames(
         "partner_affiliated_user",
         "salt_astronomer",
     ]:
-        return (
+        usernames = (
             users[normalized_role]["with_role"]
             if has_role
             else users[normalized_role]["without_role"]
         )
+        return list(usernames)
 
     if normalized_role in users:
-        return (
+        usernames = (
             users[normalized_role][proposal_code]["with_role"]
             if has_role
             else users[normalized_role][proposal_code]["without_role"]
         )
+        return list(usernames)
 
     raise ValueError(f"Unknown user role: {role}")
 
@@ -249,6 +249,11 @@ def create_user(client: TestClient) -> Dict[str, Any]:
         family_name=_random_string(),
         password="very_secret",
         institution_id=5,
+        legal_status=LegalStatus.OTHER,
+        race=None,
+        gender=None,
+        has_phd=None,
+        year_of_phd_completion=None,
     )
     response = client.post("/users/", json=new_user_details)
     return dict(response.json())

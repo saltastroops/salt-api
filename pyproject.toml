@@ -32,13 +32,10 @@ starlette = "^0.21.0"
 responses = "^0.22.0"
 faker = "^16.3.0"
 pytest-mock = "^3.10.0"
+jinja2 = "^3.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["d"], version = "^22.10.0"}
-flake8 = "^3.8.4"
-flake8-print = "^4.0.0"
-tox = "^3.21.4"
-isort = "^5.7.0"
 pytest-cov = "^2.11.1"
 bandit = "^1.7.0"
 requests = "^2.25.1"
@@ -49,7 +46,6 @@ syrupy = "^1.2.2"
 PyYAML = "^5.4.1"
 pytest-bdd = "^4.1.0"
 pytest-regressions = "^2.3.1"
-pytest-pymysql-autorecord = "^0.1.0"
 httpx = "^0.23.0"
 mkdocs-material = "^8.5.9"
 pip-audit = "^2.4.5"
@@ -59,11 +55,21 @@ mypy = "^1.1.1"
 types-pytz = "^2023.3.0.0"
 types-python-dateutil = "^2.8.19.11"
 types-requests = "^2.28.11.17"
+ruff = "^0.0.278"
+types-pyyaml = "^6.0.12.10"
+pytest = "^7.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "B", "I"]
+unfixable = ["B"]
+ignore = ["E203", "E501"]
+dummy-variable-rgx = "^ignore_me$"
+target-version = "py310"
+
+[tool.ruff.pydocstyle]
+convention = "numpy"

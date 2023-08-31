@@ -1,11 +1,10 @@
-import uuid
 from typing import Dict, Optional
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_pymysql_autorecord.util import DatabaseMock
 from starlette import status
 
+from saltapi.web.schema.user import LegalStatus
 from tests.conftest import (
     authenticate,
     create_user,
@@ -22,9 +21,22 @@ def _url(user_id: int) -> str:
 
 
 def _patch_data(
-    username: Optional[str] = None, password: Optional[str] = None
+    given_name: Optional[str],
+    family_name: Optional[str],
+    email: Optional[str],
+    password: Optional[str] = None,
 ) -> Dict[str, Optional[str]]:
-    return {"username": username, "password": password}
+    return {
+        "given_name": given_name,
+        "family_name": family_name,
+        "password": password,
+        "email": email,
+        "legal_status": LegalStatus.OTHER,
+        "race": None,
+        "gender": None,
+        "has_phd": None,
+        "year_of_phd_completion": None,
+    }
 
 
 def test_patch_user_should_return_401_for_unauthenticated_user(
@@ -32,7 +44,9 @@ def test_patch_user_should_return_401_for_unauthenticated_user(
 ) -> None:
     not_authenticated(client)
 
-    response = client.patch(_url(1072), json=_patch_data())
+    response = client.patch(
+        _url(1072), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za")
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -41,7 +55,9 @@ def test_patch_user_should_return_401_for_user_with_invalid_auth_token(
 ) -> None:
     misauthenticate(client)
 
-    response = client.patch(_url(1072), json=_patch_data())
+    response = client.patch(
+        _url(1072), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za")
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -49,7 +65,9 @@ def test_patch_user_should_return_404_for_non_existing_user(client: TestClient) 
     username = find_username("Administrator")
     authenticate(username, client)
 
-    response = client.patch(_url(0), json=_patch_data())
+    response = client.patch(
+        _url(0), json=_patch_data("Chaka", "Mofokeng", "cmofokeng@example.com")
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -67,7 +85,10 @@ def test_patch_user_should_return_403_if_non_admin_tries_to_update_other_user(
     other_user_id = 6
     authenticate(username, client)
 
-    response = client.patch(_url(other_user_id), json=_patch_data())
+    response = client.patch(
+        _url(other_user_id),
+        json=_patch_data("Chaka", "Mofokeng", "cmofokeng@saao.ac.za"),
+    )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -81,59 +102,101 @@ def test_patch_user_should_keep_existing_values_by_default(client: TestClient) -
     assert updated_user_details == current_user_details
 
 
-def test_patch_user_should_update_with_new_values(
-    database_mock: DatabaseMock, client: TestClient
-) -> None:
-    user = create_user(client)
-    new_username = database_mock.user_value(str(uuid.uuid4())[:8])
-    authenticate(user["username"], client)
+def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
+    username = "cmofokeng"
+    user_id = 1062
+    authenticate(username, client)
 
-    user_update = {"username": new_username, "password": "very_very_secret"}
-    expected_updated_user_details = user.copy()
+    user_update = _patch_data("Chaka", "Mofokeng", "mofokeng.chk@gmail.com")
+    expected_updated_user_details = client.get(_url(user_id)).json()
     expected_updated_user_details.update(user_update)
+    del expected_updated_user_details["affiliations"]
+    del expected_updated_user_details["alternative_emails"]
+    del expected_updated_user_details["id"]
     del expected_updated_user_details["password"]
+    del expected_updated_user_details["roles"]
+    del expected_updated_user_details["username"]
 
     # the endpoint returns the correct response...
-    response = client.patch(_url(user["id"]), json=user_update)
+    response = client.patch(_url(user_id), json=user_update)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_updated_user_details
 
     # ... and the user is indeed updated
-    updated_user_details = client.get(_url(user["id"])).json()
-    assert updated_user_details == expected_updated_user_details
+    updated_user_details = client.get(_url(user_id)).json()
+
+    assert (
+        updated_user_details["given_name"]
+        == expected_updated_user_details["given_name"]
+    )
+    assert (
+        updated_user_details["family_name"]
+        == expected_updated_user_details["family_name"]
+    )
+    assert updated_user_details["email"] == expected_updated_user_details["email"]
 
 
-def test_patch_user_should_be_idempotent(
-    database_mock: DatabaseMock, client: TestClient
-) -> None:
+def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     user = create_user(client)
-    new_username = database_mock.user_value(str(uuid.uuid4())[:8])
     authenticate(user["username"], client)
 
-    user_update = {"username": new_username, "password": "very_very_secret"}
+    user_update = _patch_data(
+        given_name=user["given_name"],
+        family_name=user["family_name"],
+        email=user["email"],
+        password="very_very_secret",
+    )
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
+
+    del expected_updated_user_details["affiliations"]
+    del expected_updated_user_details["alternative_emails"]
+    del expected_updated_user_details["id"]
     del expected_updated_user_details["password"]
+    del expected_updated_user_details["roles"]
+    del expected_updated_user_details["username"]
 
-    client.patch(_url(user["id"]), json=user_update)
-    client.patch(_url(user["id"]), json=user_update)
+    first_update_response = client.patch(_url(user["id"]), json=user_update)
+    second_update_response = client.patch(_url(user["id"]), json=user_update)
 
-    updated_user_details = client.get(_url(user["id"])).json()
-    assert updated_user_details == expected_updated_user_details
+    assert first_update_response.json() == expected_updated_user_details
+    assert second_update_response.json() == expected_updated_user_details
 
 
-def test_patch_user_should_allow_admin_to_update_other_user(
-    database_mock: DatabaseMock, client: TestClient
+def test_patch_user_should_return_400_for_using_existing_email(
+    client: TestClient,
 ) -> None:
     user = create_user(client)
-    new_username = database_mock.user_value(str(uuid.uuid4())[:8])
-    authenticate(find_username("Administrator"), client)
+    authenticate(user["username"], client)
+    existing_email = "hettlage@saao.ac.za"
 
-    user_update = {"username": new_username, "password": "very_very_secret"}
+    user_update = _patch_data(user["given_name"], user["family_name"], existing_email)
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
     del expected_updated_user_details["password"]
+    del expected_updated_user_details["legal_status"]
+    del expected_updated_user_details["gender"]
+    del expected_updated_user_details["race"]
+    del expected_updated_user_details["has_phd"]
+    del expected_updated_user_details["year_of_phd_completion"]
 
     response = client.patch(_url(user["id"]), json=user_update)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) -> None:
+    other_user_id = 1593
+    authenticate(find_username("Administrator"), client)
+    user_update = _patch_data("Xola", "Ndaliso", "xola.ndaliso@example.com")
+    expected_updated_user_details = client.get(_url(other_user_id)).json()
+    expected_updated_user_details.update(user_update)
+    del expected_updated_user_details["affiliations"]
+    del expected_updated_user_details["alternative_emails"]
+    del expected_updated_user_details["id"]
+    del expected_updated_user_details["password"]
+    del expected_updated_user_details["roles"]
+    del expected_updated_user_details["username"]
+    response = client.patch(_url(other_user_id), json=user_update)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_updated_user_details

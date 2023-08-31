@@ -6,11 +6,11 @@ version: "3"
 
 services:
   saltapi:
-    build:
-      context: .
+    image: ${REGISTRY}/${REGISTRY_USERNAME}/saltapi:${TAG}
     env_file:
       - .env
     environment:
+      - PORT
       - PROPOSALS_DIR=/proposals
       - SECRET_KEY
       - SDB_DSN

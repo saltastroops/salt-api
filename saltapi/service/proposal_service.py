@@ -126,23 +126,25 @@ class ProposalService:
 
     def get_urls_for_proposal_progress_report_pdfs(
         self, proposal_code: ProposalCode, request: Request, router: APIRouter
-    ) -> Dict[str, Dict[str, str]]:
+    ) -> List[Dict[str, Any]]:
         semesters = self.repository.get_progress_report_semesters(proposal_code)
 
-        progress_report_urls = dict()
+        progress_reports: List[Dict[str, Any]] = []
         for semester in semesters:
             progress_report_pdf_url = router.url_path_for(
                 "get_proposal_progress_report_pdf",
                 proposal_code=proposal_code,
                 semester=semester,
             )
-            progress_report_urls[semester] = {
-                "proposal_progress_pdf": generate_route_url(
-                    request, progress_report_pdf_url
-                ),
-            }
 
-        return progress_report_urls
+            progress_reports.append(
+                {
+                    "semester": semester,
+                    "url": generate_route_url(request, progress_report_pdf_url),
+                }
+            )
+
+        return progress_reports
 
     def get_progress_report(
         self,
@@ -234,7 +236,9 @@ class ProposalService:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
         )
-        previous_observed_times = self.repository.get_observed_time(proposal_code)
+        previous_observed_times = self.repository.get_observed_p0_to_p3_time(
+            proposal_code
+        )
 
         def previous_observed_time(semester: str) -> int:
             for ot in previous_observed_times:

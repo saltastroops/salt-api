@@ -21,7 +21,7 @@ class FakeProposalRepository:
             cast(ProposalListItem, limit),
         ]
 
-    def get_proposal_status(self, proposal_code: str) -> Dict[str, str]:
+    def get_proposal_status(self, proposal_code: str) -> Dict[str, Optional[str]]:
         if proposal_code == VALID_PROPOSAL_CODE:
             return self.proposal_status
         raise NotFoundError()

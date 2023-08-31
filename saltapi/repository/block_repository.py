@@ -1,16 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Set,
-    cast,
-    get_args,
-)
+from typing import Any, Dict, Iterable, List, Literal, Optional, cast, get_args
 
 import pytz
 from astropy.coordinates import Angle
@@ -886,18 +876,27 @@ WHERE TCOC.Pointing_Id = :pointing_id
 
     def get_proposal_codes_for_block_visits(
         self, block_visit_ids: List[int]
-    ) -> Set[str]:
+    ) -> List[str]:
         """
         Get the proposal codes for a list of block visit ids.
         """
-        proposal_codes = set()
-        for block_visit_id in block_visit_ids:
-            try:
-                proposal_codes.add(
-                    self.get_proposal_code_for_block_visit_id(block_visit_id)
-                )
-            except Exception:
-                raise NotFoundError(
-                    f"Observation id does not exist: '{block_visit_id}'"
-                )
-        return proposal_codes
+        stmt = text(
+            """
+SELECT DISTINCT PC.Proposal_code
+FROM ProposalCode PC
+         JOIN Block B ON PC.ProposalCode_Id = B.ProposalCode_Id
+         JOIN BlockVisit BV ON BV.Block_Id = B.Block_Id
+         JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
+WHERE BV.BlockVisit_Id IN :block_visit_ids
+  AND BVS.BlockVisitStatus NOT IN ('Deleted');
+        """
+        )
+        result = self.connection.execute(
+            stmt,
+            {"block_visit_ids": block_visit_ids},
+        )
+
+        try:
+            return list(result.scalars())
+        except NoResultFound:
+            raise NotFoundError()

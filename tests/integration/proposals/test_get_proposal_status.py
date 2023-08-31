@@ -16,6 +16,17 @@ def test_should_return_401_when_requesting_proposal_status_for_unauthenticated_u
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+def test_should_return_422_when_requesting_proposal_status_with_a_wrong_proposal_code_format(
+    client: TestClient,
+) -> None:
+    proposal_code = "20a1-1-ABC-123"
+
+    user = find_username("Administrator")
+    authenticate(user, client)
+    response = client.get(PROPOSALS_URL + "/" + proposal_code + "/status")
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
 def test_should_return_404_when_requesting_proposal_status_of_non_existing_proposal(
     client: TestClient,
 ) -> None:
@@ -49,7 +60,7 @@ def test_should_return_proposal_status_when_requested_by_permitted_users(
 
     assert response.status_code == status.HTTP_200_OK
     assert "value" in [s for s in response.json()]
-    assert "reason" in [s for s in response.json()]
+    assert "comment" in [s for s in response.json()]
 
 
 @pytest.mark.parametrize(

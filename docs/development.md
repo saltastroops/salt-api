@@ -51,7 +51,7 @@ poetry install
 
 ## Settings
 
-All settings for the Web Manager must be provided as environment variables or in a file. By default, that file is the file `.env` in the server's root folder (i.e. in the `python` folder). However, you can choose another file by setting the environment variable `DOTENV_FILE`. _Remember that a file defining environment variables must **never** be put under version control._
+All settings for the Web Manager must be provided as environment variables or in a file. By default, that file is the file `.env` in the server's root folder. _Remember that a file defining environment variables must **never** be put under version control._
 
 !!! warning
     Note that the value of the variable `SDB_DSN` must be in a format understood by SQLAlchemy. In particular, the protocol must indicate the database driver. So instead of just `mysql` it must be `mysql+pymysql` (for PyMYSQL) or `mysql+pymysql`. Otherwise, you might get a puzzling error like `ModuleNotFoundError: No module named 'MySQLdb'`.
@@ -317,7 +317,7 @@ Authorization should be done with `Permission` instances, which in turn use `Rol
 
 ### Roles
 
-The `app.util.role` module provides an abstract  base class `Role`, which all user role classes should extend. The extending class should not make any database query itself, but rather call a function from the module `app.service.user`. As an example, here is the implementation of the `Investigator` role.
+The `app.util.role` module provides an abstract base class `Role`, which all user role classes should extend. The extending class should not make any database query itself, but rather call a function from the module `app.service.user`. As an example, here is the implementation of the `Investigator` role.
 
 ```python
 from aiomysql import Pool

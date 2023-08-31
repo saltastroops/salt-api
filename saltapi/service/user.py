@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, NamedTuple, Optional
+from typing import List, Optional
 
 
 class Role(str, Enum):
@@ -63,8 +63,17 @@ class User:
     roles: List[Role]
 
 
-@dataclass()
-class NewUserDetails:
+@dataclass(frozen=True)
+class UserStatistics:
+    legal_status: str
+    gender: Optional[str]
+    race: Optional[str]
+    has_phd: Optional[bool]
+    year_of_phd_completion: Optional[int]
+
+
+@dataclass(frozen=True)
+class NewUserDetails(UserStatistics):
     given_name: str
     family_name: str
     email: str
@@ -74,10 +83,13 @@ class NewUserDetails:
     institution_id: int
 
 
-class UserUpdate(NamedTuple):
-    username: Optional[str]
-    # Not implemented yet
-    # given_name: Optional[str]
-    # family_name: Optional[str]
-    # email: Optional[str]
+@dataclass(frozen=True)
+class UserDetails(UserStatistics):
+    given_name: str
+    family_name: str
+    email: str
+
+
+@dataclass(frozen=True)
+class UserUpdate(UserDetails):
     password: Optional[str]

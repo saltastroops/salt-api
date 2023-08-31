@@ -5,14 +5,21 @@ from typing import Any, Callable, Optional, cast
 import pytest
 from pydantic import EmailStr
 from pytest import MonkeyPatch
-from pytest_pymysql_autorecord.util import DatabaseMock
 from sqlalchemy.engine import Connection
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.repository.user_repository import UserRepository
-from saltapi.service.user import NewUserDetails, UserUpdate
+from saltapi.service.user import UserStatistics
 from tests.conftest import find_usernames
 from tests.markers import nodatabase
+
+user_statistics = UserStatistics(
+    legal_status="South African citizen",
+    gender="Male",
+    race="African",
+    has_phd=True,
+    year_of_phd_completion=2020,
+)
 
 
 @nodatabase
@@ -25,6 +32,9 @@ def test_get_user(db_connection: Connection, check_data: Callable[[Any], None]) 
         user["roles"] = [
             str(role) for role in user["roles"]
         ]  # allow YAML representation
+
+        del user["password_hash"]
+
         users.append(user)
     check_data(users)
 
@@ -51,7 +61,11 @@ def test_get_user_by_email_returns_correct_user(
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = asdict(user_repository.get_by_email("hettlage@saao.ac.za"))
+
     user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
+
+    del user["password_hash"]
+
     check_data(user)
 
 
@@ -64,15 +78,20 @@ def test_create_user_raisers_error_if_username_exists_already(
     db_connection: Connection,
 ) -> None:
     username = "hettlage"
-    new_user_details = NewUserDetails(
-        username=username,
-        email=EmailStr(f"{username}@example.com"),
-        alternative_emails=[],
-        given_name=_random_string(),
-        family_name=_random_string(),
-        password="very_secret",
-        institution_id=5,
-    )
+    new_user_details = {
+        "username": username,
+        "email": EmailStr(f"{username}@example.com"),
+        "alternative_emails": [],
+        "given_name": _random_string(),
+        "family_name": _random_string(),
+        "password": "very_secret",
+        "institution_id": 5,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
     user_repository = UserRepository(db_connection)
     with pytest.raises(ValueError) as excinfo:
         user_repository.create(new_user_details)
@@ -81,19 +100,22 @@ def test_create_user_raisers_error_if_username_exists_already(
 
 
 @nodatabase
-def test_create_user_creates_a_new_user(
-    database_mock: DatabaseMock, db_connection: Connection
-) -> None:
-    username = database_mock.user_value(_random_string())
-    new_user_details = NewUserDetails(
-        username=username,
-        password=_random_string(),
-        email=EmailStr(f"{username}@example.com"),
-        alternative_emails=[],
-        given_name=database_mock.user_value(_random_string()),
-        family_name=database_mock.user_value(_random_string()),
-        institution_id=5,
-    )
+def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
+    username = _random_string()
+    new_user_details = {
+        "username": username,
+        "email": EmailStr(f"{username}@example.com"),
+        "alternative_emails": [],
+        "given_name": _random_string(),
+        "family_name": _random_string(),
+        "password": "very_secret",
+        "institution_id": 5,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
 
     user_repository = UserRepository(db_connection)
     user_repository.create(new_user_details)
@@ -101,9 +123,9 @@ def test_create_user_creates_a_new_user(
     created_user = user_repository.get_by_username(username)
     assert created_user.username == username
     assert created_user.password_hash is not None
-    assert created_user.email == new_user_details.email
-    assert created_user.given_name == new_user_details.given_name
-    assert created_user.family_name == new_user_details.family_name
+    assert created_user.email == new_user_details["email"]
+    assert created_user.given_name == new_user_details["given_name"]
+    assert created_user.family_name == new_user_details["family_name"]
     assert created_user.roles == []
 
 
@@ -119,69 +141,110 @@ def test_get_user_by_email_raises_error_for_non_existing_user(
 @nodatabase
 def test_patch_raises_error_for_non_existing_user(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
+
+    new_family_name = "Motaung"
+    new_given_name = "Thato"
+    new_email = "motaung.thato@gmail.com"
+
+    user_update = {
+        "family_name": new_family_name,
+        "given_name": new_given_name,
+        "email": new_email,
+        "password": None,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
+
     with pytest.raises(NotFoundError):
-        user_repository.update(0, UserUpdate(username=None, password=None))
+        user_repository.update(0, user_update)
 
 
-@nodatabase
-def test_patch_uses_existing_values_by_default(db_connection: Connection) -> None:
-    user_repository = UserRepository(db_connection)
-    user_id = 1602
-    old_user_details = user_repository.get(user_id)
-    user_repository.update(user_id, UserUpdate(username=None, password=None))
-    new_user_details = user_repository.get(user_id)
-
-    assert old_user_details == new_user_details
-
-
-def test_patch_replaces_existing_values(db_connection: Connection) -> None:
+def test_patch_user(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
     user_id = 1602
     old_user_details = user_repository.get(user_id)
 
-    new_username = "hettlage2"
-    new_password = "a_new_shiny_password"
-    assert not user_repository.verify_password(
-        new_password, old_user_details.password_hash
-    )
+    new_family_name = "Motaung"
+    new_given_name = "Thato"
+    new_email = "motaung.thato@example.com"
 
-    user_repository.update(
-        user_id, UserUpdate(username=new_username, password=new_password)
-    )
-    new_user_details = user_repository.get(user_id)
+    new_legal_status = "Other"
+    new_race = "Indian"
+    new_gender = "Male"
+    has_phd = False
 
-    assert new_user_details.username == new_username
-    assert user_repository.verify_password(new_password, new_user_details.password_hash)
+    user_update = {
+        "family_name": new_family_name,
+        "given_name": new_given_name,
+        "email": new_email,
+        "password": None,
+        "legal_status": new_legal_status,
+        "gender": new_gender,
+        "race": new_race,
+        "has_phd": has_phd,
+        "year_of_phd_completion": None,
+    }
+    user_repository.update(user_id, user_update)
+    new_user_details = user_repository.get_user_details(user_id)
+
+    assert new_user_details["family_name"] == new_family_name
+    assert new_user_details["given_name"] == new_given_name
+    assert new_user_details["email"] == new_email
+    assert new_user_details["legal_status"] == new_legal_status
+    assert new_user_details["gender"] == new_gender
+    assert new_user_details["race"] == new_race
+    assert new_user_details["has_phd"] == has_phd
+    assert new_user_details["year_of_phd_completion"] is None
+
+    user_update = {
+        "family_name": old_user_details.family_name,
+        "given_name": old_user_details.given_name,
+        "email": old_user_details.email,
+        "password": None,
+        "legal_status": new_legal_status,
+        "gender": new_gender,
+        "race": new_race,
+        "has_phd": has_phd,
+        "year_of_phd_completion": None,
+    }
+    user_repository.update(user_id, user_update)
+    new_user_details = user_repository.get_user_details(user_id)
+
+    assert new_user_details["family_name"] == old_user_details.family_name
+    assert new_user_details["given_name"] == old_user_details.given_name
+    assert new_user_details["email"] == old_user_details.email
+    assert new_user_details["legal_status"] == new_legal_status
+    assert new_user_details["gender"] == new_gender
+    assert new_user_details["race"] == new_race
+    assert new_user_details["has_phd"] == has_phd
+    assert new_user_details["year_of_phd_completion"] is None
 
 
-def test_patch_is_idempotent(db_connection: Connection) -> None:
+def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
     user_id = 1602
-    new_username = "hettlage2"
-    new_password = "a_new_shiny_password"
 
-    user_repository.update(
-        user_id, UserUpdate(username=new_username, password=new_password)
-    )
-    new_user_details_1 = user_repository.get_by_username(new_username)
+    family_name = "Chaka"
+    given_name = "Mofokeng"
+    existing_other_user_email = "hettlage@saao.ac.za"
 
-    user_repository.update(
-        user_id, UserUpdate(username=new_username, password=new_password)
-    )
-    new_user_details_2 = user_repository.get_by_username(new_username)
+    user_update = {
+        "family_name": family_name,
+        "given_name": given_name,
+        "email": existing_other_user_email,
+        "password": None,
+        "legal_status": user_statistics.legal_status,
+        "gender": user_statistics.gender,
+        "race": user_statistics.race,
+        "has_phd": user_statistics.has_phd,
+        "year_of_phd_completion": user_statistics.year_of_phd_completion,
+    }
 
-    assert new_user_details_1 == new_user_details_2
-
-
-def test_patch_cannot_use_existing_username(db_connection: Connection) -> None:
-    user_repository = UserRepository(db_connection)
-    user_id = 1602
-    existing_username = "nhlavutelo"
-
-    with pytest.raises(ValueError):
-        user_repository.update(
-            user_id, UserUpdate(username=existing_username, password=None)
-        )
+    with pytest.raises(ResourceExistsError, match="exists already"):
+        user_repository.update(user_id, user_update)
 
 
 def _check_user_has_role(
@@ -325,7 +388,7 @@ def test_has_proposal_permission_returns_correct_result(
     db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
-    proposal_code = "2022-2-COM-001"
+    proposal_code = "2022-1-COM-003"
     grantee_username = find_usernames("proposal_view_grantee", True, proposal_code)[0]
     grantee_id = user_repository.get_by_username(grantee_username).id
     assert user_repository.user_has_proposal_permission(
@@ -333,11 +396,12 @@ def test_has_proposal_permission_returns_correct_result(
         permission_type="View",
         proposal_code=proposal_code,
     )
-    non_grantee_username = find_usernames("proposal_view_grantee", True, proposal_code)[
-        0
-    ]
+
+    non_grantee_username = find_usernames(
+        "proposal_view_grantee", False, proposal_code
+    )[0]
     non_grantee_id = user_repository.get_by_username(non_grantee_username).id
-    assert user_repository.user_has_proposal_permission(
+    assert not user_repository.user_has_proposal_permission(
         user_id=non_grantee_id,
         permission_type="View",
         proposal_code=proposal_code,
@@ -362,6 +426,8 @@ def test_find_by_username_and_password_returns_correct_user(
         user_repository.find_user_with_username_and_password(username, "some_password")
     )
     user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
+
+    del user["password_hash"]
 
     assert user["username"] == username
     check_data(user)
@@ -478,7 +544,7 @@ def test_grant_proposal_permission_raises_not_found_errors(
 def test_grant_proposal_permission(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Initially there are no granted permissions
@@ -496,7 +562,7 @@ def test_grant_proposal_permission(db_connection: Connection) -> None:
 def test_grant_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2022-2-SCI-007", "permission_type": "View"}
 
     # Initially there are no granted permissions
@@ -536,7 +602,7 @@ def test_revoke_proposal_permission_raises_not_found_errors(
 def test_revoke_proposal_permission(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Grant a permission
@@ -557,7 +623,7 @@ def test_revoke_proposal_permission(db_connection: Connection) -> None:
 def test_revoke_proposal_permissions_is_idempotent(db_connection: Connection) -> None:
     user_repository = UserRepository(db_connection)
 
-    user_id = 16
+    user_id = 15
     permission = {"proposal_code": "2020-1-SCI-003", "permission_type": "View"}
 
     # Grant a permission

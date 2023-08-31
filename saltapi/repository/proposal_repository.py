@@ -65,7 +65,11 @@ SELECT DISTINCT P.Proposal_Id                   AS id,
                 Astronomer.PiptUser_Id          AS la_user_id,
                 Astronomer.FirstName            AS la_given_name,
                 Astronomer.Surname              AS la_family_name,
-                Astronomer.Email                AS la_email
+                Astronomer.Email                AS la_email,
+                IF(PU.Username = :username,
+                    1,
+                    0
+                )                               AS is_user_an_investigator
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
          JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
@@ -176,11 +180,26 @@ LIMIT :limit;
                     "email": row.pc_email,
                 },
                 "liaison_astronomer": self._liaison_astronomer(row),
+                "is_user_an_investigator": row.is_user_an_investigator > 0,
             }
             for row in result
         ]
 
-        return proposals
+        # The list of proposals returned may contain proposals twice, once with
+        # is_user_an_investigator=0 and once with is_user_an_investigator=1. In this
+        # case only one of the two should be retained, and it should be the one with
+        # is_user_an_investigator=1.
+        unique_proposals_dict: Dict[str, Dict[str, Any]] = dict()
+        for p in proposals:
+            if (
+                p["id"] not in unique_proposals_dict
+                or p["is_user_an_investigator"] == 1
+            ):
+                unique_proposals_dict[p["id"]] = p
+
+        unique_proposals = list(unique_proposals_dict.values())
+
+        return unique_proposals
 
     @staticmethod
     def _liaison_astronomer(row: Any) -> Optional[Dict[str, str]]:
@@ -274,10 +293,10 @@ LIMIT :limit;
             "investigators": self._investigators(proposal_code),
             "blocks": self._blocks(proposal_code, semester),
             "block_visits": block_visits,
-            "time_allocations": self.time_allocations(proposal_code, semester),
-            "charged_time": self.charged_time(proposal_code, semester),
+            "time_allocations": self._time_allocations(proposal_code, semester),
+            "charged_time": self._charged_time(proposal_code, semester),
             "observation_comments": self.get_observation_comments(proposal_code),
-            "targets": self._get_phase_one_targets(proposal_code),
+            "observations": self._get_phase_one_observations(proposal_code),
             "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
             "phase1_proposal_summary": summary_url,
@@ -1010,7 +1029,7 @@ WHERE C.Proposal_Code = :proposal_code
             instruments[block_id].append({"name": "BVIT", "modes": c["modes"]})
         return instruments
 
-    def time_allocations(
+    def _time_allocations(
         self, proposal_code: str, semester: str
     ) -> List[Dict[str, Any]]:
         """
@@ -1104,7 +1123,7 @@ WHERE PC.Proposal_Code = :proposal_code
             for row in result
         }
 
-    def charged_time(self, proposal_code: str, semester: str) -> Dict[str, int]:
+    def _charged_time(self, proposal_code: str, semester: str) -> Dict[str, int]:
         year, sem = semester.split("-")
         stmt = text(
             """
@@ -1638,7 +1657,13 @@ ORDER BY semester DESC;
         else:
             return None
 
-    def get_observed_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def get_observed_p0_to_p3_time(self, proposal_code: str) -> List[Dict[str, Any]]:
+        """
+        Get the charged times for priority 0 to 3, summed per semester.
+
+        Priority 4 observations are not included. Rejected observations are not included
+        either.
+        """
         stmt = text(
             """
 SELECT
@@ -1651,6 +1676,7 @@ FROM Proposal		    AS P
     JOIN BlockVisitStatus AS BVS USING (BlockVisitStatus_Id)
     JOIN Semester 		AS S ON (P.Semester_Id = S.Semester_Id)
 WHERE BlockVisitStatus = 'Accepted'
+    AND B.Priority < 4
     AND Proposal_Code = :proposal_code
     GROUP BY S.Semester_Id
     """
@@ -1698,7 +1724,7 @@ WHERE Proposal_Code=:proposal_code
 
     def _get_time_statistics(self, proposal_code: str) -> List[Dict[str, Any]]:
         allocated_requested = self.get_allocated_and_requested_time(proposal_code)
-        observed_time = self.get_observed_time(proposal_code)
+        observed_time = self.get_observed_p0_to_p3_time(proposal_code)
         time_statistics = []
         for ar in allocated_requested:
             tmp = {
@@ -1792,7 +1818,7 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Return the path of the latest proposal zip file.
 
-        The proposal zip file for a submission  is stored in a folder
+        The proposal zip file for a submission is stored in a folder
         <proposal_code>/<submission_number> and has the name <proposal_code>/zip.
 
         Parameters
@@ -1861,7 +1887,7 @@ SELECT
     CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     ReportPath                          AS proposal_progress_pdf,
     SupplementaryPath                   AS additional_pdf
-FROM ProposalProgress PP 
+FROM ProposalProgress PP
     JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON PP.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
@@ -1896,15 +1922,15 @@ WHERE PC.Proposal_Code = :proposal_code
             current_conditions = self.get_latest_observing_conditions(
                 proposal_code, semester
             )
-            progress_report["last_observing_constraints"] = {
-                "seeing": current_conditions["seeing"] if current_conditions else None,
-                "transparency": current_conditions["transparency"]
+            progress_report["last_observing_constraints"] = (
+                {
+                    "seeing": current_conditions["seeing"],
+                    "transparency": current_conditions["transparency"],
+                    "description": current_conditions["description"],
+                }
                 if current_conditions
-                else None,
-                "description": current_conditions["description"]
-                if current_conditions
-                else None,
-            }
+                else None
+            )
 
             # The requested observing conditions, on the other hand, are those
             # of the next semester. These should exist (as there exists a progress
@@ -1931,7 +1957,7 @@ WHERE PC.Proposal_Code = :proposal_code
         else:
             return {
                 "requested_time": requested_time,
-                "semester": None,
+                "semester": semester,
                 "maximum_seeing": None,
                 "transparency": None,
                 "additional_pdf": None,
@@ -2058,7 +2084,7 @@ VALUES (
         # add the proprietary period to get the data release date
         return proprietary_period_start + relativedelta(months=proprietary_period)
 
-    def is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
+    def _is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
         stmt = text(
             """
 SELECT P.Partner_Code    AS partner_code,
@@ -2099,7 +2125,7 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
             "Science",
             "Science - Long Term",
         ]:
-            if self.is_partner_allocated(proposal_code, "RSA"):
+            if self._is_partner_allocated(proposal_code, "RSA"):
                 return 24
             return 1200
         raise ValueError("Unknown proposal type.")
@@ -2128,7 +2154,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
             },
         )
 
-    def _get_phase_one_targets(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_phase_one_observations(self, proposal_code: str) -> List[Dict[str, Any]]:
         # The phase 1 targets.
         stmt = text(
             """
@@ -2195,13 +2221,18 @@ WHERE Proposal_Code = :proposal_code
         )
         return [
             {
-                "id": row.id,
-                "name": row.name,
+                "target": {
+                    "id": row.id,
+                    "name": row.name,
+                    "coordinates": target_coordinates(row),
+                    "proper_motion": target_proper_motion(row),
+                    "magnitude": target_magnitude(row),
+                    "target_type": target_type(row),
+                    "period_ephemeris": target_period_ephemeris(row),
+                    "horizons_identifier": row.horizons_identifier,
+                    "non_sidereal": row.non_sidereal == 1,
+                },
                 "observing_time": row.observing_time,
-                "coordinates": target_coordinates(row),
-                "proper_motion": target_proper_motion(row),
-                "magnitude": target_magnitude(row),
-                "target_type": target_type(row),
                 "is_optional": row.optional,
                 "requested_observations": row.requested_observations,
                 "max_lunar_phase": row.max_luner_phase,
@@ -2215,9 +2246,6 @@ WHERE Proposal_Code = :proposal_code
                     "seeing": row.seeing_probability,
                     "total": row.total_probability,
                 },
-                "period_ephemeris": target_period_ephemeris(row),
-                "horizons_identifier": row.horizons_identifier,
-                "non_sidereal": row.non_sidereal == 1,
             }
             for row in self.connection.execute(stmt, {"proposal_code": proposal_code})
         ]
@@ -2427,7 +2455,7 @@ WHERE Proposal_Code = :proposal_code
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_code_id = result.one_or_none()
         if not proposal_code_id:
-            raise NotFoundError(f"Couldn't find  proposal code '{proposal_code}'")
+            raise NotFoundError(f"Couldn't find proposal code '{proposal_code}'")
 
         return cast(int, proposal_code_id[0])
 

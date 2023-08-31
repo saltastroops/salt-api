@@ -1,0 +1,263 @@
+<div class="user-statistics">
+  <form [formGroup]="userDetailsForm">
+    <label class="label">Legal status in South Africa</label>
+    <div class="control collects-buttons" (click)="clearError('legalStatus')">
+      <label>
+        <input
+          class="radio"
+          type="radio"
+          value="South African citizen"
+          (change)="collectMoreDetails(true, 'South African citizen')"
+          name="legalStatus"
+          formControlName="legalStatus"
+          data-test="legal-status-sa-citizen"
+        />
+        I'm a South African citizen
+      </label>
+      <label>
+        <input
+          class="radio"
+          type="radio"
+          value="Permanent resident of South Africa"
+          (change)="
+            collectMoreDetails(true, 'Permanent resident of South Africa')
+          "
+          name="legalStatus"
+          formControlName="legalStatus"
+          data-test="legal-status-permanent-resident"
+        />
+        I'm a permanent resident in South Africa
+      </label>
+      <label>
+        <input
+          class="radio"
+          type="radio"
+          value="Other"
+          (change)="collectMoreDetails(false, 'Other')"
+          name="legalStatus"
+          formControlName="legalStatus"
+          data-test="legal-status-other"
+        />
+        I'm neither a South African citizen nor a permanent resident
+      </label>
+      <label
+        class="invalid-feedback"
+        *ngIf="error.legalStatus"
+        data-test="legal-status-error"
+        >{{ error.legalStatus }}</label
+      >
+    </div>
+    <div *ngIf="collect">
+      <div class="why-collect">
+        <p>
+          We are asking for your gender, race and PhD as the South African
+          Astronomical Observatory is mandated to provide these statistics for
+          SALT users who are a South African citizen or permanent resident. They
+          will only be used for this purpose, and they will only be reported in
+          aggregate form. They will not be shared with anyone else, including
+          the Time Allocation Committees.
+        </p>
+        <p>
+          We are aware that when asking about gender or race, even the options
+          in a form might be contentious. If you feel that our approach, which
+          has been guided by reporting requirements, could be improved, please
+          let us know.
+        </p>
+        <p>
+          Please contact
+          <a href="mailto:salthelp@salt.ac.za">salthelp@salt.ac.za</a> with any
+          questions and concerns you might have.
+        </p>
+      </div>
+      <label class="label">Gender</label>
+      <p class="description">
+        Please select "I'd prefer not to say" if you don't want to divulge your
+        gender.
+      </p>
+      <div class="control" (click)="clearError('gender')">
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            value="Female"
+            formControlName="gender"
+            name="gender"
+            (change)="typeDefinedGender(false)"
+            data-test="gender-female"
+          />
+          Female
+        </label>
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            value="Male"
+            formControlName="gender"
+            name="gender"
+            (change)="typeDefinedGender(false)"
+            data-test="gender-male"
+          />
+          Male
+        </label>
+        <div class="gender-support-input control">
+          <div>
+            <label>
+              <input
+                class="radio"
+                type="radio"
+                name="gender"
+                (change)="typeDefinedGender(true)"
+                data-test="gender-define-type"
+              />
+              I'd rather type myself
+            </label>
+          </div>
+          <div>
+            <input
+              [disabled]="!isSelfDefinedGender"
+              class="input"
+              type="text"
+              #selfDefinedGender
+              (change)="setGender(selfDefinedGender.value)"
+              data-test="gender-type-input"
+            />
+          </div>
+        </div>
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            [value]="'Prefer not to say'"
+            (change)="typeDefinedGender(false)"
+            formControlName="gender"
+            name="gender"
+            data-test="gender-prefer-not-to-say"
+          />
+          I'd prefer not to say
+        </label>
+        <label
+          class="invalid-feedback"
+          *ngIf="error.gender"
+          data-test="gender-error"
+          >{{ error.gender }}</label
+        >
+      </div>
+      <label class="label">Race</label>
+      <p class="description">
+        The options are specific for official reporting in South Africa. Please
+        select "I'd prefer not to say" if you don't want to divulge your race.
+      </p>
+      <div class="control" (click)="clearError('race')">
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            formControlName="race"
+            value="African"
+            data-test="race-african"
+          />
+          African
+        </label>
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            formControlName="race"
+            value="Coloured"
+            data-test="race-coloured"
+          />
+          Coloured
+        </label>
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            formControlName="race"
+            value="Indian"
+            data-test="race-indian"
+          />
+          Indian
+        </label>
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            formControlName="race"
+            value="White"
+            data-test="race-white"
+          />
+          White
+        </label>
+        <label>
+          <input
+            class="radio"
+            type="radio"
+            formControlName="race"
+            [value]="'Prefer not to say'"
+            data-test="race-prefer-not-to-say"
+          />
+          I'd prefer not to say
+        </label>
+        <label
+          class="invalid-feedback"
+          *ngIf="error.race"
+          data-test="race-error"
+          >{{ error.race }}</label
+        >
+      </div>
+
+      <label class="label">PhD</label>
+      <div class="control">
+        <div class="phd-support-input">
+          <div>
+            <label>
+              <input
+                class="radio"
+                type="radio"
+                (change)="hasPhd(true)"
+                name="phdYear"
+                data-test="has-phd"
+              />
+              I have a PhD and I completed it in the year
+            </label>
+          </div>
+          <div class="select">
+            <select
+              #phdYearSelector
+              (change)="setPhdYear(phdYearSelector.value)"
+              [attr.disabled]="!isTypePhdYear ? '' : null"
+              data-test="phd-year"
+            >
+              <option [value]="null">Select</option>
+              <option *ngFor="let year of years" [value]="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label>
+            <input
+              class="radio"
+              type="radio"
+              formControlName="phdYear"
+              name="phdYear"
+              [value]="null"
+              (change)="hasPhd(false)"
+              data-test="has-no-phd"
+            />
+            I do not have a PhD
+          </label>
+        </div>
+        <div>
+          <label
+            class="invalid-feedback"
+            *ngIf="error.phd"
+            data-test="has-phd-error"
+            >{{ error.phd }}</label
+          >
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

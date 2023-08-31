@@ -1,0 +1,27 @@
+.is-blue {
+  color: blue;
+}
+.is-red {
+  color: red;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.1em;
+  padding-bottom: 0;
+}
+
+.wrapper div {
+  display: inline-block;
+  padding-right: 1em;
+  padding-bottom: 0;
+  vertical-align: top;
+}
+.wrapper div:nth-child(even) {
+  font-weight: lighter;
+}
+
+:host {
+  display: contents;
+}

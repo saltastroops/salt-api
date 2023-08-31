@@ -2,24 +2,10 @@ import { ChangePasswordPage } from "../../support/pages/login/change-password-pa
 import {
   forceNetworkError,
   forceServerError,
-  getApiUrl,
   interceptIndefinitely,
 } from "../../support/utils";
 
-const apiUrl = getApiUrl();
-
-// load and register the grep feature using "require" function
-// https://github.com/cypress-io/cypress-grep
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const registerCypressGrep = require("cypress-grep");
-registerCypressGrep();
-
 describe("Change password page", () => {
-  beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-  });
   it("should show an error if the form is submitted without any input", () => {
     ChangePasswordPage.visit("some-token");
     ChangePasswordPage.submit();
@@ -88,18 +74,12 @@ describe("Change password page", () => {
     ChangePasswordPage.hasGenericError();
   });
 
-  it(
-    "should show a meaningful error if the password is changed with an invalid token",
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    { tags: "@skip" },
-    () => {
-      ChangePasswordPage.visit("invalid-token");
-      ChangePasswordPage.changePassword("new-password");
-      ChangePasswordPage.hasAuthenticationError();
-      ChangePasswordPage.isNotLoading();
-    },
-  );
+  it("should show a meaningful error if the password is changed with an invalid token", () => {
+    ChangePasswordPage.visit("invalid-token");
+    ChangePasswordPage.changePassword("new-password");
+    ChangePasswordPage.hasAuthenticationError();
+    ChangePasswordPage.isNotLoading();
+  });
 
   it("should show a loading indicator while the password is being changed", () => {
     interceptIndefinitely("user");

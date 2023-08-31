@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { Investigators } from "../../support/components/investigators";
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
@@ -11,14 +13,6 @@ describe("Investigators", () => {
   const PROPOSAL_CODE = "2019-2-SCI-006";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login as the investigator
       LoginPage.visit();
@@ -27,6 +21,8 @@ describe("Investigators", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should show investigator's proposal approval status column for investigators", () => {
@@ -46,10 +42,11 @@ describe("Investigators", () => {
 
   it("should update approval status when the investigator click on their status button", () => {
     Investigators.clickApprovalButton(3);
-    Investigators.approvalStatusButtonUpdatedWithStatus(3, "Reject");
-    cy.wait(1500);
-    Investigators.clickApprovalButton(3);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     Investigators.approvalStatusButtonUpdatedWithStatus(3, "Accept");
+    Investigators.clickApprovalButton(3);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
+    Investigators.approvalStatusButtonUpdatedWithStatus(3, "Reject");
   });
 });
 
@@ -58,22 +55,16 @@ describe("Investigators - administrators", () => {
   const PROPOSAL_CODE = "2019-1-SCI-014";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
-
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
-      // When I login as the adminstrator
+      // When I log in as the administrator
       LoginPage.visit();
       LoginPage.login(USERNAME, password);
     });
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should show investigator's proposal approval status button for administrator", () => {
@@ -89,9 +80,10 @@ describe("Investigators - administrators", () => {
 
   it("should update approval status when an administrator clicks on any status button for any investigator", () => {
     Investigators.clickApprovalButton(0);
-    Investigators.approvalStatusButtonUpdatedWithStatus(0, "Reject");
-    cy.wait(1500);
-    Investigators.clickApprovalButton(0);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
     Investigators.approvalStatusButtonUpdatedWithStatus(0, "Accept");
+    Investigators.clickApprovalButton(0);
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
+    Investigators.approvalStatusButtonUpdatedWithStatus(0, "Reject");
   });
 });

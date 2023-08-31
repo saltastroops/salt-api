@@ -36,22 +36,26 @@
   </thead>
 
   <tbody>
-    <tr *ngFor="let t of phase1Targets">
-      <td>{{ t.name }}</td>
-      <td>{{ degreeToHMS(t.coordinates?.rightAscension || 0) }}</td>
-      <td>{{ degreesToDms(t.coordinates?.declination || 0) }}</td>
-      <td>{{ t.coordinates?.equinox || 2000 }}</td>
+    <tr *ngFor="let o of observations">
+      <td>{{ o.target.name }}</td>
+      <td>{{ degreeToHMS(o.target.coordinates?.rightAscension || 0) }}</td>
+      <td>{{ degreesToDms(o.target.coordinates?.declination || 0) }}</td>
+      <td>{{ o.target.coordinates?.equinox || 2000 }}</td>
       <td>
         {{
-          t.magnitude?.minimumMagnitude + " - " + t.magnitude?.maximumMagnitude
+          o.target.magnitude?.minimumMagnitude +
+            " - " +
+            o.target.magnitude?.maximumMagnitude
         }}
       </td>
       <td>
         {{
-          t.targetType ? t.targetType.type + " - " + t.targetType.subtype : ""
+          o.target.targetType
+            ? o.target.targetType.type + " - " + o.target.targetType.subtype
+            : ""
         }}
       </td>
-      <td *ngIf="t.isOptional">
+      <td *ngIf="o.isOptional">
         <div>
           <img
             class="icon is-small"
@@ -60,7 +64,7 @@
           />
         </div>
       </td>
-      <td *ngIf="!t.isOptional">
+      <td *ngIf="!o.isOptional">
         <div>
           <img
             class="icon is-small"
@@ -69,17 +73,17 @@
           />
         </div>
       </td>
-      <td>{{ t.requestedObservations }}</td>
-      <td>{{ t.observingTime }}</td>
-      <td>{{ t.maxLunarPhase }}</td>
-      <td>{{ t.ranking }}</td>
-      <td>{{ t.trackCount }}</td>
-      <td>{{ t.nightCount }}</td>
-      <td>{{ t.observingProbabilities.moon }}</td>
-      <td>{{ t.observingProbabilities.competition }}</td>
-      <td>{{ t.observingProbabilities.observability }}</td>
-      <td>{{ t.observingProbabilities.seeing }}</td>
-      <td>{{ t.observingProbabilities.total }}</td>
+      <td>{{ o.requestedObservations }}</td>
+      <td>{{ o.observingTime }}</td>
+      <td>{{ o.maxLunarPhase }}</td>
+      <td>{{ o.ranking }}</td>
+      <td>{{ o.trackCount }}</td>
+      <td>{{ o.nightCount }}</td>
+      <td>{{ o.observingProbabilities.moon }}</td>
+      <td>{{ o.observingProbabilities.competition }}</td>
+      <td>{{ o.observingProbabilities.observability }}</td>
+      <td>{{ o.observingProbabilities.seeing }}</td>
+      <td>{{ o.observingProbabilities.total }}</td>
     </tr>
   </tbody>
 </table>

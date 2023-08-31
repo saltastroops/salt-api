@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from "@angular/common";
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { APP_INITIALIZER, ErrorHandler, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -18,6 +19,8 @@ import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
 import { LoginComponent } from "./login/login.component";
+import { SaFormComponent } from "./login/sa-form/sa-form.component";
+import { SwitchUserComponent } from "./login/switch-user/switch-user.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosLegendComponent } from "./mos/legend/mos-legend.component";
 import { MosBlocksTableComponent } from "./mos/mos-blocks-table/mos-blocks-table.component";
@@ -33,6 +36,7 @@ import { BlockSelectionComponent } from "./proposal/blocks/block-view/block-sele
 import { BlockViewComponent } from "./proposal/blocks/block-view/block-view.component";
 import { BlockComponent } from "./proposal/blocks/block/block.component";
 import { EditBlockStatusModalComponent } from "./proposal/blocks/block/edit-block-status-modal/edit-block-status-modal.component";
+import { FinderChartViewComponent } from "./proposal/blocks/block/finder-chart-view/finder-chart-view.component";
 import { IterationsComponent } from "./proposal/blocks/block/iterations/iterations.component";
 import { ObservationProbabilitiesComponent } from "./proposal/blocks/block/observation-probabilities/observation-probabilities.component";
 import { ObservingConditionsComponent } from "./proposal/blocks/block/observing-conditions/observing-conditions.component";
@@ -57,6 +61,7 @@ import { ProgressRequestFormComponent } from "./proposal/general/proposal-progre
 import { ProposalProgressComponent } from "./proposal/general/proposal-progress/proposal-progress.component";
 import { RequestedObservingConditionsComponent } from "./proposal/general/proposal-progress/requested-observing-conditions/requested-observing-conditions.component";
 import { SubmittedTimeRequestsComponent } from "./proposal/general/proposal-progress/submitted-time-requests/submitted-time-requests.component";
+import { DownloadObservationsModalComponent } from "./proposal/general/summary-of-executed-observations/download-observations-modal/download-observations-modal.component";
 import { SummaryOfExecutedObservationsComponent } from "./proposal/general/summary-of-executed-observations/summary-of-executed-observations.component";
 import { TimeAllocationsTableComponent } from "./proposal/general/time-allocations-table/time-allocations-table.component";
 import { BvitComponent } from "./proposal/instruments/bvit/bvit.component";
@@ -73,8 +78,8 @@ import { NirComponent } from "./proposal/instruments/nir/nir.component";
 import { ArcBibleComponent } from "./proposal/instruments/rss/arc-bible/arc-bible.component";
 import { EtalonWavelengthsComponent } from "./proposal/instruments/rss/etalon-wavelengths/etalon-wavelengths.component";
 import { FabryPerotComponent } from "./proposal/instruments/rss/fabry-perot/fabry-perot.component";
+import { ImagingComponent } from "./proposal/instruments/rss/imaging/imaging.component";
 import { MosSlitMaskComponent } from "./proposal/instruments/rss/mos-slit-mask/mos-slit-mask.component";
-import { PolarimetricImagingComponent } from "./proposal/instruments/rss/polarimetric-imaging/polarimetric-imaging.component";
 import { PolarimetryComponent } from "./proposal/instruments/rss/polarimetry/polarimetry.component";
 import { RssCalibrationComponent } from "./proposal/instruments/rss/rss-calibration/rss-calibration.component";
 import { RssDetectorComponent } from "./proposal/instruments/rss/rss-detector/rss-detector.component";
@@ -90,9 +95,9 @@ import { SalticamComponent } from "./proposal/instruments/salticam/salticam.comp
 import { InvestigatorsComponent } from "./proposal/investigators/investigators.component";
 import { P1ConfigurationsComponent } from "./proposal/p1-details/p1-configurations/p1-configurations.component";
 import { P1DetailsComponent } from "./proposal/p1-details/p1-details.component";
+import { P1ObservationsComponent } from "./proposal/p1-details/p1-observations/p1-observations.component";
 import { PhaseOneProposalDetailsTableComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details-table/phase-one-proposal-details-table.component";
 import { PhaseOneProposalDetailsComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details.component";
-import { PhaseOneTargetComponent } from "./proposal/p1-details/phase-one-target/phase-one-target.component";
 import { StudentThesesComponent } from "./proposal/p1-details/students-theses/student-theses.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RequestedTimesComponent } from "./proposal/requested-time/requested-times.component";
@@ -110,11 +115,19 @@ import { RealProposalService } from "./service/real/real-proposal.service";
 import { ErrorIndicatorComponent } from "./shared/error-indicator/error-indicator.component";
 import { LoadingIndicatorComponent } from "./shared/loading-indicator/loading-indicator.component";
 import { LoadingSpinnerComponent } from "./shared/loading-spinner/loading-spinner.component";
+import { ModalComponent } from "./shared/modal/modal.component";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SmallLoadingSpinnerComponent } from "./shared/small-loading-spinner/small-loading-spinner.component";
+import { AcquisitionTableComponent } from "./so-page/aquisition-table/acquisition-table.component";
+import { GeneralTableComponent } from "./so-page/general-table/general-table.component";
+import { HrsConfigRowComponent } from "./so-page/instrument-config-table/hrs-config-row/hrs-config-row.component";
+import { InstrumentConfigTableComponent } from "./so-page/instrument-config-table/instrument-config-table.component";
+import { NirConfigRowComponent } from "./so-page/instrument-config-table/nir-config-row/nir-config-row.component";
+import { RssConfigRowComponent } from "./so-page/instrument-config-table/rss-config-row/rss-config-row.component";
+import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/salticam-config-row/salticam-config-row.component";
+import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
-import { DownloadObservationsModalComponent } from './proposal/general/summary-of-executed-observations/download-observations-modal/download-observations-modal.component';
 
 @NgModule({
   declarations: [
@@ -163,7 +176,7 @@ import { DownloadObservationsModalComponent } from './proposal/general/summary-o
     SalticamDetectorComponent,
     SalticamFiltersComponent,
     PolarimetryComponent,
-    PolarimetricImagingComponent,
+    ImagingComponent,
     EtalonWavelengthsComponent,
     FabryPerotComponent,
     LoginComponent,
@@ -180,6 +193,10 @@ import { DownloadObservationsModalComponent } from './proposal/general/summary-o
     SortByArgsPipe,
     ObsoleteMasksComponent,
     PageMissingComponent,
+    SoPageComponent,
+    GeneralTableComponent,
+    AcquisitionTableComponent,
+    InstrumentConfigTableComponent,
     ManageUserProfileComponent,
     SmallLoadingSpinnerComponent,
     ProposalProgressComponent,
@@ -197,7 +214,6 @@ import { DownloadObservationsModalComponent } from './proposal/general/summary-o
     SortDirective,
     SortByDirective,
     P1DetailsComponent,
-    PhaseOneTargetComponent,
     PhaseOneProposalDetailsComponent,
     ProposalSummaryComponent,
     ProposalDownloadComponent,
@@ -214,7 +230,16 @@ import { DownloadObservationsModalComponent } from './proposal/general/summary-o
     SelfActivateComponent,
     ProposalStatusComponent,
     LiaisonAstronomerModalComponent,
+    SwitchUserComponent,
     DownloadObservationsModalComponent,
+    NirConfigRowComponent,
+    SalticamConfigRowComponent,
+    RssConfigRowComponent,
+    HrsConfigRowComponent,
+    P1ObservationsComponent,
+    FinderChartViewComponent,
+    SaFormComponent,
+    ModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -225,6 +250,7 @@ import { DownloadObservationsModalComponent } from './proposal/general/summary-o
     ReactiveFormsModule,
     TooltipModule,
     DateFnsModule.forRoot(),
+    NgOptimizedImage,
   ],
   providers: [
     CookieService,

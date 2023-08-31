@@ -1,6 +1,6 @@
 import { BlockSummary, Transparency } from "./block";
 import { BlockVisit, PartnerCode, PartnerName } from "./common";
-import { Phase1Target } from "./target";
+import { Phase1Observation } from "./target";
 
 export interface Affiliation {
   partnerName: PartnerName;
@@ -93,7 +93,7 @@ export interface Proposal {
   semester: string;
   generalInfo: GeneralProposalInfo;
   investigators: Investigator[];
-  targets: Phase1Target[] | null;
+  observations: Phase1Observation[] | null;
   requestedTimes: RequestedTime[];
   blocks: BlockSummary[];
   blockVisits: BlockVisit[];
@@ -116,6 +116,7 @@ export interface ProposalListItem {
   principalInvestigator: ProposalUser;
   principalContact: ProposalUser;
   liaisonAstronomer: ProposalUser | null;
+  isUserAnInvestigator: boolean;
 }
 
 export type ProposalStatusValue =
@@ -143,6 +144,7 @@ export type ProposalType =
   | "Gravitational Wave Event"
   | "Key Science Program"
   | "Large Science Proposal"
+  | "OPTICON-Radionet Pilot"
   | "Science"
   | "Science - Long Term"
   | "Science Verification";
@@ -196,6 +198,11 @@ export interface TimeStatistics {
 }
 
 export type ProgressReportsUrls = { [key: string]: { [key: string]: string } };
+
+export interface ProposalProgressReport {
+  semester: string;
+  url: string;
+}
 
 export interface NewProprietaryPeriod extends ProprietaryPeriod {
   status: string;

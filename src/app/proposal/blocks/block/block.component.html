@@ -2,6 +2,73 @@
 <hr class="heading-line block-header" />
 
 <div class="block">
+  <div>
+    <wm-edit-block-status-modal
+      #blockStatusModal
+      (blockStatusUpdate)="updateBlockStatus($event)"
+    ></wm-edit-block-status-modal>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th
+            *ngIf="
+              showEditBlockButton &&
+              (block.status.value === 'Active' ||
+                block.status.value === 'On hold')
+            "
+          >
+            Edit
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr [ngClass]="blockClass(block)">
+          <td data-test="block-status">
+            {{ block.status.value }}
+          </td>
+          <td
+            *ngIf="
+              showEditBlockButton &&
+              (block.status.value === 'Active' ||
+                block.status.value === 'On hold')
+            "
+            class="has-text-centered"
+          >
+            <button
+              class="button"
+              (click)="
+                blockStatusModal.openModal(
+                  block.id,
+                  block.status.value,
+                  block.status.reason
+                )
+              "
+              data-test="edit-block-status-button"
+              [ngClass]="blockClass(block)"
+            >
+              Edit
+            </button>
+          </td>
+        </tr>
+        <tr [ngClass]="blockClass(block)">
+          <td>
+            <b>
+              The block was last submitted with major changes on
+              {{ latestSubmissionDate | dfnsFormat: "dd LLLL yyyy" }}.
+            </b>
+          </td>
+          <td
+            *ngIf="
+              showEditBlockButton &&
+              (block.status.value === 'Active' ||
+                block.status.value === 'On hold')
+            "
+          ></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   <wm-observing-conditions [block]="block"></wm-observing-conditions>
   <div class="inline-view">
     <wm-iterations [block]="block"></wm-iterations>
@@ -12,26 +79,12 @@
       [overhead]="block.overheadTime"
       [totalObservationTime]="block.observationTime"
     ></wm-total-observation-time>
-    <div class="priority-comment-status">
-      <wm-edit-block-status-modal
-        #blockStatusModal
-        (blockStatusUpdate)="updateBlockStatus($event)"
-      ></wm-edit-block-status-modal>
+    <div>
       <table class="table">
         <thead>
           <tr>
             <th>Priority</th>
             <th>Comments</th>
-            <th>Status</th>
-            <th
-              *ngIf="
-                showEditBlockButton &&
-                (block.status.value === 'Active' ||
-                  block.status.value === 'On hold')
-              "
-            >
-              Edit
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -39,37 +92,6 @@
             <td>{{ block.priority }}</td>
             <td>
               <p [innerHTML]="block.comment | nl2br"></p>
-            </td>
-            <td data-test="block-status">{{ block.status.value }}</td>
-            <td
-              *ngIf="
-                showEditBlockButton &&
-                (block.status.value === 'Active' ||
-                  block.status.value === 'On hold')
-              "
-              class="has-text-centered"
-            >
-              <button
-                class="button"
-                (click)="
-                  blockStatusModal.openModal(
-                    block.id,
-                    block.status.value,
-                    block.status.reason
-                  )
-                "
-                data-test="edit-block-status-button"
-              >
-                Edit
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4">
-              <b>
-                The block was last submitted with major changes on
-                {{ latestSubmissionDate | dfnsFormat: "dd LLLL yyyy" }}.
-              </b>
             </td>
           </tr>
         </tbody>
@@ -108,13 +130,30 @@
             data-test="finder-chart"
           >
             <td>
-              <a href="{{ originalFinderChartURL(c) }}">
+              <a
+                *ngIf="originalFinderChartURL(c); else finderChartNotFound"
+                [routerLink]="['/finder-chart-view']"
+                [queryParams]="{
+                  finderChart: originalFinderChartURL(c),
+                  positionAngle:
+                    block.observations[0].telescopeConfigurations[0]
+                      .positionAngle || 0
+                }"
+                target="_blank"
+              >
                 <img
                   src="{{ thumbnailFinderChartURL(c) }}"
                   alt="Finding chart"
                   class="image is-128x128"
                 />
               </a>
+              <ng-template #finderChartNotFound>
+                <img
+                  src="{{ thumbnailFinderChartURL(c) }}"
+                  alt="Finding chart"
+                  class="image is-128x128"
+                />
+              </ng-template>
             </td>
             <td>
               <p

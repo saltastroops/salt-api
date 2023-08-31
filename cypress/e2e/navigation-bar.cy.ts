@@ -5,12 +5,9 @@ import { User } from "../support/types";
 import {
   forceNetworkError,
   forceServerError,
-  getApiUrl,
   getEnvVariable,
   interceptIndefinitely,
 } from "../support/utils";
-
-const apiUrl = getApiUrl();
 
 const USERNAME = getEnvVariable("defaultUsername");
 const ADMINISTRATOR = getEnvVariable("administrator");
@@ -18,24 +15,10 @@ const INVESTIGATOR = getEnvVariable("investigator");
 const SALT_ASTRONOMER = getEnvVariable("saltAstronomerUsername");
 const TAC_MEMBER = getEnvVariable("tacMember");
 
-// load and register the grep feature using "require" function
-// https://github.com/cypress-io/cypress-grep
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const registerCypressGrep = require("cypress-grep");
-registerCypressGrep();
-
 describe("Inline login form", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
-
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
   });
 
   it("should give an error if the username is missing", () => {
@@ -79,24 +62,18 @@ describe("Inline login form", () => {
     NavigationBar.hasUsernameOrPasswordError();
   });
 
-  it(
-    "should log the user in if the username and password are valid",
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    { tags: "@skip" },
-    () => {
-      cy.task("updateUserPassword", USERNAME).then((password: string) => {
-        cy.task("getUser", USERNAME).then((user: User) => {
-          HomePage.visit();
-          NavigationBar.typeUsername(USERNAME);
-          NavigationBar.typePassword(password);
-          NavigationBar.submitLogin();
-          NavigationBar.hasNoLoginForm();
-          NavigationBar.hasWelcomeMessage(user.givenName);
-        });
+  it("should log the user in if the username and password are valid", () => {
+    cy.task("updateUserPassword", USERNAME).then((password: string) => {
+      cy.task("getUser", USERNAME).then((user: User) => {
+        HomePage.visit();
+        NavigationBar.typeUsername(USERNAME);
+        NavigationBar.typePassword(password);
+        NavigationBar.submitLogin();
+        NavigationBar.hasNoLoginForm();
+        NavigationBar.hasWelcomeMessage(user.givenName);
       });
-    },
-  );
+    });
+  });
 
   it("should indicate a loading state until a successful login request finishes", () => {
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
@@ -132,14 +109,6 @@ describe("Navigation bar", () => {
   beforeEach(() => {
     // Ensure the inline login form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
-
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
   });
 
   it("should show all tabs for admin", () => {
@@ -223,14 +192,6 @@ describe("Go to proposal form", () => {
   beforeEach(() => {
     // Ensure the form is not hidden because of a small screen size
     cy.viewport(1500, 2000);
-
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
 
     cy.task("updateUserPassword", SALT_ASTRONOMER).then((password: string) => {
       // When I login

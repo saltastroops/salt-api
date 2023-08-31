@@ -14,8 +14,12 @@ select {
   align-content: center;
 }
 
-.modal-card-head,
-.modal-card-body,
-.modal-card-foot {
+input {
+  padding-bottom: 0;
+}
+
+.input-section {
   width: 300px;
+  padding: 0;
+  margin-bottom: 20px;
 }

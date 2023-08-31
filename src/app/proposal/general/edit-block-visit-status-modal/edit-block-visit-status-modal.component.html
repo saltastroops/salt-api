@@ -1,103 +1,63 @@
-<div *ngIf="isModalActive">
-  <form
-    data-test="block-visit-status-modal"
-    class="modal"
-    [ngClass]="isModalActive ? 'is-active' : ''"
+<wm-modal
+  [title]="modalTitle"
+  [loading]="loading"
+  [isModalActive]="isModalActive"
+  [error]="error"
+  (closeModal)="closeModal()"
+  (submitContent)="submitBlockVisitStatus()"
+  data-test="block-visit-status-modal"
+>
+  <div
+    [formGroup]="editBlockVisitStatusForm"
+    (ngSubmit)="submitBlockVisitStatus()"
   >
-    <div class="modal-background" (click)="closeModal()"></div>
-    <div class="modal-content">
-      <div class="modal-card">
-        <div>
-          <header class="modal-card-head">
-            <p class="modal-card-title">Edit block visit status</p>
-            <button
-              class="delete"
-              aria-label="close"
-              (click)="closeModal()"
-            ></button>
-          </header>
-          <div
-            class="modal-card-body"
-            [formGroup]="editBlockVisitStatusForm"
-            (ngSubmit)="submitBlockVisitStatus()"
-          >
-            <div class="form-group input-section">
-              <label class="label">Block status</label>
-              <select
-                #status
-                (ngModelChange)="clearError()"
-                formControlName="blockVisitStatus"
-                (change)="onBlockVisitStatusSelect(status.value)"
-                data-test="block-visit-status-value"
-              >
-                <option selected="selected" disabled="disabled" value="null">
-                  Please select a status
-                </option>
-                <option value="Accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-            <div *ngIf="f.blockVisitStatus.value === 'Rejected'">
-              <div class="form-group input-section">
-                <label class="label">Block rejection reason</label>
-                <select
-                  (ngModelChange)="clearError()"
-                  formControlName="rejectionReason"
-                  data-test="block-rejection-reason"
-                >
-                  <option selected="selected" disabled="disabled" value="null">
-                    Please select a reason
-                  </option>
-                  <option value="Instrument technical problems">
-                    Instrument technical problems
-                  </option>
-                  <option value="Observing conditions not met">
-                    Observing conditions not met
-                  </option>
-                  <option value="Telescope technical problems">
-                    Telescope technical problems
-                  </option>
-                  <option value="Other">Other</option>
-                </select>
-                <div
-                  *ngIf="f.rejectionReason.touched && editBlockVisitStatusForm.errors?.['required']"
-                  class="invalid-feedback"
-                >
-                  <div class="has-text-danger" data-test="error">
-                    The block rejection reason is required
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div *ngIf="error" class="invalid-feedback">
-              <div class="has-text-danger" data-test="error">
-                {{ error }}
-              </div>
-            </div>
-          </div>
-          <div class="modal-card-foot">
-            <input
-              type="submit"
-              class="button is-small is-primary"
-              [ngClass]="{ 'is-loading': loading }"
-              value="Submit"
-              (click)="submitBlockVisitStatus()"
-              data-test="submit-block-visit-status"
-            />
-            <input
-              type="button"
-              class="button is-small is-danger pl-4"
-              value="Cancel"
-              (click)="closeModal()"
-            />
+    <div class="form-group input-section">
+      <label class="label">Block visit status</label>
+      <select
+        #status
+        (ngModelChange)="clearError()"
+        formControlName="blockVisitStatus"
+        (change)="onBlockVisitStatusSelect(status.value)"
+        data-test="block-visit-status-value"
+      >
+        <option selected="selected" disabled="disabled" value="null">
+          Please select a status
+        </option>
+        <option value="Accepted">Accepted</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+    <div *ngIf="f.blockVisitStatus.value === 'Rejected'">
+      <div class="form-group input-section">
+        <label class="label">Block rejection reason</label>
+        <select
+          (ngModelChange)="clearError()"
+          formControlName="rejectionReason"
+          data-test="block-rejection-reason"
+        >
+          <option selected="selected" disabled="disabled" value="null">
+            Please select a reason
+          </option>
+          <option value="Instrument technical problems">
+            Instrument technical problems
+          </option>
+          <option value="Observing conditions not met">
+            Observing conditions not met
+          </option>
+          <option value="Telescope technical problems">
+            Telescope technical problems
+          </option>
+          <option value="Other">Other</option>
+        </select>
+        <div
+          *ngIf="f.rejectionReason.touched && editBlockVisitStatusForm.errors?.['required']"
+          class="invalid-feedback"
+        >
+          <div class="has-text-danger" data-test="error">
+            The block rejection reason is required
           </div>
         </div>
       </div>
     </div>
-    <button
-      class="modal-close is-large"
-      aria-label="close"
-      (click)="closeModal()"
-    ></button>
-  </form>
-</div>
+  </div>
+</wm-modal>

@@ -1,0 +1,13 @@
+.control-loading {
+  display: inline-block;
+  padding-bottom: 1em;
+  padding-left: 3em;
+}
+
+.control.is-loading::after {
+  border-right-color: #00000061;
+}
+
+.invalid-feedback {
+  font-size: 1em;
+}

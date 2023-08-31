@@ -48,4 +48,6 @@ export abstract class AuthenticationService {
   ): Observable<Message>;
 
   public abstract getUser(): Observable<User>;
+
+  public abstract switchUser(username: string): Observable<void>;
 }

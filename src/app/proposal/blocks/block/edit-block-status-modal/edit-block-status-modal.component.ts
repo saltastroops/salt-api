@@ -17,6 +17,7 @@ import { AutoUnsubscribe } from "../../../../utils";
 })
 @AutoUnsubscribe()
 export class EditBlockStatusModalComponent {
+  readonly modalTitle = "Edit block status";
   @Output() blockStatusUpdate = new EventEmitter<{
     blockId: number;
     value: BlockStatusValue;
@@ -45,6 +46,7 @@ export class EditBlockStatusModalComponent {
 
   closeModal(): void {
     this.isModalActive = false;
+    this.loading = false;
   }
 
   openModal(
@@ -53,8 +55,11 @@ export class EditBlockStatusModalComponent {
     statusReason: string | null,
   ): void {
     this.isModalActive = true;
+    this.loading = false;
+
     this.blockId = blockId;
     const statusInOptions = blockStatus == "Active" || blockStatus == "On hold";
+
     this.editBlockStatusForm.patchValue({
       blockStatus: statusInOptions ? blockStatus : null,
       statusReason: statusReason,

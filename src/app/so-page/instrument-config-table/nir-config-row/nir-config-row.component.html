@@ -1,0 +1,41 @@
+<tr *ngFor="let step of nirConfig.ditherSteps; let i = index">
+  <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">NIR</td>
+  <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">
+    {{ nirConfig.configurationType }}
+  </td>
+  <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">
+    {{ nirConfig.exposureType }}
+  </td>
+  <td>{{ step.exposureTime }}</td>
+  <td>{{ secondsToHhMmSs(step.exposureTime) }}</td>
+  <td>{{ step.iterations }}</td>
+  <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">
+    {{ nirConfig.cycles }}
+  </td>
+  <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">
+    {{ nirConfig.grating }}
+  </td>
+  <td></td>
+  <td>
+    <div class="wrapper">
+      <div>Step Number:</div>
+      <div>{{ i + 1 }}</div>
+    </div>
+    <div *ngIf="nirConfig.gratingAngle" class="wrapper">
+      <div>Grating Angle:</div>
+      <div>{{ nirConfig.gratingAngle }}&deg;</div>
+    </div>
+    <div *ngIf="nirConfig.filter" class="wrapper">
+      <div>Filter:</div>
+      <div>{{ nirConfig.filter }}</div>
+    </div>
+    <div class="wrapper">
+      <div>Procedure Type:</div>
+      <div>{{ nirConfig.procedureType }}</div>
+      <div>Offset Type:</div>
+      <div>{{ step.offsetType }}</div>
+      <div>Offset:</div>
+      <div>{{ step.offset.x }}″, {{ step.offset.y }}″</div>
+    </div>
+  </td>
+</tr>

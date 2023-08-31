@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import { LoginPage } from "../../support/pages/login/login-page";
 import { ProposalPage } from "../../support/pages/proposal-page";
 import {
@@ -14,9 +16,9 @@ const PROPOSAL_CODE = "2020-1-DDT-009";
 
 describe("Proposal loading", () => {
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
+    cy.intercept(apiUrl + "/login").as("login");
 
-    cy.recordHttp(apiUrl + "/user").as("user");
+    cy.intercept(apiUrl + "/proposals/**").as("proposals");
 
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
@@ -34,10 +36,8 @@ describe("Proposal loading", () => {
   });
 
   it("should not be indicated any longer after loading is complete", () => {
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
     ProposalPage.visit(PROPOSAL_CODE);
-    cy.wait("@proposals");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     cy.get(".loading").should("not.exist");
   });

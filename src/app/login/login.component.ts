@@ -67,7 +67,7 @@ export class LoginComponent implements OnInit {
             queryParams: redirectQueryParams,
           });
         },
-        (error: { status: number }) => {
+        (error) => {
           // The HTTP request for a token is not intercepted, and hence there may be an
           // error response with status code 401.
           if (error.status === 401) {

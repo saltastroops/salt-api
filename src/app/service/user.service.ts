@@ -57,6 +57,11 @@ export class UserService {
       given_name: user.givenName,
       family_name: user.familyName,
       institution_id: user.institutionId,
+      legal_status: user.legalStatus,
+      gender: user.gender,
+      race: user.race,
+      has_phd: user.hasPhd,
+      year_of_phd_completion: user.yearOfPhdCompletion,
     };
 
     return this.http

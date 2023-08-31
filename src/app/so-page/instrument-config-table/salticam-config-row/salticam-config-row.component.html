@@ -1,0 +1,54 @@
+<tr
+  *ngFor="let s of salticamConfig.exposures; let i = index"
+  [ngClass]="{ 'light-strip': instrumentConfig.payloadConfigIndex % 2 === 0 }"
+>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.instrumentName }}
+  </td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.configurationType }}
+  </td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.exposureType }}
+  </td>
+  <td>{{ s.time }}</td>
+  <td>{{ secondsToHhMmSs(s.time) }}</td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.iterations }}
+  </td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.cycles }}
+  </td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length"></td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.gain }}
+  </td>
+  <td>
+    <div *ngIf="salticamConfig.mode" class="wrapper">
+      <div>Mode:</div>
+      <div>{{ salticamConfig.mode }}</div>
+    </div>
+    <div *ngIf="s.filter" class="wrapper">
+      <div>Filter:</div>
+      <div>
+        {{ s.filter }}
+      </div>
+    </div>
+    <div *ngIf="salticamConfig.lamp" class="wrapper">
+      <div>Lamp:</div>
+      <div>
+        {{ salticamConfig.lamp }}
+      </div>
+    </div>
+    <div class="wrapper">
+      <div>Binning (spatial × spectral):</div>
+      <div>
+        {{
+          salticamConfig.binning.preBinnedRows.toString() +
+            "×" +
+            salticamConfig.binning.preBinnedColumns.toString()
+        }}
+      </div>
+    </div>
+  </td>
+</tr>

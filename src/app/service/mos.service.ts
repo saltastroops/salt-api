@@ -43,13 +43,13 @@ export class MosService {
   }
 
   getMosMasksInMagazine(): Observable<string[]> {
-    const uri = environment.apiUrl + "/rss/masks-in-magazine?mask_type=MOS";
+    const uri = environment.apiUrl + "/rss/masks-in-magazine?mask-type=MOS";
     return this.http.get<string[]>(uri);
   }
 
   getObsoleteRssMasks(): Observable<string[]> {
     const uri =
-      environment.apiUrl + "/rss/obsolete-masks-in-magazine?mask_type=MOS";
+      environment.apiUrl + "/rss/obsolete-masks-in-magazine?mask-type=MOS";
     return this.http.get<string[]>(uri);
   }
 

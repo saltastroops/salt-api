@@ -1,7 +1,7 @@
 export interface Nir {
   id: number;
   configuration: NirConfiguration;
-  procedure: NirProcedure | null;
+  procedure: NirProcedure;
   observationTime: number;
   overheadTime: number;
 }
@@ -35,7 +35,7 @@ export interface NirDitherStep {
   offset: NirDitherOffset;
   offsetType: NirOffsetType;
   detector: NirDetector;
-  exposureType: string;
+  exposureType: NirExposureType;
 }
 
 export interface NirDitherOffset {
@@ -57,6 +57,14 @@ export type NirOffsetType =
   | "Bundle Separation Offset"
   | "Tracker Guided Offset"
   | "Unguided Offset";
+
+export type NirExposureType =
+  | "Arc"
+  | "Bias"
+  | "Dark"
+  | "Flat Field"
+  | "Science"
+  | "Sky";
 
 export type NirSamplingMode = "Normal" | "Focus";
 

@@ -1,3 +1,5 @@
+import "cypress-network-idle";
+
 import {
   FORBIDDEN_MESSAGE,
   GENERIC_ERROR_MESSAGE,
@@ -22,13 +24,6 @@ describe("Observation comments", () => {
   const PROPOSAL_CODE = "2020-1-SCI-007";
 
   beforeEach(() => {
-    cy.recordHttp(apiUrl + "/login").as("login");
-
-    cy.recordHttp(apiUrl + "/user").as("user");
-
-    cy.recordHttp(apiUrl + "/proposals/**").as("proposals");
-
-    cy.recordHttp(apiUrl + "/blocks/**").as("blocks");
     cy.task("updateUserPassword", USERNAME).then((password: string) => {
       // When I login
       LoginPage.visit();
@@ -37,6 +32,8 @@ describe("Observation comments", () => {
 
     // And I visit a proposal page
     ProposalPage.visit(PROPOSAL_CODE);
+
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
   });
 
   it("should show an error if all typed comment text is removed again", () => {
@@ -194,6 +191,7 @@ describe("Observation comments", () => {
 
     // When I add an observation comment
     ObservationComments.addComment("This is the first comment");
+    cy.waitForNetworkIdle(apiUrl + "/*", "*", 2000);
 
     // Then the new comment is displayed
     cy.get('[data-test="observation-comment"]').should("have.length", 1);

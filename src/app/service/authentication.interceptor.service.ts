@@ -13,6 +13,7 @@ import { catchError } from "rxjs/operators";
 import {
   FORBIDDEN_MESSAGE,
   GENERIC_ERROR_MESSAGE,
+  NOT_FOUND_MESSAGE,
   NOT_LOGGED_IN_MESSAGE,
 } from "../utils";
 import { AuthenticationService } from "./authentication.service";
@@ -58,6 +59,8 @@ function httpErrorObservable(err: HttpErrorResponse): Observable<never> {
     message = FORBIDDEN_MESSAGE;
   } else if (err.status === 500) {
     message = GENERIC_ERROR_MESSAGE;
+  } else if (err.status === 404) {
+    message = NOT_FOUND_MESSAGE;
   } else if (err.error && err.error.detail) {
     message = err.error.detail;
   } else if (err.error && err.error.message) {
@@ -65,5 +68,5 @@ function httpErrorObservable(err: HttpErrorResponse): Observable<never> {
   } else if (err.error && typeof err.error === "string") {
     message = err.error;
   }
-  return throwError(message);
+  return throwError({ status: err.status, message });
 }

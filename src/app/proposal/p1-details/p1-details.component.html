@@ -25,7 +25,9 @@
   <wm-investigators [proposal]="proposal"></wm-investigators>
 </div>
 <div class="block">
-  <wm-phase-one-target [phase1Targets]="proposal.targets"></wm-phase-one-target>
+  <wm-p1-observations
+    [observations]="proposal.observations"
+  ></wm-p1-observations>
 </div>
 <div class="block">
   <wm-p1-configurations

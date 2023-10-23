@@ -100,7 +100,7 @@ class ProposalService:
         """
         return self.repository.get_proposal_file(proposal_code)
 
-    def get_proposal(self, proposal_code: str) -> Dict[str, Any]:
+    def get_proposal(self, proposal_code: str, semester: Optional[Semester], phase: Optional[int]) -> Dict[str, Any]:
         """
         Return the JSON representation of a proposal.
 
@@ -109,12 +109,18 @@ class ProposalService:
         proposal_code: str
             Proposal code.
 
+        semester: str | None
+            Semester.
+
+        phase: int | None
+            Phase.
+
         Returns
         -------
         Proposal
             The JSON representation of the proposal.
         """
-        return cast(Dict[str, Any], self.repository.get(proposal_code))
+        return cast(Dict[str, Any], self.repository.get(proposal_code, semester, phase))
 
     def get_observation_comments(self, proposal_code: str) -> List[Dict[str, str]]:
         return self.repository.get_observation_comments(proposal_code)

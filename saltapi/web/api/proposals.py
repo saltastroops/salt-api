@@ -160,7 +160,7 @@ def get_proposal(
         title="Proposal code",
         description="Proposal code of the returned proposal.",
     ),
-    semester: Union[Semester | None] = Query(
+    semester: Optional[Semester] = Query(
         None,
         description="Semester of the returned proposal.",
         title="Semester",
@@ -174,6 +174,7 @@ def get_proposal(
 ) -> _Proposal:
     """
     Returns a JSON representation of the proposal with a given proposal code, semester and phase.
+    The default values for semester and phase are the latest submission semester and phase, respectively.
 
     The JSON representation does not contain the full proposal information. Most
     importantly, while it includes a list of block ids and names, it does not include

@@ -309,7 +309,7 @@ def update_proprietary_period(
             user, proposal_code
         )
         proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal = proposal_service.get_proposal(proposal_code)
+        proposal = proposal_service.get_proposal(proposal_code, None, None)
         if permission_service.is_motivation_needed_to_update_proprietary_period(
             proposal, proprietary_period_update_request, user.username
         ):
@@ -328,7 +328,7 @@ def update_proprietary_period(
                 proposal_code=proposal_code,
                 proprietary_period=proprietary_period_update_request.proprietary_period,
             )
-            proposal = proposal_service.get_proposal(proposal_code)
+            proposal = proposal_service.get_proposal(proposal_code, None, None)
             status_code = status.HTTP_200_OK
             update_status = UpdateStatus.SUCCESSFUL
         unit_of_work.commit()

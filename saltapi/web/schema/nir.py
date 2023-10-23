@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -7,6 +7,12 @@ from pydantic import BaseModel, Field
 class NirSamplingMode(str, Enum):
     FOCUS = "Focus"
     NORMAL = "Normal"
+
+
+class NirGrating(str, Enum):
+    """NIR grating."""
+
+    PNG0950 = "ng0950"
 
 
 class NirCameraFilterWheel(str, Enum):
@@ -160,3 +166,15 @@ class Nir(BaseModel):
         description="Overhead time for the setup, in seconds",
         ge=0,
     )
+
+
+class NirSummary(BaseModel):
+    """Summary information for NIR."""
+
+    name: Literal["NIR"] = Field(
+        ..., title="Instrument name", description="Instrument name"
+    )
+    gratings: Optional[List[NirGrating]] = Field(
+        ..., title="Grating", description="Grating"
+    )
+    filters: Optional[List[str]] = Field(..., title="Filters", description="Filters")

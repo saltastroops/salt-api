@@ -1003,6 +1003,48 @@ WHERE C.Proposal_Code = :proposal_code
         )
         return {row.block_id: {"modes": [""]} for row in result}
 
+    def _block_nir_configurations(self, proposal_code: str) -> Dict[int, Dict[str, List[str]]]:
+        separator = "::::"
+        stmt = text(
+            """
+SELECT B.Block_Id                                                                                   AS block_id,
+       GROUP_CONCAT(DISTINCT NG.Grating ORDER BY NG.Grating SEPARATOR :separator) AS gratings,
+       GROUP_CONCAT(DISTINCT NF.NirFilter  ORDER BY NF.NirFilter  SEPARATOR :separator) AS filters
+FROM Nir N
+         JOIN NirConfig NC ON N.NirConfig_Id = NC.NirConfig_Id
+         LEFT JOIN NirGrating NG ON NC.NirGrating_Id = NG.NirGrating_Id
+         JOIN NirFilter NF ON NC.NirFilter_Id = NF.NirFilter_Id
+         JOIN NirPatternDetail NPD ON N.Nir_Id = NPD.Nir_Id
+         JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
+         JOIN NirDitherPatternStep NDPS
+              ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
+         JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
+         JOIN ObsConfig OC ON NPD.NirPattern_Id = OC.NirPattern_Id
+         JOIN TelescopeConfigObsConfig TCOC
+              ON OC.ObsConfig_Id = TCOC.PlannedObsConfig_Id
+         JOIN Pointing P ON TCOC.Pointing_Id = P.Pointing_Id
+         JOIN Block B ON P.Block_Id = B.Block_Id
+         JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+GROUP BY B.Block_Id
+        """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "separator": separator,
+                "proposal_code": proposal_code,
+            },
+        )
+        nir_config = {
+            row.block_id: {
+                "gratings": row.gratings.split(separator) if row.gratings else None,
+                "filters": row.filters.split(separator) if row.filters else None,
+            }
+            for row in result
+        }
+        return nir_config
+
     def _block_instruments(self, proposal_code: str) -> Dict[int, List[Dict[str, Any]]]:
         """
         Return the dictionary of block ids and dictionaries of instruments configurations.
@@ -1011,6 +1053,7 @@ WHERE C.Proposal_Code = :proposal_code
         rss_configurations = self._block_rss_configurations(proposal_code)
         hrs_configurations = self._block_hrs_configurations(proposal_code)
         bvit_configurations = self._block_bvit_configurations(proposal_code)
+        nir_configurations = self._block_nir_configurations(proposal_code)
         instruments: DefaultDict[int, List[Dict[str, Any]]] = defaultdict(list)
         for block_id, c in salticam_configurations.items():
             instruments[block_id].append({"name": "Salticam", "modes": c["modes"]})
@@ -1027,6 +1070,14 @@ WHERE C.Proposal_Code = :proposal_code
             instruments[block_id].append({"name": "HRS", "modes": c["modes"]})
         for block_id, c in bvit_configurations.items():
             instruments[block_id].append({"name": "BVIT", "modes": c["modes"]})
+        for block_id, c in nir_configurations.items():
+            instruments[block_id].append(
+                {
+                    "name": "NIR",
+                    "gratings": c["gratings"],
+                    "filters": c["filters"],
+                }
+            )
         return instruments
 
     def _time_allocations(

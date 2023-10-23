@@ -15,6 +15,7 @@ from saltapi.web.schema.common import (
     TimeInterval,
 )
 from saltapi.web.schema.hrs import HrsSummary
+from saltapi.web.schema.nir import NirSummary
 from saltapi.web.schema.observation import Observation
 from saltapi.web.schema.rss import RssSummary
 from saltapi.web.schema.salticam import SalticamSummary
@@ -227,5 +228,5 @@ class BlockSummary(BaseModel):
         description="Conditions required for observing the block",
     )
     instruments: List[
-        Union[SalticamSummary, RssSummary, HrsSummary, BvitSummary]
+        Union[SalticamSummary, RssSummary, HrsSummary, BvitSummary, NirSummary]
     ] = Field(..., title="Instruments", description="Instruments used for the block")

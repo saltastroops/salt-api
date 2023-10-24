@@ -160,10 +160,21 @@ def get_proposal(
         title="Proposal code",
         description="Proposal code of the returned proposal.",
     ),
+    semester: Optional[Semester] = Query(
+        None,
+        description="Semester of the returned proposal.",
+        title="Semester",
+    ),
+    phase: Optional[int] = Query(
+        None,
+        description="Phase of the returned proposal.",
+        title="Phase",
+    ),
     user: User = Depends(get_current_user),
 ) -> _Proposal:
     """
-    Returns a JSON representation of the proposal with a given proposal code.
+    Returns a JSON representation of the proposal with a given proposal code, semester and phase.
+    The default values are those chosen during the latest submission.
 
     The JSON representation does not contain the full proposal information. Most
     importantly, while it includes a list of block ids and names, it does not include
@@ -176,7 +187,7 @@ def get_proposal(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        proposal = proposal_service.get_proposal(proposal_code)
+        proposal = proposal_service.get_proposal(proposal_code, semester, phase)
         if proposal["phase"] == 1:
             return P1Proposal(**proposal)
         if proposal["phase"] == 2:

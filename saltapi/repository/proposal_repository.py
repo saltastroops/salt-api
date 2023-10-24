@@ -1003,7 +1003,9 @@ WHERE C.Proposal_Code = :proposal_code
         )
         return {row.block_id: {"modes": [""]} for row in result}
 
-    def _block_nir_configurations(self, proposal_code: str) -> Dict[int, Dict[str, List[str]]]:
+    def _block_nir_configurations(
+        self, proposal_code: str
+    ) -> Dict[int, Dict[str, List[str]]]:
         separator = "::::"
         stmt = text(
             """

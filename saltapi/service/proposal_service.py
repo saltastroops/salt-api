@@ -101,7 +101,10 @@ class ProposalService:
         return self.repository.get_proposal_file(proposal_code)
 
     def get_proposal(
-        self, proposal_code: str, semester: Optional[Semester] = None, phase: Optional[int] = None
+        self,
+        proposal_code: str,
+        semester: Optional[Semester] = None,
+        phase: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Return the JSON representation of a proposal.

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { UntypedFormControl } from "@angular/forms";
 
 import { parseISO } from "date-fns";
@@ -16,27 +16,16 @@ import {
 })
 export class GeneralProposalInfoComponent implements OnInit {
   @Input() proposal!: Proposal;
+  @Input() isLoading!: boolean;
+  @Output() selectSemester = new EventEmitter<string>();
   semesterControl = new UntypedFormControl();
-  currentSubmission!: Date;
-  firstSubmission!: Date;
-  principalInvestigator: Investigator | undefined;
-  principalContact: Investigator | undefined;
 
   ngOnInit(): void {
-    this.currentSubmission = parseISO(
-      this.proposal.generalInfo.currentSubmission,
-    );
-    this.firstSubmission = parseISO(this.proposal.generalInfo.firstSubmission);
-
-    const investigators = this.proposal.investigators;
     this.semesterControl.setValue(this.proposal.semester);
-
-    this.principalContact = investigators.find(
-      (investigator) => investigator.isPc,
-    );
-    this.principalInvestigator = investigators.find(
-      (investigator) => investigator.isPi,
-    );
+  }
+  onSemesterChange(): void {
+    this.isLoading = true;
+    this.selectSemester.emit(this.semesterControl.value);
   }
 
   backgroundColor(status: ProposalStatusValue): string {
@@ -100,5 +89,23 @@ export class GeneralProposalInfoComponent implements OnInit {
         return "This proposal is under scientific review.";
     }
     return "";
+  }
+
+  firstSubmission(): Date {
+    return parseISO(this.proposal.generalInfo.firstSubmission);
+  }
+
+  currentSubmission(): Date {
+    return parseISO(this.proposal.generalInfo.currentSubmission);
+  }
+
+  principalInvestigator(): Investigator | undefined {
+    const investigators = this.proposal.investigators;
+    return investigators.find((investigator) => investigator.isPi);
+  }
+
+  principalContact(): Investigator | undefined {
+    const investigators = this.proposal.investigators;
+    return investigators.find((investigator) => investigator.isPc);
   }
 }

@@ -19,8 +19,14 @@ export abstract class ProposalService {
    * investigators, but exclude block details.
    *
    * @param proposalCode Proposal code.
+   * @param semester Semester.
+   * @param phase Phase.
    */
-  public abstract getProposal(proposalCode: string): Observable<Proposal>;
+  public abstract getProposal(
+    proposalCode: string,
+    semester?: string,
+    phase?: number,
+  ): Observable<Proposal>;
 
   /**
    * Get a list of proposals from the API server.

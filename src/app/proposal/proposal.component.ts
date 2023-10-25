@@ -92,4 +92,16 @@ export class ProposalComponent implements OnInit {
     ) as HTMLElement;
     element.scrollIntoView({ behavior: "smooth" });
   }
+
+  changeSemester(semester: string): void {
+    this.isLoading = true;
+    if (this.proposal) {
+      this.proposalService
+        .getProposal(this.proposal.proposalCode, semester, this.proposal.phase)
+        .subscribe((p) => {
+          this.proposal = p;
+          this.isLoading = false;
+        });
+    }
+  }
 }

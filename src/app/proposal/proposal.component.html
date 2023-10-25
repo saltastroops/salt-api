@@ -1,75 +1,97 @@
-<wm-loading-indicator
-  *ngIf="isLoading && !proposal"
-  message="Loading proposal..."
-></wm-loading-indicator>
-<wm-error-indicator *ngIf="error" message="Loading failed"></wm-error-indicator>
-<div *ngIf="proposal as p">
-  <h1 class="title is-1">{{ p.proposalCode }}</h1>
-  <hr class="heading-line proposal-header" />
-  <div class="block">
-    <wm-general-proposal-info [proposal]="p"></wm-general-proposal-info>
+<ng-template
+  *ngIf="isLoading && !proposal; then loading; else showProposal"
+></ng-template>
+
+<ng-template #loading>
+  <wm-loading-indicator
+    *ngIf="isLoading && !proposal"
+    message="Loading proposal..."
+  ></wm-loading-indicator>
+  <wm-error-indicator
+    *ngIf="error"
+    message="Loading failed"
+  ></wm-error-indicator>
+</ng-template>
+
+<ng-template #showProposal>
+  <div *ngIf="proposal as p">
+    <h1 class="title is-1">{{ p.proposalCode }}</h1>
+    <hr class="heading-line proposal-header" />
+
+    <div class="block">
+      <wm-general-proposal-info
+        [proposal]="p"
+        [isLoading]="isLoading"
+        (selectSemester)="changeSemester($event)"
+      ></wm-general-proposal-info>
+    </div>
+
+    <div [class.is-blurred]="isLoading">
+      <ng-template
+        *ngIf="p.phase === 2; then phase2; else phase1"
+      ></ng-template>
+      <ng-template #phase2>
+        <div class="block">
+          <wm-proposal-details [proposal]="p"></wm-proposal-details>
+        </div>
+        <div class="block">
+          <wm-requested-times
+            [requestedTimes]="proposal.requestedTimes"
+          ></wm-requested-times>
+        </div>
+
+        <div class="inline-view">
+          <wm-charged-time
+            [chargedTime]="p.chargedTime"
+            [timeAllocations]="p.timeAllocations"
+          ></wm-charged-time>
+          <wm-time-allocations-table
+            [time_allocations]="proposal.timeAllocations"
+          ></wm-time-allocations-table>
+        </div>
+
+        <div class="block">
+          <wm-proposal-progress [proposal]="p"></wm-proposal-progress>
+        </div>
+
+        <div class="block">
+          <wm-investigators [proposal]="p"></wm-investigators>
+        </div>
+
+        <div class="block">
+          <wm-observation-comments
+            [observationComments]="p.observationComments"
+            [proposalCode]="p.proposalCode"
+          ></wm-observation-comments>
+        </div>
+
+        <div class="block">
+          <wm-summary-of-executed-observations
+            [blockVisits]="p.blockVisits"
+            [proposalCode]="p.proposalCode"
+            (selectBlock)="onClick($event)"
+          ></wm-summary-of-executed-observations>
+        </div>
+
+        <div class="block">
+          <wm-block-summaries
+            [blocks]="p.blocks"
+            [proposalCode]="p.proposalCode"
+            (selectBlock)="onClick($event)"
+          ></wm-block-summaries>
+        </div>
+
+        <!--  TODO: Allocation is semester dependent will fix it -->
+
+        <wm-block-view
+          [blocks]="p.blocks"
+          [blockId]="blockId"
+          [investigators]="p.investigators"
+        ></wm-block-view>
+      </ng-template>
+      <ng-template #phase1>
+        <wm-p1-details [proposal]="p"></wm-p1-details>
+      </ng-template>
+    </div>
   </div>
-  <ng-template *ngIf="p.phase === 2; then phase2; else phase1"></ng-template>
-  <ng-template #phase2>
-    <div class="block">
-      <wm-proposal-details [proposal]="p"></wm-proposal-details>
-    </div>
-    <div class="block">
-      <wm-requested-times
-        [requestedTimes]="proposal.requestedTimes"
-      ></wm-requested-times>
-    </div>
-
-    <div class="inline-view">
-      <wm-charged-time
-        [chargedTime]="p.chargedTime"
-        [timeAllocations]="p.timeAllocations"
-      ></wm-charged-time>
-      <wm-time-allocations-table
-        [time_allocations]="proposal.timeAllocations"
-      ></wm-time-allocations-table>
-    </div>
-
-    <div class="block">
-      <wm-proposal-progress [proposal]="p"></wm-proposal-progress>
-    </div>
-
-    <div class="block">
-      <wm-investigators [proposal]="p"></wm-investigators>
-    </div>
-
-    <div class="block">
-      <wm-observation-comments
-        [observationComments]="p.observationComments"
-        [proposalCode]="p.proposalCode"
-      ></wm-observation-comments>
-    </div>
-
-    <div class="block">
-      <wm-summary-of-executed-observations
-        [blockVisits]="p.blockVisits"
-        [proposalCode]="p.proposalCode"
-        (selectBlock)="onClick($event)"
-      ></wm-summary-of-executed-observations>
-    </div>
-
-    <div class="block">
-      <wm-block-summaries
-        [blocks]="p.blocks"
-        [proposalCode]="p.proposalCode"
-        (selectBlock)="onClick($event)"
-      ></wm-block-summaries>
-    </div>
-
-    <!--  TODO: Allocation is semester dependent will fix it -->
-
-    <wm-block-view
-      [blocks]="p.blocks"
-      [blockId]="blockId"
-      [investigators]="p.investigators"
-    ></wm-block-view>
-  </ng-template>
-  <ng-template #phase1>
-    <wm-p1-details [proposal]="p"></wm-p1-details>
-  </ng-template>
-</div>
+</ng-template>

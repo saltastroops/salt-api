@@ -30,11 +30,30 @@ export class RealProposalService implements ProposalService {
    * Get a proposal from the API server.
    *
    * @param proposalCode Proposal code.
+   * @param semester Semester.
+   * @param phase Phase.
    */
-  getProposal(proposalCode: string): Observable<Proposal> {
+  getProposal(
+    proposalCode: string,
+    semester?: string,
+    phase?: number,
+  ): Observable<Proposal> {
     const uri = environment.apiUrl + "/proposals/" + proposalCode;
+
+    const paramsOptions: { [key: string]: string | number } = {};
+
+    if (semester) {
+      paramsOptions["semester"] = semester;
+    }
+    if (phase) {
+      paramsOptions["phase"] = phase;
+    }
+
+    const params = new HttpParams({ fromObject: paramsOptions });
+    const options = { params };
+
     return this.http
-      .get<Proposal>(uri)
+      .get<Proposal>(uri, options)
       .pipe(
         map((proposal: Proposal) => camelcaseKeys(proposal, { deep: true })),
       );

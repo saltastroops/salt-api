@@ -218,9 +218,11 @@
 <ng-template #instrumentDetails let-i="instrument">
   <td>{{ i.name }}</td>
   <td>
-    <div *ngFor="let m of i.modes">
-      {{ m }}
-    </div>
+    <ng-container>
+      <div *ngFor="let m of i.modes">
+        {{ m }}
+      </div>
+    </ng-container>
   </td>
   <td>
     <div *ngIf="i.gratings || i.filters">

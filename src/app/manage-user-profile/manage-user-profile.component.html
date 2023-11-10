@@ -8,7 +8,7 @@
       </div>
       <div>
         <div class="select">
-          <select (change)="onSelectUser($event)">
+          <select (change)="onSelectUser($event)" data-test="select-user">
             <option
               *ngFor="let u of users"
               [value]="u.id"
@@ -27,7 +27,7 @@
     </div>
     <div *ngIf="selectedUserId">
       <hr class="section-line" />
-      <h2 class="title is-4">
+      <h2 class="title is-4" data-test="selected-user">
         Edit contacts for '{{ selectedUser.givenName }}
         {{ selectedUser.familyName }}'
       </h2>
@@ -73,9 +73,23 @@
                   <input
                     class="input"
                     type="text"
-                    id="givenName"
+                    #givenName
                     formControlName="givenName"
+                    data-test="given-name"
+                    [ngClass]="{
+                      'is-danger': f.givenName.touched && f.givenName.errors
+                    }"
+                    (change)="onGivenNameChange(givenName.value)"
                   />
+                  <div
+                    *ngIf="f.givenName.errors"
+                    class="invalid-feedback"
+                    data-test="given-name-error"
+                  >
+                    <div *ngIf="f.givenName.errors?.required">
+                      Name is required
+                    </div>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -84,9 +98,23 @@
                   <input
                     class="input"
                     type="text"
-                    id="familyName"
+                    #familyName
                     formControlName="familyName"
+                    data-test="family-name"
+                    [ngClass]="{
+                      'is-danger': f.familyName.touched && f.familyName.errors
+                    }"
+                    (change)="onFamilyNameChange(familyName.value)"
                   />
+                  <div
+                    *ngIf="f.familyName.errors"
+                    class="invalid-feedback"
+                    data-test="family-name-error"
+                  >
+                    <div *ngIf="f.familyName.errors?.required">
+                      Surname is required
+                    </div>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -96,6 +124,7 @@
                     <select
                       (change)="onSelectPartner($event)"
                       formControlName="partner"
+                      data-test="partner-institutions"
                     >
                       <option
                         *ngFor="let partner of partners"
@@ -112,7 +141,10 @@
                 <td><label class="label">Institution:</label></td>
                 <td>
                   <div class="select">
-                    <select formControlName="institutionName">
+                    <select
+                      formControlName="institutionName"
+                      data-test="institutions"
+                    >
                       <option
                         *ngFor="let institution of partnerInstitutions"
                         [value]="institution.name"
@@ -130,9 +162,33 @@
                   <input
                     class="input"
                     type="text"
-                    id="email"
+                    #email
                     formControlName="email"
+                    data-test="email"
+                    [ngClass]="{
+                      'is-danger': f.email.touched && f.email.errors
+                    }"
+                    (change)="onEmailChange(email.value)"
                   />
+                  <div
+                    *ngIf="f.email.touched && f.email.errors"
+                    class="invalid-feedback"
+                    data-test="email-error"
+                  >
+                    <div
+                      *ngIf="f.email.errors?.required"
+                      data-test="email-error"
+                    >
+                      Email is required
+                    </div>
+                    <div
+                      *ngIf="f.email.errors.email"
+                      class="has-text-danger"
+                      data-test="email-error"
+                    >
+                      Invalid email address
+                    </div>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -143,18 +199,44 @@
                     type="password"
                     id="password"
                     formControlName="password"
+                    [ngClass]="{'is-danger': userProfile.errors?.['minLength']}"
+                    data-test="password"
                   />
+                  <div
+                    *ngIf="userProfile.errors?.['minLength']"
+                    class="invalid-feedback"
+                    data-test="password-error"
+                  >
+                    <div *ngIf="userProfile.errors?.['minLength']">
+                      Password must have at least 6 characters
+                    </div>
+                  </div>
                 </td>
+                <td></td>
               </tr>
               <tr>
-                <td><label class="label">Retype password:</label></td>
+                <td><label class="label">Confirm password:</label></td>
                 <td>
                   <input
                     class="input"
                     type="password"
-                    id="retypePassword"
-                    formControlName="retypePassword"
+                    id="confirmPassword"
+                    formControlName="confirmPassword"
+                    [ngClass]="{'is-danger': f.confirmPassword.dirty && userProfile.errors?.['notMatched']}"
+                    data-test="confirm-password"
                   />
+                  <div
+                    *ngIf="f.confirmPassword.dirty && userProfile.errors?.['notMatched']"
+                    class="invalid-feedback"
+                  >
+                    <div
+                      *ngIf="userProfile.errors?.['notMatched']"
+                      class="has-text-danger"
+                      data-test="confirm-password-error"
+                    >
+                      Password mismatch
+                    </div>
+                  </div>
                 </td>
               </tr>
             </table>
@@ -169,7 +251,13 @@
               <table>
                 <tr>
                   <td>
-                    <button class="button is-primary">Submit</button>
+                    <button
+                      class="button is-primary"
+                      [ngClass]="{ 'is-loading': loading }"
+                      data-test="update-user-details"
+                    >
+                      Submit
+                    </button>
                   </td>
                 </tr>
               </table>
@@ -177,7 +265,7 @@
           </form>
         </div>
       </ng-container>
-      <ng-container *ngIf="error">
+      <ng-container *ngIf="error" data-test="submission-error">
         <div class="message is-danger">
           <div class="message-header">Error</div>
           <div class="message-body">{{ error }}</div>

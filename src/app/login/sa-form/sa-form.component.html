@@ -193,7 +193,7 @@
             class="radio"
             type="radio"
             formControlName="race"
-            [value]="'Prefer not to say'"
+            value="Prefer not to say"
             data-test="race-prefer-not-to-say"
           />
           I'd prefer not to say
@@ -215,7 +215,7 @@
                 class="radio"
                 type="radio"
                 (change)="hasPhd(true)"
-                name="phdYear"
+                name="hasPhd"
                 data-test="has-phd"
               />
               I have a PhD and I completed it in the year
@@ -228,7 +228,7 @@
               [attr.disabled]="!isTypePhdYear ? '' : null"
               data-test="phd-year"
             >
-              <option [value]="null">Select</option>
+              <option value="null">Select</option>
               <option *ngFor="let year of years" [value]="year">
                 {{ year }}
               </option>
@@ -240,9 +240,7 @@
             <input
               class="radio"
               type="radio"
-              formControlName="phdYear"
-              name="phdYear"
-              [value]="null"
+              name="hasPhd"
               (change)="hasPhd(false)"
               data-test="has-no-phd"
             />

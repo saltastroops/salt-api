@@ -9,10 +9,11 @@ import { Block } from "../types/block";
 import { Lamp } from "../types/common";
 import { Hrs } from "../types/hrs";
 import { Nir } from "../types/nir";
-import { Acquisition, PayloadConfigurationType } from "../types/observation";
+import { PayloadConfigurationType } from "../types/observation";
 import { Proposal } from "../types/proposal";
 import { Rss } from "../types/rss";
 import { Salticam } from "../types/salticam";
+import { Acquisition } from "../types/so";
 import { AutoUnsubscribe, GENERIC_ERROR_MESSAGE } from "../utils";
 
 @Component({

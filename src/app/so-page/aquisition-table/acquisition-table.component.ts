@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { Acquisition } from "../../types/observation";
+import { Acquisition } from "../../types/so";
 import { originalFinderChartURL, thumbnailFinderChartURL } from "../../utils";
 
 @Component({

@@ -35,6 +35,7 @@ export type Lamp =
   | "HgAr"
   | "HgAr and Ne"
   | "Kr"
+  | "Kr and Ar"
   | "Kr and Ne"
   | "Kr, Ar and Ne"
   | "Ne"

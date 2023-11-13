@@ -1,7 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import {
+  AbstractControl,
   UntypedFormBuilder,
   UntypedFormGroup,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from "@angular/forms";
 
@@ -13,8 +16,10 @@ import { InstitutionService } from "../service/institution.service";
 import { UserService } from "../service/user.service";
 import { Partner } from "../types/common";
 import { Institution } from "../types/institution";
-import { StatisticsError, User, UserListItem } from "../types/user";
+import { StatisticsError, User, UserListItem, UserUpdate } from "../types/user";
+import { AutoUnsubscribe } from "../utils";
 
+@AutoUnsubscribe()
 @Component({
   selector: "wm-manage-user-profile",
   templateUrl: "./manage-user-profile.component.html",
@@ -40,6 +45,32 @@ export class ManageUserProfileComponent implements OnInit {
     phd: undefined,
   };
 
+  loading = false;
+
+  // cross-validation to ensure that password has the required
+  // character length, and matches the confirm password value
+  passwordValidators: ValidatorFn = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
+    const password = control.get("password");
+    const confirmPassword = control.get("confirmPassword");
+
+    const errors: { [key: string]: boolean } = {};
+    if (
+      password?.value !== null &&
+      password?.value !== "" &&
+      password?.value?.length < 6
+    ) {
+      errors.minLength = true;
+    }
+
+    if (password?.value !== confirmPassword?.value) {
+      errors.notMatched = true;
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  };
+
   constructor(
     private authService: AuthenticationService,
     private userService: UserService,
@@ -48,20 +79,29 @@ export class ManageUserProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.userProfile = this.formBuilder.group({
-      givenName: ["", Validators.required],
-      familyName: ["", Validators.required],
-      partner: [null, Validators.required],
-      institutionName: [null, Validators.required],
-      email: ["", [Validators.required, Validators.email]],
-      password: [null],
-      retypePassword: [null],
-      legalStatus: [""],
-      gender: [""],
-      race: [""],
-      phdYear: [""],
-      hasPhd: [""],
-    });
+    this.userProfile = this.formBuilder.group(
+      {
+        givenName: ["", Validators.required],
+        familyName: ["", Validators.required],
+        partner: [null],
+        institutionName: [null],
+        email: ["", [Validators.required, Validators.email]],
+        password: [null],
+        confirmPassword: [null],
+        legalStatus: ["", Validators.required],
+        gender: [null],
+        race: [null],
+        phdYear: [null],
+        hasPhd: [null],
+      },
+      {
+        validators: [this.passwordValidators],
+      },
+    );
+
+    this.userProfile.get("partner")?.disable();
+    this.userProfile.get("institutionName")?.disable();
+
     this.user$ = this.authService.getUser().pipe(
       tap((user) => {
         this.selectedUserId$.next(user.id);
@@ -139,6 +179,10 @@ export class ManageUserProfileComponent implements OnInit {
       });
   }
 
+  get f(): { [key: string]: AbstractControl } {
+    return this.userProfile.controls;
+  }
+
   filterInstitutions(): Institution[] {
     const partnerCode = this.selectedPartnerCode;
     if (partnerCode) {
@@ -193,52 +237,87 @@ export class ManageUserProfileComponent implements OnInit {
   }
 
   validateStatistics(): void {
-    if (this.userProfile.value.legalStatus === "") {
+    if (this.userProfile.value.legalStatus === null) {
       return;
     }
     if (!this.userProfile.value.legalStatus) {
       this.statisticsError.legalStatus =
-        "You need to provide your legal status in South African";
+        "Your legal status in South Africa is required";
     }
     if (
       this.userProfile.value.legalStatus === "South African citizen" ||
       this.userProfile.value.legalStatus ===
         "Permanent resident of South Africa"
     ) {
-      if (this.userProfile.value.gender === "") {
-        this.statisticsError.gender = "You need to provide your gender.";
+      if (this.userProfile.value.gender === null) {
+        this.statisticsError.gender = "Gender is required.";
       }
-      if (this.userProfile.value.race === "") {
-        this.statisticsError.race = "You need to provide your race.";
+      if (this.userProfile.value.race === null) {
+        this.statisticsError.race = "Race is required.";
       }
-      if (this.userProfile.value.hasPhd === "") {
-        this.statisticsError.phd =
-          "You need to provide if you have a phd or not.";
+      if (this.userProfile.value.hasPhd === null) {
+        this.statisticsError.phd = "PhD status is required.";
       }
 
       if (this.userProfile.value.hasPhd && !this.userProfile.value.phdYear) {
-        this.statisticsError.phd =
-          "You need to provide the year you obtained you PhD.";
+        this.statisticsError.phd = "PhD year of completion is required.";
       }
     }
   }
 
   submit(): void {
-    this.clearErrors();
-    if (!this.userProfile.valid) {
-      this.error = "please make sure that the form filled correctly.";
-    }
     this.validateStatistics();
-    // TODO Submission not implemented
+
+    if (this.userProfile.valid) {
+      this.loading = true;
+
+      const userUpdate = {
+        givenName: this.userProfile.get("givenName")?.value,
+        familyName: this.userProfile.get("familyName")?.value,
+        password: this.userProfile.get("password")?.value,
+        email: this.userProfile.get("email")?.value,
+        legalStatus: this.userProfile.get("legalStatus")?.value,
+        gender: this.userProfile.get("gender")?.value,
+        race: this.userProfile.get("race")?.value,
+        hasPhd: this.userProfile.get("hasPhd")?.value,
+        yearOfPhdCompletion: this.userProfile.get("phdYear")?.value,
+      } as UserUpdate;
+
+      this.userService
+        .updateUser(this.selectedUser.id, userUpdate)
+        .pipe(
+          catchError((err) => {
+            this.error = err.message;
+            this.loading = false;
+            return of(null);
+          }),
+        )
+        .subscribe((user) => {
+          if (user) {
+            window.alert("User details successfully updated.");
+            const updatedUser = this.users.find(
+              (u) =>
+                u.givenName === user.givenName &&
+                u.familyName === user.familyName,
+            );
+            if (updatedUser) {
+              this.selectedUserId$.next(updatedUser.id);
+            }
+            this.loading = false;
+          }
+        });
+    }
   }
 
-  clearErrors(): void {
-    this.error = undefined;
-    this.statisticsError = {
-      legalStatus: undefined,
-      race: undefined,
-      gender: undefined,
-      phd: undefined,
-    };
+  onGivenNameChange(name: string): void {
+    this.userProfile.get("givenName")?.patchValue(name);
+  }
+
+  onFamilyNameChange(surname: string): void {
+    this.userProfile.get("familyName")?.patchValue(surname);
+  }
+
+  onEmailChange(email: string): void {
+    this.userProfile.get("email")?.patchValue(email);
   }
 }

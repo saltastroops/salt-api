@@ -28,11 +28,15 @@ export interface InstrumentSummary {
 
 export type Lamp =
   | "Ar"
+  | "Ar and Ne"
   | "Ar and ThAr"
   | "CuAr"
   | "CuAr and Xe"
   | "HgAr"
   | "HgAr and Ne"
+  | "Kr"
+  | "Kr and Ne"
+  | "Kr, Ar and Ne"
   | "Ne"
   | "QTH1"
   | "QTH1 and QTH2"

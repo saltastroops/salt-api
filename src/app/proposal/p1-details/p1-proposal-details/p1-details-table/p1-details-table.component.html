@@ -1,3 +1,9 @@
+<wm-p1-proposal-status-modal
+  #proposalStatusModal
+  [proposal]="proposal"
+  (proposalStatusUpdate)="updateProposalStatus($event)"
+>
+</wm-p1-proposal-status-modal>
 <div>
   <table class="table">
     <tr class="secondary-header">
@@ -6,15 +12,31 @@
     <tbody>
       <tr>
         <th>Status</th>
-        <td>{{ generalProposalInfo.status.value }}</td>
+        <td>
+          <div>
+            {{ proposal.generalInfo.status.value }}
+          </div>
+          <button
+            class="button is-pulled-right"
+            *ngIf="isAdminOrSa"
+            (click)="
+              proposalStatusModal.openProposalStatusCommentModal(
+                proposal.generalInfo.status.value,
+                proposal.generalInfo.status.comment
+              )
+            "
+          >
+            Change
+          </button>
+        </td>
       </tr>
-      <tr *ngIf="generalProposalInfo.status.comment">
+      <tr *ngIf="proposal.generalInfo.status.comment">
         <th>Status comment</th>
-        <td>{{ generalProposalInfo.status.comment }}</td>
+        <td>{{ proposal.generalInfo.status.comment }}</td>
       </tr>
       <tr>
         <th>Target of Opportunity</th>
-        <td *ngIf="generalProposalInfo.isTargetOfOpportunity">
+        <td *ngIf="proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -23,7 +45,7 @@
             />
           </div>
         </td>
-        <td *ngIf="!generalProposalInfo.isTargetOfOpportunity">
+        <td *ngIf="!proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -35,7 +57,7 @@
       </tr>
       <tr>
         <th>Time Restricted</th>
-        <td *ngIf="generalProposalInfo.isTimeRestricted">
+        <td *ngIf="proposal.generalInfo.isTimeRestricted">
           <div>
             <img
               class="icon is-small"
@@ -44,7 +66,7 @@
             />
           </div>
         </td>
-        <td *ngIf="!generalProposalInfo.isTimeRestricted">
+        <td *ngIf="!proposal.generalInfo.isTimeRestricted">
           <div>
             <img
               class="icon is-small"
@@ -56,7 +78,7 @@
       </tr>
       <tr>
         <th>Priority 4</th>
-        <td *ngIf="generalProposalInfo.isP4">
+        <td *ngIf="proposal.generalInfo.isP4">
           <div>
             <img
               class="icon is-small"
@@ -65,7 +87,7 @@
             />
           </div>
         </td>
-        <td *ngIf="!generalProposalInfo.isP4">
+        <td *ngIf="!proposal.generalInfo.isP4">
           <div>
             <img
               class="icon is-small"
@@ -77,7 +99,7 @@
       </tr>
       <tr>
         <th>Total time</th>
-        <td>{{ generalProposalInfo.totalRequestedTime }}</td>
+        <td>{{ proposal.generalInfo.totalRequestedTime }}</td>
       </tr>
     </tbody>
   </table>

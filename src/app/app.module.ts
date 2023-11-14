@@ -96,8 +96,9 @@ import { InvestigatorsComponent } from "./proposal/investigators/investigators.c
 import { P1ConfigurationsComponent } from "./proposal/p1-details/p1-configurations/p1-configurations.component";
 import { P1DetailsComponent } from "./proposal/p1-details/p1-details.component";
 import { P1ObservationsComponent } from "./proposal/p1-details/p1-observations/p1-observations.component";
-import { PhaseOneProposalDetailsTableComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details-table/phase-one-proposal-details-table.component";
-import { PhaseOneProposalDetailsComponent } from "./proposal/p1-details/phase-one-proposal-details/phase-one-proposal-details.component";
+import { P1DetailsTableComponent } from "./proposal/p1-details/p1-proposal-details/p1-details-table/p1-details-table.component";
+import { P1ProposalStatusModalComponent } from "./proposal/p1-details/p1-proposal-details/p1-details-table/p1-proposal-status-modal/p1-proposal-status-modal.component";
+import { P1ProposalDetailsComponent } from "./proposal/p1-details/p1-proposal-details/p1-proposal-details.component";
 import { StudentThesesComponent } from "./proposal/p1-details/students-theses/student-theses.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RequestedTimesComponent } from "./proposal/requested-time/requested-times.component";
@@ -214,12 +215,10 @@ import { SortDirective } from "./sort.directive";
     SortDirective,
     SortByDirective,
     P1DetailsComponent,
-    PhaseOneProposalDetailsComponent,
     ProposalSummaryComponent,
     ProposalDownloadComponent,
     LiaisonAstronomerComponent,
     DetailsTableComponent,
-    PhaseOneProposalDetailsTableComponent,
     RequestedTimesComponent,
     P1ConfigurationsComponent,
     StudentThesesComponent,
@@ -240,6 +239,9 @@ import { SortDirective } from "./sort.directive";
     FinderChartViewComponent,
     SaFormComponent,
     ModalComponent,
+    P1ProposalDetailsComponent,
+    P1DetailsTableComponent,
+    P1ProposalStatusModalComponent,
   ],
   imports: [
     BrowserModule,

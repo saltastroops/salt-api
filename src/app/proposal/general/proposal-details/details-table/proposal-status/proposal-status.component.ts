@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 
 import { AuthenticationService } from "../../../../../service/authentication.service";
 import { Proposal, ProposalStatusValue } from "../../../../../types/proposal";
@@ -9,7 +9,6 @@ import {
   isUserPrincipalContact,
   isUserPrincipalInvestigator,
 } from "../../../../../utils";
-import { ProposalStatusModalComponent } from "./proposal-status-modal/proposal-status-modal.component";
 
 @Component({
   selector: "wm-proposal-status",
@@ -19,11 +18,6 @@ import { ProposalStatusModalComponent } from "./proposal-status-modal/proposal-s
 @AutoUnsubscribe()
 export class ProposalStatusComponent implements OnInit {
   @Input() proposal!: Proposal;
-  proposalStatusModal!: ProposalStatusModalComponent;
-  @ViewChild(ProposalStatusModalComponent)
-  set ProposalStatusCommentModalComponent(child: ProposalStatusModalComponent) {
-    this.proposalStatusModal = child;
-  }
   isAdminOrSa = false;
   isPiOrPc = false;
   selectedStatus!: ProposalStatusValue;

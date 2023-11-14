@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { FormGroup, UntypedFormControl } from "@angular/forms";
+import { AbstractControl, FormGroup, UntypedFormControl } from "@angular/forms";
 
 import { StatisticsError } from "../../types/user";
 
@@ -17,13 +17,17 @@ export class SaFormComponent {
   isTypePhdYear = false;
   years = [...Array(101).keys()].map((i) => new Date().getFullYear() - 100 + i);
 
+  get f(): { [key: string]: AbstractControl } {
+    return this.userDetailsForm.controls;
+  }
+
   collectMoreDetails(collect: boolean, legalStatus: string): void {
     this.collect = collect;
     this.setLegalStatus(legalStatus);
     if (legalStatus === "Other") {
-      this.setGender("");
-      this.setRace("");
-      this.setPhdYear("");
+      this.setGender(null);
+      this.setRace(null);
+      this.setPhdYear(null);
     }
   }
 
@@ -47,7 +51,9 @@ export class SaFormComponent {
   hasPhd(isPhd: boolean): void {
     this.error.phd = undefined;
     this.isTypePhdYear = isPhd;
-    this.phdYearControl.setValue(null);
+    if (!isPhd) {
+      this.userDetailsForm.patchValue({ phdYear: null });
+    }
     this.userDetailsForm.patchValue({ hasPhd: isPhd });
   }
 

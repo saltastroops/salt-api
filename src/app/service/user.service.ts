@@ -6,7 +6,13 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 import { environment } from "../../environments/environment";
-import { NewUserDetails, User, UserListItem } from "../types/user";
+import {
+  BaseUserDetails,
+  NewUserDetails,
+  User,
+  UserListItem,
+  UserUpdate,
+} from "../types/user";
 
 @Injectable({
   providedIn: "root",
@@ -66,6 +72,36 @@ export class UserService {
 
     return this.http
       .post<User>(uri, newUserDetails, { headers })
+      .pipe(map((user) => camelcaseKeys(user, { deep: true })));
+  }
+
+  /**
+   * Update user details for given user
+   */
+  updateUser(
+    userId: number,
+    userUpdate: UserUpdate,
+  ): Observable<BaseUserDetails> {
+    const uri = environment.apiUrl + "/users/" + userId.toString();
+
+    const headers = new HttpHeaders({
+      "Content-type": "application/json",
+    });
+
+    const newUserDetails = {
+      password: userUpdate.password,
+      email: userUpdate.email,
+      given_name: userUpdate.givenName,
+      family_name: userUpdate.familyName,
+      legal_status: userUpdate.legalStatus,
+      gender: userUpdate.gender,
+      race: userUpdate.race,
+      has_phd: userUpdate.hasPhd,
+      year_of_phd_completion: userUpdate.yearOfPhdCompletion,
+    };
+
+    return this.http
+      .patch<BaseUserDetails>(uri, newUserDetails, { headers })
       .pipe(map((user) => camelcaseKeys(user, { deep: true })));
   }
 }

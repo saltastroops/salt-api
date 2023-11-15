@@ -89,7 +89,7 @@ export class ProposalStatusModalComponent {
     );
     if (!this.isAdminOrSa && this.isPiOrPc) {
       this.statusValue =
-        statusValue === "Active" ? "Under technical review" : "Active";
+        statusValue === "Active" ? "Inactive" : "Active";
     }
   }
 

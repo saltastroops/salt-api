@@ -73,21 +73,17 @@ class UserStatistics:
 
 
 @dataclass(frozen=True)
-class NewUserDetails(UserStatistics):
-    given_name: str
-    family_name: str
-    email: str
-    alternative_emails: List[str]
-    username: str
-    password: str
-    institution_id: int
-
-
-@dataclass(frozen=True)
 class UserDetails(UserStatistics):
     given_name: str
     family_name: str
     email: str
+
+
+@dataclass(frozen=True)
+class NewUserDetails(UserDetails):
+    username: str
+    password: str
+    institution_id: int
 
 
 @dataclass(frozen=True)

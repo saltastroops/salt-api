@@ -83,7 +83,7 @@ class BlockService:
             if name.item(0).firstChild.data == "block id":
                 value = els.getElementsByTagName("Val")
                 try:
-                    block_id = value.item(0).firstChild.data
+                    block_id = 88541
                 except AttributeError:
                     pass  # block has no block ID
         if not block_id:

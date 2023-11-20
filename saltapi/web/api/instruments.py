@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 
@@ -13,6 +13,7 @@ from saltapi.web.schema.rss import (
     RssMaskType,
     UpdateMosMaskMetadata,
 )
+from saltapi.web.schema.salt_filter import Filter
 
 router = APIRouter(tags=["Instrument"])
 
@@ -138,3 +139,16 @@ def get_obsolete_rss_masks_in_magazine(
 
         instrument_service = services.instrument_service(unit_of_work.connection)
         return instrument_service.get_obsolete_rss_masks_in_magazine(mask_types)
+
+
+@router.post("/filter-details", summary="Get the required filters.", response_model=List[Filter])
+def get_rss_filter_details(
+        semesters: List[Semester] = Body(
+            ...,
+            title="Semesters.",
+            description="The semesters of which you are checking for filters",
+        ),
+) -> List[Dict[str, Any]]:
+    with UnitOfWork() as unit_of_work:
+        filter_service = services.filter_service(unit_of_work.connection)
+        return filter_service.get_filters_details(semesters)

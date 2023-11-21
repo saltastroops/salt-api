@@ -19,7 +19,6 @@ import {
 export class LiaisonAstronomerComponent implements OnInit {
   @Input() proposal!: Proposal;
   isAdminOrSa = false;
-  isPiOrPc = false;
 
   constructor(private authService: AuthenticationService) {}
 
@@ -31,15 +30,10 @@ export class LiaisonAstronomerComponent implements OnInit {
             "SALT Astronomer",
             "Administrator",
           ] as UserRole[]);
-
-          this.isPiOrPc =
-            isUserPrincipalInvestigator(user, this.proposal.investigators) ||
-            isUserPrincipalContact(user, this.proposal.investigators);
         }
       },
       () => {
         this.isAdminOrSa = false;
-        this.isPiOrPc = false;
       },
     );
   }

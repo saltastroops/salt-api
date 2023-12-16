@@ -85,6 +85,7 @@ export interface PhaseInterval {
 export interface TelescopeConfiguration {
   iterations: number;
   positionAngle: number | null;
+  isPositionAngleFixed: boolean;
   useParallacticAngle: boolean;
   ditherPattern: DitherPattern | null;
   guideStar: GuideStar | null;

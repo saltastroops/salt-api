@@ -48,9 +48,9 @@ export type NirGain = "Bright" | "Faint";
 export type NirCameraFilterWheel =
   | "Block"
   | "Clear"
-  | "Cutoff"
-  | "Diffuser"
-  | "Empty";
+  | "Cutoff 1.5um"
+  | "Cutoff 1.7um"
+  | "Diffuser";
 
 export type NirOffsetType =
   | "FIF Offset"

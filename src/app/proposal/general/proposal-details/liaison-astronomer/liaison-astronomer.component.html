@@ -17,7 +17,7 @@
       <div *ngIf="!proposal.generalInfo.liaisonSaltAstronomer">None</div>
 
       <button
-        *ngIf="isAdminOrSa || isPiOrPc"
+        *ngIf="isAdminOrSa"
         class="button is-pulled-right"
         (click)="liaisonAstronomerModal.openModal()"
       >

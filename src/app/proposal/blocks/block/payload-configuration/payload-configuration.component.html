@@ -22,7 +22,12 @@
       <tbody>
         <tr>
           <td>{{ payloadConfiguration.guideMethod || "None" }}</td>
-          <td>{{ telescopeConfiguration.positionAngle }}</td>
+          <td>
+            {{ telescopeConfiguration.positionAngle }}&#176;
+            <strong *ngIf="telescopeConfiguration.isPositionAngleFixed"
+              >(do not flip)</strong
+            >
+          </td>
           <td>{{ telescopeConfiguration.iterations }}</td>
           <td>{{ ditherPatternDescription }}</td>
         </tr>

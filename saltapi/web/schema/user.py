@@ -18,7 +18,10 @@ class UserRole(str, Enum):
     """
 
     SALT_ASTRONOMER = "SALT Astronomer"
+    SALT_OPERATOR = "SALT Operator"
     ADMINISTRATOR = "Administrator"
+    ENGINEER = "Engineer"
+    PARTNER_AFFILIATED = "Partner Affiliated"
     TAC_MEMBER = "TAC Member"
     TAC_CHAIR = "TAC Chair"
     BOARD_MEMBER = "Board Member"

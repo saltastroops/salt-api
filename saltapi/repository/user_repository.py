@@ -759,9 +759,6 @@ WHERE PiptUser_Id = :user_id
         if self.is_engineer():
             roles.append(Role.ENGINEER)
 
-        if self.is_partner_affiliated_user(username):
-            roles.append(Role.PARTNER_AFFILIATED)
-
         if self.is_board_member(username):
             roles.append(Role.BOARD_MEMBER)
 

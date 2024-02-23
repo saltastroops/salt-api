@@ -210,59 +210,6 @@ class ProposalService:
         }
         self.repository.put_proposal_progress(proposal_progress, proposal_code, semester, final_filenames)
 
-        # _________________________________________
-
-        # # Get the content and filename of the additional pdf, if there is one
-        # additional_pdf_filename = None
-        # additional_pdf_content = b""
-        # if additional_pdf:
-        #     additional_pdf_content = await additional_pdf.read()
-        #     additional_pdf_filename = (
-        #         self.repository.generate_proposal_progress_filename(
-        #             additional_pdf_content, is_supplementary=True
-        #         )
-        #     )
-        #
-        # # Store the progress report in the database
-        # filenames = {
-        #     "proposal_progress_filename": None,
-        #     "additional_pdf_filename": additional_pdf_filename,
-        # }
-        # self.repository.put_proposal_progress(
-        #     proposal_progress, proposal_code, semester, filenames
-        # )
-        #
-        # # Save the additional file to disk. This is done last as the file should not be
-        # # stored if the progress report cannot be stored in the database.
-        # if additional_pdf_filename:
-        #     additional_pdf_path = (
-        #         ProposalService._included_dir(proposal_code) / additional_pdf_filename
-        #     )
-        #     additional_pdf_path.write_bytes(additional_pdf_content)
-        #
-        # proposal_progress_byte_io = self.generate_proposal_progress_pdf(
-        #     cast(ProposalCode, proposal_code),
-        #     cast(Semester, semester)
-        # )
-        # progress_pdf_content = proposal_progress_byte_io.read()
-        # progress_pdf_filename = (
-        #     self.repository.generate_proposal_progress_filename(
-        #         progress_pdf_content
-        #     )
-        # )
-        #
-        # filenames = {
-        #     "proposal_progress_filename": progress_pdf_filename,
-        #     "additional_pdf_filename": additional_pdf_filename,
-        # }
-        # self.repository.put_proposal_progress(
-        #     proposal_progress, proposal_code, semester, filenames
-        # )
-        # progress_pdf_path = (
-        #         ProposalService._included_dir(proposal_code) / progress_pdf_filename
-        # )
-        # progress_pdf_path.write_bytes(progress_pdf_content)
-
     @staticmethod
     async def prepare_proposal_progress(
             semester: str,

@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast, Tuple
+from typing import Any, cast, Dict, List, Optional, Tuple
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -200,10 +200,10 @@ class ProposalService:
         self.repository.put_proposal_progress(proposal_progress, proposal_code, semester, filenames)
 
         if additional_pdf_filename:
-            await self.save_additional_pdf(proposal_code, additional_pdf_filename, additional_pdf_content)
+            await self.save_progress_report_pdf(proposal_code, additional_pdf_filename, additional_pdf_content)
 
         progress_pdf_filename,  progress_pdf_content = await self.handle_proposal_progress_pdf(proposal_code, semester)
-        await self.save_progress_pdf(proposal_code, progress_pdf_filename,  progress_pdf_content)
+        await self.save_progress_report_pdf(proposal_code, progress_pdf_filename,  progress_pdf_content)
         final_filenames = {
             "proposal_progress_filename": progress_pdf_filename,
             "additional_pdf_filename": additional_pdf_filename,
@@ -258,22 +258,13 @@ class ProposalService:
         return progress_pdf_filename,  progress_pdf_content
 
     @staticmethod
-    async def save_additional_pdf(
+    async def save_progress_report_pdf(
             proposal_code: str,
-            additional_pdf_filename: str,
-            additional_pdf_content: bytes
+            pdf_filename: str,
+            pdf_content: bytes
     ) -> None:
-        additional_pdf_path = ProposalService._included_dir(proposal_code) / additional_pdf_filename
-        additional_pdf_path.write_bytes(additional_pdf_content)
-
-    @staticmethod
-    async def save_progress_pdf(
-            proposal_code: str,
-            progress_pdf_filename: str,
-            progress_pdf_content: bytes
-    ) -> None:
-        progress_pdf_path = ProposalService._included_dir(proposal_code) / progress_pdf_filename
-        progress_pdf_path.write_bytes(progress_pdf_content)
+        additional_pdf_path = ProposalService._included_dir(proposal_code) / pdf_filename
+        additional_pdf_path.write_bytes(pdf_content)
 
     @staticmethod
     def _included_dir(proposal_code: str) -> pathlib.Path:

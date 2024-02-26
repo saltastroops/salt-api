@@ -200,10 +200,10 @@ class ProposalService:
         self.repository.put_proposal_progress(proposal_progress, proposal_code, semester, filenames)
 
         if additional_pdf_filename:
-            await self.save_progress_report(proposal_code, additional_pdf_filename, additional_pdf_content)
+            await self.save_progress_report_file(proposal_code, additional_pdf_filename, additional_pdf_content)
 
         progress_pdf_filename,  progress_pdf_content = await self.handle_proposal_progress_pdf(proposal_code, semester)
-        await self.save_progress_report(proposal_code, progress_pdf_filename,  progress_pdf_content)
+        await self.save_progress_report_file(proposal_code, progress_pdf_filename, progress_pdf_content)
         final_filenames = {
             "proposal_progress_filename": progress_pdf_filename,
             "additional_pdf_filename": additional_pdf_filename,
@@ -258,7 +258,7 @@ class ProposalService:
         return progress_pdf_filename,  progress_pdf_content
 
     @staticmethod
-    async def save_progress_report(
+    async def save_progress_report_file(
             proposal_code: str,
             filename: str,
             content: bytes

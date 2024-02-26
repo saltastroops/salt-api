@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, cast, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -200,10 +200,10 @@ class ProposalService:
         self.repository.put_proposal_progress(proposal_progress, proposal_code, semester, filenames)
 
         if additional_pdf_filename:
-            await self.save_progress_report_pdf(proposal_code, additional_pdf_filename, additional_pdf_content)
+            await self.save_progress_report(proposal_code, additional_pdf_filename, additional_pdf_content)
 
         progress_pdf_filename,  progress_pdf_content = await self.handle_proposal_progress_pdf(proposal_code, semester)
-        await self.save_progress_report_pdf(proposal_code, progress_pdf_filename,  progress_pdf_content)
+        await self.save_progress_report(proposal_code, progress_pdf_filename,  progress_pdf_content)
         final_filenames = {
             "proposal_progress_filename": progress_pdf_filename,
             "additional_pdf_filename": additional_pdf_filename,
@@ -258,13 +258,13 @@ class ProposalService:
         return progress_pdf_filename,  progress_pdf_content
 
     @staticmethod
-    async def save_progress_report_pdf(
+    async def save_progress_report(
             proposal_code: str,
-            pdf_filename: str,
-            pdf_content: bytes
+            filename: str,
+            content: bytes
     ) -> None:
-        additional_pdf_path = ProposalService._included_dir(proposal_code) / pdf_filename
-        additional_pdf_path.write_bytes(pdf_content)
+        file_path = ProposalService._included_dir(proposal_code) / filename
+        file_path.write_bytes(content)
 
     @staticmethod
     def _included_dir(proposal_code: str) -> pathlib.Path:

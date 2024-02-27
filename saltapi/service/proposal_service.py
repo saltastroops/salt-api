@@ -1,7 +1,7 @@
 import pathlib
 import urllib.parse
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pdfkit
 from fastapi import APIRouter, Request, UploadFile
@@ -189,52 +189,82 @@ class ProposalService:
         semester: str,
         additional_pdf: Optional[UploadFile],
     ) -> None:
-        partner_requested_percentages = parse_partner_requested_percentages(
-            proposal_progress_report.partner_requested_percentages
-        )
-        proposal_progress = {
-            "semester": semester,
-            "requested_time": proposal_progress_report.requested_time,
-            "maximum_seeing": proposal_progress_report.maximum_seeing,
-            "transparency": proposal_progress_report.transparency,
-            # fmt: off
-            "description_of_observing_constraints":
-                proposal_progress_report.description_of_observing_constraints,
-            "change_reason": proposal_progress_report.change_reason,
-            # fmt: off
-            "summary_of_proposal_status":
-                proposal_progress_report.summary_of_proposal_status,
-            "strategy_changes": proposal_progress_report.strategy_changes,
-            "partner_requested_percentages": partner_requested_percentages,
-        }
+        proposal_progress = await self.prepare_proposal_progress(semester, proposal_progress_report)
+        additional_pdf_filename, additional_pdf_content = await self.handle_additional_pdf(additional_pdf)
 
-        # Get the content and filename of the additional pdf, if there is one
-        additional_pdf_filename = None
-        additional_pdf_content = b""
-        if additional_pdf:
-            additional_pdf_content = await additional_pdf.read()
-            additional_pdf_filename = (
-                self.repository.generate_proposal_progress_filename(
-                    additional_pdf_content, is_supplementary=True
-                )
-            )
-
-        # Store the progress report in the database
         filenames = {
             "proposal_progress_filename": None,
             "additional_pdf_filename": additional_pdf_filename,
         }
-        self.repository.put_proposal_progress(
-            proposal_progress, proposal_code, semester, filenames
-        )
 
-        # Save the additional file to disk. This is done last as the file should not be
-        # stored if the progress report cannot be stored in the database.
+        self.repository.put_proposal_progress(proposal_progress, proposal_code, semester, filenames)
+
         if additional_pdf_filename:
-            additional_pdf_path = (
-                ProposalService._included_dir(proposal_code) / additional_pdf_filename
+            await self.save_progress_report_file(proposal_code, additional_pdf_filename, additional_pdf_content)
+
+        progress_pdf_filename,  progress_pdf_content = await self.handle_proposal_progress_pdf(proposal_code, semester)
+        await self.save_progress_report_file(proposal_code, progress_pdf_filename, progress_pdf_content)
+        final_filenames = {
+            "proposal_progress_filename": progress_pdf_filename,
+            "additional_pdf_filename": additional_pdf_filename,
+        }
+        self.repository.put_proposal_progress(proposal_progress, proposal_code, semester, final_filenames)
+
+    @staticmethod
+    async def prepare_proposal_progress(
+            semester: str,
+            proposal_progress_report: ProposalProgressInput
+    ) -> Dict[str, Any]:
+        partner_requested_percentages = parse_partner_requested_percentages(
+            proposal_progress_report.partner_requested_percentages
+        )
+        return {
+            "semester": semester,
+            "requested_time": proposal_progress_report.requested_time,
+            "maximum_seeing": proposal_progress_report.maximum_seeing,
+            "transparency": proposal_progress_report.transparency,
+            "description_of_observing_constraints": proposal_progress_report.description_of_observing_constraints,
+            "change_reason": proposal_progress_report.change_reason,
+            "summary_of_proposal_status": proposal_progress_report.summary_of_proposal_status,
+            "strategy_changes": proposal_progress_report.strategy_changes,
+            "partner_requested_percentages": partner_requested_percentages,
+        }
+
+    async def handle_additional_pdf(
+            self,
+            additional_pdf: Optional[UploadFile]
+    ) -> Tuple[Optional[str], Optional[bytes]]:
+        additional_pdf_filename = None
+        additional_pdf_content = b""
+        if additional_pdf:
+            additional_pdf_content = await additional_pdf.read()
+            additional_pdf_filename = self.repository.generate_proposal_progress_filename(
+                additional_pdf_content,
+                is_supplementary=True
             )
-            additional_pdf_path.write_bytes(additional_pdf_content)
+        return additional_pdf_filename, additional_pdf_content
+
+    async def handle_proposal_progress_pdf(
+            self,
+            proposal_code: str,
+            semester: str
+    ) -> Tuple[str, bytes]:
+        proposal_progress_byte_io = self.generate_proposal_progress_pdf(
+            cast(ProposalCode, proposal_code),
+            cast(Semester, semester)
+        )
+        progress_pdf_content = proposal_progress_byte_io.read()
+        progress_pdf_filename = self.repository.generate_proposal_progress_filename(progress_pdf_content)
+        return progress_pdf_filename,  progress_pdf_content
+
+    @staticmethod
+    async def save_progress_report_file(
+            proposal_code: str,
+            filename: str,
+            content: bytes
+    ) -> None:
+        file_path = ProposalService._included_dir(proposal_code) / filename
+        file_path.write_bytes(content)
 
     @staticmethod
     def _included_dir(proposal_code: str) -> pathlib.Path:
@@ -251,9 +281,9 @@ class ProposalService:
             proposal_code
         )
 
-        def previous_observed_time(semester: str) -> int:
+        def previous_observed_time(_semester: str) -> int:
             for ot in previous_observed_times:
-                if ot["semester"] == semester:
+                if ot["semester"] == _semester:
                     return int(ot["observed_time"])
             return 0
 

@@ -75,7 +75,7 @@ def create_user(
 ) -> _User:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
-        user_service.create_user(
+        pipt_user_id = user_service.create_user(
             _NewUserDetails(
                 username=user.username,
                 password=user.password,
@@ -90,6 +90,15 @@ def create_user(
                 has_phd=user.has_phd,
                 year_of_phd_completion=user.year_of_phd_completion,
             )
+        )
+
+        # Now that the user has been added to the Database we need to confirm that the user provided a correct email
+        # address.
+        # Validate email
+        user_service.send_registration_confirmation_email(
+            pipt_user_id,
+            f"{user.family_name} {user.given_name}",
+            user.email
         )
         unit_of_work.commit()
 
@@ -285,6 +294,32 @@ def update_password(
         permission_service.check_permission_to_update_user(user, user_id)
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_password(user_id, password)
+
+        unit_of_work.commit()
+
+        return user_service.get_user(user_id)
+
+
+@router.post(
+    "/{user_id}/activate-user", summary="Activate user", response_model=User
+)
+def activate_user(
+        user_id: int = Path(
+            ...,
+            title="User id",
+            description="Id for user to activate",
+        ),
+        user: _User = Depends(get_current_user),
+
+) -> _User:
+    """
+    Update user's password.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_activate_user(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.activate_user(user_id)
 
         unit_of_work.commit()
 

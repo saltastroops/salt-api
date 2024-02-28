@@ -511,3 +511,9 @@ class PermissionService:
                     f"There exists no observation with id {bv_id} "
                     f"for the proposal {proposal_code}."
                 )
+
+    def check_permission_to_activate_user(self, user_id: int, user: User) -> None:
+        if user_id == user.id:
+            pass
+        else:
+            self.check_role(user.username, [Role.ADMINISTRATOR,])

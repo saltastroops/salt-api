@@ -165,7 +165,7 @@ ORDER BY I.Surname, I.FirstName
         ]
         return users
 
-    def create(self, new_user_details: Dict[str, Any]) -> None:
+    def create(self, new_user_details: Dict[str, Any]) -> int:
         """Creates a new user."""
 
         # Make sure the username is still available
@@ -187,6 +187,7 @@ ORDER BY I.Surname, I.FirstName
                 year_of_phd_completion=new_user_details["year_of_phd_completion"],
             ),
         )
+        return pipt_user_id
 
     def _create_investigator_details(self, new_user_details: Dict[str, Any]) -> int:
         """
@@ -1050,3 +1051,17 @@ ON DUPLICATE KEY UPDATE
                 "year_of_phd": user_information["year_of_phd_completion"],
             },
         )
+
+    def activate_user(self, user_id: int) -> None:
+        stmt = text(
+            """
+UPDATE PiptUser
+SET Active = 1
+WHERE PiptUser_Id = :user_id
+        """
+        )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        self.connection.execute(stmt, {"user_id": user_id})

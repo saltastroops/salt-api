@@ -92,11 +92,11 @@ SALT Team
             if user_details["has_phd"] and not user_details["year_of_phd_completion"]:
                 raise ValidationError("Year of completing PhD is missing.")
 
-    def create_user(self, user: NewUserDetails) -> None:
+    def create_user(self, user: NewUserDetails) -> int:
         if self._does_user_exist(user.username):
             raise ValidationError(f"The username {user.username} exists already.")
         self._validate_user_statistics(vars(user))
-        self.repository.create(vars(user))
+        return self.repository.create(vars(user))
 
     def get_user(self, user_id: int) -> User:
         user = self.repository.get(user_id)
@@ -172,3 +172,55 @@ SALT Team
             return
         except NotFoundError:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
+
+    def send_registration_confirmation_email(self, pipt_user_id: int, user_fullname: str, user_email: str) -> None:
+        mail_service = MailService()
+        authentication_service = AuthenticationService(self.repository)
+        confirmation_token = authentication_service.jwt_token(
+            {"sub": str(pipt_user_id)}, timedelta(hours=3)
+        )
+
+        registration_confirmation_url = get_settings().frontend_uri + "/activate-user/" + confirmation_token
+        plain_body = f"""Dear {user_fullname},
+
+Someone (probably you) is registering to the SALT Web Manager.
+
+Please click on the link below to activate the user:
+
+{registration_confirmation_url}
+
+Alternatively you can copy the link into the address bar of your browser.
+
+If you have not registering to the SALT Web Manager, you can just ignore this email.
+
+Kind regards,
+
+SALT Team
+        """
+
+        html_body = f"""
+<html>
+  <head></head>
+  <body>
+    <p>Dear {user_fullname},</p>
+    <p>Someone (probably you) is registering to the SALT Web Manager.</p>
+    <p>Please click on the link below to activate the user:</p>
+    <p><a href="{registration_confirmation_url}">{registration_confirmation_url}</a>.</p>
+    <p>Alternatively you can copy the link into the address bar of your browser.</p>
+    <p>If you have not registering to the SALT Web Manager, you can just ignore this email.</p>
+    <p>Kind regards,</p>
+    <p>SALT Team</p>
+  </body>
+</html>
+        """
+
+        message = mail_service.generate_email(
+            to=f"{user_fullname} <{user_email}>",
+            html_body=html_body,
+            plain_body=plain_body,
+            subject="User Activation",
+        )
+        mail_service.send_email(to=[user_email], message=message)
+
+    def activate_user(self, user_id: int) -> None:
+        self.repository.activate_user(user_id)

@@ -60,6 +60,21 @@ class AuthenticationService:
 
         return cast(str, encoded_jwt)
 
+    @staticmethod
+    def temp_jwt_token(
+            payload: Dict[str, Any], expires_delta: Optional[timedelta] = None
+    ) -> str:
+        """Create a JWT token."""
+        to_encode = payload.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_LIFETIME_HOURS)
+        to_encode["exp"] = expire
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+        return cast(str, encoded_jwt)
+
     def authenticate_user(self, username: str, password: str) -> User:
         user = self.user_repository.find_user_with_username_and_password(
             username, password

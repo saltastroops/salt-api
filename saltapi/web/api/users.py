@@ -20,7 +20,7 @@ from saltapi.web.schema.user import (
     User,
     UserListItem,
     UserUpdate,
-    BaseUserDetails,
+    BaseUserDetails, UsernameEmail,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -115,6 +115,35 @@ def get_users(
         user_service = services.user_service(unit_of_work.connection)
 
         return user_service.get_users()
+
+
+@router.post(
+    "/send-activation-link", summary="Send an activation Link", response_model=Message
+)
+def send_activation(
+        username_email: UsernameEmail = Body(
+            ..., title="Username or Email", description="Username or Email."
+        ),
+
+) -> Message:
+    """
+    Send activation link.
+    """
+    with UnitOfWork() as unit_of_work:
+
+        user_service = services.user_service(unit_of_work.connection)
+        try:
+            user = user_service.get_user_by_username(username_email.username_email)
+        except NotFoundError:
+            user = user_service.get_user_by_email(username_email.username_email)
+
+        user_service.send_registration_confirmation_email(
+            user.id,
+            f"{user.family_name} {user.given_name}",
+            user.email
+        )
+
+        return Message(message="Email with an activation link has been sent.")
 
 
 @router.get("/{user_id}", summary="Get user details", response_model=User)
@@ -313,7 +342,7 @@ def activate_user(
 
 ) -> _User:
     """
-    Update user's password.
+    Activate user
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

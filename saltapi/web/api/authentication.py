@@ -117,6 +117,12 @@ def login(
     """
     try:
         user = authenticate_user(form_data.username, form_data.password)
+    except ValidationError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not verified.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

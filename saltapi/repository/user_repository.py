@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -37,6 +37,7 @@ SELECT PU.PiptUser_Id           AS id,
        I.InstituteName_Name     AS institution_name,
        I2.Institute_Id          AS institution_id,
        I2.Department            AS department,
+       PU.Active                AS is_active,
        PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
          JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
@@ -44,7 +45,7 @@ FROM PiptUser AS PU
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
-WHERE Active = 1
+
 """
 
     def _get(self, rows: Any) -> User:
@@ -70,6 +71,8 @@ WHERE Active = 1
                             "partner_name": row.partner_name,
                         }
                     ],
+                    "is_active": True if row.is_active == 1 else False,
+                    "user_verified": True if row.user_verified == 1 else False,
                 }
             else:
                 if row.alternative_email != row.email:
@@ -84,7 +87,7 @@ WHERE Active = 1
                     }
                 )
         if not user:
-            raise NotFoundError("Unknown username")
+            raise NotFoundError("Unknown user")
         return User(**user, roles=self.get_user_roles(user["username"]))
 
     def get_by_username(self, username: str) -> User:
@@ -93,7 +96,7 @@ WHERE Active = 1
 
         If the username does not exist, a NotFoundError is raised.
         """
-        query = self._get_user_query + """ AND PU.Username = :username"""
+        query = self._get_user_query + """ WHERE PU.Username = :username"""
         stmt = text(query)
         result = self.connection.execute(stmt, {"username": username})
         user = self._get(result)
@@ -105,7 +108,7 @@ WHERE Active = 1
 
         If there is no such user, a NotFoundError is raised.
         """
-        query = self._get_user_query + """\nAND PU.PiptUser_Id = :user_id"""
+        query = self._get_user_query + """\nWHERE PU.PiptUser_Id = :user_id"""
         stmt = text(query)
         result = self.connection.execute(stmt, {"user_id": user_id})
         user = self._get(result)
@@ -117,7 +120,7 @@ WHERE Active = 1
 
         If there is no such user, a NotFoundError is raised.
         """
-        query = self._get_user_query + """\nAND I1.Email = :email"""
+        query = self._get_user_query + """\nWHERE I1.Email = :email"""
         stmt = text(query)
         result = self.connection.execute(stmt, {"email": email})
         user = self._get(result)
@@ -149,7 +152,7 @@ SELECT DISTINCT PU.PiptUser_Id          AS id,
                 I.Surname               AS family_name
 FROM PiptUser PU
          JOIN Investigator I ON I.Investigator_Id = PU.Investigator_Id
-WHERE I.FirstName != 'Guest' AND PU.Active = 1
+WHERE I.FirstName != 'Guest'
 ORDER BY I.Surname, I.FirstName
         """
         )
@@ -737,9 +740,6 @@ WHERE PiptUser_Id = :user_id
             raise NotFoundError()
         if not self.verify_password(password, user.password_hash):
             raise NotFoundError()
-        if not self.user_verified(user.id):
-            raise ValidationError("User not verified.")
-
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:
@@ -1054,12 +1054,3 @@ ON DUPLICATE KEY UPDATE
                 "year_of_phd": user_information["year_of_phd_completion"],
             },
         )
-
-    def user_verified(self, user_id: int) -> bool:
-        stmt = text(
-            """SELECT UserVerified FROM PiptUser WHERE PiptUser_Id=:user_id"""
-        )
-        result = self.connection.execute(
-            stmt, {"user_id": user_id})
-
-        return cast(bool, result.scalar_one())

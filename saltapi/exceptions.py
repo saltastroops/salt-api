@@ -13,3 +13,9 @@ class ValidationError(ValueError):
 
 class ResourceExistsError(ValueError):
     pass
+
+
+class InactiveUserError(Exception):
+    def __init__(self, message="User account is not active. Please contact SALT Help for assistance."):
+        self.message = message
+        super().__init__(self.message)

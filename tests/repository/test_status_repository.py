@@ -1,10 +1,12 @@
+from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import List
+from typing import Any, List
 
 import pytest
 import pytz
 from sqlalchemy.engine import Connection
 
+from saltapi.exceptions import ValidationError
 from saltapi.repository.status_repository import (
     StatusRepository,
     SubsystemStatusDetails,
@@ -41,7 +43,7 @@ def _find_subsystem_status(
     for s in status:
         if s["subsystem"] == subsystem:
             return s
-    raise ValueError(f"Unsupported subsystem: {subsystem}")
+    raise ValidationError(f"Unsupported subsystem: {subsystem}")
 
 
 def test_get_status(db_connection: Connection) -> None:
@@ -100,7 +102,7 @@ def test_add_status_update(db_connection: Connection) -> None:
 
 
 def test_status_update_with_missing_subsystem(db_connection: Connection) -> None:
-    # A ValueError is raised if the subsystem is missing in a status update.
+    # A ValidationError is raised if the subsystem is missing in a status update.
 
     status_updates = _default_status_updates()
     salticam_status_update = _find_subsystem_status(status_updates, "Salticam")
@@ -109,22 +111,22 @@ def test_status_update_with_missing_subsystem(db_connection: Connection) -> None
     # subsystem is missing
     del salticam_status_update["subsystem"]  # type: ignore
     salticam_status_update["subsystem"] = None  # type: ignore
-    with pytest.raises(ValueError, match="subsystem"):
+    with pytest.raises(ValidationError, match="subsystem"):
         status_repository.update_status(salticam_status_update)
 
     # subsystem is None
     salticam_status_update["subsystem"] = None  # type: ignore
-    with pytest.raises(ValueError, match="subsystem"):
+    with pytest.raises(ValidationError, match="subsystem"):
         status_repository.update_status(salticam_status_update)
 
     # subsystem is an empty string
     salticam_status_update["subsystem"] = ""
-    with pytest.raises(ValueError, match="subsystem"):
+    with pytest.raises(ValidationError, match="subsystem"):
         status_repository.update_status(salticam_status_update)
 
 
 def test_status_update_with_missing_status(db_connection: Connection) -> None:
-    # A ValueError is raised if the status is missing in a status update.
+    # A ValidationError is raised if the status is missing in a status update.
 
     status_updates = _default_status_updates()
     salticam_status_update = _find_subsystem_status(status_updates, "Salticam")
@@ -133,25 +135,25 @@ def test_status_update_with_missing_status(db_connection: Connection) -> None:
     # status is missing
     del salticam_status_update["status"]  # type: ignore
     salticam_status_update["status"] = None  # type: ignore
-    with pytest.raises(ValueError, match="status"):
+    with pytest.raises(ValidationError, match="status"):
         status_repository.update_status(salticam_status_update)
 
     # status is None
     salticam_status_update["status"] = None  # type: ignore
-    with pytest.raises(ValueError, match="status"):
+    with pytest.raises(ValidationError, match="status"):
         status_repository.update_status(salticam_status_update)
 
     # status is an empty string
     salticam_status_update["status"] = ""
-    with pytest.raises(ValueError, match="status"):
+    with pytest.raises(ValidationError, match="status"):
         status_repository.update_status(salticam_status_update)
 
 
 def test_status_update_with_missing_status_changed_at(
     db_connection: Connection,
 ) -> None:
-    # A ValueError is raised if the status has changed and no time of state change is
-    # given.
+    # A ValidationError is raised if the status has changed and no time of state change
+    # is given.
 
     status_updates = _default_status_updates()
     salticam_status_update = _find_subsystem_status(status_updates, "Salticam")
@@ -167,12 +169,12 @@ def test_status_update_with_missing_status_changed_at(
     #  state_changed_at is missing
     del salticam_status_update["status_changed_at"]  # type: ignore
     salticam_status_update["status_changed_at"] = None
-    with pytest.raises(ValueError, match="status"):
+    with pytest.raises(ValidationError, match="status"):
         status_repository.update_status(salticam_status_update)
 
     # state_changed_at is None
     salticam_status_update["status_changed_at"] = None
-    with pytest.raises(ValueError, match="status"):
+    with pytest.raises(ValidationError, match="status"):
         status_repository.update_status(salticam_status_update)
 
 
@@ -203,7 +205,7 @@ def test_status_update_status_changed_at_must_be_timezone_aware(
     salticam_status_update = _find_subsystem_status(status_updates, "Salticam")
     salticam_status_update["status_changed_at"] = datetime(2024, 2, 29, 13, 30, 5, 0)
     status_repository = StatusRepository(db_connection)
-    with pytest.raises(ValueError, match="status.*timezone aware"):
+    with pytest.raises(ValidationError, match="status.*timezone aware"):
         status_repository.update_status(salticam_status_update)
 
 
@@ -218,15 +220,27 @@ def test_status_update_expected_available_again_at_must_be_timezone_aware(
         2024, 2, 29, 13, 30, 5, 0
     )
     status_repository = StatusRepository(db_connection)
-    with pytest.raises(ValueError, match="expected.*timezone aware"):
+    with pytest.raises(ValidationError, match="expected.*timezone aware"):
         status_repository.update_status(salticam_status_update)
 
 
+@contextmanager
+def does_not_raise():
+    yield
+
+
 @pytest.mark.parametrize(
-    "timeshift", [timedelta(seconds=0), timedelta(microseconds=1), timedelta(days=123)]
+    "timeshift, raises",
+    [
+        (timedelta(days=-56), does_not_raise()),
+        (timedelta(seconds=-1), does_not_raise()),
+        (timedelta(seconds=0), pytest.raises(ValidationError, match="later")),
+        (timedelta(microseconds=1), pytest.raises(ValidationError, match="later")),
+        (timedelta(days=123), pytest.raises(ValidationError, match="later")),
+    ],
 )
 def test_status_update_incorrect_time_order(
-    timeshift: timedelta, db_connection: Connection
+    timeshift: timedelta, raises: Any, db_connection: Connection
 ) -> None:
     # The time when the subsystem become available again must be later than the time
     # when the status changed.
@@ -237,7 +251,7 @@ def test_status_update_incorrect_time_order(
         salticam_status_update["status_changed_at"] - timeshift  # type: ignore
     )
     status_repository = StatusRepository(db_connection)
-    with pytest.raises(ValueError, match="later"):
+    with raises:
         status_repository.update_status(salticam_status_update)
 
 
@@ -253,7 +267,7 @@ def test_status_update_no_reason_allowed_if_status_is_available(
     salticam_status_update["reason"] = reason
     salticam_status_update["expected_available_again_at"] = None
     status_repository = StatusRepository(db_connection)
-    with pytest.raises(ValueError, match="reason"):
+    with pytest.raises(ValidationError, match="reason"):
         status_repository.update_status(salticam_status_update)
 
 
@@ -268,7 +282,7 @@ def test_status_update_no_expected_available_again_allowed_if_status_is_availabl
     salticam_status_update["status"] = "Available"
     salticam_status_update["reason"] = None
     status_repository = StatusRepository(db_connection)
-    with pytest.raises(ValueError, match="expected"):
+    with pytest.raises(ValidationError, match="expected"):
         status_repository.update_status(salticam_status_update)
 
 

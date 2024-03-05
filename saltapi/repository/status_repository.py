@@ -5,6 +5,7 @@ import pytz
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
+from saltapi.exceptions import ValidationError
 from saltapi.util import is_timezone_aware
 
 SubsystemStatusDetails = TypedDict(
@@ -61,7 +62,7 @@ class StatusRepository:
         """
         self._validate(subsystem_status_update)
 
-        self._use_current_values(subsystem_status_update)
+        subsystem_status_update = self._use_current_values(subsystem_status_update)
 
         stmt = text(
             """
@@ -132,33 +133,35 @@ LIMIT 1
         # subsystem is required
         subsystem = subsystem_status_update.get("subsystem")
         if not subsystem:
-            raise ValueError("The subsystem is missing.")
+            raise ValidationError("The subsystem is missing.")
 
         # status is required
         status = subsystem_status_update.get("status")
         if not status:
-            raise ValueError("The status is missing.")
+            raise ValidationError("The status is missing.")
 
         # status_changed_at is required if the status has changed
         current_status = self._get_status_for_subsystem(subsystem)["status"]
         if status != current_status and not subsystem_status_update.get(
             "status_changed_at"
         ):
-            raise ValueError(
+            raise ValidationError(
                 "The time when the status has changed is required if the status has changed. "
             )
 
         # status_changed_at must be timezone aware
         status_changed_at = subsystem_status_update["status_changed_at"]
         if status_changed_at and not is_timezone_aware(status_changed_at):
-            raise ValueError("status_changed_at must be a timezone aware datetime.")
+            raise ValidationError(
+                "status_changed_at must be a timezone aware datetime."
+            )
 
         # no expected time of availability is allowed if the subsystem is available
         expected_available_again_at = subsystem_status_update[
             "expected_available_again_at"
         ]
         if status == "Available" and expected_available_again_at is not None:
-            raise ValueError(
+            raise ValidationError(
                 "The expected time of availability again must be None if the subsystem is available."
             )
 
@@ -166,7 +169,7 @@ LIMIT 1
         if expected_available_again_at and not is_timezone_aware(
             expected_available_again_at
         ):
-            raise ValueError(
+            raise ValidationError(
                 "expected_available_again_at must be a timezone aware datetime"
             )
 
@@ -176,13 +179,15 @@ LIMIT 1
             and status_changed_at
             and expected_available_again_at <= status_changed_at
         ):
-            raise ValueError(
+            raise ValidationError(
                 "The time when the subsystem is expected to be available again must be later then the time when the status changed."
             )
 
         # no reason is allowed if the subsystem is available
         if status == "Available" and subsystem_status_update["reason"] is not None:
-            raise ValueError("The reason must be None if the subsystem is available")
+            raise ValidationError(
+                "The reason must be None if the subsystem is available"
+            )
 
     def _use_current_values(
         self, subsystem_status: SubsystemStatusDetails

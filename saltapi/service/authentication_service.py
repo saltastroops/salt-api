@@ -6,12 +6,13 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
 
-from saltapi.exceptions import NotFoundError, AuthorizationError, InactiveUserError
+from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication import AccessToken
 from saltapi.service.user import User
 from saltapi.settings import get_settings
+from saltapi.util import validate_user
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = get_settings().auth_token_lifetime_hours
@@ -84,24 +85,12 @@ def get_current_user(request: Request) -> User:
             user = _user_from_auth_header(authorization)
         else:
             user = _user_from_session(request)
-        if not user.is_active:
-            raise InactiveUserError()
-        if not user.user_verified:
-            raise AuthorizationError()
+        validate_user(user)
         return user
-    except AuthorizationError:
+    except AuthorizationError as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"User didn't validate the account. Please visit "
-                f"{get_settings().frontend_uri}/request-validation-link, to validate your account"
-            ),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except InactiveUserError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is not active. Please contact SALT Help for assistance.",
+            detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
     except Exception:

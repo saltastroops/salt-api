@@ -62,7 +62,7 @@ class User:
     affiliations: List[Institution]
     roles: List[Role]
     user_verified: bool
-    is_active: bool
+    active: bool
 
 
 @dataclass(frozen=True)

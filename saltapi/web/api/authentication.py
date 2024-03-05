@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from saltapi.exceptions import AuthorizationError, InactiveUserError,  NotFoundError, ValidationError
+from saltapi.exceptions import AuthorizationError, NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
 from saltapi.service.authentication_service import (
@@ -16,6 +16,7 @@ from saltapi.service.authentication_service import (
 )
 from saltapi.service.user import User
 from saltapi.settings import get_settings
+from saltapi.util import validate_user
 from saltapi.web import services
 from saltapi.web.schema.user import UserSwitchDetails
 
@@ -65,27 +66,15 @@ def token(
     """
     try:
         user = authenticate_user(form_data.username, form_data.password)
-
-        if not user.user_verified:
-            AuthorizationError()
-        if not user.is_active:
-            raise InactiveUserError()
+        validate_user(user)
         return AuthenticationService.access_token(user)
-    except AuthorizationError:
+    except AuthorizationError as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"User didn't validate the account. Please visit "
-                f"{get_settings().frontend_uri}/request-validation-link, to validate your account"
-            ),
+            detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except InactiveUserError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is not active. Please contact SALT Help for assistance.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -137,23 +126,11 @@ def login(
     """
     try:
         user = authenticate_user(form_data.username, form_data.password)
-        if not user.user_verified:
-            AuthorizationError()
-        if not user.is_active:
-            raise InactiveUserError()
-    except AuthorizationError:
+        validate_user(user)
+    except AuthorizationError as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"User didn't validate the account. Please visit "
-                f"{get_settings().frontend_uri}/request-validation-link, to validate your account"
-            ),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except InactiveUserError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is not active. Please contact SALT Help for assistance.",
+            detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
     except Exception:

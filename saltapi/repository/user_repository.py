@@ -37,7 +37,7 @@ SELECT PU.PiptUser_Id           AS id,
        I.InstituteName_Name     AS institution_name,
        I2.Institute_Id          AS institution_id,
        I2.Department            AS department,
-       PU.Active                AS is_active,
+       PU.Active                AS active,
        PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
          JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
@@ -71,7 +71,7 @@ FROM PiptUser AS PU
                             "partner_name": row.partner_name,
                         }
                     ],
-                    "is_active": True if row.is_active == 1 else False,
+                    "active": True if row.active == 1 else False,
                     "user_verified": True if row.user_verified == 1 else False,
                 }
             else:

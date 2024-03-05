@@ -8,6 +8,9 @@ from astropy.coordinates import Angle
 from fastapi import Form
 from pydantic import BaseModel
 
+from saltapi.exceptions import AuthorizationError
+from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.web.schema.common import PartnerCode
 
 
@@ -305,3 +308,13 @@ def parse_partner_requested_percentages(value: str) -> List[Dict[str, Any]]:
         raise ValueError(f"The percentages do not add up to 100%: {value}")
 
     return partner_requested_percentages
+
+
+def validate_user(user: User) -> None:
+    if not user.active:
+        raise AuthorizationError("User account is not active. Please contact SALT Help for assistance.")
+    if not user.user_verified:
+        raise AuthorizationError(
+            "Your account has not been validated. Please visit "
+            f"{get_settings().frontend_uri}/request-validation-link to validate your account."
+        )

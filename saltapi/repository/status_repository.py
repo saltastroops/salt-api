@@ -66,15 +66,17 @@ class StatusRepository:
 
         stmt = text(
             """
-INSERT INTO SaltSubsystemStatusUpdate (SaltSubsystem_Id, SaltSubsystemStatus_Id, StatusChangedAt, Reason, ExpectedAvailableAgainAt, ReportingUser)
-VALUES (
-    (SELECT SaltSubsystem_Id FROM SaltSubsystem WHERE SaltSubsystem = :subsystem),
-    (SELECT SaltSubsystemStatus_Id FROM SaltSubsystemStatus WHERE SaltSubsystemStatus = :status),
-    :status_changed_at,
-    :reason,
-    :expected_available_again_at,
-    :reporting_user
-)
+INSERT INTO SaltSubsystemStatusUpdate (SaltSubsystem_Id, SaltSubsystemStatus_Id,
+                                       StatusChangedAt, Reason,
+                                       ExpectedAvailableAgainAt, ReportingUser)
+VALUES ((SELECT SaltSubsystem_Id FROM SaltSubsystem WHERE SaltSubsystem = :subsystem),
+        (SELECT SaltSubsystemStatus_Id
+         FROM SaltSubsystemStatus
+         WHERE SaltSubsystemStatus = :status),
+        :status_changed_at,
+        :reason,
+        :expected_available_again_at,
+        :reporting_user)
         """
         )
         self.connection.execute(
@@ -95,14 +97,15 @@ VALUES (
         stmt = text(
             """
 SELECT sss.SaltSubsystemStatus       AS status,
-   sssu.StatusChangedAt          AS status_changed_at,
-   sssu.Reason                   AS reason,
-   sssu.ExpectedAvailableAgainAt AS expected_available_again_at,
-   sssu.ReportingUser            AS reporting_user
+       sssu.StatusChangedAt          AS status_changed_at,
+       sssu.Reason                   AS reason,
+       sssu.ExpectedAvailableAgainAt AS expected_available_again_at,
+       sssu.ReportingUser            AS reporting_user
 FROM SaltSubsystemStatusUpdate sssu
-     JOIN SaltSubsystemStatus sss ON sssu.SaltSubsystemStatus_Id = sss.SaltSubsystemStatus_Id
+         JOIN SaltSubsystemStatus sss
+              ON sssu.SaltSubsystemStatus_Id = sss.SaltSubsystemStatus_Id
 WHERE sssu.SaltSubsystem_Id =
-  (SELECT SaltSubsystem_Id FROM SaltSubsystem WHERE SaltSubsystem = :subsystem)
+      (SELECT SaltSubsystem_Id FROM SaltSubsystem WHERE SaltSubsystem = :subsystem)
 ORDER BY sssu.CreatedAt DESC, sssu.SaltSubsystemStatusUpdate_Id DESC
 LIMIT 1
         """
@@ -180,7 +183,8 @@ LIMIT 1
             and expected_available_again_at <= status_changed_at
         ):
             raise ValidationError(
-                "The time when the subsystem is expected to be available again must be later then the time when the status changed."
+                "The time when the subsystem is expected to be available again must be "
+                "later then the time when the status changed."
             )
 
         # no reason is allowed if the subsystem is available

@@ -327,3 +327,14 @@ def is_timezone_aware(t: datetime) -> bool:
         True if the datetime is timezone aware, False otherwise.
     """
     return t.tzinfo is not None and t.tzinfo.utcoffset(t) is not None
+
+
+def validate_user(user: User) -> None:
+    if not user.active:
+        raise AuthorizationError("Your account is not active. Please contact SALT Help for assistance.")
+    if not user.user_verified:
+        raise AuthorizationError(
+            "Your account has not been validated. Please visit "
+            f"{get_settings().frontend_uri}/request-validation-link to validate your account."
+        )
+

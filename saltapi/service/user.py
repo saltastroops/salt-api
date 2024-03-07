@@ -61,6 +61,8 @@ class User:
     password_hash: str
     affiliations: List[Institution]
     roles: List[Role]
+    user_verified: bool
+    is_active: bool
 
 
 @dataclass(frozen=True)

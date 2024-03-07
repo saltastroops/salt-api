@@ -107,5 +107,5 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content={"message": "Forbidden"}
+            status_code=status.HTTP_403_FORBIDDEN, content={"message": str(exc)}
         )

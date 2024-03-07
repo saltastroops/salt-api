@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import uuid
+from unittest.mock import MagicMock, patch
 
 import dotenv
 
@@ -17,6 +18,7 @@ dotenv.load_dotenv(os.environ["DOTENV_FILE"])
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
+import fastapi
 import pytest
 import yaml
 from fastapi.testclient import TestClient
@@ -68,7 +70,11 @@ def _create_engine() -> Engine:
         echo_sql = (
             True if os.environ.get("ECHO_SQL") else False
         )  # SQLAlchemy needs a bool
-        return create_engine(sdb_dsn, echo=echo_sql, future=True)
+        return create_engine(
+            sdb_dsn,
+            echo=echo_sql,
+            future=True,
+        )
     else:
         raise ValueError("No SDB_DSN environment variable set")
 
@@ -113,6 +119,17 @@ def check_data(
 @pytest.fixture()
 def client() -> Generator[TestClient, None, None]:
     yield TestClient(app)
+
+
+@pytest.fixture()
+def saao_client() -> Generator[TestClient, None, None]:
+    """
+    Test client that has a SAAO network ip.
+    """
+    request_client = MagicMock()
+    request_client.host = "10.1.0.0"
+    with patch.object(fastapi.Request, "client", request_client):
+        yield TestClient(app)
 
 
 def find_username(

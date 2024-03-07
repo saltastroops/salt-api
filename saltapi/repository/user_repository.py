@@ -2,14 +2,14 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, cast, Optional
 
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError
+from saltapi.exceptions import NotFoundError, ResourceExistsError, AuthenticationError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -48,7 +48,7 @@ FROM PiptUser AS PU
 
 """
 
-    def _get(self, rows: Any) -> User:
+    def _get(self, rows: Any) -> Optional[User]:
         user = {}
         for i, row in enumerate(rows):
             if i == 0:
@@ -86,11 +86,11 @@ FROM PiptUser AS PU
                         "partner_name": row.partner_name,
                     }
                 )
-        if not user:
-            raise NotFoundError("Unknown user")
-        return User(**user, roles=self.get_user_roles(user["username"]))
+        if user:
+            return User(**user, roles=self.get_user_roles(user["username"]))
+        return None
 
-    def get_by_username(self, username: str) -> User:
+    def get_by_username(self, username: str) -> Optional[User]:
         """
         Returns the user with a given username.
 
@@ -102,7 +102,7 @@ FROM PiptUser AS PU
         user = self._get(result)
         return user
 
-    def get(self, user_id: int) -> User:
+    def get(self, user_id: int) -> Optional[User]:
         """
         Returns the user with a given user id.
 
@@ -114,7 +114,7 @@ FROM PiptUser AS PU
         user = self._get(result)
         return user
 
-    def get_by_email(self, email: str) -> User:
+    def get_by_email(self, email: str) -> Optional[User]:
         """
         Returns the user with a given email
 
@@ -260,12 +260,8 @@ WHERE Investigator_Id = :investigator_id
 
     def _does_username_exist(self, username: str) -> bool:
         """Check whether a username exists already."""
-        try:
-            self.get_by_username(username)
-        except NotFoundError:
-            return False
 
-        return True
+        return self.get_by_username(username) is not None
 
     def update(self, user_id: int, user_update: Dict[str, Any]) -> None:
         """
@@ -278,14 +274,12 @@ WHERE Investigator_Id = :investigator_id
         if not self.is_existing_user_id(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
 
-        try:
-            user = self.get_by_email(user_update["email"])
+        user = self.get_by_email(user_update["email"])
+        if user is not None:
             if user.id != user_id:
                 raise ResourceExistsError(
                     f"The email {user_update['email']} exists already."
                 )
-        except NotFoundError:
-            pass
 
         if user_update["password"]:
             self.update_password(user_id, user_update["password"])
@@ -737,9 +731,9 @@ WHERE PiptUser_Id = :user_id
         """
         user = self.get_by_username(username)
         if not user:
-            raise NotFoundError()
+            raise AuthenticationError()
         if not self.verify_password(password, user.password_hash):
-            raise NotFoundError()
+            raise AuthenticationError()
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:

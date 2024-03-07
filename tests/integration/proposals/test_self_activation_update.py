@@ -68,7 +68,7 @@ def test_update_is_self_activatable_should_not_be_allowed_for_a_wrong_proposal_c
     client: TestClient,
 ) -> None:
     # Administrators and SALT Astronomers can not update with a wrong proposal code
-    proposal_code = "2022-1-NOT-CODE-099"
+    proposal_code = "2022-1-NOT_CODE-099"
     user = find_username("Administrator")
     authenticate(user, client)
 

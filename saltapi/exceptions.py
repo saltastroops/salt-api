@@ -2,6 +2,10 @@ class AuthorizationError(Exception):
     pass
 
 
+class AuthenticationError(Exception):
+    pass
+
+
 class NotFoundError(ValueError):
     pass
 

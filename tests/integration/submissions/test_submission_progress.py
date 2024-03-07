@@ -76,6 +76,8 @@ def _dummy_user(id: int, username: str) -> User:
         password_hash="1234",
         affiliations=[],
         roles=[],
+        user_verified=True,
+        active=True
     )
 
 

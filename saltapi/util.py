@@ -312,7 +312,7 @@ def parse_partner_requested_percentages(value: str) -> List[Dict[str, Any]]:
 
 def validate_user(user: User) -> None:
     if not user.active:
-        raise AuthorizationError("User account is not active. Please contact SALT Help for assistance.")
+        raise AuthorizationError("Your account is not active. Please contact SALT Help for assistance.")
     if not user.user_verified:
         raise AuthorizationError(
             "Your account has not been validated. Please visit "

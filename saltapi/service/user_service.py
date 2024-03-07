@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.user_repository import UserRepository
@@ -72,12 +72,7 @@ SALT Team
         return self.repository.get_user_roles(username)
 
     def _does_user_exist(self, username: str) -> bool:
-        try:
-            self.get_user_by_username(username)
-        except NotFoundError:
-            return False
-
-        return True
+        return self.get_user_by_username(username) is not None
 
     @staticmethod
     def _validate_user_statistics(user_details: Dict[str, Any]) -> None:
@@ -98,11 +93,14 @@ SALT Team
         self._validate_user_statistics(vars(user))
         self.repository.create(vars(user))
 
-    def get_user(self, user_id: int) -> User:
+    def get_user(self, user_id: int) -> Optional[User]:
         user = self.repository.get(user_id)
         # Just in case the password hash ends up somewhere
-        user.password_hash = "***"  # nosec
-        return user
+        if user:
+            # Just in case the password hash ends up somewhere
+            user.password_hash = "***"  # nosec
+            return user
+        return None
 
     def get_user_details(self, user_id: int) -> Dict[str, Any]:
         user = self.repository.get_user_details(user_id)
@@ -112,17 +110,22 @@ SALT Team
         users_details = self.repository.get_users()
         return users_details
 
-    def get_user_by_email(self, email: str) -> User:
+    def get_user_by_email(self, email: str) -> Optional[User]:
         user = self.repository.get_by_email(email)
-        # Just in case the password hash ends up somewhere
-        user.password_hash = "***"  # nosec
-        return user
+        if user:
+            # Just in case the password hash ends up somewhere
+            user.password_hash = "***"  # nosec
+            return user
+        return None
 
-    def get_user_by_username(self, username: str) -> User:
+    def get_user_by_username(self, username: str) -> Optional[User]:
+
         user = self.repository.get_by_username(username)
-        # Just in case the password hash ends up somewhere
-        user.password_hash = "***"  # nosec
-        return user
+        if user:
+            # Just in case the password hash ends up somewhere
+            user.password_hash = "***"  # nosec
+            return user
+        return None
 
     def update_user(self, user_id: int, user: Dict[str, Any]) -> None:
         self._validate_user_statistics(user)

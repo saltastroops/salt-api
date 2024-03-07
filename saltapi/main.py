@@ -17,6 +17,7 @@ from saltapi.web.api.salt_astronomers import router as salt_astronomers_router
 from saltapi.web.api.submissions import router as submissions_router
 from saltapi.web.api.user import router as user_router
 from saltapi.web.api.users import router as users_router
+from saltapi.web.api.status import router as status_router
 
 app = FastAPI()
 
@@ -52,3 +53,4 @@ app.include_router(institution_router)
 app.include_router(salt_astronomers_router)
 app.include_router(submissions_router)
 app.include_router(finder_charts_router)
+app.include_router(status_router)

@@ -36,13 +36,16 @@ SELECT PU.PiptUser_Id           AS id,
        P.Partner_Name           AS partner_name,
        I.InstituteName_Name     AS institution_name,
        I2.Institute_Id          AS institution_id,
-       I2.Department            AS department
+       I2.Department            AS department,
+       PU.Active                AS is_active,
+       PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
          JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
+
 """
 
     def _get(self, rows: Any) -> User:
@@ -68,6 +71,8 @@ FROM PiptUser AS PU
                             "partner_name": row.partner_name,
                         }
                     ],
+                    "is_active": True if row.is_active == 1 else False,
+                    "user_verified": True if row.user_verified == 1 else False,
                 }
             else:
                 if row.alternative_email != row.email:
@@ -82,7 +87,7 @@ FROM PiptUser AS PU
                     }
                 )
         if not user:
-            raise NotFoundError("Unknown username")
+            raise NotFoundError("Unknown user")
         return User(**user, roles=self.get_user_roles(user["username"]))
 
     def get_by_username(self, username: str) -> User:
@@ -91,7 +96,7 @@ FROM PiptUser AS PU
 
         If the username does not exist, a NotFoundError is raised.
         """
-        query = self._get_user_query + """WHERE PU.Username = :username"""
+        query = self._get_user_query + """ WHERE PU.Username = :username"""
         stmt = text(query)
         result = self.connection.execute(stmt, {"username": username})
         user = self._get(result)
@@ -735,7 +740,6 @@ WHERE PiptUser_Id = :user_id
             raise NotFoundError()
         if not self.verify_password(password, user.password_hash):
             raise NotFoundError()
-
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:

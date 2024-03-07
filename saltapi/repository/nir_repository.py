@@ -21,15 +21,7 @@ SELECT N.Nir_Id                                          AS nir_id,
        NC.GratingAngle / 1000                            AS grating_angle,
        NAS.Location                                      AS articulation_station,
        NF.NirFilter                                      AS filter,
-       NS.NirSampling                                    AS detector_sampling_mode,
        NCFW.NirCameraFilterWheel                         AS camera_filter_wheel,
-       ND.Ramps                                          AS ramps,
-       ND.URG_Groups                                     AS up_the_ramp_groups,
-       ND.ReadsPerSample                                 AS reads_per_sample,
-       ND.ExposureTime                                   AS exposure_time,
-       ND.Iterations                                     AS detector_iterations,
-       NET.NirExposureType                               AS exposure_type,
-       NG1.NirGain                                       AS gain,
        NPT.NirProcedureType                              AS procedure_type
 FROM Nir N
          JOIN NirConfig NC ON N.NirConfig_Id = NC.NirConfig_Id
@@ -39,12 +31,6 @@ FROM Nir N
          JOIN NirFilter NF ON NC.NirFilter_Id = NF.NirFilter_Id
          JOIN NirProcedure NP ON N.NirProcedure_Id = NP.NirProcedure_Id
          JOIN NirProcedureType NPT ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
-         JOIN NirDitherPatternStep NDPS
-                   ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
-         JOIN NirDetector ND ON NDPS.NirDetector_Id = ND.NirDetector_Id
-         JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
-         JOIN NirGain NG1 ON ND.NirGain_Id = NG1.NirGain_Id
-         JOIN NirSampling NS ON ND.NirSampling_Id = NS.NirSampling_Id
          JOIN NirCameraFilterWheel NCFW
                    ON NC.NirCameraFilterWheel_Id = NCFW.NirCameraFilterWheel_Id
 WHERE N.Nir_Id = :nir_id
@@ -98,8 +84,16 @@ ORDER BY Nir_Id DESC;
         stmt = text(
             """
 SELECT NDPS.OffsetX                 AS offset_x,
-       NDPS.OffsetX                 AS offset_y,
-       NDOT.NirDitherOffsetType     AS offset_type
+       NDPS.OffsetY                 AS offset_y,
+       NDOT.NirDitherOffsetType     AS offset_type,
+       NS.NirSampling                                    AS detector_sampling_mode,
+       ND.Ramps                                          AS ramps,
+       ND.URG_Groups                                     AS up_the_ramp_groups,
+       ND.ReadsPerSample                                 AS reads_per_sample,
+       ND.ExposureTime                                   AS exposure_time,
+       ND.Iterations                                     AS detector_iterations,
+       NET.NirExposureType                               AS exposure_type,
+       NG1.NirGain                                       AS gain
 FROM Nir N
          JOIN NirProcedure NP
                     ON N.NirProcedure_Id = NP.NirProcedure_Id
@@ -107,9 +101,12 @@ FROM Nir N
                     ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
          JOIN NirDitherPatternStep NDPS
                     ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
-         JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
-         JOIN NirDitherOffsetType NDOT
+          JOIN NirDitherOffsetType NDOT
                     ON NDPS.NirDitherOffsetType_Id = NDOT.NirDitherOffsetType_Id
+         JOIN NirDetector ND ON NDPS.NirDetector_Id = ND.NirDetector_Id
+         JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
+         JOIN NirGain NG1 ON ND.NirGain_Id = NG1.NirGain_Id
+         JOIN NirSampling NS ON ND.NirSampling_Id = NS.NirSampling_Id
 WHERE N.Nir_Id = :nir_id
         """
         )
@@ -124,8 +121,8 @@ WHERE N.Nir_Id = :nir_id
             {
                 "offset": {"x": result.offset_x / 1000, "y": result.offset_y / 1000},
                 "offset_type": result.offset_type,
-                "detector": self._detector(row),
-                "exposure_type": row.exposure_type,
+                "detector": self._detector(result),
+                "exposure_type": result.exposure_type,
             }
             for result in results
         ]

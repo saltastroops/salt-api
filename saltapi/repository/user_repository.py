@@ -45,7 +45,6 @@ FROM PiptUser AS PU
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
-
 """
 
     def _get(self, rows: Any) -> Optional[User]:

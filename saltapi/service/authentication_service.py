@@ -87,12 +87,6 @@ def get_current_user(request: Request) -> User:
             user = _user_from_session(request)
         validate_user(user)
         return user
-    except AuthorizationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

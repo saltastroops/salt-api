@@ -512,8 +512,8 @@ class PermissionService:
                     f"for the proposal {proposal_code}."
                 )
 
-    def check_permission_to_activate_user(self, user_id: int, user: User) -> None:
-        if user_id == user.id:
-            pass
-        else:
-            self.check_role(user.username, [Role.ADMINISTRATOR,])
+    def check_permission_to_validate_user(self, user_id: int, user: User) -> None:
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+        if user_id != user.id:
+            raise ValidationError(f"You cannot user id {user_id}")

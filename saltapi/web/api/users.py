@@ -5,7 +5,7 @@ from starlette import status
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.authentication_service import get_current_user
+from saltapi.service.authentication_service import get_current_user, get_user_to_verify
 from saltapi.service.user import NewUserDetails as _NewUserDetails
 from saltapi.service.user import User as _User
 from saltapi.service.user import UserDetails as _UserDetails
@@ -118,9 +118,9 @@ def get_users(
 
 
 @router.post(
-    "/send-activation-link", summary="Send an activation Link", response_model=Message
+    "/send-verification-link", summary="Send an activation Link", response_model=Message
 )
-def send_activation(
+def send_verification_link(
         username_email: UsernameEmail = Body(
             ..., title="Username or Email", description="Username or Email."
         ),
@@ -330,7 +330,7 @@ def update_password(
 
 
 @router.post(
-    "/{user_id}/activate-user", summary="Activate user", response_model=User
+    "/{user_id}/verify-user", summary="Activate user", response_model=User
 )
 def activate_user(
         user_id: int = Path(
@@ -338,7 +338,7 @@ def activate_user(
             title="User id",
             description="Id for user to activate",
         ),
-        user: _User = Depends(get_current_user),
+        user: _User = Depends(get_user_to_verify),
 
 ) -> _User:
     """
@@ -346,9 +346,9 @@ def activate_user(
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_activate_user(user_id, user)
+        permission_service.check_permission_to_validate_user(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
-        user_service.activate_user(user_id)
+        user_service.verify_user(user_id)
 
         unit_of_work.commit()
 

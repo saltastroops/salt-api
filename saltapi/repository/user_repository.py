@@ -224,8 +224,8 @@ VALUES (:institution_id, :given_name, :family_name, :email)
 
         stmt = text(
             """
-INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active)
-VALUES (:username, :password_hash, :investigator_id, :email_validation, 0)
+INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active, UserVerified)
+VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
         """
         )
         result = self.connection.execute(
@@ -1052,11 +1052,11 @@ ON DUPLICATE KEY UPDATE
             },
         )
 
-    def activate_user(self, user_id: int) -> None:
+    def verify_user(self, user_id: int) -> None:
         stmt = text(
             """
 UPDATE PiptUser
-SET Active = 1
+SET UserVerified = 1
 WHERE PiptUser_Id = :user_id
         """
         )

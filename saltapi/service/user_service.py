@@ -18,7 +18,7 @@ class UserService:
         mail_service = MailService()
         authentication_service = AuthenticationService(self.repository)
         reset_token = authentication_service.jwt_token(
-            {"sub": str(user.id)}, timedelta(hours=1)
+            {"sub": str(user.id)}, timedelta(hours=1), verification=True
         )
         user_full_name = f"{user.given_name} {user.family_name}"
 
@@ -177,21 +177,23 @@ SALT Team
         mail_service = MailService()
         authentication_service = AuthenticationService(self.repository)
         confirmation_token = authentication_service.jwt_token(
-            {"sub": str(pipt_user_id)}, timedelta(hours=3)
+            {"sub": str(pipt_user_id)}, timedelta(hours=3), verification=True
         )
 
-        registration_confirmation_url = get_settings().frontend_uri + "/activate-user/" + confirmation_token
+        registration_confirmation_url = get_settings().frontend_uri + "/verify-user/" + str(pipt_user_id) + "/" + confirmation_token
         plain_body = f"""Dear {user_fullname},
 
-Someone (probably you) is registering to the SALT Web Manager.
+It appears that someone (likely you) is registering to the SALT Web Manager.
 
-Please click on the link below to activate the user:
+To verify your email and complete the registration process, please click on the link below:
 
 {registration_confirmation_url}
 
-Alternatively you can copy the link into the address bar of your browser.
+Alternatively, you can copy the link and paste it into the address bar of your browser.
 
-If you have not registering to the SALT Web Manager, you can just ignore this email.
+Please note that this verification link will expire in 3 hours.
+
+If you did not intend to register to the SALT Web Manager, please disregard this email.
 
 Kind regards,
 
@@ -203,11 +205,12 @@ SALT Team
   <head></head>
   <body>
     <p>Dear {user_fullname},</p>
-    <p>Someone (probably you) is registering to the SALT Web Manager.</p>
-    <p>Please click on the link below to activate the user:</p>
+    <p>It appears that someone (likely you) is registering to the SALT Web Manager.</p>
+    <p>To verify your email and complete the registration process, please click on the link below:</p>
     <p><a href="{registration_confirmation_url}">{registration_confirmation_url}</a>.</p>
-    <p>Alternatively you can copy the link into the address bar of your browser.</p>
-    <p>If you have not registering to the SALT Web Manager, you can just ignore this email.</p>
+    <p>Alternatively, you can copy the link and paste it into the address bar of your browser.</p>
+    <p>Please note that this verification link will expire in 3 hours.</p>
+    <p>IIf you did not intend to register to the SALT Web Manager, please disregard this email.</p>
     <p>Kind regards,</p>
     <p>SALT Team</p>
   </body>
@@ -222,5 +225,5 @@ SALT Team
         )
         mail_service.send_email(to=[user_email], message=message)
 
-    def activate_user(self, user_id: int) -> None:
-        self.repository.activate_user(user_id)
+    def verify_user(self, user_id: int) -> None:
+        self.repository.verify_user(user_id)

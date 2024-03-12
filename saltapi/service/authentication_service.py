@@ -6,7 +6,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication import AccessToken
@@ -16,6 +16,7 @@ from saltapi.settings import get_settings
 ALGORITHM = "HS256"
 ACCESS_TOKEN_LIFETIME_HOURS = get_settings().auth_token_lifetime_hours
 SECRET_KEY = get_settings().secret_key
+VERIFICATION_KEY = get_settings().verification_key
 USER_ID_KEY = "user_id"  # nosec
 SECONDARY_AUTH_TOKEN_KEY = "secondary_auth_token"  # nosec
 
@@ -47,7 +48,7 @@ class AuthenticationService:
 
     @staticmethod
     def jwt_token(
-        payload: Dict[str, Any], expires_delta: Optional[timedelta] = None
+        payload: Dict[str, Any], expires_delta: Optional[timedelta] = None, verification: bool =False
     ) -> str:
         """Create a JWT token."""
         to_encode = payload.copy()
@@ -56,7 +57,10 @@ class AuthenticationService:
         else:
             expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_LIFETIME_HOURS)
         to_encode["exp"] = expire
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        secret_key = SECRET_KEY
+        if verification:
+            secret_key = VERIFICATION_KEY
+        encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=ALGORITHM)
 
         return cast(str, encoded_jwt)
 
@@ -81,8 +85,11 @@ class AuthenticationService:
         )
         return user
 
-    def validate_auth_token(self, token: str) -> User:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    def validate_auth_token(self, token: str, verification: bool) -> User:
+        secret_key = SECRET_KEY
+        if verification:
+            secret_key = VERIFICATION_KEY
+        payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         if not payload:
             raise JWTError("Token failed to decode.")
         try:
@@ -107,7 +114,7 @@ def get_current_user(request: Request) -> User:
         )
 
 
-def _user_from_auth_header(authorization: str) -> User:
+def _user_from_auth_header(authorization: str, verification: bool = False) -> User:
     # Based on FastAPI's OAuth2PasswordBearer class
     scheme, token = get_authorization_scheme_param(authorization)
     if scheme.lower() != "bearer":
@@ -117,7 +124,7 @@ def _user_from_auth_header(authorization: str) -> User:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return find_user_from_token(token)
+    return find_user_from_token(token, verification)
 
 
 def _user_from_session(request: Request) -> User:
@@ -140,9 +147,27 @@ def _user_from_session(request: Request) -> User:
         return user_repository.get(user_id)
 
 
-def find_user_from_token(token: str) -> User:
+def find_user_from_token(token: str, verification: bool) -> User:
     with UnitOfWork() as unit_of_work:
         user_repository = UserRepository(unit_of_work.connection)
         authentication_repository = AuthenticationService(user_repository)
 
-        return authentication_repository.validate_auth_token(token)
+        return authentication_repository.validate_auth_token(token, verification)
+
+
+def get_user_to_verify(request: Request) -> User:
+    try:
+        authorization: Optional[str] = request.headers.get("Authorization")
+        if authorization:
+            user = _user_from_auth_header(authorization, verification=True)
+            if not user:
+                raise NotFoundError("User not found")
+
+            return user
+        raise ValidationError("Failed to validate user.")
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Couldn't validate validation token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

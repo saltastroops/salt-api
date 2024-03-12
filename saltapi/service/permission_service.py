@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, cast
 
+from fastapi import Request
+
 from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -511,6 +513,13 @@ class PermissionService:
                     f"There exists no observation with id {bv_id} "
                     f"for the proposal {proposal_code}."
                 )
+
+    def check_permission_to_update_telescope_status(self, request: Request):
+        host = request.client.host
+        if not host or host[:4] not in ("10.1", "10.2"):
+            raise AuthorizationError(
+                "You may only update the status from within the SAAO network."
+            )
 
     def check_permission_to_validate_user(self, user_id: int, user: User) -> None:
         if self.check_user_has_role(user, Role.ADMINISTRATOR):

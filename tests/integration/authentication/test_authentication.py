@@ -31,6 +31,28 @@ def test_should_return_401_if_you_login_with_invalid_password(
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+@pytest.mark.parametrize("endpoint", [TOKEN_URL, LOGIN_URL])
+def test_should_return_403_if_user_not_active(
+        endpoint: str,
+        client: TestClient,
+) -> None:
+    response = client.post(
+        endpoint, data={"username": "ajb", "password": "secret"}
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.parametrize("endpoint", [TOKEN_URL, LOGIN_URL])
+def test_should_return_403_if_user_not_verified(
+        endpoint: str,
+        client: TestClient,
+) -> None:
+    response = client.post(
+        endpoint, data={"username": "ajb", "password": "secret"}
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
 def test_should_return_a_token(
     client: TestClient,
 ) -> None:

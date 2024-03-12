@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from starlette import status
 
 from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import NotFoundError, AuthorizationError, InactiveUserError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication import AccessToken
@@ -103,9 +104,29 @@ def get_current_user(request: Request) -> User:
     try:
         authorization: Optional[str] = request.headers.get("Authorization")
         if authorization:
-            return _user_from_auth_header(authorization)
+            user = _user_from_auth_header(authorization)
         else:
-            return _user_from_session(request)
+            user = _user_from_session(request)
+        if not user.is_active:
+            raise InactiveUserError()
+        if not user.user_verified:
+            raise AuthorizationError()
+        return user
+    except AuthorizationError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                f"User didn't validate the account. Please visit "
+                f"{get_settings().frontend_uri}/request-validation-link, to validate your account"
+            ),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except InactiveUserError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is not active. Please contact SALT Help for assistance.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

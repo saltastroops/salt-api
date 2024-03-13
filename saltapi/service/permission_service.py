@@ -525,4 +525,4 @@ class PermissionService:
         if self.check_user_has_role(user, Role.ADMINISTRATOR):
             return
         if user_id != user.id:
-            raise ValidationError(f"You cannot user id {user_id}")
+            raise ValidationError(f"You can't validate user with user ID {user_id}.")

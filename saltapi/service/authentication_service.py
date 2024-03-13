@@ -6,8 +6,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
 
-from saltapi.exceptions import NotFoundError, ValidationError
-from saltapi.exceptions import NotFoundError, AuthorizationError, InactiveUserError
+from saltapi.exceptions import AuthorizationError, InactiveUserError, NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication import AccessToken
@@ -62,21 +61,6 @@ class AuthenticationService:
         if verification:
             secret_key = VERIFICATION_KEY
         encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=ALGORITHM)
-
-        return cast(str, encoded_jwt)
-
-    @staticmethod
-    def temp_jwt_token(
-            payload: Dict[str, Any], expires_delta: Optional[timedelta] = None
-    ) -> str:
-        """Create a JWT token."""
-        to_encode = payload.copy()
-        if expires_delta:
-            expire = datetime.utcnow() + expires_delta
-        else:
-            expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_LIFETIME_HOURS)
-        to_encode["exp"] = expire
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
         return cast(str, encoded_jwt)
 
@@ -179,13 +163,15 @@ def find_user_from_token(token: str, verification: bool) -> User:
 def get_user_to_verify(request: Request) -> User:
     try:
         authorization: Optional[str] = request.headers.get("Authorization")
-        if authorization:
-            user = _user_from_auth_header(authorization, verification=True)
-            if not user:
-                raise NotFoundError("User not found")
 
-            return user
-        raise ValidationError("Failed to validate user.")
+        if not authorization:
+            raise ValidationError("Failed to validate user.")
+
+        user = _user_from_auth_header(authorization, verification=True)
+        if not user:
+            raise NotFoundError("User not found.")
+        return user
+
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

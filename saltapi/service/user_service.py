@@ -210,7 +210,7 @@ SALT Team
     <p><a href="{registration_confirmation_url}">{registration_confirmation_url}</a>.</p>
     <p>Alternatively, you can copy the link and paste it into the address bar of your browser.</p>
     <p>Please note that this verification link will expire in 3 hours.</p>
-    <p>IIf you did not intend to register to the SALT Web Manager, please disregard this email.</p>
+    <p>If you did not intend to register to the SALT Web Manager, please disregard this email.</p>
     <p>Kind regards,</p>
     <p>SALT Team</p>
   </body>
@@ -221,7 +221,7 @@ SALT Team
             to=f"{user_fullname} <{user_email}>",
             html_body=html_body,
             plain_body=plain_body,
-            subject="User Activation",
+            subject="SALT Web Manager User Verification",
         )
         mail_service.send_email(to=[user_email], message=message)
 

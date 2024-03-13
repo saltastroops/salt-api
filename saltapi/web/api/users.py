@@ -118,7 +118,7 @@ def get_users(
 
 
 @router.post(
-    "/send-verification-link", summary="Send an activation Link", response_model=Message
+    "/send-verification-link", summary="Send a verification link.", response_model=Message
 )
 def send_verification_link(
         username_email: UsernameEmail = Body(
@@ -127,7 +127,7 @@ def send_verification_link(
 
 ) -> Message:
     """
-    Send activation link.
+    Send verification link.
     """
     with UnitOfWork() as unit_of_work:
 
@@ -330,19 +330,19 @@ def update_password(
 
 
 @router.post(
-    "/{user_id}/verify-user", summary="Activate user", response_model=User
+    "/{user_id}/verify-user", summary="Verify user", response_model=User
 )
-def activate_user(
+def verify_user(
         user_id: int = Path(
             ...,
             title="User id",
-            description="Id for user to activate",
+            description="Id for user to verify",
         ),
         user: _User = Depends(get_user_to_verify),
 
 ) -> _User:
     """
-    Activate user
+    Verify user
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

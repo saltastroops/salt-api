@@ -1056,11 +1056,14 @@ ON DUPLICATE KEY UPDATE
             },
         )
 
-    def verify_user(self, user_id: int) -> None:
+    def verify_user(self, user_id: int, verify: bool = True) -> None:
+        """
+        Method to change user's verification statatus.
+        """
         stmt = text(
             """
 UPDATE PiptUser
-SET UserVerified = 1
+SET UserVerified = :verify
 WHERE PiptUser_Id = :user_id
         """
         )
@@ -1068,4 +1071,21 @@ WHERE PiptUser_Id = :user_id
         if not self._does_user_id_exist(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
 
-        self.connection.execute(stmt, {"user_id": user_id})
+        self.connection.execute(stmt, {"user_id": user_id, "verify": verify})
+
+    def activate_user(self, user_id: int, active: bool = True) -> None:
+        """
+        Method to activate or deactivate a user.
+        """
+        stmt = text(
+            """
+UPDATE PiptUser
+SET Active = :active
+WHERE PiptUser_Id = :user_id
+        """
+        )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        self.connection.execute(stmt, {"user_id": user_id, "active": active})

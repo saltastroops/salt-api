@@ -176,7 +176,6 @@ def test_patch_user_should_return_400_for_using_someone_elses_email(
     user_update = _patch_data(user["given_name"], user["family_name"], existing_email)
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
-    _remove_untested(expected_updated_user_details)
 
     response = client.patch(_url(user["id"]), json=user_update)
 

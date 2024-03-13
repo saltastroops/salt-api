@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, AuthenticationError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -639,6 +639,7 @@ WHERE PS.PiptSetting_Name = 'RightAdmin'
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
+        password = cast(str, password)
         return hashlib.md5(password.encode("utf-8")).hexdigest()  # nosec
 
     def _update_password_hash(self, username: str, password: str) -> None:
@@ -721,18 +722,18 @@ WHERE PiptUser_Id = :user_id
 
     def find_user_with_username_and_password(
         self, username: str, password: str
-    ) -> User:
+    ) -> Optional[User]:
         """
         Find a user with a username and password.
 
         If the combination of username and password is valid, then the corresponding
-        user is returned. Otherwise a NotFoundError is raised.
+        user is returned. Otherwise, None is returned
         """
         user = self.get_by_username(username)
         if not user:
-            raise AuthenticationError()
+            return
         if not self.verify_password(password, user.password_hash):
-            raise AuthenticationError()
+            return
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:

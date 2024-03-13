@@ -7,7 +7,7 @@ from pydantic import EmailStr
 from pytest import MonkeyPatch
 from sqlalchemy.engine import Connection
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, AuthenticationError
+from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import UserStatistics
 from tests.conftest import find_usernames
@@ -83,7 +83,7 @@ def _random_string() -> str:
 
 
 @nodatabase
-def test_create_user_raisers_error_if_username_exists_already(
+def test_create_user_raises_error_if_username_exists_already(
         db_connection: Connection,
 ) -> None:
     username = "hettlage"
@@ -436,7 +436,6 @@ def test_find_by_username_and_password_returns_correct_user(
     user = asdict(
         user_repository.find_user_with_username_and_password(username, "some_password")
     )
-    print(user)
     user["roles"] = [str(role) for role in user["roles"]]  # allow YAML representation
 
     del user["password_hash"]
@@ -456,32 +455,22 @@ def test_find_by_username_and_password_returns_none_for_wrong_username(
     monkeypatch.setattr(
         user_repository, "verify_password", lambda password, hashed_password: True
     )
-
-    with pytest.raises(AuthenticationError):
-        user_repository.find_user_with_username_and_password(
-            cast(str, username), "some_password"
-        )
+    assert user_repository.find_user_with_username_and_password(cast(str, username), "some_password") is None
 
 
+@pytest.mark.parametrize(
+    "username, password",
+    [("hettlage", "wrongpassword"), ("hettlage", ""), ("hettlage", "æ����"), ],
+)
 @nodatabase
-def test_find_by_username_and_password_raises_error_for_wrong_password(
-        db_connection: Connection,
+def test_find_by_username_and_password_returns_none_for_wrong_password(
+        username, password, db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
-    username = "hettlage"
 
     # Make sure the user exists
     assert user_repository.get_by_username(username)
-
-    with pytest.raises(AuthenticationError):
-        user_repository.find_user_with_username_and_password(username, "wrongpassword")
-
-    with pytest.raises(AuthenticationError):
-        user_repository.find_user_with_username_and_password(username, "")
-
-    # None may raise an exception other than AuthenticationError
-    with pytest.raises(Exception):
-        user_repository.find_user_with_username_and_password(username, cast(str, None))
+    assert user_repository.find_user_with_username_and_password(username, password) is None
 
 
 @pytest.mark.parametrize(

@@ -6,7 +6,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
 
-from saltapi.exceptions import AuthorizationError, NotFoundError
+from saltapi.exceptions import AuthenticationError, NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication import AccessToken
@@ -65,6 +65,8 @@ class AuthenticationService:
         user = self.user_repository.find_user_with_username_and_password(
             username, password
         )
+        if not user:
+            raise AuthenticationError("User not found.")
         return user
 
     def validate_auth_token(self, token: str) -> User:

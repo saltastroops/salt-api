@@ -99,8 +99,7 @@ SALT Team
         if user:
             # Just in case the password hash ends up somewhere
             user.password_hash = "***"  # nosec
-            return user
-        return None
+        return user
 
     def get_user_details(self, user_id: int) -> Dict[str, Any]:
         user = self.repository.get_user_details(user_id)
@@ -115,8 +114,7 @@ SALT Team
         if user:
             # Just in case the password hash ends up somewhere
             user.password_hash = "***"  # nosec
-            return user
-        return None
+        return user
 
     def get_user_by_username(self, username: str) -> Optional[User]:
 
@@ -124,8 +122,7 @@ SALT Team
         if user:
             # Just in case the password hash ends up somewhere
             user.password_hash = "***"  # nosec
-            return user
-        return None
+        return user
 
     def update_user(self, user_id: int, user: Dict[str, Any]) -> None:
         self._validate_user_statistics(user)

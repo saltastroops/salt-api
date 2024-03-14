@@ -563,8 +563,8 @@ def test_proprietary_period_start_date_returns_correct_start_date(
 @pytest.mark.parametrize(
     "proposal_code,proprietary_period,block_visits,expected_date",
     [
-        ("2020-2-SCI-005", 0, [], date(2023, 11, 1)),
-        ("2020-2-SCI-005", 10, [], date(2024, 9, 1)),
+        ("2020-2-SCI-005", 0, [], date(2024, 5, 1)),
+        ("2020-2-SCI-005", 10, [], date(2025, 3, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 2, 1)}], date(2021, 5, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 2, 1)}], date(2022, 3, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 4, 30)}], date(2021, 5, 1)),

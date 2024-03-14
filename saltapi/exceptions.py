@@ -3,6 +3,10 @@ class AuthorizationError(Exception):
         super().__init__(message)
 
 
+class AuthenticationError(Exception):
+    pass
+
+
 class NotFoundError(ValueError):
     pass
 

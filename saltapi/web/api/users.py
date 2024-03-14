@@ -104,8 +104,10 @@ def get_users(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_users(user)
         user_service = services.user_service(unit_of_work.connection)
-
-        return user_service.get_users()
+        user = user_service.get_users()
+        if user is None:
+            raise NotFoundError("User Unknown.")
+        return user
 
 
 @router.get("/{user_id}", summary="Get user details", response_model=User)
@@ -121,7 +123,10 @@ def get_user(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
         user_service = services.user_service(unit_of_work.connection)
-        return user_service.get_user(user_id)
+        user = user_service.get_user(user_id)
+        if user is None:
+            raise NotFoundError("Unknown user.")
+        return user
 
 
 @router.patch(
@@ -287,5 +292,7 @@ def update_password(
         user_service.update_password(user_id, password)
 
         unit_of_work.commit()
-
-        return user_service.get_user(user_id)
+        user = user_service.get_user(user_id)
+        if user is None:
+            raise NotFoundError("Unknown user.")
+        return user

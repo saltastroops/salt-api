@@ -14,7 +14,6 @@ from saltapi.web.schema.user import LegalStatus
 os.environ["DOTENV_FILE"] = ".env.test"
 dotenv.load_dotenv(os.environ["DOTENV_FILE"])
 
-
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
@@ -26,7 +25,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Connection, Engine
 
 import saltapi.web.api.authentication
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import AuthenticationError
 from saltapi.main import app
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import User
@@ -36,7 +35,7 @@ from saltapi.service.user_service import UserService
 def get_user_authentication_function() -> Callable[[str, str], User]:
     def authenticate_user(username: str, password: str) -> User:
         if password != USER_PASSWORD and password != USER_PASSWORD_UPDATE:
-            raise NotFoundError("No user found for username and password")
+            raise AuthenticationError("No user found for username and password")
 
         with cast(Engine, _create_engine()).connect() as connection:
             user_repository = UserRepository(connection)
@@ -51,9 +50,7 @@ app.dependency_overrides[
     saltapi.web.api.authentication.get_user_authentication_function
 ] = get_user_authentication_function
 
-
 TEST_DATA = "users.yaml"
-
 
 # Replace the user authentication with one which assumes that every user has the
 # password "secret".
@@ -105,7 +102,7 @@ def _data_file(data_type: str, request: pytest.FixtureRequest) -> Path:
 
 @pytest.fixture(scope="function")
 def check_data(
-    data_regression: Any, request: pytest.FixtureRequest
+        data_regression: Any, request: pytest.FixtureRequest
 ) -> Generator[Callable[[Any], None], None, None]:
     # Figure out the file path for the data file
     data_file = _data_file("regression", request)
@@ -133,9 +130,9 @@ def saao_client() -> Generator[TestClient, None, None]:
 
 
 def find_username(
-    user_type: str,
-    proposal_code: Optional[str] = None,
-    partner_code: Optional[str] = None,
+        user_type: str,
+        proposal_code: Optional[str] = None,
+        partner_code: Optional[str] = None,
 ) -> str:
     """
     Find the username of a user who has a given user type.
@@ -193,7 +190,7 @@ def find_username(
 
 
 def find_usernames(
-    role: str, has_role: bool, proposal_code: Optional[str] = None
+        role: str, has_role: bool, proposal_code: Optional[str] = None
 ) -> List[str]:
     normalized_role = role.lower()
     normalized_role = normalized_role.replace(" ", "_").replace("-", "_")
@@ -277,12 +274,12 @@ def create_user(client: TestClient) -> Dict[str, Any]:
 
 
 def setup_finder_chart_files(
-    proposals_dir: Path,
-    proposal_code: str,
-    parent_dirs: List[str],
-    finder_chart_name: str,
-    original_suffixes: List[str],
-    thumbnail_suffixes: List[str],
+        proposals_dir: Path,
+        proposal_code: str,
+        parent_dirs: List[str],
+        finder_chart_name: str,
+        original_suffixes: List[str],
+        thumbnail_suffixes: List[str],
 ) -> List[Path]:
     """
     Setup dummy finder charts.
@@ -327,10 +324,10 @@ def setup_finder_chart_files(
 
         if suffix in ["jpg", "pdf", "png"]:
             finder_chart_template = (
-                Path(__file__).parent
-                / "data"
-                / "finder_charts"
-                / f"finder_chart.{suffix}"
+                    Path(__file__).parent
+                    / "data"
+                    / "finder_charts"
+                    / f"finder_chart.{suffix}"
             )
             finder_chart = parent_dir / f"{prefix}{finder_chart_name}.{suffix}"
             shutil.copy(finder_chart_template, finder_chart)

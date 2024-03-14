@@ -1058,9 +1058,9 @@ ON DUPLICATE KEY UPDATE
 
     def verify_user(self, user_id: int, verify: bool = True) -> None:
         """
-        Method to update user's verification status.
+        Update user's verification status.
 
-        An error is raised if the user id doesn't exist.
+        If the user id does not exist, a NotFoundError is raised.
         """
         stmt = text(
             """
@@ -1077,9 +1077,9 @@ WHERE PiptUser_Id = :user_id
 
     def activate_user(self, user_id: int, active: bool = True) -> None:
         """
-        Method to update user's activation status.
+        Update user's activation status.
 
-        An error is raised if the user id doesn't exist.
+        If the user id does not exist, a NotFoundError is raised.
         """
         stmt = text(
             """

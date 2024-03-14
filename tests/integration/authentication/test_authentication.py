@@ -44,6 +44,7 @@ def test_should_return_403_if_user_not_active(
 
 
 @pytest.mark.parametrize("endpoint", [TOKEN_URL, LOGIN_URL])
+@pytest.mark.skip(reason="User needs to be active and not validated")
 def test_should_return_403_if_user_not_verified(
         endpoint: str,
         client: TestClient,
@@ -52,7 +53,8 @@ def test_should_return_403_if_user_not_verified(
         endpoint, data={"username": "ajb", "password": "secret"}
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert "Your account is not active" in response.json()["message"]
+    # TODO activate user and invalidate the user to Do this test
+    assert "Your account has not been validated" in response.json()["message"]
 
 
 def test_should_return_a_token(

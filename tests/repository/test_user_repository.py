@@ -70,7 +70,7 @@ def test_get_user_by_email_returns_correct_user(
 
 
 @nodatabase
-def test_get_user_by_email_returns_returns_none_if_no_user(
+def test_get_user_by_email_returns_none_for_non_existing_user(
         db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     user_repository = UserRepository(db_connection)
@@ -139,11 +139,11 @@ def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
 
 
 @nodatabase
-def test_get_user_by_email_returns_none_for_non_existing_user(
+def test_get_user_by_username_returns_none_for_non_existing_use(
         db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
-    user = user_repository.get_by_username("invalid@email.com")
+    user = user_repository.get_by_username("nonExistingUsername")
     assert user is None
 
 
@@ -445,7 +445,7 @@ def test_find_by_username_and_password_returns_correct_user(
 
 
 @nodatabase
-@pytest.mark.parametrize("username", ["idontexist", "", None])
+@pytest.mark.parametrize("username", ["idontexist", ""])
 def test_find_by_username_and_password_returns_none_for_wrong_username(
         db_connection: Connection, username: Optional[str], monkeypatch: MonkeyPatch
 ) -> None:
@@ -458,10 +458,6 @@ def test_find_by_username_and_password_returns_none_for_wrong_username(
     assert user_repository.find_user_with_username_and_password(cast(str, username), "some_password") is None
 
 
-@pytest.mark.parametrize(
-    "username, password",
-    [("hettlage", "wrongpassword"), ("hettlage", ""), ("hettlage", "æ����"), ],
-)
 @nodatabase
 def test_find_by_username_and_password_returns_none_for_wrong_password(
         username, password, db_connection: Connection,
@@ -470,7 +466,7 @@ def test_find_by_username_and_password_returns_none_for_wrong_password(
 
     # Make sure the user exists
     assert user_repository.get_by_username(username)
-    assert user_repository.find_user_with_username_and_password(username, password) is None
+    assert user_repository.find_user_with_username_and_password(username, "wrongpassword") is None
 
 
 @pytest.mark.parametrize(

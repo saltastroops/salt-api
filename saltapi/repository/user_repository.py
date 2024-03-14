@@ -639,7 +639,6 @@ WHERE PS.PiptSetting_Name = 'RightAdmin'
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
-        password = cast(str, password)
         return hashlib.md5(password.encode("utf-8")).hexdigest()  # nosec
 
     def _update_password_hash(self, username: str, password: str) -> None:
@@ -731,9 +730,9 @@ WHERE PiptUser_Id = :user_id
         """
         user = self.get_by_username(username)
         if not user:
-            return
+            return None
         if not self.verify_password(password, user.password_hash):
-            return
+            return None
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:

@@ -135,10 +135,12 @@ def send_verification_link(
     with UnitOfWork() as unit_of_work:
 
         user_service = services.user_service(unit_of_work.connection)
-        try:
-            user = user_service.get_user_by_username(username_email.username_email)
-        except NotFoundError:
+
+        user = user_service.get_user_by_username(username_email.username_email)
+        if not user:
             user = user_service.get_user_by_email(username_email.username_email)
+        if not user:
+            raise NotFoundError()
 
         user_service.send_registration_confirmation_email(
             user.id,

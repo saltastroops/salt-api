@@ -32,6 +32,8 @@ USER = User(
         )
     ],
     roles=[],
+    user_verified=True,
+    active=True
 )
 
 
@@ -55,6 +57,8 @@ class FakeUserRepository:
                     )
                 ],
                 roles=[],
+                user_verified=True,
+                active=True
             )
         return None
 
@@ -79,6 +83,8 @@ class FakeUserRepository:
                     )
                 ],
                 roles=[],
+                user_verified=True,
+                active=True
             )
 
         raise NotFoundError("User not found or password doesn't match.")

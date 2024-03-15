@@ -14,7 +14,7 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
-from saltapi.exceptions import ValidationError
+from saltapi.exceptions import ValidationError, NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
@@ -642,11 +642,12 @@ def update_investigator_proposal_approval_status(
             user, approval_user_id, proposal_code
         )
 
-        user_details = (
-            user
-            if user.id == approval_user_id
-            else user_service.get_user(approval_user_id)
-        )
+        if user.id == approval_user_id:
+            user_details = user
+        else:
+            user_details = user_service.get_user(approval_user_id)
+            if user_details is None:
+                raise NotFoundError("Unknown user.")
 
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal_service.update_investigator_proposal_approval_status(

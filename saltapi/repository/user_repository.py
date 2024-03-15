@@ -2,7 +2,7 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, cast, Optional
 
 from passlib.context import CryptContext
 from sqlalchemy import text
@@ -37,7 +37,7 @@ SELECT PU.PiptUser_Id           AS id,
        I.InstituteName_Name     AS institution_name,
        I2.Institute_Id          AS institution_id,
        I2.Department            AS department,
-       PU.Active                AS is_active,
+       PU.Active                AS active,
        PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
          JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
@@ -45,10 +45,9 @@ FROM PiptUser AS PU
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
-
 """
 
-    def _get(self, rows: Any) -> User:
+    def _get(self, rows: Any) -> Optional[User]:
         user = {}
         for i, row in enumerate(rows):
             if i == 0:
@@ -71,7 +70,7 @@ FROM PiptUser AS PU
                             "partner_name": row.partner_name,
                         }
                     ],
-                    "is_active": True if row.is_active == 1 else False,
+                    "active": True if row.active == 1 else False,
                     "user_verified": True if row.user_verified == 1 else False,
                 }
             else:
@@ -86,11 +85,11 @@ FROM PiptUser AS PU
                         "partner_name": row.partner_name,
                     }
                 )
-        if not user:
-            raise NotFoundError("Unknown user")
-        return User(**user, roles=self.get_user_roles(user["username"]))
+        if user:
+            return User(**user, roles=self.get_user_roles(user["username"]))
+        return None
 
-    def get_by_username(self, username: str) -> User:
+    def get_by_username(self, username: str) -> Optional[User]:
         """
         Returns the user with a given username.
 
@@ -102,7 +101,7 @@ FROM PiptUser AS PU
         user = self._get(result)
         return user
 
-    def get(self, user_id: int) -> User:
+    def get(self, user_id: int) -> Optional[User]:
         """
         Returns the user with a given user id.
 
@@ -114,7 +113,7 @@ FROM PiptUser AS PU
         user = self._get(result)
         return user
 
-    def get_by_email(self, email: str) -> User:
+    def get_by_email(self, email: str) -> Optional[User]:
         """
         Returns the user with a given email
 
@@ -261,12 +260,8 @@ WHERE Investigator_Id = :investigator_id
 
     def _does_username_exist(self, username: str) -> bool:
         """Check whether a username exists already."""
-        try:
-            self.get_by_username(username)
-        except NotFoundError:
-            return False
 
-        return True
+        return self.get_by_username(username) is not None
 
     def update(self, user_id: int, user_update: Dict[str, Any]) -> None:
         """
@@ -279,14 +274,12 @@ WHERE Investigator_Id = :investigator_id
         if not self.is_existing_user_id(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
 
-        try:
-            user = self.get_by_email(user_update["email"])
+        user = self.get_by_email(user_update["email"])
+        if user is not None:
             if user.id != user_id:
                 raise ResourceExistsError(
                     f"The email {user_update['email']} exists already."
                 )
-        except NotFoundError:
-            pass
 
         if user_update["password"]:
             self.update_password(user_id, user_update["password"])
@@ -729,18 +722,18 @@ WHERE PiptUser_Id = :user_id
 
     def find_user_with_username_and_password(
         self, username: str, password: str
-    ) -> User:
+    ) -> Optional[User]:
         """
         Find a user with a username and password.
 
         If the combination of username and password is valid, then the corresponding
-        user is returned. Otherwise a NotFoundError is raised.
+        user is returned. Otherwise, None is returned
         """
         user = self.get_by_username(username)
         if not user:
-            raise NotFoundError()
+            return None
         if not self.verify_password(password, user.password_hash):
-            raise NotFoundError()
+            return None
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:

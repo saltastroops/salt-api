@@ -13,6 +13,7 @@ from saltapi.exceptions import (
     AuthorizationError,
     NotFoundError,
     ValidationError,
+    AuthenticationError,
 )
 
 
@@ -109,3 +110,15 @@ def setup_exception_handler(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": str(exc)}
         )
+
+    @app.exception_handler(AuthenticationError)
+    async def authentication_error_handler(
+            request: Request, exc: AuthenticationError
+    ) -> Response:
+        """Catch an AuthenticationError."""
+
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED, content={"message": str(exc)}
+        )
+

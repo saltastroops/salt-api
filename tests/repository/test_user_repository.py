@@ -460,10 +460,10 @@ def test_find_by_username_and_password_returns_none_for_wrong_username(
 
 @nodatabase
 def test_find_by_username_and_password_returns_none_for_wrong_password(
-        username, password, db_connection: Connection,
+         db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
-
+    username = "hettlage"
     # Make sure the user exists
     assert user_repository.get_by_username(username)
     assert user_repository.find_user_with_username_and_password(username, "wrongpassword") is None

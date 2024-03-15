@@ -6,7 +6,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from starlette import status
 
-from saltapi.exceptions import AuthenticationError, InactiveUserError, NotFoundError, ValidationError
+from saltapi.exceptions import AuthenticationError, NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication import AccessToken
@@ -49,7 +49,7 @@ class AuthenticationService:
 
     @staticmethod
     def jwt_token(
-        payload: Dict[str, Any], expires_delta: Optional[timedelta] = None, verification: bool =False
+        payload: Dict[str, Any], expires_delta: Optional[timedelta] = None, verification: bool = False
     ) -> str:
         """Create a JWT token."""
         to_encode = payload.copy()

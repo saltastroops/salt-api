@@ -2,10 +2,13 @@ import os
 import re
 import shutil
 import uuid
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 import dotenv
 
+from saltapi.service.authentication_service import AuthenticationService
+from saltapi.service.mail_service import MailService
 from saltapi.web.schema.user import LegalStatus
 
 # Make sure that the test database etc. are used.
@@ -129,6 +132,11 @@ def saao_client() -> Generator[TestClient, None, None]:
         yield TestClient(app)
 
 
+@pytest.fixture
+def email_service_mock():
+    return MailService()
+
+
 def find_username(
         user_type: str,
         proposal_code: Optional[str] = None,
@@ -233,6 +241,20 @@ def authenticate(username: str, client: TestClient) -> None:
     )
     token = response.json()["access_token"]
     client.headers["Authorization"] = f"Bearer {token}"
+
+
+def authenticate_with_validation_token(user_id: int, client: TestClient) -> None:
+    with cast(Engine, _create_engine()).connect() as connection:
+        user_repository = UserRepository(connection)
+        auth_service = AuthenticationService(user_repository)
+        token = auth_service.jwt_token({"sub": str(user_id)}, timedelta(hours=1), verification=True)
+        client.headers["Authorization"] = f"Bearer {token}"
+
+
+def get_user_by_username(username: str) -> User:
+    with cast(Engine, _create_engine()).connect() as connection:
+        user_repository = UserRepository(connection)
+        return user_repository.get_by_username(username)
 
 
 def get_authenticated_user_id(client: TestClient) -> int:

@@ -47,7 +47,7 @@ def test_list_returns_correct_content(
         # from RU for 2021-1 (although it is requesting time from UW)
         ("2021-1", "2021-1", {"user_type": "TAC Chair", "partner_code": "RU"}),
         # TAC member for UW
-        ("2021-1", "2021-1", {"user_type": "TAC member", "partner_code": "UW"}),
+        ("2021-1", "2021-1", {"user_type": "TAC member", "partner_code": "RU"}),
         # User without a proposal in the semester
         (
             "2020-2",

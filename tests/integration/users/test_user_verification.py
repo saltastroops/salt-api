@@ -39,7 +39,7 @@ def test_user_verification_requires_valid_user_id(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_user_cannot_validate_user_without_authentication_token(
+def test_user_cannot_verify_without_authentication_token(
         client: TestClient,
 ) -> None:
     user_id = 0

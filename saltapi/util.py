@@ -334,7 +334,7 @@ def validate_user(user: User) -> None:
         raise AuthorizationError("Your account is not active. Please contact SALT Help for assistance.")
     if not user.user_verified:
         raise AuthorizationError(
-            "Your account has not been validated. Please visit "
-            f"{get_settings().frontend_uri}/request-validation-link to validate your account."
+            "Your account has not been verified. Please visit "
+            f"{get_settings().frontend_uri}/request-verification-link to verify your account."
         )
 

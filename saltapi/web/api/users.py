@@ -136,9 +136,10 @@ def send_verification_link(
 
         user_service = services.user_service(unit_of_work.connection)
 
-        user = user_service.get_user_by_username(username_email.username_email)
-        if not user:
-            user = user_service.get_user_by_email(username_email.username_email)
+        user = (
+                user_service.get_user_by_username(username_email.username_email)
+                or user_service.get_user_by_email(username_email.username_email)
+        )
         if not user:
             raise NotFoundError()
 

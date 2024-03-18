@@ -137,7 +137,7 @@ def _user_from_session(request: Request) -> User:
         return user_repository.get(user_id)
 
 
-def find_user_from_token(token: str, verification: bool) -> User:
+def find_user_from_token(token: str, verification: bool = False) -> User:
     with UnitOfWork() as unit_of_work:
         user_repository = UserRepository(unit_of_work.connection)
         authentication_repository = AuthenticationService(user_repository)

@@ -1,9 +1,11 @@
 import uuid
 from typing import Any, Dict, Optional
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from starlette import status
 
+from saltapi.service.mail_service import MailService
 from saltapi.web.schema.user import LegalStatus
 from tests.conftest import (
     authenticate,
@@ -48,8 +50,9 @@ def _new_user_details(username: Optional[str] = None) -> Dict[str, Any]:
     )
 
 
+@patch.object(MailService, 'send_email')
 def test_post_user_should_be_allowed_for_unauthenticated_user(
-    client: TestClient,
+        mocker, email_service_mock, client: TestClient,
 ) -> None:
     not_authenticated(client)
 
@@ -57,19 +60,21 @@ def test_post_user_should_be_allowed_for_unauthenticated_user(
     assert response.status_code == status.HTTP_201_CREATED
 
 
+@patch.object(MailService, 'send_email')
 def test_post_user_should_be_allowed_for_misauthenticated_user(
-    client: TestClient,
+        mocker, email_service_mock, client: TestClient,
 ) -> None:
     misauthenticate(client)
-
+    mocker.patch.object(email_service_mock, 'send_email')
     response = client.post(USERS_URL, json=_new_user_details())
     assert response.status_code == status.HTTP_201_CREATED
 
 
-def test_post_user_should_be_allowed_for_authenticated_user(client: TestClient) -> None:
+@patch.object(MailService, 'send_email')
+def test_post_user_should_be_allowed_for_authenticated_user(mocker, email_service_mock, client: TestClient) -> None:
     username = find_username("Investigator", proposal_code="2019-2-SCI-006")
     authenticate(username, client)
-
+    mocker.patch.object(email_service_mock, 'send_email')
     response = client.post(USERS_URL, json=_new_user_details())
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -87,7 +92,8 @@ def test_post_user_should_return_400_if_username_exists_already(
     assert "username" in response.json()["message"].lower()
 
 
-def test_post_user_should_create_a_new_user(client: TestClient) -> None:
+@patch.object(MailService, 'send_email')
+def test_post_user_should_create_a_new_user(mocker, email_service_mock, client: TestClient) -> None:
     new_user_details = _new_user_details()
     expected_user = new_user_details.copy()
     del expected_user["password"]
@@ -98,6 +104,8 @@ def test_post_user_should_create_a_new_user(client: TestClient) -> None:
     del expected_user["has_phd"]
     del expected_user["year_of_phd_completion"]
     expected_user["roles"] = []
+
+    mocker.patch.object(email_service_mock, 'send_email')
 
     response = client.post(USERS_URL, json=new_user_details)
     assert response.status_code == status.HTTP_201_CREATED

@@ -86,13 +86,13 @@ def test_should_return_422_for_invalid_semesters(
             ),
         ],
         [
-            find_username("TAC Member", partner_code="UW"),
+            find_username("TAC Member", partner_code="RU"),
             "2021-1",
             "2021-1",
-            8,
+            7,
             (
-                "2018-2-LSP-001, 2018-2-MLT-005, 2020-1-MLT-005, 2020-1-MLT-009, "
-                "2020-2-MLT-009, 2021-1-SCI-016, 2021-1-SCI-023, 2021-1-SCI-025"
+                "2021-1-SCI-028, 2018-1-SCI-041, 2021-1-MLT-007, 2021-1-SCI-031, "
+                "2018-1-SCI-012, 2021-1-SCI-012, 2021-1-SCI-015"
             ),
         ],
         [

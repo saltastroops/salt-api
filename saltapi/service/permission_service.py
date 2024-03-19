@@ -520,3 +520,9 @@ class PermissionService:
             raise AuthorizationError(
                 "You may only update the status from within the SAAO network."
             )
+
+    def check_permission_to_validate_user(self, user_id: int, user: User) -> None:
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+        if user_id != user.id:
+            raise ValidationError(f"You can't validate user with user ID {user_id}.")

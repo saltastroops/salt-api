@@ -5,7 +5,7 @@ from starlette import status
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.authentication_service import get_current_user
+from saltapi.service.authentication_service import get_current_user, get_user_to_verify
 from saltapi.service.user import NewUserDetails as _NewUserDetails
 from saltapi.service.user import User as _User
 from saltapi.service.user import UserDetails as _UserDetails
@@ -21,6 +21,7 @@ from saltapi.web.schema.user import (
     UserListItem,
     UserUpdate,
     BaseUserDetails,
+    UsernameEmail,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -75,7 +76,7 @@ def create_user(
 ) -> _User:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
-        user_service.create_user(
+        pipt_user_id = user_service.create_user(
             _NewUserDetails(
                 username=user.username,
                 password=user.password,
@@ -90,6 +91,15 @@ def create_user(
                 has_phd=user.has_phd,
                 year_of_phd_completion=user.year_of_phd_completion,
             )
+        )
+
+        # Now that the user has been added to the Database we need to confirm that the user provided a correct email
+        # address.
+        # Validate email
+        user_service.send_registration_confirmation_email(
+            pipt_user_id,
+            f"{user.family_name} {user.given_name}",
+            user.email
         )
         unit_of_work.commit()
 
@@ -108,6 +118,38 @@ def get_users(
         if user is None:
             raise NotFoundError("User Unknown.")
         return user
+
+
+@router.post(
+    "/send-verification-link", summary="Send a verification link.", response_model=Message
+)
+def send_verification_link(
+        username_email: UsernameEmail = Body(
+            ..., title="Username or Email", description="Username or Email."
+        ),
+
+) -> Message:
+    """
+    Send verification link.
+    """
+    with UnitOfWork() as unit_of_work:
+
+        user_service = services.user_service(unit_of_work.connection)
+
+        user = (
+                user_service.get_user_by_username(username_email.username_email)
+                or user_service.get_user_by_email(username_email.username_email)
+        )
+        if not user:
+            raise NotFoundError()
+
+        user_service.send_registration_confirmation_email(
+            user.id,
+            f"{user.family_name} {user.given_name}",
+            user.email
+        )
+
+        return Message(message="Email with an activation link has been sent.")
 
 
 @router.get("/{user_id}", summary="Get user details", response_model=User)
@@ -296,3 +338,29 @@ def update_password(
         if user is None:
             raise NotFoundError("Unknown user.")
         return user
+
+
+@router.post(
+    "/{user_id}/verify-user", summary="Verify user", response_model=User
+)
+def verify_user(
+        user_id: int = Path(
+            ...,
+            title="User id",
+            description="Id for user to verify",
+        ),
+        user: _User = Depends(get_user_to_verify),
+
+) -> _User:
+    """
+    Verify user
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_validate_user(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.verify_user(user_id)
+
+        unit_of_work.commit()
+
+        return user_service.get_user(user_id)

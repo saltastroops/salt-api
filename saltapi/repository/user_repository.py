@@ -169,7 +169,7 @@ ORDER BY I.Surname, I.FirstName
         ]
         return users
 
-    def create(self, new_user_details: Dict[str, Any]) -> None:
+    def create(self, new_user_details: Dict[str, Any]) -> int:
         """Creates a new user."""
 
         # Make sure the username is still available
@@ -191,6 +191,7 @@ ORDER BY I.Surname, I.FirstName
                 year_of_phd_completion=new_user_details["year_of_phd_completion"],
             ),
         )
+        return pipt_user_id
 
     def _create_investigator_details(self, new_user_details: Dict[str, Any]) -> int:
         """
@@ -227,8 +228,8 @@ VALUES (:institution_id, :given_name, :family_name, :email)
 
         stmt = text(
             """
-INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active)
-VALUES (:username, :password_hash, :investigator_id, :email_validation, 0)
+INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active, UserVerified)
+VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
         """
         )
         result = self.connection.execute(
@@ -1047,3 +1048,41 @@ ON DUPLICATE KEY UPDATE
                 "year_of_phd": user_information["year_of_phd_completion"],
             },
         )
+
+    def verify_user(self, user_id: int, verify: bool = True) -> None:
+        """
+        Update user's verification status.
+
+        If the user id does not exist, a NotFoundError is raised.
+        """
+        stmt = text(
+            """
+UPDATE PiptUser
+SET UserVerified = :verify
+WHERE PiptUser_Id = :user_id
+        """
+        )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        self.connection.execute(stmt, {"user_id": user_id, "verify": verify})
+
+    def activate_user(self, user_id: int, active: bool = True) -> None:
+        """
+        Update user's activation status.
+
+        If the user id does not exist, a NotFoundError is raised.
+        """
+        stmt = text(
+            """
+UPDATE PiptUser
+SET Active = :active
+WHERE PiptUser_Id = :user_id
+        """
+        )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        self.connection.execute(stmt, {"user_id": user_id, "active": active})

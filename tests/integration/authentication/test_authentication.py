@@ -1,6 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
+from sqlalchemy.engine import Connection
+
+from saltapi.repository.user_repository import UserRepository
+from tests.conftest import authenticate, find_username
 
 TOKEN_URL = "/token"
 
@@ -35,7 +39,15 @@ def test_should_return_401_if_you_login_with_invalid_password(
 def test_should_return_403_if_user_not_active(
         endpoint: str,
         client: TestClient,
+        db_connection: Connection
 ) -> None:
+    with db_connection as connect:
+        username = "ajb"
+        user_repo = UserRepository(connect)
+        user = user_repo.get_by_username(username)
+        user_repo.activate_user(user.id, False)
+        user_repo.verify_user(user.id, True)
+        connect.commit()
     response = client.post(
         endpoint, data={"username": "ajb", "password": "secret"}
     )
@@ -44,17 +56,23 @@ def test_should_return_403_if_user_not_active(
 
 
 @pytest.mark.parametrize("endpoint", [TOKEN_URL, LOGIN_URL])
-@pytest.mark.skip(reason="User needs to be active and not verified")
 def test_should_return_403_if_user_not_verified(
         endpoint: str,
         client: TestClient,
+        db_connection: Connection
 ) -> None:
-    response = client.post(
-        endpoint, data={"username": "ajb", "password": "secret"}
-    )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    # TODO activate user and not verify the user to Do this test
-    assert "Your account has not been verified" in response.json()["message"]
+    with db_connection as connect:
+        username = "ajb"
+        user_repo = UserRepository(connect)
+        user = user_repo.get_by_username(username)
+        user_repo.activate_user(user.id, True)
+        user_repo.verify_user(user.id, False)
+        connect.commit()
+        response = client.post(
+            endpoint, data={"username": username, "password": "secret"}
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert "Your account has not been verified" in response.json()["message"]
 
 
 def test_should_return_a_token(
@@ -177,3 +195,54 @@ def test_logout_should_work_if_you_are_not_logged_in(client: TestClient) -> None
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert "session" not in response.cookies
+
+
+def _change_users_verify_active_status(user_id: int, verify: bool, active: bool, connection: Connection):
+    user_repo = UserRepository(connection)
+    user_repo.activate_user(user_id, active)
+    user_repo.verify_user(user_id, verify)
+    connection.commit()
+
+def test_users_with_a_valid_token_and_are_not_active_shouldnt_make_any_request(client: TestClient,  db_connection: Connection) -> None:
+    username = find_username("Not Active User")
+
+    # Make user the user is valid and have a valid token
+    with db_connection as connect:
+        user_repo = UserRepository(connect)
+        user = user_repo.get_by_username(username)
+
+        _change_users_verify_active_status(user.id, verify=True, active=True, connection=connect)
+        authenticate(username, client)
+        response = client.get("/proposals/")
+        assert response.status_code == status.HTTP_200_OK
+
+        # Deactivate the user.
+        user_repo = UserRepository(connect)
+        _change_users_verify_active_status(user.id, verify=True, active=False, connection=connect)
+
+        response = client.get("/proposals/")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Reset back
+        _change_users_verify_active_status(user.id, verify=False, active=False, connection=connect)
+
+
+def test_users_with_a_valid_token_and_are_not_verified_shouldnt_make_any_request(client: TestClient,  db_connection: Connection) -> None:
+    username = find_username("Not Active User")
+
+    with db_connection as connect:
+        user_repo = UserRepository(connect)
+        user = user_repo.get_by_username(username)
+
+        # Make user the user is valid and have a valid token
+        _change_users_verify_active_status(user.id, verify=True, active=True, connection=connect)
+        authenticate(username, client)
+        response = client.get("/proposals/")
+        assert response.status_code == status.HTTP_200_OK
+
+        # Deactivate the user.
+        _change_users_verify_active_status(user.id, verify=False, active=True, connection=connect)
+
+        response = client.get("/proposals/")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        _change_users_verify_active_status(user.id, verify=False, active=False, connection=connect)

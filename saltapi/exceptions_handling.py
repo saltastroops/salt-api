@@ -5,6 +5,7 @@ from typing import Any, Union
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse, Response
+from jose import JWTError
 from loguru import logger
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from starlette.datastructures import URL
@@ -114,6 +115,18 @@ def setup_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(AuthenticationError)
     async def authentication_error_handler(
             request: Request, exc: AuthenticationError
+    ) -> Response:
+        """Catch an AuthenticationError."""
+
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED, content={"message": str(exc)}
+        )
+
+
+    @app.exception_handler(JWTError)
+    async def authentication_error_handler(
+            request: Request, exc: JWTError
     ) -> Response:
         """Catch an AuthenticationError."""
 

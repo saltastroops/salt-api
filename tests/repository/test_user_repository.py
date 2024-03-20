@@ -10,7 +10,7 @@ from sqlalchemy.engine import Connection
 from saltapi.exceptions import NotFoundError, ResourceExistsError
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import UserStatistics
-from tests.conftest import find_usernames
+from tests.conftest import find_usernames, find_username
 from tests.markers import nodatabase
 
 user_statistics = UserStatistics(
@@ -460,7 +460,7 @@ def test_find_by_username_and_password_returns_none_for_wrong_username(
 
 @nodatabase
 def test_find_by_username_and_password_returns_none_for_wrong_password(
-         db_connection: Connection,
+        db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
     username = "hettlage"
@@ -637,3 +637,67 @@ def test_revoke_proposal_permissions_is_idempotent(db_connection: Connection) ->
     # Check that the permission has been revoked
     granted_permissions = user_repository.get_proposal_permissions(user_id)
     assert len(granted_permissions) == 0
+
+
+def test_verify_user_raises_not_found_error_if_not_a_valid_user(db_connection: Connection) -> None:
+    user_repository = UserRepository(db_connection)
+    with pytest.raises(NotFoundError):
+        user_repository.verify_user(-1, False)
+
+
+@nodatabase
+def test_verify_user_update_users_verification_status(db_connection: Connection) -> None:
+    def _get_user_with_updated_user_verified_status(user_id: int, verify: bool,  connection: Connection):
+        user_repository = UserRepository(connection)
+        user_repository.verify_user(user_id, verify)
+        connection.commit()
+        return user_repository.get(user_id)
+
+    username = find_username("Not Active User")
+
+    with db_connection as connect:
+        user_repository = UserRepository(connect)
+        user = user_repository.get_by_username(username)
+
+        # Test user verification is false
+        user = _get_user_with_updated_user_verified_status(user.id, False, connect)
+        assert user.user_verified is False
+
+        # Set the verification status to True
+        user = _get_user_with_updated_user_verified_status(user.id, True, connect)
+        assert user.user_verified is True
+        # Set the verification status back to False
+        user = _get_user_with_updated_user_verified_status(user.id, False, connect)
+        assert user.user_verified is False
+
+
+def test_activate_user_raises_not_found_error_if_not_a_valid_user(db_connection: Connection) -> None:
+    user_repository = UserRepository(db_connection)
+    with pytest.raises(NotFoundError):
+        user_repository.activate_user(-1, False)
+
+
+@nodatabase
+def test_activate_user_update_users_activation_status(db_connection: Connection) -> None:
+    def _get_user_with_updated_active_status(user_id: int, active: bool,  connection: Connection):
+        user_repository = UserRepository(connection)
+        user_repository.activate_user(user_id, active)
+        connection.commit()
+        return user_repository.get(user_id)
+    username = find_username("Not Active User")
+
+    with db_connection as connect:
+        user_repository = UserRepository(connect)
+        user = user_repository.get_by_username(username)
+
+        # Test user activeness status is false
+        user = _get_user_with_updated_active_status(user.id, False, connect)
+        assert user.active is False
+
+        # Set the active status to true
+        user = _get_user_with_updated_active_status(user.id, True, connect)
+        assert user.active is True
+
+        # Set the activeness status back to False
+        user = _get_user_with_updated_active_status(user.id, False, connect)
+        assert user.active is False

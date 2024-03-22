@@ -68,11 +68,20 @@
       </div>
       <div class="form-group">
         <a
+          *ngIf="!error?.includes('Your account has not been verified')"
           class="has-text-link {{ loading ? 'is-loading' : '' }}"
           data-test="forgot-password-link"
           [routerLink]="['/forgot-password']"
         >
           Forgot password
+        </a>
+        <a
+          *ngIf="error?.includes('Your account has not been verified')"
+          class="has-text-link {{ loading ? 'is-loading' : '' }}"
+          data-test="verify-account-link"
+          [routerLink]="['/request-verification-link']"
+        >
+          Verification Link
         </a>
       </div>
     </div>

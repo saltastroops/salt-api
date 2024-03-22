@@ -373,3 +373,29 @@ $bvit-calibration-config-color: #999999;
 .pointer.sortable:hover {
   background: $primary-header;
 }
+
+.light-danger {
+  color: #ff9696;
+}
+
+.light-link {
+  color : #a1c7ff;
+}
+
+.light-link:hover {
+  color : #6da2fa;
+}
+
+.logout-link {
+  color: #ff9696;
+}
+.logout-link:hover {
+  color: #fa7171;
+}
+
+.login-light {
+  background: #a0d9f3;
+}
+.login-light:hover {
+  background: #85c9f5;
+}

@@ -73,6 +73,8 @@ export class InlineLoginComponent implements OnInit {
           // an error response with status code 401.
           if (error.status === 401) {
             this.error = "Username or password is incorrect.";
+          } else if (error.status === 403) {
+            this.error = "Your account has not been verified.";
           } else {
             this.error = GENERIC_ERROR_MESSAGE;
           }

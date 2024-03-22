@@ -11,6 +11,8 @@ import { MosComponent } from "./mos/mos.component";
 import { FinderChartViewComponent } from "./proposal/blocks/block/finder-chart-view/finder-chart-view.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RegisterUserComponent } from "./register-user/register-user.component";
+import { RequestVerificationLinkComponent } from "./register-user/request-verification-link/request-verification-link.component";
+import { VerifyUserComponent } from "./register-user/verify-user/verify-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SoPageComponent } from "./so-page/so-page.component";
@@ -26,6 +28,7 @@ const routes: Routes = [
   },
   { path: "forgot-password", component: ForgotPasswordComponent },
   { path: "change-password/:token", component: ChangePasswordComponent },
+  { path: "verify-user/:user_id/:token", component: VerifyUserComponent },
   { path: "mos", component: MosComponent, canActivate: [AuthGuardService] },
   { path: "so-pages", component: SoPageComponent },
   {
@@ -34,7 +37,10 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
 
-  { path: "so-pages", component: PageMissingComponent },
+  {
+    path: "request-verification-link",
+    component: RequestVerificationLinkComponent,
+  },
   { path: "investigators", component: PageMissingComponent },
   {
     path: "switch-user",

@@ -91,7 +91,7 @@ def get_current_user(request: Request) -> User:
     else:
         user = _user_from_session(request)
     if not user:
-        raise NotFoundError("User not found.")
+        raise NotFoundError("Could not validate token.")
     validate_user(user)
     return user
 

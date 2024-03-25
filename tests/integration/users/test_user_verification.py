@@ -110,7 +110,7 @@ def test_post_send_verification_link_send_email(
         email_service_mock,
         client: TestClient
 ) -> None:
-    username = find_username(user_type="Not Active User"),
+    username = find_username(user_type="Inactive User")
     user = get_user_by_username(username)
     mocker.patch.object(email_service_mock, 'send_email')
     response = client.post(f"{USERS_URL}/send-verification-link", json={"username_email": user.username})

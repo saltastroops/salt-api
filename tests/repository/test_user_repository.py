@@ -677,7 +677,7 @@ def test_activate_user_raises_not_found_error_if_not_a_valid_user(db_connection:
         user_repository.activate_user(-1, False)
 
 
-def _get_user_with_updated_active_status(user_id: int, active: bool,  connection: Connection):
+def _updated_active_status(user_id: int, active: bool,  connection: Connection):
     user_repository = UserRepository(connection)
     user_repository.activate_user(user_id, active)
     connection.commit()
@@ -693,13 +693,13 @@ def test_activate_user_update_users_activation_status(db_connection: Connection)
     user = user_repository.get_by_username(username)
 
     # Test user activeness status is false
-    user = _get_user_with_updated_active_status(user.id, False, db_connection)
+    user = _updated_active_status(user.id, False, db_connection)
     assert user.active is False
 
     # Set the active status to true
-    user = _get_user_with_updated_active_status(user.id, True, db_connection)
+    user = _updated_active_status(user.id, True, db_connection)
     assert user.active is True
 
     # Set the activeness status back to False
-    user = _get_user_with_updated_active_status(user.id, False, db_connection)
+    user = _updated_active_status(user.id, False, db_connection)
     assert user.active is False

@@ -50,7 +50,7 @@ def setup_exception_handler(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def exception_handle(request: Request, exc: Exception) -> Response:
+    async def exception_handle(request: Request) -> Response:
         """Catch an Exception."""
 
         log_message(request.method, request.url, traceback.format_exc())
@@ -122,7 +122,6 @@ def setup_exception_handler(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED, content={"message": str(exc)}
         )
-
 
     @app.exception_handler(JWTError)
     async def authentication_error_handler(

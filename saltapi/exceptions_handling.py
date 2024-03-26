@@ -120,9 +120,7 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED, content={
-                "message": "The authorisation token could not be parsed."
-            }
+            status_code=status.HTTP_401_UNAUTHORIZED, content={"message": str(exc)}
         )
 
 
@@ -134,6 +132,8 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED, content={"message": str(exc)}
+            status_code=status.HTTP_401_UNAUTHORIZED, content={
+                "message": "The authorisation token could not be parsed."
+            }
         )
 

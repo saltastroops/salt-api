@@ -50,7 +50,7 @@ def setup_exception_handler(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def generic_exception_handle(request: Request) -> Response:
+    async def generic_exception_handler(request: Request) -> Response:
         """Catch an Exception."""
 
         log_message(request.method, request.url, traceback.format_exc())

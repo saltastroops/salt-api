@@ -645,7 +645,7 @@ def test_verify_user_raises_not_found_error_if_not_a_valid_user(db_connection: C
         user_repository.verify_user(-1, False)
 
 
-def _updated_user_verified_status(user_id: int, verify: bool, connection: Connection):
+def _update_user_verified_status(user_id: int, verify: bool, connection: Connection):
     user_repository = UserRepository(connection)
     user_repository.verify_user(user_id, verify)
     connection.commit()
@@ -659,15 +659,15 @@ def test_verify_user_update_users_verification_status(db_connection: Connection)
     user = user_repository.get_by_username(username)
 
     # Test user verification is false
-    user = _updated_user_verified_status(user.id, False, db_connection)
+    user = _update_user_verified_status(user.id, False, db_connection)
     assert user.user_verified is False
 
     # Set the verification status to True
-    user = _updated_user_verified_status(user.id, True, db_connection)
+    user = _update_user_verified_status(user.id, True, db_connection)
     assert user.user_verified is True
 
     # Set the verification status back to False
-    user = _updated_user_verified_status(user.id, False, db_connection)
+    user = _update_user_verified_status(user.id, False, db_connection)
     assert user.user_verified is False
 
 
@@ -677,7 +677,7 @@ def test_activate_user_raises_not_found_error_if_not_a_valid_user(db_connection:
         user_repository.activate_user(-1, False)
 
 
-def _updated_active_status(user_id: int, active: bool,  connection: Connection):
+def _update_active_status(user_id: int, active: bool, connection: Connection):
     user_repository = UserRepository(connection)
     user_repository.activate_user(user_id, active)
     connection.commit()
@@ -693,13 +693,13 @@ def test_activate_user_update_users_activation_status(db_connection: Connection)
     user = user_repository.get_by_username(username)
 
     # Test user activeness status is false
-    user = _updated_active_status(user.id, False, db_connection)
+    user = _update_active_status(user.id, False, db_connection)
     assert user.active is False
 
     # Set the active status to true
-    user = _updated_active_status(user.id, True, db_connection)
+    user = _update_active_status(user.id, True, db_connection)
     assert user.active is True
 
     # Set the activeness status back to False
-    user = _updated_active_status(user.id, False, db_connection)
+    user = _update_active_status(user.id, False, db_connection)
     assert user.active is False

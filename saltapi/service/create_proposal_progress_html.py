@@ -17,7 +17,7 @@ def create_proposal_progress_html(
     )
     _next_semester = next_semester(new_request["semester"])
 
-    environment = Environment(loader=FileSystemLoader("saltapi/templates/"))
+    environment = Environment(loader=FileSystemLoader("saltapi/templates/"), autoescape=True)
 
     template = environment.get_template("proposal_progress.html")
 

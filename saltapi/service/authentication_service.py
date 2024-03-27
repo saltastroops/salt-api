@@ -73,35 +73,27 @@ class AuthenticationService:
             raise AuthenticationError("User not found.")
         return user
 
-    def validate_auth_token(self, token: str, verification: bool) -> User:
+    def validate_auth_token(self, token: str, verification: bool) -> Optional[User]:
         secret_key = SECRET_KEY
         if verification:
             secret_key = VERIFICATION_KEY
         payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         if not payload:
             raise JWTError("Token failed to decode.")
-        try:
-            user = self.user_repository.get(payload["sub"])
-        except NotFoundError:
-            raise ValueError("Token not valid.")
-        return user
+
+        return self.user_repository.get(payload["sub"])
 
 
 def get_current_user(request: Request) -> User:
-    try:
-        authorization: Optional[str] = request.headers.get("Authorization")
-        if authorization:
-            user = _user_from_auth_header(authorization)
-        else:
-            user = _user_from_session(request)
-        validate_user(user)
-        return user
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate token.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    authorization: Optional[str] = request.headers.get("Authorization")
+    if authorization:
+        user = _user_from_auth_header(authorization)
+    else:
+        user = _user_from_session(request)
+    if not user:
+        raise NotFoundError("Could not validate token.")
+    validate_user(user)
+    return user
 
 
 def _user_from_auth_header(authorization: str, verification: bool = False) -> User:
@@ -137,7 +129,7 @@ def _user_from_session(request: Request) -> User:
         return user_repository.get(user_id)
 
 
-def find_user_from_token(token: str, verification: bool = False) -> User:
+def find_user_from_token(token: str, verification: bool = False) -> Optional[User]:
     with UnitOfWork() as unit_of_work:
         user_repository = UserRepository(unit_of_work.connection)
         authentication_repository = AuthenticationService(user_repository)

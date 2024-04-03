@@ -613,9 +613,7 @@ ORDER BY I.Surname, I.FirstName
             del investigator["relevance_of_proposal"]
             del investigator["year_of_completion"]
 
-            if investigator["approval_code"] is None:
-                investigator["approval_code"] = ""
-            if len(investigator["approval_code"]) > 0:
+            if investigator["approval_code"]:
                 investigator["has_approved_proposal"] = None
             elif investigator["approved"] == 1:
                 investigator["has_approved_proposal"] = True

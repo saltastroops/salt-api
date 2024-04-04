@@ -613,16 +613,12 @@ ORDER BY I.Surname, I.FirstName
             del investigator["relevance_of_proposal"]
             del investigator["year_of_completion"]
 
-            if investigator["approved"] == 1:
-                investigator["has_approved_proposal"] = True
-            elif (
-                investigator["approval_code"] is None
-                or investigator["approval_code"] == ""
-                or investigator["approval_code"] == 0
-            ):
-                investigator["has_approved_proposal"] = False
-            else:
+            if investigator["approval_code"]:
                 investigator["has_approved_proposal"] = None
+            elif investigator["approved"] == 1:
+                investigator["has_approved_proposal"] = True
+            else:
+                investigator["has_approved_proposal"] = False
 
             del investigator["approved"]
             del investigator["approval_code"]

@@ -29,12 +29,32 @@ export class InvestigatorsComponent implements OnInit {
       this.user = user;
       this.showApprovalStatusButton =
         this.investigators.some((i) => i.id === this.user.id) ||
-        this.isAdministrator(user);
+        this.isAdministrator();
     });
   }
 
-  isAdministrator(user: User): boolean {
-    return hasAnyRole(user, ["Administrator"]);
+  isAdministrator(): boolean {
+    return hasAnyRole(this.user, ["Administrator"]);
+  }
+
+  hideAcceptButton(userId: number, hasApproved: boolean | null): boolean {
+    if (this.isAdministrator()) {
+      return hasApproved === true;
+    } else if (this.user.id === userId) {
+      return hasApproved !== null;
+    } else {
+      return true;
+    }
+  }
+
+  hideRejectButton(userId: number, hasApproved: boolean | null): boolean {
+    if (this.isAdministrator()) {
+      return hasApproved === false;
+    } else if (this.user.id === userId) {
+      return hasApproved !== null;
+    } else {
+      return true;
+    }
   }
 
   submitApprovalStatus(
@@ -67,4 +87,5 @@ export class InvestigatorsComponent implements OnInit {
         },
       );
   }
+
 }

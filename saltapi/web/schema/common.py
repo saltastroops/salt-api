@@ -156,6 +156,7 @@ class Lamp(str, Enum):
     KR_AND_NE = "Kr and Ne"
     KR_AR_AND_NE = "Kr, Ar and Ne"
     NE = "Ne"
+    QTH = "QTH"
     QTH1 = "QTH1"
     QTH1_AND_QTH2 = "QTH1 and QTH2"
     QTH2 = "QTH2"

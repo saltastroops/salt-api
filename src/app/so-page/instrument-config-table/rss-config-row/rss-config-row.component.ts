@@ -33,7 +33,7 @@ export class RssConfigRowComponent implements OnInit {
       grating: rss.configuration.spectroscopy?.grating,
       mode: rss.configuration.mode,
       gain: rss.detector.gain,
-      iterations: this.instrumentConfig.iterations,
+      iterations: rss.detector.iterations,
     };
   }
 

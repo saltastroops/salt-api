@@ -1,0 +1,16 @@
+<div class="has-text-centered">
+  <div *ngIf="!error">
+    <h2 class="title">Account Verification Successful.</h2>
+    <p>Your account has been successfully verified. You can now log in.</p>
+  </div>
+  <div *ngIf="error">
+    <h2 class="title">Account Verification Failed.</h2>
+    <p>Failed to verify user.</p>
+    <br />
+    <div>
+      <a class="is-link mt-2" href="/request-verification-link"
+        >Request another verification link</a
+      >
+    </div>
+  </div>
+</div>

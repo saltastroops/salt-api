@@ -18,7 +18,7 @@
     />
     <input
       type="submit"
-      class="button is-small"
+      class="button is-small login-light"
       [ngClass]="{ 'is-loading': loading }"
       [disabled]="loading"
       id="login_details"
@@ -26,7 +26,13 @@
       data-test="inline-login-submit"
     />
   </div>
-  <div *ngIf="error" class="has-text-danger" data-test="inline-login-error">
-    {{ error }}
+  <div *ngIf="error" class="light-danger" data-test="inline-login-error">
+    {{ error }} <a
+    *ngIf="error?.includes('Your account has not been verified')"
+    class="light-link {{ loading ? 'is-loading' : '' }}"
+    [routerLink]="['/request-verification-link']"
+  >
+    Request verification link
+  </a>
   </div>
 </form>

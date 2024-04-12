@@ -50,4 +50,11 @@ export abstract class AuthenticationService {
   public abstract getUser(): Observable<User>;
 
   public abstract switchUser(username: string): Observable<void>;
+
+  public abstract verifyUser(
+    user_id: number,
+    token: string,
+  ): Observable<Message>;
+
+  public abstract requestVerificationLink(email: string): Observable<Message>;
 }

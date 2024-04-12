@@ -193,4 +193,38 @@ export class RealAuthenticationService implements AuthenticationService {
       }),
     );
   }
+
+  verifyUser(user_id: number, token: string): Observable<Message> {
+    // Make sure there is no any other token
+    this.logout().subscribe(() => {
+      /* do nothing */
+    });
+
+    const options = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    return this.http.post<Message>(
+      `${environment.apiUrl}/users/${user_id}/verify-user`,
+      {},
+      options,
+    );
+  }
+
+  /**
+   * Request an verification link.
+   *
+   * @param usernameEmail Username or email
+   */
+  requestVerificationLink(usernameEmail: string): Observable<Message> {
+    const uri = environment.apiUrl + "/users/send-verification-link";
+    const headers = new HttpHeaders({
+      "Content-type": "application/json",
+    });
+
+    return this.http
+      .post<Message>(uri, { username_email: usernameEmail }, { headers })
+      .pipe(map((message: Message) => camelcaseKeys(message, { deep: true })));
+  }
 }

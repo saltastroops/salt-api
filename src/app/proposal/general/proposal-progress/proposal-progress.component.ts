@@ -94,9 +94,8 @@ export class ProposalProgressComponent implements OnInit {
     return progressReports.map((r) => {
       const url = new URL(r.url);
       const noOriginUrl = url.href.replace(url.origin, "");
-      r.url = this.apiUrl + noOriginUrl;
 
-      return r;
+      return { ...r, url: this.apiUrl + noOriginUrl };
     });
   }
 

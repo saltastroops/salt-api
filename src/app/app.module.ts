@@ -104,6 +104,8 @@ import { ProposalComponent } from "./proposal/proposal.component";
 import { RequestedTimesComponent } from "./proposal/requested-time/requested-times.component";
 import { TargetComponent } from "./proposal/target/target.component";
 import { RegisterUserComponent } from "./register-user/register-user.component";
+import { RequestVerificationLinkComponent } from "./register-user/request-verification-link/request-verification-link.component";
+import { VerifyUserComponent } from "./register-user/verify-user/verify-user.component";
 import { AuthGuardService } from "./service/auth-guard.service";
 import { AuthenticationInterceptor } from "./service/authentication.interceptor.service";
 import { AuthenticationService } from "./service/authentication.service";
@@ -242,6 +244,8 @@ import { SortDirective } from "./sort.directive";
     P1ProposalDetailsComponent,
     P1DetailsTableComponent,
     P1ProposalStatusModalComponent,
+    VerifyUserComponent,
+    RequestVerificationLinkComponent,
   ],
   imports: [
     BrowserModule,

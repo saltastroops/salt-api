@@ -54,11 +54,11 @@
         <div
           [ngClass]="{ 'null-approval-status': i.hasApprovedProposal === null }"
         >
-          <div *ngIf="!i.hasApprovedProposal">
+          <div>
             <button
               class="button is-success is-small"
               [ngClass]="{
-                'is-hidden': !(i.id === user.id || isAdministrator(user))
+                'is-hidden': hideAcceptButton(i.id, i.hasApprovedProposal)
               }"
               (click)="
                 submitApprovalStatus($event, i.id, proposal.proposalCode, true)
@@ -68,11 +68,11 @@
               Accept
             </button>
           </div>
-          <div *ngIf="i.hasApprovedProposal || i.hasApprovedProposal === null">
+          <div>
             <button
               class="button is-danger is-small"
               [ngClass]="{
-                'is-hidden': !(i.id === user.id || isAdministrator(user))
+                'is-hidden': hideRejectButton(i.id, i.hasApprovedProposal)
               }"
               (click)="
                 submitApprovalStatus($event, i.id, proposal.proposalCode, false)
@@ -111,6 +111,16 @@
           >Investigator still has to approve/refuse the submission of the
           proposal.</span
         >
+      </td>
+    <tr>
+      <td colspan="8">
+        <div>
+          <p>
+            If you need to change your approval choice from 'accept' to 'reject' or vice versa,
+            please contact SALT Help at salthelp@salt.ac.za.
+          </p>
+
+        </div>
       </td>
     </tr>
   </tbody>

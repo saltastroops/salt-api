@@ -7,7 +7,7 @@ from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import PasswordUpdate, ProposalPermissionType
+from saltapi.web.schema.user import ProposalPermissionType
 
 
 class UserService:
@@ -22,7 +22,7 @@ class UserService:
         )
         user_full_name = f"{user.given_name} {user.family_name}"
 
-        password_reset_url = self.password_reset_url(reset_token)
+        password_reset_url = self.password_reset_url(user.id, reset_token)
         plain_body = f"""Dear {user_full_name},
 
 Someone (probably you) has requested to reset your SALT Web Manager password.
@@ -65,8 +65,8 @@ SALT Team
         mail_service.send_email(to=[user.email], message=message)
 
     @staticmethod
-    def password_reset_url(token: str) -> str:
-        return get_settings().frontend_uri + "/change-password/" + token
+    def password_reset_url(user_id: int, token: str) -> str:
+        return get_settings().frontend_uri + f"/change-password/{user_id}/" + token
 
     def get_user_roles(self, username: str) -> List[Role]:
         return self.repository.get_user_roles(username)
@@ -128,8 +128,8 @@ SALT Team
         self._validate_user_statistics(user)
         self.repository.update(user_id, user)
 
-    def update_password(self, user_id: int, password_update: PasswordUpdate) -> None:
-        self.repository.update_password(user_id, password_update.password)
+    def update_password(self, user_id: int, password: str) -> None:
+        self.repository.update_password(user_id, password)
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
         return self.repository.get_salt_astronomers()

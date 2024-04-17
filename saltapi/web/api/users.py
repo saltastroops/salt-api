@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Path
+from fastapi import APIRouter, Body, Depends, Path
 from starlette import status
 
 from saltapi.exceptions import NotFoundError
@@ -46,17 +46,13 @@ def send_password_reset_email(
     with UnitOfWork() as unit_of_work:
         username_email = password_reset_request.username_email
         user_service = services.user_service(unit_of_work.connection)
-        try:
-            try:
-                user = user_service.get_user_by_username(username_email)
-            except NotFoundError:
-                user = user_service.get_user_by_email(username_email)
 
-        except NotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Username or email didn't match any user.",
-            )
+        user = user_service.get_user_by_username(username_email)
+        if not user:
+            user = user_service.get_user_by_email(username_email)
+
+        if not user:
+            raise NotFoundError("User not found.")
 
         user_service.send_password_reset_email(user)
 
@@ -319,25 +315,31 @@ def update_password(
         title="User id",
         description="Id for whom the password is updated",
     ),
-    password: PasswordUpdate = Body(
-        ..., title="Password", description="Password to replace the old one."
+    password_update: PasswordUpdate = Body(
+        ...,
+        title="Password and authentication token",
+        description="Password to replace the old one. And and Authentication token to verify the user"
     ),
-    user: _User = Depends(get_current_user),
 ) -> _User:
     """
     Update user's password.
     """
     with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_update_user(user, user_id)
-        user_service = services.user_service(unit_of_work.connection)
-        user_service.update_password(user_id, password)
+        authentication_service = services.authentication_service(unit_of_work.connection)
+        user = authentication_service.validate_auth_token(password_update.authentication_key, verification=True)
+        if user:
+            permission_service = services.permission_service(unit_of_work.connection)
+            permission_service.check_permission_to_update_user(user, user_id)
 
-        unit_of_work.commit()
-        user = user_service.get_user(user_id)
-        if user is None:
-            raise NotFoundError("Unknown user.")
-        return user
+            user_service = services.user_service(unit_of_work.connection)
+            user_service.update_password(user_id, password_update.password)
+
+            unit_of_work.commit()
+            user = user_service.get_user(user_id)
+            return user
+
+        raise NotFoundError("Unknown user.")
+
 
 
 @router.post(

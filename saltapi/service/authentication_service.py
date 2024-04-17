@@ -73,7 +73,7 @@ class AuthenticationService:
             raise AuthenticationError("User not found.")
         return user
 
-    def validate_auth_token(self, token: str, verification: bool) -> Optional[User]:
+    def validate_auth_token(self, token: str, verification: bool = False) -> Optional[User]:
         secret_key = SECRET_KEY
         if verification:
             secret_key = VERIFICATION_KEY

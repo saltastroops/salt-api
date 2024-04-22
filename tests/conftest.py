@@ -251,6 +251,13 @@ def authenticate_with_validation_token(user_id: int, client: TestClient) -> None
         client.headers["Authorization"] = f"Bearer {token}"
 
 
+def valid_user_verification_token(user_id: int) -> str:
+    with cast(Engine, _create_engine()).connect() as connection:
+        user_repository = UserRepository(connection)
+        auth_service = AuthenticationService(user_repository)
+        return auth_service.jwt_token({"sub": str(user_id)}, timedelta(hours=1), verification=True)
+
+
 def get_user_by_username(username: str) -> User:
     with cast(Engine, _create_engine()).connect() as connection:
         user_repository = UserRepository(connection)

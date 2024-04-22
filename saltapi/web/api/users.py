@@ -47,9 +47,7 @@ def send_password_reset_email(
         username_email = password_reset_request.username_email
         user_service = services.user_service(unit_of_work.connection)
 
-        user = user_service.get_user_by_username(username_email)
-        if not user:
-            user = user_service.get_user_by_email(username_email)
+        user = user_service.get_user_by_username(username_email) or user_service.get_user_by_email(username_email)
 
         if not user:
             raise NotFoundError("User not found.")
@@ -318,7 +316,7 @@ def update_password(
     password_update: PasswordUpdate = Body(
         ...,
         title="Password and authentication token",
-        description="Password to replace the old one. And and Authentication token to verify the user"
+        description="Password to replace the old one, and an authentication token to verify the user."
     ),
 ) -> _User:
     """
@@ -327,19 +325,18 @@ def update_password(
     with UnitOfWork() as unit_of_work:
         authentication_service = services.authentication_service(unit_of_work.connection)
         user = authentication_service.validate_auth_token(password_update.authentication_key, verification=True)
-        if user:
-            permission_service = services.permission_service(unit_of_work.connection)
-            permission_service.check_permission_to_update_user(user, user_id)
+        if not user:
+            raise NotFoundError("Unknown user.")
 
-            user_service = services.user_service(unit_of_work.connection)
-            user_service.update_password(user_id, password_update.password)
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_user(user, user_id)
 
-            unit_of_work.commit()
-            user = user_service.get_user(user_id)
-            return user
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.update_password(user_id, password_update.password)
 
-        raise NotFoundError("Unknown user.")
-
+        unit_of_work.commit()
+        user = user_service.get_user(user_id)
+        return user
 
 
 @router.post(

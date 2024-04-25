@@ -516,7 +516,7 @@ class PermissionService:
 
     def check_permission_to_update_telescope_status(self, request: Request):
         host = request.client.host
-        if not host or host[:4] not in ("10.1", "10.2"):
+        if not host or (host[:4] not in ("10.1", "10.2") and host != "127.0.0.1"):
             raise AuthorizationError(
                 "You may only update the status from within the SAAO network."
             )

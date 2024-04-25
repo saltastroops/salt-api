@@ -31,6 +31,7 @@ _partners = dict(
     OTH="Other",
     POL="Poland",
     RSA="South Africa",
+    SVP="Science Verification Proposals",
     RU="Rutgers University",
     UC="University of Canterbury",
     UKSC="UK SALT Consortium",
@@ -331,10 +332,11 @@ def is_timezone_aware(t: datetime) -> bool:
 
 def validate_user(user: User) -> None:
     if not user.active:
-        raise AuthorizationError("Your account is not active. Please contact SALT Help for assistance.")
+        raise AuthorizationError(
+            "Your account is not active. Please contact SALT Help for assistance."
+        )
     if not user.user_verified:
         raise AuthorizationError(
             "Your account has not been verified. Please visit "
             f"{get_settings().frontend_uri}/request-verification-link to verify your account."
         )
-

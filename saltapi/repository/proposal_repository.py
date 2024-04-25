@@ -2133,6 +2133,10 @@ VALUES (
         # add the proprietary period to get the data release date
         return proprietary_period_start + relativedelta(months=proprietary_period)
 
+    def get_release_date(self, proprietary_period: int, proposal_code: str):
+        block_visits = self.block_visits(proposal_code)
+        return self._data_release_date(proprietary_period, block_visits)
+
     def _is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
         stmt = text(
             """

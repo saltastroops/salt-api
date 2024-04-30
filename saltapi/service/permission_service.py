@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional, cast
 
 from fastapi import Request
@@ -7,6 +8,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
+from saltapi.settings import get_settings
 from saltapi.web.schema.proposal import (
     ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
@@ -516,9 +518,9 @@ class PermissionService:
 
     def check_permission_to_update_telescope_status(self, request: Request):
         host = request.client.host
-        if not host or (host[:4] not in ("10.1", "10.2") and host != "127.0.0.1"):
+        if not re.match(get_settings().allow_status_update_origin_regex, host):
             raise AuthorizationError(
-                "You may only update the status from within the SAAO network."
+                f"You may not update the status from this ip address: {host}"
             )
 
     def check_permission_to_validate_user(self, user_id: int, user: User) -> None:

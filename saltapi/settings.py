@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     # Example: "http://(localhost|127\.0\.0\.1):5000"
     allow_origin_regex: str
 
+    # Regular expression for the origins from which a
+    # telescope status may be requested
+    # Example: "localhost|127.\.0\.0\.1|10\.1.*|10\.2.*|196\.21\.185\.73
+    allow_status_update_origin_regex: str
+
     # DSN for Sentry
     sentry_dsn: Optional[str]
 

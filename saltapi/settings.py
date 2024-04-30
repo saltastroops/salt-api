@@ -34,8 +34,9 @@ class Settings(BaseSettings):
     # Lifetime of an authentication token, in hours
     auth_token_lifetime_hours: int = 7 * 24
 
-    # URI which is allowed to connect to the API
-    frontend_uri: str
+    # Regular expression for the origins allowed by CORS
+    # Example: "http://(localhost|127\.0\.0\.1):5000"
+    allow_origin_regex: str
 
     # DSN for Sentry
     sentry_dsn: Optional[str]

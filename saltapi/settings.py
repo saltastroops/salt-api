@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     # SMTP server for sending emails
     smtp_server: Optional[str]
 
+    # Username for the SMTP server
+    smtp_username: Optional[str]
+
+    # Password for the SMTP server
+    smtp_password: Optional[str]
+
     # Directory containing the jar file MappingService.jar for mapping proposals to the
     # database
     mapping_tool_dir: DirectoryPath

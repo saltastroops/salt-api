@@ -15,7 +15,7 @@ export class NirConfigRowComponent implements OnInit {
   nirConfig!: NirConfig;
 
   ngOnInit(): void {
-    const nir = this.telescopeConfiguration.instrument as Nir;
+    const nir: Nir = this.telescopeConfiguration.instrument as Nir;
     const instrumentConfig: any = {
       instrumentName: "NIR",
       configurationType: this.telescopeConfiguration.configurationType,
@@ -24,6 +24,8 @@ export class NirConfigRowComponent implements OnInit {
       cycles: nir.procedure.cycles,
       procedureType: nir.procedure.procedureType,
       filter: nir.configuration.filter,
+      lamp: this.telescopeConfiguration.lamp,
+      calibrationFilter: this.telescopeConfiguration.calibrationFilter,
       ditherSteps: [],
     };
     nir.procedure.ditherPattern.forEach((step) => {
@@ -50,6 +52,8 @@ interface NirConfig {
   grating: string | null;
   gratingAngle: number | null;
   filter: string | null;
+  calibrationFilter: string | null;
+  lamp: string | null;
   procedureType: NirProcedureType;
   ditherSteps: {
     exposureTime: number;

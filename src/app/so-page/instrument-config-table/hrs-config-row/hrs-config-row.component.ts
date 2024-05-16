@@ -20,6 +20,7 @@ export class HrsConfigRowComponent implements OnInit {
     this.hrsConfig = {
       instrumentName: "HRS",
       configurationType: this.telescopeConfiguration.configurationType,
+      calibrationFilter: this.telescopeConfiguration.calibrationFilter,
       exposureType: hrs.configuration.exposureType,
       mode: hrs.configuration.mode,
       cycles: hrs.procedure.cycles,
@@ -56,6 +57,7 @@ interface HrsConfig {
   exposureType: HrsExposureType;
   cycles: number;
   mode: string;
+  calibrationFilter: string | null;
   blueDetector: {
     binning: {
       preBinnedColumns: number;

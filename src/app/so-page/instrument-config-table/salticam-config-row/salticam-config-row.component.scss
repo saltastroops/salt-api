@@ -22,6 +22,9 @@ td {
 .light-strip {
   background: $light-strip;
 }
+.wrapper div:nth-child(even) {
+  font-weight: lighter;
+}
 
 :host {
   display: contents;

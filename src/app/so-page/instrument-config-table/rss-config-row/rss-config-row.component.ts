@@ -26,6 +26,7 @@ export class RssConfigRowComponent implements OnInit {
         preBinnedRows: rss.detector.preBinnedRows,
       },
       filter: rss.configuration.filter,
+      calibrationFilter: this.instrumentConfig.calibrationFilter,
       lamp: this.instrumentConfig.lamp,
       cycles: rss.procedure.cycles,
       mask: rss.configuration.mask?.barcode,
@@ -45,6 +46,7 @@ interface RssConfig {
   mode: string | null;
   exposureTime: number;
   filter: string;
+  calibrationFilter: string | null;
   gain: string;
   configurationType: PayloadConfigurationType;
   exposureType: RssExposureType;

@@ -33,6 +33,7 @@ export class SalticamConfigRowComponent implements OnInit {
       exposureType: scam.detector.exposureType,
       mode: scam.detector.mode,
       lamp: this.instrumentConfig.lamp,
+      calibrationFilter: this.instrumentConfig.calibrationFilter
     };
   }
   protected readonly secondsToHhMmSs = secondsToHhMmSs;
@@ -47,6 +48,7 @@ interface SalticamConfig {
   }[];
   gain: string;
   lamp: string | null;
+  calibrationFilter: string | null;
   configurationType: PayloadConfigurationType;
   exposureType: SalticamExposureType;
   iterations: number;

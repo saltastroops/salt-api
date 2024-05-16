@@ -123,6 +123,7 @@ export class SoPageComponent implements OnInit {
             configurationType: pc.payloadConfigurationType,
             iterations: tc.iterations,
             lamp: pc.lamp,
+            calibrationFilter: pc.calibrationFilter
           };
 
           if (pc.instruments.salticam) {
@@ -156,7 +157,7 @@ export class SoPageComponent implements OnInit {
             });
           }
           if (pc.instruments.nir) {
-            pc.instruments.nir.forEach((nir) => {
+            pc.instruments.nir.forEach((nir: Nir) => {
               this.telescopeConfigurations.push({
                 ...telescopeConfig,
                 instrumentName: "NIR",
@@ -177,6 +178,7 @@ export interface SoInstrumentConfiguration {
   instrumentName: string;
   configurationType: PayloadConfigurationType;
   lamp: Lamp | null;
+  calibrationFilter: string | null;
   iterations: number;
   instrument: Hrs | Nir | Rss | Salticam;
   payloadConfigIndex: number;

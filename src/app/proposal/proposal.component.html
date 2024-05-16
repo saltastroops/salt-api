@@ -40,11 +40,13 @@
           ></wm-requested-times>
         </div>
 
-        <div class="inline-view">
+        <div class="block">
           <wm-charged-time
             [chargedTime]="p.chargedTime"
             [timeAllocations]="p.timeAllocations"
           ></wm-charged-time>
+        </div>
+        <div class="block">
           <wm-time-allocations-table
             [time_allocations]="proposal.timeAllocations"
           ></wm-time-allocations-table>

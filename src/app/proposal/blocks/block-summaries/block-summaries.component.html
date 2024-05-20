@@ -76,12 +76,15 @@
           {{ b.id }}
         </td>
         <td [attr.rowspan]="b.instruments.length">
-          <a
-            data-test="block-name"
-            href="javascript:void(0)"
-            (click)="onClick(b.id)"
+          <span>
+            <a
+              data-test="block-name"
+              href="javascript:void(0)"
+              (click)="onClick(b.id)"
             >{{ b.name }}</a
-          >
+            >
+          </span>
+          <span> {{" "}}</span>
         </td>
         <td
           class="has-text-right"

@@ -4,6 +4,7 @@ from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pdfkit
+import requests
 from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
@@ -373,6 +374,18 @@ class ProposalService:
         self.repository.update_proprietary_period(
             proposal_code=proposal_code, proprietary_period=proprietary_period
         )
+
+        release_date = self.repository.get_release_date(proprietary_period, proposal_code)
+        body = {
+            "query": "mutation($proposalCode:String!,$institution:Institution!,$apiKey:String!,$releaseDate:String!){updateReleaseDates(proposalCode:$proposalCode,institution:$institution,apiKey:$apiKey,metadataReleaseDate:$releaseDate,dataReleaseDate:$releaseDate){status}}",
+            "variables": {
+                "proposalCode": proposal_code,
+                "institution": "SALT",
+                "releaseDate": str(release_date),
+                "apiKey": get_settings().ssda_api_key
+            }
+        }
+        requests.post(get_settings().ssda_api_url, json=body)
 
     def get_proposal_status(self, proposal_code: str) -> Dict[str, str]:
         """

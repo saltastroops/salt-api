@@ -129,6 +129,12 @@ class Settings(BaseSettings):
     # URL for getting the TCS ICD file
     tcs_icd_url: str
 
+    # SSDA API key for updating proprietary period
+    ssda_api_key: str
+
+    # URL for the SAAO SALT Data Archive api
+    ssda_api_url: str
+
     class Config:
         env_file = os.getenv("DOTENV_FILE", ".env")
 

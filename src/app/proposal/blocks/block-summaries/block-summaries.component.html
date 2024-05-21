@@ -59,7 +59,6 @@
       <th>Grating/Filter</th>
     </tr>
   </thead>
-
   <tbody>
     <ng-container *ngFor="let b of filteredBlocks">
       <tr
@@ -215,6 +214,12 @@
         </tr>
       </ng-container>
     </ng-container>
+  </tbody>
+  <thead><th colspan="13">Legend</th></thead>
+  <tbody>
+  <tr><td colspan="2"></td><td colspan="11">Can still be observed</td></tr>
+  <tr class="completed-block"><td colspan="2"></td><td colspan="11">Completed</td></tr>
+  <tr class="has-red-background"><td colspan="2"></td><td colspan="11">Not observable any more</td></tr>
   </tbody>
 </table>
 

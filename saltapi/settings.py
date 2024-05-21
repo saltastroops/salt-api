@@ -110,10 +110,10 @@ class Settings(BaseSettings):
     # URL for getting the TCS ICD file
     tcs_icd_url: str
 
-    # SSDA API key for updating proprietary period
+    # SSDA API key for updating proprietary periods
     ssda_api_key: str
 
-    # URL for the SAAO SALT Data Archive api
+    # URL for the SAAO SALT Data Archive API
     ssda_api_url: str
 
     class Config:

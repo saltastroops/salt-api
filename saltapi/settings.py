@@ -43,6 +43,13 @@ class Settings(BaseSettings):
     # Example: "localhost|127.\.0\.0\.1|10\.1.*|10\.2.*|196\.21\.185\.73
     allow_status_update_origin_regex: str
 
+    # List of email addresses to which status updates are sent
+    # Example: "John Doe <doe@example.com>, Jane Miller <jane@example.com>
+    # Both the full name and the email address should be included, and the email
+    # address must be enclosed in angular brackets. Neither of these may include a
+    # comma.
+    status_update_email_recipients: str
+
     # DSN for Sentry
     sentry_dsn: Optional[str]
 

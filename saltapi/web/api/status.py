@@ -45,6 +45,7 @@ def update_status(
         status_repository = StatusRepository(unit_of_work.connection)
         status_service = StatusService(status_repository)
         status_service.add_status_update(status_update)
+        status_service.send_status_update_email(status_update)
 
         unit_of_work.commit()
 

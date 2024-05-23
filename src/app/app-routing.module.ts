@@ -16,6 +16,7 @@ import { VerifyUserComponent } from "./register-user/verify-user/verify-user.com
 import { AuthGuardService } from "./service/auth-guard.service";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SoPageComponent } from "./so-page/so-page.component";
+import { BlockPageComponent } from "./block-page/block-page.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -36,7 +37,11 @@ const routes: Routes = [
     component: ManageUserProfileComponent,
     canActivate: [AuthGuardService],
   },
-
+  {
+    path: "block/:blockId",
+    component: BlockPageComponent,
+    canActivate: [AuthGuardService]
+  },
   {
     path: "request-verification-link",
     component: RequestVerificationLinkComponent,

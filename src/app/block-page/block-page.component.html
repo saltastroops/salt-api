@@ -1,0 +1,25 @@
+<div *ngIf="loading">
+    <wm-loading-indicator
+      *ngIf="loading"
+      message="Loading Block..."
+    ></wm-loading-indicator>
+</div>
+<div *ngIf="!loading">
+  <div *ngIf="!error">
+    <h2 class="title is-1">Details for Block: {{block.name}} (#{{block.id}})</h2>
+    <wm-general-block-page-info
+      [proposal]="proposal"
+    ></wm-general-block-page-info>
+
+    <wm-block
+      [block]="block"
+      [investigators]="proposal.investigators"
+    ></wm-block>
+  </div>
+  <div *ngIf="error">
+    <wm-error-indicator
+      *ngIf="error"
+      [message]="error"
+    ></wm-error-indicator>
+  </div>
+</div>

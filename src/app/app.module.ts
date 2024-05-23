@@ -131,6 +131,8 @@ import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/sa
 import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
+import { GeneralBlockPageInfoComponent } from './block-page/general-block-page-info/general-block-page-info.component';
+import { BlockPageComponent } from './block-page/block-page.component';
 
 @NgModule({
   declarations: [
@@ -246,6 +248,8 @@ import { SortDirective } from "./sort.directive";
     P1ProposalStatusModalComponent,
     VerifyUserComponent,
     RequestVerificationLinkComponent,
+    GeneralBlockPageInfoComponent,
+    BlockPageComponent,
   ],
   imports: [
     BrowserModule,

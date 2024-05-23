@@ -82,14 +82,16 @@
     <div>
       <table class="table">
         <thead>
-          <tr>
+          <tr class="secondary-header">
             <th>Priority</th>
+            <th>Ranking</th>
             <th>Comments</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>{{ block.priority }}</td>
+            <td>{{ block.ranking }}</td>
             <td>
               <p [innerHTML]="block.comment | nl2br"></p>
             </td>

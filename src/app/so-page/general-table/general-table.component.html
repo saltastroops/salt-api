@@ -14,7 +14,7 @@
       </tr>
       <tr>
         <td>{{ proposal.proposalCode }}</td>
-        <td>{{ block.id }}</td>
+        <td><a [href]="'block/' + block.id"   target="_blank">{{ block.id }}</a></td>
         <td>{{ block.name }}</td>
         <td colspan="2">{{ proposal.generalInfo.title }}</td>
       </tr>

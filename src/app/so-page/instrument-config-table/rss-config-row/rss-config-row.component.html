@@ -8,7 +8,7 @@
   <td>
     {{ rssConfig.exposureType }}
   </td>
-  <td>{{ rssConfig.exposureTime }}</td>
+  <td>{{ rssConfig.exposureTime }} sec</td>
   <td>{{ secondsToHhMmSs(rssConfig.exposureTime) }}</td>
   <td>
     {{ rssConfig.iterations }}
@@ -16,25 +16,23 @@
   <td>
     {{ rssConfig.cycles }}
   </td>
+  <td>{{ rssConfig.lamp }}</td>
   <td>
-    {{ rssConfig.grating }}
-  </td>
-  <td>
-    {{ rssConfig.gain }}
+    {{ rssConfig.calibrationFilter }}
   </td>
   <td>
     <div class="wrapper">
       <div>Mode:</div>
       <div>{{ rssConfig.mode }}</div>
     </div>
-    <div *ngIf="rssConfig.lamp" class="wrapper">
-      <div>Lamp:</div>
-      <div>{{ rssConfig.lamp }}</div>
+    <div *ngIf="rssConfig.grating" class="wrapper">
+      <div>Grating:</div>
+      <div>{{ rssConfig.grating }}</div>
     </div>
-    <div *ngIf="rssConfig.filter" class="wrapper">
-      <div>Filter:</div>
+    <div *ngIf="rssConfig.gain" class="wrapper">
+      <div>Gain:</div>
       <div>
-        {{ rssConfig.filter }}
+        {{ rssConfig.gain }}
       </div>
     </div>
     <div *ngIf="rssConfig.maskType" class="wrapper">
@@ -48,6 +46,10 @@
       <div>
         {{ rssConfig.mask }}
       </div>
+    </div>
+    <div class="wrapper">
+      <div>Filter:</div>
+      <div>{{ rssConfig.filter }}</div>
     </div>
     <div class="wrapper">
       <div>Binning (spatial × spectral):</div>

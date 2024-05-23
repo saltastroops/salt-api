@@ -1,0 +1,43 @@
+
+<h2 class="title is-2">Proposal {{proposal.proposalCode}}</h2>
+<hr class="heading-line proposal-header">
+<table class="table">
+  <thead>
+    <tr>
+      <th colspan="3" class="has-text-centered">General</th>
+    </tr>
+    <tr class="secondary-header">
+      <th class="has-text-centered">Code</th>
+      <th colspan="2" class="has-text-centered">Title</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ proposal.proposalCode }}</td>
+      <td colspan="2">{{ proposal.generalInfo.title }}</td>
+    </tr>
+    <tr class="secondary-header">
+      <th>Principal Investigator</th>
+      <th>Principal Contact</th>
+      <th>SALT Astronomer</th>
+    </tr>
+    <tr>
+      <td>{{ principalInvestigator }}</td>
+      <td>{{ principalContact }}</td>
+      <td>{{ liaisonSaltAstronomer }}</td>
+    </tr>
+    <tr class="secondary-header">
+      <th colspan="3">Summary for SALT Astronomer</th>
+    </tr>
+    <tr>
+      <td colspan="3" [innerHTML]="proposal.generalInfo.summaryForSaltAstronomer | nl2br"></td>
+    </tr>
+    <tr class="secondary-header">
+      <th colspan="3">Summary for the nightlog</th>
+    </tr>
+    <tr>
+      <td colspan="3" [innerHTML]="proposal.generalInfo.summaryForNightLog | nl2br"></td>
+    </tr>
+  </tbody>
+</table>
+

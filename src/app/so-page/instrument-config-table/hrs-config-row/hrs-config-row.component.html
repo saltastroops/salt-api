@@ -10,12 +10,14 @@
   </td>
   <td>
     <span class="is-blue">{{
-      hrsConfig.blueDetector.exposureTimes[i] || 0
-    }}</span>
+        hrsConfig.blueDetector.exposureTimes[i] || 0
+      }} sec
+    </span>
     |
     <span class="is-red">{{
-      hrsConfig.redDetector.exposureTimes[i] || 0
-    }}</span>
+        hrsConfig.redDetector.exposureTimes[i] || 0
+      }} sec
+    </span>
   </td>
   <td>
     <span class="is-blue">{{
@@ -25,6 +27,7 @@
     <span class="is-red">
       {{ secondsToHhMmSs(hrsConfig.redDetector.exposureTimes[i] || 0) }}
     </span>
+
   </td>
   <td>
     <span class="is-blue">{{ hrsConfig.blueDetector.iterations }}</span> |
@@ -32,7 +35,7 @@
   </td>
   <td>{{ hrsConfig.cycles }}</td>
   <td></td>
-  <td></td>
+  <td>{{ hrsConfig.calibrationFilter }}</td>
   <td>
     <div class="wrapper">
       <div>Binning (spatial × spectral):</div>

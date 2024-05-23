@@ -78,7 +78,8 @@ export class EditProprietaryPeriodModalComponent {
           },
           () => {
             this.loading = false;
-            this.error = "Opps, Something went wrong.";
+            this.error = "Opps, Something went wrong. " +
+              "Contact SALT Help for assistance.";
           },
         );
     } else {

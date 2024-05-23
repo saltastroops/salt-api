@@ -12,6 +12,10 @@
   vertical-align: top;
 }
 
+.wrapper div:nth-child(even) {
+  font-weight: lighter;
+}
+
 td {
   vertical-align: middle;
 }

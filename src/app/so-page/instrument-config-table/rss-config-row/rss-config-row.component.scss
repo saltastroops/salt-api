@@ -16,6 +16,10 @@ td {
   vertical-align: middle;
 }
 
+.wrapper div:nth-child(even) {
+  font-weight: lighter;
+}
+
 :host {
   display: contents;
 }

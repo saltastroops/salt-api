@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     # Lifetime of an authentication token, in hours
     auth_token_lifetime_hours: int = 7 * 24
 
+    # Base URI of the Web Manager frontend, without a trailing slash
+    # Example: https://www.salt.ac.za/wm
+    frontend_uri: str
+
     # Regular expression for the origins allowed by CORS
     # Example: "http://(localhost|127\.0\.0\.1):5000"
     allow_origin_regex: str

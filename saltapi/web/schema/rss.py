@@ -4,13 +4,11 @@ from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from saltapi.web.schema.common import Lamp
-
 
 class ArcBibleEntry(BaseModel):
     """RSS arc bible entry."""
 
-    lamp: Lamp = Field(..., title="Lamp", description="Calibration lamp")
+    lamp: str = Field(..., title="Lamp", description="Calibration lamp")
     is_preferred_lamp: bool = Field(
         ...,
         title="Preferred lamp?",

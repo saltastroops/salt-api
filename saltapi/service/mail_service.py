@@ -17,10 +17,13 @@ class MailService:
                 "variable SMTP_SERVER to define the server."
             )
             return
-        smtp_obj = smtplib.SMTP(settings.smtp_server)
-        smtp_obj.sendmail(
-            msg=message.as_string(), from_addr=settings.from_email, to_addrs=to
-        )
+        with smtplib.SMTP(settings.smtp_server) as smtp_obj:
+            if settings.smtp_username and settings.smtp_password:
+                smtp_obj.starttls()
+                smtp_obj.login(settings.smtp_username, settings.smtp_password)
+            smtp_obj.sendmail(
+                msg=message.as_string(), from_addr=settings.from_email, to_addrs=to
+            )
 
     @staticmethod
     def generate_email(

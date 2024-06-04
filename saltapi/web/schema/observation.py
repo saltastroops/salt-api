@@ -5,7 +5,7 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 
 from saltapi.web.schema.bvit import Bvit
-from saltapi.web.schema.common import Lamp, TargetCoordinates, TimeInterval
+from saltapi.web.schema.common import TargetCoordinates, TimeInterval
 from saltapi.web.schema.hrs import Hrs
 from saltapi.web.schema.nir import Nir
 from saltapi.web.schema.rss import Rss
@@ -143,7 +143,7 @@ class PayloadConfiguration(BaseModel):
         title="Calibration screen used?",
         description="Whether the calibration screen is used",
     )
-    lamp: Optional[Lamp] = Field(
+    lamp: Optional[str] = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
     calibration_filter: Optional[CalibrationFilter] = Field(

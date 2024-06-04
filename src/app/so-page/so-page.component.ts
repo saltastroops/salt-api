@@ -6,7 +6,6 @@ import { catchError, switchMap, tap } from "rxjs/operators";
 import { ProposalService } from "../service/proposal.service";
 import { SoService } from "../service/so.service";
 import { Block } from "../types/block";
-import { Lamp } from "../types/common";
 import { Hrs } from "../types/hrs";
 import { Nir } from "../types/nir";
 import { PayloadConfigurationType } from "../types/observation";
@@ -177,7 +176,7 @@ export class SoPageComponent implements OnInit {
 export interface SoInstrumentConfiguration {
   instrumentName: string;
   configurationType: PayloadConfigurationType;
-  lamp: Lamp | null;
+  lamp: string | null;
   calibrationFilter: string | null;
   iterations: number;
   instrument: Hrs | Nir | Rss | Salticam;

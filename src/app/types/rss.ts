@@ -1,7 +1,7 @@
-import { InstrumentSummary, Lamp } from "./common";
+import { InstrumentSummary } from "./common";
 
 export interface ArcBibleEntry {
-  lamp: Lamp;
+  lamp: string;
   isPreferredLamp: boolean;
   originalExposureTime: number;
   preferredExposureTime: number;

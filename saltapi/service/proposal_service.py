@@ -380,8 +380,11 @@ class ProposalService:
             }
         }
 
-        ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-        if ssda_response['errors']:
+        try:
+            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+            if ssda_response['errors']:
+                raise SSDAError()
+        except:
             raise SSDAError()
 
     def update_proprietary_period(

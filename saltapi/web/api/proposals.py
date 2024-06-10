@@ -14,7 +14,7 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
-from saltapi.exceptions import ValidationError, NotFoundError
+from saltapi.exceptions import ValidationError, NotFoundError, SSDAError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
@@ -323,6 +323,7 @@ def update_proprietary_period(
             )
             status_code = status.HTTP_202_ACCEPTED
             update_status = UpdateStatus.PENDING
+            unit_of_work.commit()
         else:
             proposal_service.update_proprietary_period(
                 proposal_code=proposal_code,
@@ -331,13 +332,21 @@ def update_proprietary_period(
             proposal = proposal_service.get_proposal(proposal_code)
             status_code = status.HTTP_200_OK
             update_status = UpdateStatus.SUCCESSFUL
-        unit_of_work.commit()
+            unit_of_work.commit()
+            try:
+                proposal_service.update_proprietary_period_in_ssda(
+                    proposal_code=proposal_code,
+                    proprietary_period=proprietary_period_update_request.proprietary_period,
+                )
+            except SSDAError:
+                status_code = status.HTTP_207_MULTI_STATUS
         return JSONResponse(
             status_code=status_code,
             content={
                 **proposal["general_info"]["proprietary_period"],
                 "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
                 "status": update_status,
+                "status_code": status_code,
             },
         )
 

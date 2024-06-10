@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, SSDAError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
@@ -368,13 +368,7 @@ class ProposalService:
             proposal_code, proprietary_period, motivation, username
         )
 
-    def update_proprietary_period(
-        self, proposal_code: str, proprietary_period: int
-    ) -> None:
-        self.repository.update_proprietary_period(
-            proposal_code=proposal_code, proprietary_period=proprietary_period
-        )
-
+    def update_proprietary_period_in_ssda(self, proposal_code: str, proprietary_period: int):
         release_date = self.repository.get_release_date(proprietary_period, proposal_code)
         body = {
             "query": "mutation($proposalCode:String!,$institution:Institution!,$apiKey:String!,$releaseDate:String!){updateReleaseDates(proposalCode:$proposalCode,institution:$institution,apiKey:$apiKey,metadataReleaseDate:$releaseDate,dataReleaseDate:$releaseDate){status}}",
@@ -385,7 +379,17 @@ class ProposalService:
                 "apiKey": get_settings().ssda_api_key
             }
         }
-        requests.post(get_settings().ssda_api_url, json=body)
+
+        ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+        if ssda_response['errors']:
+            raise SSDAError()
+
+    def update_proprietary_period(
+        self, proposal_code: str, proprietary_period: int
+    ) -> None:
+        self.repository.update_proprietary_period(
+            proposal_code=proposal_code, proprietary_period=proprietary_period
+        )
 
     def get_proposal_status(self, proposal_code: str) -> Dict[str, str]:
         """

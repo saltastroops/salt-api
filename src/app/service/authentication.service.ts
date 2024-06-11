@@ -44,6 +44,7 @@ export abstract class AuthenticationService {
 
   public abstract changePassword(
     password: string,
+    userId: number,
     token: string,
   ): Observable<Message>;
 

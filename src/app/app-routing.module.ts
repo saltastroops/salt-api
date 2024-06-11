@@ -28,7 +28,7 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
   { path: "forgot-password", component: ForgotPasswordComponent },
-  { path: "change-password/:token", component: ChangePasswordComponent },
+  { path: "change-password/:user_id/:token", component: ChangePasswordComponent },
   { path: "verify-user/:user_id/:token", component: VerifyUserComponent },
   { path: "mos", component: MosComponent, canActivate: [AuthGuardService] },
   { path: "so-pages", component: SoPageComponent },

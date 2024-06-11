@@ -20,8 +20,9 @@ export class BlockPageComponent implements OnInit {
   constructor( private blockService: BlockService,private proposalService: ProposalService,private route: ActivatedRoute,) { }
 
   ngOnInit(): void {
-    this.loading = true;
+
     this.route.params.subscribe((params) => {
+      this.loading = true;
       this.blockId = params.blockId;
       this.fetchBlockDetails();
     });
@@ -36,9 +37,13 @@ export class BlockPageComponent implements OnInit {
 
         this.fetchProposalDetails(proposalCode);
       },
-      () => {
+      (error) => {
         this.loading = false
-        this.error = `Failed to fetch block ${this.blockId}.`;
+        if (error.status === 404 || error.status === 422) {
+          this.error = `Block id ${this.blockId} not found.`;
+        } else {
+          this.error = `Failed to fetch block '${this.blockId}'.`;
+        }
       }
     );
   }

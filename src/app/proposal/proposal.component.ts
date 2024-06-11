@@ -8,6 +8,7 @@ import {
   map,
   mapTo,
   switchMap,
+  tap,
 } from "rxjs/operators";
 
 import { ProposalService } from "../service/proposal.service";
@@ -23,6 +24,7 @@ export class ProposalComponent implements OnInit {
 
   blockId!: number;
   proposal: Proposal | null = null;
+  proposalCode!: string;
   isLoading = false;
   error?: string;
   contentSubscription!: Subscription;
@@ -38,7 +40,12 @@ export class ProposalComponent implements OnInit {
     const trigger$ = this.route.params.pipe(debounceTime(this.DEBOUNCE_TIME));
 
     const requestResult$ = trigger$
-      .pipe(map((params) => params["proposal-code"]))
+      .pipe(
+        map((params) => params["proposal-code"]),
+        tap((proposalCode) => {
+          this.proposalCode = proposalCode
+        })
+      )
       .pipe(
         switchMap((proposalCode) => {
           return this.proposalService.getProposal(proposalCode).pipe(
@@ -70,7 +77,11 @@ export class ProposalComponent implements OnInit {
       this.proposal = proposal;
     });
     this.errorSubscription = error$.subscribe((error) => {
-      this.error = error;
+      if (error && (error.status === 404 || error.status === 422) ){
+        this.error = `Proposal code ${ this.proposalCode } not found.`
+      }else {
+        this.error = `Failed to fetch proposal '${this.proposalCode}'.`
+      }
     });
     this.isLoadingSubscription = isLoading$.subscribe((isLoading) => {
       // For some reason in some browsers the loading event is fired only a second or
@@ -80,6 +91,7 @@ export class ProposalComponent implements OnInit {
       // displayed at the same time for a short while.
       if (isLoading) {
         this.proposal = null;
+        this.error = undefined;
       }
       this.isLoading = isLoading;
     });

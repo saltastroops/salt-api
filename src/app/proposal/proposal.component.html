@@ -7,10 +7,6 @@
     *ngIf="isLoading && !proposal"
     message="Loading proposal..."
   ></wm-loading-indicator>
-  <wm-error-indicator
-    *ngIf="error"
-    message="Loading failed"
-  ></wm-error-indicator>
 </ng-template>
 
 <ng-template #showProposal>
@@ -97,3 +93,7 @@
     </div>
   </div>
 </ng-template>
+<wm-error-indicator
+  *ngIf="error"
+  [message]="error"
+></wm-error-indicator>

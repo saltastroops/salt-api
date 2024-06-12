@@ -138,13 +138,13 @@ def setup_exception_handler(app: FastAPI) -> None:
         )
 
     @app.exception_handler(SSDAError)
-    async def authentication_error_handler(
+    async def ssda_error_handler(
             request: Request, exc: SSDAError
     ) -> Response:
         """Catch an SSDA Error."""
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_207_MULTI_STATUS, content={
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={
                 "message": exc.message
             }
         )

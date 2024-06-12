@@ -332,14 +332,14 @@ def update_proprietary_period(
             proposal = proposal_service.get_proposal(proposal_code)
             status_code = status.HTTP_200_OK
             update_status = UpdateStatus.SUCCESSFUL
-            unit_of_work.commit()
             try:
                 proposal_service.update_proprietary_period_in_ssda(
                     proposal_code=proposal_code,
                     proprietary_period=proprietary_period_update_request.proprietary_period,
                 )
+                unit_of_work.commit()
             except SSDAError:
-                status_code = status.HTTP_207_MULTI_STATUS
+                status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return JSONResponse(
             status_code=status_code,
             content={

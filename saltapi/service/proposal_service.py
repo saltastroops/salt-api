@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import urllib.parse
 from io import BytesIO
@@ -382,9 +383,13 @@ class ProposalService:
 
         try:
             ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-            if ssda_response['errors']:
-                raise SSDAError()
         except:
+            raise SSDAError()
+
+        if ssda_response['errors']:
+            for err in ssda_response['errors']:
+                error_message = f'SSDA Error start\n{err["message"]}\n{err["path"]}\nSSDA error end'
+                logging.error(error_message)
             raise SSDAError()
 
     def update_proprietary_period(

@@ -528,3 +528,9 @@ class PermissionService:
             return
         if user_id != user.id:
             raise ValidationError(f"You can't validate user with user ID {user_id}.")
+
+    def check_permission_to_update_user_rights(self, user: User) -> None:
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+
+        raise AuthorizationError(f"You are not allowed update user rights.")

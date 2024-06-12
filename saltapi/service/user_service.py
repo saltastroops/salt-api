@@ -7,7 +7,7 @@ from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType
+from saltapi.web.schema.user import ProposalPermissionType, UserRights, RightLevel
 
 
 class UserService:
@@ -227,3 +227,33 @@ SALT Team
 
     def verify_user(self, user_id: int) -> None:
         self.repository.verify_user(user_id)
+
+    def get_right_setting(self, right) -> str:
+        if right == Role.ADMINISTRATOR:
+            return "RightAdmin"
+        if right == Role.BOARD_MEMBER:
+            return "RightBoard"
+        if right == Role.SALT_ASTRONOMER:
+            return "RightAstronomer"
+        if right == Role.SALT_OPERATOR:
+            return "RightOperator"
+        if right == Role.MASK_CUTTER:
+            return "RightMaskCutting"
+        if right == Role.LIBRARIAN:
+            return "RightProposals"
+
+        raise ValidationError("Unknown user right: " + right)
+
+    def update_user_rights(self, user_id: int, rights: List[UserRights]) -> None:
+
+        for right in rights:
+            value = 0
+            if right.level == RightLevel.BASIC:
+                value = 1
+            if right.level == RightLevel.ALL:
+                value = 2
+            if right.right == Role.LIBRARIAN and right.level != RightLevel.NONE:
+                # Making sure librarian never get full proposal rights
+                value = 1
+            right_setting = self.get_right_setting(right.right)
+            self.repository.update_right(user_id, right_setting, value)

@@ -22,6 +22,7 @@ from saltapi.web.schema.user import (
     UserUpdate,
     BaseUserDetails,
     UsernameEmail,
+    UserRights,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -363,3 +364,32 @@ def verify_user(
         unit_of_work.commit()
 
         return user_service.get_user(user_id)
+
+
+@router.post("/{user_id}/update-rights", summary="Update user rights", response_model=User)
+def update_user_rights(
+        user_id: int = Path(
+            ...,
+            title="User id",
+            description="Id for user to update rights for."
+        ),
+        user: _User = Depends(get_current_user),
+        rights: List[UserRights] = Body(
+            ...,
+            title="User rights",
+            description="User rights to update."
+        )
+) -> User:
+    """
+   Update user's password.
+   """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_user_rights(user)
+
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.update_user_rights(user_id, rights)
+
+        unit_of_work.commit()
+        user = user_service.get_user(user_id)
+        return user

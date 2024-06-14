@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 
-import { of } from "rxjs";
+import { Observable, of } from "rxjs";
 import { catchError, switchMap, tap } from "rxjs/operators";
 
 import { ProposalService } from "../service/proposal.service";
@@ -14,6 +14,7 @@ import { Rss } from "../types/rss";
 import { Salticam } from "../types/salticam";
 import { Acquisition } from "../types/so";
 import { AutoUnsubscribe, GENERIC_ERROR_MESSAGE } from "../utils";
+import { BlockService } from "../service/block.service";
 
 @Component({
   selector: "wm-so-page",
@@ -23,6 +24,7 @@ import { AutoUnsubscribe, GENERIC_ERROR_MESSAGE } from "../utils";
 @AutoUnsubscribe()
 export class SoPageComponent implements OnInit {
   block: Block | undefined;
+  blockId = "";
   proposal: Proposal | undefined;
   error: string | undefined = "This is fake error";
   acquisition!: Acquisition;
@@ -30,11 +32,12 @@ export class SoPageComponent implements OnInit {
   positionAngle: number | null = null;
   loading = false;
   automaticallyUpdate = false;
-  loadBlock = "currentBlock";
+  loadBlock: LoadBlock = "currentBlock";
   initialLoad = false;
   constructor(
     private soService: SoService,
     private proposalService: ProposalService,
+    private blockService: BlockService,
   ) {}
 
   ngOnInit(): void {
@@ -51,10 +54,19 @@ export class SoPageComponent implements OnInit {
   fetchBlock(): void {
     this.telescopeConfigurations = [];
     this.error = undefined;
-    const loadedBlock$ =
-      this.loadBlock === "currentBlock"
-        ? this.soService.getCurrentBlock()
-        : this.soService.getNextScheduledBlock();
+    let loadedBlock$: Observable<Block>
+    if(this.loadBlock === "nextBlock") {
+      loadedBlock$ = this.soService.getNextScheduledBlock()
+    } else if (this.loadBlock === "currentBlock") {
+      loadedBlock$ = this.soService.getCurrentBlock()
+    } else if(this.loadBlock === "otherBlock") {
+      loadedBlock$ = this.blockService.getBlock(parseInt(this.blockId))
+    } else {
+      this.loading = false;
+      this.error = "Can't determine which block to load."
+      throw new Error("Can't determine which block to load.")
+    }
+
     loadedBlock$
       .pipe(
         tap((block) => {
@@ -75,17 +87,22 @@ export class SoPageComponent implements OnInit {
         catchError((err) => {
           this.loading = false;
           if (err.status === 404) {
-            if (this.loadBlock === "currentBlock") {
-              this.error =
-                "There is no block that is being observed currently.";
-            } else {
-              this.error =
-                "There is no block that is scheduled for the next observation.";
+            switch (this.loadBlock) {
+              case "currentBlock":
+                this.error = "There is no block that is being observed currently.";
+                break;
+              case "nextBlock":
+                this.error = "There is no block that is scheduled for the next observation.";
+                break;
+              case "otherBlock":
+                this.error = `Couldn't find block id: ${this.blockId || 'None'}`;
+                break;
+              default:
+                this.error = GENERIC_ERROR_MESSAGE;
             }
           } else {
             this.error = GENERIC_ERROR_MESSAGE;
           }
-
           return of(undefined);
         }),
       )
@@ -99,11 +116,26 @@ export class SoPageComponent implements OnInit {
     this.loading = true;
     this.fetchBlock();
   }
+
+  updateBlockId(event: KeyboardEvent, blockId: string): void {
+    this.blockId = blockId
+    if (event.key === "Enter") {
+      this.fetchBlock()
+    }
+  }
+
+  updateSelectedBlock(selectedBlock: LoadBlock): void{
+    this.loadBlock = selectedBlock;
+    if (selectedBlock !== "otherBlock"){
+      this.fetchBlock()
+    }
+  }
+
   updateAutomatically(checked: boolean): void {
     this.automaticallyUpdate = checked;
   }
 
-  displayedBlockChange(loadBlockValue: string): void {
+  displayedBlockChange(loadBlockValue: LoadBlock): void {
     this.loadBlock = loadBlockValue;
     this.updatePage();
   }
@@ -182,3 +214,5 @@ export interface SoInstrumentConfiguration {
   instrument: Hrs | Nir | Rss | Salticam;
   payloadConfigIndex: number;
 }
+
+type LoadBlock  = "currentBlock" | "nextBlock" | "otherBlock"

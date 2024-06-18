@@ -383,8 +383,8 @@ class ProposalService:
 
         try:
             ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-        except:
-            raise SSDAError()
+        except Exception as error:
+            raise SSDAError() from error
 
         if ssda_response['errors']:
             for err in ssda_response['errors']:

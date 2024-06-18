@@ -1087,27 +1087,19 @@ WHERE PiptUser_Id = :user_id
 
         self.connection.execute(stmt, {"user_id": user_id, "active": active})
 
-    def _get_right_setting_id(self, right_setting: str):
-        stmt = text(
-            """
- SELECT PiptSetting_Id      AS  setting_id
- FROM PiptSetting
- WHERE PiptSetting_Name = :right_setting
-            """
-        )
-        result = self.connection.execute(stmt, {"right_setting": right_setting})
-        return cast(int, result.scalar_one())
-
     def update_right(self, user_id: int, right_setting: str, value: int):
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
-VALUES (:user_id, :setting_id, :value)
+VALUES (
+     :user_id,
+    (SELECT PiptSetting_Id FROM PipSetting WHERE PiptSetting_Name = :right_setting),
+    :value)
 ON DUPLICATE KEY UPDATE Value = :value
             """
         )
         self.connection.execute(stmt, {
             "user_id": user_id,
-            "setting_id": self._get_right_setting_id(right_setting),
+            "right_setting": right_setting,
             "value": value
         })

@@ -6,7 +6,7 @@ from starlette import status
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user, get_user_to_verify
-from saltapi.service.user import NewUserDetails as _NewUserDetails
+from saltapi.service.user import NewUserDetails as _NewUserDetails, Role
 from saltapi.service.user import User as _User
 from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
@@ -22,7 +22,6 @@ from saltapi.web.schema.user import (
     UserUpdate,
     BaseUserDetails,
     UsernameEmail,
-    UserRights,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -366,29 +365,29 @@ def verify_user(
         return user_service.get_user(user_id)
 
 
-@router.post("/{user_id}/update-rights", summary="Update user rights", response_model=User)
-def update_user_rights(
+@router.post("/{user_id}/update-roles", summary="Update user roles", response_model=User)
+def update_user_roles(
         user_id: int = Path(
             ...,
             title="User id",
             description="Id for user to update rights for."
         ),
         user: _User = Depends(get_current_user),
-        rights: List[UserRights] = Body(
+        roles: List[Role] = Body(
             ...,
-            title="User rights",
-            description="User rights to update."
+            title="User Roles",
+            description="User roles to update."
         )
 ) -> User:
     """
-   Update user's password.
+   Update user's roles.
    """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_update_user_rights(user)
+        permission_service.check_permission_to_update_user_roles(user)
 
         user_service = services.user_service(unit_of_work.connection)
-        user_service.update_user_rights(user_id, rights)
+        user_service.update_user_roles(user_id, roles)
 
         unit_of_work.commit()
         user = user_service.get_user(user_id)

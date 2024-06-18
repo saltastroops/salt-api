@@ -191,14 +191,3 @@ class PasswordUpdate(BaseModel):
 
 class UsernameEmail(BaseModel):
     username_email: str = Field(..., title="Username or Email", description="Username or Email.")
-
-
-class RightLevel(str, Enum):
-    NONE = "None"
-    BASIC = "Basic"
-    ALL = "All"
-
-
-class UserRights(BaseModel):
-    right: str = Field(..., title="Right", description="Right.")
-    level: RightLevel = Field(..., title="Right level", description="Right level like None, Basic and All.")

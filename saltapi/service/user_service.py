@@ -228,25 +228,5 @@ SALT Team
     def verify_user(self, user_id: int) -> None:
         self.repository.verify_user(user_id)
 
-    def _get_right_setting(self, role: Role) -> str:
-        if role == Role.ADMINISTRATOR:
-            return "RightAdmin"
-        if role == Role.BOARD_MEMBER:
-            return "RightBoard"
-        if role == Role.SALT_ASTRONOMER:
-            return "RightAstronomer"
-        if role == Role.SALT_OPERATOR:
-            return "RightOperator"
-        if role == Role.MASK_CUTTER:
-            return "RightMaskCutting"
-        if role == Role.LIBRARIAN:
-            return "RightLibrarian"
-
-        raise ValidationError("Unknown user right: " + role)
-
-    def update_user_roles(self, user_id: int, roles: List[Role]) -> None:
-
-        for role in roles:
-            right_setting = self._get_right_setting(role)
-            # From the role I assume everyone has the full rights of their roles.
-            self.repository.update_right(user_id, right_setting, 2)
+    def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
+        self.repository.update_user_roles(user_id, new_roles)

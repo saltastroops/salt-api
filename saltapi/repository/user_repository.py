@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError
+from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -1087,13 +1087,13 @@ WHERE PiptUser_Id = :user_id
 
         self.connection.execute(stmt, {"user_id": user_id, "active": active})
 
-    def update_right(self, user_id: int, right_setting: str, value: int):
+    def _update_right(self, user_id: int, right_setting: str, value: int):
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
 VALUES (
      :user_id,
-    (SELECT PiptSetting_Id FROM PipSetting WHERE PiptSetting_Name = :right_setting),
+    (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_setting),
     :value)
 ON DUPLICATE KEY UPDATE Value = :value
             """
@@ -1103,3 +1103,30 @@ ON DUPLICATE KEY UPDATE Value = :value
             "right_setting": right_setting,
             "value": value
         })
+
+    def _get_right_setting(self, role: Role) -> str:
+        if role == Role.ADMINISTRATOR:
+            return "RightAdmin"
+        if role == Role.BOARD_MEMBER:
+            return "RightBoard"
+        if role == Role.SALT_ASTRONOMER:
+            return "RightAstronomer"
+        if role == Role.SALT_OPERATOR:
+            return "RightOperator"
+        if role == Role.MASK_CUTTER:
+            return "RightMaskCutting"
+        if role == Role.LIBRARIAN:
+            return "RightLibrarian"
+
+        raise ValidationError("Unknown user right: " + role)
+
+    def update_user_roles(self, user_id: int, new_roles: List[Role]):
+        current_roles = self.get(user_id).roles
+        for role in new_roles:
+            right_setting = self._get_right_setting(role)
+            # From the role I assume everyone has the full rights of their roles.
+            self._update_right(user_id, right_setting, 2)
+        for role in current_roles:
+            if role not in new_roles:
+                right_setting = self._get_right_setting(role)
+                self._update_right(user_id, right_setting, 0)

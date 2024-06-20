@@ -1087,7 +1087,7 @@ WHERE PiptUser_Id = :user_id
 
         self.connection.execute(stmt, {"user_id": user_id, "active": active})
 
-    def _update_right(self, user_id: int, right_setting: str, value: int):
+    def _update_right(self, user_id: int, right_setting: str, value: int) -> None:
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
@@ -1104,6 +1104,23 @@ ON DUPLICATE KEY UPDATE Value = :value
             "value": value
         })
 
+    def _delete_right(self, user_id: int, right_setting: str) -> None:
+        stmt = text(
+            """
+DELETE FROM PiptUserSetting
+WHERE PiptUser_Id = :user_id 
+    AND PiptSetting_Id = (
+        SELECT PiptSetting_Id FROM PiptSetting
+            WHERE PiptSetting_Name = :right_setting
+        )       
+
+            """
+        )
+        self.connection.execute(stmt, {
+            "user_id": user_id,
+            "right_setting": right_setting
+        })
+
     def _get_right_setting(self, role: Role) -> str:
         if role == Role.ADMINISTRATOR:
             return "RightAdmin"
@@ -1118,15 +1135,15 @@ ON DUPLICATE KEY UPDATE Value = :value
         if role == Role.LIBRARIAN:
             return "RightLibrarian"
 
-        raise ValidationError("Unknown user right: " + role)
+        raise ValidationError("Unknown user role: " + role)
 
-    def update_user_roles(self, user_id: int, new_roles: List[Role]):
+    def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
         current_roles = self.get(user_id).roles
         for role in new_roles:
             right_setting = self._get_right_setting(role)
-            # From the role I assume everyone has the full rights of their roles.
+            # The setting is set to 2 as that value indicates having full rights.
             self._update_right(user_id, right_setting, 2)
         for role in current_roles:
             if role not in new_roles:
                 right_setting = self._get_right_setting(role)
-                self._update_right(user_id, right_setting, 0)
+                self._delete_right(user_id, right_setting)

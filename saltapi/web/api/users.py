@@ -365,7 +365,7 @@ def verify_user(
         return user_service.get_user(user_id)
 
 
-@router.patch("/{user_id}/update-roles", summary="Update user roles", response_model=User)
+@router.post("/{user_id}/update-roles", summary="Update user roles", response_model=User)
 def update_user_roles(
         user_id: int = Path(
             ...,

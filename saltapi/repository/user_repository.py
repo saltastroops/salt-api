@@ -1121,6 +1121,53 @@ WHERE PiptUser_Id = :user_id
             "right_setting": right_setting
         })
 
+    def get_investigato_id(self, user_id) -> int:
+        stmt = text("""
+SELECT  Investigator_Id from Investigator WHERE PiptUser_Id = :user_id      
+        """)
+
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return cast(int, result.scalar_one())
+
+    def _add_salt_astronomer(self, user_id: int):
+        stmt = text("""
+INSERT INTO SaltAstronomer (Investigator_Id)
+VALUES (:investigator_id)
+       """)
+        self.connection.execute(stmt, {
+            "investigator_id": self.get_investigato_id(user_id)
+        })
+
+    def _remove_salt_astronomer(self, user_id: int):
+        stmt = text("""
+DELETE FROM  SaltAstronomer
+WHERE Investigator_id = :investigator_id
+       """)
+        self.connection.execute(stmt, {
+            "investigator_id": self.get_investigato_id(user_id),
+        })
+
+    def _add_salt_oparator(self, user: User) -> None:
+        stmt = text("""
+INSERT INTO SaltOperator (FirstName, Surname, Email, Phone, Current)
+VALUES (:firstname, :surname, :email, :phone, 1)
+       """)
+        self.connection.execute(stmt, {
+            "firstname": user.given_name,
+            "surname": user.family_name,
+            "email": user.email,
+            "phone": None
+        })
+
+    def _remove_salt_oparator(self, user: User) -> None:
+        stmt = text("""
+DELETE FROM  SaltOperator
+WHERE Email = :email
+       """)
+        self.connection.execute(stmt, {
+            "email": user.email
+        })
+
     def _get_right_setting(self, role: Role) -> str:
         if role == Role.ADMINISTRATOR:
             return "RightAdmin"
@@ -1138,12 +1185,25 @@ WHERE PiptUser_Id = :user_id
         raise ValidationError("Unknown user role: " + role)
 
     def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
-        current_roles = self.get(user_id).roles
-        for role in new_roles:
+        user = self.get(user_id)
+        new_roles_set = set(new_roles)
+        current_roles = set(user.roles)
+        roles_to_add = new_roles_set - current_roles
+        roles_to_remove = current_roles - new_roles_set
+
+        for role in roles_to_add:
+            if role == Role.SALT_ASTRONOMER:
+                self._add_salt_astronomer(user.id)
+            if role == Role.SALT_OPERATOR:
+                self._add_salt_oparator(user)
             right_setting = self._get_right_setting(role)
             # The setting is set to 2 as that value indicates having full rights.
             self._update_right(user_id, right_setting, 2)
-        for role in current_roles:
+        for role in roles_to_remove:
             if role not in new_roles:
+                if role == Role.SALT_ASTRONOMER:
+                    self._remove_salt_astronomer(user.id)
+                if role == Role.SALT_OPERATOR:
+                    self._remove_salt_oparator(user)
                 right_setting = self._get_right_setting(role)
                 self._delete_right(user_id, right_setting)

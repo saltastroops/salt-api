@@ -101,13 +101,14 @@ FROM Nir N
                     ON NP.NirProcedureType_Id = NPT.NirProcedureType_Id
          JOIN NirDitherPatternStep NDPS
                     ON NP.NirDitherPattern_Id = NDPS.NirDitherPattern_Id
-          JOIN NirDitherOffsetType NDOT
+         LEFT JOIN NirDitherOffsetType NDOT
                     ON NDPS.NirDitherOffsetType_Id = NDOT.NirDitherOffsetType_Id
          JOIN NirDetector ND ON NDPS.NirDetector_Id = ND.NirDetector_Id
          JOIN NirExposureType NET ON NDPS.NirExposureType_Id = NET.NirExposureType_Id
          JOIN NirGain NG1 ON ND.NirGain_Id = NG1.NirGain_Id
          JOIN NirSampling NS ON ND.NirSampling_Id = NS.NirSampling_Id
 WHERE N.Nir_Id = :nir_id
+ORDER BY NDPS.NirDitherPattern_Order ASC
         """
         )
         results = self.connection.execute(

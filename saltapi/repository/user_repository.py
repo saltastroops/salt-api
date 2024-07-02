@@ -1129,22 +1129,22 @@ SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id
         result = self.connection.execute(stmt, {"user_id": user_id})
         return cast(int, result.scalar_one())
 
-    def _add_salt_astronomer(self, user_id: int):
+    def _add_salt_astronomer(self, user: User):
         stmt = text("""
 INSERT INTO SaltAstronomer (Investigator_Id)
 VALUES (:investigator_id)
        """)
         self.connection.execute(stmt, {
-            "investigator_id": self._get_investigator_id(user_id)
+            "investigator_id": self._get_investigator_id(user.id)
         })
 
-    def _remove_salt_astronomer(self, user_id: int):
+    def _remove_salt_astronomer(self, user: User):
         stmt = text("""
 DELETE FROM SaltAstronomer
 WHERE Investigator_id = :investigator_id
        """)
         self.connection.execute(stmt, {
-            "investigator_id": self._get_investigator_id(user_id),
+            "investigator_id": self._get_investigator_id(user.id),
         })
 
     def _add_salt_operator(self, user: User) -> None:
@@ -1193,7 +1193,7 @@ WHERE Email = :email
 
         for role in roles_to_add:
             if role == Role.SALT_ASTRONOMER:
-                self._add_salt_astronomer(user.id)
+                self._add_salt_astronomer(user)
             if role == Role.SALT_OPERATOR:
                 self._add_salt_operator(user)
             right_setting = self._get_right_setting(role)
@@ -1201,7 +1201,7 @@ WHERE Email = :email
             self._update_right(user_id, right_setting, 2)
         for role in roles_to_remove:
             if role == Role.SALT_ASTRONOMER:
-                self._remove_salt_astronomer(user.id)
+                self._remove_salt_astronomer(user)
             if role == Role.SALT_OPERATOR:
                 self._remove_salt_operator(user)
             right_setting = self._get_right_setting(role)

@@ -93,7 +93,7 @@ WHERE B.Block_Id = :block_id;
         observation_probabilities = {
             "moon": row.moon_probability,
             "competition": row.competition_probability,
-            "observability": row.observability_probability,
+            "observability": 0 if row.observability_probability < 0 else row.observability_probability,
             "seeing": row.seeing_probability,
             "average_ranking": row.average_ranking,
             "total": row.total_probability,

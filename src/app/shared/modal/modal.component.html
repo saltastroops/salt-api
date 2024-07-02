@@ -14,6 +14,11 @@
           </header>
           <div class="modal-card-body">
             <ng-content></ng-content>
+            <div *ngIf="warning" class="invalid-feedback">
+              <div class="has-text-warning" data-test="warning">
+                {{ warning }}
+              </div>
+            </div>
             <div *ngIf="error" class="invalid-feedback">
               <div class="has-text-danger" data-test="error">
                 {{ error }}
@@ -21,20 +26,19 @@
             </div>
           </div>
           <div class="modal-card-foot">
-            <input
+            <button
               type="submit"
               class="button is-small is-primary mr-3 pl-4"
               [ngClass]="{ 'is-loading': loading }"
-              value="Submit"
               (click)="submit()"
               data-test="submit"
-            />
-            <input
+              [disabled]="loading"
+            >Submit</button>
+            <button
               type="button"
               class="button is-small is-danger pl-4"
-              value="Cancel"
               (click)="close()"
-            />
+            >Cancel</button>
           </div>
         </div>
       </div>

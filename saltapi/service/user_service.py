@@ -227,3 +227,6 @@ SALT Team
 
     def verify_user(self, user_id: int) -> None:
         self.repository.verify_user(user_id)
+
+    def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
+        self.repository.update_user_roles(user_id, new_roles)

@@ -117,7 +117,7 @@ class NirDitherStep(BaseModel):
     offset: NirDitherOffset = Field(
         ..., title="Dither offset", description="Dither offset"
     )
-    offset_type: NirOffsetType = Field(
+    offset_type: NirOffsetType | None = Field(
         ..., title="Dither offset type", description="Dither offset type"
     )
     detector: NirDetector = Field(

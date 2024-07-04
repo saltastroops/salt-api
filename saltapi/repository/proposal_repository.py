@@ -3,6 +3,7 @@ import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time
+from pprint import pprint
 from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
@@ -614,10 +615,10 @@ ORDER BY I.Surname, I.FirstName
             del investigator["relevance_of_proposal"]
             del investigator["year_of_completion"]
 
-            if investigator["approval_code"]:
-                investigator["has_approved_proposal"] = None
-            elif investigator["approved"] == 1:
+            if investigator["approved"] == 1:
                 investigator["has_approved_proposal"] = True
+            elif investigator["approval_code"]:
+                investigator["has_approved_proposal"] = None
             else:
                 investigator["has_approved_proposal"] = False
 
@@ -1351,6 +1352,7 @@ WHERE PC.Proposal_Code = :proposal_code
     def _validate_status_update(self, proposal_code: str, status: str) -> None:
         """Check if the proposal status can be updated."""
         proposal = self.get(proposal_code)
+        pprint(proposal)
 
         if proposal["phase"] == 2 and status in [
             ProposalStatusValue.ACCEPTED,

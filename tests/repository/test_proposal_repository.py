@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 from sqlalchemy.engine import Connection
 
 import saltapi.repository.proposal_repository
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.settings import Settings, get_settings
 from tests.conftest import find_username
@@ -413,6 +413,27 @@ def test_update_proposal_status(db_connection: Connection) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "proposal_code, status",
+    [
+        # Phase 2 proposal
+        ("2019-1-SCI-010", "Accepted"),
+        ("2019-1-SCI-010", "Rejected"),
+        ("2019-1-SCI-010", "Under scientific review"),
+        # Phase 1 proposal
+        ("2020-1-SCI-015", "Active"),
+        ("2020-1-SCI-015", "Completed"),
+        ("2020-1-SCI-015", "Under technical review"),
+    ],
+)
+def test_update_proposal_status_raise_validation_error(proposal_code: str, status: str, db_connection: Connection) -> None:
+    # Set the status to "Active"
+    proposal_repository = ProposalRepository(db_connection)
+
+    with pytest.raises(ValidationError):
+        proposal_repository.update_proposal_status(proposal_code, status)
+
+
 def test_update_proposal_status_for_not_none_status_reason(
     db_connection: Connection,
 ) -> None:
@@ -563,8 +584,8 @@ def test_proprietary_period_start_date_returns_correct_start_date(
 @pytest.mark.parametrize(
     "proposal_code,proprietary_period,block_visits,expected_date",
     [
-        ("2020-2-SCI-005", 0, [], date(2024, 5, 1)),
-        ("2020-2-SCI-005", 10, [], date(2025, 3, 1)),
+        ("2020-2-SCI-005", 0, [], date(2024, 11, 1)),
+        ("2020-2-SCI-005", 10, [], date(2025, 9, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 2, 1)}], date(2021, 5, 1)),
         ("2020-2-SCI-005", 10, [{"night": date(2021, 2, 1)}], date(2022, 3, 1)),
         ("2020-2-SCI-005", 0, [{"night": date(2021, 4, 30)}], date(2021, 5, 1)),

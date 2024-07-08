@@ -24,6 +24,11 @@
                 {{ error }}
               </div>
             </div>
+            <div *ngIf="warning">
+              <div class="has-text-warning" data-test="warning">
+                {{ warning }}
+              </div>
+            </div>
           </div>
           <div class="modal-card-foot">
             <button

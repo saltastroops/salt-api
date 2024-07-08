@@ -73,7 +73,8 @@ export class LoginComponent implements OnInit {
           if (error.status === 401) {
             this.error = "Username or password is incorrect.";
           } else if (error.status === 403) {
-            this.error = "Your account has not been verified. Click on the link below to verify your account.";
+            this.error =
+              "Your account has not been verified. Click on the link below to verify your account.";
           } else {
             this.error = GENERIC_ERROR_MESSAGE;
           }

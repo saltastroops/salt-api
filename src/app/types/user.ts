@@ -6,7 +6,11 @@ export type UserRole =
   | "SALT Operator"
   | "TAC Chair"
   | "Technician"
-  | "TAC Member";
+  | "TAC Member"
+  | "Mask Cutter"
+  | "Librarian"
+  | "Engineer"
+  | "Board Member";
 
 export interface User {
   id: number;

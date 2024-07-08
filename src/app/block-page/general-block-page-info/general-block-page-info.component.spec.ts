@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { GeneralBlockPageInfoComponent } from './general-block-page-info.component';
+import { GeneralBlockPageInfoComponent } from "./general-block-page-info.component";
 
-describe('BlockProposalGeneralComponent', () => {
+describe("BlockProposalGeneralComponent", () => {
   let component: GeneralBlockPageInfoComponent;
   let fixture: ComponentFixture<GeneralBlockPageInfoComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GeneralBlockPageInfoComponent ]
-    })
-    .compileComponents();
+      declarations: [GeneralBlockPageInfoComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('BlockProposalGeneralComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

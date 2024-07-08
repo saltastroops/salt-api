@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
+import { BlockPageComponent } from "./block-page/block-page.component";
 import { HomeComponent } from "./home/home.component";
 import { ChangePasswordComponent } from "./login/change-password/change-password.component";
 import { ForgotPasswordComponent } from "./login/forgot-password/forgot-password.component";
@@ -8,6 +9,7 @@ import { LoginComponent } from "./login/login.component";
 import { SwitchUserComponent } from "./login/switch-user/switch-user.component";
 import { ManageUserProfileComponent } from "./manage-user-profile/manage-user-profile.component";
 import { MosComponent } from "./mos/mos.component";
+import { EditRolesComponent } from "./options/edit-roles/edit-roles.component";
 import { FinderChartViewComponent } from "./proposal/blocks/block/finder-chart-view/finder-chart-view.component";
 import { ProposalComponent } from "./proposal/proposal.component";
 import { RegisterUserComponent } from "./register-user/register-user.component";
@@ -16,7 +18,6 @@ import { VerifyUserComponent } from "./register-user/verify-user/verify-user.com
 import { AuthGuardService } from "./service/auth-guard.service";
 import { PageMissingComponent } from "./shared/page-missing/page-missing.component";
 import { SoPageComponent } from "./so-page/so-page.component";
-import { BlockPageComponent } from "./block-page/block-page.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -28,7 +29,10 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
   { path: "forgot-password", component: ForgotPasswordComponent },
-  { path: "change-password/:user_id/:token", component: ChangePasswordComponent },
+  {
+    path: "change-password/:user_id/:token",
+    component: ChangePasswordComponent,
+  },
   { path: "verify-user/:user_id/:token", component: VerifyUserComponent },
   { path: "mos", component: MosComponent, canActivate: [AuthGuardService] },
   { path: "so-pages", component: SoPageComponent },
@@ -40,7 +44,7 @@ const routes: Routes = [
   {
     path: "block/:blockId",
     component: BlockPageComponent,
-    canActivate: [AuthGuardService]
+    canActivate: [AuthGuardService],
   },
   {
     path: "request-verification-link",
@@ -50,6 +54,11 @@ const routes: Routes = [
   {
     path: "switch-user",
     component: SwitchUserComponent,
+    canActivate: [AuthGuardService],
+  },
+  {
+    path: "edit-roles",
+    component: EditRolesComponent,
     canActivate: [AuthGuardService],
   },
   { path: "page-missing", component: PageMissingComponent },

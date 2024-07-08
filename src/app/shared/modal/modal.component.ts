@@ -11,7 +11,6 @@ export class ModalComponent {
   @Input() loading!: boolean;
   @Input() error!: string | undefined;
   @Input() warning!: string | undefined;
-
   @Output() submitContent = new EventEmitter<void>();
   @Output() closeModal = new EventEmitter<void>();
 

@@ -3,6 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { catchError, switchMap, tap } from "rxjs/operators";
 
+import { BlockService } from "../service/block.service";
 import { ProposalService } from "../service/proposal.service";
 import { SoService } from "../service/so.service";
 import { Block } from "../types/block";
@@ -14,7 +15,6 @@ import { Rss } from "../types/rss";
 import { Salticam } from "../types/salticam";
 import { Acquisition } from "../types/so";
 import { AutoUnsubscribe, GENERIC_ERROR_MESSAGE } from "../utils";
-import { BlockService } from "../service/block.service";
 
 @Component({
   selector: "wm-so-page",
@@ -54,17 +54,17 @@ export class SoPageComponent implements OnInit {
   fetchBlock(): void {
     this.telescopeConfigurations = [];
     this.error = undefined;
-    let loadedBlock$: Observable<Block>
-    if(this.loadBlock === "nextBlock") {
-      loadedBlock$ = this.soService.getNextScheduledBlock()
+    let loadedBlock$: Observable<Block>;
+    if (this.loadBlock === "nextBlock") {
+      loadedBlock$ = this.soService.getNextScheduledBlock();
     } else if (this.loadBlock === "currentBlock") {
-      loadedBlock$ = this.soService.getCurrentBlock()
-    } else if(this.loadBlock === "otherBlock") {
-      loadedBlock$ = this.blockService.getBlock(parseInt(this.blockId))
+      loadedBlock$ = this.soService.getCurrentBlock();
+    } else if (this.loadBlock === "otherBlock") {
+      loadedBlock$ = this.blockService.getBlock(parseInt(this.blockId));
     } else {
       this.loading = false;
-      this.error = "Can't determine which block to load."
-      throw new Error("Can't determine which block to load.")
+      this.error = "Can't determine which block to load.";
+      throw new Error("Can't determine which block to load.");
     }
 
     loadedBlock$
@@ -89,13 +89,17 @@ export class SoPageComponent implements OnInit {
           if (err.status === 404) {
             switch (this.loadBlock) {
               case "currentBlock":
-                this.error = "There is no block that is being observed currently.";
+                this.error =
+                  "There is no block that is being observed currently.";
                 break;
               case "nextBlock":
-                this.error = "There is no block that is scheduled for the next observation.";
+                this.error =
+                  "There is no block that is scheduled for the next observation.";
                 break;
               case "otherBlock":
-                this.error = `Couldn't find block id: ${this.blockId || 'None'}`;
+                this.error = `Couldn't find block id: ${
+                  this.blockId || "None"
+                }`;
                 break;
               default:
                 this.error = GENERIC_ERROR_MESSAGE;
@@ -118,16 +122,16 @@ export class SoPageComponent implements OnInit {
   }
 
   updateBlockId(event: KeyboardEvent, blockId: string): void {
-    this.blockId = blockId
+    this.blockId = blockId;
     if (event.key === "Enter") {
-      this.fetchBlock()
+      this.fetchBlock();
     }
   }
 
-  updateSelectedBlock(selectedBlock: LoadBlock): void{
+  updateSelectedBlock(selectedBlock: LoadBlock): void {
     this.loadBlock = selectedBlock;
-    if (selectedBlock !== "otherBlock"){
-      this.fetchBlock()
+    if (selectedBlock !== "otherBlock") {
+      this.fetchBlock();
     }
   }
 
@@ -154,7 +158,7 @@ export class SoPageComponent implements OnInit {
             configurationType: pc.payloadConfigurationType,
             iterations: tc.iterations,
             lamp: pc.lamp,
-            calibrationFilter: pc.calibrationFilter
+            calibrationFilter: pc.calibrationFilter,
           };
 
           if (pc.instruments.salticam) {
@@ -215,4 +219,4 @@ export interface SoInstrumentConfiguration {
   payloadConfigIndex: number;
 }
 
-type LoadBlock  = "currentBlock" | "nextBlock" | "otherBlock"
+type LoadBlock = "currentBlock" | "nextBlock" | "otherBlock";

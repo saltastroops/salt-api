@@ -43,8 +43,8 @@ export class ProposalComponent implements OnInit {
       .pipe(
         map((params) => params["proposal-code"]),
         tap((proposalCode) => {
-          this.proposalCode = proposalCode
-        })
+          this.proposalCode = proposalCode;
+        }),
       )
       .pipe(
         switchMap((proposalCode) => {
@@ -77,10 +77,10 @@ export class ProposalComponent implements OnInit {
       this.proposal = proposal;
     });
     this.errorSubscription = error$.subscribe((error) => {
-      if (error && (error.status === 404 || error.status === 422) ){
-        this.error = `Proposal code ${ this.proposalCode } not found.`
-      }else {
-        this.error = `Failed to fetch proposal '${this.proposalCode}'.`
+      if (error && (error.status === 404 || error.status === 422)) {
+        this.error = `Proposal code ${this.proposalCode} not found.`;
+      } else {
+        this.error = `Failed to fetch proposal '${this.proposalCode}'.`;
       }
     });
     this.isLoadingSubscription = isLoading$.subscribe((isLoading) => {

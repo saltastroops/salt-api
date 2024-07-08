@@ -45,9 +45,10 @@ export class NavigationBarComponent implements OnInit {
   }
 
   gotoProposal(): void {
-    const proposalCodeOrBlockId = this.gotoProposalForm.value.proposalCode.trim();
+    const proposalCodeOrBlockId =
+      this.gotoProposalForm.value.proposalCode.trim();
     this.gotoProposalForm.patchValue({ proposalCode: "" });
-    if (isNaN(proposalCodeOrBlockId)){
+    if (isNaN(proposalCodeOrBlockId)) {
       this.router.navigate(["/proposal", proposalCodeOrBlockId]);
     } else {
       this.router.navigate(["/block", proposalCodeOrBlockId]);

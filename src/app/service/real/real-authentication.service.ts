@@ -149,19 +149,22 @@ export class RealAuthenticationService implements AuthenticationService {
    *
    * @param token Authentication token.
    * @param password Password.
+   * @param userId User Id.
    */
-  changePassword(password: string, userId: number, token: string): Observable<Message> {
+  changePassword(
+    password: string,
+    userId: number,
+    token: string,
+  ): Observable<Message> {
     // Make sure that we don't use another token for changing the password
     this.logout().subscribe(() => {
       /* do nothing */
     });
 
     return this.http.post<Message>(
-              `${environment.apiUrl}/users/${userId}/update-password`,
-              { password,  authentication_key: token},
-            );
-
-
+      `${environment.apiUrl}/users/${userId}/update-password`,
+      { password, authentication_key: token },
+    );
   }
 
   getUser(): Observable<User> {

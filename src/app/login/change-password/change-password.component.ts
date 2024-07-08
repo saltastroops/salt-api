@@ -64,7 +64,7 @@ export class ChangePasswordComponent implements OnInit {
       .subscribe(
         () => {
           this.loading = false;
-          this.passwordUpdatedSuccessfully = true
+          this.passwordUpdatedSuccessfully = true;
         },
         (error) => {
           this.error = error.message;

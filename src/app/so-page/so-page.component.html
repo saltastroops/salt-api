@@ -43,10 +43,9 @@
             [value]="blockId"
             [disabled]="loadBlock !== 'otherBlock'"
             (keyup)="updateBlockId($event, blockIdInput.value)"
-          >
+          />
         </div>
       </div>
-
     </div>
     <div class="control">
       <div></div>
@@ -63,13 +62,13 @@
         </label>
       </div>
       <div>
-      <button
-        class="button is-primary {{ loading ? 'is-loading' : '' }}"
-        (click)="updatePage()"
-      >
-        Update page
-      </button>
-    </div>
+        <button
+          class="button is-primary {{ loading ? 'is-loading' : '' }}"
+          (click)="updatePage()"
+        >
+          Update page
+        </button>
+      </div>
     </div>
   </div>
   <div>

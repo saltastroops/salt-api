@@ -3,7 +3,6 @@ import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time
-from pprint import pprint
 from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
@@ -1352,7 +1351,6 @@ WHERE PC.Proposal_Code = :proposal_code
     def _validate_status_update(self, proposal_code: str, status: str) -> None:
         """Check if the proposal status can be updated."""
         proposal = self.get(proposal_code)
-        pprint(proposal)
 
         if proposal["phase"] == 2 and status in [
             ProposalStatusValue.ACCEPTED,

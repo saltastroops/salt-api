@@ -427,7 +427,6 @@ def test_update_proposal_status(db_connection: Connection) -> None:
     ],
 )
 def test_update_proposal_status_raise_validation_error(proposal_code: str, status: str, db_connection: Connection) -> None:
-    # Set the status to "Active"
     proposal_repository = ProposalRepository(db_connection)
 
     with pytest.raises(ValidationError):

@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError
+from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -1086,3 +1086,123 @@ WHERE PiptUser_Id = :user_id
             raise NotFoundError(f"Unknown user id: {user_id}")
 
         self.connection.execute(stmt, {"user_id": user_id, "active": active})
+
+    def _update_right(self, user_id: int, right_setting: str, value: int) -> None:
+        stmt = text(
+            """
+INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
+VALUES (
+     :user_id,
+    (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_setting),
+    :value)
+ON DUPLICATE KEY UPDATE Value = :value
+            """
+        )
+        self.connection.execute(stmt, {
+            "user_id": user_id,
+            "right_setting": right_setting,
+            "value": value
+        })
+
+    def _delete_right(self, user_id: int, right_setting: str) -> None:
+        stmt = text(
+            """
+DELETE FROM PiptUserSetting
+WHERE PiptUser_Id = :user_id 
+    AND PiptSetting_Id = (
+        SELECT PiptSetting_Id FROM PiptSetting
+            WHERE PiptSetting_Name = :right_setting
+        )       
+
+            """
+        )
+        self.connection.execute(stmt, {
+            "user_id": user_id,
+            "right_setting": right_setting
+        })
+
+    def _get_investigator_id(self, user_id) -> int:
+        stmt = text("""
+SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id     
+        """)
+
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return cast(int, result.scalar_one())
+
+    def _add_salt_astronomer(self, user: User):
+        stmt = text("""
+INSERT INTO SaltAstronomer (Investigator_Id)
+VALUES (:investigator_id)
+       """)
+        self.connection.execute(stmt, {
+            "investigator_id": self._get_investigator_id(user.id)
+        })
+
+    def _remove_salt_astronomer(self, user: User):
+        stmt = text("""
+DELETE FROM SaltAstronomer
+WHERE Investigator_id = :investigator_id
+       """)
+        self.connection.execute(stmt, {
+            "investigator_id": self._get_investigator_id(user.id),
+        })
+
+    def _add_salt_operator(self, user: User) -> None:
+        stmt = text("""
+INSERT INTO SaltOperator (FirstName, Surname, Email, Phone, Current)
+VALUES (:firstname, :surname, :email, :phone, 1)
+       """)
+        self.connection.execute(stmt, {
+            "firstname": user.given_name,
+            "surname": user.family_name,
+            "email": user.email,
+            "phone": None
+        })
+
+    def _remove_salt_operator(self, user: User) -> None:
+        stmt = text("""
+DELETE FROM SaltOperator
+WHERE Email = :email
+       """)
+        self.connection.execute(stmt, {
+            "email": user.email
+        })
+
+    def _get_right_setting(self, role: Role) -> str:
+        if role == Role.ADMINISTRATOR:
+            return "RightAdmin"
+        if role == Role.BOARD_MEMBER:
+            return "RightBoard"
+        if role == Role.SALT_ASTRONOMER:
+            return "RightAstronomer"
+        if role == Role.SALT_OPERATOR:
+            return "RightOperator"
+        if role == Role.MASK_CUTTER:
+            return "RightMaskCutting"
+        if role == Role.LIBRARIAN:
+            return "RightLibrarian"
+
+        raise ValidationError("Unknown user role: " + role)
+
+    def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
+        user = self.get(user_id)
+        new_roles_set = set(new_roles)
+        current_roles_set = set(user.roles)
+        roles_to_add = new_roles_set - current_roles_set
+        roles_to_remove = current_roles_set - new_roles_set
+
+        for role in roles_to_add:
+            if role == Role.SALT_ASTRONOMER:
+                self._add_salt_astronomer(user)
+            if role == Role.SALT_OPERATOR:
+                self._add_salt_operator(user)
+            right_setting = self._get_right_setting(role)
+            # The setting is set to 2 as that value indicates having full rights.
+            self._update_right(user_id, right_setting, 2)
+        for role in roles_to_remove:
+            if role == Role.SALT_ASTRONOMER:
+                self._remove_salt_astronomer(user)
+            if role == Role.SALT_OPERATOR:
+                self._remove_salt_operator(user)
+            right_setting = self._get_right_setting(role)
+            self._delete_right(user_id, right_setting)

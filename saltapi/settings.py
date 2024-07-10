@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     # Lifetime of an authentication token, in hours
     auth_token_lifetime_hours: int = 7 * 24
 
+    # Base URI of the Web Manager frontend, without a trailing slash
+    # Example: https://www.salt.ac.za/wm
+    frontend_uri: str
+
     # Regular expression for the origins allowed by CORS
     # Example: "http://(localhost|127\.0\.0\.1):5000"
     allow_origin_regex: str
@@ -43,6 +47,13 @@ class Settings(BaseSettings):
     # Example: "localhost|127.\.0\.0\.1|10\.1.*|10\.2.*|196\.21\.185\.73
     allow_status_update_origin_regex: str
 
+    # List of email addresses to which status updates are sent
+    # Example: "John Doe <doe@example.com>, Jane Miller <jane@example.com>
+    # Both the full name and the email address should be included, and the email
+    # address must be enclosed in angular brackets. Neither of these may include a
+    # comma.
+    status_update_email_recipients: str
+
     # DSN for Sentry
     sentry_dsn: Optional[str]
 
@@ -51,6 +62,12 @@ class Settings(BaseSettings):
 
     # SMTP server for sending emails
     smtp_server: Optional[str]
+
+    # Username for the SMTP server
+    smtp_username: Optional[str]
+
+    # Password for the SMTP server
+    smtp_password: Optional[str]
 
     # Directory containing the jar file MappingService.jar for mapping proposals to the
     # database
@@ -115,6 +132,12 @@ class Settings(BaseSettings):
 
     # URL for getting the TCS ICD file
     tcs_icd_url: str
+
+    # SSDA API key for updating proprietary period
+    ssda_api_key: str
+
+    # URL for the SAAO SALT Data Archive api
+    ssda_api_url: str
 
     class Config:
         env_file = os.getenv("DOTENV_FILE", ".env")

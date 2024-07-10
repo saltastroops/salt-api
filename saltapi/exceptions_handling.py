@@ -15,6 +15,7 @@ from saltapi.exceptions import (
     NotFoundError,
     ValidationError,
     AuthenticationError,
+    SSDAError,
 )
 
 
@@ -133,6 +134,18 @@ def setup_exception_handler(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED, content={
                 "message": "The authorisation token could not be parsed."
+            }
+        )
+
+    @app.exception_handler(SSDAError)
+    async def ssda_error_handler(
+            request: Request, exc: SSDAError
+    ) -> Response:
+        """Catch an SSDA Error."""
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={
+                "message": exc.message
             }
         )
 

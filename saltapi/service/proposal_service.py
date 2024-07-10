@@ -1,14 +1,16 @@
+import logging
 import pathlib
 import urllib.parse
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pdfkit
+import requests
 from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, SSDAError
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
@@ -366,6 +368,29 @@ class ProposalService:
         self.repository.insert_proprietary_period_extension_request(
             proposal_code, proprietary_period, motivation, username
         )
+
+    def update_proprietary_period_in_ssda(self, proposal_code: str, proprietary_period: int):
+        release_date = self.repository.get_release_date(proprietary_period, proposal_code)
+        body = {
+            "query": "mutation($proposalCode:String!,$institution:Institution!,$apiKey:String!,$releaseDate:String!){updateReleaseDates(proposalCode:$proposalCode,institution:$institution,apiKey:$apiKey,metadataReleaseDate:$releaseDate,dataReleaseDate:$releaseDate){status}}",
+            "variables": {
+                "proposalCode": proposal_code,
+                "institution": "SALT",
+                "releaseDate": str(release_date),
+                "apiKey": get_settings().ssda_api_key
+            }
+        }
+
+        try:
+            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+        except Exception as error:
+            raise SSDAError() from error
+
+        if ssda_response['errors']:
+            for err in ssda_response['errors']:
+                error_message = f'SSDA Error start\n{err["message"]}\n{err["path"]}\nSSDA error end'
+                logging.error(error_message)
+            raise SSDAError()
 
     def update_proprietary_period(
         self, proposal_code: str, proprietary_period: int

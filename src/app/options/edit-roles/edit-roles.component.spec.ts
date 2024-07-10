@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { BlockPageComponent } from "./block-page.component";
+import { EditRolesComponent } from "./edit-roles.component";
 
-describe("BlockPageComponent", () => {
-  let component: BlockPageComponent;
-  let fixture: ComponentFixture<BlockPageComponent>;
+describe("ChangeUserRolesComponent", () => {
+  let component: EditRolesComponent;
+  let fixture: ComponentFixture<EditRolesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [BlockPageComponent],
+      declarations: [EditRolesComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BlockPageComponent);
+    fixture = TestBed.createComponent(EditRolesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

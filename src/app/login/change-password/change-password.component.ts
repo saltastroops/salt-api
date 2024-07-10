@@ -17,8 +17,10 @@ import { AuthenticationService } from "../../service/authentication.service";
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: UntypedFormGroup;
   token!: string;
+  userId!: number;
   loading = false;
   submitted = false;
+  passwordUpdatedSuccessfully = false;
   error: string | undefined = undefined;
 
   constructor(
@@ -35,6 +37,7 @@ export class ChangePasswordComponent implements OnInit {
     });
     this.route.params.subscribe((params) => {
       this.token = params.token;
+      this.userId = params.user_id;
     });
   }
 
@@ -57,17 +60,21 @@ export class ChangePasswordComponent implements OnInit {
 
     this.loading = true;
     this.authenticationService
-      .changePassword(this.f.password.value, this.token)
+      .changePassword(this.f.password.value, this.userId, this.token)
       .subscribe(
         () => {
           this.loading = false;
-          this.router.navigate(["/login"]);
+          this.passwordUpdatedSuccessfully = true;
         },
         (error) => {
           this.error = error.message;
           this.loading = false;
         },
       );
+  }
+
+  gotoLogin(): void {
+    this.router.navigate(["/login"]);
   }
 
   clearError(): void {

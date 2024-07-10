@@ -1,0 +1,8 @@
+.has-two-columns {
+  display: grid;
+  grid-template-columns: 30em auto;
+  column-gap: 2em;
+}
+ul {
+  margin-top: 0;
+}

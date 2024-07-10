@@ -6,16 +6,14 @@
   <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">
     {{ nirConfig.exposureType }}
   </td>
-  <td>
-    {{ step.exposureTime }} sec
-  </td>
+  <td>{{ step.exposureTime }} sec</td>
   <td>{{ secondsToHhMmSs(step.exposureTime) }}</td>
   <td>{{ step.iterations }}</td>
   <td *ngIf="i === 0" [attr.rowspan]="nirConfig.ditherSteps.length">
     {{ nirConfig.cycles }}
   </td>
   <td>{{ nirConfig.lamp }}</td>
-  <td> {{ nirConfig.calibrationFilter }}</td>
+  <td>{{ nirConfig.calibrationFilter }}</td>
   <td>
     <div class="wrapper">
       <div>Step Number:</div>

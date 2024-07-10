@@ -9,7 +9,7 @@ import {
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { Observable, of } from "rxjs";
+import { of } from "rxjs";
 import { catchError, map, switchMap, take, tap } from "rxjs/operators";
 
 import { InstitutionService } from "../service/institution.service";
@@ -17,6 +17,7 @@ import { UserService } from "../service/user.service";
 import { Partner, PartnerCode } from "../types/common";
 import { Institution, NewInstitutionDetails } from "../types/institution";
 import { NewUserDetails, StatisticsError } from "../types/user";
+import { GENERIC_ERROR_MESSAGE } from "../utils";
 
 @Component({
   selector: "wm-register-user",
@@ -38,9 +39,7 @@ export class RegisterUserComponent implements OnInit {
     gender: undefined,
     phd: undefined,
   };
-  selectedInstitutionId!: number;
-  institutionId$!: Observable<number>;
-  DEBOUNCE_TIME = 100;
+  isRegistered = false;
 
   // cross-validation to ensure that password
   // and confirm password values match
@@ -213,14 +212,19 @@ export class RegisterUserComponent implements OnInit {
             return of(null);
           }),
         )
-        .subscribe((user) => {
-          if (user) {
-            window.alert(
-              "You have successfully registered.\nYou may proceed to log in.",
-            );
+        .subscribe(
+          (user) => {
+            if(user){
+              // If the server call fails with an error, the catchError above returns a stream with
+              // a null user. In this case loading has stopped but no success message must be shown.
+              this.isRegistered = true;
+            }
             this.loading = false;
-          }
-        });
+          },
+          () => {
+            this.loading = false;
+            this.error = GENERIC_ERROR_MESSAGE;
+          });
     }
   }
 

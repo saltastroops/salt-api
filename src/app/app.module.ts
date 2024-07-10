@@ -13,6 +13,8 @@ import { DateFnsModule } from "ngx-date-fns";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
+import { BlockPageComponent } from "./block-page/block-page.component";
+import { GeneralBlockPageInfoComponent } from "./block-page/general-block-page-info/general-block-page-info.component";
 import { HomeGuestComponent } from "./home/home-guest/home-guest.component";
 import { HomeUserComponent } from "./home/home-user/home-user.component";
 import { HomeComponent } from "./home/home.component";
@@ -29,6 +31,7 @@ import { MosComponent } from "./mos/mos.component";
 import { ObsoleteMasksComponent } from "./mos/obsolete-masks/obsolete-masks.component";
 import { InlineLoginComponent } from "./navigation-bar/inline-login/inline-login.component";
 import { NavigationBarComponent } from "./navigation-bar/navigation-bar.component";
+import { EditRolesComponent } from "./options/edit-roles/edit-roles.component";
 import { nl2brPipe } from "./pipes/nl2br.pipe";
 import { SortByArgsPipe } from "./pipes/sort-by-args.pipe";
 import { BlockSummariesComponent } from "./proposal/blocks/block-summaries/block-summaries.component";
@@ -131,8 +134,6 @@ import { SalticamConfigRowComponent } from "./so-page/instrument-config-table/sa
 import { SoPageComponent } from "./so-page/so-page.component";
 import { SortByDirective } from "./sort-by.directive";
 import { SortDirective } from "./sort.directive";
-import { GeneralBlockPageInfoComponent } from './block-page/general-block-page-info/general-block-page-info.component';
-import { BlockPageComponent } from './block-page/block-page.component';
 
 @NgModule({
   declarations: [
@@ -250,6 +251,7 @@ import { BlockPageComponent } from './block-page/block-page.component';
     RequestVerificationLinkComponent,
     GeneralBlockPageInfoComponent,
     BlockPageComponent,
+    EditRolesComponent,
   ],
   imports: [
     BrowserModule,

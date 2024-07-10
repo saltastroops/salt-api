@@ -19,7 +19,9 @@
   <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
     {{ salticamConfig.cycles }}
   </td>
-  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">{{ salticamConfig.lamp }}</td>
+  <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
+    {{ salticamConfig.lamp }}
+  </td>
   <td *ngIf="i === 0" [attr.rowspan]="salticamConfig.exposures.length">
     {{ salticamConfig.calibrationFilter }}
   </td>
@@ -36,7 +38,7 @@
     </div>
     <div class="wrapper">
       <div>Filter:</div>
-      <div>{{s.filter}}</div>
+      <div>{{ s.filter }}</div>
     </div>
     <div class="wrapper">
       <div>Binning (spatial × spectral):</div>

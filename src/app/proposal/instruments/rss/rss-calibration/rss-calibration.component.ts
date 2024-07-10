@@ -1,6 +1,5 @@
 import { Component, Input } from "@angular/core";
 
-import { Lamp } from "../../../../types/common";
 import { CalibrationFilter } from "../../../../types/observation";
 
 @Component({
@@ -10,5 +9,5 @@ import { CalibrationFilter } from "../../../../types/observation";
 })
 export class RssCalibrationComponent {
   @Input() filter!: CalibrationFilter | null;
-  @Input() lamp!: Lamp;
+  @Input() lamp!: string;
 }

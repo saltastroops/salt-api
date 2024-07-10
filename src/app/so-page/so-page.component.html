@@ -1,46 +1,74 @@
 <div class="table-container">
   <div class="wrapper">
-    <div>Display</div>
-    <div>
-      <div
-        class="select"
-        [ngClass]="{ 'is-danger': !!(error && !initialLoad) }"
-      >
-        <select
-          #displayedBlock
-          (change)="displayedBlockChange(displayedBlock.value)"
-        >
-          <option
-            [selected]="loadBlock === 'currentBlock'"
-            value="currentBlock"
-          >
-            Currently observed block
-          </option>
-          <option [selected]="loadBlock === 'NextBlock'" value="NextBlock">
-            Next scheduled block
-          </option>
-        </select>
+    <div class="control">
+      <div>
+        <label class="radio">
+          <input
+            type="radio"
+            name="loaded-block"
+            [checked]="loadBlock === 'currentBlock'"
+            (change)="updateSelectedBlock('currentBlock')"
+          />
+          Currently observed block
+        </label>
+      </div>
+      <div>
+        <label class="radio">
+          <input
+            type="radio"
+            name="loaded-block"
+            [checked]="loadBlock === 'nextBlock'"
+            (change)="updateSelectedBlock('nextBlock')"
+          />
+          Next scheduled block
+        </label>
+      </div>
+      <div class="other-section">
+        <div>
+          <label class="radio">
+            <input
+              type="radio"
+              name="loaded-block"
+              [checked]="loadBlock === 'otherBlock'"
+              (change)="updateSelectedBlock('otherBlock')"
+            />
+            Specific Block Id
+          </label>
+        </div>
+        <div>
+          <input
+            #blockIdInput
+            type="text"
+            class="input"
+            [value]="blockId"
+            [disabled]="loadBlock !== 'otherBlock'"
+            (keyup)="updateBlockId($event, blockIdInput.value)"
+          />
+        </div>
       </div>
     </div>
-    <div>
-      <button
-        class="button is-primary {{ loading ? 'is-loading' : '' }}"
-        (click)="updatePage()"
-      >
-        Update page
-      </button>
-    </div>
-    <div>
-      <label class="checkbox">
-        <input
-          #automaticallyUpdateCheckbox
-          class="checkbox"
-          type="checkbox"
-          [checked]="automaticallyUpdate"
-          (click)="updateAutomatically(automaticallyUpdateCheckbox.checked)"
-        />
-        Update this page automatically
-      </label>
+    <div class="control">
+      <div></div>
+      <div>
+        <label class="checkbox">
+          <input
+            #automaticallyUpdateCheckbox
+            class="checkbox"
+            type="checkbox"
+            [checked]="automaticallyUpdate"
+            (click)="updateAutomatically(automaticallyUpdateCheckbox.checked)"
+          />
+          Update this page automatically
+        </label>
+      </div>
+      <div>
+        <button
+          class="button is-primary {{ loading ? 'is-loading' : '' }}"
+          (click)="updatePage()"
+        >
+          Update page
+        </button>
+      </div>
     </div>
   </div>
   <div>

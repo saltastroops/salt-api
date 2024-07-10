@@ -27,12 +27,13 @@
     />
   </div>
   <div *ngIf="error" class="light-danger" data-test="inline-login-error">
-    {{ error }} <a
-    *ngIf="error?.includes('Your account has not been verified')"
-    class="light-link {{ loading ? 'is-loading' : '' }}"
-    [routerLink]="['/request-verification-link']"
-  >
-    Request verification link
-  </a>
+    {{ error }}
+    <a
+      *ngIf="error?.includes('Your account has not been verified')"
+      class="light-link {{ loading ? 'is-loading' : '' }}"
+      [routerLink]="['/request-verification-link']"
+    >
+      Request verification link
+    </a>
   </div>
 </form>

@@ -1,5 +1,5 @@
 import { Bvit } from "./bvit";
-import { Lamp, TargetCoordinates, TimeInterval } from "./common";
+import { TargetCoordinates, TimeInterval } from "./common";
 import { Hrs } from "./hrs";
 import { Nir } from "./nir";
 import { Rss } from "./rss";
@@ -65,7 +65,7 @@ export interface Observation {
 export interface PayloadConfiguration {
   payloadConfigurationType: PayloadConfigurationType;
   useCalibrationScreen: boolean | null;
-  lamp: Lamp | null;
+  lamp: string | null;
   calibrationFilter: CalibrationFilter | null;
   guideMethod: GuideMethod;
   instruments: Instruments;

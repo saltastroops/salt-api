@@ -1,0 +1,246 @@
+<div class="content" *ngIf="selectedUser">
+  <div *ngIf="hasAnyRole(user, ['Administrator'])">
+    <h2 class="title is-2">Change user role</h2>
+    <div class="has-two-columns">
+      <div>
+        <table class="table-body-background-color">
+          <tbody>
+            <tr>
+              <td colspan="2">
+                <div><strong>Select user</strong></div>
+                <div class="select">
+                  <select
+                    (change)="onSelectUser($event)"
+                    data-test="select-user"
+                  >
+                    <option
+                      *ngFor="let u of users"
+                      [value]="u.id"
+                      [selected]="u.id === selectedUserId"
+                    >
+                      {{ u.familyName }}, {{ u.givenName }}
+                    </option>
+                  </select>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tbody *ngIf="selectedUser">
+            <tr>
+              <td colspan="2"><h4 class="title is-4">User Information</h4></td>
+            </tr>
+            <tr>
+              <td><strong>Name: </strong></td>
+              <td>
+                {{ selectedUser.familyName + " " + selectedUser.givenName }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Username: </strong></td>
+              <td>
+                {{ selectedUser.username }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Role(s):</strong></td>
+              <td>
+                <ul>
+                  <li *ngFor="let role of selectedUser.roles">
+                    {{ role }}
+                  </li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button
+                  class="button"
+                  (click)="submitRoles()"
+                  [ngClass]="loading ? 'is-loading' : ''"
+                  [disabled]="loading"
+                >
+                  Update
+                </button>
+                <p *ngIf="error" class="invalid-feedback">{{ error }}</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <table class="table" *ngIf="selectedUser">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div>
+                  <label for="administrator"
+                    ><input
+                      type="checkbox"
+                      id="administrator"
+                      data-test="administrator"
+                      [checked]="hasAnyRole(selectedUser, ['Administrator'])"
+                      (click)="updateRoles('Administrator')"
+                    />
+                    Administrator
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>The user has all permissions.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>
+                  <label for="salt-astronomer"
+                    ><input
+                      type="checkbox"
+                      id="salt-astronomer"
+                      data-test="salt-astronomer"
+                      [checked]="hasAnyRole(selectedUser, ['SALT Astronomer'])"
+                      (click)="updateRoles('SALT Astronomer')"
+                    />
+                    SALT Astronomer
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>
+                    The user is a SALT astronomer and can be connected to a
+                    proposal.
+                  </li>
+                  <li>
+                    The user can change proposal and block status of all
+                    proposals.
+                  </li>
+                  <li>The user can make a comment about a proposal.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>
+                  <label for="salt-operator"
+                    ><input
+                      type="checkbox"
+                      id="salt-operator"
+                      data-test="salt-operator"
+                      [checked]="hasAnyRole(selectedUser, ['SALT Operator'])"
+                      (click)="updateRoles('SALT Operator')"
+                    />
+                    SALT Operator
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>The user is a SALT operator.</li>
+                  <li>The user may view all proposals.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>
+                  <label for="board-member"
+                    ><input
+                      type="checkbox"
+                      id="board-member"
+                      data-test="board-member"
+                      [checked]="hasAnyRole(selectedUser, ['Board Member'])"
+                      (click)="updateRoles('Board Member')"
+                    />
+                    Board member
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>The user is a SALT Board member.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>
+                  <label for="mask-cutter"
+                    ><input
+                      type="checkbox"
+                      id="mask-cutter"
+                      data-test="mask-cutter"
+                      [checked]="hasAnyRole(selectedUser, ['Mask Cutter'])"
+                      (click)="updateRoles('Mask Cutter')"
+                    />
+                    Mask cutter
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>The user is cutting MOS masks.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>
+                  <label for="librarian"
+                    ><input
+                      type="checkbox"
+                      id="librarian"
+                      data-test="librarian"
+                      [checked]="hasAnyRole(selectedUser, ['Librarian'])"
+                      (click)="updateRoles('Librarian')"
+                    />
+                    Librarian
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>The user may view all proposals.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>
+                  <label for="engineer"
+                    ><input
+                      type="checkbox"
+                      id="engineer"
+                      data-test="engineer"
+                      [checked]="hasAnyRole(selectedUser, ['Engineer'])"
+                      (click)="updateRoles('Engineer')"
+                    />
+                    Engineer
+                  </label>
+                </div>
+              </td>
+              <td>
+                <ul>
+                  <li>The user is an engineer.</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!hasAnyRole(user, ['Administrator'])">
+    <wm-error-indicator
+      [message]="'You are not allowed to view this page.'"
+    ></wm-error-indicator>
+  </div>
+</div>

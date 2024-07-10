@@ -104,4 +104,16 @@ export class UserService {
       .patch<BaseUserDetails>(uri, newUserDetails, { headers })
       .pipe(map((user) => camelcaseKeys(user, { deep: true })));
   }
+
+  updateRoles(user: User): Observable<User> {
+    const uri =
+      environment.apiUrl + "/users/" + user.id.toString() + "/update-roles";
+    const headers = new HttpHeaders({
+      "Content-type": "application/json",
+    });
+
+    return this.http
+      .post<User>(uri, user.roles, { headers })
+      .pipe(map((user) => camelcaseKeys(user, { deep: true })));
+  }
 }

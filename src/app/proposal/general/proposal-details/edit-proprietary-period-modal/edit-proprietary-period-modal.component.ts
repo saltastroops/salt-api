@@ -28,6 +28,8 @@ export class EditProprietaryPeriodModalComponent {
   proposalCode!: string;
   error: string | undefined = undefined;
   motivationNeeded = false;
+  userMessage: string | undefined = undefined;
+
   constructor(
     private formBuilder: UntypedFormBuilder,
     private proposalService: ProposalService,
@@ -40,6 +42,8 @@ export class EditProprietaryPeriodModalComponent {
   openModal(proprietaryPeriod: ProprietaryPeriod, proposalCode: string): void {
     this.isModalActive = true;
     this.loading = false;
+    this.error = undefined;
+    this.userMessage = undefined;
     this.proprietaryPeriod = proprietaryPeriod;
     this.proposalCode = proposalCode;
     this.checkForMotivation();
@@ -56,6 +60,8 @@ export class EditProprietaryPeriodModalComponent {
     this.proprietaryPeriod["motivation"] = motivation;
   }
   submitProprietaryPeriod(): void {
+    this.userMessage = undefined;
+    this.error = undefined;
     this.checkForMotivation();
     if (!this.motivationNeeded || this.proprietaryPeriod.motivation) {
       this.loading = true;
@@ -71,14 +77,19 @@ export class EditProprietaryPeriodModalComponent {
               ...data,
             };
             if (data.status == "Pending") {
-              window.alert("Your request has been submitted.");
+              this.userMessage = "Your request has been submitted."
             }
             this.updatePeriod.emit(data.period);
-            this.closeModal();
+
+            if (!this.userMessage){
+              this.closeModal();
+            }
+            this.loading = false;
           },
           () => {
             this.loading = false;
-            this.error = "Opps, Something went wrong. " +
+            this.error =
+              "Opps, Something went wrong. " +
               "Contact SALT Help for assistance.";
           },
         );

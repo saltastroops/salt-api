@@ -77,10 +77,16 @@ export class ProposalComponent implements OnInit {
       this.proposal = proposal;
     });
     this.errorSubscription = error$.subscribe((error) => {
-      if (error && (error.status === 404 || error.status === 422)) {
-        this.error = `Proposal code ${this.proposalCode} not found.`;
+      if (error){
+        if (error.status === 404 || error.status === 422){
+          this.error = `Proposal code ${ this.proposalCode } not found.`;
+        }
+        else {
+          this.error = `Failed to fetch proposal '${this.proposalCode}'.`;
+        }
       } else {
-        this.error = `Failed to fetch proposal '${this.proposalCode}'.`;
+        // The error stream emits null if there is no error.
+        this.error = undefined;
       }
     });
     this.isLoadingSubscription = isLoading$.subscribe((isLoading) => {

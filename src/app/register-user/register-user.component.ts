@@ -162,13 +162,12 @@ export class RegisterUserComponent implements OnInit {
         url: this.registerNewUserForm.get("url")?.value,
       } as NewInstitutionDetails;
 
-      const newInstitutionId$ = this.institutionService
-        .createInstitution(newInstitution)
-        .pipe(map((institution) => institution.institutionId));
-
-      const institutionId$ = this.showAddNewInstitutionControls
-        ? newInstitutionId$
-        : of(parseInt(this.registerNewUserForm.get("institutionId")?.value));
+      const institutionId$ =
+        this.registerNewUserForm.get("institutionId")?.value != "0"
+          ? of(parseInt(this.registerNewUserForm.get("institutionId")?.value))
+          : this.institutionService
+              .createInstitution(newInstitution)
+              .pipe(map((institution) => institution.institutionId));
 
       institutionId$
         .pipe(
@@ -214,7 +213,7 @@ export class RegisterUserComponent implements OnInit {
         )
         .subscribe(
           (user) => {
-            if(user){
+            if (user) {
               // If the server call fails with an error, the catchError above returns a stream with
               // a null user. In this case loading has stopped but no success message must be shown.
               this.isRegistered = true;
@@ -224,7 +223,8 @@ export class RegisterUserComponent implements OnInit {
           () => {
             this.loading = false;
             this.error = GENERIC_ERROR_MESSAGE;
-          });
+          },
+        );
     }
   }
 

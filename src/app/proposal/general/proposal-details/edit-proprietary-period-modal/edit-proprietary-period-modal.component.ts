@@ -77,11 +77,11 @@ export class EditProprietaryPeriodModalComponent {
               ...data,
             };
             if (data.status == "Pending") {
-              this.userMessage = "Your request has been submitted."
+              this.userMessage = "Your request has been submitted.";
             }
             this.updatePeriod.emit(data.period);
 
-            if (!this.userMessage){
+            if (!this.userMessage) {
               this.closeModal();
             }
             this.loading = false;

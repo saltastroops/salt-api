@@ -11,8 +11,8 @@
           class="input"
           data-test="username"
           [ngClass]="{
-          'is-danger': f.username.touched && f.username.errors
-        }"
+            'is-danger': f.username.touched && f.username.errors
+          }"
         />
         <div
           *ngIf="f.username.touched && f.username.errors"
@@ -36,8 +36,8 @@
             class="input"
             data-test="password"
             [ngClass]="{
-            'is-danger': f.password.touched && f.password.errors
-          }"
+              'is-danger': f.password.touched && f.password.errors
+            }"
           />
           <div
             *ngIf="f.password.touched && f.password.errors"
@@ -107,8 +107,8 @@
           class="input"
           data-test="given-name"
           [ngClass]="{
-          'is-danger': f.givenName.touched && f.givenName.errors
-        }"
+            'is-danger': f.givenName.touched && f.givenName.errors
+          }"
         />
         <div
           *ngIf="f.givenName.touched && f.givenName.errors"
@@ -133,8 +133,8 @@
           class="input"
           data-test="family-name"
           [ngClass]="{
-          'is-danger': f.familyName.touched && f.familyName.errors
-        }"
+            'is-danger': f.familyName.touched && f.familyName.errors
+          }"
         />
         <div
           *ngIf="f.familyName.touched && f.familyName.errors"
@@ -207,8 +207,9 @@
           >
             <div
               *ngIf="
-              f.institutionId.errors.required || f.institutionId.value === null
-            "
+                f.institutionId.errors.required ||
+                f.institutionId.value === null
+              "
               class="has-text-danger"
               data-test="institutions-error"
             >
@@ -331,8 +332,8 @@
           class="input"
           data-test="email"
           [ngClass]="{
-          'is-danger': f.email.touched && f.email.errors
-        }"
+            'is-danger': f.email.touched && f.email.errors
+          }"
         />
         <div *ngIf="f.email.touched && f.email.errors" class="invalid-feedback">
           <div
@@ -368,7 +369,9 @@
           data-test="register-new-user-submit"
         />
         <div *ngIf="error">
-          <p class="has-text-danger" data-test="submission-error">{{ error }}</p>
+          <p class="has-text-danger" data-test="submission-error">
+            {{ error }}
+          </p>
         </div>
       </div>
     </form>
@@ -378,14 +381,21 @@
   <div class="notification">
     <h2 class="title is-3">Registration Successful</h2>
     <div class="hero-body">
-      <p class="subtitle">An email with a verification link has been sent to your email address.</p>
-      <p class="subtitle">Please check your inbox and click on the verification link to activate your account.</p>
-      <p class="subtitle">If you do not see the email, check your spam or junk folder.</p>
       <p class="subtitle">
-        Please contact SALT Help at <a href="mailto:salthelp@saao.ac.za">salthelp@saao.ac.za</a>
+        An email with a verification link has been sent to your email address.
+      </p>
+      <p class="subtitle">
+        Please check your inbox and click on the verification link to activate
+        your account.
+      </p>
+      <p class="subtitle">
+        If you do not see the email, check your spam or junk folder.
+      </p>
+      <p class="subtitle">
+        Please contact SALT Help at
+        <a href="mailto:salthelp@saao.ac.za">salthelp@saao.ac.za</a>
         if you have any problems with logging in.
       </p>
     </div>
   </div>
 </div>
-

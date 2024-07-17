@@ -51,10 +51,10 @@ def setup_exception_handler(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def generic_exception_handler(request: Request) -> Response:
+    async def generic_exception_handler(request: Request, exc: Exception) -> Response:
         """Catch an Exception."""
 
-        log_message(request.method, request.url, traceback.format_exc())
+        log_message(request.method, request.url, exc)
         return JSONResponse(
             content={
                 "message": "Sorry, something has gone wrong. Please try again later."

@@ -100,6 +100,9 @@ class SalticamFilter(BaseModel):
     description: str = Field(
         ..., title="Description", description="Description of the filter"
     )
+    is_installed: bool = Field(
+        ..., title="Is installed", description="Indicated weather the filter is installed or not."
+    )
 
 
 class SalticamExposure(BaseModel):

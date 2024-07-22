@@ -125,11 +125,13 @@ ORDER BY SW.SalticamWindow_Order
 
         stmt = text(
             """
-SELECT SF.SalticamFilter_Name   AS filter_name,
-       SF.DescriptiveName       AS filter_description,
-       SFPD.ExposureTime / 1000 AS exposure_time
+SELECT SF.SalticamFilter_Name               AS filter_name,
+       SF.DescriptiveName                   AS filter_description,
+       SFPD.ExposureTime / 1000             AS exposure_time,
+       IF(SCF.SalticamSlot IS NULL, 0, 1)   AS is_installed
 FROM SalticamFilterPatternDetail SFPD
          JOIN SalticamFilter SF ON SFPD.SalticamFilter_Id = SF.SalticamFilter_Id
+         LEFT JOIN SalticamCurrentFilters SCF ON SFPD.SalticamFilter_Id = SCF.SalticamFilter_Id
 WHERE SFPD.SalticamFilterPattern_Id = :pattern_id;
         """
         )
@@ -140,6 +142,7 @@ WHERE SFPD.SalticamFilterPattern_Id = :pattern_id;
                 "filter": {
                     "name": row.filter_name,
                     "description": row.filter_description,
+                    "is_installed": row.is_installed
                 },
                 "exposure_time": float(row.exposure_time),
             }

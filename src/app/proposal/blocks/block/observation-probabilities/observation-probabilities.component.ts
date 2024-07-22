@@ -1,5 +1,6 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 
+import { Block } from "../../../../types/block";
 import { ObservationProbabilities } from "../../../../types/common";
 
 @Component({
@@ -7,6 +8,12 @@ import { ObservationProbabilities } from "../../../../types/common";
   templateUrl: "./observation-probabilities.component.html",
   styleUrls: ["./observation-probabilities.component.scss"],
 })
-export class ObservationProbabilitiesComponent {
-  @Input() probabilities!: ObservationProbabilities;
+export class ObservationProbabilitiesComponent implements  OnInit{
+  @Input() block!: Block;
+  probabilities!: ObservationProbabilities;
+
+  ngOnInit(): void {
+    console.log(this.block);
+    this.probabilities = this.block.observationProbabilities;
+  }
 }

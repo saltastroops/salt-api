@@ -1,25 +1,29 @@
-<wm-proposal-status-modal
-  #proposalStatusCommentModal
-  [proposal]="proposal"
-  (closeModal)="setStatus($event)"
->
-</wm-proposal-status-modal>
-
-<div>
-  {{ selectedStatus }}
-</div>
-<button
-  *ngIf="
+<div class="inline-view">
+  <div>
+    {{ selectedStatus }}
+  </div>
+  <div>
+    <button
+      *ngIf="
     isAdminOrSa ||
     (isPiOrPc && selectedStatus === 'Active') ||
     (isPiOrPc &&
       selectedStatus === 'Under technical review' &&
       proposal.generalInfo.isSelfActivatable)
   "
-  class="button is-pulled-right"
-  (click)="
+      class="button is-pulled-right"
+      (click)="
     proposalStatusCommentModal.openProposalStatusCommentModal(selectedStatus)
   "
+    >
+      Change
+    </button>
+  </div>
+</div>
+
+<wm-proposal-status-modal
+  #proposalStatusCommentModal
+  [proposal]="proposal"
+  (closeModal)="setStatus($event)"
 >
-  Change
-</button>
+</wm-proposal-status-modal>

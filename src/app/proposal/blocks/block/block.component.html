@@ -1,4 +1,4 @@
-<h2 class="title is-2">Block {{ block.name }}</h2>
+<h2 class="title is-2">Block {{ block.name }} (#{{block.id}})</h2>
 <hr class="heading-line block-header" />
 
 <div class="block">
@@ -70,38 +70,34 @@
     </table>
   </div>
   <wm-observing-conditions [block]="block"></wm-observing-conditions>
+  <div>
+    <table class="table is-bordered is-fullwidth">
+      <thead>
+        <tr class="headers">
+          <th>Priority</th>
+          <th>Ranking</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>{{ block.priority }}</td>
+        <td>{{ block.ranking }}</td>
+        <td>
+          <p [innerHTML]="block.comment | nl2br"></p>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <wm-observing-windows
+    [observingWindows]="block.observingWindows"
+  ></wm-observing-windows>
   <div class="inline-view">
-    <wm-iterations [block]="block"></wm-iterations>
     <wm-observation-probabilities
-      [probabilities]="block.observationProbabilities"
+      [block]="block"
     ></wm-observation-probabilities>
-    <wm-total-observation-time
-      [overhead]="block.overheadTime"
-      [totalObservationTime]="block.observationTime"
-    ></wm-total-observation-time>
-    <div>
-      <table class="table">
-        <thead>
-          <tr class="secondary-header">
-            <th>Priority</th>
-            <th>Ranking</th>
-            <th>Comments</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ block.priority }}</td>
-            <td>{{ block.ranking }}</td>
-            <td>
-              <p [innerHTML]="block.comment | nl2br"></p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <wm-observing-windows
-      [observingWindows]="block.observingWindows"
-    ></wm-observing-windows>
+
     <wm-target
       *ngFor="let observation of block.observations"
       [target]="observation.target"

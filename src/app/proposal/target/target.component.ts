@@ -8,8 +8,12 @@ import { degreesToDms, degreesToHms } from "../../utils";
   templateUrl: "./target.component.html",
   styleUrls: ["./target.component.scss"],
 })
-export class TargetComponent {
+export class TargetComponent implements OnInit{
   @Input() target!: Target;
+
+  ngOnInit(): void {
+    console.log(this.target);
+  }
 
   rightAscension = (): string => {
     return !this.target.nonSidereal

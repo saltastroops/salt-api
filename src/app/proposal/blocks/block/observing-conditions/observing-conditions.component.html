@@ -1,8 +1,10 @@
 <div>
-  <table class="table">
+  <table class="table is-bordered">
     <thead>
       <tr class="secondary-header">
         <th colspan="6" class="has-text-centered">Observing Conditions</th>
+        <th colspan="5">Iterations</th>
+        <th colspan="2">Total Observation Times (seconds)</th>
       </tr>
       <tr>
         <th>Transparency</th>
@@ -10,7 +12,14 @@
         <th>Min Lunar Distance</th>
         <th>Min Seeing</th>
         <th>Max Seeing</th>
-        <th>Obs. Time (seconds)</th>
+        <th>Obs. Time</th>
+        <th>Wait</th>
+        <th>Visits</th>
+        <th>Attempted</th>
+        <th>Done</th>
+        <th>Shutter open time</th>
+        <th>Overheads</th>
+        <th>Total observation time</th>
       </tr>
     </thead>
     <tbody>
@@ -20,7 +29,14 @@
         <td>{{ block.observingConditions.minimumLunarDistance }}</td>
         <td>{{ block.observingConditions.minimumSeeing }}</td>
         <td>{{ block.observingConditions.maximumSeeing }}</td>
-        <td>{{ block.observationTime }}</td>
+        <td>{{ block.observationTime }} sec</td>
+        <td>{{ block.waitPeriod }}</td>
+        <td>{{ block.requestedObservations }}</td>
+        <td>{{ rejectedObservations() }}</td>
+        <td>{{ acceptedObservations() }}</td>
+        <td>{{ block.observationTime - block.overheadTime }} sec</td>
+        <td class="has-text-right">{{ block.overheadTime }} sec</td>
+        <td class="has-text-right">{{ block.observationTime }} sec</td>
       </tr>
     </tbody>
   </table>

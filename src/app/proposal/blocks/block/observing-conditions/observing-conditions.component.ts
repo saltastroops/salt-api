@@ -10,4 +10,9 @@ import { Block } from "../../../../types/block";
 export class ObservingConditionsComponent {
   @Input() block!: Block;
   @Input() observationTime!: number;
+
+  acceptedObservations = (): number =>
+    this.block.blockVisits.filter((o) => o.status === "Accepted").length;
+  rejectedObservations = (): number =>
+    this.block.blockVisits.filter((o) => o.status === "Rejected").length;
 }

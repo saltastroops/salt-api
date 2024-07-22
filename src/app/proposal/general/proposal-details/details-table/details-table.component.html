@@ -1,31 +1,23 @@
-<wm-edit-proprietary-period-modal
-  #proprietaryPeriodModal
-  (updatePeriod)="onProprietaryPeriodUpdate($event)"
-></wm-edit-proprietary-period-modal>
-<div>
-  <table class="table">
+
+<table class="table is-bordered is-fullwidth">
     <thead>
       <tr class="secondary-header">
-        <th colspan="2" class="has-text-centered">Details</th>
+        <th colspan="5" class="has-text-centered">Details</th>
       </tr>
+    <tr class="headers">
+      <th>Status</th>
+      <th>Type</th>
+      <th>Target of Opportunity</th>
+      <th>Total time</th>
+      <th>Proprietary period</th>
+    </tr>
     </thead>
     <tbody>
       <tr>
-        <th>Status</th>
         <td>
           <wm-proposal-status [proposal]="proposal"></wm-proposal-status>
         </td>
-      </tr>
-      <tr *ngIf="proposal.generalInfo.status.comment">
-        <th>Status Comment</th>
-        <td>{{ proposal.generalInfo.status.comment }}</td>
-      </tr>
-      <tr>
-        <th>Type</th>
         <td>{{ proposal.generalInfo.proposalType }}</td>
-      </tr>
-      <tr>
-        <th>Target of Opportunity</th>
         <td *ngIf="proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
@@ -44,30 +36,24 @@
             />
           </div>
         </td>
-      </tr>
-      <tr>
-        <th>Total time</th>
-        <td>{{ proposal.generalInfo.totalRequestedTime }}</td>
-      </tr>
-      <tr>
-        <th>Proprietary period</th>
-        <td class="proprietary-period">
-          {{ releaseDate | dfnsFormat: "d MMMM yyyy" }}
-          <button
+        <td>{{ proposal.generalInfo.totalRequestedTime }} sec</td>
+        <td class="inline-view">
+          <div>{{ releaseDate | dfnsFormat: "d MMMM yyyy" }}</div>
+          <div><button
             (click)="
-              proprietaryPeriodModal.openModal(
-                proposal.generalInfo.proprietaryPeriod,
-                proposal.proposalCode
-              )
-            "
+                proprietaryPeriodModal.openModal(
+                  proposal.generalInfo.proprietaryPeriod,
+                  proposal.proposalCode
+                )
+              "
             class="button is-pulled-right"
           >
             Change
-          </button>
+          </button></div>
         </td>
       </tr>
-      <tr *ngIf="isAdminOrSa">
-        <th colspan="2">
+      <tr  *ngIf="isAdminOrSa">
+        <th colspan="5">
           <wm-self-activate
             [proposalCode]="proposal.proposalCode"
             [isSelfActivatable]="isSelfActivatable"
@@ -75,5 +61,21 @@
         </th>
       </tr>
     </tbody>
+    <thead *ngIf="proposal.generalInfo.status.comment">
+      <tr class="headers">
+        <th colspan="5">
+          Status Comment
+        </th>
+      </tr>
+    </thead>
+    <tbody *ngIf="proposal.generalInfo.status.comment">
+      <tr>
+        <td colspan="5">{{ proposal.generalInfo.status.comment }}</td>
+      </tr>
+    </tbody>
   </table>
-</div>
+
+<wm-edit-proprietary-period-modal
+  #proprietaryPeriodModal
+  (updatePeriod)="onProprietaryPeriodUpdate($event)"
+></wm-edit-proprietary-period-modal>

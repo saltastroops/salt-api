@@ -1098,11 +1098,9 @@ VALUES (
 ON DUPLICATE KEY UPDATE Value = :value
             """
         )
-        self.connection.execute(stmt, {
-            "user_id": user_id,
-            "right_setting": right_setting,
-            "value": value
-        })
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_setting": right_setting, "value": value}
+        )
 
     def _delete_right(self, user_id: int, right_setting: str) -> None:
         stmt = text(
@@ -1116,57 +1114,70 @@ WHERE PiptUser_Id = :user_id
 
             """
         )
-        self.connection.execute(stmt, {
-            "user_id": user_id,
-            "right_setting": right_setting
-        })
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_setting": right_setting}
+        )
 
     def _get_investigator_id(self, user_id) -> int:
-        stmt = text("""
+        stmt = text(
+            """
 SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id     
-        """)
+        """
+        )
 
         result = self.connection.execute(stmt, {"user_id": user_id})
         return cast(int, result.scalar_one())
 
     def _add_salt_astronomer(self, user: User):
-        stmt = text("""
+        stmt = text(
+            """
 INSERT INTO SaltAstronomer (Investigator_Id)
 VALUES (:investigator_id)
-       """)
-        self.connection.execute(stmt, {
-            "investigator_id": self._get_investigator_id(user.id)
-        })
+       """
+        )
+        self.connection.execute(
+            stmt, {"investigator_id": self._get_investigator_id(user.id)}
+        )
 
     def _remove_salt_astronomer(self, user: User):
-        stmt = text("""
+        stmt = text(
+            """
 DELETE FROM SaltAstronomer
 WHERE Investigator_id = :investigator_id
-       """)
-        self.connection.execute(stmt, {
-            "investigator_id": self._get_investigator_id(user.id),
-        })
+       """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "investigator_id": self._get_investigator_id(user.id),
+            },
+        )
 
     def _add_salt_operator(self, user: User) -> None:
-        stmt = text("""
+        stmt = text(
+            """
 INSERT INTO SaltOperator (FirstName, Surname, Email, Phone, Current)
 VALUES (:firstname, :surname, :email, :phone, 1)
-       """)
-        self.connection.execute(stmt, {
-            "firstname": user.given_name,
-            "surname": user.family_name,
-            "email": user.email,
-            "phone": None
-        })
+       """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "firstname": user.given_name,
+                "surname": user.family_name,
+                "email": user.email,
+                "phone": None,
+            },
+        )
 
     def _remove_salt_operator(self, user: User) -> None:
-        stmt = text("""
+        stmt = text(
+            """
 DELETE FROM SaltOperator
 WHERE Email = :email
-       """)
-        self.connection.execute(stmt, {
-            "email": user.email
-        })
+       """
+        )
+        self.connection.execute(stmt, {"email": user.email})
 
     def _get_right_setting(self, role: Role) -> str:
         if role == Role.ADMINISTRATOR:

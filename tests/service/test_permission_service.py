@@ -148,7 +148,7 @@ USER = User(
     ],
     roles=[],
     user_verified=True,
-    active=True
+    active=True,
 )
 
 PROPOSAL_CODE = ProposalCode("some_code")

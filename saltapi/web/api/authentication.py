@@ -157,5 +157,3 @@ def switch_user(
         if user is not None:
             return _login_user(user, request)
         raise ValidationError(f"Unknown username: {user_switch.username}")
-
-

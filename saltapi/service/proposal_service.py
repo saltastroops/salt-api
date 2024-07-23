@@ -33,7 +33,7 @@ def generate_route_url(request: Request, router_path: URLPath) -> str:
 
 
 def generate_pdf_path(
-        proposal_code: str, filename: Optional[str]
+    proposal_code: str, filename: Optional[str]
 ) -> Optional[pathlib.Path]:
     proposals_dir = get_settings().proposals_dir
     return (
@@ -48,11 +48,11 @@ class ProposalService:
         self.repository = repository
 
     def list_proposal_summaries(
-            self,
-            username: str,
-            from_semester: str = "2000-1",
-            to_semester: str = "2099-2",
-            limit: int = 1000,
+        self,
+        username: str,
+        from_semester: str = "2000-1",
+        to_semester: str = "2099-2",
+        limit: int = 1000,
     ) -> List[ProposalListItem]:
         """
         Return the list of proposals for a semester range.
@@ -103,10 +103,10 @@ class ProposalService:
         return self.repository.get_proposal_file(proposal_code)
 
     def get_proposal(
-            self,
-            proposal_code: str,
-            semester: Optional[Semester] = None,
-            phase: Optional[int] = None,
+        self,
+        proposal_code: str,
+        semester: Optional[Semester] = None,
+        phase: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Return the JSON representation of a proposal.
@@ -133,12 +133,12 @@ class ProposalService:
         return self.repository.get_observation_comments(proposal_code)
 
     def add_observation_comment(
-            self, proposal_code: str, comment: str, user: User
+        self, proposal_code: str, comment: str, user: User
     ) -> Dict[str, str]:
         return self.repository.add_observation_comment(proposal_code, comment, user)
 
     def get_urls_for_proposal_progress_report_pdfs(
-            self, proposal_code: ProposalCode, request: Request, router: APIRouter
+        self, proposal_code: ProposalCode, request: Request, router: APIRouter
     ) -> List[Dict[str, Any]]:
         semesters = self.repository.get_progress_report_semesters(proposal_code)
 
@@ -160,16 +160,16 @@ class ProposalService:
         return progress_reports
 
     def get_progress_report(
-            self,
-            proposal_code: ProposalCode,
-            semester: Semester,
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
     ) -> Dict[str, Any]:
         return self.repository.get_progress_report(proposal_code, semester)
 
     def get_proposal_progress_report_pdfs(
-            self,
-            proposal_code: ProposalCode,
-            semester: Semester,
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
     ) -> Dict[str, Any]:
         progress_report = self.repository.get_progress_report(proposal_code, semester)
 
@@ -185,11 +185,11 @@ class ProposalService:
         return progress_report_pdfs
 
     async def put_proposal_progress(
-            self,
-            proposal_progress_report: ProposalProgressInput,
-            proposal_code: str,
-            semester: str,
-            additional_pdf: Optional[UploadFile],
+        self,
+        proposal_progress_report: ProposalProgressInput,
+        proposal_code: str,
+        semester: str,
+        additional_pdf: Optional[UploadFile],
     ) -> None:
         proposal_progress = await self.prepare_proposal_progress(
             semester, proposal_progress_report
@@ -230,7 +230,7 @@ class ProposalService:
 
     @staticmethod
     async def prepare_proposal_progress(
-            semester: str, proposal_progress_report: ProposalProgressInput
+        semester: str, proposal_progress_report: ProposalProgressInput
     ) -> Dict[str, Any]:
         partner_requested_percentages = parse_partner_requested_percentages(
             proposal_progress_report.partner_requested_percentages
@@ -248,7 +248,7 @@ class ProposalService:
         }
 
     async def handle_additional_pdf(
-            self, additional_pdf: Optional[UploadFile]
+        self, additional_pdf: Optional[UploadFile]
     ) -> Tuple[Optional[str], Optional[bytes]]:
         additional_pdf_filename = None
         additional_pdf_content = b""
@@ -262,21 +262,20 @@ class ProposalService:
         return additional_pdf_filename, additional_pdf_content
 
     async def handle_proposal_progress_pdf(
-            self, proposal_code: str, semester: str
+        self, proposal_code: str, semester: str
     ) -> Tuple[str, bytes]:
         proposal_progress_byte_io = self.generate_proposal_progress_pdf(
-            cast(ProposalCode, proposal_code),
-            cast(Semester, semester)
+            cast(ProposalCode, proposal_code), cast(Semester, semester)
         )
         progress_pdf_content = proposal_progress_byte_io.read()
-        progress_pdf_filename = self.repository.generate_proposal_progress_filename(progress_pdf_content)
-        return progress_pdf_filename,  progress_pdf_content
+        progress_pdf_filename = self.repository.generate_proposal_progress_filename(
+            progress_pdf_content
+        )
+        return progress_pdf_filename, progress_pdf_content
 
     @staticmethod
     async def save_progress_report_file(
-            proposal_code: str,
-            filename: str,
-            content: bytes
+        proposal_code: str, filename: str, content: bytes
     ) -> None:
         file_path = ProposalService._included_dir(proposal_code) / filename
         file_path.write_bytes(content)
@@ -287,7 +286,7 @@ class ProposalService:
         return base_dir / proposal_code / "Included"
 
     def _create_progress_description(
-            self, proposal_code: str, semester: str, progress_report: Dict[str, Any]
+        self, proposal_code: str, semester: str, progress_report: Dict[str, Any]
     ) -> bytes:
         previous_allocated_requested = self.repository.get_allocated_and_requested_time(
             proposal_code
@@ -334,9 +333,9 @@ class ProposalService:
         return cast(bytes, pdfkit.from_string(html_content, options=options))
 
     def generate_proposal_progress_pdf(
-            self,
-            proposal_code: ProposalCode,
-            semester: Semester,
+        self,
+        proposal_code: ProposalCode,
+        semester: Semester,
     ) -> BytesIO:
         """
         Generate the proposal progress PDF for a proposal.
@@ -355,8 +354,8 @@ class ProposalService:
 
             if progress_report["additional_pdf"]:
                 additional_pdf_path = (
-                        ProposalService._included_dir(proposal_code)
-                        / progress_report["additional_pdf"]
+                    ProposalService._included_dir(proposal_code)
+                    / progress_report["additional_pdf"]
                 )
                 merger.append(additional_pdf_path)
 
@@ -372,18 +371,18 @@ class ProposalService:
             return b
 
     def create_proprietary_period_extension_request(
-            self,
-            proposal_code: str,
-            proprietary_period: int,
-            motivation: str,
-            username: str,
+        self,
+        proposal_code: str,
+        proprietary_period: int,
+        motivation: str,
+        username: str,
     ) -> None:
         self.repository.insert_proprietary_period_extension_request(
             proposal_code, proprietary_period, motivation, username
         )
 
     def update_proprietary_period_in_ssda(
-            self, proposal_code: str, proprietary_period: int
+        self, proposal_code: str, proprietary_period: int
     ):
         release_date = self.repository.get_release_date(
             proprietary_period, proposal_code
@@ -394,8 +393,8 @@ class ProposalService:
                 "proposalCode": proposal_code,
                 "institution": "SALT",
                 "releaseDate": str(release_date),
-                "apiKey": get_settings().ssda_api_key
-            }
+                "apiKey": get_settings().ssda_api_key,
+            },
         }
 
         try:
@@ -403,14 +402,16 @@ class ProposalService:
         except Exception as error:
             raise SSDAError() from error
 
-        if ssda_response['errors']:
-            for err in ssda_response['errors']:
-                error_message = f'SSDA Error start\n{err["message"]}\n{err["path"]}\nSSDA error end'
+        if ssda_response["errors"]:
+            for err in ssda_response["errors"]:
+                error_message = (
+                    f'SSDA Error start\n{err["message"]}\n{err["path"]}\nSSDA error end'
+                )
                 logging.error(error_message)
             raise SSDAError()
 
     def update_proprietary_period(
-            self, proposal_code: str, proprietary_period: int
+        self, proposal_code: str, proprietary_period: int
     ) -> None:
         self.repository.update_proprietary_period(
             proposal_code=proposal_code, proprietary_period=proprietary_period
@@ -423,14 +424,21 @@ class ProposalService:
         return self.repository.get_proposal_status(proposal_code)
 
     def update_proposal_status(
-            self, proposal_code: str, status: str, status_comment: Optional[str]
+        self, proposal_code: str, status: str, status_comment: Optional[str]
     ) -> None:
         """
         Set the proposal status for a proposal code.
         """
         allowed_statuses = {
             1: ["Accepted", "Deleted", "Rejected", "Under scientific review"],
-            2: ["Active", "Completed", "Deleted", "Expired", "Inactive", "Under technical review"]
+            2: [
+                "Active",
+                "Completed",
+                "Deleted",
+                "Expired",
+                "Inactive",
+                "Under technical review",
+            ],
         }
         phase = self.repository.latest_submission_phase(proposal_code)
         if status not in allowed_statuses.get(phase, []):
@@ -438,7 +446,7 @@ class ProposalService:
         self.repository.update_proposal_status(proposal_code, status, status_comment)
 
     def update_is_self_activatable(
-            self, proposal_code: str, is_self_activatable: bool
+        self, proposal_code: str, is_self_activatable: bool
     ) -> None:
         self.repository.update_is_self_activatable(proposal_code, is_self_activatable)
 
@@ -446,7 +454,7 @@ class ProposalService:
         return self.repository.is_self_activatable(proposal_code)
 
     def update_liaison_astronomer(
-            self, proposal_code: str, liaison_astronomer_id: Optional[int]
+        self, proposal_code: str, liaison_astronomer_id: Optional[int]
     ) -> None:
         self.repository.update_liaison_astronomer(proposal_code, liaison_astronomer_id)
 
@@ -454,7 +462,7 @@ class ProposalService:
         return self.repository.get_liaison_astronomer(proposal_code)
 
     def update_investigator_proposal_approval_status(
-            self, approval_user_id: int, proposal_code: str, approved: bool
+        self, approval_user_id: int, proposal_code: str, approved: bool
     ) -> None:
         """
         Updates the investigator's approval status of the proposal.

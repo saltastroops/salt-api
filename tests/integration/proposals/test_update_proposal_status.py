@@ -165,7 +165,7 @@ def test_sa_and_admins_may_make_any_allowed_phase2_status_change(
     authenticate(username, client)
     status_comment = None
 
-    proposal_code = "2023-1-MLT-006"    # Phase 2 proposal
+    proposal_code = "2023-1-MLT-006"  # Phase 2 proposal
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "comment": status_comment},
@@ -197,10 +197,10 @@ def test_sa_and_admins_may_make_any_allowed_phase2_status_change(
     ],
 )
 def test_proposal_status_update_with_non_allowed_phase1_statuses(
-        proposal_status_value: str,
-        client: TestClient,
+    proposal_status_value: str,
+    client: TestClient,
 ) -> None:
-    proposal_code = "2022-2-SCI-007"    # Phase 1 proposal
+    proposal_code = "2022-2-SCI-007"  # Phase 1 proposal
     username = find_username("administrator")
     authenticate(username, client)
     status_comment = "This is a test comment."
@@ -208,7 +208,7 @@ def test_proposal_status_update_with_non_allowed_phase1_statuses(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "comment": status_comment},
-        )
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 

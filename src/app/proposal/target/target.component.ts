@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input } from "@angular/core";
 
 import { Target } from "../../types/target";
 import { degreesToDms, degreesToHms } from "../../utils";
@@ -8,12 +8,8 @@ import { degreesToDms, degreesToHms } from "../../utils";
   templateUrl: "./target.component.html",
   styleUrls: ["./target.component.scss"],
 })
-export class TargetComponent implements OnInit{
+export class TargetComponent {
   @Input() target!: Target;
-
-  ngOnInit(): void {
-    console.log(this.target);
-  }
 
   rightAscension = (): string => {
     return !this.target.nonSidereal

@@ -1355,7 +1355,7 @@ WHERE PC.Proposal_Code = :proposal_code
         if proposal["phase"] == 2 and status in [
             ProposalStatusValue.ACCEPTED,
             ProposalStatusValue.REJECTED,
-            ProposalStatusValue.UNDER_SCIENTIFIC_REVIEW
+            ProposalStatusValue.UNDER_SCIENTIFIC_REVIEW,
         ]:
             raise ValidationError(f"Wrong status for a phase 2 proposal: {status}.")
         if proposal["phase"] == 1 and status in [
@@ -1363,7 +1363,7 @@ WHERE PC.Proposal_Code = :proposal_code
             ProposalStatusValue.COMPLETED,
             ProposalStatusValue.UNDER_TECHNICAL_REVIEW,
             ProposalStatusValue.EXPIRED,
-            ProposalStatusValue.INACTIVE
+            ProposalStatusValue.INACTIVE,
         ]:
             raise ValidationError(f"Wrong status for a phase 1 proposal: {status}.")
 

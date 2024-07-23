@@ -49,7 +49,9 @@ class AuthenticationService:
 
     @staticmethod
     def jwt_token(
-        payload: Dict[str, Any], expires_delta: Optional[timedelta] = None, verification: bool = False
+        payload: Dict[str, Any],
+        expires_delta: Optional[timedelta] = None,
+        verification: bool = False,
     ) -> str:
         """Create a JWT token."""
         to_encode = payload.copy()
@@ -73,7 +75,9 @@ class AuthenticationService:
             raise AuthenticationError("User not found.")
         return user
 
-    def validate_auth_token(self, token: str, verification: bool = False) -> Optional[User]:
+    def validate_auth_token(
+        self, token: str, verification: bool = False
+    ) -> Optional[User]:
         secret_key = SECRET_KEY
         if verification:
             secret_key = VERIFICATION_KEY

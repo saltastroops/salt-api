@@ -39,7 +39,7 @@ def _patch_data(
         "has_phd": None,
         "year_of_phd_completion": None,
         "active": True,
-        "user_verified": True
+        "user_verified": True,
     }
 
 
@@ -108,12 +108,14 @@ def test_patch_user_should_return_403_if_non_admin_tries_to_update_other_user(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch.object(MailService, 'send_email')
-def test_patch_user_should_keep_existing_values_by_default(mocker, email_service_mock, client: TestClient) -> None:
+@patch.object(MailService, "send_email")
+def test_patch_user_should_keep_existing_values_by_default(
+    mocker, email_service_mock, client: TestClient
+) -> None:
     user = create_user(client)
     authenticate(find_username("Administrator"), client)
 
-    mocker.patch.object(email_service_mock, 'send_email')
+    mocker.patch.object(email_service_mock, "send_email")
     current_user_details = client.get(_url(user["id"])).json()
     client.patch(_url(user["id"]), json={})
     updated_user_details = client.get(_url(user["id"])).json()
@@ -150,8 +152,10 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     assert updated_user_details["email"] == expected_updated_user_details["email"]
 
 
-@patch.object(MailService, 'send_email')
-def test_patch_user_should_be_idempotent(mocker, email_service_mock, client: TestClient) -> None:
+@patch.object(MailService, "send_email")
+def test_patch_user_should_be_idempotent(
+    mocker, email_service_mock, client: TestClient
+) -> None:
     user = create_user(client)
     authenticate(find_username("Administrator"), client)
 
@@ -165,7 +169,7 @@ def test_patch_user_should_be_idempotent(mocker, email_service_mock, client: Tes
     expected_updated_user_details.update(user_update)
     expected_updated_user_details = _remove_untested(expected_updated_user_details)
 
-    mocker.patch.object(email_service_mock, 'send_email')
+    mocker.patch.object(email_service_mock, "send_email")
     first_update_response = client.patch(_url(user["id"]), json=user_update)
     second_update_response = client.patch(_url(user["id"]), json=user_update)
 
@@ -173,9 +177,11 @@ def test_patch_user_should_be_idempotent(mocker, email_service_mock, client: Tes
     assert second_update_response.json() == expected_updated_user_details
 
 
-@patch.object(MailService, 'send_email')
+@patch.object(MailService, "send_email")
 def test_patch_user_should_return_400_for_using_someone_elses_email(
-        mocker, email_service_mock, client: TestClient,
+    mocker,
+    email_service_mock,
+    client: TestClient,
 ) -> None:
     user = create_user(client)
     authenticate(find_username("Administrator"), client)
@@ -184,7 +190,7 @@ def test_patch_user_should_return_400_for_using_someone_elses_email(
     user_update = _patch_data(user["given_name"], user["family_name"], existing_email)
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
-    mocker.patch.object(email_service_mock, 'send_email')
+    mocker.patch.object(email_service_mock, "send_email")
     response = client.patch(_url(user["id"]), json=user_update)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST

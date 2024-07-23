@@ -186,8 +186,12 @@ class SaltAstronomer(FullName):
 
 class PasswordUpdate(BaseModel):
     password: str = Field(..., title="Password", description="Password.")
-    authentication_key: str = Field(..., title="Authentication token", description="The authentication Token")
+    authentication_key: str = Field(
+        ..., title="Authentication token", description="The authentication Token"
+    )
 
 
 class UsernameEmail(BaseModel):
-    username_email: str = Field(..., title="Username or Email", description="Username or Email.")
+    username_email: str = Field(
+        ..., title="Username or Email", description="Username or Email."
+    )

@@ -173,14 +173,22 @@ SALT Team
         except NotFoundError:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
 
-    def send_registration_confirmation_email(self, pipt_user_id: int, user_fullname: str, user_email: str) -> None:
+    def send_registration_confirmation_email(
+        self, pipt_user_id: int, user_fullname: str, user_email: str
+    ) -> None:
         mail_service = MailService()
         authentication_service = AuthenticationService(self.repository)
         confirmation_token = authentication_service.jwt_token(
             {"sub": str(pipt_user_id)}, timedelta(hours=3), verification=True
         )
 
-        registration_confirmation_url = get_settings().frontend_uri + "/verify-user/" + str(pipt_user_id) + "/" + confirmation_token
+        registration_confirmation_url = (
+            get_settings().frontend_uri
+            + "/verify-user/"
+            + str(pipt_user_id)
+            + "/"
+            + confirmation_token
+        )
         plain_body = f"""Dear {user_fullname},
 
 It appears that someone (likely you) is registering to the SALT Web Manager.

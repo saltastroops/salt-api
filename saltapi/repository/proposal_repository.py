@@ -262,7 +262,7 @@ LIMIT :limit;
         if semester is None:
             semester = self._latest_submission_semester(proposal_code)
         if phase is None:
-            phase = self._latest_submission_phase(proposal_code)
+            phase = self.latest_submission_phase(proposal_code)
 
         general_info = self._general_info(proposal_code, semester)
 
@@ -379,7 +379,7 @@ LIMIT 1
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(str, result.scalar_one())
 
-    def _latest_submission_phase(self, proposal_code: str) -> int:
+    def latest_submission_phase(self, proposal_code: str) -> int:
         """Return the proposal phase of the latest submission."""
         stmt = text(
             """

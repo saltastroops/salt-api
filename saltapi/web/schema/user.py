@@ -18,7 +18,9 @@ class UserRole(str, Enum):
     """
 
     SALT_ASTRONOMER = "SALT Astronomer"
+    SALT_OPERATOR = "SALT Operator"
     ADMINISTRATOR = "Administrator"
+    ENGINEER = "Engineer"
     TAC_MEMBER = "TAC Member"
     TAC_CHAIR = "TAC Chair"
     BOARD_MEMBER = "Board Member"
@@ -184,3 +186,8 @@ class SaltAstronomer(FullName):
 
 class PasswordUpdate(BaseModel):
     password: str = Field(..., title="Password", description="Password.")
+    authentication_key: str = Field(..., title="Authentication token", description="The authentication Token")
+
+
+class UsernameEmail(BaseModel):
+    username_email: str = Field(..., title="Username or Email", description="Username or Email.")

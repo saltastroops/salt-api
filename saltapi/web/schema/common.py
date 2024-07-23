@@ -141,28 +141,6 @@ class BlockVisit(BaseBlockVisit):
     )
 
 
-class Lamp(str, Enum):
-    """Calibration lamp(s)."""
-
-    AR = "Ar"
-    AR_AND_NE = "Ar and Ne"
-    AR_AND_THAR = "Ar and ThAr"
-    CUAR = "CuAr"
-    CUAR_AND_XE = "CuAr and Xe"
-    HGAR = "HgAr"
-    HGAR_AND_NE = "HgAr and Ne"
-    KR = "Kr"
-    KR_AND_AR = "Kr and Ar"
-    KR_AND_NE = "Kr and Ne"
-    KR_AR_AND_NE = "Kr, Ar and Ne"
-    NE = "Ne"
-    QTH1 = "QTH1"
-    QTH1_AND_QTH2 = "QTH1 and QTH2"
-    QTH2 = "QTH2"
-    THAR = "ThAr"
-    XE = "Xe"
-
-
 class ObservationProbabilities(BaseModel):
     """Probabilities related to observing."""
 

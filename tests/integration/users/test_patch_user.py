@@ -1,9 +1,11 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
+from saltapi.service.mail_service import MailService
 from saltapi.web.schema.user import LegalStatus
 from tests.conftest import (
     authenticate,
@@ -36,7 +38,21 @@ def _patch_data(
         "gender": None,
         "has_phd": None,
         "year_of_phd_completion": None,
+        "active": True,
+        "user_verified": True
     }
+
+
+def _remove_untested(user_details: Dict[str, Any]):
+    del user_details["affiliations"]
+    del user_details["alternative_emails"]
+    del user_details["id"]
+    del user_details["password"]
+    del user_details["roles"]
+    del user_details["username"]
+    del user_details["active"]
+    del user_details["user_verified"]
+    return user_details
 
 
 def test_patch_user_should_return_401_for_unauthenticated_user(
@@ -92,9 +108,12 @@ def test_patch_user_should_return_403_if_non_admin_tries_to_update_other_user(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_patch_user_should_keep_existing_values_by_default(client: TestClient) -> None:
+@patch.object(MailService, 'send_email')
+def test_patch_user_should_keep_existing_values_by_default(mocker, email_service_mock, client: TestClient) -> None:
     user = create_user(client)
-    authenticate(user["username"], client)
+    authenticate(find_username("Administrator"), client)
+
+    mocker.patch.object(email_service_mock, 'send_email')
     current_user_details = client.get(_url(user["id"])).json()
     client.patch(_url(user["id"]), json={})
     updated_user_details = client.get(_url(user["id"])).json()
@@ -110,12 +129,7 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     user_update = _patch_data("Chaka", "Mofokeng", "mofokeng.chk@gmail.com")
     expected_updated_user_details = client.get(_url(user_id)).json()
     expected_updated_user_details.update(user_update)
-    del expected_updated_user_details["affiliations"]
-    del expected_updated_user_details["alternative_emails"]
-    del expected_updated_user_details["id"]
-    del expected_updated_user_details["password"]
-    del expected_updated_user_details["roles"]
-    del expected_updated_user_details["username"]
+    expected_updated_user_details = _remove_untested(expected_updated_user_details)
 
     # the endpoint returns the correct response...
     response = client.patch(_url(user_id), json=user_update)
@@ -136,9 +150,10 @@ def test_patch_user_should_update_with_new_values(client: TestClient) -> None:
     assert updated_user_details["email"] == expected_updated_user_details["email"]
 
 
-def test_patch_user_should_be_idempotent(client: TestClient) -> None:
+@patch.object(MailService, 'send_email')
+def test_patch_user_should_be_idempotent(mocker, email_service_mock, client: TestClient) -> None:
     user = create_user(client)
-    authenticate(user["username"], client)
+    authenticate(find_username("Administrator"), client)
 
     user_update = _patch_data(
         given_name=user["given_name"],
@@ -148,14 +163,9 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     )
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
+    expected_updated_user_details = _remove_untested(expected_updated_user_details)
 
-    del expected_updated_user_details["affiliations"]
-    del expected_updated_user_details["alternative_emails"]
-    del expected_updated_user_details["id"]
-    del expected_updated_user_details["password"]
-    del expected_updated_user_details["roles"]
-    del expected_updated_user_details["username"]
-
+    mocker.patch.object(email_service_mock, 'send_email')
     first_update_response = client.patch(_url(user["id"]), json=user_update)
     second_update_response = client.patch(_url(user["id"]), json=user_update)
 
@@ -163,23 +173,18 @@ def test_patch_user_should_be_idempotent(client: TestClient) -> None:
     assert second_update_response.json() == expected_updated_user_details
 
 
-def test_patch_user_should_return_400_for_using_existing_email(
-    client: TestClient,
+@patch.object(MailService, 'send_email')
+def test_patch_user_should_return_400_for_using_someone_elses_email(
+        mocker, email_service_mock, client: TestClient,
 ) -> None:
     user = create_user(client)
-    authenticate(user["username"], client)
+    authenticate(find_username("Administrator"), client)
     existing_email = "hettlage@saao.ac.za"
 
     user_update = _patch_data(user["given_name"], user["family_name"], existing_email)
     expected_updated_user_details = user.copy()
     expected_updated_user_details.update(user_update)
-    del expected_updated_user_details["password"]
-    del expected_updated_user_details["legal_status"]
-    del expected_updated_user_details["gender"]
-    del expected_updated_user_details["race"]
-    del expected_updated_user_details["has_phd"]
-    del expected_updated_user_details["year_of_phd_completion"]
-
+    mocker.patch.object(email_service_mock, 'send_email')
     response = client.patch(_url(user["id"]), json=user_update)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -191,12 +196,7 @@ def test_patch_user_should_allow_admin_to_update_other_user(client: TestClient) 
     user_update = _patch_data("Xola", "Ndaliso", "xola.ndaliso@example.com")
     expected_updated_user_details = client.get(_url(other_user_id)).json()
     expected_updated_user_details.update(user_update)
-    del expected_updated_user_details["affiliations"]
-    del expected_updated_user_details["alternative_emails"]
-    del expected_updated_user_details["id"]
-    del expected_updated_user_details["password"]
-    del expected_updated_user_details["roles"]
-    del expected_updated_user_details["username"]
+    expected_updated_user_details = _remove_untested(expected_updated_user_details)
     response = client.patch(_url(other_user_id), json=user_update)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_updated_user_details

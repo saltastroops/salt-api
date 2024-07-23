@@ -1,10 +1,14 @@
+import re
 from typing import Any, Dict, List, Optional, cast
+
+from fastapi import Request
 
 from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
+from saltapi.settings import get_settings
 from saltapi.web.schema.proposal import (
     ProposalStatusValue,
     ProprietaryPeriodUpdateRequest,
@@ -511,3 +515,22 @@ class PermissionService:
                     f"There exists no observation with id {bv_id} "
                     f"for the proposal {proposal_code}."
                 )
+
+    def check_permission_to_update_telescope_status(self, request: Request):
+        host = request.client.host
+        if not re.match(get_settings().allow_status_update_origin_regex, host):
+            raise AuthorizationError(
+                f"You may not update the status from this ip address: {host}"
+            )
+
+    def check_permission_to_validate_user(self, user_id: int, user: User) -> None:
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+        if user_id != user.id:
+            raise ValidationError(f"You can't validate user with user ID {user_id}.")
+
+    def check_permission_to_update_user_roles(self, user: User) -> None:
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+
+        raise AuthorizationError(f"You are not allowed update user roles.")

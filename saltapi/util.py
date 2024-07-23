@@ -8,6 +8,9 @@ from astropy.coordinates import Angle
 from fastapi import Form
 from pydantic import BaseModel
 
+from saltapi.exceptions import AuthorizationError
+from saltapi.service.user import User
+from saltapi.settings import get_settings
 from saltapi.web.schema.common import PartnerCode
 
 
@@ -28,6 +31,7 @@ _partners = dict(
     OTH="Other",
     POL="Poland",
     RSA="South Africa",
+    SVP="Science Verification Proposals",
     RU="Rutgers University",
     UC="University of Canterbury",
     UKSC="UK SALT Consortium",
@@ -161,8 +165,8 @@ def next_semester(current_semester: Optional[str] = None) -> str:
         else:
             raise ValueError(f"No such semester: {semester}")
         return f"{year}-{semester}"
-    except ValueError:
-        raise ValueError(f"Invalid semester string: {current_semester}")
+    except ValueError as e:
+        raise ValueError(f"Invalid semester string: {current_semester}") from e
 
 
 def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:
@@ -190,7 +194,7 @@ def as_form(cls: Type[BaseModel]) -> Type[BaseModel]:
     sig = inspect.signature(_as_form)
     sig = sig.replace(parameters=new_params)
     _as_form.__signature__ = sig  # type: ignore
-    setattr(cls, "as_form", _as_form)
+    cls.as_form = _as_form
     return cls
 
 
@@ -305,3 +309,34 @@ def parse_partner_requested_percentages(value: str) -> List[Dict[str, Any]]:
         raise ValueError(f"The percentages do not add up to 100%: {value}")
 
     return partner_requested_percentages
+
+
+def is_timezone_aware(t: datetime) -> bool:
+    """
+    Check whether a datetime is timezone aware.
+
+    From https://thispointer.com/check-if-datetime-is-timezone-aware-in-python/.
+
+    Parameters
+    ----------
+    t: datetime
+        Datetime.
+
+    Returns
+    -------
+    bool
+        True if the datetime is timezone aware, False otherwise.
+    """
+    return t.tzinfo is not None and t.tzinfo.utcoffset(t) is not None
+
+
+def validate_user(user: User) -> None:
+    if not user.active:
+        raise AuthorizationError(
+            "Your account is not active. Please contact SALT Help for assistance."
+        )
+    if not user.user_verified:
+        raise AuthorizationError(
+            "Your account has not been verified. Please visit "
+            f"{get_settings().frontend_uri}/request-verification-link to verify your account."
+        )

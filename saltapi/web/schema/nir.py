@@ -20,9 +20,9 @@ class NirCameraFilterWheel(str, Enum):
 
     BLOCK = "Block"
     CLEAR = "Clear"
-    CUTOFF = "Cutoff"
+    CUTOFF_1_5_MICRON = "Cutoff 1.5um"
+    CUTOFF_1_7_MICRON = "Cutoff 1.7um"
     DIFFUSER = "Diffuser"
-    EMPTY = "Empty"
 
 
 class NirConfiguration(BaseModel):
@@ -117,7 +117,7 @@ class NirDitherStep(BaseModel):
     offset: NirDitherOffset = Field(
         ..., title="Dither offset", description="Dither offset"
     )
-    offset_type: NirOffsetType = Field(
+    offset_type: NirOffsetType | None = Field(
         ..., title="Dither offset type", description="Dither offset type"
     )
     detector: NirDetector = Field(

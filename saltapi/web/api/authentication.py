@@ -1,11 +1,11 @@
 import uuid
 from typing import Callable
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Body, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import ValidationError, AuthenticationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
 from saltapi.service.authentication_service import (
@@ -16,6 +16,7 @@ from saltapi.service.authentication_service import (
 )
 from saltapi.service.user import User
 from saltapi.settings import get_settings
+from saltapi.util import validate_user
 from saltapi.web import services
 from saltapi.web.schema.user import UserSwitchDetails
 
@@ -63,15 +64,11 @@ def token(
 
     Note that the token expires 24 hours after being issued.
     """
-    try:
-        user = authenticate_user(form_data.username, form_data.password)
-        return AuthenticationService.access_token(user)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise AuthenticationError("User not found")
+    validate_user(user)
+    return AuthenticationService.access_token(user)
 
 
 def _login_user(user: User, request: Request) -> Response:
@@ -115,15 +112,10 @@ def login(
     This approach was taken from
     https://medium.com/@thbrown/logging-out-with-http-only-session-ad09898876ba.
     """
-    try:
-        user = authenticate_user(form_data.username, form_data.password)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise AuthenticationError("User not found.")
+    validate_user(user)
     return _login_user(user, request)
 
 
@@ -161,9 +153,9 @@ def switch_user(
         permission_service.check_permission_to_switch_user(user)
 
         user_service = services.user_service(unit_of_work.connection)
-        try:
-            user = user_service.get_user_by_username(user_switch.username)
-        except NotFoundError:
-            raise ValidationError(f"Unknown username: {user_switch.username}")
+        user = user_service.get_user_by_username(user_switch.username)
+        if user is not None:
+            return _login_user(user, request)
+        raise ValidationError(f"Unknown username: {user_switch.username}")
 
-        return _login_user(user, request)
+

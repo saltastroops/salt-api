@@ -33,6 +33,8 @@ responses = "^0.22.0"
 faker = "^16.3.0"
 pytest-mock = "^3.10.0"
 jinja2 = "^3.1.2"
+pyyaml = "^6.0.1"
+wkhtmltopdf = "^0.2"
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["d"], version = "^22.10.0"}
@@ -43,7 +45,7 @@ pydantic = {extras = ["dotenv"], version = "^1.8.1"}
 pytest-asyncio = "^0.14.0"
 mkdocs-macros-plugin = "^0.5.0"
 syrupy = "^1.2.2"
-PyYAML = "^5.4.1"
+PyYAML = "^6.0.0"
 pytest-bdd = "^4.1.0"
 pytest-regressions = "^2.3.1"
 httpx = "^0.23.0"
@@ -70,6 +72,9 @@ unfixable = ["B"]
 ignore = ["E203", "E501"]
 dummy-variable-rgx = "^ignore_me$"
 target-version = "py310"
+
+[tool.ruff.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Body", "fastapi.Depends", "fastapi.Path", "fastapi.Query"]
 
 [tool.ruff.pydocstyle]
 convention = "numpy"

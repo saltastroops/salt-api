@@ -30,6 +30,7 @@ from saltapi.util import (
     target_type,
     tonight,
 )
+from saltapi.web.schema.proposal import ProposalStatusValue
 
 
 class ProposalRepository:
@@ -615,14 +616,10 @@ ORDER BY I.Surname, I.FirstName
 
             if investigator["approved"] == 1:
                 investigator["has_approved_proposal"] = True
-            elif (
-                investigator["approval_code"] is None
-                or investigator["approval_code"] == ""
-                or investigator["approval_code"] == 0
-            ):
-                investigator["has_approved_proposal"] = False
-            else:
+            elif investigator["approval_code"]:
                 investigator["has_approved_proposal"] = None
+            else:
+                investigator["has_approved_proposal"] = False
 
             del investigator["approved"]
             del investigator["approval_code"]
@@ -1351,6 +1348,25 @@ WHERE PC.Proposal_Code = :proposal_code
         except NoResultFound:
             raise NotFoundError()
 
+    def _validate_status_update(self, proposal_code: str, status: str) -> None:
+        """Check if the proposal status can be updated."""
+        proposal = self.get(proposal_code)
+
+        if proposal["phase"] == 2 and status in [
+            ProposalStatusValue.ACCEPTED,
+            ProposalStatusValue.REJECTED,
+            ProposalStatusValue.UNDER_SCIENTIFIC_REVIEW
+        ]:
+            raise ValidationError(f"Wrong status for a phase 2 proposal: {status}.")
+        if proposal["phase"] == 1 and status in [
+            ProposalStatusValue.ACTIVE,
+            ProposalStatusValue.COMPLETED,
+            ProposalStatusValue.UNDER_TECHNICAL_REVIEW,
+            ProposalStatusValue.EXPIRED,
+            ProposalStatusValue.INACTIVE
+        ]:
+            raise ValidationError(f"Wrong status for a phase 1 proposal: {status}.")
+
     def update_proposal_status(
         self, proposal_code: str, status: str, status_comment: Optional[str] = None
     ) -> None:
@@ -1370,6 +1386,8 @@ WHERE PC.Proposal_Code = :proposal_code
             proposal_code_id = self.get_proposal_code_id(proposal_code)
         except NoResultFound:
             raise ValidationError(f"Unknown proposal code: {proposal_code}")
+
+        self._validate_status_update(proposal_code, status)
 
         stmt = text(
             """
@@ -2136,6 +2154,10 @@ VALUES (
             return None
         # add the proprietary period to get the data release date
         return proprietary_period_start + relativedelta(months=proprietary_period)
+
+    def get_release_date(self, proprietary_period: int, proposal_code: str):
+        block_visits = self.block_visits(proposal_code)
+        return self._data_release_date(proprietary_period, block_visits)
 
     def _is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
         stmt = text(

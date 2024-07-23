@@ -1,12 +1,12 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Path
+from fastapi import APIRouter, Body, Depends, Path
 from starlette import status
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.authentication_service import get_current_user
-from saltapi.service.user import NewUserDetails as _NewUserDetails
+from saltapi.service.authentication_service import get_current_user, get_user_to_verify
+from saltapi.service.user import NewUserDetails as _NewUserDetails, Role
 from saltapi.service.user import User as _User
 from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
@@ -21,6 +21,7 @@ from saltapi.web.schema.user import (
     UserListItem,
     UserUpdate,
     BaseUserDetails,
+    UsernameEmail,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -45,17 +46,11 @@ def send_password_reset_email(
     with UnitOfWork() as unit_of_work:
         username_email = password_reset_request.username_email
         user_service = services.user_service(unit_of_work.connection)
-        try:
-            try:
-                user = user_service.get_user_by_username(username_email)
-            except NotFoundError:
-                user = user_service.get_user_by_email(username_email)
 
-        except NotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Username or email didn't match any user.",
-            )
+        user = user_service.get_user_by_username(username_email) or user_service.get_user_by_email(username_email)
+
+        if not user:
+            raise NotFoundError("User not found.")
 
         user_service.send_password_reset_email(user)
 
@@ -75,7 +70,7 @@ def create_user(
 ) -> _User:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
-        user_service.create_user(
+        pipt_user_id = user_service.create_user(
             _NewUserDetails(
                 username=user.username,
                 password=user.password,
@@ -91,6 +86,15 @@ def create_user(
                 year_of_phd_completion=user.year_of_phd_completion,
             )
         )
+
+        # Now that the user has been added to the Database we need to confirm that the user provided a correct email
+        # address.
+        # Validate email
+        user_service.send_registration_confirmation_email(
+            pipt_user_id,
+            f"{user.family_name} {user.given_name}",
+            user.email
+        )
         unit_of_work.commit()
 
         return user_service.get_user_by_username(user.username)
@@ -104,8 +108,42 @@ def get_users(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_users(user)
         user_service = services.user_service(unit_of_work.connection)
+        user = user_service.get_users()
+        if user is None:
+            raise NotFoundError("User Unknown.")
+        return user
 
-        return user_service.get_users()
+
+@router.post(
+    "/send-verification-link", summary="Send a verification link.", response_model=Message
+)
+def send_verification_link(
+        username_email: UsernameEmail = Body(
+            ..., title="Username or Email", description="Username or Email."
+        ),
+
+) -> Message:
+    """
+    Send verification link.
+    """
+    with UnitOfWork() as unit_of_work:
+
+        user_service = services.user_service(unit_of_work.connection)
+
+        user = (
+                user_service.get_user_by_username(username_email.username_email)
+                or user_service.get_user_by_email(username_email.username_email)
+        )
+        if not user:
+            raise NotFoundError()
+
+        user_service.send_registration_confirmation_email(
+            user.id,
+            f"{user.family_name} {user.given_name}",
+            user.email
+        )
+
+        return Message(message="Email with an activation link has been sent.")
 
 
 @router.get("/{user_id}", summary="Get user details", response_model=User)
@@ -121,7 +159,10 @@ def get_user(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
         user_service = services.user_service(unit_of_work.connection)
-        return user_service.get_user(user_id)
+        user = user_service.get_user(user_id)
+        if user is None:
+            raise NotFoundError("Unknown user.")
+        return user
 
 
 @router.patch(
@@ -272,20 +313,82 @@ def update_password(
         title="User id",
         description="Id for whom the password is updated",
     ),
-    password: PasswordUpdate = Body(
-        ..., title="Password", description="Password to replace the old one."
+    password_update: PasswordUpdate = Body(
+        ...,
+        title="Password and authentication token",
+        description="Password to replace the old one, and an authentication token to verify the user."
     ),
-    user: _User = Depends(get_current_user),
 ) -> _User:
     """
     Update user's password.
     """
     with UnitOfWork() as unit_of_work:
+        authentication_service = services.authentication_service(unit_of_work.connection)
+        user = authentication_service.validate_auth_token(password_update.authentication_key, verification=True)
+        if not user:
+            raise NotFoundError("Unknown user.")
+
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
+
         user_service = services.user_service(unit_of_work.connection)
-        user_service.update_password(user_id, password)
+        user_service.update_password(user_id, password_update.password)
+
+        unit_of_work.commit()
+        user = user_service.get_user(user_id)
+        return user
+
+
+@router.post(
+    "/{user_id}/verify-user", summary="Verify user", response_model=User
+)
+def verify_user(
+        user_id: int = Path(
+            ...,
+            title="User id",
+            description="Id for user to verify",
+        ),
+        user: _User = Depends(get_user_to_verify),
+
+) -> _User:
+    """
+    Verify user
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_validate_user(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.verify_user(user_id)
 
         unit_of_work.commit()
 
         return user_service.get_user(user_id)
+
+
+@router.post("/{user_id}/update-roles", summary="Update user roles", response_model=User)
+def update_user_roles(
+        user_id: int = Path(
+            ...,
+            title="User id",
+            description="Id for user to update rights for."
+        ),
+        user: _User = Depends(get_current_user),
+        roles: List[Role] = Body(
+            ...,
+            title="User Roles",
+            description="User roles to update."
+        )
+) -> User:
+    """
+   Update user's roles.
+   """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_update_user_roles(user)
+
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.update_user_roles(user_id, roles)
+
+        unit_of_work.commit()
+        user = user_service.get_user(user_id)
+        return user

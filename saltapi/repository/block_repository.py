@@ -93,7 +93,9 @@ WHERE B.Block_Id = :block_id;
         observation_probabilities = {
             "moon": row.moon_probability,
             "competition": row.competition_probability,
-            "observability": row.observability_probability,
+            "observability": None if row.observability_probability is None
+                                  else 0 if row.observability_probability < 0
+                                    else row.observability_probability,
             "seeing": row.seeing_probability,
             "average_ranking": row.average_ranking,
             "total": row.total_probability,
@@ -522,6 +524,7 @@ SELECT P.Pointing_Id                                                  AS pointin
        TCOC.PlannedObsConfig_Order                                    AS planned_obsconfig_order,
        O.Target_Id                                                    AS target_id,
        TC.PositionAngle                                               AS position_angle,
+       TC.FixedAngle                                                  AS fixed_angle,
        TC.UseParallacticAngle                                         AS use_parallactic_angle,
        TC.Iterations                                                  AS tc_iterations,
        DP.DitherPatternDescription                                    AS dp_description,
@@ -680,6 +683,7 @@ ORDER BY TCOC.Pointing_Id, TCOC.Observation_Order, TCOC.TelescopeConfig_Order,
             tc = {
                 "iterations": row["tc_iterations"],
                 "position_angle": row["position_angle"],
+                "is_position_angle_fixed": row["fixed_angle"] or 0,
                 "use_parallactic_angle": row["use_parallactic_angle"],
                 "dither_pattern": self._dither_pattern(row),
                 "guide_star": self._guide_star(row),

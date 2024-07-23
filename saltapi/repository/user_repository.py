@@ -2,14 +2,14 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, cast, Optional
 
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError
+from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -36,7 +36,9 @@ SELECT PU.PiptUser_Id           AS id,
        P.Partner_Name           AS partner_name,
        I.InstituteName_Name     AS institution_name,
        I2.Institute_Id          AS institution_id,
-       I2.Department            AS department
+       I2.Department            AS department,
+       PU.Active                AS active,
+       PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
          JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
@@ -45,7 +47,7 @@ FROM PiptUser AS PU
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
 """
 
-    def _get(self, rows: Any) -> User:
+    def _get(self, rows: Any) -> Optional[User]:
         user = {}
         for i, row in enumerate(rows):
             if i == 0:
@@ -68,6 +70,8 @@ FROM PiptUser AS PU
                             "partner_name": row.partner_name,
                         }
                     ],
+                    "active": True if row.active == 1 else False,
+                    "user_verified": True if row.user_verified == 1 else False,
                 }
             else:
                 if row.alternative_email != row.email:
@@ -81,23 +85,23 @@ FROM PiptUser AS PU
                         "partner_name": row.partner_name,
                     }
                 )
-        if not user:
-            raise NotFoundError("Unknown username")
-        return User(**user, roles=self.get_user_roles(user["username"]))
+        if user:
+            return User(**user, roles=self.get_user_roles(user["username"]))
+        return None
 
-    def get_by_username(self, username: str) -> User:
+    def get_by_username(self, username: str) -> Optional[User]:
         """
         Returns the user with a given username.
 
         If the username does not exist, a NotFoundError is raised.
         """
-        query = self._get_user_query + """WHERE PU.Username = :username"""
+        query = self._get_user_query + """ WHERE PU.Username = :username"""
         stmt = text(query)
         result = self.connection.execute(stmt, {"username": username})
         user = self._get(result)
         return user
 
-    def get(self, user_id: int) -> User:
+    def get(self, user_id: int) -> Optional[User]:
         """
         Returns the user with a given user id.
 
@@ -109,7 +113,7 @@ FROM PiptUser AS PU
         user = self._get(result)
         return user
 
-    def get_by_email(self, email: str) -> User:
+    def get_by_email(self, email: str) -> Optional[User]:
         """
         Returns the user with a given email
 
@@ -165,7 +169,7 @@ ORDER BY I.Surname, I.FirstName
         ]
         return users
 
-    def create(self, new_user_details: Dict[str, Any]) -> None:
+    def create(self, new_user_details: Dict[str, Any]) -> int:
         """Creates a new user."""
 
         # Make sure the username is still available
@@ -187,6 +191,7 @@ ORDER BY I.Surname, I.FirstName
                 year_of_phd_completion=new_user_details["year_of_phd_completion"],
             ),
         )
+        return pipt_user_id
 
     def _create_investigator_details(self, new_user_details: Dict[str, Any]) -> int:
         """
@@ -223,8 +228,8 @@ VALUES (:institution_id, :given_name, :family_name, :email)
 
         stmt = text(
             """
-INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active)
-VALUES (:username, :password_hash, :investigator_id, :email_validation, 0)
+INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active, UserVerified)
+VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
         """
         )
         result = self.connection.execute(
@@ -255,12 +260,8 @@ WHERE Investigator_Id = :investigator_id
 
     def _does_username_exist(self, username: str) -> bool:
         """Check whether a username exists already."""
-        try:
-            self.get_by_username(username)
-        except NotFoundError:
-            return False
 
-        return True
+        return self.get_by_username(username) is not None
 
     def update(self, user_id: int, user_update: Dict[str, Any]) -> None:
         """
@@ -273,14 +274,12 @@ WHERE Investigator_Id = :investigator_id
         if not self.is_existing_user_id(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
 
-        try:
-            user = self.get_by_email(user_update["email"])
+        user = self.get_by_email(user_update["email"])
+        if user is not None:
             if user.id != user_id:
                 raise ResourceExistsError(
                     f"The email {user_update['email']} exists already."
                 )
-        except NotFoundError:
-            pass
 
         if user_update["password"]:
             self.update_password(user_id, user_update["password"])
@@ -723,19 +722,18 @@ WHERE PiptUser_Id = :user_id
 
     def find_user_with_username_and_password(
         self, username: str, password: str
-    ) -> User:
+    ) -> Optional[User]:
         """
         Find a user with a username and password.
 
         If the combination of username and password is valid, then the corresponding
-        user is returned. Otherwise a NotFoundError is raised.
+        user is returned. Otherwise, None is returned
         """
         user = self.get_by_username(username)
         if not user:
-            raise NotFoundError()
+            return None
         if not self.verify_password(password, user.password_hash):
-            raise NotFoundError()
-
+            return None
         return user
 
     def get_user_roles(self, username: str) -> List[Role]:
@@ -752,6 +750,12 @@ WHERE PiptUser_Id = :user_id
 
         if self.is_salt_astronomer(username):
             roles.append(Role.SALT_ASTRONOMER)
+
+        if self.is_salt_operator(username):
+            roles.append(Role.SALT_OPERATOR)
+
+        if self.is_engineer():
+            roles.append(Role.ENGINEER)
 
         if self.is_board_member(username):
             roles.append(Role.BOARD_MEMBER)
@@ -1044,3 +1048,161 @@ ON DUPLICATE KEY UPDATE
                 "year_of_phd": user_information["year_of_phd_completion"],
             },
         )
+
+    def verify_user(self, user_id: int, verify: bool = True) -> None:
+        """
+        Update user's verification status.
+
+        If the user id does not exist, a NotFoundError is raised.
+        """
+        stmt = text(
+            """
+UPDATE PiptUser
+SET UserVerified = :verify
+WHERE PiptUser_Id = :user_id
+        """
+        )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        self.connection.execute(stmt, {"user_id": user_id, "verify": verify})
+
+    def activate_user(self, user_id: int, active: bool = True) -> None:
+        """
+        Update user's activation status.
+
+        If the user id does not exist, a NotFoundError is raised.
+        """
+        stmt = text(
+            """
+UPDATE PiptUser
+SET Active = :active
+WHERE PiptUser_Id = :user_id
+        """
+        )
+
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
+
+        self.connection.execute(stmt, {"user_id": user_id, "active": active})
+
+    def _update_right(self, user_id: int, right_setting: str, value: int) -> None:
+        stmt = text(
+            """
+INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
+VALUES (
+     :user_id,
+    (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_setting),
+    :value)
+ON DUPLICATE KEY UPDATE Value = :value
+            """
+        )
+        self.connection.execute(stmt, {
+            "user_id": user_id,
+            "right_setting": right_setting,
+            "value": value
+        })
+
+    def _delete_right(self, user_id: int, right_setting: str) -> None:
+        stmt = text(
+            """
+DELETE FROM PiptUserSetting
+WHERE PiptUser_Id = :user_id 
+    AND PiptSetting_Id = (
+        SELECT PiptSetting_Id FROM PiptSetting
+            WHERE PiptSetting_Name = :right_setting
+        )       
+
+            """
+        )
+        self.connection.execute(stmt, {
+            "user_id": user_id,
+            "right_setting": right_setting
+        })
+
+    def _get_investigator_id(self, user_id) -> int:
+        stmt = text("""
+SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id     
+        """)
+
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return cast(int, result.scalar_one())
+
+    def _add_salt_astronomer(self, user: User):
+        stmt = text("""
+INSERT INTO SaltAstronomer (Investigator_Id)
+VALUES (:investigator_id)
+       """)
+        self.connection.execute(stmt, {
+            "investigator_id": self._get_investigator_id(user.id)
+        })
+
+    def _remove_salt_astronomer(self, user: User):
+        stmt = text("""
+DELETE FROM SaltAstronomer
+WHERE Investigator_id = :investigator_id
+       """)
+        self.connection.execute(stmt, {
+            "investigator_id": self._get_investigator_id(user.id),
+        })
+
+    def _add_salt_operator(self, user: User) -> None:
+        stmt = text("""
+INSERT INTO SaltOperator (FirstName, Surname, Email, Phone, Current)
+VALUES (:firstname, :surname, :email, :phone, 1)
+       """)
+        self.connection.execute(stmt, {
+            "firstname": user.given_name,
+            "surname": user.family_name,
+            "email": user.email,
+            "phone": None
+        })
+
+    def _remove_salt_operator(self, user: User) -> None:
+        stmt = text("""
+DELETE FROM SaltOperator
+WHERE Email = :email
+       """)
+        self.connection.execute(stmt, {
+            "email": user.email
+        })
+
+    def _get_right_setting(self, role: Role) -> str:
+        if role == Role.ADMINISTRATOR:
+            return "RightAdmin"
+        if role == Role.BOARD_MEMBER:
+            return "RightBoard"
+        if role == Role.SALT_ASTRONOMER:
+            return "RightAstronomer"
+        if role == Role.SALT_OPERATOR:
+            return "RightOperator"
+        if role == Role.MASK_CUTTER:
+            return "RightMaskCutting"
+        if role == Role.LIBRARIAN:
+            return "RightLibrarian"
+
+        raise ValidationError("Unknown user role: " + role)
+
+    def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
+        user = self.get(user_id)
+        new_roles_set = set(new_roles)
+        current_roles_set = set(user.roles)
+        roles_to_add = new_roles_set - current_roles_set
+        roles_to_remove = current_roles_set - new_roles_set
+
+        for role in roles_to_add:
+            if role == Role.SALT_ASTRONOMER:
+                self._add_salt_astronomer(user)
+            if role == Role.SALT_OPERATOR:
+                self._add_salt_operator(user)
+            right_setting = self._get_right_setting(role)
+            # The setting is set to 2 as that value indicates having full rights.
+            self._update_right(user_id, right_setting, 2)
+        for role in roles_to_remove:
+            if role == Role.SALT_ASTRONOMER:
+                self._remove_salt_astronomer(user)
+            if role == Role.SALT_OPERATOR:
+                self._remove_salt_operator(user)
+            right_setting = self._get_right_setting(role)
+            self._delete_right(user_id, right_setting)

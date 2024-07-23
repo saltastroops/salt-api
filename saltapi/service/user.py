@@ -17,6 +17,8 @@ class Role(str, Enum):
     PROPOSAL_TAC_MEMBER = "Proposal TAC Member"
     PROPOSAL_TAC_CHAIR = "Proposal TAC Chair"
     PARTNER_AFFILIATED = "Partner Affiliated"
+    LIBRARIAN = "Librarian"
+    MASK_CUTTER = "Mask Cutter"
 
 
 @dataclass()
@@ -61,6 +63,8 @@ class User:
     password_hash: str
     affiliations: List[Institution]
     roles: List[Role]
+    user_verified: bool
+    active: bool
 
 
 @dataclass(frozen=True)

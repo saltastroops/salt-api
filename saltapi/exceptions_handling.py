@@ -5,6 +5,7 @@ from typing import Any, Union
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse, Response
+from jose import JWTError
 from loguru import logger
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from starlette.datastructures import URL
@@ -13,6 +14,8 @@ from saltapi.exceptions import (
     AuthorizationError,
     NotFoundError,
     ValidationError,
+    AuthenticationError,
+    SSDAError,
 )
 
 
@@ -48,10 +51,10 @@ def setup_exception_handler(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def exception_handle(request: Request, exc: Exception) -> Response:
+    async def generic_exception_handler(request: Request, exc: Exception) -> Response:
         """Catch an Exception."""
 
-        log_message(request.method, request.url, traceback.format_exc())
+        log_message(request.method, request.url, exc)
         return JSONResponse(
             content={
                 "message": "Sorry, something has gone wrong. Please try again later."
@@ -107,5 +110,42 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content={"message": "Forbidden"}
+            status_code=status.HTTP_403_FORBIDDEN, content={"message": str(exc)}
         )
+
+    @app.exception_handler(AuthenticationError)
+    async def authentication_error_handler(
+            request: Request, exc: AuthenticationError
+    ) -> Response:
+        """Catch an AuthenticationError."""
+
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED, content={"message": str(exc)}
+        )
+
+    @app.exception_handler(JWTError)
+    async def authentication_error_handler(
+            request: Request, exc: JWTError
+    ) -> Response:
+        """Catch an AuthenticationError."""
+
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED, content={
+                "message": "The authorisation token could not be parsed."
+            }
+        )
+
+    @app.exception_handler(SSDAError)
+    async def ssda_error_handler(
+            request: Request, exc: SSDAError
+    ) -> Response:
+        """Catch an SSDA Error."""
+        log_message(request.method, request.url, exc)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={
+                "message": exc.message
+            }
+        )
+

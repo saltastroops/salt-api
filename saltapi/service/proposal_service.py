@@ -382,7 +382,7 @@ class ProposalService:
         }
 
         try:
-            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+            ssda_response = requests.post(get_settings().ssda_api_url, json=body, timeout=5).json()
         except Exception as error:
             raise SSDAError() from error
 

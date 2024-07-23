@@ -411,6 +411,13 @@ class ProposalService:
         """
         Set the proposal status for a proposal code.
         """
+        allowed_statuses = {
+            1: ["Accepted", "Deleted", "Rejected", "Under scientific review"],
+            2: ["Active", "Completed", "Deleted", "Expired", "Inactive", "Under technical review"]
+        }
+        phase = self.repository.latest_submission_phase(proposal_code)
+        if status not in allowed_statuses.get(phase, []):
+            raise ValueError(f"Proposal status not allowed for phase {phase}")
         self.repository.update_proposal_status(proposal_code, status, status_comment)
 
     def update_is_self_activatable(

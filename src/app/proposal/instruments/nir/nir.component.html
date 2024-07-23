@@ -3,21 +3,21 @@
 </h2>
 <hr class="heading-line hrs-header" />
 <div>
-  <div class="inline-view">
+  <div class="has-two-columns">
     <wm-nir-general-info [nir]="nir"></wm-nir-general-info>
     <wm-nir-configuration
       *ngIf="nir.configuration"
       [nirConfiguration]="nir.configuration"
     ></wm-nir-configuration>
-    <div *ngIf="nir.procedure">
-      <wm-nir-dither-steps
-        [nirDitherSteps]="nir.procedure.ditherPattern"
-      ></wm-nir-dither-steps>
-    </div>
     <wm-nir-calibration
       *ngIf="payloadConfiguration.lamp"
       [filter]="payloadConfiguration.calibrationFilter"
       [lamp]="payloadConfiguration.lamp"
     ></wm-nir-calibration>
+  </div>
+  <div *ngIf="nir.procedure">
+    <wm-nir-dither-steps
+      [nirDitherSteps]="nir.procedure.ditherPattern"
+    ></wm-nir-dither-steps>
   </div>
 </div>

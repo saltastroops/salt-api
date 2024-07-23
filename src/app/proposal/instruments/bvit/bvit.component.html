@@ -2,22 +2,26 @@
   Bvit {{ payloadConfiguration.payloadConfigurationType }} Configuration
 </h2>
 <hr class="heading-line bvit-header" />
-<div class="table-container">
-  <div class="row secondary-header">
-    <div class="has-text-centered">General</div>
-  </div>
-  <div class="row headers general">
-    <div>Mode</div>
-    <div>Iris size</div>
-    <div>Filter</div>
-    <div>Neutral Density</div>
-    <div>Shutter open time</div>
-  </div>
-  <div class="row general">
-    <div>{{ bvit.mode }}</div>
-    <div>{{ bvit.irisSize }}</div>
-    <div>{{ bvit.filter }}</div>
-    <div>{{ bvit.neutralDensity }}</div>
-    <div>{{ bvit.shutterOpenTime }} sec</div>
-  </div>
-</div>
+<table>
+  <thead>
+    <tr class="headers">
+      <td colspan="5" class="has-text-centered">General</td>
+    </tr>
+    <tr>
+      <th>Mode</th>
+      <th>Iris size</th>
+      <th>Filter</th>
+      <th>Neutral Density</th>
+      <th>Shutter open time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ bvit.mode }}</td>
+      <td>{{ bvit.irisSize }}</td>
+      <td>{{ bvit.filter }}</td>
+      <td>{{ bvit.neutralDensity }}</td>
+      <td>{{ bvit.shutterOpenTime }} sec</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { HrsProcedure } from "../../../../types/hrs";
+import { Hrs } from "../../../../types/hrs";
 
 @Component({
   selector: "wm-hrs-general-info",
@@ -8,5 +8,5 @@ import { HrsProcedure } from "../../../../types/hrs";
   styleUrls: ["./hrs-general-info.component.scss"],
 })
 export class HrsGeneralInfoComponent {
-  @Input() hrsProcedure!: HrsProcedure;
+  @Input() hrs!: Hrs;
 }

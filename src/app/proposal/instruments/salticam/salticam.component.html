@@ -3,11 +3,8 @@
 </h2>
 <hr class="heading-line salticam-header" />
 <div>
-  <div class="inline-view">
+  <div class="has-two-columns">
     <wm-salticam-general-info [salticam]="salticam"></wm-salticam-general-info>
-    <wm-salticam-observation-times
-      [salticam]="salticam"
-    ></wm-salticam-observation-times>
     <wm-salticam-detector [detector]="salticam.detector"></wm-salticam-detector>
     <wm-salticam-filters
       [salticamExposures]="salticam.procedure.exposures"

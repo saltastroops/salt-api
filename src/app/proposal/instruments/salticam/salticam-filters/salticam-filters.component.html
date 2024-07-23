@@ -1,20 +1,20 @@
 <div>
-  <table class="table">
+  <table class="table is-bordered is-fullwidth">
     <thead>
-      <tr class="secondary-header">
+      <tr class="headers">
         <th colspan="3" class="has-text-centered">Filters</th>
       </tr>
-      <tr>
+      <tr class="secondary-header">
         <th>Name</th>
         <th>Description</th>
-        <th>Exposure Time (seconds)</th>
+        <th>Exposure Time</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let f of salticamExposures">
         <td>{{ f.filter.name }}</td>
         <td>{{ f.filter.description }}</td>
-        <td>{{ f.exposureTime }}</td>
+        <td>{{ f.exposureTime }} sec</td>
       </tr>
       <tr>
         <td colspan="3">The filter is current unavailable</td>

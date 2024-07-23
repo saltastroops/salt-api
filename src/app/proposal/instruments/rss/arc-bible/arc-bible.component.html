@@ -1,28 +1,27 @@
-<div *ngIf="arcBibleEntries">
-  <table class="table">
-    <thead>
-      <tr class="secondary-header">
-        <th colspan="4" class="has-text-centered">Arc Bible</th>
-      </tr>
-      <tr>
-        <th>Lamp</th>
-        <th>Base Exp. Time (seconds)</th>
-        <th>Corrected Exp. Time (seconds)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let ab of arcBibleEntries">
-        <td>
-          {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
-        </td>
-        <td *ngIf="ab.originalExposureTime; else elseBlock">
-          {{ ab.originalExposureTime | number: "1.1-2" }}
-        </td>
-        <td *ngIf="ab.preferredExposureTime; else elseBlock">
-          {{ ab.preferredExposureTime | number: "1.1-2" }}
-        </td>
-        <ng-template #elseBlock><td>n/a</td></ng-template>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<table *ngIf="arcBibleEntries" class="table is-bordered is-fullwidth">
+  <thead>
+    <tr class="headers">
+      <th colspan="4" class="has-text-centered">Arc Bible</th>
+    </tr>
+    <tr class="secondary-header">
+      <th>Lamp</th>
+      <th>Base Exp. Time</th>
+      <th>Corrected Exp. Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let ab of arcBibleEntries">
+      <td>
+        {{ ab.lamp }} <span *ngIf="ab.isPreferredLamp"> (preferred)</span>
+      </td>
+      <td *ngIf="ab.originalExposureTime; else elseBlock">
+        {{ ab.originalExposureTime | number: "1.1-2" }} sec
+      </td>
+      <td *ngIf="ab.preferredExposureTime; else elseBlock">
+        {{ ab.preferredExposureTime | number: "1.1-2" }} sec
+      </td>
+      <ng-template #elseBlock><td>n/a</td></ng-template>
+    </tr>
+  </tbody>
+</table>
+

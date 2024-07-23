@@ -1,23 +1,28 @@
 <div>
   <div class="inline-view">
     <div>
-      <table class="table">
-        <tr class="secondary-header">
+      <table class="table is-bordered">
+        <thead>
+        <tr class="headers">
           <th colspan="2" class="has-text-centered">Download</th>
         </tr>
-        <tr>
-          <td colspan="2">
-            <a class="has-text-link" [href]="zipDownloadLink()"
-            >Download zip file</a
-            >
-          </td>
-        </tr>
-        <tr *ngIf="doesSummaryExist()">
-          <td colspan="2">
-            <a [href]="summaryDownloadLink()">Download summary</a>
-          </td>
-        </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="2">
+              <a class="has-text-link" [href]="zipDownloadLink()"
+              >Download zip file</a
+              >
+            </td>
+          </tr>
+          <tr *ngIf="doesSummaryExist()">
+            <td colspan="2">
+              <a [href]="summaryDownloadLink()">Download summary</a>
+            </td>
+          </tr>
+        </tbody>
       </table>
+
     </div>
     <div>
       <wm-liaison-astronomer [proposal]="proposal"></wm-liaison-astronomer>

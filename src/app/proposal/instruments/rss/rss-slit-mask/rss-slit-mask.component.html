@@ -1,25 +1,26 @@
-<div *ngIf="slitMask">
-  <table
-    class="table"
-    [ngClass]="{ 'has-red-background': !slitMask.isInMagazine }"
-  >
+<table
+  *ngIf="slitMask"
+  class="table is-bordered is-fullwidth"
+  [ngClass]="{ 'has-red-background': !slitMask.isInMagazine }"
+>
+  <thead>
+    <tr class="headers">
+      <th colspan="3" class="has-text-centered">Slit mask</th>
+    </tr>
     <tr class="secondary-header">
-      <th colspan="2" class="has-text-centered">Slit mask</th>
-    </tr>
-    <tr>
       <th>Type</th>
-      <td>{{ slitMask.maskType }}</td>
-    </tr>
-    <tr>
       <th>Description</th>
-      <td>{{ slitMask.description }}</td>
-    </tr>
-    <tr>
       <th>Barcode</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ slitMask.maskType }}</td>
+      <td>{{ slitMask.description }}</td>
       <td>{{ slitMask.barcode }}</td>
     </tr>
     <tr *ngIf="!slitMask.isInMagazine">
-      <td>This Mask is currently unavailable!</td>
+      <td colspan="3">This Mask is currently unavailable!</td>
     </tr>
-  </table>
-</div>
+  </tbody>
+</table>

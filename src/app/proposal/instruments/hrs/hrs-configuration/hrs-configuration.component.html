@@ -1,20 +1,19 @@
 <div>
-  <table class="table">
+  <table class="table is-bordered is-fullwidth">
     <thead>
-      <tr class="secondary-header">
-        <th colspan="5" class="has-text-centered">Configuration</th>
+      <tr class="headers">
+        <th colspan="4" class="has-text-centered">Configuration</th>
       </tr>
-      <tr>
-        <th>Mode</th>
+      <tr class="secondary-header">
+        <th colspan="2">Mode</th>
         <th>Exposure Type</th>
         <th>Iodine Cell</th>
-        <th>Target Location</th>
-        <th>Fibre Separation</th>
+
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="{{ resolution }}">{{ hrsConfig.mode }}</td>
+        <td colspan="2" class="{{ resolution }}">{{ hrsConfig.mode }}</td>
         <td>{{ hrsConfig.exposureType }}</td>
         <td
           [ngClass]="{
@@ -23,6 +22,21 @@
         >
           {{ hrsConfig.iodineCellPosition }}
         </td>
+
+      </tr>
+    </tbody>
+    <thead>
+      <tr class="secondary-header">
+        <th>Nod Interval</th>
+        <th>Nod Count</th>
+        <th>Target Location</th>
+        <th>Fibre Separation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td></td>
         <td>{{ hrsConfig.targetLocation }}</td>
         <td>{{ hrsConfig.fiberSeparation }} arcsec</td>
       </tr>

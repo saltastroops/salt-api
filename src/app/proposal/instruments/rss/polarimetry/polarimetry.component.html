@@ -1,29 +1,38 @@
-<div>
-  <table class="table is-bordered">
-    <tr class="secondary-header">
+<table class="table is-bordered is-fullwidth">
+  <thead>
+    <tr class="headers">
       <th colspan="3" class="has-text-centered">Polarimetry</th>
     </tr>
-    <tr>
-      <th colspan="2">Beam Splitter Orientation</th>
-      <td>{{ beamSplitterOrientation }}</td>
+    <tr class="secondary-header">
+      <th>Mode</th>
+      <th>Beam Splitter OrientationP</th>
+      <th>Pattern Name</th>
     </tr>
+  </thead>
+  <tbody>
     <tr>
-      <th colspan="2">Pattern Name</th>
+      <td>{{configuration.configuration.mode}}</td>
+      <td>{{ beamSplitterOrientation }}</td>
       <td>{{ pattern.name }}</td>
     </tr>
+  </tbody>
+  <thead>
     <tr class="secondary-header">
       <th>#</th>
       <th>Half-Wave Pattern</th>
       <th>Quarter-Wave Pattern</th>
     </tr>
-    <tr *ngFor="let p of pattern.wavePlateAngles; let i = index">
-      <td>{{ i }}</td>
-      <td>
-        <p class="is-pulled-right">{{ p.halfWave }}</p>
-      </td>
-      <td>
-        <p class="is-pulled-right">{{ p.quarterWave }}</p>
-      </td>
-    </tr>
-  </table>
-</div>
+  </thead>
+  <tbody>
+  <tr *ngFor="let p of pattern.wavePlateAngles; let i = index">
+    <td>{{ i }}</td>
+    <td>
+      <p class="is-pulled-right">{{ p.halfWave }}</p>
+    </td>
+    <td>
+      <p class="is-pulled-right">{{ p.quarterWave }}</p>
+    </td>
+  </tr>
+  </tbody>
+</table>
+

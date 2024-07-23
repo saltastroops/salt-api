@@ -1,33 +1,29 @@
 <div>
-  <table class="table">
-    <tr class="has-text-centered" [ngClass]="detectorColor.toLocaleLowerCase()">
-      <th colspan="2">{{ detectorColor }} Detector</th>
-    </tr>
-    <tr>
-      <th>Iteration</th>
-      <td>{{ hrsDetector.iterations }}</td>
-    </tr>
-    <tr>
-      <th>RoSpeed</th>
-      <td>{{ hrsDetector.readoutSpeed }}</td>
-    </tr>
-    <tr>
-      <th>Amplifiers</th>
-      <td>{{ hrsDetector.readoutAmplifiers }}</td>
-    </tr>
-    <tr>
-      <th>PreBinColumns</th>
-      <td>{{ hrsDetector.preBinnedColumns }}</td>
-    </tr>
-    <tr>
-      <th>PreBinRows</th>
-      <td>{{ hrsDetector.preBinnedRows }}</td>
-    </tr>
-    <tr>
-      <th>Exposure times</th>
-      <td class="exposure-times" *ngFor="let h of exposureTimes">
-        <p>{{ h }} sec</p>
-      </td>
-    </tr>
+  <table class="table is-bordered is-fullwidth">
+    <thead>
+     <tr class="headers has-text-centered" [ngClass]="detectorColor.toLocaleLowerCase()">
+       <th colspan="6">{{ detectorColor }} Detector</th>
+     </tr>
+      <tr class="secondary-header">
+        <th>Iteration</th>
+        <th>RoSpeed</th>
+        <th>Amplifiers</th>
+        <th>PreBinColumns</th>
+        <th>PreBinRows</th>
+        <th>Exposure times</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ hrsDetector.iterations }}</td>
+        <td>{{ hrsDetector.readoutSpeed }}</td>
+        <td>{{ hrsDetector.readoutAmplifiers }}</td>
+        <td>{{ hrsDetector.preBinnedColumns }}</td>
+        <td>{{ hrsDetector.preBinnedRows }}</td>
+        <td class="exposure-times" *ngFor="let h of exposureTimes">
+          <p>{{ h }} sec</p>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </div>

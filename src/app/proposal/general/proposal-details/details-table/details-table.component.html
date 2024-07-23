@@ -1,16 +1,16 @@
 
 <table class="table is-bordered is-fullwidth">
     <thead>
-      <tr class="secondary-header">
+      <tr class="headers">
         <th colspan="5" class="has-text-centered">Details</th>
       </tr>
-    <tr class="headers">
-      <th>Status</th>
-      <th>Type</th>
-      <th>Target of Opportunity</th>
-      <th>Total time</th>
-      <th>Proprietary period</th>
-    </tr>
+      <tr class="secondary-header">
+        <th>Status</th>
+        <th>Type</th>
+        <th>Target of Opportunity</th>
+        <th>Total time</th>
+        <th>Proprietary period</th>
+      </tr>
     </thead>
     <tbody>
       <tr>
@@ -18,7 +18,7 @@
           <wm-proposal-status [proposal]="proposal"></wm-proposal-status>
         </td>
         <td>{{ proposal.generalInfo.proposalType }}</td>
-        <td *ngIf="proposal.generalInfo.isTargetOfOpportunity">
+        <td class="has-text-centered" *ngIf="proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -27,7 +27,7 @@
             />
           </div>
         </td>
-        <td *ngIf="!proposal.generalInfo.isTargetOfOpportunity">
+        <td class="has-text-centered" *ngIf="!proposal.generalInfo.isTargetOfOpportunity">
           <div>
             <img
               class="icon is-small"
@@ -62,7 +62,7 @@
       </tr>
     </tbody>
     <thead *ngIf="proposal.generalInfo.status.comment">
-      <tr class="headers">
+      <tr class="secondary-header">
         <th colspan="5">
           Status Comment
         </th>

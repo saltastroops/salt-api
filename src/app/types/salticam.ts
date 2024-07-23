@@ -43,6 +43,7 @@ export type SalticamExposureType = "Bias" | "Flat Field" | "Science";
 export interface SalticamFilter {
   name: string;
   description: string;
+  isInstalled: boolean;
 }
 
 export type SalticamGain = "Bright" | "Faint";

@@ -1,11 +1,26 @@
 <div>
-  <table class="table">
-    <tr class="secondary-header">
-      <th colspan="2" class="has-text-centered">General</th>
-    </tr>
-    <tr>
-      <th>Cycles</th>
-      <td>{{ hrsProcedure.cycles }}</td>
-    </tr>
+  <table class="table is-bordered is-fullwidth">
+    <thead>
+      <tr class="headers">
+        <th colspan="2">General</th>
+        <th colspan="3">Observation times</th>
+      </tr>
+      <tr class="secondary-header">
+        <th>MinSN</th>
+        <th>Cycles</th>
+        <th>Shutter open time</th>
+        <th>Overhead</th>
+        <th>Charged</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td>{{ hrs.procedure.cycles }}</td>
+        <td>{{ hrs.observationTime - hrs.overheadTime }} sec</td>
+        <td>{{ hrs.overheadTime }} sec</td>
+        <td>{{ hrs.observationTime }} sec</td>
+      </tr>
+    </tbody>
   </table>
 </div>

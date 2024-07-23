@@ -1,27 +1,31 @@
 
 <table class="table is-bordered">
-  <tr class="secondary-header">
-    <th class="has-text-centered" colspan="2">Responsible SALT Astronomer:</th>
-  </tr>
-  <tr>
-    <td>
-      <div *ngIf="proposal.generalInfo.liaisonSaltAstronomer">
-        <a href="mailto:salthelp@salt.ac.za">
-          {{ proposal.generalInfo.liaisonSaltAstronomer.givenName }}
-          {{ proposal.generalInfo.liaisonSaltAstronomer.familyName }}
-        </a>
-      </div>
-      <div *ngIf="!proposal.generalInfo.liaisonSaltAstronomer">None</div>
+  <thead>
+    <tr class="headers">
+      <th class="has-text-centered" colspan="2">Responsible SALT Astronomer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div *ngIf="proposal.generalInfo.liaisonSaltAstronomer">
+          <a href="mailto:salthelp@salt.ac.za">
+            {{ proposal.generalInfo.liaisonSaltAstronomer.givenName }}
+            {{ proposal.generalInfo.liaisonSaltAstronomer.familyName }}
+          </a>
+        </div>
+        <div *ngIf="!proposal.generalInfo.liaisonSaltAstronomer">None</div>
 
-      <button
-        *ngIf="isAdminOrSa"
-        class="button is-pulled-right"
-        (click)="liaisonAstronomerModal.openModal()"
-      >
-        Change
-      </button>
-    </td>
-  </tr>
+        <button
+          *ngIf="isAdminOrSa"
+          class="button is-pulled-right"
+          (click)="liaisonAstronomerModal.openModal()"
+        >
+          Change
+        </button>
+      </td>
+    </tr>
+  </tbody>
 </table>
 <wm-liaison-astronomer-modal
   [proposal]="proposal"

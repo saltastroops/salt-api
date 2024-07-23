@@ -2,7 +2,7 @@
   RSS {{ payloadConfiguration.payloadConfigurationType }} Configuration
 </h2>
 <hr class="heading-line rss-header-config-color" />
-<div class="inline-view">
+<div class="has-two-columns">
   <wm-rss-general-info [rss]="rss"></wm-rss-general-info>
   <wm-rss-detector [detector]="rss.detector"></wm-rss-detector>
   <wm-rss-spectroscopy
@@ -41,6 +41,7 @@
     [beamSplitterOrientation]="
       rss.configuration.polarimetry.beamSplitterOrientation
     "
+    [configuration]="rss"
   ></wm-polarimetry>
   <wm-etalon-wavelengths
     *ngIf="rss.procedure.etalonWavelengths"

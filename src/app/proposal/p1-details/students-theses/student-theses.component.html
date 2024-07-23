@@ -1,26 +1,38 @@
 <table
-  class="table"
-  *ngIf="isThesisProposal || generalInfo.isTargetOfOpportunity"
+  class="table is-bordered is-fullwidth"
+  *ngIf="generalInfo.isTargetOfOpportunity"
 >
-  <tr class="comment-section" *ngIf="generalInfo.isTargetOfOpportunity">
-    <th colspan="4">Reason for ToO flag</th>
-  </tr>
-  <tr *ngIf="generalInfo.isTargetOfOpportunity">
-    <td colspan="4">{{ generalInfo.targetOfOpportunityReason }}</td>
-  </tr>
-  <tr class="comment-section" *ngIf="generalInfo.isTargetOfOpportunity">
-    <th colspan="4">
-      This proposal will be used for {{ thesisStudents.length }} post-graduate
-      theses.
-    </th>
-  </tr>
-  <tr class="secondary-header" *ngIf="isThesisProposal">
-    <th>Student's Name</th>
-    <th>Thesis Type</th>
-    <th>Year of completion</th>
-    <th>Importance and contribution to the thesis</th>
-  </tr>
-  <tbody *ngIf="isThesisProposal">
+  <thead>
+    <tr class="headers">
+      <th>Target of Opportunity Proposal</th>
+    </tr>
+    <tr class="secondary-header">Reason for ToO flag</tr>
+  </thead>
+  <tbody>
+    <tr class="comment-section" >
+      <td colspan="4">{{ generalInfo.targetOfOpportunityReason }}</td>
+    </tr>
+  </tbody>
+</table>
+<table class="table is-bordered is-fullwidth" *ngIf="isThesisProposal">
+  <thead>
+    <tr class="headers has-text-centered">
+      <th colspan="4">Thesis Proposal</th>
+    </tr>
+    <tr class="comment-section">
+      <th colspan="4">
+        This proposal will be used for {{ thesisStudents.length }} post-graduate
+        theses.
+      </th>
+    </tr>
+    <tr class="secondary-header">
+      <th>Student's Name</th>
+      <th>Thesis Type</th>
+      <th>Year of completion</th>
+      <th>Importance and contribution to the thesis</th>
+    </tr>
+  </thead>
+  <tbody>
     <tr *ngFor="let s of thesisStudents">
       <td>{{ s.givenName + " " + s.familyName }}</td>
       <td>{{ s.thesis?.thesisType }}</td>

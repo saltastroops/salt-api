@@ -21,7 +21,7 @@
 <div class="field" *ngIf="showObservationsList">
   <table class="table is-bordered" [wmSort]="sort">
     <thead>
-      <tr>
+      <tr class="secondary-header">
         <th
           wmSortBy="blockName"
           data-test="executed-observations-block-name-header"
@@ -32,7 +32,7 @@
           wmSortBy="observationTime"
           data-test="executed-observations-observation-time-header"
         >
-          Observation Time (seconds)
+          Observation Time
         </th>
         <th
           class="priority-width"
@@ -136,7 +136,7 @@
             data-test="executed-observations-observation-time"
             class="has-text-right"
           >
-            {{ e.observationTime }}
+            {{ e.observationTime }} sec
           </td>
           <td data-test="executed-observations-priority">
             {{ e.priority }}

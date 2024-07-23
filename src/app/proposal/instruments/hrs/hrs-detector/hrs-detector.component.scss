@@ -1,14 +1,9 @@
 @import "../../../../../styles.scss";
 
-.detector {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  align-items: center;
+.detector-section {
+  display: block;
 }
 
-.detector-row div {
-  line-height: 4px;
-}
 
 .exposure-times {
   display: flex;
@@ -25,7 +20,6 @@
   color: white;
   text-align: left;
   font-weight: bolder;
-  font-size: 0.85rem;
   height: 100%;
 }
 
@@ -34,7 +28,6 @@
   color: white;
   text-align: left;
   font-weight: bolder;
-  font-size: 0.85rem;
   height: 100%;
 }
 

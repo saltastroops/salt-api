@@ -1,9 +1,3 @@
-<div *ngIf="loading">
-  <wm-loading-indicator
-    *ngIf="loading"
-    message="Loading Block..."
-  ></wm-loading-indicator>
-</div>
 <div *ngIf="!loading">
   <div *ngIf="!error">
     <h2 class="title is-1">
@@ -21,4 +15,10 @@
   <div *ngIf="error">
     <wm-error-indicator *ngIf="error" [message]="error"></wm-error-indicator>
   </div>
+</div>
+<div *ngIf="loading">
+  <wm-loading-indicator
+    *ngIf="loading"
+    message="Loading Block..."
+  ></wm-loading-indicator>
 </div>

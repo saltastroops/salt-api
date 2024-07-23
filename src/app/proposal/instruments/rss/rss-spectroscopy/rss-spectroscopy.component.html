@@ -1,23 +1,23 @@
-<div *ngIf="spectroscopy">
-  <table class="table">
+<table *ngIf="spectroscopy" class="table is-bordered is-fullwidth">
+  <thead>
+    <tr class="headers">
+      <th colspan="5" class="has-text-centered">Spectroscopy</th>
+    </tr>
     <tr class="secondary-header">
-      <th colspan="4" class="has-text-centered">Spectroscopy</th>
-    </tr>
-    <tr>
       <th>Filter</th>
-      <td colspan="3">{{ filter }}</td>
-    </tr>
-    <tr class="double-boarder">
       <th>Grating</th>
-      <td>{{ spectroscopy.grating }}</td>
       <th>Grating angle</th>
-      <td>{{ spectroscopy.gratingAngle | number: "1.2-2" }}&#176;</td>
-    </tr>
-    <tr class="double-boarder">
       <th>Camera station</th>
-      <td>{{ spectroscopy.cameraStation }}</td>
       <th>Camera angle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ filter }}</td>
+      <td>{{ spectroscopy.grating }}</td>
+      <td>{{ spectroscopy.gratingAngle | number: "1.2-2" }}&#176;</td>
+      <td>{{ spectroscopy.cameraStation }}</td>
       <td>{{ spectroscopy.cameraAngle | number: "1.2-2" }}&#176;</td>
     </tr>
-  </table>
-</div>
+  </tbody>
+</table>

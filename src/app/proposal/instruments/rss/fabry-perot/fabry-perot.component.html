@@ -1,15 +1,19 @@
-<div>
-  <table class="table">
-    <tr class="secondary-header">
+
+<table class="table is-bordered is-fullwidth">
+  <thead>
+    <tr class="headers">
       <th colspan="2" class="has-text-centered">Fabry Perot</th>
     </tr>
-    <tr>
+    <tr class="secondary-header">
       <th>Filter</th>
-      <td>{{ filter }}</td>
-    </tr>
-    <tr>
       <th>Mode</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ filter }}</td>
       <td>{{ mode }}</td>
     </tr>
-  </table>
-</div>
+  </tbody>
+</table>
+

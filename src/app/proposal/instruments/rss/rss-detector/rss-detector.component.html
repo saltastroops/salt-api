@@ -1,50 +1,48 @@
-<div>
-  <table class="table">
-    <thead>
-      <tr class="secondary-header">
-        <th colspan="5" class="has-text-centered">Detector</th>
-      </tr>
-      <tr>
-        <th>Iterations</th>
-        <th>RoSpeed</th>
-        <th>Gain</th>
-        <th>Mode</th>
-        <th>Binning (spatial × spectral)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ detector.iterations }}</td>
-        <td>{{ detector.readoutSpeed }}</td>
-        <td>{{ detector.gain }}</td>
-        <td>{{ detector.mode }}</td>
-        <td>{{ detector.preBinnedRows }} × {{ detector.preBinnedColumns }}</td>
-      </tr>
-    </tbody>
-    <thead>
-      <tr>
-        <th colspan="2">Exp. Type</th>
-        <th colspan="2">Exp. Time (seconds)</th>
-        <th>Window Height</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td colspan="2">{{ detector.exposureType }}</td>
-        <td colspan="2">{{ detector.exposureTime | number: "1.2-2" }}</td>
-        <td>
-          <span *ngIf="detector.detectorWindow">{{
-            detector.detectorWindow.height
-          }}</span>
-          <span
-            *ngIf="
-              detector.detectorWindow === null ||
-              detector.detectorWindow.height !== null
-            "
-            >No Window</span
-          >
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<table class="table is-bordered is-fullwidth">
+  <thead>
+    <tr class="headers">
+      <th colspan="5" class="has-text-centered">Detector</th>
+    </tr>
+    <tr class="secondary-header">
+      <th>Iterations</th>
+      <th>RoSpeed</th>
+      <th>Gain</th>
+      <th>Mode</th>
+      <th>Binning (spatial × spectral)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ detector.iterations }}</td>
+      <td>{{ detector.readoutSpeed }}</td>
+      <td>{{ detector.gain }}</td>
+      <td>{{ detector.mode }}</td>
+      <td>{{ detector.preBinnedRows }} × {{ detector.preBinnedColumns }}</td>
+    </tr>
+  </tbody>
+  <thead>
+    <tr class="secondary-header">
+      <th colspan="2">Exp. Type</th>
+      <th colspan="2">Exp. Time (seconds)</th>
+      <th>Window Height</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="2">{{ detector.exposureType }}</td>
+      <td colspan="2">{{ detector.exposureTime | number: "1.2-2" }}</td>
+      <td>
+        <span *ngIf="detector.detectorWindow">{{
+          detector.detectorWindow.height
+        }}</span>
+        <span
+          *ngIf="
+            detector.detectorWindow === null ||
+            detector.detectorWindow.height !== null
+          "
+          >No Window</span
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,106 +1,109 @@
+<table class="table is-bordered is-fullwidth">
+  <thead>
+    <tr class="headers">
+      <th colspan="5" class="has-text-centered">Details</th>
+    </tr>
+    <tr class="secondary-header">
+      <th>Status</th>
+      <th>Target of Opportunity</th>
+      <th>Time Restricted</th>
+      <th>Priority 4</th>
+      <th>Total time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div>
+          {{ proposal.generalInfo.status.value }}
+        </div>
+        <button
+          class="button is-pulled-right"
+          *ngIf="isAdminOrSa"
+          (click)="
+            proposalStatusModal.openProposalStatusCommentModal(
+              proposal.generalInfo.status.value,
+              proposal.generalInfo.status.comment
+            )
+          "
+        >
+          Change
+        </button>
+      </td>
+      <td class="has-text-centered" *ngIf="proposal.generalInfo.isTargetOfOpportunity">
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="Is target of opportunity"
+          />
+        </div>
+      </td>
+      <td class="has-text-centered" *ngIf="!proposal.generalInfo.isTargetOfOpportunity">
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_Cross_2120375.svg"
+            alt="Is not target of opportunity"
+          />
+        </div>
+      </td>
+      <td class="has-text-centered" *ngIf="proposal.generalInfo.isTimeRestricted">
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="Is target of opportunity"
+          />
+        </div>
+      </td>
+      <td class="has-text-centered" *ngIf="!proposal.generalInfo.isTimeRestricted">
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_Cross_2120375.svg"
+            alt="Is not target of opportunity"
+          />
+        </div>
+      </td>
+      <td class="has-text-centered" *ngIf="proposal.generalInfo.isP4">
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_tick_2836262-green.svg"
+            alt="Is target of opportunity"
+          />
+        </div>
+      </td>
+      <td class="has-text-centered" *ngIf="!proposal.generalInfo.isP4">
+        <div>
+          <img
+            class="icon is-small"
+            src="/assets/icons/noun_Cross_2120375.svg"
+            alt="Is not target of opportunity"
+          />
+        </div>
+      </td>
+      <td>{{ proposal.generalInfo.totalRequestedTime }} sec</td>
+    </tr>
+  </tbody>
+
+  <thead *ngIf="proposal.generalInfo.status.comment">
+    <tr class="secondary-header">
+      <th colspan="5">Status comment</th>
+    </tr>
+  </thead>
+  <tbody *ngIf="proposal.generalInfo.status.comment">
+    <tr>
+      <td colspan="5">{{ proposal.generalInfo.status.comment }}</td>
+    </tr>
+
+  </tbody>
+</table>
+
 <wm-p1-proposal-status-modal
   #proposalStatusModal
   [proposal]="proposal"
   (proposalStatusUpdate)="updateProposalStatus($event)"
 >
 </wm-p1-proposal-status-modal>
-<div>
-  <table class="table">
-    <tr class="secondary-header">
-      <th colspan="2" class="has-text-centered">Details</th>
-    </tr>
-    <tbody>
-      <tr>
-        <th>Status</th>
-        <td>
-          <div>
-            {{ proposal.generalInfo.status.value }}
-          </div>
-          <button
-            class="button is-pulled-right"
-            *ngIf="isAdminOrSa"
-            (click)="
-              proposalStatusModal.openProposalStatusCommentModal(
-                proposal.generalInfo.status.value,
-                proposal.generalInfo.status.comment
-              )
-            "
-          >
-            Change
-          </button>
-        </td>
-      </tr>
-      <tr *ngIf="proposal.generalInfo.status.comment">
-        <th>Status comment</th>
-        <td>{{ proposal.generalInfo.status.comment }}</td>
-      </tr>
-      <tr>
-        <th>Target of Opportunity</th>
-        <td *ngIf="proposal.generalInfo.isTargetOfOpportunity">
-          <div>
-            <img
-              class="icon is-small"
-              src="/assets/icons/noun_tick_2836262-green.svg"
-              alt="Is target of opportunity"
-            />
-          </div>
-        </td>
-        <td *ngIf="!proposal.generalInfo.isTargetOfOpportunity">
-          <div>
-            <img
-              class="icon is-small"
-              src="/assets/icons/noun_Cross_2120375.svg"
-              alt="Is not target of opportunity"
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <th>Time Restricted</th>
-        <td *ngIf="proposal.generalInfo.isTimeRestricted">
-          <div>
-            <img
-              class="icon is-small"
-              src="/assets/icons/noun_tick_2836262-green.svg"
-              alt="Is target of opportunity"
-            />
-          </div>
-        </td>
-        <td *ngIf="!proposal.generalInfo.isTimeRestricted">
-          <div>
-            <img
-              class="icon is-small"
-              src="/assets/icons/noun_Cross_2120375.svg"
-              alt="Is not target of opportunity"
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <th>Priority 4</th>
-        <td *ngIf="proposal.generalInfo.isP4">
-          <div>
-            <img
-              class="icon is-small"
-              src="/assets/icons/noun_tick_2836262-green.svg"
-              alt="Is target of opportunity"
-            />
-          </div>
-        </td>
-        <td *ngIf="!proposal.generalInfo.isP4">
-          <div>
-            <img
-              class="icon is-small"
-              src="/assets/icons/noun_Cross_2120375.svg"
-              alt="Is not target of opportunity"
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <th>Total time</th>
-        <td>{{ proposal.generalInfo.totalRequestedTime }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>

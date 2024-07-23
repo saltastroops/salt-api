@@ -1,22 +1,31 @@
 <table class="table is-bordered is-fullwidth">
-  <tr class="secondary-header">
-    <th class="has-text-centered">Summary For SALT Astronomer</th>
-  </tr>
-  <tr>
-    <td>
-      <div class="notification">
-        <p
-          [innerHTML]="generalProposalInfo.summaryForSaltAstronomer | nl2br"
-        ></p>
-      </div>
-    </td>
-  </tr>
-  <tr class="secondary-header">
-    <th class="has-text-centered">Summary For The Night Log</th>
-  </tr>
-  <tr>
-    <td>
-      <p>{{ generalProposalInfo.summaryForNightLog }}</p>
-    </td>
-  </tr>
+  <thead>
+    <tr class="secondary-header">
+      <th class="has-text-centered">Summary For SALT Astronomer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div class="notification">
+          <p
+            [innerHTML]="generalProposalInfo.summaryForSaltAstronomer | nl2br"
+          ></p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+
+  <thead>
+    <tr class="secondary-header">
+      <th class="has-text-centered">Summary For The Night Log</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <p>{{ generalProposalInfo.summaryForNightLog }}</p>
+      </td>
+    </tr>
+  </tbody>
 </table>

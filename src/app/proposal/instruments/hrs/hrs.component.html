@@ -3,11 +3,16 @@
 </h2>
 <hr class="heading-line hrs-header" />
 <div>
-  <div class="inline-view">
-    <wm-hrs-general-info [hrsProcedure]="hrs.procedure"></wm-hrs-general-info>
-    <wm-hrs-observing-times [hrs]="hrs"></wm-hrs-observing-times>
-    <wm-hrs-detector [hrs]="hrs" detectorColor="Blue"></wm-hrs-detector>
-    <wm-hrs-detector [hrs]="hrs" detectorColor="Red"></wm-hrs-detector>
+  <div class="has-two-columns">
+    <div>
+      <wm-hrs-general-info [hrs]="hrs"></wm-hrs-general-info>
+      <wm-hrs-configuration [hrsConfig]="hrs.configuration"></wm-hrs-configuration>
+    </div>
+    <div>
+      <div class="detector-section">
+        <wm-hrs-detector [hrs]="hrs" detectorColor="Blue"></wm-hrs-detector>
+        <wm-hrs-detector [hrs]="hrs" detectorColor="Red"></wm-hrs-detector>
+      </div>
+    </div>
   </div>
-  <wm-hrs-configuration [hrsConfig]="hrs.configuration"></wm-hrs-configuration>
 </div>

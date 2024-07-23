@@ -2,7 +2,7 @@
 
 <table class="table is-bordered">
   <thead>
-    <tr>
+    <tr class="secondary-header">
       <th>Semester</th>
       <th>Requested Time</th>
       <th>Allocated Time</th>
@@ -10,7 +10,6 @@
       <th>Completion</th>
     </tr>
   </thead>
-
   <tbody>
     <tr *ngFor="let s of submittedTimeRequests">
       <td>{{ s.semester }}</td>

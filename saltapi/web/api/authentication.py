@@ -73,12 +73,14 @@ def token(
 
 def _login_user(user: User, request: Request) -> Response:
     secondary_auth_token = str(uuid.uuid4())
+    cookie_data = {"secondary_auth_token": secondary_auth_token}
+    signed_cookie = AuthenticationService.jwt_token(cookie_data)
     request.session[USER_ID_KEY] = user.id
-    request.session[SECONDARY_AUTH_TOKEN_KEY] = secondary_auth_token
+    request.session[SECONDARY_AUTH_TOKEN_KEY] = signed_cookie
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
     response.set_cookie(
         key=SECONDARY_AUTH_TOKEN_KEY,
-        value=secondary_auth_token,
+        value=signed_cookie,
         httponly=False,
         max_age=3600 * get_settings().auth_token_lifetime_hours,
     )

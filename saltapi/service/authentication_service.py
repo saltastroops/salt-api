@@ -111,8 +111,16 @@ def _user_from_auth_header(authorization: str, verification: bool = False) -> Us
 
 def _user_from_session(request: Request) -> User:
     user_id = request.session.get(USER_ID_KEY)
-    secondary_auth_token = request.cookies.get(SECONDARY_AUTH_TOKEN_KEY)
-    secondary_auth_token_from_session = request.session.get(SECONDARY_AUTH_TOKEN_KEY)
+
+    singed_auth_token = request.cookies.get(SECONDARY_AUTH_TOKEN_KEY)
+    secondary_auth_token = jwt.decode(
+        singed_auth_token, SECRET_KEY, algorithms=[ALGORITHM]
+    )
+
+    signed_auth_token_from_session = request.session.get(SECONDARY_AUTH_TOKEN_KEY)
+    secondary_auth_token_from_session = jwt.decode(
+        signed_auth_token_from_session, SECRET_KEY, algorithms=[ALGORITHM]
+    )
     if (
         not user_id
         or not secondary_auth_token

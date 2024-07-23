@@ -100,8 +100,8 @@ class SalticamFilter(BaseModel):
     description: str = Field(
         ..., title="Description", description="Description of the filter"
     )
-    is_installed: bool = Field(
-        ..., title="Is installed", description="Indicated weather the filter is installed or not."
+    is_in_magazine: bool = Field(
+        ..., title="Is is in magazine", description="Indicated weather the filter is in magazine"
     )
 
 

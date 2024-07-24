@@ -34,6 +34,22 @@ def test_proposal_status_update_requires_proposal_status(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+def test_proposal_status_update_requires_valid_proposal(
+        client: TestClient,
+) -> None:
+    proposal_code = "2099-2-LSP-001"
+    username = find_username("administrator")
+    authenticate(username, client)
+
+    proposal_status_value = "Active"
+
+    response = client.put(
+        PROPOSALS_URL + "/" + proposal_code + "/status",
+        json={"value": proposal_status_value, "comment": None},
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_proposal_status_update_requires_valid_proposal_status_value(
     client: TestClient,
 ) -> None:
@@ -215,12 +231,36 @@ def test_proposal_status_update_with_non_allowed_phase1_statuses(
 @pytest.mark.parametrize(
     "proposal_status_value",
     [
+        "Accepted",
+        "Rejected",
+        "Under scientific review",
+    ],
+)
+def test_proposal_status_update_with_non_allowed_phase2_statuses(
+        proposal_status_value: str,
+        client: TestClient,
+) -> None:
+    proposal_code = "2023-1-MLT-006" # Phase 2 proposal
+    username = find_username("administrator")
+    authenticate(username, client)
+    status_comment = "This is a test comment."
+
+    response = client.put(
+        PROPOSALS_URL + "/" + proposal_code + "/status",
+        json={"value": proposal_status_value, "comment": status_comment},
+        )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.parametrize(
+    "proposal_status_value",
+    [
         "Deleted",
         "Rejected",
         "Under scientific review",
     ],
 )
-def test_proposal_status_update_for_phase1_with_a_comment(
+def test_proposal_status_update_for_with_a_comment(
     proposal_status_value: str,
     client: TestClient,
 ) -> None:

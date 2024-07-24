@@ -392,7 +392,10 @@ LIMIT 1
         """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        return cast(int, result.scalar_one())
+        try:
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError()
 
     def _first_submission_date(self, proposal_code: str) -> datetime:
         """

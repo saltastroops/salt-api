@@ -35,7 +35,7 @@ user = User(
     ],
     roles=[],
     user_verified=True,
-    active=True
+    active=True,
 )
 
 

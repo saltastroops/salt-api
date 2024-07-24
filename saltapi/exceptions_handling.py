@@ -115,7 +115,7 @@ def setup_exception_handler(app: FastAPI) -> None:
 
     @app.exception_handler(AuthenticationError)
     async def authentication_error_handler(
-            request: Request, exc: AuthenticationError
+        request: Request, exc: AuthenticationError
     ) -> Response:
         """Catch an AuthenticationError."""
 
@@ -125,27 +125,20 @@ def setup_exception_handler(app: FastAPI) -> None:
         )
 
     @app.exception_handler(JWTError)
-    async def authentication_error_handler(
-            request: Request, exc: JWTError
-    ) -> Response:
+    async def authentication_error_handler(request: Request, exc: JWTError) -> Response:
         """Catch an AuthenticationError."""
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED, content={
-                "message": "The authorisation token could not be parsed."
-            }
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"message": "The authorisation token could not be parsed."},
         )
 
     @app.exception_handler(SSDAError)
-    async def ssda_error_handler(
-            request: Request, exc: SSDAError
-    ) -> Response:
+    async def ssda_error_handler(request: Request, exc: SSDAError) -> Response:
         """Catch an SSDA Error."""
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={
-                "message": exc.message
-            }
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": exc.message},
         )
-

@@ -262,7 +262,7 @@ LIMIT :limit;
         if semester is None:
             semester = self._latest_submission_semester(proposal_code)
         if phase is None:
-            phase = self._latest_submission_phase(proposal_code)
+            phase = self.latest_submission_phase(proposal_code)
 
         general_info = self._general_info(proposal_code, semester)
 
@@ -379,7 +379,7 @@ LIMIT 1
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(str, result.scalar_one())
 
-    def _latest_submission_phase(self, proposal_code: str) -> int:
+    def latest_submission_phase(self, proposal_code: str) -> int:
         """Return the proposal phase of the latest submission."""
         stmt = text(
             """
@@ -392,7 +392,10 @@ LIMIT 1
         """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        return cast(int, result.scalar_one())
+        try:
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError()
 
     def _first_submission_date(self, proposal_code: str) -> datetime:
         """
@@ -1355,7 +1358,7 @@ WHERE PC.Proposal_Code = :proposal_code
         if proposal["phase"] == 2 and status in [
             ProposalStatusValue.ACCEPTED,
             ProposalStatusValue.REJECTED,
-            ProposalStatusValue.UNDER_SCIENTIFIC_REVIEW
+            ProposalStatusValue.UNDER_SCIENTIFIC_REVIEW,
         ]:
             raise ValidationError(f"Wrong status for a phase 2 proposal: {status}.")
         if proposal["phase"] == 1 and status in [
@@ -1363,7 +1366,7 @@ WHERE PC.Proposal_Code = :proposal_code
             ProposalStatusValue.COMPLETED,
             ProposalStatusValue.UNDER_TECHNICAL_REVIEW,
             ProposalStatusValue.EXPIRED,
-            ProposalStatusValue.INACTIVE
+            ProposalStatusValue.INACTIVE,
         ]:
             raise ValidationError(f"Wrong status for a phase 1 proposal: {status}.")
 

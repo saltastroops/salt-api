@@ -47,7 +47,9 @@ def send_password_reset_email(
         username_email = password_reset_request.username_email
         user_service = services.user_service(unit_of_work.connection)
 
-        user = user_service.get_user_by_username(username_email) or user_service.get_user_by_email(username_email)
+        user = user_service.get_user_by_username(
+            username_email
+        ) or user_service.get_user_by_email(username_email)
 
         if not user:
             raise NotFoundError("User not found.")
@@ -91,9 +93,7 @@ def create_user(
         # address.
         # Validate email
         user_service.send_registration_confirmation_email(
-            pipt_user_id,
-            f"{user.family_name} {user.given_name}",
-            user.email
+            pipt_user_id, f"{user.family_name} {user.given_name}", user.email
         )
         unit_of_work.commit()
 
@@ -115,13 +115,14 @@ def get_users(
 
 
 @router.post(
-    "/send-verification-link", summary="Send a verification link.", response_model=Message
+    "/send-verification-link",
+    summary="Send a verification link.",
+    response_model=Message,
 )
 def send_verification_link(
-        username_email: UsernameEmail = Body(
-            ..., title="Username or Email", description="Username or Email."
-        ),
-
+    username_email: UsernameEmail = Body(
+        ..., title="Username or Email", description="Username or Email."
+    ),
 ) -> Message:
     """
     Send verification link.
@@ -130,17 +131,14 @@ def send_verification_link(
 
         user_service = services.user_service(unit_of_work.connection)
 
-        user = (
-                user_service.get_user_by_username(username_email.username_email)
-                or user_service.get_user_by_email(username_email.username_email)
-        )
+        user = user_service.get_user_by_username(
+            username_email.username_email
+        ) or user_service.get_user_by_email(username_email.username_email)
         if not user:
             raise NotFoundError()
 
         user_service.send_registration_confirmation_email(
-            user.id,
-            f"{user.family_name} {user.given_name}",
-            user.email
+            user.id, f"{user.family_name} {user.given_name}", user.email
         )
 
         return Message(message="Email with an activation link has been sent.")
@@ -316,15 +314,19 @@ def update_password(
     password_update: PasswordUpdate = Body(
         ...,
         title="Password and authentication token",
-        description="Password to replace the old one, and an authentication token to verify the user."
+        description="Password to replace the old one, and an authentication token to verify the user.",
     ),
 ) -> _User:
     """
     Update user's password.
     """
     with UnitOfWork() as unit_of_work:
-        authentication_service = services.authentication_service(unit_of_work.connection)
-        user = authentication_service.validate_auth_token(password_update.authentication_key, verification=True)
+        authentication_service = services.authentication_service(
+            unit_of_work.connection
+        )
+        user = authentication_service.validate_auth_token(
+            password_update.authentication_key, verification=True
+        )
         if not user:
             raise NotFoundError("Unknown user.")
 
@@ -339,17 +341,14 @@ def update_password(
         return user
 
 
-@router.post(
-    "/{user_id}/verify-user", summary="Verify user", response_model=User
-)
+@router.post("/{user_id}/verify-user", summary="Verify user", response_model=User)
 def verify_user(
-        user_id: int = Path(
-            ...,
-            title="User id",
-            description="Id for user to verify",
-        ),
-        user: _User = Depends(get_user_to_verify),
-
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id for user to verify",
+    ),
+    user: _User = Depends(get_user_to_verify),
 ) -> _User:
     """
     Verify user
@@ -365,23 +364,21 @@ def verify_user(
         return user_service.get_user(user_id)
 
 
-@router.post("/{user_id}/update-roles", summary="Update user roles", response_model=User)
+@router.post(
+    "/{user_id}/update-roles", summary="Update user roles", response_model=User
+)
 def update_user_roles(
-        user_id: int = Path(
-            ...,
-            title="User id",
-            description="Id for user to update rights for."
-        ),
-        user: _User = Depends(get_current_user),
-        roles: List[Role] = Body(
-            ...,
-            title="User Roles",
-            description="User roles to update."
-        )
+    user_id: int = Path(
+        ..., title="User id", description="Id for user to update rights for."
+    ),
+    user: _User = Depends(get_current_user),
+    roles: List[Role] = Body(
+        ..., title="User Roles", description="User roles to update."
+    ),
 ) -> User:
     """
-   Update user's roles.
-   """
+    Update user's roles.
+    """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user_roles(user)

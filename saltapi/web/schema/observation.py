@@ -173,7 +173,7 @@ class TelescopeConfiguration(BaseModel):
     is_position_angle_fixed: bool = Field(
         ...,
         title="Is the position angle fixed?",
-        description="Is the position angle fixed and must not be flipped by 180 degrees?"
+        description="Is the position angle fixed and must not be flipped by 180 degrees?",
     )
     use_parallactic_angle: bool = Field(
         ...,

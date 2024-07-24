@@ -441,7 +441,7 @@ class ProposalService:
             ],
         }
         phase = self.repository.latest_submission_phase(proposal_code)
-        if status not in allowed_statuses.get(phase, []):
+        if status not in allowed_statuses[phase]:
             raise ValueError(f"Proposal status not allowed for phase {phase}")
         self.repository.update_proposal_status(proposal_code, status, status_comment)
 

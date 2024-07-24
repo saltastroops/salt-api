@@ -35,7 +35,7 @@ def test_proposal_status_update_requires_proposal_status(
 
 
 def test_proposal_status_update_requires_valid_proposal(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     proposal_code = "2099-2-LSP-001"
     username = find_username("administrator")
@@ -237,10 +237,10 @@ def test_proposal_status_update_with_non_allowed_phase1_statuses(
     ],
 )
 def test_proposal_status_update_with_non_allowed_phase2_statuses(
-        proposal_status_value: str,
-        client: TestClient,
+    proposal_status_value: str,
+    client: TestClient,
 ) -> None:
-    proposal_code = "2023-1-MLT-006" # Phase 2 proposal
+    proposal_code = "2023-1-MLT-006"  # Phase 2 proposal
     username = find_username("administrator")
     authenticate(username, client)
     status_comment = "This is a test comment."
@@ -248,7 +248,7 @@ def test_proposal_status_update_with_non_allowed_phase2_statuses(
     response = client.put(
         PROPOSALS_URL + "/" + proposal_code + "/status",
         json={"value": proposal_status_value, "comment": status_comment},
-        )
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 

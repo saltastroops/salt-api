@@ -13,7 +13,6 @@ export class ObservationProbabilitiesComponent implements  OnInit{
   probabilities!: ObservationProbabilities;
 
   ngOnInit(): void {
-    console.log(this.block);
     this.probabilities = this.block.observationProbabilities;
   }
 }

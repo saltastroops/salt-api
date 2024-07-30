@@ -11,10 +11,10 @@ export class StudentThesesComponent implements OnInit {
   @Input() investigators: Investigator[] = [];
   @Input() generalInfo!: GeneralProposalInfo;
   thesisStudents: Investigator[] = [];
-  isThesisProposal = false;
+  isUsedForThesis = false;
 
   ngOnInit(): void {
     this.thesisStudents = this.investigators.filter((i) => i.thesis);
-    this.isThesisProposal = this.investigators.some((i) => i.thesis);
+    this.isUsedForThesis = this.investigators.some((i) => i.thesis);
   }
 }

@@ -6,9 +6,9 @@
     <tr class="secondary-header">
       <th>Mode</th>
       <th>Cycles</th>
-      <th>Total Exp. time</th>
+      <th>Shutter Open Time</th>
       <th>Overhead</th>
-      <th>Charged</th>
+      <th>Total Observation Time</th>
     </tr>
   </thead>
   <tbody>
@@ -23,10 +23,10 @@
         {{ rss.observationTime - rss.overheadTime | number: "1.2-2" }} sec
       </td>
       <td class="has-text-right">
-        {{ rss.overheadTime | number: "1.2-2" }} seconds
+        {{ rss.overheadTime | number: "1.2-2" }} sec
       </td>
       <td class="has-text-right">
-        {{ rss.observationTime | number: "1.2-2" }} seconds
+        {{ rss.observationTime | number: "1.2-2" }} sec
       </td>
     </tr>
   </tbody>

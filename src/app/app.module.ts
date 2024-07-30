@@ -40,12 +40,10 @@ import { BlockViewComponent } from "./proposal/blocks/block-view/block-view.comp
 import { BlockComponent } from "./proposal/blocks/block/block.component";
 import { EditBlockStatusModalComponent } from "./proposal/blocks/block/edit-block-status-modal/edit-block-status-modal.component";
 import { FinderChartViewComponent } from "./proposal/blocks/block/finder-chart-view/finder-chart-view.component";
-import { IterationsComponent } from "./proposal/blocks/block/iterations/iterations.component";
 import { ObservationProbabilitiesComponent } from "./proposal/blocks/block/observation-probabilities/observation-probabilities.component";
 import { ObservingConditionsComponent } from "./proposal/blocks/block/observing-conditions/observing-conditions.component";
 import { ObservingWindowsComponent } from "./proposal/blocks/block/observing-windows/observing-windows.component";
 import { PayloadConfigurationComponent } from "./proposal/blocks/block/payload-configuration/payload-configuration.component";
-import { TotalObservationTimeComponent } from "./proposal/blocks/block/total-observation-time/total-observation-time.component";
 import { ChargedTimeComponent } from "./proposal/general/charged-time/charged-time.component";
 import { EditBlockVisitStatusModalComponent } from "./proposal/general/edit-block-visit-status-modal/edit-block-visit-status-modal.component";
 import { GeneralProposalInfoComponent } from "./proposal/general/general-proposal-info/general-proposal-info.component";
@@ -71,7 +69,6 @@ import { BvitComponent } from "./proposal/instruments/bvit/bvit.component";
 import { HrsConfigurationComponent } from "./proposal/instruments/hrs/hrs-configuration/hrs-configuration.component";
 import { HrsDetectorComponent } from "./proposal/instruments/hrs/hrs-detector/hrs-detector.component";
 import { HrsGeneralInfoComponent } from "./proposal/instruments/hrs/hrs-general-info/hrs-general-info.component";
-import { HrsObservingTimesComponent } from "./proposal/instruments/hrs/hrs-observing-times/hrs-observing-times.component";
 import { HrsComponent } from "./proposal/instruments/hrs/hrs.component";
 import { NirCalibrationComponent } from "./proposal/instruments/nir/nir-calibration/nir-calibration.component";
 import { NirConfigurationComponent } from "./proposal/instruments/nir/nir-configuration/nir-configuration.component";
@@ -162,15 +159,12 @@ import { SortDirective } from "./sort.directive";
     RssCalibrationComponent,
     RssComponent,
     ObservingConditionsComponent,
-    IterationsComponent,
     BlockComponent,
-    TotalObservationTimeComponent,
     ObservingWindowsComponent,
     ObservationProbabilitiesComponent,
     PayloadConfigurationComponent,
     HrsComponent,
     HrsGeneralInfoComponent,
-    HrsObservingTimesComponent,
     HrsConfigurationComponent,
     HrsDetectorComponent,
     TargetComponent,

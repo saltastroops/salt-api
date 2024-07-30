@@ -14,15 +14,16 @@
     </tr>
   </tbody>
 </table>
-<table class="table is-bordered is-fullwidth" *ngIf="isThesisProposal">
+<table class="table is-bordered is-fullwidth" *ngIf="isUsedForThesis">
   <thead>
     <tr class="headers has-text-centered">
-      <th colspan="4">Thesis Proposal</th>
+      <th *ngIf="thesisStudents.length === 1" colspan="4">Thesis Proposal</th>
+      <th *ngIf="thesisStudents.length > 1" colspan="4">Theses Proposal</th>
     </tr>
     <tr class="comment-section">
       <th colspan="4">
         This proposal will be used for {{ thesisStudents.length }} post-graduate
-        theses.
+        {{ thesisStudents.length === 1 ? 'theses' : 'thesis' }}.
       </th>
     </tr>
     <tr class="secondary-header">

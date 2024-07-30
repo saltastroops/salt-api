@@ -12,6 +12,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
 
 from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
@@ -38,6 +39,7 @@ class ProposalRepository:
 
     def __init__(self, connection: Connection):
         self.connection = connection
+        self.block_repository = BlockRepository(connection)
 
     def _list(
         self, username: str, from_semester: str, to_semester: str, limit: int
@@ -2683,3 +2685,157 @@ WHERE Investigator_Id = (SELECT *
 
         if not result.rowcount:
             raise NotFoundError()
+
+    def _get_pools_allocations(self, pool_id: int, summed_used_time: List[Dict[str, any]]):
+        stmt = text(
+            """
+SELECT
+    PAT.Priority        AS priority,
+    PAT.AssignedTime    AS assigned_time
+FROM PoolAssignedTime PAT
+WHERE PAT.Pool_Id = :pool_id
+            """
+        )
+
+        allocations = []
+        for row in self.connection.execute(stmt, {"pool_id": pool_id}):
+            used_time = 0
+            for t in summed_used_time:
+                if t["priority"] == row.priority:
+                    used_time = t["total_time"]
+            allocations.append({
+                "priority": row.priority,
+                "assigned_time": row.assigned_time,
+                "used_time": used_time
+            })
+        return allocations
+
+    def get_pools(self, proposal_code: str, semester: Optional[str]) -> List[Dict[str, any]]:
+
+        if semester is None:
+            semester = self._latest_submission_semester(proposal_code)
+
+        stmt = text(
+            """
+SELECT
+    P.Pool_Id           AS id,
+    P.Pool_Name         AS name,
+    PRS.X1              AS wait,
+    PR.Pool_Rule_short  AS description
+FROM Pool P
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S ON P.Semester_Id = S.Semester_Id
+    JOIN PoolRuleSet PRS ON P.Pool_Id = PRS.Pool_Id
+    JOIN PoolRule PR ON PRS.PoolRule_Id = PR.PoolRule_Id
+WHERE PC.Proposal_Code = :proposal_code AND CONCAT(S.Year, '-', S.Semester) = :semester
+            """
+        )
+        pools = []
+        for row in self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+            },
+        ):
+            pool_blocks = self._get_pool_blocks(row.id, semester, proposal_code)
+            total_times_per_priority = {}
+
+            # Iterate through the blocks and sum total times by priority
+            for block in pool_blocks:
+                priority = block["priority"]
+                total_time = block["total_observed_time"]
+                if priority in total_times_per_priority:
+                    total_times_per_priority[priority] += total_time
+                else:
+                    total_times_per_priority[priority] = total_time
+            summed_blocks = [{"priority": priority, "total_time": total_time} for priority, total_time in total_times_per_priority.items()]
+
+            pools.append(
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "wait": row.wait,
+                    "description": row.description,
+                    "allocations": self._get_pools_allocations(row.id, summed_blocks),
+                    "blocks": pool_blocks,
+                }
+            )
+        return pools
+
+    def _get_block_total_observed_time(self, block_id: int) -> int:
+        stmt = text(
+            """
+SELECT SUM(B.ObsTime) AS total_observed_time FROM BlockVisit BV 
+    JOIN Block B ON BV.Block_Id = B.Block_Id
+WHERE BV.Block_Id = :block_id            
+            """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "block_id": block_id,
+            },
+        )
+        total_obs_time = result.one_or_none()
+        if total_obs_time[0] is not None:
+            return cast(int, total_obs_time[0])
+        return 0
+
+    def _get_pool_block(self, block_id: int, block_observable_tonight: Dict[int, int]) -> Dict[str, any]:
+        stmt = text(
+            """
+SELECT
+    B.Block_Id          AS id,
+    B.Block_Name        AS name,
+    B.Priority          AS priority,
+    B.MaxLunarPhase     AS max_lunar_phase,
+    B.NVisits           AS n_visits,
+    B.NDone             AS n_done,
+    B.ObsTime           AS observation_time,
+    BS.BlockStatus      AS status
+FROM Block B
+    JOIN BlockStatus BS ON B.BlockStatus_Id = BS.BlockStatus_Id
+WHERE B.Block_Id = :block_id
+            """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "block_id": block_id,
+            },
+        )
+        block = result.one_or_none()
+
+        return {
+            "id": block.id,
+            "name": block.name,
+            "priority": block.priority,
+            "maximum_lunar_phase": block.max_lunar_phase,
+            "n_visits": block.n_visits,
+            "n_done": block.n_done,
+            "block_status": block.status,
+            "status": block.status,
+            "observation_time": block.observation_time,
+            "total_observed_time": self._get_block_total_observed_time(block_id),
+            "is_observable_tonight": block_observable_tonight.get(block_id, False)
+        }
+
+    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, any]]:
+
+        stmt = text(
+            """
+SELECT BP.Block_Id      AS block_id
+FROM BlockPool  BP
+WHERE BP.Pool_Id = :pool_id
+            """
+        )
+        block_observable_tonight = self._block_observable_nights(
+            proposal_code, semester, tonight()
+        )
+
+        blocks = []
+        for row in self.connection.execute(stmt, {"pool_id": pool_id}):
+            blocks.append(self._get_pool_block(row.block_id, block_observable_tonight))
+
+        return blocks

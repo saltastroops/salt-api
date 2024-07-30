@@ -26,6 +26,7 @@ from saltapi.web import services
 from saltapi.web.schema.common import Message, ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
+from saltapi.web.schema.pool import Pool
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
@@ -192,6 +193,31 @@ def get_proposal(
             return P1Proposal(**proposal)
         if proposal["phase"] == 2:
             return P2Proposal(**proposal)
+
+@router.get(
+    "/{proposal_code}/pools",
+    summary="Get a proposal",
+    response_model=List[Pool],
+)
+def get_pools(
+        proposal_code: ProposalCode = Path(
+            ...,
+            title="Proposal code",
+            description="Proposal code of the proposal whose progress report is requested.",
+        ),
+        semester: Optional[Semester] = Query(
+            None,
+            description="Semester of the returned proposal.",
+            title="Semester",
+        ),
+        user: User = Depends(get_current_user),
+) -> List[Pool]:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        pools = proposal_service.get_pools(proposal_code, semester)
+        return [Pool(**pool) for pool in pools]
 
 
 @router.get(

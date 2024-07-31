@@ -2384,7 +2384,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/nir/{row.id}.nsim",
-                    "description": row.description,
+                    "description": row.Pool_rule,
                 }
             )
         return simulations
@@ -2407,7 +2407,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/hrs/{row.id}.hsim",
-                    "description": row.description,
+                    "description": row.Pool_rule,
                 }
             )
         return simulations
@@ -2430,7 +2430,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/rss/{row.id}.rsim",
-                    "description": row.description,
+                    "description": row.Pool_rule,
                 }
             )
         return simulations
@@ -2453,7 +2453,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/salticam/{row.id}.ssim",
-                    "description": row.description,
+                    "description": row.Pool_rule,
                 }
             )
         return simulations
@@ -2721,7 +2721,7 @@ SELECT
     P.Pool_Id           AS id,
     P.Pool_Name         AS name,
     PRS.X1              AS wait,
-    PR.Pool_Rule_short  AS description
+    PR.Pool_Rule_short  AS pool_rule
 FROM Pool P
     JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON P.Semester_Id = S.Semester_Id
@@ -2756,7 +2756,7 @@ WHERE PC.Proposal_Code = :proposal_code AND CONCAT(S.Year, '-', S.Semester) = :s
                     "id": row.id,
                     "name": row.name,
                     "wait": row.wait,
-                    "description": row.description,
+                    "pool_rule": row.pool_rule,
                     "allocations": self._get_pools_allocations(row.id, summed_blocks),
                     "blocks": pool_blocks,
                 }
@@ -2782,7 +2782,7 @@ WHERE BV.Block_Id = :block_id
             return cast(int, total_obs_time[0])
         return 0
 
-    def _get_pool_block(self, block_id: int, block_observable_tonight: Dict[int, int]) -> Dict[str, any]:
+    def _get_pool_block(self, block_id: int, block_observable_tonight: Dict[int, int]) -> Dict[str, Any]:
         stmt = text(
             """
 SELECT
@@ -2821,7 +2821,7 @@ WHERE B.Block_Id = :block_id
             "is_observable_tonight": block_observable_tonight.get(block_id, False)
         }
 
-    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, any]]:
+    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, Any]]:
 
         stmt = text(
             """

@@ -64,8 +64,8 @@ class PoolAllocations(BaseModel):
     )
     assigned_time: float = Field(
         ...,
-        title="Preferred exposure time",
-        description="Preferred (corrected) exposure time, in seconds",
+        title="Assigned time to pool",
+        description="The time assigned to this pool",
     )
     used_time: float = Field(
         ...,
@@ -75,7 +75,7 @@ class PoolAllocations(BaseModel):
 
 
 class Pool(BaseModel):
-    """RSS arc bible entry."""
+    """Proposal's pool."""
 
     id: int = Field(
         ...,
@@ -87,16 +87,16 @@ class Pool(BaseModel):
         title="Pool name",
         description="The pool name"
     )
-    description: str = Field(
+    Pool_rule: str = Field(
         ...,
-        title="Pool description",
-        description="Describing that type of a pool it is."
+        title="Pool short rule",
+        description="The pool's short rule"
     )
 
     blocks: List[PoolBlock] = Field(
         ...,
-        title="Original exposure time",
-        description="Original exposure time, in seconds",
+        title="Pool's blocks",
+        description="The pool's blocks",
     )
     allocations: List[PoolAllocations] = Field(
         ...,

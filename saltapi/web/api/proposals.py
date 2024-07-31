@@ -196,18 +196,18 @@ def get_proposal(
 
 @router.get(
     "/{proposal_code}/pools",
-    summary="Get a proposal",
+    summary="Get the pools in a proposal",
     response_model=List[Pool],
 )
 def get_pools(
         proposal_code: ProposalCode = Path(
             ...,
             title="Proposal code",
-            description="Proposal code of the proposal whose progress report is requested.",
+            description="Proposal code of the proposal whose pools are requested.",
         ),
         semester: Optional[Semester] = Query(
             None,
-            description="Semester of the returned proposal.",
+            description="Semester of the returned pools.",
             title="Semester",
         ),
         user: User = Depends(get_current_user),

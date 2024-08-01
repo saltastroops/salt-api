@@ -87,7 +87,7 @@ class Pool(BaseModel):
         title="Pool name",
         description="The pool name"
     )
-    Pool_rule: str = Field(
+    pool_rule: str = Field(
         ...,
         title="Pool short rule",
         description="The pool's short rule"

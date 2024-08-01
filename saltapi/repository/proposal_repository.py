@@ -2384,7 +2384,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/nir/{row.id}.nsim",
-                    "description": row.Pool_rule,
+                    "description": row.description,
                 }
             )
         return simulations
@@ -2407,7 +2407,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/hrs/{row.id}.hsim",
-                    "description": row.Pool_rule,
+                    "description": row.description,
                 }
             )
         return simulations
@@ -2430,7 +2430,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/rss/{row.id}.rsim",
-                    "description": row.Pool_rule,
+                    "description": row.description,
                 }
             )
         return simulations
@@ -2453,7 +2453,7 @@ WHERE Proposal_Code = :proposal_code
                 {
                     "name": row.name,
                     "url": f"/instrument-simulations/salticam/{row.id}.ssim",
-                    "description": row.Pool_rule,
+                    "description": row.description,
                 }
             )
         return simulations

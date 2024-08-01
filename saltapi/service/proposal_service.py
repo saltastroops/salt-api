@@ -470,3 +470,6 @@ class ProposalService:
         self.repository.update_investigator_proposal_approval_status(
             approval_user_id, proposal_code, approved
         )
+
+    def get_pools(self, proposal_code: str, semester: Optional[Semester] = None) -> List[Dict[str, any]]:
+        return self.repository.get_pools(proposal_code, semester)

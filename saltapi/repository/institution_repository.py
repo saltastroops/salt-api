@@ -153,13 +153,14 @@ AND I2.Department = :department
         stmt = text(
             """
 INSERT INTO Institute (Partner_Id, InstituteName_Id, Department, Url, Address)
-VALUES ((SELECT P.Partner_Id FROM Partner P WHERE P.Partner_Name = 'Other'),
+VALUES ((SELECT P.Partner_Id FROM Partner P WHERE P.Partner_Name = :partner_name),
         :institution_name_id, :department, :url, :address)
         """
         )
         self.connection.execute(
             stmt,
             {
+                "partner_name": new_institution_details["partner_name"].value,
                 "institution_name_id": institution_name_id,
                 "department": new_institution_details["department"],
                 "url": new_institution_details["url"],

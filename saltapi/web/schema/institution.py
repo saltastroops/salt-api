@@ -32,6 +32,9 @@ class Institution(BaseModel):
 class NewInstitutionDetails(BaseModel):
     """New institution details."""
 
+    partner_name: Optional[PartnerName] = Field(
+        ..., title="Partner name", description="Name of the partner"
+    )
     institution_name: str = Field(
         ..., title="Institution name", description="Name of the institution"
     )

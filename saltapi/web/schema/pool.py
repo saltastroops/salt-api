@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -56,7 +56,7 @@ class PoolBlock(BaseModel):
     )
 
 
-class PoolAllocations(BaseModel):
+class PoolTimes(BaseModel):
     priority: int = Field(
         ...,
         title="Pool priority",
@@ -64,8 +64,8 @@ class PoolAllocations(BaseModel):
     )
     assigned_time: float = Field(
         ...,
-        title="Assigned time to pool",
-        description="The time assigned to this pool",
+        title="Assigned time ",
+        description="The time assigned to the pool",
     )
     used_time: float = Field(
         ...,
@@ -74,8 +74,21 @@ class PoolAllocations(BaseModel):
     )
 
 
+class PoolRule(BaseModel):
+    pool_rule: str = Field(
+        ...,
+        title="Pool short rule",
+        description="The pool's short rule",
+    )
+    pool_rule_parameter: Optional[int] = Field(
+        ...,
+        title="Argument applied to this rule",
+        description="The argument applied to this rule"
+    )
+
+
 class Pool(BaseModel):
-    """Proposal's pool."""
+    """Pool in a proposal."""
 
     id: int = Field(
         ...,
@@ -87,7 +100,7 @@ class Pool(BaseModel):
         title="Pool name",
         description="The pool name"
     )
-    pool_rule: str = Field(
+    pool_rules: List[PoolRule] = Field(
         ...,
         title="Pool short rule",
         description="The pool's short rule"
@@ -95,10 +108,10 @@ class Pool(BaseModel):
 
     blocks: List[PoolBlock] = Field(
         ...,
-        title="Pool's blocks",
-        description="The pool's blocks",
+        title="Pool blocks",
+        description="The blocks in the pool",
     )
-    allocations: List[PoolAllocations] = Field(
+    pool_times: List[PoolTimes] = Field(
         ...,
         title="Pool allocation",
         description="The pool's time allocations"

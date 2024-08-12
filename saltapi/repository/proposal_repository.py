@@ -2686,7 +2686,7 @@ WHERE Investigator_Id = (SELECT *
         if not result.rowcount:
             raise NotFoundError()
 
-    def _get_pools_allocations(self, pool_id: int, summed_used_time: List[Dict[str, any]]):
+    def _get_pools_times(self, pool_id: int, summed_used_time: List[Dict[str, int]]):
         stmt = text(
             """
 SELECT
@@ -2697,71 +2697,38 @@ WHERE PAT.Pool_Id = :pool_id
             """
         )
 
-        allocations = []
+        pool_times = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
             used_time = 0
             for t in summed_used_time:
                 if t["priority"] == row.priority:
                     used_time = t["total_time"]
-            allocations.append({
+            pool_times.append({
                 "priority": row.priority,
                 "assigned_time": row.assigned_time,
                 "used_time": used_time
             })
-        return allocations
+        return pool_times
 
-    def get_pools(self, proposal_code: str, semester: Optional[str]) -> List[Dict[str, any]]:
-
-        if semester is None:
-            semester = self._latest_submission_semester(proposal_code)
-
+    def _get_pool_rules(self, pool_id: int) -> List[Dict[str, int]]:
         stmt = text(
             """
 SELECT
-    P.Pool_Id           AS id,
-    P.Pool_Name         AS name,
-    PRS.X1              AS wait,
+    PRS.X1              AS pool_rule_parameter,
     PR.Pool_Rule_short  AS pool_rule
-FROM Pool P
-    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
-    JOIN Semester S ON P.Semester_Id = S.Semester_Id
-    JOIN PoolRuleSet PRS ON P.Pool_Id = PRS.Pool_Id
-    JOIN PoolRule PR ON PRS.PoolRule_Id = PR.PoolRule_Id
-WHERE PC.Proposal_Code = :proposal_code AND CONCAT(S.Year, '-', S.Semester) = :semester
+FROM PoolRuleSet    PRS
+    JOIN PoolRule   PR ON PRS.PoolRule_Id = PR.PoolRule_Id
+WHERE PRS.Pool_Id = :pool_id
             """
         )
-        pools = []
-        for row in self.connection.execute(
-            stmt,
-            {
-                "proposal_code": proposal_code,
-                "semester": semester,
-            },
-        ):
-            pool_blocks = self._get_pool_blocks(row.id, semester, proposal_code)
-            total_times_per_priority = {}
 
-            # Iterate through the blocks and sum total times by priority
-            for block in pool_blocks:
-                priority = block["priority"]
-                total_time = block["total_observed_time"]
-                if priority in total_times_per_priority:
-                    total_times_per_priority[priority] += total_time
-                else:
-                    total_times_per_priority[priority] = total_time
-            summed_blocks = [{"priority": priority, "total_time": total_time} for priority, total_time in total_times_per_priority.items()]
-
-            pools.append(
-                {
-                    "id": row.id,
-                    "name": row.name,
-                    "wait": row.wait,
-                    "pool_rule": row.pool_rule,
-                    "allocations": self._get_pools_allocations(row.id, summed_blocks),
-                    "blocks": pool_blocks,
-                }
-            )
-        return pools
+        pool_rules = []
+        for row in self.connection.execute(stmt, {"pool_id": pool_id}):
+            pool_rules.append({
+                "pool_rule": row.pool_rule,
+                "pool_rule_parameter": row.pool_rule_parameter,
+            })
+        return pool_rules
 
     def _get_block_total_observed_time(self, block_id: int) -> int:
         stmt = text(
@@ -2782,7 +2749,8 @@ WHERE BV.Block_Id = :block_id
             return cast(int, total_obs_time[0])
         return 0
 
-    def _get_pool_block(self, block_id: int, block_observable_tonight: Dict[int, int]) -> Dict[str, Any]:
+    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, Any]]:
+
         stmt = text(
             """
 SELECT
@@ -2793,41 +2761,13 @@ SELECT
     B.NVisits           AS n_visits,
     B.NDone             AS n_done,
     B.ObsTime           AS observation_time,
-    BS.BlockStatus      AS status
-FROM Block B
-    JOIN BlockStatus BS ON B.BlockStatus_Id = BS.BlockStatus_Id
-WHERE B.Block_Id = :block_id
-            """
-        )
-        result = self.connection.execute(
-            stmt,
-            {
-                "block_id": block_id,
-            },
-        )
-        block = result.one_or_none()
-
-        return {
-            "id": block.id,
-            "name": block.name,
-            "priority": block.priority,
-            "maximum_lunar_phase": block.max_lunar_phase,
-            "n_visits": block.n_visits,
-            "n_done": block.n_done,
-            "block_status": block.status,
-            "status": block.status,
-            "observation_time": block.observation_time,
-            "total_observed_time": self._get_block_total_observed_time(block_id),
-            "is_observable_tonight": block_observable_tonight.get(block_id, False)
-        }
-
-    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, Any]]:
-
-        stmt = text(
-            """
-SELECT BP.Block_Id      AS block_id
+    BS.BlockStatus      AS status,
+    BP.Block_Id         AS block_id
 FROM BlockPool  BP
-WHERE BP.Pool_Id = :pool_id
+    JOIN Block B ON BP.Block_Id = B.Block_Id
+    JOIN BlockStatus BS ON B.BlockStatus_Id = BS.BlockStatus_Id
+WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
+    AND BP.Pool_Id = :pool_id
             """
         )
         block_observable_tonight = self._block_observable_nights(
@@ -2835,7 +2775,68 @@ WHERE BP.Pool_Id = :pool_id
         )
 
         blocks = []
-        for row in self.connection.execute(stmt, {"pool_id": pool_id}):
-            blocks.append(self._get_pool_block(row.block_id, block_observable_tonight))
-
+        for block in self.connection.execute(stmt, {"pool_id": pool_id}):
+            blocks.append(
+                {
+                    "id": block.id,
+                    "name": block.name,
+                    "priority": block.priority,
+                    "maximum_lunar_phase": block.max_lunar_phase,
+                    "n_visits": block.n_visits,
+                    "n_done": block.n_done,
+                    "block_status": block.status,
+                    "status": block.status,
+                    "observation_time": block.observation_time,
+                    "total_observed_time": self._get_block_total_observed_time(block.id),
+                    "is_observable_tonight": block_observable_tonight.get(block.id, False)
+                }
+            )
         return blocks
+
+    def get_pools(self, proposal_code: str, semester: Optional[str]) -> List[Dict[str, any]]:
+
+        if semester is None:
+            semester = self._latest_submission_semester(proposal_code)
+
+        stmt = text(
+            """
+SELECT
+    PO.Pool_Id           AS id,
+    PO.Pool_Name         AS name
+FROM Proposal P
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Pool PO ON P.Proposal_Id = PO.Proposal_Id
+    JOIN Semester S ON P.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code
+    AND CONCAT(S.Year, '-', S.Semester) = :semester
+    AND P.Current = 1
+            """
+        )
+        pools = []
+        for row in self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+            },
+        ):
+            pool_blocks = self._get_pool_blocks(row.id, semester, proposal_code)
+            total_times_per_priority = defaultdict(int)
+
+            # Iterate through the blocks and sum total times by priority
+            for block in pool_blocks:
+                priority = block["priority"]
+                total_observed_time = block["total_observed_time"]
+                total_times_per_priority[priority] += total_observed_time
+            summed_blocks = [{"priority": priority, "total_time": total_time} for priority, total_time in dict(total_times_per_priority).items()]
+
+            pools.append(
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "pool_rules": self._get_pool_rules(row.id),
+                    "pool_times": self._get_pools_times(row.id, summed_blocks),
+                    "blocks": pool_blocks,
+                }
+            )
+        return pools

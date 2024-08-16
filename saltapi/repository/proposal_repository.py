@@ -2686,7 +2686,7 @@ WHERE Investigator_Id = (SELECT *
         if not result.rowcount:
             raise NotFoundError()
 
-    def _get_pools_times(self, pool_id: int, summed_used_time: List[Dict[str, int]]):
+    def _get_pool_times(self, pool_id: int, summed_used_time: List[Dict[str, int]]):
         stmt = text(
             """
 SELECT
@@ -2714,8 +2714,8 @@ WHERE PAT.Pool_Id = :pool_id
         stmt = text(
             """
 SELECT
-    PRS.X1              AS pool_rule_parameter,
-    PR.Pool_Rule_short  AS pool_rule
+    PRS.X1              AS rule_parameter,
+    PR.Pool_Rule_short  AS rule
 FROM PoolRuleSet    PRS
     JOIN PoolRule   PR ON PRS.PoolRule_Id = PR.PoolRule_Id
 WHERE PRS.Pool_Id = :pool_id
@@ -2725,8 +2725,8 @@ WHERE PRS.Pool_Id = :pool_id
         pool_rules = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
             pool_rules.append({
-                "pool_rule": row.pool_rule,
-                "pool_rule_parameter": row.pool_rule_parameter,
+                "rule": row.rule,
+                "rule_parameter": row.rule_parameter,
             })
         return pool_rules
 
@@ -2828,14 +2828,16 @@ WHERE PC.Proposal_Code = :proposal_code
                 priority = block["priority"]
                 total_observed_time = block["total_observed_time"]
                 total_times_per_priority[priority] += total_observed_time
-            summed_blocks = [{"priority": priority, "total_time": total_time} for priority, total_time in dict(total_times_per_priority).items()]
+            priority_times = [
+                {"priority": priority, "total_time": total_time}
+                for priority, total_time in dict(total_times_per_priority).items()]
 
             pools.append(
                 {
                     "id": row.id,
                     "name": row.name,
                     "pool_rules": self._get_pool_rules(row.id),
-                    "pool_times": self._get_pools_times(row.id, summed_blocks),
+                    "pool_times": self._get_pool_times(row.id, priority_times),
                     "blocks": pool_blocks,
                 }
             )

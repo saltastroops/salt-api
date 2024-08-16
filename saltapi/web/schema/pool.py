@@ -64,7 +64,7 @@ class PoolTimes(BaseModel):
     )
     assigned_time: float = Field(
         ...,
-        title="Assigned time ",
+        title="Assigned time",
         description="The time assigned to the pool",
     )
     used_time: float = Field(
@@ -75,15 +75,15 @@ class PoolTimes(BaseModel):
 
 
 class PoolRule(BaseModel):
-    pool_rule: str = Field(
+    rule: str = Field(
         ...,
-        title="Pool short rule",
-        description="The pool's short rule",
+        title="Pool rule",
+        description="The pool's rule",
     )
-    pool_rule_parameter: Optional[int] = Field(
+    rule_parameter: Optional[int] = Field(
         ...,
-        title="Argument applied to this rule",
-        description="The argument applied to this rule"
+        title="Parameter for the rule",
+        description="The parameter for the rule"
     )
 
 

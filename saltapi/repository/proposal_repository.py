@@ -2735,7 +2735,8 @@ WHERE PRS.Pool_Id = :pool_id
             """
 SELECT SUM(B.ObsTime) AS total_observed_time FROM BlockVisit BV 
     JOIN Block B ON BV.Block_Id = B.Block_Id
-WHERE BV.Block_Id = :block_id            
+    JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
+WHERE BV.Block_Id = :block_id AND BVS.BlockVisitStatus = 'Accepted'      
             """
         )
         result = self.connection.execute(
@@ -2801,15 +2802,13 @@ WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
         stmt = text(
             """
 SELECT
-    PO.Pool_Id           AS id,
-    PO.Pool_Name         AS name
-FROM Proposal P
+    P.Pool_Id           AS id,
+    P.Pool_Name         AS name
+FROM Pool P
     JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
-    JOIN Pool PO ON P.Proposal_Id = PO.Proposal_Id
     JOIN Semester S ON P.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
     AND CONCAT(S.Year, '-', S.Semester) = :semester
-    AND P.Current = 1
             """
         )
         pools = []
@@ -2830,8 +2829,9 @@ WHERE PC.Proposal_Code = :proposal_code
                 total_times_per_priority[priority] += total_observed_time
             priority_times = [
                 {"priority": priority, "total_time": total_time}
-                for priority, total_time in dict(total_times_per_priority).items()]
-
+                for priority, total_time in dict(total_times_per_priority).items()
+            ]
+            print(row.id)
             pools.append(
                 {
                     "id": row.id,

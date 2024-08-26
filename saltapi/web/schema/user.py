@@ -195,3 +195,15 @@ class UsernameEmail(BaseModel):
     username_email: str = Field(
         ..., title="Username or Email", description="Username or Email."
     )
+
+class UserContact(BaseModel):
+    given_name: str = Field(..., title="Given name", description="Given name.")
+    family_name: str = Field(..., title="Family name", description="Family name.")
+    email: str = Field(..., title="Email", description="Email.")
+    institution_id: int = Field(
+        ...,
+        title="Institution id",
+        description=(
+            "Unique identifier of the institution to which the user is affiliated."
+        ),
+    )

@@ -95,7 +95,7 @@ def create_user(
         user_service.send_registration_confirmation_email(
             pipt_user_id, f"{user.family_name} {user.given_name}", user.email
         )
-        # unit_of_work.commit()
+        unit_of_work.commit()
 
         return user_service.get_user_by_username(user.username)
 

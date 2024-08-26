@@ -2831,7 +2831,6 @@ WHERE PC.Proposal_Code = :proposal_code
                 {"priority": priority, "total_time": total_time}
                 for priority, total_time in dict(total_times_per_priority).items()
             ]
-            print(row.id)
             pools.append(
                 {
                     "id": row.id,

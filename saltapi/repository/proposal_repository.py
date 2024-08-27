@@ -2686,7 +2686,7 @@ WHERE Investigator_Id = (SELECT *
         if not result.rowcount:
             raise NotFoundError()
 
-    def _get_pool_times(self, pool_id: int, summed_used_time: List[Dict[str, int]]):
+    def _get_pool_times(self, pool_id: int, total_times_per_priority: Dict[str, int]):
         stmt = text(
             """
 SELECT
@@ -2699,10 +2699,7 @@ WHERE PAT.Pool_Id = :pool_id
 
         pool_times = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
-            used_time = 0
-            for t in summed_used_time:
-                if t["priority"] == row.priority:
-                    used_time = t["total_time"]
+            used_time = total_times_per_priority[row.priority]
             pool_times.append({
                 "priority": row.priority,
                 "assigned_time": row.assigned_time,
@@ -2827,16 +2824,13 @@ WHERE PC.Proposal_Code = :proposal_code
                 priority = block["priority"]
                 total_observed_time = block["total_observed_time"]
                 total_times_per_priority[priority] += total_observed_time
-            priority_times = [
-                {"priority": priority, "total_time": total_time}
-                for priority, total_time in dict(total_times_per_priority).items()
-            ]
+
             pools.append(
                 {
                     "id": row.id,
                     "name": row.name,
                     "pool_rules": self._get_pool_rules(row.id),
-                    "pool_times": self._get_pool_times(row.id, priority_times),
+                    "pool_times": self._get_pool_times(row.id, total_times_per_priority),
                     "blocks": pool_blocks,
                 }
             )

@@ -2686,7 +2686,7 @@ WHERE Investigator_Id = (SELECT *
         if not result.rowcount:
             raise NotFoundError()
 
-    def _get_pool_times(self, pool_id: int, total_times_per_priority: Dict[str, int]):
+    def _get_pool_times(self, pool_id: int, total_times_per_priority: Dict[int, int]):
         stmt = text(
             """
 SELECT

@@ -1218,7 +1218,7 @@ WHERE Email = :email
             right_setting = self._get_right_setting(role)
             self._delete_right(user_id, right_setting)
 
-    def _update_user_investigator(self, user_id, investigator_id):
+    def set_preferred_contact(self, user_id, investigator_id):
         stmt = text(
             """
 UPDATE PiptUser
@@ -1228,11 +1228,11 @@ WHERE PiptUser_Id = :user_id
         )
         self.connection.execute(stmt, {"user_id": user_id, "investigator_id": investigator_id})
 
-    def _add_investigator_contact(self, user_id: int, new_user_contact: Dict[str, Any]) -> int:
+    def add_contact_details(self, user_id: int, new_user_contact: Dict[str, Any]) -> int:
         """
-        Add investigator contact.
+        Add contact details to a user.
 
-        The primary key of the new database entry is returned.
+        The primary key of the new Investigator entry is returned.
         """
 
         stmt = text(
@@ -1253,14 +1253,6 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
                 },
             )
         except IntegrityError as e:
-            raise ValueError(f"Email address: {new_user_contact['email']} already exist.")
+            raise ValueError(f"The email address {new_user_contact['email']} already exists.")
 
         return cast(int, result.lastrowid)
-
-
-    def add_contact(self, user_id: int,  contact:Dict[str, str]) -> Optional[User]:
-        user = self.get(user_id)
-        if user:
-            investigator_id = self._add_investigator_contact(user.id, contact)
-            self._update_user_investigator(user.id, investigator_id)
-        return user

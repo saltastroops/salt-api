@@ -541,4 +541,4 @@ class PermissionService:
         if user_id == user.id:
             return
 
-        raise ValidationError("You are not allowed to add this contact.")
+        raise ValidationError("You are not allowed to add a contact to this user")

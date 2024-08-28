@@ -239,5 +239,7 @@ SALT Team
     def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
         self.repository.update_user_roles(user_id, new_roles)
 
-    def add_contact(self,user_id: int, contact: Dict[str, str]) -> Optional[User]:
-        return self.repository.add_contact(user_id, contact)
+    def add_contact(self,user_id: int, contact: Dict[str, str]) -> None:
+        investigator_id = self.repository.add_contact_details(user_id, contact)
+        self.repository.set_preferred_contact(user_id, investigator_id)
+

@@ -393,7 +393,7 @@ def update_user_roles(
 
 
 @router.post(
-    "/{user_id}/add-contact", summary="Add user's contact", response_model=User
+    "/{user_id}/add-contact", summary="Add contact details to the user", response_model=User
 )
 def add_contact(
         user_id: int = Path(
@@ -401,19 +401,17 @@ def add_contact(
         ),
         user: _User = Depends(get_current_user),
         contact: UserContact = Body(
-            ..., title="User Contact", description="User contact to add."
+            ..., title="Contact details", description="User contact to add."
         ),
 ) -> User:
     """
-    Add user contact.
+    dd contact details to the user.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_add_user_contact(user_id, user)
 
         user_service = services.user_service(unit_of_work.connection)
-        user = user_service.add_contact(user_id, vars(contact))
-        if not user:
-            raise NotFoundError("Unknown user.")
+        user_service.add_contact(user_id, dict(contact))
         unit_of_work.commit()
-        return user
+        return user_service.get_user(user_id)

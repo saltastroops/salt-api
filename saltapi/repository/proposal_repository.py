@@ -12,6 +12,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound
 
 from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.repository.block_repository import BlockRepository
 from saltapi.service.proposal import Proposal, ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
@@ -38,6 +39,7 @@ class ProposalRepository:
 
     def __init__(self, connection: Connection):
         self.connection = connection
+        self.block_repository = BlockRepository(connection)
 
     def _list(
         self, username: str, from_semester: str, to_semester: str, limit: int
@@ -2683,3 +2685,153 @@ WHERE Investigator_Id = (SELECT *
 
         if not result.rowcount:
             raise NotFoundError()
+
+    def _get_pool_times(self, pool_id: int, total_times_per_priority: Dict[int, int]):
+        stmt = text(
+            """
+SELECT
+    PAT.Priority        AS priority,
+    PAT.AssignedTime    AS assigned_time
+FROM PoolAssignedTime PAT
+WHERE PAT.Pool_Id = :pool_id
+            """
+        )
+
+        pool_times = []
+        for row in self.connection.execute(stmt, {"pool_id": pool_id}):
+            used_time = total_times_per_priority[row.priority]
+            pool_times.append({
+                "priority": row.priority,
+                "assigned_time": row.assigned_time,
+                "used_time": used_time
+            })
+        return pool_times
+
+    def _get_pool_rules(self, pool_id: int) -> List[Dict[str, int]]:
+        stmt = text(
+            """
+SELECT
+    PRS.X1              AS rule_parameter,
+    PR.Pool_Rule_short  AS rule
+FROM PoolRuleSet    PRS
+    JOIN PoolRule   PR ON PRS.PoolRule_Id = PR.PoolRule_Id
+WHERE PRS.Pool_Id = :pool_id
+            """
+        )
+
+        pool_rules = []
+        for row in self.connection.execute(stmt, {"pool_id": pool_id}):
+            pool_rules.append({
+                "rule": row.rule,
+                "rule_parameter": row.rule_parameter,
+            })
+        return pool_rules
+
+    def _get_block_total_observed_time(self, block_id: int) -> int:
+        stmt = text(
+            """
+SELECT SUM(B.ObsTime) AS total_observed_time FROM BlockVisit BV 
+    JOIN Block B ON BV.Block_Id = B.Block_Id
+    JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
+WHERE BV.Block_Id = :block_id AND BVS.BlockVisitStatus = 'Accepted'      
+            """
+        )
+        result = self.connection.execute(
+            stmt,
+            {
+                "block_id": block_id,
+            },
+        )
+        total_obs_time = result.one_or_none()
+        if total_obs_time[0] is not None:
+            return cast(int, total_obs_time[0])
+        return 0
+
+    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, Any]]:
+
+        stmt = text(
+            """
+SELECT
+    B.Block_Id          AS id,
+    B.Block_Name        AS name,
+    B.Priority          AS priority,
+    B.MaxLunarPhase     AS max_lunar_phase,
+    B.NVisits           AS n_visits,
+    B.NDone             AS n_done,
+    B.ObsTime           AS observation_time,
+    BS.BlockStatus      AS status,
+    BP.Block_Id         AS block_id
+FROM BlockPool  BP
+    JOIN Block B ON BP.Block_Id = B.Block_Id
+    JOIN BlockStatus BS ON B.BlockStatus_Id = BS.BlockStatus_Id
+WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
+    AND BP.Pool_Id = :pool_id
+            """
+        )
+        block_observable_tonight = self._block_observable_nights(
+            proposal_code, semester, tonight()
+        )
+
+        blocks = []
+        for block in self.connection.execute(stmt, {"pool_id": pool_id}):
+            blocks.append(
+                {
+                    "id": block.id,
+                    "name": block.name,
+                    "priority": block.priority,
+                    "maximum_lunar_phase": block.max_lunar_phase,
+                    "n_visits": block.n_visits,
+                    "n_done": block.n_done,
+                    "block_status": block.status,
+                    "status": block.status,
+                    "observation_time": block.observation_time,
+                    "total_observed_time": self._get_block_total_observed_time(block.id),
+                    "is_observable_tonight": block_observable_tonight.get(block.id, False)
+                }
+            )
+        return blocks
+
+    def get_pools(self, proposal_code: str, semester: Optional[str]) -> List[Dict[str, any]]:
+
+        if semester is None:
+            semester = self._latest_submission_semester(proposal_code)
+
+        stmt = text(
+            """
+SELECT
+    P.Pool_Id           AS id,
+    P.Pool_Name         AS name
+FROM Pool P
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S ON P.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code
+    AND CONCAT(S.Year, '-', S.Semester) = :semester
+            """
+        )
+        pools = []
+        for row in self.connection.execute(
+            stmt,
+            {
+                "proposal_code": proposal_code,
+                "semester": semester,
+            },
+        ):
+            pool_blocks = self._get_pool_blocks(row.id, semester, proposal_code)
+            total_times_per_priority = defaultdict(int)
+
+            # Iterate through the blocks and sum total times by priority
+            for block in pool_blocks:
+                priority = block["priority"]
+                total_observed_time = block["total_observed_time"]
+                total_times_per_priority[priority] += total_observed_time
+
+            pools.append(
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "pool_rules": self._get_pool_rules(row.id),
+                    "pool_times": self._get_pool_times(row.id, total_times_per_priority),
+                    "blocks": pool_blocks,
+                }
+            )
+        return pools

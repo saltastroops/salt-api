@@ -102,8 +102,8 @@ class SalticamFilter(BaseModel):
     )
     is_in_magazine: bool = Field(
         ...,
-        title="Is is in magazine",
-        description="Indicates whether the filter currently is in the magazine"
+        title="Is the filter in the magazine?",
+        description="Is the filter in the magazine?",
     )
 
 

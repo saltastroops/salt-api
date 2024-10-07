@@ -197,8 +197,8 @@ class UsernameEmail(BaseModel):
     )
 
 class UserContact(BaseModel):
-    given_name: str = Field(..., title="Given name", description="Given name.")
-    family_name: str = Field(..., title="Family name", description="Family name.")
+    given_name: str = Field(..., title="Given name", description="The given name.")
+    family_name: str = Field(..., title="Family name", description="The family name.")
     email: str = Field(..., title="Email address", description="The email address.")
     institution_id: int = Field(
         ...,

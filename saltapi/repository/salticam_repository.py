@@ -123,7 +123,6 @@ ORDER BY SW.SalticamWindow_Order
     def _exposures(self, filter_pattern_id: int) -> List[Dict[str, Any]]:
         """Return Salticam exposures."""
 
-        print(filter_pattern_id)
         stmt = text(
             """
 SELECT SF.SalticamFilter_Name                   AS filter_name,
@@ -133,7 +132,7 @@ SELECT SF.SalticamFilter_Name                   AS filter_name,
 FROM SalticamFilterPatternDetail SFPD
     JOIN SalticamFilter SF ON SFPD.SalticamFilter_Id = SF.SalticamFilter_Id
     LEFT JOIN SalticamCurrentFilters SCF ON SF.SalticamFilter_Id = SCF.SalticamFilter_Id
-WHERE SFPD.SalticamFilterPattern_Id =  :pattern_id;
+WHERE SFPD.SalticamFilterPattern_Id = :pattern_id;
         """
         )
         result = self.connection.execute(stmt, {"pattern_id": filter_pattern_id})

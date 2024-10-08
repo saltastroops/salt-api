@@ -1217,3 +1217,42 @@ WHERE Email = :email
                 self._remove_salt_operator(user)
             right_setting = self._get_right_setting(role)
             self._delete_right(user_id, right_setting)
+
+    def set_preferred_contact(self, user_id, investigator_id):
+        stmt = text(
+            """
+UPDATE PiptUser
+SET Investigator_Id = :investigator_id
+WHERE PiptUser_Id = :user_id            
+            """
+        )
+        self.connection.execute(stmt, {"user_id": user_id, "investigator_id": investigator_id})
+
+    def add_contact_details(self, user_id: int, new_user_contact: Dict[str, Any]) -> int:
+        """
+        Add contact details to a user.
+
+        The primary key of the new Investigator entry is returned.
+        """
+
+        stmt = text(
+            """
+INSERT INTO Investigator (Institute_Id, FirstName, Surname, Email, PiptUser_Id)
+VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
+        """
+        )
+        try:
+            result = self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "institution_id": new_user_contact["institution_id"],
+                    "given_name": new_user_contact["given_name"],
+                    "family_name": new_user_contact["family_name"],
+                    "email": new_user_contact["email"],
+                },
+            )
+        except IntegrityError as e:
+            raise ValueError(f"The email address {new_user_contact['email']} already exists.")
+
+        return cast(int, result.lastrowid)

@@ -534,3 +534,11 @@ class PermissionService:
             return
 
         raise AuthorizationError(f"You are not allowed update user roles.")
+
+    def check_permission_to_add_user_contact(self, user_id: int, user: User):
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+        if user_id == user.id:
+            return
+
+        raise ValidationError("You are not allowed to add a contact to this user")

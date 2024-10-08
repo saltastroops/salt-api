@@ -22,6 +22,7 @@ from saltapi.web.schema.user import (
     UserUpdate,
     BaseUserDetails,
     UsernameEmail,
+    UserContact,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -389,3 +390,28 @@ def update_user_roles(
         unit_of_work.commit()
         user = user_service.get_user(user_id)
         return user
+
+
+@router.post(
+    "/{user_id}/add-contact", summary="Add contact details to the user", response_model=User
+)
+def add_contact(
+        user_id: int = Path(
+            ..., title="User id", description="Id for user to add contact for."
+        ),
+        user: _User = Depends(get_current_user),
+        contact: UserContact = Body(
+            ..., title="Contact details", description="User contact to add."
+        ),
+) -> User:
+    """
+    dd contact details to the user.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_add_user_contact(user_id, user)
+
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.add_contact(user_id, dict(contact))
+        unit_of_work.commit()
+        return user_service.get_user(user_id)

@@ -35,20 +35,51 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
     target_of_opportunity_reason: Optional[str] = Field(
         ..., title="ToO reason", description="Reason for ToO flag"
     )
+class RssP1Configuration(BaseModel):
+    grating: Optional[str] = Field(
+        ..., title="Grating", description=" The grating"
+    )
+    mask_type: Optional[str] = Field(
+        ..., title="Mask type", description="The mask type"
+    )
+    pattern_name: Optional[str] = Field(
+        ..., title="Pattern name", description="The pattern name"
+    )
+    fabry_perot_mode: Optional[str] = Field(
+        ..., title="Fabry perot mode", description="The fabry perot mode"
+    )
+
+
+class Filter(BaseModel):
+    name: str = Field(..., title="Filter name", description="The filter name")
+    description: str = Field(..., title="Filter description", description="The filter description")
 
 
 class ScienceConfiguration(BaseModel):
     instrument: str = Field(..., title="Instrument", description="The instrument name.")
-    mode: str = Field(
+    mode: Optional[str] = Field(
         ...,
         title="Configuration mode",
         description=(
             "The configuration mode. This is the filter for BVIT, the exposure mode for"
             " HRS, the grating for RSS and NIR, and the detector mode for Salticam."
-        ),
+        )
+    )
+    detector_mode: Optional[str] = Field(
+        ...,
+        title="Detector mode", description="The detector mode",
     )
     simulations: List[Simulation] = Field(
         ..., title="Simulations", description="The simulations for the proposal."
+    )
+    rss_p1_configurations: List[RssP1Configuration] = Field(
+        ..., title="RSS P1 Configurations", description="The RSS P1 Configurations"
+    )
+    configuration_number: int = Field(
+        ..., title="Configurations number", description="The configurations number"
+    )
+    filters: List[Filter] = Field(
+        ..., title="List of Filters", description="The list of configured filters"
     )
 
 

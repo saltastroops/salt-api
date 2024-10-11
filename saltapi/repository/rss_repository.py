@@ -146,18 +146,19 @@ ORDER BY Rss_Id DESC;
         return {"beam_splitter_orientation": row.beam_splitter_orientation}
 
     def _mask(self, row: Any) -> Optional[Dict[str, Any]]:
-        if not row.has_mask:
-            return None
-
-        if not row.has_mos_mask:
+        if row.has_mask and not row.has_mos_mask:
             mask = {
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,
                 "is_in_magazine": row.mask_in_magazine,
             }
-        else:
-            mask = {
+
+        return None
+
+    def _mos_mask(self, row: Any) -> Optional[Dict[str, Any]]:
+        if row.has_mos_mask:
+            return {
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,
@@ -168,7 +169,7 @@ ORDER BY Rss_Id DESC;
                 "is_in_magazine": row.mask_in_magazine,
             }
 
-        return mask
+        return None
 
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """Return an RSS configuration."""
@@ -180,6 +181,7 @@ ORDER BY Rss_Id DESC;
             "polarimetry": self._polarimetry(row),
             "filter": row.filter,
             "mask": self._mask(row),
+            "mos_mask": self._mos_mask(row),
         }
         return config
 

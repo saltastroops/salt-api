@@ -2314,8 +2314,8 @@ WHERE Proposal_Code = :proposal_code
                 },
                 "observing_time": row.observing_time,
                 "is_optional": row.optional,
-                "requested_observations": row.requested_observations,
-                "max_lunar_phase": row.max_luner_phase,
+                "requested_observations": 2,
+                "max_lunar_phase": 100,
                 "ranking": row.ranking,
                 "track_count": row.track_count,
                 "night_count": row.nights_count,
@@ -2458,6 +2458,75 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
+    def _get_p1_bvit_filter(self, bvit_id: int):
+        stmt = text(
+            """
+SELECT
+    BF.BvitFilter_Name          AS `name`
+FROM P1Bvit  P1B
+    JOIN BvitFilter BF ON	P1B.BvitFilter_Id = BF.BvitFilter_Id
+WHERE P1B.P1Bvit_Id = :bvit_id
+        """
+        )
+        result = self.connection.execute(stmt, {"bvit_id": bvit_id})
+        return [
+            {'name': row.name, 'description': row.name}
+            for row in result
+        ]
+
+    def _get_p1_rss_config(self, proposal_code):
+        stmt = text(
+            """
+SELECT
+    RG.Grating              AS grating,
+    RFPM.FabryPerot_Mode    AS fabry_perot_mode,
+    RPP.PatternName         AS pattern_name,
+    RMT.RssMaskType         AS mask_type
+FROM P1Config P1C
+    JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN P1Rss P1R ON P1C.P1Rss_Id = P1R.P1Rss_Id
+    JOIN RssMode RM ON P1R.RssMode_Id = RM.RssMode_Id
+    LEFT JOIN P1RssSpectroscopy P1RS ON P1R.P1RssSpectroscopy_Id = P1RS.P1RssSpectroscopy_Id
+    LEFT JOIN P1RssPolarimetry P1RP ON P1R.P1RssPolarimetry_Id = P1RP.P1RssPolarimetry_Id
+    LEFT JOIN P1RssFabryPerot P1RFP ON P1R.P1RssFabryPerot_Id = P1RFP.P1RssFabryPerot_Id
+    LEFT JOIN P1RssMask P1RM ON P1R.P1RssMask_Id = P1RM.P1RssMask_Id
+    LEFT JOIN RssGrating RG ON P1RS.RssGrating_Id = RG.RssGrating_Id
+    LEFT JOIN RssFabryPerotMode RFPM ON P1RFP.RssFabryPerotMode_Id = RFPM.RssFabryPerotMode_Id
+    LEFT JOIN RssPolarimetryPattern RPP ON P1RP.RssPolarimetryPattern_Id = RPP.RssPolarimetryPattern_Id
+    LEFT JOIN RssMaskType RMT ON P1RM.RssMaskType_Id = RMT.RssMaskType_Id
+WHERE Proposal_Code = :proposal_code
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        return [
+            {
+                'grating': row.grating,
+                'mask_type': row.mask_type,
+                'pattern_name': row.pattern_name,
+                'fabry_perot_mode': row.fabry_perot_mode
+            }
+            for row in result
+        ]
+
+    def _get_p1_scam_filter(self, scam_id: int):
+        stmt = text(
+            """
+SELECT
+    SF.SalticamFilter_Name          AS `name`,
+    SF.DescriptiveName              AS description
+FROM P1Salticam  P1S
+    JOIN P1SalticamFilterPattern P1SFP ON P1S.P1SalticamFilterPattern_Id = P1SFP.P1SalticamFilterPattern_Id
+    JOIN P1SalticamFilterPatternDetail P1SFD ON P1SFP.P1SalticamFilterPattern_Id = P1SFD.P1SalticamFilterPattern_Id
+    JOIN SalticamFilter SF ON P1SFD.SalticamFilter_Id = SF.SalticamFilter_Id
+WHERE P1S.P1Salticam_Id = :scam_id
+        """
+        )
+        result = self.connection.execute(stmt, {"scam_id": scam_id})
+        return [
+            {'name': row.name, 'description': row.description}
+            for row in result
+        ]
+
     def _get_science_configurations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
             """
@@ -2471,6 +2540,7 @@ SELECT
     HM.ExposureMode				        AS hrs_mode,
     NG.Grating					        AS nir_grating,
     RM.`Mode`					        AS rss_mode,
+    RDM.DetectorMode					AS rss_detector_mode,
     SM.DetectorMode				        AS scam_detector_mode
 FROM P1Config P1C
     JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
@@ -2481,6 +2551,7 @@ FROM P1Config P1C
     LEFT JOIN P1Nir PN ON P1C.P1Nir_Id = PN.P1Nir_Id
     LEFT JOIN NirGrating NG ON PN.NirGrating_Id = NG.NirGrating_Id
     LEFT JOIN P1Rss PR ON P1C.P1Rss_Id = PR.P1Rss_Id
+    LEFT JOIN RssDetectorMode RDM ON PR.RssDetectorMode_Id = RDM.RssDetectorMode_Id
     LEFT JOIN RssMode RM ON PR.RssMode_Id = RM.RssMode_Id
     LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
     LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id
@@ -2490,33 +2561,55 @@ WHERE PC.Proposal_Code = :proposal_code
         configurations = []
 
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+            configuration = None
+            rss_p1_configurations = []
+            detector_mode = None
+            mode = None
+            filters = []
             if row.bvit:
+                configuration_number = row.bvit
                 instrument = "BVIT"
                 mode = row.bvit_filter
                 simulations = []  # There are no BVIT simulations
+                filters = self._get_p1_bvit_filter(row.bvit)
             elif row.hrs:
+                configuration_number = row.hrs
                 instrument = "HRS"
                 mode = normalised_hrs_mode(row.hrs_mode)
                 simulations = self._get_hrs_simulations(proposal_code)
             elif row.nir:
+                configuration_number = row.nir
                 instrument = "NIR"
                 mode = row.nir_grating
                 simulations = self._get_nir_simulations(proposal_code)
             elif row.rss:
+                configuration_number = row.rss
                 instrument = "RSS"
                 mode = row.rss_mode
+                detector_mode = row.rss_detector_mode
                 simulations = self._get_rss_simulations(proposal_code)
+                rss_p1_configurations = self._get_p1_rss_config(proposal_code)
             elif row.scam:
+                configuration_number = row.scam
                 instrument = "SALTICAM"
-                mode = row.scam_detector_mode
+                detector_mode = row.scam_detector_mode
                 simulations = self._get_salticam_simulations(proposal_code)
+                filters = self._get_p1_scam_filter(row.scam)
             else:
                 raise NotFoundError(
                     "Unknown instrument configuration found for proposal:"
                     f" {proposal_code}"
                 )
             configurations.append(
-                {"instrument": instrument, "mode": mode, "simulations": simulations}
+                {
+                    "instrument": instrument,
+                    "configuration_number": configuration_number,
+                    "mode": mode,
+                    "detector_mode": detector_mode,
+                    "simulations": simulations,
+                    "rss_p1_configurations": rss_p1_configurations,
+                    "filters": filters
+                }
             )
         if len(configurations) == 0:
             return []

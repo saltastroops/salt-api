@@ -192,7 +192,7 @@ def get_proposal(
         if proposal["phase"] == 1:
             return P1Proposal(**proposal)
         if proposal["phase"] == 2:
-            return P1Proposal(**proposal)
+            return P2Proposal(**proposal)
 
 @router.get(
     "/{proposal_code}/pools",

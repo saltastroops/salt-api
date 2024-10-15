@@ -2458,30 +2458,15 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_p1_bvit_filter(self, bvit_id: int):
-        stmt = text(
-            """
-SELECT
-    BF.BvitFilter_Name          AS `name`
-FROM P1Bvit  P1B
-    JOIN BvitFilter BF ON	P1B.BvitFilter_Id = BF.BvitFilter_Id
-WHERE P1B.P1Bvit_Id = :bvit_id
-        """
-        )
-        result = self.connection.execute(stmt, {"bvit_id": bvit_id})
-        return [
-            {'name': row.name, 'description': row.name}
-            for row in result
-        ]
-
     def _get_p1_rss_config(self, proposal_code):
         stmt = text(
             """
 SELECT
     RG.Grating              AS grating,
     RFPM.FabryPerot_Mode    AS fabry_perot_mode,
-    RPP.PatternName         AS pattern_name,
-    RMT.RssMaskType         AS mask_type
+    RPP.PatternName         AS polarimetry_pattern_name,
+    RMT.RssMaskType         AS mask_type,
+    P1RM.MosDescription     AS mos_description
 FROM P1Config P1C
     JOIN ProposalCode PC ON P1C.ProposalCode_Id = PC.ProposalCode_Id
     JOIN P1Rss P1R ON P1C.P1Rss_Id = P1R.P1Rss_Id
@@ -2498,17 +2483,16 @@ WHERE Proposal_Code = :proposal_code
         """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        return [
-            {
-                'grating': row.grating,
-                'mask_type': row.mask_type,
-                'pattern_name': row.pattern_name,
-                'fabry_perot_mode': row.fabry_perot_mode
-            }
-            for row in result
-        ]
+        row = result.one()
+        return{
+            'grating': row.grating,
+            'mask_type': row.mask_type,
+            'polarimetry_pattern_name': row.polarimetry_pattern_name,
+            'fabry_perot_mode': row.fabry_perot_mode,
+            'mos_description': row.mos_description
+        }
 
-    def _get_p1_scam_filter(self, scam_id: int):
+    def _get_p1_scam_filters(self, scam_id: int):
         stmt = text(
             """
 SELECT
@@ -2561,56 +2545,66 @@ WHERE PC.Proposal_Code = :proposal_code
         configurations = []
 
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
-            configuration = None
-            rss_p1_configurations = []
-            detector_mode = None
-            mode = None
-            filters = []
             if row.bvit:
-                configuration_number = row.bvit
-                instrument = "BVIT"
-                mode = row.bvit_filter
-                simulations = []  # There are no BVIT simulations
-                filters = self._get_p1_bvit_filter(row.bvit)
+                configurations.append({
+                    "simulations": [],       # There are no BVIT simulations
+                    "bvit": {
+                        "filter": {
+                            'name':  row.bvit_filter, 'description': row.bvit_filter}
+                    },
+                    "hrs": None,
+                    "nir": None,
+                    "rss": None,
+                    "salticam": None,
+                })
             elif row.hrs:
-                configuration_number = row.hrs
-                instrument = "HRS"
-                mode = normalised_hrs_mode(row.hrs_mode)
-                simulations = self._get_hrs_simulations(proposal_code)
+                configurations.append({
+                    "simulations": self._get_hrs_simulations(proposal_code),
+                    "bvit": None,
+                    "hrs": {"detector_mode": normalised_hrs_mode(row.hrs_mode)},
+                    "nir": None,
+                    "rss": None,
+                    "salticam": None,
+                })
             elif row.nir:
-                configuration_number = row.nir
-                instrument = "NIR"
-                mode = row.nir_grating
-                simulations = self._get_nir_simulations(proposal_code)
+                configurations.append({
+                    "simulations": self._get_nir_simulations(proposal_code),
+                    "bvit": None,
+                    "hrs": None,
+                    "nir": { "grating": row.nir_grating },
+                    "rss": None,
+                    "salticam": None,
+                })
             elif row.rss:
-                configuration_number = row.rss
-                instrument = "RSS"
-                mode = row.rss_mode
-                detector_mode = row.rss_detector_mode
-                simulations = self._get_rss_simulations(proposal_code)
-                rss_p1_configurations = self._get_p1_rss_config(proposal_code)
+                configurations.append({
+                    "simulations": self._get_rss_simulations(proposal_code),
+                    "bvit": None,
+                    "hrs": None,
+                    "nir": None,
+                    "rss": {
+                        "mode": row.rss_mode,
+                        "detector_mode": row.rss_detector_mode,
+                        "rss_mode_configuration": self._get_p1_rss_config(proposal_code)
+                    },
+                    "salticam": None,
+                })
             elif row.scam:
-                configuration_number = row.scam
-                instrument = "SALTICAM"
-                detector_mode = row.scam_detector_mode
-                simulations = self._get_salticam_simulations(proposal_code)
-                filters = self._get_p1_scam_filter(row.scam)
+                configurations.append({
+                    "simulations": self._get_salticam_simulations(proposal_code),
+                    "bvit": None,
+                    "hrs": None,
+                    "nir": None,
+                    "rss": None,
+                    "salticam": {
+                        "detector_mode": row.scam_detector_mode,
+                        "filters": self._get_p1_scam_filters(row.scam)
+                    }
+                })
             else:
                 raise NotFoundError(
                     "Unknown instrument configuration found for proposal:"
                     f" {proposal_code}"
                 )
-            configurations.append(
-                {
-                    "instrument": instrument,
-                    "configuration_number": configuration_number,
-                    "mode": mode,
-                    "detector_mode": detector_mode,
-                    "simulations": simulations,
-                    "rss_p1_configurations": rss_p1_configurations,
-                    "filters": filters
-                }
-            )
         if len(configurations) == 0:
             return []
         return configurations

@@ -168,7 +168,7 @@ class RssConfiguration(BaseModel):
         ..., title="Slit mask", description="Slit mask"
     )
     mos_mask: Optional[RssMosMask] = Field(
-        ..., title="Mos slit mask", description="Mos slit mask"
+        ..., title="MOS slit mask", description="The MOS slit mask"
     )
 
 
@@ -221,7 +221,6 @@ class RssGain(str, Enum):
 
 class RssReadoutSpeed(str, Enum):
     """RSS detector readout speed."""
-
     FAST = "Fast"
     NONE = "None"
     SLOW = "Slow"
@@ -229,7 +228,6 @@ class RssReadoutSpeed(str, Enum):
 
 class RssDetector(BaseModel):
     """Rss detector setup."""
-
     mode: RssDetectorMode = Field(
         ..., title="Detector mode", description="Detector mode"
     )
@@ -271,7 +269,6 @@ class RssDetector(BaseModel):
 
 class RssWaveplateAnglePair(BaseModel):
     """Half-wave plate and quarter-wave plate angle pair."""
-
     half_wave: Optional[float] = Field(
         ...,
         title="Half-wave plate angle",

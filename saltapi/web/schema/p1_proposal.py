@@ -1,5 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
+from numpy.core.defchararray import title
 from pydantic import BaseModel, Field
 
 from saltapi.web.schema.common import ObservationProbabilities, Ranking
@@ -35,18 +36,18 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
     target_of_opportunity_reason: Optional[str] = Field(
         ..., title="ToO reason", description="Reason for ToO flag"
     )
-class RssP1Configuration(BaseModel):
+class P1RssModeConfiguration(BaseModel):
     grating: Optional[str] = Field(
         ..., title="Grating", description=" The grating"
     )
     mask_type: Optional[str] = Field(
         ..., title="Mask type", description="The mask type"
     )
-    pattern_name: Optional[str] = Field(
-        ..., title="Pattern name", description="The pattern name"
+    polarimetry_pattern_name: Optional[str] = Field(
+        ..., title="Polarimetry pattern name", description="The polarimetry pattern name"
     )
     fabry_perot_mode: Optional[str] = Field(
-        ..., title="Fabry perot mode", description="The fabry perot mode"
+        ..., title="Fabry-Pérot mode", description="The Fabry-Pérot mode"
     )
 
 
@@ -55,31 +56,43 @@ class Filter(BaseModel):
     description: str = Field(..., title="Filter description", description="The filter description")
 
 
-class ScienceConfiguration(BaseModel):
-    instrument: str = Field(..., title="Instrument", description="The instrument name.")
-    mode: Optional[str] = Field(
-        ...,
-        title="Configuration mode",
-        description=(
-            "The configuration mode. This is the filter for BVIT, the exposure mode for"
-            " HRS, the grating for RSS and NIR, and the detector mode for Salticam."
-        )
+class P1Bvit(BaseModel):
+    filter: Filter = Field(
+        ..., title="List of Filters", description="The list of configured filters"
     )
-    detector_mode: Optional[str] = Field(
-        ...,
-        title="Detector mode", description="The detector mode",
+
+class P1Hrs(BaseModel):
+    detector_mode: str = Field(..., title="Detector mode", description="The detector mode")
+
+
+class P1Nir(BaseModel):
+    grating: str = Field(..., title="Grating", description="The grating")
+
+
+class P1Rss(BaseModel):
+    mode: str = Field(..., title="Configuration mode", description="The configuration mode")
+    detector_mode: str = Field(..., title="Detector mode", description="The detector mode")
+    rss_mode_configuration: P1RssModeConfiguration = Field(
+        ..., title="RSS mode configuratio", description="The RSS mode configurations"
     )
-    simulations: List[Simulation] = Field(
-        ..., title="Simulations", description="The simulations for the proposal."
-    )
-    rss_p1_configurations: List[RssP1Configuration] = Field(
-        ..., title="RSS P1 Configurations", description="The RSS P1 Configurations"
-    )
-    configuration_number: int = Field(
-        ..., title="Configurations number", description="The configurations number"
-    )
+
+
+class P1Salticam(BaseModel):
+    detector_mode: str = Field(..., title="Detector mode", description="The detector mode")
     filters: List[Filter] = Field(
         ..., title="List of Filters", description="The list of configured filters"
+    )
+
+
+class ScienceConfiguration(BaseModel):
+    bvit: Optional[P1Bvit] = Field(..., title="BVIT Setup", description="The phase 1 BVIT setup")
+    hrs: Optional[P1Hrs] = Field(..., title="HRS Setup", description="The phase 1 HRS setup")
+    nir: Optional[P1Nir] = Field(..., title="NIR Setup", description="The phase 1 NIR setup")
+    rss: Optional[P1Rss] = Field(..., title="RSS Setup", description="The phase 1 RSS setup")
+    salticam: Optional[P1Salticam] = Field(..., title="SALTICAM Setup", description="The phase 1 SALTICAM setup")
+
+    simulations: List[Simulation] = Field(
+        ..., title="Simulations", description="The simulations for the proposal."
     )
 
 

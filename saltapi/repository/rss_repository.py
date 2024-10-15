@@ -147,7 +147,7 @@ ORDER BY Rss_Id DESC;
 
     def _mask(self, row: Any) -> Optional[Dict[str, Any]]:
         if row.has_mask and not row.has_mos_mask:
-            mask = {
+           return {
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
                 "description": row.mask_description,

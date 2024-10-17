@@ -2366,7 +2366,7 @@ WHERE Proposal_Code = :proposal_code
 
         return list(req_time.values())
 
-    def _get_nir_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_nir_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2375,11 +2375,14 @@ SELECT
     PiComment					AS description
 FROM P1NirSimulation P1NS
     JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code
+WHERE Proposal_Code = :proposal_code AND P1Nir_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code,
+            "configuration_id": configuration_id
+        }):
             simulations.append(
                 {
                     "name": row.name,
@@ -2389,7 +2392,7 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_hrs_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_hrs_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2398,11 +2401,14 @@ SELECT
     PiComment					AS description
 FROM P1HrsSimulation P1HS
     JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code
+WHERE Proposal_Code = :proposal_code AND P1Hrs_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code,
+            "configuration_id": configuration_id
+        }):
             simulations.append(
                 {
                     "name": row.name,
@@ -2412,7 +2418,7 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_rss_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_rss_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2421,11 +2427,14 @@ SELECT
     PiComment					AS description
 FROM P1RssSimulation P1RS
     JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code
+WHERE Proposal_Code = :proposal_code AND P1Rss_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code,
+            "configuration_id": configuration_id
+        }):
             simulations.append(
                 {
                     "name": row.name,
@@ -2435,7 +2444,7 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_salticam_simulations(self, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_salticam_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2444,11 +2453,14 @@ SELECT
     PiComment					    AS description
 FROM P1SalticamSimulation P1SS
     JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
-WHERE Proposal_Code = :proposal_code
+WHERE Proposal_Code = :proposal_code AND P1Salticam_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
+        for row in self.connection.execute(stmt, {
+            "proposal_code": proposal_code,
+            "configuration_id": configuration_id
+        }):
             simulations.append(
                 {
                     "name": row.name,
@@ -2458,7 +2470,7 @@ WHERE Proposal_Code = :proposal_code
             )
         return simulations
 
-    def _get_p1_rss_config(self, proposal_code):
+    def _get_p1_rss_config(self, proposal_code, config_id):
         stmt = text(
             """
 SELECT
@@ -2479,12 +2491,15 @@ FROM P1Config P1C
     LEFT JOIN RssFabryPerotMode RFPM ON P1RFP.RssFabryPerotMode_Id = RFPM.RssFabryPerotMode_Id
     LEFT JOIN RssPolarimetryPattern RPP ON P1RP.RssPolarimetryPattern_Id = RPP.RssPolarimetryPattern_Id
     LEFT JOIN RssMaskType RMT ON P1RM.RssMaskType_Id = RMT.RssMaskType_Id
-WHERE Proposal_Code = :proposal_code
+WHERE Proposal_Code = :proposal_code AND P1C.P1Rss_Id = :config_id
         """
         )
-        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        result = self.connection.execute(stmt, {
+            "proposal_code": proposal_code,
+            "config_id": config_id
+        })
         row = result.one()
-        return{
+        return {
             'grating': row.grating,
             'mask_type': row.mask_type,
             'polarimetry_pattern_name': row.polarimetry_pattern_name,
@@ -2546,58 +2561,46 @@ WHERE PC.Proposal_Code = :proposal_code
 
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             if row.bvit:
-                configurations.append({
-                    "simulations": [],       # There are no BVIT simulations
-                    "bvit": {
+                configurations.append({  # There are no BVIT simulations
+                    "configuration": {
+                        "instrument": "BVIT",
                         "filter": {
                             'name':  row.bvit_filter, 'description': row.bvit_filter}
-                    },
-                    "hrs": None,
-                    "nir": None,
-                    "rss": None,
-                    "salticam": None,
+                    }
                 })
             elif row.hrs:
                 configurations.append({
-                    "simulations": self._get_hrs_simulations(proposal_code),
-                    "bvit": None,
-                    "hrs": {"detector_mode": normalised_hrs_mode(row.hrs_mode)},
-                    "nir": None,
-                    "rss": None,
-                    "salticam": None,
+                    "configuration": {
+                        "instrument": "HRS",
+                        "simulations": self._get_hrs_simulations(proposal_code, row.hrs),
+                        "detector_mode": normalised_hrs_mode(row.hrs_mode)
+                    },
                 })
             elif row.nir:
                 configurations.append({
-                    "simulations": self._get_nir_simulations(proposal_code),
-                    "bvit": None,
-                    "hrs": None,
-                    "nir": { "grating": row.nir_grating },
-                    "rss": None,
-                    "salticam": None,
+                    "configuration": {
+                        "simulations": self._get_nir_simulations(proposal_code, row.nir),
+                        "instrument": "NIR",
+                        "grating": row.nir_grating
+                    },
                 })
             elif row.rss:
                 configurations.append({
-                    "simulations": self._get_rss_simulations(proposal_code),
-                    "bvit": None,
-                    "hrs": None,
-                    "nir": None,
-                    "rss": {
+                    "configuration": {
+                        "instrument": "RSS",
                         "mode": row.rss_mode,
                         "detector_mode": row.rss_detector_mode,
-                        "rss_mode_configuration": self._get_p1_rss_config(proposal_code)
+                        "rss_mode_configuration": self._get_p1_rss_config(proposal_code, row.rss),
+                        "simulations": self._get_rss_simulations(proposal_code, row.rss),
                     },
-                    "salticam": None,
                 })
             elif row.scam:
                 configurations.append({
-                    "simulations": self._get_salticam_simulations(proposal_code),
-                    "bvit": None,
-                    "hrs": None,
-                    "nir": None,
-                    "rss": None,
-                    "salticam": {
-                        "detector_mode": row.scam_detector_mode,
-                        "filters": self._get_p1_scam_filters(row.scam)
+                    "configuration": {
+                        "instrument": "SALTICAM",
+                        "detector_mode":row.scam_detector_mode,
+                        "filters":self._get_p1_scam_filters(row.scam),
+                        "simulations":self._get_salticam_simulations(proposal_code, row.scam)
                     }
                 })
             else:

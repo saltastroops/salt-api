@@ -42,4 +42,5 @@ services:
       - ${PROPOSALS_DIR}:/proposals
       - ${MAPPING_TOOL_LOG_DIR}:/mapping-logs
       - ${MAPPING_TOOL_DIR}:/mapping-tool
-    network_mode: "default"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

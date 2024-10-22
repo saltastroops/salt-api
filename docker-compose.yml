@@ -42,5 +42,3 @@ services:
       - ${PROPOSALS_DIR}:/proposals
       - ${MAPPING_TOOL_LOG_DIR}:/mapping-logs
       - ${MAPPING_TOOL_DIR}:/mapping-tool
-    extra_hosts:
-      - "host.docker.internal:host-gateway"

@@ -157,6 +157,30 @@ class PermissionService:
                 raise AuthorizationError()
             raise
 
+    def check_permission_to_submit_proposal(
+        self, user: User, proposal_code: Optional[str]
+    ) -> None:
+        """
+        Check that the user may submit a proposal.
+
+        This is the case if this is new submission rather than a resubmission of if the
+        user is any of the following:
+
+        * a SALT Astronomer
+        * an administrator
+        * a Principal Investigator or Principal Contact of the proposal
+        """
+        if proposal_code.startswith("Unsubmitted"):
+            return
+        username = user.username
+        if self.user_has_role(
+            username, Role.PRINCIPAL_CONTACT, proposal_code
+        ) or self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
+            return
+
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+        self.check_role(username, roles)
+
     def check_permission_to_update_proposal_status(
         self, user: User, proposal_code: str, proposal_status: str
     ) -> None:

@@ -10,6 +10,7 @@ from typing import Any, Optional, cast
 
 from defusedxml.ElementTree import fromstring
 from fastapi import UploadFile
+from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import ValidationError
 from saltapi.repository.database import engine
@@ -17,11 +18,15 @@ from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.service.submission import SubmissionMessageType, SubmissionStatus
 from saltapi.service.user import User
 from saltapi.settings import get_settings
+from saltapi.web import services
 
 
 class SubmissionService:
-    def __init__(self, submission_repository: SubmissionRepository):
+    def __init__(
+        self, submission_repository: SubmissionRepository, connection: Connection
+    ):
         self.submission_repository = submission_repository
+        self.connection = connection
 
     async def submit_proposal(
         self, submitter: User, proposal: UploadFile, proposal_code: Optional[str]
@@ -48,8 +53,8 @@ class SubmissionService:
 
         # Get and check the proposal code for consistency
         xml = await self._extract_xml(proposal)
+        xml_proposal_code = SubmissionService._extract_proposal_code(xml)
         if proposal_code:
-            xml_proposal_code = SubmissionService._extract_proposal_code(xml)
             if proposal_code != xml_proposal_code:
                 raise ValidationError(
                     "The proposal code passed as query parameter "
@@ -57,6 +62,10 @@ class SubmissionService:
                     "given in the proposal file "
                     f"({xml_proposal_code})."
                 )
+
+        # Check that the user is allowed to make the submission
+        permission_service = services.permission_service(self.connection)
+        permission_service.check_permission_to_submit_proposal(submitter, proposal_code)
 
         # Record the submission in the database
         submission_identifier = self.submission_repository.create(

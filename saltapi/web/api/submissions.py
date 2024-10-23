@@ -61,15 +61,15 @@ async def create_submission(
     proposal code is supplied as a query parameter, the proposal code defined in the
     proposal must be the same as that passed as a query parameter.
     """
-    # Submissions don't use database transactions. As such no unit of work is used.
-    # This can lead to warnings when mocking with the pytest-pymysql-autorecord plugin,
-    # which you may ignore.
-    submission_repository = SubmissionRepository(engine().connect())
-    submission_service = services.submission_service(submission_repository)
-    submission_identifier = await submission_service.submit_proposal(
-        user, proposal, proposal_code
-    )
-    return {"submission_identifier": submission_identifier}
+    with UnitOfWork() as unit_of_work:
+        submission_repository = SubmissionRepository(unit_of_work.connection)
+        submission_service = services.submission_service(
+            submission_repository, unit_of_work.connection
+        )
+        submission_identifier = await submission_service.submit_proposal(
+            user, proposal, proposal_code
+        )
+        return {"submission_identifier": submission_identifier}
 
 
 @router.websocket("/{identifier}/progress/ws")

@@ -77,10 +77,10 @@ def institution_service(connection: Connection) -> InstitutionService:
 
 
 def submission_service(
-    submission_repository: SubmissionRepository,
+    submission_repository: SubmissionRepository, connection: Connection
 ) -> SubmissionService:
     """Return a submission service instance."""
-    return SubmissionService(submission_repository)
+    return SubmissionService(submission_repository, connection)
 
 
 def finder_chart_service(connection: Connection) -> FinderChartService:

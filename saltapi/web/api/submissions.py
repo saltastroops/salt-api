@@ -25,7 +25,7 @@ from saltapi.service.authentication_service import (
 from saltapi.service.submission import SubmissionStatus
 from saltapi.service.user import User
 from saltapi.web import services
-from saltapi.web.schema.submissions import SubmissionIdentifier
+from saltapi.web.schema.submissions import Submission, SubmissionProgress
 
 router = APIRouter(prefix="/submissions", tags=["Submissions"])
 
@@ -38,7 +38,7 @@ SUBMISSION_PROGRESS_TIMEOUT = timedelta(hours=5)
     "/",
     summary="Submit a proposal",
     status_code=status.HTTP_202_ACCEPTED,
-    response_model=SubmissionIdentifier,
+    response_model=Submission,
 )
 async def create_submission(
     proposal: UploadFile = File(
@@ -61,22 +61,69 @@ async def create_submission(
     proposal code is supplied as a query parameter, the proposal code defined in the
     proposal must be the same as that passed as a query parameter.
     """
-    with UnitOfWork() as unit_of_work:
-        submission_repository = SubmissionRepository(unit_of_work.connection)
-        submission_service = services.submission_service(
-            submission_repository, unit_of_work.connection
-        )
-        xml = await submission_service.extract_xml(proposal)
-        xml_proposal_code = submission_service.extract_proposal_code(xml)
+    # Submissions don't use database transactions. As such no unit of work is used.
+    # This can lead to warnings when mocking with the pytest-pymysql-autorecord plugin,
+    # which you may ignore.
+    connection = engine().connect().execution_options(isolation_level="AUTOCOMMIT")
+    submission_repository = SubmissionRepository(connection)
+    submission_service = services.submission_service(submission_repository)
+    xml = await submission_service.extract_xml(proposal)
+    xml_proposal_code = submission_service.extract_proposal_code(xml)
 
-        # Check that the user is allowed to make the submission
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_submit_proposal(user, xml_proposal_code)
+    # Check that the user is allowed to make the submission
+    permission_service = services.permission_service(connection)
+    permission_service.check_permission_to_submit_proposal(user, xml_proposal_code)
 
-        submission_identifier = await submission_service.submit_proposal(
-            user, proposal, proposal_code
-        )
-        return {"submission_identifier": submission_identifier}
+    submission_identifier = await submission_service.submit_proposal(
+        user, proposal, proposal_code
+    )
+    return {"submission_identifier": submission_identifier}
+
+
+@router.get(
+    "/{identifier}/progress",
+    response_model=SubmissionProgress,
+    summary="Get the current submission progress",
+)
+async def query_submission_progress(
+    identifier: str = Path(
+        ...,
+        title="Submission identifier",
+        description="Unique identifier for the submission whose log is requested.",
+    ),
+    from_entry_number: int = Query(
+        1,
+        alias="from-entry-number",
+        title="Minimum entry number",
+        description=(
+            "Minimum entry number from which onwards log entries are considered"
+        ),
+    ),
+    user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    Get the current submission progress.
+
+    Yoy may optionally specify a minimum entry number from which onwards to return log
+    entries. Use the `from-entry-number` query parameter for this. For example, if you
+    are only interested in status changes, you could choose a `from-entry-number` like
+    100000.
+    """
+    # The submission repository doesn't use database transactions. As such no unit of
+    # work is used. This can lead to warnings when mocking with the
+    # pytest-pymysql-autorecord plugin, which you may ignore.
+    connection = engine().connect().execution_options(isolation_level="AUTOCOMMIT")
+    submission_repository = SubmissionRepository(connection)
+    submission_service = services.submission_service(submission_repository)
+    submission = submission_repository.get(identifier)
+
+    # Check that the user is allowed to view the submission progress
+    permission_service = services.permission_service(connection)
+    permission_service.check_permission_to_view_submission_progress(user, submission)
+
+    return await submission_service.query_submission_progress(
+        submission, from_entry_number
+    )
 
 
 @router.websocket("/{identifier}/progress/ws")

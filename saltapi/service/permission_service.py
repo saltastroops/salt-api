@@ -6,6 +6,7 @@ from fastapi import Request
 from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
@@ -21,10 +22,12 @@ class PermissionService:
         user_repository: UserRepository,
         proposal_repository: ProposalRepository,
         block_repository: BlockRepository,
+        submission_repository: SubmissionRepository,
     ) -> None:
         self.user_repository = user_repository
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
+        self.submission_repository = submission_repository
 
     def user_has_role(
         self,
@@ -180,6 +183,13 @@ class PermissionService:
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
         self.check_role(username, roles)
+
+    def check_permission_to_view_submission_progress(
+        self, user: User, submission: Dict[str, Any]
+    ):
+        submitter_id = submission["submitter_id"]
+        if submitter_id != user.id:
+            raise AuthorizationError()
 
     def check_permission_to_update_proposal_status(
         self, user: User, proposal_code: str, proposal_status: str

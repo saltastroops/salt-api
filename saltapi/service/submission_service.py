@@ -6,7 +6,7 @@ import tempfile
 import threading
 import zipfile
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, Dict
 
 from defusedxml.ElementTree import fromstring
 from fastapi import UploadFile
@@ -18,15 +18,12 @@ from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.service.submission import SubmissionMessageType, SubmissionStatus
 from saltapi.service.user import User
 from saltapi.settings import get_settings
-from saltapi.web import services
 
 
 class SubmissionService:
-    def __init__(
-        self, submission_repository: SubmissionRepository, connection: Connection
-    ):
+    def __init__(self, submission_repository: SubmissionRepository):
         self.submission_repository = submission_repository
-        self.connection = connection
+        self.connection = submission_repository.connection
 
     async def submit_proposal(
         self, submitter: User, proposal: UploadFile, proposal_code: Optional[str]
@@ -83,6 +80,21 @@ class SubmissionService:
         )
         t.start()
         return submission_identifier
+
+    async def query_submission_progress(
+        self, submission: Dict[str, Any], from_entry_number: int
+    ) -> Dict[str, Any]:
+        # Get the submission status and log entries
+        submission_progress = self.submission_repository.get_progress(
+            identifier=submission["identifier"],
+            from_entry_number=from_entry_number,
+        )
+
+        # Datetimes cannot be serialized, so we convert them to ISO 8601 strings.
+        for log_entry in submission_progress["log_entries"]:
+            log_entry["logged_at"] = log_entry["logged_at"].isoformat()
+
+        return submission_progress
 
     @staticmethod
     async def extract_xml(proposal: UploadFile) -> str:

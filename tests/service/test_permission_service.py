@@ -6,6 +6,7 @@ from pydantic import EmailStr
 from saltapi.exceptions import AuthorizationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.permission_service import PermissionService
 from saltapi.service.proposal import ProposalCode
@@ -112,6 +113,10 @@ class FakeBlockRepository:
     pass
 
 
+class FakeSubmissionRepository:
+    pass
+
+
 INVESTIGATOR = "investigator"
 PRINCIPAL_INVESTIGATOR = "principal_investigator"
 PRINCIPAL_CONTACT = "principal_contact"
@@ -189,13 +194,17 @@ def _assert_role_based_permission(
     """
     proposal_repository = cast(ProposalRepository, FakeProposalRepository())
     block_repository = cast(BlockRepository, FakeBlockRepository)
+    submission_repository = cast(SubmissionRepository, FakeSubmissionRepository)
     for (
         role,
         user_repository,
         expected_result,
     ) in _user_repositories_and_expected_results(roles_with_permission):
         permission_service = PermissionService(
-            user_repository, proposal_repository, block_repository
+            user_repository,
+            proposal_repository,
+            block_repository,
+            submission_repository,
         )
         if expected_result:
             getattr(permission_service, permission)(user=USER, **kwargs)

@@ -66,6 +66,13 @@ async def create_submission(
         submission_service = services.submission_service(
             submission_repository, unit_of_work.connection
         )
+        xml = await submission_service.extract_xml(proposal)
+        xml_proposal_code = submission_service.extract_proposal_code(xml)
+
+        # Check that the user is allowed to make the submission
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_submit_proposal(user, xml_proposal_code)
+
         submission_identifier = await submission_service.submit_proposal(
             user, proposal, proposal_code
         )

@@ -52,8 +52,8 @@ class SubmissionService:
             raise ValidationError("The submitted file must be a zipfile.")
 
         # Get and check the proposal code for consistency
-        xml = await self._extract_xml(proposal)
-        xml_proposal_code = SubmissionService._extract_proposal_code(xml)
+        xml = await self.extract_xml(proposal)
+        xml_proposal_code = SubmissionService.extract_proposal_code(xml)
         if proposal_code:
             if proposal_code != xml_proposal_code:
                 raise ValidationError(
@@ -62,10 +62,6 @@ class SubmissionService:
                     "given in the proposal file "
                     f"({xml_proposal_code})."
                 )
-
-        # Check that the user is allowed to make the submission
-        permission_service = services.permission_service(self.connection)
-        permission_service.check_permission_to_submit_proposal(submitter, proposal_code)
 
         # Record the submission in the database
         submission_identifier = self.submission_repository.create(
@@ -89,7 +85,7 @@ class SubmissionService:
         return submission_identifier
 
     @staticmethod
-    async def _extract_xml(proposal: UploadFile) -> str:
+    async def extract_xml(proposal: UploadFile) -> str:
         await proposal.seek(0)
         with zipfile.ZipFile(cast(Any, proposal.file)._file) as z:
             contents = z.namelist()
@@ -103,7 +99,7 @@ class SubmissionService:
                 )
 
     @staticmethod
-    def _extract_proposal_code(xml: str) -> Optional[str]:
+    def extract_proposal_code(xml: str) -> Optional[str]:
         root = fromstring(xml)
         if re.match(r"([{].*[}])?Proposal$", root.tag):
             return str(root.attrib.get("code"))

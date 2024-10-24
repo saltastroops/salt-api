@@ -22,9 +22,10 @@ class SubmissionRepository:
         Parameters
         ----------
         connection: Connection
-            Database connection. WARNING: AUTOCOMMIT will be enabled on this connection.
+            Database connection. WARNING: AUTOCOMMIT should be enabled on this
+            connection.
         """
-        self.connection = connection.execution_options(isolation_level="AUTOCOMMIT")
+        self.connection = connection
 
     def get(self, identifier: str) -> Dict[str, Any]:
         """
@@ -42,7 +43,8 @@ class SubmissionRepository:
         """
         stmt = text(
             """
-SELECT PC.Proposal_Code    AS proposal_code,
+SELECT S.Identifier        AS identifier,
+       PC.Proposal_Code    AS proposal_code,
        S.Submitter_Id      AS submitter_id,
        SS.SubmissionStatus AS status,
        S.StartedAt         AS started_at,
@@ -58,6 +60,7 @@ WHERE S.Identifier = :identifier
             row = result.one()
             normalized_status = row.status[:1].upper() + row.status[1:].lower()
             return {
+                "identifier": row.identifier,
                 "proposal_code": row.proposal_code,
                 "submitter_id": row.submitter_id,
                 "status": SubmissionStatus(normalized_status),

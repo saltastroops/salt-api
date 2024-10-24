@@ -6,10 +6,11 @@ import tempfile
 import threading
 import zipfile
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, Dict
 
 from defusedxml.ElementTree import fromstring
 from fastapi import UploadFile
+from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import ValidationError
 from saltapi.repository.database import engine
@@ -22,6 +23,7 @@ from saltapi.settings import get_settings
 class SubmissionService:
     def __init__(self, submission_repository: SubmissionRepository):
         self.submission_repository = submission_repository
+        self.connection = submission_repository.connection
 
     async def submit_proposal(
         self, submitter: User, proposal: UploadFile, proposal_code: Optional[str]
@@ -47,9 +49,9 @@ class SubmissionService:
             raise ValidationError("The submitted file must be a zipfile.")
 
         # Get and check the proposal code for consistency
-        xml = await self._extract_xml(proposal)
+        xml = await self.extract_xml(proposal)
+        xml_proposal_code = SubmissionService.extract_proposal_code(xml)
         if proposal_code:
-            xml_proposal_code = SubmissionService._extract_proposal_code(xml)
             if proposal_code != xml_proposal_code:
                 raise ValidationError(
                     "The proposal code passed as query parameter "
@@ -79,8 +81,23 @@ class SubmissionService:
         t.start()
         return submission_identifier
 
+    async def query_submission_progress(
+        self, submission: Dict[str, Any], from_entry_number: int
+    ) -> Dict[str, Any]:
+        # Get the submission status and log entries
+        submission_progress = self.submission_repository.get_progress(
+            identifier=submission["identifier"],
+            from_entry_number=from_entry_number,
+        )
+
+        # Datetimes cannot be serialized, so we convert them to ISO 8601 strings.
+        for log_entry in submission_progress["log_entries"]:
+            log_entry["logged_at"] = log_entry["logged_at"].isoformat()
+
+        return submission_progress
+
     @staticmethod
-    async def _extract_xml(proposal: UploadFile) -> str:
+    async def extract_xml(proposal: UploadFile) -> str:
         await proposal.seek(0)
         with zipfile.ZipFile(cast(Any, proposal.file)._file) as z:
             contents = z.namelist()
@@ -94,7 +111,7 @@ class SubmissionService:
                 )
 
     @staticmethod
-    def _extract_proposal_code(xml: str) -> Optional[str]:
+    def extract_proposal_code(xml: str) -> Optional[str]:
         root = fromstring(xml)
         if re.match(r"([{].*[}])?Proposal$", root.tag):
             return str(root.attrib.get("code"))

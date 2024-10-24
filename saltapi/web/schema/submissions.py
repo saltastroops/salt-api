@@ -18,7 +18,7 @@ class SubmissionStatus(str, Enum):
     """Submission status value."""
 
     FAILED = "Failed"
-    IN_PREPARATION = "In preparation"
+    IN_PROGRESS = "In progress"
     SUCCESSFUL = "Successful"
 
 

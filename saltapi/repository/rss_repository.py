@@ -665,3 +665,36 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
             if m not in needed_masks:
                 obsolete_masks.append(m)
         return obsolete_masks
+
+    def get_rss_slit_mask(self, exclude_mask_types: List[RssMaskType]) -> List[Dict[str, Any]]:
+        """
+        The list of RSS masks, optionally filtered by a mask type.
+        """
+        stmt = """
+SELECT
+    Barcode             AS barcode,
+    Description         AS description,
+    RssMaskType         AS mask_type,
+    IF(RCM.RssMaskSlot IS NOT NULL, 1, 0)        AS in_magazine
+    
+FROM RssMask RM
+    JOIN RssMaskType RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
+    LEFT JOIN RssCurrentMasks RCM ON RM.RssMask_Id = RCM.RssMask_Id
+    LEFT JOIN RssPredefinedMaskDetails RPMD ON RM.RssMask_Id = RPMD.RssMask_Id
+"""
+        if len(exclude_mask_types) > 0:
+            stmt += "WHERE RssMaskType NOT IN :exclude_mask_types"
+        return [
+            {
+                "barcode": m.barcode,
+                "mask_type": m.mask_type,
+                "description": m.description,
+                "is_in_magazine": m.in_magazine
+            }
+            for m in self.connection.execute(
+                text(stmt),
+                {
+                    "exclude_mask_types": tuple([m.value for m in exclude_mask_types]),
+                },
+            )
+        ]

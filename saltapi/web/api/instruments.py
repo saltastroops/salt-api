@@ -149,7 +149,7 @@ def get_rss_slit_masks(
             [],
             title="Mask types",
             description="The mask types to exclude.",
-            alias="mask-type",
+            alias="exclude-mask-type",
         ),
         user: User = Depends(get_current_user),
 ) -> List[RssMask]:

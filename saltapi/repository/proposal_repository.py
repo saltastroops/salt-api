@@ -2562,46 +2562,38 @@ WHERE PC.Proposal_Code = :proposal_code
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             if row.bvit:
                 configurations.append({  # There are no BVIT simulations
-                    "configuration": {
-                        "instrument": "BVIT",
-                        "filter": {
-                            'name':  row.bvit_filter, 'description': row.bvit_filter}
+
+                    "instrument": "BVIT",
+                    "filter": {
+                        'name':  row.bvit_filter, 'description': row.bvit_filter
                     }
                 })
             elif row.hrs:
                 configurations.append({
-                    "configuration": {
-                        "instrument": "HRS",
-                        "simulations": self._get_hrs_simulations(proposal_code, row.hrs),
-                        "detector_mode": normalised_hrs_mode(row.hrs_mode)
-                    },
+                    "instrument": "HRS",
+                    "simulations": self._get_hrs_simulations(proposal_code, row.hrs),
+                    "detector_mode": normalised_hrs_mode(row.hrs_mode)
                 })
             elif row.nir:
                 configurations.append({
-                    "configuration": {
-                        "simulations": self._get_nir_simulations(proposal_code, row.nir),
-                        "instrument": "NIR",
-                        "grating": row.nir_grating
-                    },
+                    "simulations": self._get_nir_simulations(proposal_code, row.nir),
+                    "instrument": "NIR",
+                    "grating": row.nir_grating
                 })
             elif row.rss:
                 configurations.append({
-                    "configuration": {
-                        "instrument": "RSS",
-                        "mode": row.rss_mode,
-                        "detector_mode": row.rss_detector_mode,
-                        "rss_mode_configuration": self._get_p1_rss_config(proposal_code, row.rss),
-                        "simulations": self._get_rss_simulations(proposal_code, row.rss),
-                    },
+                    "instrument": "RSS",
+                    "mode": row.rss_mode,
+                    "detector_mode": row.rss_detector_mode,
+                    "rss_mode_configuration": self._get_p1_rss_config(proposal_code, row.rss),
+                    "simulations": self._get_rss_simulations(proposal_code, row.rss),
                 })
             elif row.scam:
                 configurations.append({
-                    "configuration": {
-                        "instrument": "SALTICAM",
-                        "detector_mode":row.scam_detector_mode,
-                        "filters":self._get_p1_scam_filters(row.scam),
-                        "simulations":self._get_salticam_simulations(proposal_code, row.scam)
-                    }
+                    "instrument": "SALTICAM",
+                    "detector_mode":row.scam_detector_mode,
+                    "filters":self._get_p1_scam_filters(row.scam),
+                    "simulations":self._get_salticam_simulations(proposal_code, row.scam)
                 })
             else:
                 raise NotFoundError(

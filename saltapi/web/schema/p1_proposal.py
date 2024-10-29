@@ -99,13 +99,6 @@ class P1Salticam(BaseModel):
     )
 
 
-class ScienceConfiguration(BaseModel):
-    configuration: Union[P1Bvit, P1Hrs, P1Nir, P1Rss, P1Salticam] = Field(
-        ...,
-        title="Instrument configuration",
-        description="The instrument configuration",
-    )
-
 class P1Observation(BaseModel):
     """A target in a Phase 1 proposal."""
 
@@ -187,7 +180,7 @@ class P1Proposal(Proposal):
         title="Targets",
         description="Targets for which observations are requested.",
     )
-    science_configurations: List[ScienceConfiguration] = Field(
+    science_configurations: List[Union[P1Bvit, P1Hrs, P1Nir, P1Rss, P1Salticam]] = Field(
         title="Instruments configurations",
         description="The phase 1 instruments configurations.",
     )

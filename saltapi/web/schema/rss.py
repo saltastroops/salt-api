@@ -164,12 +164,10 @@ class RssConfiguration(BaseModel):
         ..., title="Polarimetry setup", description="Polarimetry setup"
     )
     filter: str = Field(..., title="Filter", description="Filter")
-    mask: Optional[RssMask] = Field(
+    mask: Optional[Union[RssMask, RssMosMask]] = Field(
         ..., title="Slit mask", description="Slit mask"
     )
-    mos_mask: Optional[RssMosMask] = Field(
-        ..., title="MOS slit mask", description="The MOS slit mask"
-    )
+
 
 
 class RssDetectorCalculation(str, Enum):

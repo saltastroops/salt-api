@@ -148,7 +148,7 @@ def get_rss_slit_masks(
         exclude_mask_types: List[RssMaskType] = Query(
             [],
             title="Mask types",
-            description="The mask types to exclude.",
+            description="The mask types to exclude",
             alias="exclude-mask-type",
         ),
         user: User = Depends(get_current_user),
@@ -158,7 +158,7 @@ def get_rss_slit_masks(
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_view_obsolete_masks_in_magazine(user)
+        permission_service.check_permission_to_view_rss_masks(user)
 
         instrument_service = services.instrument_service(unit_of_work.connection)
-        return [RssMask(**mask) for mask in instrument_service.get_rss_slit_mask(exclude_mask_types)]
+        return [RssMask(**mask) for mask in instrument_service.get_rss_slit_masks(exclude_mask_types)]

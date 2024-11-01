@@ -140,7 +140,7 @@ class RssMosMask(RssMask):
     cut_by: Optional[str] = Field(
         ..., title="Cut by", description="Person who cut the mask"
     )
-    cut_date: Optional[str] = Field(
+    cut_date: Optional[date] = Field(
         ..., title="Cut date", description="Date when the mask was cut"
     )
     comment: Optional[str] = Field(
@@ -167,6 +167,7 @@ class RssConfiguration(BaseModel):
     mask: Optional[Union[RssMask, RssMosMask]] = Field(
         ..., title="Slit mask", description="Slit mask"
     )
+
 
 
 class RssDetectorCalculation(str, Enum):
@@ -218,7 +219,6 @@ class RssGain(str, Enum):
 
 class RssReadoutSpeed(str, Enum):
     """RSS detector readout speed."""
-
     FAST = "Fast"
     NONE = "None"
     SLOW = "Slow"
@@ -226,7 +226,6 @@ class RssReadoutSpeed(str, Enum):
 
 class RssDetector(BaseModel):
     """Rss detector setup."""
-
     mode: RssDetectorMode = Field(
         ..., title="Detector mode", description="Detector mode"
     )
@@ -268,7 +267,6 @@ class RssDetector(BaseModel):
 
 class RssWaveplateAnglePair(BaseModel):
     """Half-wave plate and quarter-wave plate angle pair."""
-
     half_wave: Optional[float] = Field(
         ...,
         title="Half-wave plate angle",

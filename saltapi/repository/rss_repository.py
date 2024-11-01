@@ -179,7 +179,7 @@ ORDER BY Rss_Id DESC;
             "fabry_perot": self._fabry_perot(row),
             "polarimetry": self._polarimetry(row),
             "filter": row.filter,
-            "mask": self._mask(row),
+            "mask": self._mask(row)
         }
         return config
 

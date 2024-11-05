@@ -1,6 +1,6 @@
 from datetime import date
 from enum import Enum
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -129,11 +129,6 @@ class RssMask(BaseModel):
         title="Is the mask in the magazine?",
         description="Is the mask in the magazine?",
     )
-
-
-class RssMosMask(RssMask):
-    """RSS MOS mask."""
-
     equinox: Optional[float] = Field(
         ..., title="Equinox", description="Equinox of the mask coordinates"
     )
@@ -148,7 +143,16 @@ class RssMosMask(RssMask):
         title="Comment",
         description="Comment regarding the production and handling of the mask",
     )
-
+    plot_filename: Optional[str] = Field(
+        ...,
+        title="Plot Path",
+        description="The filename of the Slit Mask plot file.",
+    )
+    xml_filename: Optional[str] = Field(
+        ...,
+        title="XML Path",
+        description="The filename of the Slit Mask XML file.",
+    )
 
 class RssConfiguration(BaseModel):
     """RSS instrument configuration."""
@@ -164,7 +168,7 @@ class RssConfiguration(BaseModel):
         ..., title="Polarimetry setup", description="Polarimetry setup"
     )
     filter: str = Field(..., title="Filter", description="Filter")
-    mask: Optional[Union[RssMask, RssMosMask]] = Field(
+    mask: Optional[RssMask] = Field(
         ..., title="Slit mask", description="Slit mask"
     )
 

@@ -44,6 +44,8 @@ SELECT R.Rss_Id                                          AS rss_id,
        RMMD.CutBy                                        AS mos_cut_by,
        RMMD.CutDate                                      AS mos_cut_date,
        RMMD.SaComment                                    AS mos_comment,
+       RMMD.PlotPath                                     AS plot_path,
+       RMMD.XmlPath                                      AS xml_path,
        RDM.DetectorMode                                  AS detector_mode,
        RD.PreShuffle                                     AS pre_shuffle,
        RD.PostShuffle                                    AS post_shuffle,
@@ -149,26 +151,18 @@ ORDER BY Rss_Id DESC;
         if not row.has_mask:
             return None
 
-        if not row.has_mos_mask:
-            mask = {
+        return {
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
+                "plot_filename": row.plot_path.split("/")[-1] if row.plot_path else None,
+                "xml_filename": row.xml_path.split("/")[-1] if row.xml_path else None,
                 "description": row.mask_description,
-                "is_in_magazine": row.mask_in_magazine,
-            }
-        else:
-            mask = {
-                "mask_type": row.mask_type,
-                "barcode": row.mask_barcode,
-                "description": row.mask_description,
-                "equinox": float(row.mos_equinox),
+                "equinox": float(row.mos_equinox) if row.mos_equinox else None,
                 "cut_by": row.mos_cut_by,
                 "cut_date": row.mos_cut_date,
                 "comment": row.mos_comment,
                 "is_in_magazine": row.mask_in_magazine,
             }
-
-        return mask
 
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """Return an RSS configuration."""

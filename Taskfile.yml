@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+  lint:
+    desc: Lint the Dockerfile.
+    cmds:
+      - docker run -i hadolint/hadolint < Dockerfile

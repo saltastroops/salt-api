@@ -242,6 +242,9 @@ VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
             },
         )
 
+        # Give the new user the permission to view and submit their own proposals
+        self._update_right(result.lastrowid, "RightProposals", 1)
+
         return cast(int, result.lastrowid)
 
     def _add_investigator_to_pipt_user(

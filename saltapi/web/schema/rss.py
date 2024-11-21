@@ -1,6 +1,6 @@
 from datetime import date
 from enum import Enum
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -129,9 +129,6 @@ class RssMask(BaseModel):
         title="Is the mask in the magazine?",
         description="Is the mask in the magazine?",
     )
-    equinox: Optional[float] = Field(
-        ..., title="Equinox", description="Equinox of the mask coordinates"
-    )
     cut_by: Optional[str] = Field(
         ..., title="Cut by", description="Person who cut the mask"
     )
@@ -145,14 +142,21 @@ class RssMask(BaseModel):
     )
     plot_filename: Optional[str] = Field(
         ...,
-        title="Plot Path",
-        description="The filename of the Slit Mask plot file.",
+        title="Plot filename",
+        description=(
+            "The filename of the Slit Mask plot file. "
+            "This file is downloadable on /PROPOSAL_CODE/attached/THIS_FILENAME"
+        ),
     )
     xml_filename: Optional[str] = Field(
         ...,
-        title="XML Path",
-        description="The filename of the Slit Mask XML file.",
+        title="XML filename",
+        description=(
+            "The filename of the Slit Mask XML file. "
+            "This file is downloadable on /PROPOSAL_CODE/attached/THIS_FILENAME"
+        ),
     )
+
 
 class RssConfiguration(BaseModel):
     """RSS instrument configuration."""
@@ -171,7 +175,6 @@ class RssConfiguration(BaseModel):
     mask: Optional[RssMask] = Field(
         ..., title="Slit mask", description="Slit mask"
     )
-
 
 
 class RssDetectorCalculation(str, Enum):

@@ -8,7 +8,6 @@ from saltapi.settings import get_settings
 from saltapi.web.api.authentication import router as authentication_router
 from saltapi.web.api.block_visits import router as block_visits_router
 from saltapi.web.api.blocks import router as blocks_router
-from saltapi.web.api.downloads import router as download_router
 from saltapi.web.api.finder_charts import router as finder_charts_router
 from saltapi.web.api.institutions import router as institution_router
 from saltapi.web.api.instruments import router as instruments_router
@@ -54,4 +53,3 @@ app.include_router(salt_astronomers_router)
 app.include_router(submissions_router)
 app.include_router(finder_charts_router)
 app.include_router(status_router)
-app.include_router(download_router)

@@ -473,3 +473,7 @@ class ProposalService:
 
     def get_pools(self, proposal_code: str, semester: Optional[Semester] = None) -> List[Dict[str, any]]:
         return self.repository.get_pools(proposal_code, semester)
+
+    @staticmethod
+    def get_proposal_attachments_dir(proposal_code: str) -> pathlib.Path:
+        return get_settings().proposals_dir / proposal_code / "Included"

@@ -144,16 +144,16 @@ class RssMask(BaseModel):
         ...,
         title="Plot filename",
         description=(
-            "The filename of the Slit Mask plot file. "
-            "This file is downloadable on /PROPOSAL_CODE/attached/THIS_FILENAME"
+            "The filename of the slit mask plot file."
+            "This file is downloadable from /PROPOSAL_CODE/attachments/THIS_FILENAME"
         ),
     )
     xml_filename: Optional[str] = Field(
         ...,
         title="XML filename",
         description=(
-            "The filename of the Slit Mask XML file. "
-            "This file is downloadable on /PROPOSAL_CODE/attached/THIS_FILENAME"
+            "The filename of the slit mask XML file."
+            "This file is downloadable from /PROPOSAL_CODE/attached/THIS_FILENAME"
         ),
     )
 

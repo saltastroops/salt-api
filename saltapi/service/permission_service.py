@@ -368,7 +368,7 @@ class PermissionService:
 
     def check_permission_to_view_rss_masks(self, user: User) -> None:
         """
-        Check that the user can view the rss slit masks.
+        Check that the user can view the RSS slit masks.
         """
 
         roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]

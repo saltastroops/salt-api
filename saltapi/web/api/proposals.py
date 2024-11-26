@@ -694,7 +694,7 @@ def update_investigator_proposal_approval_status(
         unit_of_work.commit()
 
 @router.get("/{proposal_code}/attachments/{filename}", summary="Download the attached files of a proposal")
-async def download_attachment(
+async def serve_attachment(
         proposal_code: str = Path(
             ...,
             title="Proposal code",

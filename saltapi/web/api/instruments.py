@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 
@@ -64,7 +64,7 @@ def get_mos_masks_metadata(
         description="Only include MOS masks for this semester and earlier.",
         title="To semester",
     ),
-) -> List[MosBlock]:
+) -> List[Dict[str, Any]]:
     """
     Get the list of blocks using MOS.
     """
@@ -81,7 +81,7 @@ def get_mos_masks_metadata(
         mos_blocks = instrument_service.get_mos_masks_metadata(
             from_semester, to_semester
         )
-        return [MosBlock(**md) for md in mos_blocks]
+        return  mos_blocks
 
 
 @router.patch(
@@ -152,7 +152,7 @@ def get_rss_slit_masks(
             alias="exclude-mask-type",
         ),
         user: User = Depends(get_current_user),
-) -> List[RssMask]:
+) -> List[Dict[str, Any]]:
     """
     Returns the list of RSS slit masks.
     """
@@ -161,4 +161,4 @@ def get_rss_slit_masks(
         permission_service.check_permission_to_view_rss_masks(user)
 
         instrument_service = services.instrument_service(unit_of_work.connection)
-        return [RssMask(**mask) for mask in instrument_service.get_rss_slit_masks(exclude_mask_types)]
+        return instrument_service.get_rss_slit_masks(exclude_mask_types)

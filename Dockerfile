@@ -14,7 +14,7 @@ WORKDIR /app
 
 RUN apt-get update -y \
  && apt-get install -y --no-install-recommends default-jre=2:1.17-74 \
- && apt-get install -y --no-install-recommends ghostscript=10.0.0~dfsg-11+deb12u5 \
+ && apt-get install -y --no-install-recommends ghostscript=10.0.0~dfsg-11+deb12u6 \
  && apt-get install -y --no-install-recommends imagemagick=8:6.9.11.60+dfsg-1.6+deb12u2 \
  && apt-get install -y --no-install-recommends wkhtmltopdf=0.12.6-2+b1 \
  && apt-get clean \

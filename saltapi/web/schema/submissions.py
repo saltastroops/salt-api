@@ -7,7 +7,7 @@ from pydantic import UUID4, BaseModel, Field
 class Submission(BaseModel):
     """A proposal submission."""
 
-    identifier: UUID4 = Field(
+    submission_identifier: UUID4 = Field(
         ...,
         title="Submission identifier",
         description="Unique identifier for the submission",

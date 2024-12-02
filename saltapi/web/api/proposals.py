@@ -1,3 +1,5 @@
+import mimetypes
+import os
 from datetime import date
 from typing import Any, Dict, List, Optional, Union
 
@@ -690,3 +692,38 @@ def update_investigator_proposal_approval_status(
         )
 
         unit_of_work.commit()
+
+@router.get("/{proposal_code}/attachments/{filename}", summary="Download the attached files of a proposal")
+async def serve_attachment(
+        proposal_code: str = Path(
+            ...,
+            title="Proposal code",
+            description="The proposal code",
+        ),
+        filename: str = Path(
+            ...,
+            title="Filename",
+            description=(
+                    "Name of the file to download."
+            ),
+        ),
+        user: User = Depends(get_current_user)
+)-> FileResponse:
+
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        proposal_services = services.ProposalService(unit_of_work.connection)
+        file_path = proposal_services.get_proposal_attachments_dir(proposal_code) / filename
+
+        # Check if the file exists
+        if not os.path.isfile(file_path):
+            raise HTTPException(status_code=404, detail="File not found")
+        media_type, _ = mimetypes.guess_type(filename)
+
+        if not media_type:
+            raise HTTPException(status_code=400, detail="Unsupported file format")
+
+        # Serve the file
+        return FileResponse(file_path, media_type=media_type)

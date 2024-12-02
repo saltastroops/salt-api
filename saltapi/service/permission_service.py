@@ -400,6 +400,15 @@ class PermissionService:
 
         self.check_role(user.username, roles)
 
+    def check_permission_to_view_rss_masks(self, user: User) -> None:
+        """
+        Check that the user can view the RSS slit masks.
+        """
+
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+
+        self.check_role(user.username, roles)
+
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:
         if role in user.roles:

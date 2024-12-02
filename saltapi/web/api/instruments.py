@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 
@@ -11,7 +11,7 @@ from saltapi.web.schema.rss import (
     MosBlock,
     MosMaskMetadata,
     RssMaskType,
-    UpdateMosMaskMetadata,
+    UpdateMosMaskMetadata, RssMask,
 )
 
 router = APIRouter(tags=["Instrument"])
@@ -64,7 +64,7 @@ def get_mos_masks_metadata(
         description="Only include MOS masks for this semester and earlier.",
         title="To semester",
     ),
-) -> List[MosBlock]:
+) -> List[Dict[str, Any]]:
     """
     Get the list of blocks using MOS.
     """
@@ -81,7 +81,7 @@ def get_mos_masks_metadata(
         mos_blocks = instrument_service.get_mos_masks_metadata(
             from_semester, to_semester
         )
-        return [MosBlock(**md) for md in mos_blocks]
+        return  mos_blocks
 
 
 @router.patch(
@@ -138,3 +138,27 @@ def get_obsolete_rss_masks_in_magazine(
 
         instrument_service = services.instrument_service(unit_of_work.connection)
         return instrument_service.get_obsolete_rss_masks_in_magazine(mask_types)
+
+@router.get(
+    "/rss/slit-masks",
+    summary="Get the RSS slit masks.",
+    response_model=List[RssMask],
+)
+def get_rss_slit_masks(
+        exclude_mask_types: List[RssMaskType] = Query(
+            [],
+            title="Mask types",
+            description="The mask types to exclude",
+            alias="exclude-mask-type",
+        ),
+        user: User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
+    """
+    Returns the list of RSS slit masks.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_rss_masks(user)
+
+        instrument_service = services.instrument_service(unit_of_work.connection)
+        return instrument_service.get_rss_slit_masks(exclude_mask_types)

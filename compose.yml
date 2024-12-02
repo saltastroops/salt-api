@@ -4,7 +4,7 @@
 
 services:
   salt-api:
-    image: saltastroops/salt-api
+    build: .
     env_file:
       - .env
     environment:

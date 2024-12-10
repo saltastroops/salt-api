@@ -650,8 +650,8 @@ SELECT COUNT(*)
 FROM PiptUser PU
     JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
     JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
-WHERE PS.PiptSetting_Name = 'RightProposals'
-    AND PUS.Value > 2
+WHERE PS.PiptSetting_Name = 'RightLibrarian'
+    AND PUS.Value > 0
     AND PU.Username = :username
         """
         )

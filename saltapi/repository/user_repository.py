@@ -640,6 +640,24 @@ WHERE PS.PiptSetting_Name = 'RightAdmin'
         # TODO Method need to be implemented.
         return False
 
+    def is_librarian(self, username) -> bool:
+        """
+        Should check whether the user is a librarian
+        """
+        stmt = text(
+            """
+SELECT COUNT(*)
+FROM PiptUser PU
+    JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+    JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+WHERE PS.PiptSetting_Name = 'RightLibrarian'
+    AND PUS.Value > 0
+    AND PU.Username = :username
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return cast(int, result.scalar()) > 0
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
@@ -768,6 +786,9 @@ WHERE PiptUser_Id = :user_id
 
         if self.is_tac_member_in_general(username):
             roles.append(Role.TAC_MEMBER)
+
+        if self.is_librarian(username):
+            roles.append(Role.LIBRARIAN)
 
         return roles
 

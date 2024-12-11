@@ -24,6 +24,7 @@ class UserRole(str, Enum):
     TAC_MEMBER = "TAC Member"
     TAC_CHAIR = "TAC Chair"
     BOARD_MEMBER = "Board Member"
+    LIBRARIAN = "Librarian"
 
 
 class FullName(BaseModel):

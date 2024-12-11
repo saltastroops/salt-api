@@ -48,6 +48,9 @@ class PermissionService:
         elif role == Role.ENGINEER:
             return self.user_repository.is_engineer()
 
+        elif role == Role.LIBRARIAN:
+            return self.user_repository.is_librarian(username)
+
         elif role == Role.INVESTIGATOR:
             return self.user_repository.is_investigator(
                 username, cast(str, proposal_code)
@@ -133,6 +136,7 @@ class PermissionService:
                     Role.INVESTIGATOR,
                     Role.PROPOSAL_TAC_MEMBER,
                     Role.ADMINISTRATOR,
+                    Role.LIBRARIAN,
                 ]
                 self.check_role(username, roles, proposal_code)
             else:
@@ -143,6 +147,7 @@ class PermissionService:
                     Role.SALT_OPERATOR,
                     Role.PARTNER_AFFILIATED,
                     Role.ADMINISTRATOR,
+                    Role.LIBRARIAN
                 ]
 
                 self.check_role(username, roles, proposal_code)

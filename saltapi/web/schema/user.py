@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.web.schema.common import ProposalCode
-from saltapi.web.schema.institution import Institution
+from saltapi.web.schema.institution import UserInstitution
 
 
 class UserRole(str, Enum):
@@ -56,7 +56,7 @@ class User(FullName):
     )
     username: str = Field(..., title="Username", description="Username.")
     roles: List[UserRole] = Field(..., title="User roles", description="User roles.")
-    affiliations: List[Institution] = Field(
+    affiliations: List[UserInstitution] = Field(
         ..., title="Affiliation", description="Affiliation of the user"
     )
 

@@ -68,6 +68,7 @@ FROM PiptUser AS PU
                             "department": row.department,
                             "partner_code": row.partner_code,
                             "partner_name": row.partner_name,
+                            "contact": row.email,
                         }
                     ],
                     "active": True if row.active == 1 else False,
@@ -78,6 +79,7 @@ FROM PiptUser AS PU
                     user["alternative_emails"].append(row.alternative_email)
                 user["affiliations"].append(
                     {
+                        "contact": row.alternative_email if row.alternative_email else row.email,
                         "institution_id": row.institution_id,
                         "name": row.institution_name,
                         "department": row.department,

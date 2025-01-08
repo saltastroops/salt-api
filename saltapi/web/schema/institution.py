@@ -33,7 +33,7 @@ class UserInstitution(Institution):
     contact: str = Field(
         ...,
         title="Contact",
-        description="The contact at this institution"
+        description="The user's email address for this institution"
     )
 
 

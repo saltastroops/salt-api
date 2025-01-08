@@ -49,11 +49,6 @@ class User(FullName):
 
     id: int = Field(..., title="User id", description="User id.")
     email: EmailStr = Field(..., title="Email address", description="Email address")
-    alternative_emails: List[EmailStr] = Field(
-        ...,
-        title="Alternative email addresses",
-        description="Alternative email addresses",
-    )
     username: str = Field(..., title="Username", description="Username.")
     roles: List[UserRole] = Field(..., title="User roles", description="User roles.")
     affiliations: List[UserInstitution] = Field(

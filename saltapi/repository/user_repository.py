@@ -26,8 +26,8 @@ class UserRepository:
         self.connection = connection
         self._get_user_query = """
 SELECT PU.PiptUser_Id           AS id,
-       I1.Email                 AS email,
-       I0.Email                 AS alternative_email,
+       I1.Email                 AS preferred_email,
+       I0.Email                 AS email,
        I0.Surname               AS family_name,
        I0.FirstName             AS given_name,
        PU.Password              AS password_hash,
@@ -40,7 +40,7 @@ SELECT PU.PiptUser_Id           AS id,
        PU.Active                AS active,
        PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
-         JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
+         JOIN Investigator I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
@@ -56,10 +56,7 @@ FROM PiptUser AS PU
                     "username": row.username,
                     "family_name": row.family_name,
                     "given_name": row.given_name,
-                    "email": row.email,
-                    "alternative_emails": [row.alternative_email]
-                    if row.alternative_email != row.email
-                    else [],
+                    "email": row.preferred_email,
                     "password_hash": row.password_hash,
                     "affiliations": [
                         {
@@ -68,18 +65,16 @@ FROM PiptUser AS PU
                             "department": row.department,
                             "partner_code": row.partner_code,
                             "partner_name": row.partner_name,
-                            "contact": row.email,
+                            "contact": row.preferred_email,
                         }
                     ],
                     "active": True if row.active == 1 else False,
                     "user_verified": True if row.user_verified == 1 else False,
                 }
             else:
-                if row.alternative_email != row.email:
-                    user["alternative_emails"].append(row.alternative_email)
                 user["affiliations"].append(
                     {
-                        "contact": row.alternative_email if row.alternative_email else row.email,
+                        "contact": row.email,
                         "institution_id": row.institution_id,
                         "name": row.institution_name,
                         "department": row.department,

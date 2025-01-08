@@ -26,7 +26,6 @@ class ContactDetails:
     given_name: str
     family_name: str
     email: str
-    alternative_emails: List[str]
 
 
 @dataclass()
@@ -58,7 +57,6 @@ class User:
     given_name: str
     family_name: str
     email: str
-    alternative_emails: List[str]
     username: str
     password_hash: str
     affiliations: List[Institution]
@@ -81,7 +79,6 @@ class NewUserDetails(UserStatistics):
     given_name: str
     family_name: str
     email: str
-    alternative_emails: List[str]
     username: str
     password: str
     institution_id: int

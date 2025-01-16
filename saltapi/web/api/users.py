@@ -404,7 +404,7 @@ def add_contact(
         ),
 ) -> User:
     """
-    dd contact details to the user.
+    Add contact details to the user.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

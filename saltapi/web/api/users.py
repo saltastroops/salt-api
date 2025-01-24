@@ -409,7 +409,6 @@ def add_contact(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_add_user_contact(user_id, user)
-
         user_service = services.user_service(unit_of_work.connection)
         user_service.add_contact(user_id, dict(contact))
         unit_of_work.commit()

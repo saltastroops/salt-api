@@ -58,30 +58,20 @@ FROM PiptUser AS PU
                     "given_name": row.given_name,
                     "email": row.preferred_email,
                     "password_hash": row.password_hash,
-                    "affiliations": [
-                        {
-                            "institution_id": row.institution_id,
-                            "name": row.institution_name,
-                            "department": row.department,
-                            "partner_code": row.partner_code,
-                            "partner_name": row.partner_name,
-                            "contact": row.preferred_email,
-                        }
-                    ],
+                    "affiliations": [],
                     "active": True if row.active == 1 else False,
                     "user_verified": True if row.user_verified == 1 else False,
                 }
-            else:
-                user["affiliations"].append(
-                    {
-                        "contact": row.email,
-                        "institution_id": row.institution_id,
-                        "name": row.institution_name,
-                        "department": row.department,
-                        "partner_code": row.partner_code,
-                        "partner_name": row.partner_name,
-                    }
-                )
+            user["affiliations"].append(
+                {
+                    "contact": row.email,
+                    "institution_id": row.institution_id,
+                    "name": row.institution_name,
+                    "department": row.department,
+                    "partner_code": row.partner_code,
+                    "partner_name": row.partner_name,
+                }
+            )
         if user:
             return User(**user, roles=self.get_user_roles(user["username"]))
         return None
@@ -1274,5 +1264,5 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
                 },
             )
         except IntegrityError as e:
-            raise ValueError(f"The email address {new_user_contact['email']} already exists.")
+            raise ValidationError(f"The email address {new_user_contact['email']} already exists for this institution.")
         return cast(int, result.lastrowid)

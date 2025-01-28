@@ -78,7 +78,6 @@ def create_user(
                 username=user.username,
                 password=user.password,
                 email=user.email,
-                alternative_emails=[],
                 given_name=user.given_name,
                 family_name=user.family_name,
                 institution_id=user.institution_id,
@@ -405,12 +404,11 @@ def add_contact(
         ),
 ) -> User:
     """
-    dd contact details to the user.
+    Add contact details to the user.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_add_user_contact(user_id, user)
-
         user_service = services.user_service(unit_of_work.connection)
         user_service.add_contact(user_id, dict(contact))
         unit_of_work.commit()

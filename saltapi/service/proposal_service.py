@@ -86,7 +86,9 @@ class ProposalService:
         """
         return self.repository.get_phase1_summary(proposal_code)
 
-    def get_proposal_file(self, proposal_code: str) -> pathlib.Path:
+    def get_proposal_file(
+        self, proposal_code: str, phase: Optional[int] = None
+    ) -> pathlib.Path:
         """
         Return the file path of the proposal zip file.
 
@@ -100,7 +102,7 @@ class ProposalService:
         `~pathlib.Path`
             The file path of the proposal zip file.
         """
-        return self.repository.get_proposal_file(proposal_code)
+        return self.repository.get_proposal_file(proposal_code, phase)
 
     def get_proposal(
         self,
@@ -471,7 +473,9 @@ class ProposalService:
             approval_user_id, proposal_code, approved
         )
 
-    def get_pools(self, proposal_code: str, semester: Optional[Semester] = None) -> List[Dict[str, any]]:
+    def get_pools(
+        self, proposal_code: str, semester: Optional[Semester] = None
+    ) -> List[Dict[str, any]]:
         return self.repository.get_pools(proposal_code, semester)
 
     @staticmethod

@@ -1449,7 +1449,9 @@ WHERE PC.Proposal_Code = :proposal_code;
 
         return bool(cast(int, one) if one is not None else 0 > 0)
 
-    def get_current_version(self, proposal_code: str) -> int:
+    def get_current_version(
+        self, proposal_code: str, phase: Optional[int] = None
+    ) -> int:
         """
         Return the current version (number) of a proposal.
 
@@ -1457,24 +1459,36 @@ WHERE PC.Proposal_Code = :proposal_code;
         ----------
         proposal_code: str
             The proposal code.
+        phase: int
+            The requested proposal phase.
 
         Returns
         -------
         int
             The proposal version.
         """
+        if phase is None:
+            phases = [1, 2]
+        else:
+            phases = [phase]
         stmt = text(
             """
 SELECT MAX(Submission) AS version
 FROM Proposal P
 JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
+WHERE PC.Proposal_Code = :proposal_code AND P.Phase IN :phases
         """
         )
-        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        result = self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "phases": phases}
+        )
         version = result.scalar_one()
         if version is None:
-            raise NotFoundError(f"No such proposal code: {proposal_code}")
+            raise NotFoundError(
+                f"There exists no proposal with proposal code  "
+                f"{proposal_code} and phase "
+                f"{' or '.join([str(p) for p in phases])}"
+            )
 
         return cast(int, version)
 
@@ -1890,16 +1904,23 @@ WHERE PC.Proposal_Code = :proposal_code
 
         return path
 
-    def get_proposal_file(self, proposal_code: str) -> pathlib.Path:
+    def get_proposal_file(
+        self, proposal_code: str, phase: Optional[int] = None
+    ) -> pathlib.Path:
         """
-        Return the path of the latest proposal zip file.
+        Return the path of the latest proposal zip file with an (optional) phase.
+
+        If no phase is given, any phase is allowed for the proposal.
 
         The proposal zip file for a submission is stored in a folder
         <proposal_code>/<submission_number> and has the name <proposal_code>/zip.
 
         Parameters
         ----------
-        proposal_code
+        proposal_code: str
+            Proposal code.
+        phase: int or None
+            Requested phase.
 
         Returns
         -------
@@ -1908,7 +1929,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
         """
         proposals_dir = get_settings().proposals_dir
-        version = self.get_current_version(proposal_code)
+        version = self.get_current_version(proposal_code, phase)
         path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
         if not path.exists():
             raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
@@ -2366,7 +2387,9 @@ WHERE Proposal_Code = :proposal_code
 
         return list(req_time.values())
 
-    def _get_nir_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
+    def _get_nir_simulations(
+        self, proposal_code: str, configuration_id: int
+    ) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2379,10 +2402,9 @@ WHERE Proposal_Code = :proposal_code AND P1Nir_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code,
-            "configuration_id": configuration_id
-        }):
+        for row in self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
+        ):
             simulations.append(
                 {
                     "name": row.name,
@@ -2392,7 +2414,9 @@ WHERE Proposal_Code = :proposal_code AND P1Nir_Id = :configuration_id
             )
         return simulations
 
-    def _get_hrs_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
+    def _get_hrs_simulations(
+        self, proposal_code: str, configuration_id: int
+    ) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2405,10 +2429,9 @@ WHERE Proposal_Code = :proposal_code AND P1Hrs_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code,
-            "configuration_id": configuration_id
-        }):
+        for row in self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
+        ):
             simulations.append(
                 {
                     "name": row.name,
@@ -2418,7 +2441,9 @@ WHERE Proposal_Code = :proposal_code AND P1Hrs_Id = :configuration_id
             )
         return simulations
 
-    def _get_rss_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
+    def _get_rss_simulations(
+        self, proposal_code: str, configuration_id: int
+    ) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2431,10 +2456,9 @@ WHERE Proposal_Code = :proposal_code AND P1Rss_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code,
-            "configuration_id": configuration_id
-        }):
+        for row in self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
+        ):
             simulations.append(
                 {
                     "name": row.name,
@@ -2444,7 +2468,9 @@ WHERE Proposal_Code = :proposal_code AND P1Rss_Id = :configuration_id
             )
         return simulations
 
-    def _get_salticam_simulations(self, proposal_code: str, configuration_id: int) -> List[Dict[str, Any]]:
+    def _get_salticam_simulations(
+        self, proposal_code: str, configuration_id: int
+    ) -> List[Dict[str, Any]]:
         stmt = text(
             """
 SELECT
@@ -2457,10 +2483,9 @@ WHERE Proposal_Code = :proposal_code AND P1Salticam_Id = :configuration_id
         """
         )
         simulations = []
-        for row in self.connection.execute(stmt, {
-            "proposal_code": proposal_code,
-            "configuration_id": configuration_id
-        }):
+        for row in self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
+        ):
             simulations.append(
                 {
                     "name": row.name,
@@ -2494,17 +2519,16 @@ FROM P1Config P1C
 WHERE Proposal_Code = :proposal_code AND P1C.P1Rss_Id = :config_id
         """
         )
-        result = self.connection.execute(stmt, {
-            "proposal_code": proposal_code,
-            "config_id": config_id
-        })
+        result = self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "config_id": config_id}
+        )
         row = result.one()
         return {
-            'grating': row.grating,
-            'mask_type': row.mask_type,
-            'polarimetry_pattern_name': row.polarimetry_pattern_name,
-            'fabry_perot_mode': row.fabry_perot_mode,
-            'mos_description': row.mos_description
+            "grating": row.grating,
+            "mask_type": row.mask_type,
+            "polarimetry_pattern_name": row.polarimetry_pattern_name,
+            "fabry_perot_mode": row.fabry_perot_mode,
+            "mos_description": row.mos_description,
         }
 
     def _get_p1_scam_filters(self, scam_id: int):
@@ -2521,10 +2545,7 @@ WHERE P1S.P1Salticam_Id = :scam_id
         """
         )
         result = self.connection.execute(stmt, {"scam_id": scam_id})
-        return [
-            {'name': row.name, 'description': row.description}
-            for row in result
-        ]
+        return [{"name": row.name, "description": row.description} for row in result]
 
     def _get_science_configurations(self, proposal_code: str) -> List[Dict[str, Any]]:
         stmt = text(
@@ -2561,40 +2582,60 @@ WHERE PC.Proposal_Code = :proposal_code
 
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
             if row.bvit:
-                configurations.append({  # There are no BVIT simulations
-
-                    "instrument": "BVIT",
-                    "filter": {
-                        'name':  row.bvit_filter, 'description': row.bvit_filter
+                configurations.append(
+                    {  # There are no BVIT simulations
+                        "instrument": "BVIT",
+                        "filter": {
+                            "name": row.bvit_filter,
+                            "description": row.bvit_filter,
+                        },
                     }
-                })
+                )
             elif row.hrs:
-                configurations.append({
-                    "instrument": "HRS",
-                    "simulations": self._get_hrs_simulations(proposal_code, row.hrs),
-                    "detector_mode": normalised_hrs_mode(row.hrs_mode)
-                })
+                configurations.append(
+                    {
+                        "instrument": "HRS",
+                        "simulations": self._get_hrs_simulations(
+                            proposal_code, row.hrs
+                        ),
+                        "detector_mode": normalised_hrs_mode(row.hrs_mode),
+                    }
+                )
             elif row.nir:
-                configurations.append({
-                    "simulations": self._get_nir_simulations(proposal_code, row.nir),
-                    "instrument": "NIR",
-                    "grating": row.nir_grating
-                })
+                configurations.append(
+                    {
+                        "simulations": self._get_nir_simulations(
+                            proposal_code, row.nir
+                        ),
+                        "instrument": "NIR",
+                        "grating": row.nir_grating,
+                    }
+                )
             elif row.rss:
-                configurations.append({
-                    "instrument": "RSS",
-                    "mode": row.rss_mode,
-                    "detector_mode": row.rss_detector_mode,
-                    "rss_mode_configuration": self._get_p1_rss_config(proposal_code, row.rss),
-                    "simulations": self._get_rss_simulations(proposal_code, row.rss),
-                })
+                configurations.append(
+                    {
+                        "instrument": "RSS",
+                        "mode": row.rss_mode,
+                        "detector_mode": row.rss_detector_mode,
+                        "rss_mode_configuration": self._get_p1_rss_config(
+                            proposal_code, row.rss
+                        ),
+                        "simulations": self._get_rss_simulations(
+                            proposal_code, row.rss
+                        ),
+                    }
+                )
             elif row.scam:
-                configurations.append({
-                    "instrument": "SALTICAM",
-                    "detector_mode":row.scam_detector_mode,
-                    "filters":self._get_p1_scam_filters(row.scam),
-                    "simulations":self._get_salticam_simulations(proposal_code, row.scam)
-                })
+                configurations.append(
+                    {
+                        "instrument": "SALTICAM",
+                        "detector_mode": row.scam_detector_mode,
+                        "filters": self._get_p1_scam_filters(row.scam),
+                        "simulations": self._get_salticam_simulations(
+                            proposal_code, row.scam
+                        ),
+                    }
+                )
             else:
                 raise NotFoundError(
                     "Unknown instrument configuration found for proposal:"
@@ -2782,11 +2823,13 @@ WHERE PAT.Pool_Id = :pool_id
         pool_times = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
             used_time = total_times_per_priority[row.priority]
-            pool_times.append({
-                "priority": row.priority,
-                "assigned_time": row.assigned_time,
-                "used_time": used_time
-            })
+            pool_times.append(
+                {
+                    "priority": row.priority,
+                    "assigned_time": row.assigned_time,
+                    "used_time": used_time,
+                }
+            )
         return pool_times
 
     def _get_pool_rules(self, pool_id: int) -> List[Dict[str, int]]:
@@ -2803,10 +2846,12 @@ WHERE PRS.Pool_Id = :pool_id
 
         pool_rules = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
-            pool_rules.append({
-                "rule": row.rule,
-                "rule_parameter": row.rule_parameter,
-            })
+            pool_rules.append(
+                {
+                    "rule": row.rule,
+                    "rule_parameter": row.rule_parameter,
+                }
+            )
         return pool_rules
 
     def _get_block_total_observed_time(self, block_id: int) -> int:
@@ -2829,7 +2874,9 @@ WHERE BV.Block_Id = :block_id AND BVS.BlockVisitStatus = 'Accepted'
             return cast(int, total_obs_time[0])
         return 0
 
-    def _get_pool_blocks(self, pool_id: int, semester: str, proposal_code: str) -> List[Dict[str, Any]]:
+    def _get_pool_blocks(
+        self, pool_id: int, semester: str, proposal_code: str
+    ) -> List[Dict[str, Any]]:
 
         stmt = text(
             """
@@ -2867,13 +2914,19 @@ WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
                     "block_status": block.status,
                     "status": block.status,
                     "observation_time": block.observation_time,
-                    "total_observed_time": self._get_block_total_observed_time(block.id),
-                    "is_observable_tonight": block_observable_tonight.get(block.id, False)
+                    "total_observed_time": self._get_block_total_observed_time(
+                        block.id
+                    ),
+                    "is_observable_tonight": block_observable_tonight.get(
+                        block.id, False
+                    ),
                 }
             )
         return blocks
 
-    def get_pools(self, proposal_code: str, semester: Optional[str]) -> List[Dict[str, any]]:
+    def get_pools(
+        self, proposal_code: str, semester: Optional[str]
+    ) -> List[Dict[str, any]]:
 
         if semester is None:
             semester = self._latest_submission_semester(proposal_code)
@@ -2912,7 +2965,9 @@ WHERE PC.Proposal_Code = :proposal_code
                     "id": row.id,
                     "name": row.name,
                     "pool_rules": self._get_pool_rules(row.id),
-                    "pool_times": self._get_pool_times(row.id, total_times_per_priority),
+                    "pool_times": self._get_pool_times(
+                        row.id, total_times_per_priority
+                    ),
                     "blocks": pool_blocks,
                 }
             )

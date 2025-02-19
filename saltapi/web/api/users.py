@@ -412,6 +412,9 @@ def add_contact(
         permission_service.check_permission_to_add_user_contact(user_id, user)
 
         user_service = services.user_service(unit_of_work.connection)
-        user_service.add_contact(user_id, dict(contact))
+        new_contact = dict(contact)
+        new_contact["family_name"] = user.family_name
+        new_contact["given_name"] = user.given_name
+        user_service.add_contact(user_id, new_contact)
         unit_of_work.commit()
         return user_service.get_user(user_id)

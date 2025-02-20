@@ -1277,6 +1277,6 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
                 },
             )
         except IntegrityError as e:
-            raise ValidationError(f"The email address {new_user_contact['email']} already exists.")
+            raise ValidationError(f"The email address {new_user_contact['email']} already exists for this institution.")
 
         return cast(int, result.lastrowid)

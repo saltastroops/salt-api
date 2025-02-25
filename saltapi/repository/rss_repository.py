@@ -664,15 +664,20 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
         """
         stmt = """
 SELECT
-    Barcode             AS barcode,
-    Description         AS description,
-    RssMaskType         AS mask_type,
-    IF(RCM.RssMaskSlot IS NOT NULL, 1, 0)        AS in_magazine
-    
+    RM.Barcode                  AS barcode,
+    RPMD.Description            AS description,
+    RMT.RssMaskType             AS mask_type,
+    IF(RCM.RssMaskSlot IS NOT NULL, 1, 0)        AS in_magazine,
+    RMMD.SaComment              AS mask_comment,
+    RMMD.CutBy                  AS cut_by,
+    RMMD.CutDate                AS cut_date,
+    RMMD.PlotPath               AS plot_path,
+    RMMD.XmlPath                AS xml_path
 FROM RssMask RM
     JOIN RssMaskType RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
     LEFT JOIN RssCurrentMasks RCM ON RM.RssMask_Id = RCM.RssMask_Id
     LEFT JOIN RssPredefinedMaskDetails RPMD ON RM.RssMask_Id = RPMD.RssMask_Id
+    LEFT JOIN RssMosMaskDetails RMMD ON RM.RssMask_Id = RMMD.RssMask_Id
 """
         if len(exclude_mask_types) > 0:
             stmt += "WHERE RssMaskType NOT IN :exclude_mask_types"
@@ -681,7 +686,12 @@ FROM RssMask RM
                 "barcode": m.barcode,
                 "mask_type": m.mask_type,
                 "description": m.description,
-                "is_in_magazine": m.in_magazine
+                "is_in_magazine": m.in_magazine,
+                "plot_filename": m.plot_path.split("/")[-1] if m.plot_path else None,
+                "xml_filename": m.xml_path.split("/")[-1] if m.xml_path else None,
+                "cut_by": m.cut_by,
+                "cut_date": m.cut_date,
+                "comment": m.mask_comment
             }
             for m in self.connection.execute(
                 text(stmt),

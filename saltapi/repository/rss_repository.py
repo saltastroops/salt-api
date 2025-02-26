@@ -40,10 +40,11 @@ SELECT R.Rss_Id                                          AS rss_id,
        RMT.RssMaskType                                   AS mask_type,
        RMA.Barcode                                       AS mask_barcode,
        RPMD.Description                                  AS mask_description,
-       RMMD.Equinox                                      AS mos_equinox,
        RMMD.CutBy                                        AS mos_cut_by,
        RMMD.CutDate                                      AS mos_cut_date,
        RMMD.SaComment                                    AS mos_comment,
+       RMMD.PlotPath                                     AS plot_path,
+       RMMD.XmlPath                                      AS xml_path,
        RDM.DetectorMode                                  AS detector_mode,
        RD.PreShuffle                                     AS pre_shuffle,
        RD.PostShuffle                                    AS post_shuffle,
@@ -149,26 +150,17 @@ ORDER BY Rss_Id DESC;
         if not row.has_mask:
             return None
 
-        if not row.has_mos_mask:
-            mask = {
+        return {
                 "mask_type": row.mask_type,
                 "barcode": row.mask_barcode,
+                "plot_filename": row.plot_path.split("/")[-1] if row.plot_path else None,
+                "xml_filename": row.xml_path.split("/")[-1] if row.xml_path else None,
                 "description": row.mask_description,
-                "is_in_magazine": row.mask_in_magazine,
-            }
-        else:
-            mask = {
-                "mask_type": row.mask_type,
-                "barcode": row.mask_barcode,
-                "description": row.mask_description,
-                "equinox": float(row.mos_equinox),
                 "cut_by": row.mos_cut_by,
                 "cut_date": row.mos_cut_date,
                 "comment": row.mos_comment,
                 "is_in_magazine": row.mask_in_magazine,
             }
-
-        return mask
 
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """Return an RSS configuration."""
@@ -179,7 +171,7 @@ ORDER BY Rss_Id DESC;
             "fabry_perot": self._fabry_perot(row),
             "polarimetry": self._polarimetry(row),
             "filter": row.filter,
-            "mask": self._mask(row),
+            "mask": self._mask(row)
         }
         return config
 
@@ -665,3 +657,46 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
             if m not in needed_masks:
                 obsolete_masks.append(m)
         return obsolete_masks
+
+    def get_rss_slit_mask(self, exclude_mask_types: List[RssMaskType]) -> List[Dict[str, Any]]:
+        """
+        The list of RSS masks, optionally filtered by a mask type.
+        """
+        stmt = """
+SELECT
+    RM.Barcode                  AS barcode,
+    RPMD.Description            AS description,
+    RMT.RssMaskType             AS mask_type,
+    IF(RCM.RssMaskSlot IS NOT NULL, 1, 0)        AS in_magazine,
+    RMMD.SaComment              AS mask_comment,
+    RMMD.CutBy                  AS cut_by,
+    RMMD.CutDate                AS cut_date,
+    RMMD.PlotPath               AS plot_path,
+    RMMD.XmlPath                AS xml_path
+FROM RssMask RM
+    JOIN RssMaskType RMT ON RM.RssMaskType_Id = RMT.RssMaskType_Id
+    LEFT JOIN RssCurrentMasks RCM ON RM.RssMask_Id = RCM.RssMask_Id
+    LEFT JOIN RssPredefinedMaskDetails RPMD ON RM.RssMask_Id = RPMD.RssMask_Id
+    LEFT JOIN RssMosMaskDetails RMMD ON RM.RssMask_Id = RMMD.RssMask_Id
+"""
+        if len(exclude_mask_types) > 0:
+            stmt += "WHERE RssMaskType NOT IN :exclude_mask_types"
+        return [
+            {
+                "barcode": m.barcode,
+                "mask_type": m.mask_type,
+                "description": m.description,
+                "is_in_magazine": m.in_magazine,
+                "plot_filename": m.plot_path.split("/")[-1] if m.plot_path else None,
+                "xml_filename": m.xml_path.split("/")[-1] if m.xml_path else None,
+                "cut_by": m.cut_by,
+                "cut_date": m.cut_date,
+                "comment": m.mask_comment
+            }
+            for m in self.connection.execute(
+                text(stmt),
+                {
+                    "exclude_mask_types": tuple([m.value for m in exclude_mask_types]),
+                },
+            )
+        ]

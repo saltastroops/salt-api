@@ -426,7 +426,9 @@ def test_update_proposal_status(db_connection: Connection) -> None:
         ("2020-1-SCI-015", "Under technical review"),
     ],
 )
-def test_update_proposal_status_raise_validation_error(proposal_code: str, status: str, db_connection: Connection) -> None:
+def test_update_proposal_status_raise_validation_error(
+    proposal_code: str, status: str, db_connection: Connection
+) -> None:
     proposal_repository = ProposalRepository(db_connection)
 
     with pytest.raises(ValidationError):

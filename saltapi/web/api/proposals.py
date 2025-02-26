@@ -1,3 +1,5 @@
+import mimetypes
+import os
 from datetime import date
 from typing import Any, Dict, List, Optional, Union
 
@@ -26,6 +28,7 @@ from saltapi.web import services
 from saltapi.web.schema.common import Message, ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
 from saltapi.web.schema.p2_proposal import P2Proposal
+from saltapi.web.schema.pool import Pool
 from saltapi.web.schema.proposal import (
     Comment,
     DataReleaseDate,
@@ -131,6 +134,9 @@ def get_proposal_zip(
         title="Proposal code",
         description="Proposal code of the returned proposal zip file.",
     ),
+    phase: Optional[int] = Query(
+        None, title="Phase", description="Phase of the returned proposal zip file"
+    ),
     user: User = Depends(get_current_user),
 ) -> FileResponse:
     """
@@ -143,7 +149,7 @@ def get_proposal_zip(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
-        path = proposal_service.get_proposal_file(proposal_code)
+        path = proposal_service.get_proposal_file(proposal_code, phase)
         return FileResponse(
             path, media_type="application/zip", filename=f"{proposal_code}.zip"
         )
@@ -192,6 +198,32 @@ def get_proposal(
             return P1Proposal(**proposal)
         if proposal["phase"] == 2:
             return P2Proposal(**proposal)
+
+
+@router.get(
+    "/{proposal_code}/pools",
+    summary="Get the pools in a proposal",
+    response_model=List[Pool],
+)
+def get_pools(
+    proposal_code: ProposalCode = Path(
+        ...,
+        title="Proposal code",
+        description="Proposal code of the proposal whose pools are requested.",
+    ),
+    semester: Optional[Semester] = Query(
+        None,
+        description="Semester of the returned pools.",
+        title="Semester",
+    ),
+    user: User = Depends(get_current_user),
+) -> List[Pool]:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        pools = proposal_service.get_pools(proposal_code, semester)
+        return [Pool(**pool) for pool in pools]
 
 
 @router.get(
@@ -664,3 +696,42 @@ def update_investigator_proposal_approval_status(
         )
 
         unit_of_work.commit()
+
+
+@router.get(
+    "/{proposal_code}/attachments/{filename}",
+    summary="Download the attached files of a proposal",
+)
+async def serve_attachment(
+    proposal_code: str = Path(
+        ...,
+        title="Proposal code",
+        description="The proposal code",
+    ),
+    filename: str = Path(
+        ...,
+        title="Filename",
+        description=("Name of the file to download."),
+    ),
+    user: User = Depends(get_current_user),
+) -> FileResponse:
+
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        proposal_services = services.ProposalService(unit_of_work.connection)
+        file_path = (
+            proposal_services.get_proposal_attachments_dir(proposal_code) / filename
+        )
+
+        # Check if the file exists
+        if not os.path.isfile(file_path):
+            raise HTTPException(status_code=404, detail="File not found")
+        media_type, _ = mimetypes.guess_type(filename)
+
+        if not media_type:
+            raise HTTPException(status_code=400, detail="Unsupported file format")
+
+        # Serve the file
+        return FileResponse(file_path, media_type=media_type)

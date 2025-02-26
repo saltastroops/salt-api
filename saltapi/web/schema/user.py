@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.web.schema.common import ProposalCode
-from saltapi.web.schema.institution import Institution
+from saltapi.web.schema.institution import UserInstitution
 
 
 class UserRole(str, Enum):
@@ -24,6 +24,7 @@ class UserRole(str, Enum):
     TAC_MEMBER = "TAC Member"
     TAC_CHAIR = "TAC Chair"
     BOARD_MEMBER = "Board Member"
+    LIBRARIAN = "Librarian"
 
 
 class FullName(BaseModel):
@@ -48,14 +49,9 @@ class User(FullName):
 
     id: int = Field(..., title="User id", description="User id.")
     email: EmailStr = Field(..., title="Email address", description="Email address")
-    alternative_emails: List[EmailStr] = Field(
-        ...,
-        title="Alternative email addresses",
-        description="Alternative email addresses",
-    )
     username: str = Field(..., title="Username", description="Username.")
     roles: List[UserRole] = Field(..., title="User roles", description="User roles.")
-    affiliations: List[Institution] = Field(
+    affiliations: List[UserInstitution] = Field(
         ..., title="Affiliation", description="Affiliation of the user"
     )
 
@@ -186,8 +182,22 @@ class SaltAstronomer(FullName):
 
 class PasswordUpdate(BaseModel):
     password: str = Field(..., title="Password", description="Password.")
-    authentication_key: str = Field(..., title="Authentication token", description="The authentication Token")
+    authentication_key: str = Field(
+        ..., title="Authentication token", description="The authentication Token"
+    )
 
 
 class UsernameEmail(BaseModel):
-    username_email: str = Field(..., title="Username or Email", description="Username or Email.")
+    username_email: str = Field(
+        ..., title="Username or Email", description="Username or Email."
+    )
+
+class UserContact(BaseModel):
+    email: str = Field(..., title="Email address", description="The email address.")
+    institution_id: int = Field(
+        ...,
+        title="Institution id",
+        description=(
+            "Unique identifier of the institution to which the user is affiliated."
+        ),
+    )

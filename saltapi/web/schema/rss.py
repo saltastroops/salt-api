@@ -1,6 +1,6 @@
 from datetime import date
 from enum import Enum
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -129,24 +129,32 @@ class RssMask(BaseModel):
         title="Is the mask in the magazine?",
         description="Is the mask in the magazine?",
     )
-
-
-class RssMosMask(RssMask):
-    """RSS MOS mask."""
-
-    equinox: Optional[float] = Field(
-        ..., title="Equinox", description="Equinox of the mask coordinates"
-    )
     cut_by: Optional[str] = Field(
         ..., title="Cut by", description="Person who cut the mask"
     )
-    cut_date: Optional[str] = Field(
+    cut_date: Optional[date] = Field(
         ..., title="Cut date", description="Date when the mask was cut"
     )
     comment: Optional[str] = Field(
         ...,
         title="Comment",
         description="Comment regarding the production and handling of the mask",
+    )
+    plot_filename: Optional[str] = Field(
+        ...,
+        title="Plot filename",
+        description=(
+            "The filename of the slit mask plot file."
+            "This file is downloadable from /PROPOSAL_CODE/attachments/THIS_FILENAME"
+        ),
+    )
+    xml_filename: Optional[str] = Field(
+        ...,
+        title="XML filename",
+        description=(
+            "The filename of the slit mask XML file."
+            "This file is downloadable from /PROPOSAL_CODE/attached/THIS_FILENAME"
+        ),
     )
 
 
@@ -164,7 +172,7 @@ class RssConfiguration(BaseModel):
         ..., title="Polarimetry setup", description="Polarimetry setup"
     )
     filter: str = Field(..., title="Filter", description="Filter")
-    mask: Optional[Union[RssMask, RssMosMask]] = Field(
+    mask: Optional[RssMask] = Field(
         ..., title="Slit mask", description="Slit mask"
     )
 
@@ -218,7 +226,6 @@ class RssGain(str, Enum):
 
 class RssReadoutSpeed(str, Enum):
     """RSS detector readout speed."""
-
     FAST = "Fast"
     NONE = "None"
     SLOW = "Slow"
@@ -226,7 +233,6 @@ class RssReadoutSpeed(str, Enum):
 
 class RssDetector(BaseModel):
     """Rss detector setup."""
-
     mode: RssDetectorMode = Field(
         ..., title="Detector mode", description="Detector mode"
     )
@@ -268,7 +274,6 @@ class RssDetector(BaseModel):
 
 class RssWaveplateAnglePair(BaseModel):
     """Half-wave plate and quarter-wave plate angle pair."""
-
     half_wave: Optional[float] = Field(
         ...,
         title="Half-wave plate angle",

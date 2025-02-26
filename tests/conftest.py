@@ -105,7 +105,7 @@ def _data_file(data_type: str, request: pytest.FixtureRequest) -> Path:
 
 @pytest.fixture(scope="function")
 def check_data(
-        data_regression: Any, request: pytest.FixtureRequest
+    data_regression: Any, request: pytest.FixtureRequest
 ) -> Generator[Callable[[Any], None], None, None]:
     # Figure out the file path for the data file
     data_file = _data_file("regression", request)
@@ -138,9 +138,9 @@ def email_service_mock():
 
 
 def find_username(
-        user_type: str,
-        proposal_code: Optional[str] = None,
-        partner_code: Optional[str] = None,
+    user_type: str,
+    proposal_code: Optional[str] = None,
+    partner_code: Optional[str] = None,
 ) -> str:
     """
     Find the username of a user who has a given user type.
@@ -198,7 +198,7 @@ def find_username(
 
 
 def find_usernames(
-        role: str, has_role: bool, proposal_code: Optional[str] = None
+    role: str, has_role: bool, proposal_code: Optional[str] = None
 ) -> List[str]:
     normalized_role = role.lower()
     normalized_role = normalized_role.replace(" ", "_").replace("-", "_")
@@ -247,7 +247,9 @@ def authenticate_with_validation_token(user_id: int, client: TestClient) -> None
     with cast(Engine, _create_engine()).connect() as connection:
         user_repository = UserRepository(connection)
         auth_service = AuthenticationService(user_repository)
-        token = auth_service.jwt_token({"sub": str(user_id)}, timedelta(hours=1), verification=True)
+        token = auth_service.jwt_token(
+            {"sub": str(user_id)}, timedelta(hours=1), verification=True
+        )
         client.headers["Authorization"] = f"Bearer {token}"
 
 
@@ -255,7 +257,9 @@ def valid_user_verification_token(user_id: int) -> str:
     with cast(Engine, _create_engine()).connect() as connection:
         user_repository = UserRepository(connection)
         auth_service = AuthenticationService(user_repository)
-        return auth_service.jwt_token({"sub": str(user_id)}, timedelta(hours=1), verification=True)
+        return auth_service.jwt_token(
+            {"sub": str(user_id)}, timedelta(hours=1), verification=True
+        )
 
 
 def get_user_by_username(username: str) -> User:
@@ -303,12 +307,12 @@ def create_user(client: TestClient) -> Dict[str, Any]:
 
 
 def setup_finder_chart_files(
-        proposals_dir: Path,
-        proposal_code: str,
-        parent_dirs: List[str],
-        finder_chart_name: str,
-        original_suffixes: List[str],
-        thumbnail_suffixes: List[str],
+    proposals_dir: Path,
+    proposal_code: str,
+    parent_dirs: List[str],
+    finder_chart_name: str,
+    original_suffixes: List[str],
+    thumbnail_suffixes: List[str],
 ) -> List[Path]:
     """
     Setup dummy finder charts.
@@ -353,10 +357,10 @@ def setup_finder_chart_files(
 
         if suffix in ["jpg", "pdf", "png"]:
             finder_chart_template = (
-                    Path(__file__).parent
-                    / "data"
-                    / "finder_charts"
-                    / f"finder_chart.{suffix}"
+                Path(__file__).parent
+                / "data"
+                / "finder_charts"
+                / f"finder_chart.{suffix}"
             )
             finder_chart = parent_dir / f"{prefix}{finder_chart_name}.{suffix}"
             shutil.copy(finder_chart_template, finder_chart)

@@ -6,6 +6,7 @@ from fastapi import Request
 from saltapi.exceptions import AuthorizationError, ValidationError
 from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
@@ -21,10 +22,12 @@ class PermissionService:
         user_repository: UserRepository,
         proposal_repository: ProposalRepository,
         block_repository: BlockRepository,
+        submission_repository: SubmissionRepository,
     ) -> None:
         self.user_repository = user_repository
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
+        self.submission_repository = submission_repository
 
     def user_has_role(
         self,
@@ -44,6 +47,9 @@ class PermissionService:
 
         elif role == Role.ENGINEER:
             return self.user_repository.is_engineer()
+
+        elif role == Role.LIBRARIAN:
+            return self.user_repository.is_librarian(username)
 
         elif role == Role.INVESTIGATOR:
             return self.user_repository.is_investigator(
@@ -130,6 +136,7 @@ class PermissionService:
                     Role.INVESTIGATOR,
                     Role.PROPOSAL_TAC_MEMBER,
                     Role.ADMINISTRATOR,
+                    Role.LIBRARIAN,
                 ]
                 self.check_role(username, roles, proposal_code)
             else:
@@ -140,6 +147,7 @@ class PermissionService:
                     Role.SALT_OPERATOR,
                     Role.PARTNER_AFFILIATED,
                     Role.ADMINISTRATOR,
+                    Role.LIBRARIAN
                 ]
 
                 self.check_role(username, roles, proposal_code)
@@ -156,6 +164,37 @@ class PermissionService:
             except Exception:
                 raise AuthorizationError()
             raise
+
+    def check_permission_to_submit_proposal(
+        self, user: User, proposal_code: Optional[str]
+    ) -> None:
+        """
+        Check that the user may submit a proposal.
+
+        This is the case if this is new submission rather than a resubmission of if the
+        user is any of the following:
+
+        * a SALT Astronomer
+        * an administrator
+        * a Principal Investigator or Principal Contact of the proposal
+        """
+        if proposal_code.startswith("Unsubmitted"):
+            return
+        username = user.username
+        if self.user_has_role(
+            username, Role.PRINCIPAL_CONTACT, proposal_code
+        ) or self.user_has_role(username, Role.PRINCIPAL_INVESTIGATOR, proposal_code):
+            return
+
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR]
+        self.check_role(username, roles)
+
+    def check_permission_to_view_submission_progress(
+        self, user: User, submission: Dict[str, Any]
+    ):
+        submitter_id = submission["submitter_id"]
+        if submitter_id != user.id:
+            raise AuthorizationError()
 
     def check_permission_to_update_proposal_status(
         self, user: User, proposal_code: str, proposal_status: str
@@ -366,6 +405,15 @@ class PermissionService:
 
         self.check_role(user.username, roles)
 
+    def check_permission_to_view_rss_masks(self, user: User) -> None:
+        """
+        Check that the user can view the RSS slit masks.
+        """
+
+        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+
+        self.check_role(user.username, roles)
+
     @staticmethod
     def check_user_has_role(user: User, role: Role) -> bool:
         if role in user.roles:
@@ -534,3 +582,11 @@ class PermissionService:
             return
 
         raise AuthorizationError(f"You are not allowed update user roles.")
+
+    def check_permission_to_add_user_contact(self, user_id: int, user: User):
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+        if user_id == user.id:
+            return
+
+        raise ValidationError("You are not allowed to add a contact to this user")

@@ -43,7 +43,10 @@ def permission_service(connection: Connection) -> PermissionService:
     user_repository = UserRepository(connection)
     proposal_repository = ProposalRepository(connection)
     block_repository = BlockRepository(connection)
-    return PermissionService(user_repository, proposal_repository, block_repository)
+    submission_repository = SubmissionRepository(connection)
+    return PermissionService(
+        user_repository, proposal_repository, block_repository, submission_repository
+    )
 
 
 def proposal_service(connection: Connection) -> ProposalService:

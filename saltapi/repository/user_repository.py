@@ -26,8 +26,8 @@ class UserRepository:
         self.connection = connection
         self._get_user_query = """
 SELECT PU.PiptUser_Id           AS id,
-       I1.Email                 AS email,
-       I0.Email                 AS alternative_email,
+       I1.Email                 AS preferred_email,
+       I0.Email                 AS email,
        I0.Surname               AS family_name,
        I0.FirstName             AS given_name,
        PU.Password              AS password_hash,
@@ -40,7 +40,7 @@ SELECT PU.PiptUser_Id           AS id,
        PU.Active                AS active,
        PU.UserVerified          AS user_verified
 FROM PiptUser AS PU
-         JOIN Investigator AS I0 ON PU.PiptUser_Id = I0.PiptUser_Id
+         JOIN Investigator I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
@@ -56,35 +56,22 @@ FROM PiptUser AS PU
                     "username": row.username,
                     "family_name": row.family_name,
                     "given_name": row.given_name,
-                    "email": row.email,
-                    "alternative_emails": [row.alternative_email]
-                    if row.alternative_email != row.email
-                    else [],
+                    "email": row.preferred_email,
                     "password_hash": row.password_hash,
-                    "affiliations": [
-                        {
-                            "institution_id": row.institution_id,
-                            "name": row.institution_name,
-                            "department": row.department,
-                            "partner_code": row.partner_code,
-                            "partner_name": row.partner_name,
-                        }
-                    ],
+                    "affiliations": [],
                     "active": True if row.active == 1 else False,
                     "user_verified": True if row.user_verified == 1 else False,
                 }
-            else:
-                if row.alternative_email != row.email:
-                    user["alternative_emails"].append(row.alternative_email)
-                user["affiliations"].append(
-                    {
-                        "institution_id": row.institution_id,
-                        "name": row.institution_name,
-                        "department": row.department,
-                        "partner_code": row.partner_code,
-                        "partner_name": row.partner_name,
-                    }
-                )
+            user["affiliations"].append(
+                {
+                    "contact": row.email,
+                    "institution_id": row.institution_id,
+                    "name": row.institution_name,
+                    "department": row.department,
+                    "partner_code": row.partner_code,
+                    "partner_name": row.partner_name,
+                }
+            )
         if user:
             return User(**user, roles=self.get_user_roles(user["username"]))
         return None
@@ -241,6 +228,9 @@ VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
                 "email_validation": str(uuid.uuid4())[:8],
             },
         )
+
+        # Give the new user the permission to view and submit their own proposals
+        self._update_right(result.lastrowid, "RightProposals", 1)
 
         return cast(int, result.lastrowid)
 
@@ -637,6 +627,24 @@ WHERE PS.PiptSetting_Name = 'RightAdmin'
         # TODO Method need to be implemented.
         return False
 
+    def is_librarian(self, username) -> bool:
+        """
+        Should check whether the user is a librarian
+        """
+        stmt = text(
+            """
+SELECT COUNT(*)
+FROM PiptUser PU
+    JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+    JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+WHERE PS.PiptSetting_Name = 'RightLibrarian'
+    AND PUS.Value > 0
+    AND PU.Username = :username
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return cast(int, result.scalar()) > 0
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
@@ -765,6 +773,9 @@ WHERE PiptUser_Id = :user_id
 
         if self.is_tac_member_in_general(username):
             roles.append(Role.TAC_MEMBER)
+
+        if self.is_librarian(username):
+            roles.append(Role.LIBRARIAN)
 
         return roles
 
@@ -1098,11 +1109,9 @@ VALUES (
 ON DUPLICATE KEY UPDATE Value = :value
             """
         )
-        self.connection.execute(stmt, {
-            "user_id": user_id,
-            "right_setting": right_setting,
-            "value": value
-        })
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_setting": right_setting, "value": value}
+        )
 
     def _delete_right(self, user_id: int, right_setting: str) -> None:
         stmt = text(
@@ -1116,57 +1125,70 @@ WHERE PiptUser_Id = :user_id
 
             """
         )
-        self.connection.execute(stmt, {
-            "user_id": user_id,
-            "right_setting": right_setting
-        })
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_setting": right_setting}
+        )
 
     def _get_investigator_id(self, user_id) -> int:
-        stmt = text("""
+        stmt = text(
+            """
 SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id     
-        """)
+        """
+        )
 
         result = self.connection.execute(stmt, {"user_id": user_id})
         return cast(int, result.scalar_one())
 
     def _add_salt_astronomer(self, user: User):
-        stmt = text("""
+        stmt = text(
+            """
 INSERT INTO SaltAstronomer (Investigator_Id)
 VALUES (:investigator_id)
-       """)
-        self.connection.execute(stmt, {
-            "investigator_id": self._get_investigator_id(user.id)
-        })
+       """
+        )
+        self.connection.execute(
+            stmt, {"investigator_id": self._get_investigator_id(user.id)}
+        )
 
     def _remove_salt_astronomer(self, user: User):
-        stmt = text("""
+        stmt = text(
+            """
 DELETE FROM SaltAstronomer
 WHERE Investigator_id = :investigator_id
-       """)
-        self.connection.execute(stmt, {
-            "investigator_id": self._get_investigator_id(user.id),
-        })
+       """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "investigator_id": self._get_investigator_id(user.id),
+            },
+        )
 
     def _add_salt_operator(self, user: User) -> None:
-        stmt = text("""
+        stmt = text(
+            """
 INSERT INTO SaltOperator (FirstName, Surname, Email, Phone, Current)
 VALUES (:firstname, :surname, :email, :phone, 1)
-       """)
-        self.connection.execute(stmt, {
-            "firstname": user.given_name,
-            "surname": user.family_name,
-            "email": user.email,
-            "phone": None
-        })
+       """
+        )
+        self.connection.execute(
+            stmt,
+            {
+                "firstname": user.given_name,
+                "surname": user.family_name,
+                "email": user.email,
+                "phone": None,
+            },
+        )
 
     def _remove_salt_operator(self, user: User) -> None:
-        stmt = text("""
+        stmt = text(
+            """
 DELETE FROM SaltOperator
 WHERE Email = :email
-       """)
-        self.connection.execute(stmt, {
-            "email": user.email
-        })
+       """
+        )
+        self.connection.execute(stmt, {"email": user.email})
 
     def _get_right_setting(self, role: Role) -> str:
         if role == Role.ADMINISTRATOR:
@@ -1206,3 +1228,42 @@ WHERE Email = :email
                 self._remove_salt_operator(user)
             right_setting = self._get_right_setting(role)
             self._delete_right(user_id, right_setting)
+
+    def set_preferred_contact(self, user_id, investigator_id):
+        stmt = text(
+            """
+UPDATE PiptUser
+SET Investigator_Id = :investigator_id
+WHERE PiptUser_Id = :user_id            
+            """
+        )
+        self.connection.execute(stmt, {"user_id": user_id, "investigator_id": investigator_id})
+
+    def add_contact_details(self, user_id: int, new_user_contact: Dict[str, Any]) -> int:
+        """
+        Add contact details to a user.
+
+        The primary key of the new Investigator entry is returned.
+        """
+
+        stmt = text(
+            """
+INSERT INTO Investigator (Institute_Id, FirstName, Surname, Email, PiptUser_Id)
+VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
+        """
+        )
+        try:
+            result = self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "institution_id": new_user_contact["institution_id"],
+                    "given_name": new_user_contact["given_name"],
+                    "family_name": new_user_contact["family_name"],
+                    "email": new_user_contact["email"],
+                },
+            )
+        except IntegrityError as e:
+            raise ValidationError(f"The email address {new_user_contact['email']} already exists for this institution.")
+
+        return cast(int, result.lastrowid)

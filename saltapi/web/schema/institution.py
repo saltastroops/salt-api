@@ -29,6 +29,14 @@ class Institution(BaseModel):
     )
 
 
+class UserInstitution(Institution):
+    contact: str = Field(
+        ...,
+        title="Contact",
+        description="The user's email address for this institution"
+    )
+
+
 class NewInstitutionDetails(BaseModel):
     """New institution details."""
 

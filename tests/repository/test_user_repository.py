@@ -48,7 +48,7 @@ def test_get_user_returns_none_for_non_existing_user(db_connection: Connection) 
 
 @nodatabase
 def test_get_user_by_id_returns_correct_user(
-        db_connection: Connection, check_data: Callable[[Any], None]
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = asdict(user_repository.get(3))
@@ -57,7 +57,7 @@ def test_get_user_by_id_returns_correct_user(
 
 @nodatabase
 def test_get_user_by_email_returns_correct_user(
-        db_connection: Connection, check_data: Callable[[Any], None]
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = asdict(user_repository.get_by_email("hettlage@saao.ac.za"))
@@ -71,7 +71,7 @@ def test_get_user_by_email_returns_correct_user(
 
 @nodatabase
 def test_get_user_by_email_returns_none_for_non_existing_user(
-        db_connection: Connection, check_data: Callable[[Any], None]
+    db_connection: Connection, check_data: Callable[[Any], None]
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = user_repository.get_by_email("noemail@email.com")
@@ -84,7 +84,7 @@ def _random_string() -> str:
 
 @nodatabase
 def test_create_user_raises_error_if_username_exists_already(
-        db_connection: Connection,
+    db_connection: Connection,
 ) -> None:
     username = "hettlage"
     new_user_details = {
@@ -140,7 +140,7 @@ def test_create_user_creates_a_new_user(db_connection: Connection) -> None:
 
 @nodatabase
 def test_get_user_by_username_returns_none_for_non_existing_use(
-        db_connection: Connection,
+    db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
     user = user_repository.get_by_username("nonExistingUsername")
@@ -257,7 +257,7 @@ def test_patch_cannot_use_existing_email(db_connection: Connection) -> None:
 
 
 def _check_user_has_role(
-        role: str, method: str, proposal_code: Optional[str], db_connection: Connection
+    role: str, method: str, proposal_code: Optional[str], db_connection: Connection
 ) -> None:
     user_repository = UserRepository(db_connection)
     for username in find_usernames(role, True, proposal_code):
@@ -271,7 +271,7 @@ def _check_user_has_role(
 
 
 def _check_user_does_not_have_role(
-        role: str, method: str, proposal_code: Optional[str], db_connection: Connection
+    role: str, method: str, proposal_code: Optional[str], db_connection: Connection
 ) -> None:
     user_repository = UserRepository(db_connection)
     for username in find_usernames(role, False, proposal_code):
@@ -285,7 +285,7 @@ def _check_user_does_not_have_role(
 
 
 def _check_user_role(
-        role: str, method: str, proposal_code: Optional[str], db_connection: Connection
+    role: str, method: str, proposal_code: Optional[str], db_connection: Connection
 ) -> None:
     _check_user_has_role(role, method, proposal_code, db_connection)
 
@@ -382,21 +382,20 @@ def test_is_administrator(db_connection: Connection) -> None:
     ],
 )
 def test_role_checks_return_false_for_non_existing_proposal(
-        db_connection: Connection, role: str
+    db_connection: Connection, role: str
 ) -> None:
     user_repository = UserRepository(db_connection)
     assert (
-            getattr(user_repository, f"is_{role}")(
-                username="gw",
-                proposal_code="idontexist"
-            )
-            is False
+        getattr(user_repository, f"is_{role}")(
+            username="gw", proposal_code="idontexist"
+        )
+        is False
     )
 
 
 @pytest.mark.skip(reason="No Grantee user at the moment.")
 def test_has_proposal_permission_returns_correct_result(
-        db_connection: Connection,
+    db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
     proposal_code = "2022-1-COM-003"
@@ -421,9 +420,9 @@ def test_has_proposal_permission_returns_correct_result(
 
 @nodatabase
 def test_find_by_username_and_password_returns_correct_user(
-        db_connection: Connection,
-        check_data: Callable[[Any], None],
-        monkeypatch: MonkeyPatch,
+    db_connection: Connection,
+    check_data: Callable[[Any], None],
+    monkeypatch: MonkeyPatch,
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -447,7 +446,7 @@ def test_find_by_username_and_password_returns_correct_user(
 @nodatabase
 @pytest.mark.parametrize("username", ["idontexist", ""])
 def test_find_by_username_and_password_returns_none_for_wrong_username(
-        db_connection: Connection, username: Optional[str], monkeypatch: MonkeyPatch
+    db_connection: Connection, username: Optional[str], monkeypatch: MonkeyPatch
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -455,18 +454,26 @@ def test_find_by_username_and_password_returns_none_for_wrong_username(
     monkeypatch.setattr(
         user_repository, "verify_password", lambda password, hashed_password: True
     )
-    assert user_repository.find_user_with_username_and_password(cast(str, username), "some_password") is None
+    assert (
+        user_repository.find_user_with_username_and_password(
+            cast(str, username), "some_password"
+        )
+        is None
+    )
 
 
 @nodatabase
 def test_find_by_username_and_password_returns_none_for_wrong_password(
-        db_connection: Connection,
+    db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
     username = "hettlage"
     # Make sure the user exists
     assert user_repository.get_by_username(username)
-    assert user_repository.find_user_with_username_and_password(username, "wrongpassword") is None
+    assert (
+        user_repository.find_user_with_username_and_password(username, "wrongpassword")
+        is None
+    )
 
 
 @pytest.mark.parametrize(
@@ -474,7 +481,7 @@ def test_find_by_username_and_password_returns_none_for_wrong_password(
     [(-1, False), (0, False), (2, False), (3, True), (1768, True), (345678, False)],
 )
 def test_is_existing_user_id(
-        user_id: int, exists: bool, db_connection: Connection
+    user_id: int, exists: bool, db_connection: Connection
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -482,7 +489,7 @@ def test_is_existing_user_id(
 
 
 def test_get_proposal_permissions_raises_not_found_error(
-        db_connection: Connection,
+    db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -491,7 +498,7 @@ def test_get_proposal_permissions_raises_not_found_error(
 
 
 def test_get_proposal_permissions(
-        db_connection: Connection,
+    db_connection: Connection,
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -526,7 +533,7 @@ def test_get_proposal_permissions(
     ],
 )
 def test_grant_proposal_permission_raises_not_found_errors(
-        user_id: int, proposal_code: str, permission_type: str, db_connection: Connection
+    user_id: int, proposal_code: str, permission_type: str, db_connection: Connection
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -584,7 +591,7 @@ def test_grant_proposal_permissions_is_idempotent(db_connection: Connection) -> 
     ],
 )
 def test_revoke_proposal_permission_raises_not_found_errors(
-        user_id: int, proposal_code: str, permission_type: str, db_connection: Connection
+    user_id: int, proposal_code: str, permission_type: str, db_connection: Connection
 ) -> None:
     user_repository = UserRepository(db_connection)
 
@@ -639,7 +646,9 @@ def test_revoke_proposal_permissions_is_idempotent(db_connection: Connection) ->
     assert len(granted_permissions) == 0
 
 
-def test_verify_user_raises_not_found_error_if_not_a_valid_user(db_connection: Connection) -> None:
+def test_verify_user_raises_not_found_error_if_not_a_valid_user(
+    db_connection: Connection,
+) -> None:
     user_repository = UserRepository(db_connection)
     with pytest.raises(NotFoundError):
         user_repository.verify_user(-1, False)
@@ -653,7 +662,9 @@ def _update_user_verified_status(user_id: int, verify: bool, connection: Connect
 
 
 @nodatabase
-def test_verify_user_update_users_verification_status(db_connection: Connection) -> None:
+def test_verify_user_update_users_verification_status(
+    db_connection: Connection,
+) -> None:
     username = find_username("Inactive User")
     user_repository = UserRepository(db_connection)
     user = user_repository.get_by_username(username)
@@ -671,7 +682,9 @@ def test_verify_user_update_users_verification_status(db_connection: Connection)
     assert user.user_verified is False
 
 
-def test_activate_user_raises_not_found_error_if_not_a_valid_user(db_connection: Connection) -> None:
+def test_activate_user_raises_not_found_error_if_not_a_valid_user(
+    db_connection: Connection,
+) -> None:
     user_repository = UserRepository(db_connection)
     with pytest.raises(NotFoundError):
         user_repository.activate_user(-1, False)
@@ -685,7 +698,9 @@ def _update_active_status(user_id: int, active: bool, connection: Connection):
 
 
 @nodatabase
-def test_activate_user_update_users_activation_status(db_connection: Connection) -> None:
+def test_activate_user_update_users_activation_status(
+    db_connection: Connection,
+) -> None:
     username = find_username("Inactive User")
 
     # with db_connection as connect:

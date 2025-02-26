@@ -14,7 +14,7 @@ from fastapi import (
 )
 from starlette import status
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, AuthorizationError
 from saltapi.repository.database import engine
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.unit_of_work import UnitOfWork
@@ -22,10 +22,10 @@ from saltapi.service.authentication_service import (
     find_user_from_token,
     get_current_user,
 )
-from saltapi.service.submission import SubmissionStatus
+from saltapi.service.submission import SubmissionStatus, SubmissionLogEntry
 from saltapi.service.user import User
 from saltapi.web import services
-from saltapi.web.schema.submissions import SubmissionIdentifier
+from saltapi.web.schema.submissions import Submission, SubmissionProgress
 
 router = APIRouter(prefix="/submissions", tags=["Submissions"])
 
@@ -38,7 +38,7 @@ SUBMISSION_PROGRESS_TIMEOUT = timedelta(hours=5)
     "/",
     summary="Submit a proposal",
     status_code=status.HTTP_202_ACCEPTED,
-    response_model=SubmissionIdentifier,
+    response_model=Submission,
 )
 async def create_submission(
     proposal: UploadFile = File(
@@ -64,17 +64,24 @@ async def create_submission(
     # Submissions don't use database transactions. As such no unit of work is used.
     # This can lead to warnings when mocking with the pytest-pymysql-autorecord plugin,
     # which you may ignore.
-    submission_repository = SubmissionRepository(engine().connect())
+    connection = engine().connect().execution_options(isolation_level="AUTOCOMMIT")
+    submission_repository = SubmissionRepository(connection)
     submission_service = services.submission_service(submission_repository)
+    xml = await submission_service.extract_xml(proposal)
+    xml_proposal_code = submission_service.extract_proposal_code(xml)
+
+    # Check that the user is allowed to make the submission
+    permission_service = services.permission_service(connection)
+    permission_service.check_permission_to_submit_proposal(user, xml_proposal_code)
+
     submission_identifier = await submission_service.submit_proposal(
         user, proposal, proposal_code
     )
     return {"submission_identifier": submission_identifier}
 
 
-@router.websocket("/{identifier}/progress/ws")
-async def submission_progress(
-    websocket: WebSocket,
+@router.get("/{identifier}/progress", response_model=SubmissionProgress)
+async def get_submission_progress(
     identifier: str = Path(
         ...,
         title="Submission identifier",
@@ -88,164 +95,46 @@ async def submission_progress(
             "Minimum entry number from which onwards log entries are considered"
         ),
     ),
-) -> None:
+    user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
     """
-    Request to receive the existing and all future log entries and status changes.
+    Get the progress information for a submission.
 
-    After connecting to this endpoint you must send a message with a valid JWT token
-    authenticating you. This is a token returned by the `/token` endpoint, as you would
-    use in the `Authorization` header for other (HTTP) endpoints. If the token sent is
-    invalid, the connection is closed with the closing code 1011.
+    The following details are returned for the submission with the given identifier:
 
-    You must have created a submission in order to view its log or status. If another
-    user has created it, the connection is closed with the closing code 1011.
+    - The current submission status, which may be "Failed", "In progress" or
+      "Successful".
+    - The list of log entries. Each log entry consists of the time when it was logged
+      (as an ISO 8601 datetime string), the type of log message ("Error", "Info" or
+      "Warning") and the log message.
+    - The proposal code, which may be None.
 
-    If the specified submission identifier does not exist, the connection is closed with
-    the closing code 1011.
-
-    Yoy may optionally specify a minimum entry number from which onwards to return log
-    entries. Use the `from-entry-number` query parameter for this. For example, if you
-    are only interested in status changes, you could choose a `from-entry-number` like
-    100000.
-
-    When you connect to this endpoint (and have sent a valid token), the current status
-    and the existing log entries are sent. The endpoint checks the database every few
-    seconds for new log entries or status changes, and it returns a JSON object with
-    the current status (irrespective of whether it has changed or not) and the list of
-    new log entries (or an empty list if there are no new entries). Here are two
-    examples with two and no new log entries, respectively:
-
-    .. code-block:: json
-       {
-           "status": "In progress",
-           "log_entries: [
-               {
-                   "entry_number": 14,
-                   "logged_at": "2022-05-03T08:16:56+00:00",
-                   "message_type": "Info",
-                   "message": "Mapping block NGC 6000..."
-               },
-               {
-                   "entry_number": 15,
-                   "logged_at": "2022-05-03T08:17:01+00:00",
-                   "message_type": "Info",
-                   "message": "Mapping block NGC 6001..."
-               },
-           ]
-       }
-
-    .. code-block:: json
-       {
-           "status": "In progress",
-            "log_entries": []
-       }
-
-    If the submission is successful, a JSON object is sent which in addition includes
-    the proposal code:
-
-    .. code-block:: json
-       {
-           "status": "Successful",
-           "log_entries": [
-               {
-                   "entry_number": 20,
-                   "logged_at": "2022-05-03T08:17:34+00:00",
-                   "message_type": "Info",
-                   "message": "The submission was successful."
-               }
-           ],
-           "proposal_code": "2022-1-SCI-042"
-       }
-
-    The entry_number of a log entry is a running number for a submission. In other
-    words, the n-th log entry created for a submission has the entry number n.
+    By default, all the submission's log entries are returned. However, you may use the
+    query parameter from-entry-number to request log entries starting from an entry
+    number only. For example, if from-entry-number is 3, only the third, fourth, ...
+    log entry are included in the response.
     """
-    include_from_entry_number = from_entry_number
-
-    await websocket.accept()
-
-    # Authenticate the user
-    token = await websocket.receive_text()
-    try:
-        user: Optional[User] = find_user_from_token(token)
-    except Exception:
-        user = None
-    if user is None:
-        reason = (
-            "You are not authenticated. The first message sent to this endpoint "
-            "must be a valid JWT token, which you should have obtained from the "
-            "/token endpoint."
-        )
-        await websocket.close(1011, reason)
-        return
-
     with UnitOfWork() as unit_of_work:
         submission_repository = SubmissionRepository(unit_of_work.connection)
 
-        start = datetime.now()
-
         # Check that the authenticated user made the submission (and, implicitly, that
         # the identifier exists).
-        try:
-            submission = submission_repository.get(identifier)
-        except NotFoundError:
-            reason = f"Unknown submission identifier: {identifier}"
-            await websocket.close(1011, reason)
-            return
+        submission = submission_repository.get(identifier)
         if submission["submitter_id"] != user.id:
-            reason = "You cannot access the submission log as someone else made the "
-            "submission."
-            await websocket.close(1011, reason)
-            return
-
-        while True:
-            # Terminate the process if it has been running for too long
-            now = datetime.now()
-            if start - now > SUBMISSION_PROGRESS_TIMEOUT:
-                reason = "The submission has been in progress for too long."
-                await websocket.close(1011, reason)
-                return
-
-            # Get the submission status and log entries
-            submission_progress = submission_repository.get_progress(
-                identifier=identifier,
-                from_entry_number=include_from_entry_number,
+            raise AuthorizationError(
+                "You cannot access the submission log as someone else made the "
+                "submission."
             )
 
-            # Next time we shouldn't include any log entries we got now.
-            if len(submission_progress["log_entries"]) > 0:
-                include_from_entry_number = 1 + max(
-                    log_entry["entry_number"]
-                    for log_entry in submission_progress["log_entries"]
-                )
+        # Get the submission status and log entries
+        submission_progress = submission_repository.get_progress(
+            identifier=identifier,
+            from_entry_number=from_entry_number,
+        )
 
-            # Datetimes cannot be serialized, so we convert them to ISO 8601 strings.
-            for log_entry in submission_progress["log_entries"]:
-                log_entry["logged_at"] = log_entry["logged_at"].isoformat()
+        # Datetimes cannot be serialized, so we convert them to ISO 8601 strings.
+        for log_entry in submission_progress["log_entries"]:
+            log_entry["logged_at"] = log_entry["logged_at"].isoformat()
 
-            # Send a message with the current status, new log entries and (in case of a
-            # successful submission) proposal code.
-            if submission_progress["status"] != SubmissionStatus.SUCCESSFUL.value:
-                if "proposal_code" in submission_progress:
-                    del submission_progress["proposal_code"]
-            await websocket.send_json(submission_progress)
-
-            if submission_progress["status"] != SubmissionStatus.IN_PROGRESS.value:
-                await websocket.close()
-                return
-
-            await asyncio.sleep(TIME_BETWEEN_DB_QUERIES)
-
-
-def _submission_details(
-    identifier: str, from_entry_number: int, submission_repository: SubmissionRepository
-) -> Dict[str, Any]:
-    submission = submission_repository.get(identifier)
-    log_entries = submission_repository.get_log_entries(identifier, from_entry_number)
-    for log_entry in log_entries:
-        log_entry["message_type"] = log_entry["message_type"].value
-    return {
-        "submitter_id": submission["submitter_id"],
-        "status": submission["status"].value,
-        "log_entries": log_entries,
-    }
+        # Send a message with the current status, new log entries and proposal code.
+        return submission_progress

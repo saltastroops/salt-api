@@ -100,6 +100,11 @@ class SalticamFilter(BaseModel):
     description: str = Field(
         ..., title="Description", description="Description of the filter"
     )
+    is_in_magazine: bool = Field(
+        ...,
+        title="Is the filter in the magazine?",
+        description="Is the filter in the magazine?",
+    )
 
 
 class SalticamExposure(BaseModel):

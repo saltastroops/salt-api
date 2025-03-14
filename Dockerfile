@@ -28,8 +28,6 @@ RUN pip install poetry
 
 COPY ./pyproject.toml ./poetry.lock* ./
 
-RUN poetry self add "poetry-plugin-export"
-
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 RUN pip uninstall -y poetry

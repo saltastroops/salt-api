@@ -1,18 +1,27 @@
-# Docker Compose file for building and launching the Web Manager
-
-# WARNING: This Dockerfile is not suitable for production use.
-
-version: "3"
-
+version: '3'
 services:
-  saltapi:
-    build: .
+  web-manager:
+    image: web-manager-image
+    build:
+      context: ./web-manager
+    ports:
+      - "4200:80"
+    env_file:
+      - .env
+
+  salt-api:
+    image: salt-api-image
+    build:
+      context: ./salt-api
+    ports:
+      - "8001:80"
     env_file:
       - .env
     environment:
       - PORT
       - PROPOSALS_DIR=/proposals
       - SECRET_KEY
+      - VERIFICATION_KEY
       - SDB_DSN
       - FRONTEND_URI
       - FROM_EMAIL
@@ -34,6 +43,7 @@ services:
       - MAPPING_TOOL_JAVA_COMMAND=java
       - MAPPING_TOOL_PYTHON_INTERPRETER=python
       - MAPPING_TOOL_FINDER_CHART_TOOL
+      - ACCESS_TOKEN_LIFETIME_HOURS=24
       - MAPPING_TOOL_IMAGE_CONVERSION_COMMAND=/usr/bin/convert
       - SSDA_API_KEY
       - SSDA_API_URL
@@ -41,11 +51,21 @@ services:
       - ALLOW_STATUS_UPDATE_ORIGIN_REGEX
       - ALLOW_ORIGIN_REGEX
       - STATUS_UPDATE_EMAIL_RECIPIENTS
-      - VERIFICATION_KEY
-    ports:
-      - ${PORT}:80
     restart: always
     volumes:
       - ${PROPOSALS_DIR}:/proposals
       - ${MAPPING_TOOL_LOG_DIR}:/mapping-logs
       - ${MAPPING_TOOL_DIR}:/mapping-tool
+
+  nginx-proxy:
+    build: .
+    env_file:
+      - .env
+    environment:
+        - AUTH_TOKEN_LIFETIME_HOURS
+    ports:
+        - "4201:80"  # Map port 4201 on the host to port 80 in the container
+    depends_on:
+        - web-manager
+        - salt-api
+

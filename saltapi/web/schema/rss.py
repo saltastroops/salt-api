@@ -35,6 +35,8 @@ class RssMode(str, Enum):
     MOS = "MOS"
     MOS_POLARIMETRY = "MOS polarimetry"
     POLARIMETRIC_IMAGING = "Polarimetric imaging"
+    SMI = "SMI"
+    SMI_POLARIMETRY = "SMI polarimetry"
     SPECTROPOLARIMETRY = "Spectropolarimetry"
     SPECTROSCOPY = "Spectroscopy"
 
@@ -112,6 +114,7 @@ class RssMaskType(str, Enum):
     LONGSLIT = "Longslit"
     MOS = "MOS"
     POLARIMETRIC = "Polarimetric"
+    SMI = "SMI"
 
 
 class RssMask(BaseModel):

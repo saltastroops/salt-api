@@ -6,7 +6,7 @@ version: "3"
 
 services:
   saltapi:
-    image: ${REGISTRY}/${REGISTRY_USERNAME}/saltapi:${TAG}
+    build: .
     env_file:
       - .env
     environment:

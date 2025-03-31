@@ -327,10 +327,10 @@ LIMIT :limit;
         """
         stmt = text(
             """
-SELECT DISTINCT CONCAT(S.Year, '-', S.Semester) AS semester
-FROM Semester S
-         JOIN Proposal P ON S.Semester_Id = P.Semester_Id
-         JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+SELECT DISTINCT CONCAT(S.Year, '-', S.Semester) AS semester 
+FROM MultiPartner MP
+    JOIN Semester S ON MP.Semester_Id = S.Semester_Id
+    JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
 ORDER BY S.Year, S.Semester;
         """
@@ -458,6 +458,35 @@ LIMIT 1
 
         return db_proposal_type
 
+    def _get_proposal_text(self, proposal_code, semester):
+        """
+        Return the most resent proposal text for a semester
+        """
+        stmt = text("""
+SELECT
+    PT.Title                            AS title,
+    PT.Abstract                         AS abstract,
+    PT.ReadMe                           AS summary_for_salt_astronomer,
+    PT.NightlogSummary                  AS summary_for_night_log
+FROM ProposalText PT
+         JOIN ProposalCode PC ON PT.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN Semester S ON PT.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code
+  AND CONCAT(S.Year, '-', S.Semester) <= :semester
+ORDER BY S.Year, S.Semester;
+        """)
+        result = self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "semester": semester}
+        )
+        row = result.one()
+        return {
+            "title": row.title,
+            "abstract": row.abstract,
+            "summary_for_salt_astronomer": row.summary_for_salt_astronomer,
+            "summary_for_night_log": row.summary_for_night_log,
+        }
+
+
     def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         """
         Return general proposal information for a semester.
@@ -465,58 +494,49 @@ LIMIT 1
         year, sem = semester.split("-")
         stmt = text(
             """
-SELECT PT.Title                            AS title,
-       PT.Abstract                         AS abstract,
-       PT.ReadMe                           AS summary_for_salt_astronomer,
-       PT.NightlogSummary                  AS summary_for_night_log,
-       P.Submission                        AS submission_number,
-       T.ProposalType                      AS proposal_type,
-       PS.Status                           AS status,
-       PGI.StatusComment                   AS comment,
-       PGI.ActOnAlert                      AS target_of_opportunity,
-       P.TotalReqTime                      AS total_requested_time,
-       PGI.ProprietaryPeriod               AS proprietary_period,
-       I.PiptUser_Id                       AS astronomer_user_id,
-       I.FirstName                         AS astronomer_given_name,
-       I.Surname                           AS astronomer_family_name,
-       I.Email                             AS astronomer_email,
-       PGI.TimeRestricted                  AS is_time_restricted,
-       P1T.Reason						   AS too_reason,
-       I.PiptUser_Id                       AS liaison_salt_astronomer_id,
-       IF(PGI.P4 IS NOT NULL,
-          PGI.P4,
-          0)                               AS is_p4,
-       IF(PSA.PiPcMayActivate IS NOT NULL,
-          PSA.PiPcMayActivate,
-          0)                               AS self_activatable
+SELECT 
+    P.Submission                        AS submission_number,
+    T.ProposalType                      AS proposal_type,
+    PS.Status                           AS status,
+    PGI.StatusComment                   AS comment,
+    PGI.ActOnAlert                      AS target_of_opportunity,
+    P.TotalReqTime                      AS total_requested_time,
+    PGI.ProprietaryPeriod               AS proprietary_period,
+    I.PiptUser_Id                       AS astronomer_user_id,
+    I.FirstName                         AS astronomer_given_name,
+    I.Surname                           AS astronomer_family_name,
+    I.Email                             AS astronomer_email,
+    PGI.TimeRestricted                  AS is_time_restricted,
+    P1T.Reason						    AS too_reason,
+    I.PiptUser_Id                       AS liaison_salt_astronomer_id,
+    IF(PGI.P4 IS NOT NULL,
+      PGI.P4,
+      0)                               AS is_p4,
+    IF(PSA.PiPcMayActivate IS NOT NULL,
+      PSA.PiPcMayActivate,
+      0)                               AS self_activatable
 FROM Proposal P
-         JOIN Semester S ON P.Semester_Id = S.Semester_Id
-         JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
-         JOIN ProposalText PT ON
-            PC.ProposalCode_Id = PT.ProposalCode_Id AND S.Semester_Id = PT.Semester_Id
-         JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
-         JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
-         JOIN ProposalStatus PS ON PGI.ProposalStatus_Id = PS.ProposalStatus_Id
-         JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
-         LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
-         LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
-         LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
+    JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
+    JOIN ProposalStatus PS ON PGI.ProposalStatus_Id = PS.ProposalStatus_Id
+    JOIN ProposalContact C ON PC.ProposalCode_Id = C.ProposalCode_Id
+    LEFT JOIN Investigator I ON C.Astronomer_Id = I.Investigator_Id
+    LEFT JOIN ProposalSelfActivation PSA ON P.ProposalCode_Id = PSA.ProposalCode_Id
+    LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
-  AND P.Current = 1
-  AND S.Year = :year
-  AND S.Semester = :semester
+    AND P.Current = 1
         """
         )
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
         row = result.one()
+        
+        proposal_text = self._get_proposal_text(proposal_code, semester)
 
         info = {
-            "title": row.title,
-            "abstract": row.abstract,
-            "summary_for_salt_astronomer": row.summary_for_salt_astronomer,
-            "summary_for_night_log": row.summary_for_night_log,
+            **proposal_text,
             "submission_number": row.submission_number,
             "status": {"value": row.status, "comment": row.comment},
             "proposal_type": self._map_proposal_type(row.proposal_type),

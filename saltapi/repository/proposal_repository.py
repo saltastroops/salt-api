@@ -462,13 +462,14 @@ LIMIT 1
         """
         Return the proposal text for a semester.
 
-        The proposal text includes the title, abstract, summary for the SALT Astronomer and the summary for the night
-        log.
+        The proposal text includes the title, abstract, summary for the SALT Astronomer
+        and the summary for the night log.
 
-        No text may exist for the given semester as no phase 2 has been submitted for the proposal yet.
-        In this case the latest text (preceding the semester) is used.
+        No text may exist for the given semester as no phase 2 has been submitted for
+        the proposal yet. In this case the latest text (preceding the semester) is used.
         """
-        stmt = text("""
+        stmt = text(
+            """
 SELECT
     PT.Title                            AS title,
     PT.Abstract                         AS abstract,
@@ -481,7 +482,8 @@ WHERE PC.Proposal_Code = :proposal_code
   AND CONCAT(S.Year, '-', S.Semester) <= :semester
 ORDER BY S.Year, S.Semester DESC
 LIMIT 1;
-        """)
+        """
+        )
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -495,8 +497,8 @@ LIMIT 1;
 
     def _proposal_general_info(self, proposal_code: str, semester: str):
         """
-       Return general proposal information for a semester.
-       """
+        Return general proposal information for a semester.
+        """
         year, sem = semester.split("-")
         stmt = text(
             """
@@ -582,7 +584,7 @@ WHERE PC.Proposal_Code = :proposal_code
             **general_info,
             "first_submission": self._first_submission_date(proposal_code),
             "submission_number": self._latest_submission(proposal_code),
-            "semesters": self._semesters(proposal_code)
+            "semesters": self._semesters(proposal_code),
         }
 
     def _investigators(self, proposal_code: str) -> List[Dict[str, Any]]:

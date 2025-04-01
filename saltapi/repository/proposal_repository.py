@@ -460,7 +460,11 @@ LIMIT 1
 
     def _get_proposal_text(self, proposal_code, semester):
         """
-        Return the most resent proposal text for a semester
+        Return the proposal text for a semester.
+        The proposal text includes the title, abstract, summary for the SALT Astronomer and the summary for the night
+        log.
+        No text may exist for the given semester as no phase 2 has been submitted for the proposal yet.
+        In this case the latest text (preceding the semester) is used.
         """
         stmt = text("""
 SELECT
@@ -473,7 +477,8 @@ FROM ProposalText PT
          JOIN Semester S ON PT.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
   AND CONCAT(S.Year, '-', S.Semester) <= :semester
-ORDER BY S.Year, S.Semester;
+ORDER BY S.Year, S.Semester DESC
+LIMIT 1;
         """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
@@ -486,11 +491,10 @@ ORDER BY S.Year, S.Semester;
             "summary_for_night_log": row.summary_for_night_log,
         }
 
-
-    def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
+    def _get_proposal_general_info(self, proposal_code: str, semester: str):
         """
-        Return general proposal information for a semester.
-        """
+       Return general proposal information for a semester.
+       """
         year, sem = semester.split("-")
         stmt = text(
             """
@@ -516,6 +520,7 @@ SELECT
       PSA.PiPcMayActivate,
       0)                               AS self_activatable
 FROM Proposal P
+    JOIN Semester S ON P.Semester_Id = S.Semester_Id
     JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
     JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
     JOIN ProposalType T ON PGI.ProposalType_Id = T.ProposalType_Id
@@ -526,17 +531,18 @@ FROM Proposal P
     LEFT JOIN P1ToO P1T ON P.ProposalCode_Id = P1T.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
     AND P.Current = 1
+    AND CONCAT(S.Year, '-', S.Semester) <= :semester
+    ORDER BY S.Semester_Id DESC
+    LIMIT 1
+
         """
         )
         result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
+            stmt, {"proposal_code": proposal_code, "semester": semester}
         )
         row = result.one()
-        
-        proposal_text = self._get_proposal_text(proposal_code, semester)
 
         info = {
-            **proposal_text,
             "submission_number": row.submission_number,
             "status": {"value": row.status, "comment": row.comment},
             "proposal_type": self._map_proposal_type(row.proposal_type),
@@ -560,12 +566,22 @@ WHERE PC.Proposal_Code = :proposal_code
             }
         else:
             info["liaison_salt_astronomer"] = None
-
-        info["first_submission"] = self._first_submission_date(proposal_code)
-        info["submission_number"] = self._latest_submission(proposal_code)
-        info["semesters"] = self._semesters(proposal_code)
-
         return info
+
+    def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
+        """
+        Return general proposal information for a semester.
+        """
+        proposal_text = self._get_proposal_text(proposal_code, semester)
+        general_info = self._get_proposal_general_info(proposal_code, semester)
+
+        return {
+            **proposal_text,
+            **general_info,
+            "first_submission": self._first_submission_date(proposal_code),
+            "submission_number": self._latest_submission(proposal_code),
+            "semesters": self._semesters(proposal_code)
+        }
 
     def _investigators(self, proposal_code: str) -> List[Dict[str, Any]]:
         """

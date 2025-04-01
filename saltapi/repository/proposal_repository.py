@@ -458,11 +458,13 @@ LIMIT 1
 
         return db_proposal_type
 
-    def _get_proposal_text(self, proposal_code, semester):
+    def _proposal_text(self, proposal_code, semester):
         """
         Return the proposal text for a semester.
+
         The proposal text includes the title, abstract, summary for the SALT Astronomer and the summary for the night
         log.
+
         No text may exist for the given semester as no phase 2 has been submitted for the proposal yet.
         In this case the latest text (preceding the semester) is used.
         """
@@ -491,7 +493,7 @@ LIMIT 1;
             "summary_for_night_log": row.summary_for_night_log,
         }
 
-    def _get_proposal_general_info(self, proposal_code: str, semester: str):
+    def _proposal_general_info(self, proposal_code: str, semester: str):
         """
        Return general proposal information for a semester.
        """
@@ -572,8 +574,8 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Return general proposal information for a semester.
         """
-        proposal_text = self._get_proposal_text(proposal_code, semester)
-        general_info = self._get_proposal_general_info(proposal_code, semester)
+        proposal_text = self._proposal_text(proposal_code, semester)
+        general_info = self._proposal_general_info(proposal_code, semester)
 
         return {
             **proposal_text,

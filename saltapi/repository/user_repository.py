@@ -645,6 +645,24 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
 
+    def is_gravitational_wave_subscribed(self, username) -> bool:
+        """
+        Should check whether the user is a librarian
+        """
+        stmt = text(
+            """
+SELECT COUNT(*)
+FROM PiptUser PU
+    JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+    JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+WHERE PS.PiptSetting_Name = 'GravitationalWaveProposals'
+    AND PUS.Value > 0
+    AND PU.Username = :username
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return cast(int, result.scalar()) > 0
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
@@ -776,6 +794,9 @@ WHERE PiptUser_Id = :user_id
 
         if self.is_librarian(username):
             roles.append(Role.LIBRARIAN)
+
+        if self.is_gravitational_wave_subscribed(username):
+            roles.append(Role.GRAVITATIONAL_WAVE_SUBSCRIBER)
 
         return roles
 
@@ -1203,6 +1224,8 @@ WHERE Email = :email
             return "RightMaskCutting"
         if role == Role.LIBRARIAN:
             return "RightLibrarian"
+        if role == Role.GRAVITATIONAL_WAVE_SUBSCRIBER:
+            return "GravitationalWaveProposals"
 
         raise ValidationError("Unknown user role: " + role)
 
@@ -1267,3 +1290,38 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
             raise ValidationError(f"The email address {new_user_contact['email']} already exists for this institution.")
 
         return cast(int, result.lastrowid)
+
+    def subscribe_to_gw(self, user_id, subscribe: bool) -> None:
+        stmt = text(
+            """
+INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
+    SELECT :user_id,
+            (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = 'GravitationalWaveProposals'), 
+            :value
+ON DUPLICATE KEY UPDATE Value = VALUES(Value);            
+            """
+        )
+        try:
+            self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "value": subscribe
+                },
+            )
+        except:
+            action = "subscribe" if subscribe else "unsubscribe"
+            raise ValidationError(f"Failed to {action}. Please try again later.")
+
+    def all_partners(self) -> List[str]:
+
+        stmt = text(
+            """
+SELECT Partner_Code AS partner_code 
+FROM Partner P
+WHERE P.Partner_Code != 'OTH' AND P.Virtual = 0
+            """
+        )
+        result = self.connection.execute(stmt)
+
+        return [row.partner_code for row in result]

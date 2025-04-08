@@ -246,3 +246,6 @@ SALT Team
         investigator_id = self.repository.add_contact_details(user_id, contact)
         self.repository.set_preferred_contact(user_id, investigator_id)
 
+    def subscribe_to_gw(self, user_id: int, subscribe: bool) -> None:
+        self.repository.subscribe_to_gw(user_id, subscribe)
+

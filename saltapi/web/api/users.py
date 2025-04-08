@@ -417,3 +417,30 @@ def add_contact(
         user_service.add_contact(user_id, new_contact)
         unit_of_work.commit()
         return user_service.get_user(user_id)
+
+
+@router.post(
+        "/{user_id}/subscribe-to-gw/{subscribe}", summary="Subscribe to gravitational wave proposal", response_model=User
+)
+def subscribe_to_gravitational_wave_proposal(
+        user_id: int = Path(
+            ..., title="User id", description="Id for user to add contact for."
+        ),
+        subscribe: bool = Path(
+            ..., title="subscribe", description="true for subscribe and false for unsubscribe."
+        ),
+        user: _User = Depends(get_current_user),
+) -> User:
+    """
+    Subscribe/Unsubscribe a member to gravitational wave proposal mailing list.
+    """
+    with UnitOfWork() as unit_of_work:
+
+        permission_service = services.permission_service(unit_of_work.connection)
+        # Any one belonging to any SALT partner can Subscribe
+        permission_service.check_permission_to_subscribe_to_gw(user_id, user, subscribe)
+        user_service = services.user_service(unit_of_work.connection)
+
+        user_service.subscribe_to_gw(user_id, subscribe)
+        unit_of_work.commit()
+        return user_service.get_user(user_id)

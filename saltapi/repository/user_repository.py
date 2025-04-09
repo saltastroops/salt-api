@@ -645,9 +645,9 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
 
-    def is_gravitational_wave_subscribed(self, username) -> bool:
+    def is_gravitational_wave_subscriber(self, username) -> bool:
         """
-        Should check whether the user is a librarian
+        Check whether the user has subscribed to the GW mailing list.
         """
         stmt = text(
             """
@@ -795,8 +795,8 @@ WHERE PiptUser_Id = :user_id
         if self.is_librarian(username):
             roles.append(Role.LIBRARIAN)
 
-        if self.is_gravitational_wave_subscribed(username):
-            roles.append(Role.GRAVITATIONAL_WAVE_SUBSCRIBER)
+        if self.is_gravitational_wave_subscriber(username):
+            roles.append(Role.GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER)
 
         return roles
 
@@ -1224,7 +1224,7 @@ WHERE Email = :email
             return "RightMaskCutting"
         if role == Role.LIBRARIAN:
             return "RightLibrarian"
-        if role == Role.GRAVITATIONAL_WAVE_SUBSCRIBER:
+        if role == Role.GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER:
             return "GravitationalWaveProposals"
 
         raise ValidationError("Unknown user role: " + role)
@@ -1291,7 +1291,7 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
 
         return cast(int, result.lastrowid)
 
-    def subscribe_to_gw(self, user_id, subscribe: bool) -> None:
+    def subscribe_to_gavitational_wave_news(self, user_id, subscribe: bool) -> None:
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
@@ -1311,7 +1311,7 @@ ON DUPLICATE KEY UPDATE Value = VALUES(Value);
             )
         except:
             action = "subscribe" if subscribe else "unsubscribe"
-            raise ValidationError(f"Failed to {action}. Please try again later.")
+            raise ValidationError(f"Failed to {action} user.")
 
     def all_partners(self) -> List[str]:
 

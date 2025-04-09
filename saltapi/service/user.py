@@ -18,7 +18,7 @@ class Role(str, Enum):
     PROPOSAL_TAC_CHAIR = "Proposal TAC Chair"
     PARTNER_AFFILIATED = "Partner Affiliated"
     LIBRARIAN = "Librarian"
-    GRAVITATIONAL_WAVE_SUBSCRIBER = "Gravitational Wave Subscriber"
+    GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER = "Gravitational Wave News Subscriber"
     MASK_CUTTER = "Mask Cutter"
 
 

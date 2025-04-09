@@ -246,6 +246,6 @@ SALT Team
         investigator_id = self.repository.add_contact_details(user_id, contact)
         self.repository.set_preferred_contact(user_id, investigator_id)
 
-    def subscribe_to_gw(self, user_id: int, subscribe: bool) -> None:
-        self.repository.subscribe_to_gw(user_id, subscribe)
+    def subscribe_to_gravitational_wave_news(self, user_id: int, subscribe: bool) -> None:
+        self.repository.subscribe_to_gavitational_wave_news(user_id, subscribe)
 

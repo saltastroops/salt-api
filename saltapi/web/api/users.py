@@ -435,12 +435,9 @@ def subscribe_to_gravitational_wave_proposal(
     Subscribe/Unsubscribe a member to gravitational wave proposal mailing list.
     """
     with UnitOfWork() as unit_of_work:
-
         permission_service = services.permission_service(unit_of_work.connection)
-        # Any one belonging to any SALT partner can Subscribe
-        permission_service.check_permission_to_subscribe_to_gw(user_id, user, subscribe)
+        permission_service.check_permission_to_subscribe_to_gravitational_wave_news(user_id, user, subscribe)
         user_service = services.user_service(unit_of_work.connection)
-
-        user_service.subscribe_to_gw(user_id, subscribe)
+        user_service.subscribe_to_gravitational_wave_news(user_id, subscribe)
         unit_of_work.commit()
         return user_service.get_user(user_id)

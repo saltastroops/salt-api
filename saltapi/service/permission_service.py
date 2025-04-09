@@ -90,8 +90,8 @@ class PermissionService:
 
         elif role == Role.TAC_MEMBER:
             return self.user_repository.is_tac_member_in_general(username)
-        elif role == Role.GRAVITATIONAL_WAVE_SUBSCRIBER:
-            return self.user_repository.is_gravitational_wave_subscribed(username)
+        elif role == Role.GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER:
+            return self.user_repository.is_gravitational_wave_subscriber(username)
         else:
             return False
 
@@ -593,7 +593,7 @@ class PermissionService:
 
         raise ValidationError("You are not allowed to add a contact to this user")
 
-    def check_permission_to_subscribe_to_gw(self, user_id: int, user: User, subscribe: bool):
+    def check_permission_to_subscribe_to_gravitational_wave_news(self, user_id: int, user: User, subscribe: bool):
         if self.check_user_has_role(user, Role.ADMINISTRATOR):
             return
         if user_id == user.id:
@@ -603,4 +603,5 @@ class PermissionService:
                 for affiliation in user.affiliations:
                     if affiliation.partner_code in self.user_repository.all_partners():
                         return
+                raise ValidationError("you aren't allowed to subscribe as you aren't affiliated with a SALT partner.")
         raise ValidationError("You are not allowed to subscribe or unsubscribe on behalf of this user.")

@@ -421,7 +421,9 @@ def add_contact(
 
 
 @router.patch(
-        "/{user_id}/subscription/", summary="Subscribe to gravitational wave proposal", response_model=User
+        "/{user_id}/subscription/",
+    summary="Subscribe to gravitational wave proposal",
+    response_model=List[Subscription]
 )
 def subscribe_to_gravitational_wave_proposal(
         user_id: int = Path(
@@ -431,7 +433,7 @@ def subscribe_to_gravitational_wave_proposal(
             ..., title="Subscription", description="List of subscriptions."
         ),
         user: _User = Depends(get_current_user),
-) -> User:
+) -> List[Subscription]:
     """
     Subscribe/Unsubscribe a member to mailing list by name.
     """
@@ -450,7 +452,8 @@ def subscribe_to_gravitational_wave_proposal(
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_subscriptions(user_id, subscriptions)
         unit_of_work.commit()
-        return user_service.get_user(user_id)
+        subscriptions = user_service.get_subscriptions(user_id)
+        return [Subscription(**subscription) for subscription in subscriptions]
 
 
 @router.get(

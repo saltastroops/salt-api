@@ -1324,7 +1324,6 @@ WHERE PiptUser_Id = :user_id
                     "value": subscribe
                 },
             )
-            print("Done", user_id, subscribe)
         except:
             action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
             raise ValidationError(f"Failed to {action} SALT news.")

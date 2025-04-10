@@ -1291,7 +1291,7 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
 
         return cast(int, result.lastrowid)
 
-    def subscribe_to_gavitational_wave_news(self, user_id, subscribe: bool) -> None:
+    def subscribe_to_gravitational_wave_news(self, user_id, subscribe: bool) -> None:
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
@@ -1310,18 +1310,63 @@ ON DUPLICATE KEY UPDATE Value = VALUES(Value);
                 },
             )
         except:
-            action = "subscribe" if subscribe else "unsubscribe"
-            raise ValidationError(f"Failed to {action} user.")
+            action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
+            raise ValidationError(f"Failed to {action} gravitational wave news.")
 
-    def all_partners(self) -> List[str]:
-
+    def subscribe_to_salt_news(self, user_id, subscribe: bool) -> None:
         stmt = text(
             """
-SELECT Partner_Code AS partner_code 
-FROM Partner P
-WHERE P.Partner_Code != 'OTH' AND P.Virtual = 0
+UPDATE PiptUser
+SET ReceiveNews = :value
+WHERE PiptUser_Id = :user_id    
             """
         )
-        result = self.connection.execute(stmt)
+        try:
+            self.connection.execute(
+                stmt,
+                {
+                    "user_id": user_id,
+                    "value": subscribe
+                },
+            )
+            print("Done", user_id, subscribe)
+        except:
+            action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
+            raise ValidationError(f"Failed to {action} SALT news.")
 
-        return [row.partner_code for row in result]
+    def _is_user_subscribed_to_salt_news_mailing_list(self, user_id: int)-> bool:
+        stmt = text(
+            """
+SELECT 1 FROM PiptUser
+WHERE ReceiveNews > 0 AND PiptUser_Id = :user_id    
+            """
+        )
+        result =  self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
+        return result is not None
+
+    def _is_user_subscribed_to_gravitational_wave_mailing_list(self, user_id: int) -> Optional[Dict[str, Any]]:
+        stmt = text(
+            """
+SELECT 1 FROM PiptUserSetting
+WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProposals'
+    AND PiptUser_Id = :user_id    
+    AND Value > 0
+            """
+        )
+        result =  self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
+        return result is not None
+
+    def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
+        subscriptions = []
+        if self._is_user_subscribed_to_gravitational_wave_mailing_list(user_id):
+            subscriptions.append({
+                "to": "Gravitational Wave News",
+                "is_subscribed": True
+            })
+        if self._is_user_subscribed_to_salt_news_mailing_list(user_id):
+            subscriptions.append({
+                "to": "SALT News",
+                "is_subscribed": True
+            })
+
+        return subscriptions

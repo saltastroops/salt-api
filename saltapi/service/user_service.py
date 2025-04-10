@@ -7,7 +7,7 @@ from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType
+from saltapi.web.schema.user import ProposalPermissionType, Subscription
 
 
 class UserService:
@@ -246,6 +246,13 @@ SALT Team
         investigator_id = self.repository.add_contact_details(user_id, contact)
         self.repository.set_preferred_contact(user_id, investigator_id)
 
-    def subscribe_to_gravitational_wave_news(self, user_id: int, subscribe: bool) -> None:
-        self.repository.subscribe_to_gavitational_wave_news(user_id, subscribe)
+    def update_subscriptions(self, user_id: int, subscriptions: List[Subscription]) -> None:
+        for subscription in subscriptions:
+            if subscription.to == "Gravitational Wave News":
+                self.repository.subscribe_to_gravitational_wave_news(user_id, subscription.is_subscribed)
+            if subscription.to == "SALT News":
+                self.repository.subscribe_to_salt_news(user_id, subscription.is_subscribed)
+
+    def get_subscriptions(self, user_id) -> List[Dict[str, Any]]:
+        return self.repository.get_subscriptions(user_id)
 

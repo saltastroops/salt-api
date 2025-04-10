@@ -202,3 +202,18 @@ class UserContact(BaseModel):
             "Unique identifier of the institution to which the user is affiliated."
         ),
     )
+
+
+class SubscriptionType(str, Enum):
+    """
+    The type of subscriptions you can subscribe to
+    """
+
+    SALT_NEWS = "SALT News"
+    GRAVITATIONAL_WAVE_News = "Gravitational Wave News"
+
+
+class Subscription(BaseModel):
+    to: SubscriptionType = Field(..., title="Subscription", description="The name of the subscription.")
+    is_subscribed: bool = Field(..., title="Is subscribed", description="Is subscribed")
+

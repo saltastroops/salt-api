@@ -22,7 +22,7 @@ from saltapi.web.schema.user import (
     UserUpdate,
     BaseUserDetails,
     UsernameEmail,
-    UserContact,
+    UserContact, Subscription,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -419,25 +419,57 @@ def add_contact(
         return user_service.get_user(user_id)
 
 
-@router.post(
-        "/{user_id}/subscribe-to-gw/{subscribe}", summary="Subscribe to gravitational wave proposal", response_model=User
+
+@router.patch(
+        "/{user_id}/subscription/", summary="Subscribe to gravitational wave proposal", response_model=User
 )
 def subscribe_to_gravitational_wave_proposal(
         user_id: int = Path(
             ..., title="User id", description="Id for user to add contact for."
         ),
-        subscribe: bool = Path(
-            ..., title="subscribe", description="true for subscribe and false for unsubscribe."
+        subscriptions: List[Subscription] = Body(
+            ..., title="Subscription", description="List of subscriptions."
         ),
         user: _User = Depends(get_current_user),
 ) -> User:
     """
-    Subscribe/Unsubscribe a member to gravitational wave proposal mailing list.
+    Subscribe/Unsubscribe a member to mailing list by name.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_subscribe_to_gravitational_wave_news(user_id, user, subscribe)
+        for subscription in subscriptions:
+            if subscription.to == "Gravitational Wave News":
+                permission_service.check_permission_to_subscribe_to_gravitational_wave_news(
+                    user_id,
+                    user,
+                    subscription.is_subscribed
+                )
+            if subscription.to == "SALT News":
+               permission_service.check_permission_to_subscribe_to_salt_news(user_id, user)
+
         user_service = services.user_service(unit_of_work.connection)
-        user_service.subscribe_to_gravitational_wave_news(user_id, subscribe)
+        user_service.update_subscriptions(user_id, subscriptions)
         unit_of_work.commit()
         return user_service.get_user(user_id)
+
+
+@router.get(
+    "/{user_id}/subscription/",
+    summary="Subscribe to gravitational wave proposal",
+    response_model=List[Subscription]
+)
+def subscribe_to_gravitational_wave_proposal(
+    user_id: int = Path(
+        ..., title="User id", description="Id for user to add contact for."
+    ),
+    user: _User = Depends(get_current_user),
+) -> List[Subscription]:
+    """
+    List of all subscriptions of the user.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_subscriptions(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+        subscriptions = user_service.get_subscriptions(user_id)
+        return [Subscription(**subscription) for subscription in subscriptions]

@@ -795,9 +795,6 @@ WHERE PiptUser_Id = :user_id
         if self.is_librarian(username):
             roles.append(Role.LIBRARIAN)
 
-        if self.is_gravitational_wave_subscriber(username):
-            roles.append(Role.GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER)
-
         return roles
 
     def get_salt_astronomers(self) -> List[Dict[str, Any]]:
@@ -1224,8 +1221,6 @@ WHERE Email = :email
             return "RightMaskCutting"
         if role == Role.LIBRARIAN:
             return "RightLibrarian"
-        if role == Role.GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER:
-            return "GravitationalWaveProposals"
 
         raise ValidationError("Unknown user role: " + role)
 

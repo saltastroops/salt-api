@@ -93,8 +93,6 @@ class PermissionService:
 
         elif role == Role.TAC_MEMBER:
             return self.user_repository.is_tac_member_in_general(username)
-        elif role == Role.GRAVITATIONAL_WAVE_NEWS_SUBSCRIBER:
-            return self.user_repository.is_gravitational_wave_subscriber(username)
         else:
             return False
 

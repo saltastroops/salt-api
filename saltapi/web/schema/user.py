@@ -25,7 +25,6 @@ class UserRole(str, Enum):
     TAC_CHAIR = "TAC Chair"
     BOARD_MEMBER = "Board Member"
     LIBRARIAN = "Librarian"
-    GRAVITATIONAL_WAVE_SUBSCRIBER = "Gravitational Wave Subscriber"
 
 
 class FullName(BaseModel):
@@ -208,7 +207,6 @@ class SubscriptionType(str, Enum):
     """
     The type of subscriptions you can subscribe to
     """
-
     SALT_NEWS = "SALT News"
     GRAVITATIONAL_WAVE_News = "Gravitational Wave News"
 

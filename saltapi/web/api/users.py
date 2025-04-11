@@ -433,27 +433,26 @@ def update_subscriptions(
             ..., title="Subscriptions", description="List of subscriptions."
         ),
         user: _User = Depends(get_current_user),
-) -> List[Subscription]:
+) -> List[Dict[str, Any]]:
     """
-    Update a user's subscriptions..
+    Update a user's subscriptions.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         for subscription in subscriptions:
             if subscription.to == "Gravitational Wave Notifications":
-                permission_service.check_permission_to_subscribe_to_gravitational_wave_news(
+                permission_service.check_permission_to_subscribe_to_gravitational_wave_notifications(
                     user_id,
                     user,
                     subscription.is_subscribed
                 )
             if subscription.to == "SALT News":
-               permission_service.check_permission_to_subscribe_to_salt_notifications(user_id, user)
+               permission_service.check_permission_to_subscribe_to_salt_news(user_id, user)
 
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_subscriptions(user_id, subscriptions)
         unit_of_work.commit()
-        subscriptions = user_service.get_subscriptions(user_id)
-        return [Subscription(**subscription) for subscription in subscriptions]
+        return user_service.get_subscriptions(user_id)
 
 
 @router.get(
@@ -466,13 +465,12 @@ def get_subscriptions(
         ..., title="User id", description="Id for the user whose subscriptions are listed."
     ),
     user: _User = Depends(get_current_user),
-) -> List[Subscription]:
+) -> List[Dict[str, Any]]:
     """
-    List of a user's subscriptions.
+    List a user's subscriptions.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_subscriptions(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
-        subscriptions = user_service.get_subscriptions(user_id)
-        return [Subscription(**subscription) for subscription in subscriptions]
+        return  user_service.get_subscriptions(user_id)

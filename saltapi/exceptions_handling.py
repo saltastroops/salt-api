@@ -15,7 +15,7 @@ from saltapi.exceptions import (
     NotFoundError,
     ValidationError,
     AuthenticationError,
-    SSDAError, DatabaseUpdateError,
+    SSDAError,
 )
 
 
@@ -141,12 +141,4 @@ def setup_exception_handler(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": exc.message},
-        )
-
-    @app.exception_handler(DatabaseUpdateError)
-    async def database_update_error_handler(request: Request, exc: DatabaseUpdateError) -> Response:
-        """Catch an database update error."""
-        log_message(request.method, request.url, exc)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": str(exc)}
         )

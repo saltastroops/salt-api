@@ -249,7 +249,7 @@ SALT Team
     def update_subscriptions(self, user_id: int, subscriptions: List[Subscription]) -> None:
         for subscription in subscriptions:
             if subscription.to == "Gravitational Wave Notifications":
-                self.repository.subscribe_to_gravitational_wave_news(user_id, subscription.is_subscribed)
+                self.repository.subscribe_to_gravitational_wave_notifications(user_id, subscription.is_subscribed)
             if subscription.to == "SALT News":
                 self.repository.subscribe_to_salt_news(user_id, subscription.is_subscribed)
 

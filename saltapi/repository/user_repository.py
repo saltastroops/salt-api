@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError, DatabaseUpdateError
+from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -1268,7 +1268,7 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
 
         return cast(int, result.lastrowid)
 
-    def subscribe_to_gravitational_wave_news(self, user_id, subscribe: bool) -> None:
+    def subscribe_to_gravitational_wave_notifications(self, user_id, subscribe: bool) -> None:
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
@@ -1280,17 +1280,14 @@ ON DUPLICATE KEY UPDATE Value = VALUES(Value);
         )
         if not self._does_user_id_exist(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
-        try:
-            self.connection.execute(
-                stmt,
-                {
-                    "user_id": user_id,
-                    "value": subscribe
-                },
-            )
-        except:
-            action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
-            raise DatabaseUpdateError(f"Failed to {action} gravitational wave news.")
+
+        self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+                "value": subscribe
+            },
+        )
 
     def subscribe_to_salt_news(self, user_id, subscribe: bool) -> None:
         stmt = text(
@@ -1302,17 +1299,14 @@ WHERE PiptUser_Id = :user_id
         )
         if not self._does_user_id_exist(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
-        try:
-            self.connection.execute(
-                stmt,
-                {
-                    "user_id": user_id,
-                    "value": subscribe
-                },
-            )
-        except:
-            action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
-            raise DatabaseUpdateError(f"Failed to {action} SALT news.")
+
+        self.connection.execute(
+            stmt,
+            {
+                "user_id": user_id,
+                "value": subscribe
+            },
+        )
 
     def _is_user_subscribed_to_salt_news(self, user_id: int)-> bool:
         stmt = text(
@@ -1324,7 +1318,7 @@ WHERE ReceiveNews > 0 AND PiptUser_Id = :user_id
         result =  self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
         return result is not None
 
-    def _is_user_subscribed_to_gravitational_wave_mailing_list(self, user_id: int) -> Optional[Dict[str, Any]]:
+    def _is_user_subscribed_to_gravitational_wave_notifications(self, user_id: int) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
 SELECT 1 FROM PiptUserSetting
@@ -1338,7 +1332,7 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
 
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         subscriptions = []
-        if self._is_user_subscribed_to_gravitational_wave_mailing_list(user_id):
+        if self._is_user_subscribed_to_gravitational_wave_notifications(user_id):
             subscriptions.append({
                 "to": "Gravitational Wave Notifications",
                 "is_subscribed": True

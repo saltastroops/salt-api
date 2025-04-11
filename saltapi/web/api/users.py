@@ -22,7 +22,7 @@ from saltapi.web.schema.user import (
     UserUpdate,
     BaseUserDetails,
     UsernameEmail,
-    UserContact,
+    UserContact, Subscription,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -417,3 +417,60 @@ def add_contact(
         user_service.add_contact(user_id, new_contact)
         unit_of_work.commit()
         return user_service.get_user(user_id)
+
+
+
+@router.patch(
+        "/{user_id}/subscriptions/",
+    summary="Update a user's subscriptions",
+    response_model=List[Subscription]
+)
+def update_subscriptions(
+        user_id: int = Path(
+            ..., title="User id", description="Id for the user whose subscriptions are updated."
+        ),
+        subscriptions: List[Subscription] = Body(
+            ..., title="Subscriptions", description="List of subscriptions."
+        ),
+        user: _User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
+    """
+    Update a user's subscriptions.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        for subscription in subscriptions:
+            if subscription.to == "Gravitational Wave Notifications":
+                permission_service.check_permission_to_subscribe_to_gravitational_wave_notifications(
+                    user_id,
+                    user,
+                    subscription.is_subscribed
+                )
+            if subscription.to == "SALT News":
+               permission_service.check_permission_to_subscribe_to_salt_news(user_id, user)
+
+        user_service = services.user_service(unit_of_work.connection)
+        user_service.update_subscriptions(user_id, subscriptions)
+        unit_of_work.commit()
+        return user_service.get_subscriptions(user_id)
+
+
+@router.get(
+    "/{user_id}/subscriptions/",
+    summary="List a user's subscriptions",
+    response_model=List[Subscription]
+)
+def get_subscriptions(
+    user_id: int = Path(
+        ..., title="User id", description="Id for the user whose subscriptions are listed."
+    ),
+    user: _User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
+    """
+    List a user's subscriptions.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_subscriptions(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+        return  user_service.get_subscriptions(user_id)

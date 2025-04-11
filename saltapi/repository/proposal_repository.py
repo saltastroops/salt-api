@@ -459,6 +459,7 @@ LIMIT 1
         return db_proposal_type
 
     def _proposal_text(self, proposal_code, semester):
+
         """
         Return the proposal text for a semester.
 
@@ -497,8 +498,43 @@ LIMIT 1;
 
     def _proposal_general_info(self, proposal_code: str, semester: str):
         """
-        Return general proposal information for a semester.
+        Return the proposal text for a semester.
+
+        The proposal text includes the title, abstract, summary for the SALT Astronomer and the summary for the night
+        log.
+
+        No text may exist for the given semester as no phase 2 has been submitted for the proposal yet.
+        In this case the latest text (preceding the semester) is used.
         """
+        stmt = text("""
+SELECT
+    PT.Title                            AS title,
+    PT.Abstract                         AS abstract,
+    PT.ReadMe                           AS summary_for_salt_astronomer,
+    PT.NightlogSummary                  AS summary_for_night_log
+FROM ProposalText PT
+         JOIN ProposalCode PC ON PT.ProposalCode_Id = PC.ProposalCode_Id
+         JOIN Semester S ON PT.Semester_Id = S.Semester_Id
+WHERE PC.Proposal_Code = :proposal_code
+  AND CONCAT(S.Year, '-', S.Semester) <= :semester
+ORDER BY S.Year, S.Semester DESC
+LIMIT 1;
+        """)
+        result = self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "semester": semester}
+        )
+        row = result.one()
+        return {
+            "title": row.title,
+            "abstract": row.abstract,
+            "summary_for_salt_astronomer": row.summary_for_salt_astronomer,
+            "summary_for_night_log": row.summary_for_night_log,
+        }
+
+    def _proposal_general_info(self, proposal_code: str, semester: str):
+        """
+       Return general proposal information for a semester.
+       """
         year, sem = semester.split("-")
         stmt = text(
             """
@@ -585,6 +621,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "first_submission": self._first_submission_date(proposal_code),
             "submission_number": self._latest_submission(proposal_code),
             "semesters": self._semesters(proposal_code),
+
         }
 
     def _investigators(self, proposal_code: str) -> List[Dict[str, Any]]:

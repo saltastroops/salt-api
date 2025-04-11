@@ -421,33 +421,33 @@ def add_contact(
 
 
 @router.patch(
-        "/{user_id}/subscription/",
-    summary="Subscribe to gravitational wave proposal",
+        "/{user_id}/subscriptions/",
+    summary="Update a user's subscriptions",
     response_model=List[Subscription]
 )
-def subscribe_to_gravitational_wave_proposal(
+def update_subscriptions(
         user_id: int = Path(
-            ..., title="User id", description="Id for user to add contact for."
+            ..., title="User id", description="Id for the user whose subscriptions are updated."
         ),
         subscriptions: List[Subscription] = Body(
-            ..., title="Subscription", description="List of subscriptions."
+            ..., title="Subscriptions", description="List of subscriptions."
         ),
         user: _User = Depends(get_current_user),
 ) -> List[Subscription]:
     """
-    Subscribe/Unsubscribe a member to mailing list by name.
+    Update a user's subscriptions..
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         for subscription in subscriptions:
-            if subscription.to == "Gravitational Wave News":
+            if subscription.to == "Gravitational Wave Notifications":
                 permission_service.check_permission_to_subscribe_to_gravitational_wave_news(
                     user_id,
                     user,
                     subscription.is_subscribed
                 )
             if subscription.to == "SALT News":
-               permission_service.check_permission_to_subscribe_to_salt_news(user_id, user)
+               permission_service.check_permission_to_subscribe_to_salt_notifications(user_id, user)
 
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_subscriptions(user_id, subscriptions)
@@ -457,18 +457,18 @@ def subscribe_to_gravitational_wave_proposal(
 
 
 @router.get(
-    "/{user_id}/subscription/",
-    summary="Subscribe to gravitational wave proposal",
+    "/{user_id}/subscriptions/",
+    summary="List a user's subscriptions",
     response_model=List[Subscription]
 )
-def subscribe_to_gravitational_wave_proposal(
+def get_subscriptions(
     user_id: int = Path(
-        ..., title="User id", description="Id for user to add contact for."
+        ..., title="User id", description="Id for the user whose subscriptions are listed."
     ),
     user: _User = Depends(get_current_user),
 ) -> List[Subscription]:
     """
-    List of all subscriptions of the user.
+    List of a user's subscriptions.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)

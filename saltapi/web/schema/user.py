@@ -205,13 +205,13 @@ class UserContact(BaseModel):
 
 class SubscriptionType(str, Enum):
     """
-    The type of subscriptions you can subscribe to
+    The type of subscriptions a user can subscribe to
     """
     SALT_NEWS = "SALT News"
-    GRAVITATIONAL_WAVE_News = "Gravitational Wave News"
+    GRAVITATIONAL_WAVE_News = "Gravitational Wave Notifications"
 
 
 class Subscription(BaseModel):
-    to: SubscriptionType = Field(..., title="Subscription", description="The name of the subscription.")
-    is_subscribed: bool = Field(..., title="Is subscribed", description="Is subscribed")
+    to: SubscriptionType = Field(..., title="Subscription", description="The type of the subscription.")
+    is_subscribed: bool = Field(..., title="Is subscribed", description="Whether the user is subscribed")
 

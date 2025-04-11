@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
+from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError, DatabaseUpdateError
 from saltapi.service.user import Role, User
 
 pwd_context = CryptContext(
@@ -638,24 +638,6 @@ FROM PiptUser PU
     JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
     JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
 WHERE PS.PiptSetting_Name = 'RightLibrarian'
-    AND PUS.Value > 0
-    AND PU.Username = :username
-        """
-        )
-        result = self.connection.execute(stmt, {"username": username})
-        return cast(int, result.scalar()) > 0
-
-    def is_gravitational_wave_subscriber(self, username) -> bool:
-        """
-        Check whether the user has subscribed to the GW mailing list.
-        """
-        stmt = text(
-            """
-SELECT COUNT(*)
-FROM PiptUser PU
-    JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
-    JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
-WHERE PS.PiptSetting_Name = 'GravitationalWaveProposals'
     AND PUS.Value > 0
     AND PU.Username = :username
         """
@@ -1296,6 +1278,8 @@ INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
 ON DUPLICATE KEY UPDATE Value = VALUES(Value);            
             """
         )
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
         try:
             self.connection.execute(
                 stmt,
@@ -1306,7 +1290,7 @@ ON DUPLICATE KEY UPDATE Value = VALUES(Value);
             )
         except:
             action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
-            raise ValidationError(f"Failed to {action} gravitational wave news.")
+            raise DatabaseUpdateError(f"Failed to {action} gravitational wave news.")
 
     def subscribe_to_salt_news(self, user_id, subscribe: bool) -> None:
         stmt = text(
@@ -1316,6 +1300,8 @@ SET ReceiveNews = :value
 WHERE PiptUser_Id = :user_id    
             """
         )
+        if not self._does_user_id_exist(user_id):
+            raise NotFoundError(f"Unknown user id: {user_id}")
         try:
             self.connection.execute(
                 stmt,
@@ -1326,9 +1312,9 @@ WHERE PiptUser_Id = :user_id
             )
         except:
             action = "subscribe user to receive" if subscribe else "unsubscribe user from receiving"
-            raise ValidationError(f"Failed to {action} SALT news.")
+            raise DatabaseUpdateError(f"Failed to {action} SALT news.")
 
-    def _is_user_subscribed_to_salt_news_mailing_list(self, user_id: int)-> bool:
+    def _is_user_subscribed_to_salt_news(self, user_id: int)-> bool:
         stmt = text(
             """
 SELECT 1 FROM PiptUser
@@ -1354,10 +1340,10 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         subscriptions = []
         if self._is_user_subscribed_to_gravitational_wave_mailing_list(user_id):
             subscriptions.append({
-                "to": "Gravitational Wave News",
+                "to": "Gravitational Wave Notifications",
                 "is_subscribed": True
             })
-        if self._is_user_subscribed_to_salt_news_mailing_list(user_id):
+        if self._is_user_subscribed_to_salt_news(user_id):
             subscriptions.append({
                 "to": "SALT News",
                 "is_subscribed": True

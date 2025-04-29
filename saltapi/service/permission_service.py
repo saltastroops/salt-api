@@ -8,6 +8,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
+from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
 from saltapi.web.schema.proposal import (
@@ -23,11 +24,13 @@ class PermissionService:
         proposal_repository: ProposalRepository,
         block_repository: BlockRepository,
         submission_repository: SubmissionRepository,
+        utils: Utils,
     ) -> None:
         self.user_repository = user_repository
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
         self.submission_repository = submission_repository
+        self.utils = utils
 
     def user_has_role(
         self,
@@ -589,4 +592,27 @@ class PermissionService:
         if user_id == user.id:
             return
 
-        raise ValidationError("You are not allowed to add a contact to this user")
+        raise AuthorizationError("You are not allowed to add a contact to this user")
+
+    def check_permission_to_subscribe_to_gravitational_wave_notifications(self, user_id: int, user: User, subscribe: bool):
+        if self.check_user_has_role(user, Role.ADMINISTRATOR):
+            return
+        if user_id == user.id:
+            if not subscribe:
+                return
+            else:
+                for affiliation in user.affiliations:
+                    if affiliation.partner_code in self.utils.all_partners():
+                        return
+                raise AuthorizationError("You aren't allowed to subscribe as you aren't affiliated with a SALT partner.")
+        raise AuthorizationError("You are not allowed to subscribe or unsubscribe another user.")
+
+    def check_permission_to_subscribe_to_salt_news(self, user_id: int, user: User):
+        if self.check_user_has_role(user, Role.ADMINISTRATOR) or user_id == user.id:
+            return
+        raise AuthorizationError("You are not allowed to subscribe or unsubscribe another user.")
+
+    def check_permission_to_view_subscriptions(self, user_id, user):
+        if self.check_user_has_role(user, Role.ADMINISTRATOR) or user_id == user.id:
+            return
+        raise AuthorizationError("You are not allowed view the subscriptions.")

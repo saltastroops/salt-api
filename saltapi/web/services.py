@@ -8,6 +8,7 @@ from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
+from saltapi.repository.utils import Utils
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.block_service import BlockService
 from saltapi.service.data_service import DataService
@@ -44,8 +45,9 @@ def permission_service(connection: Connection) -> PermissionService:
     proposal_repository = ProposalRepository(connection)
     block_repository = BlockRepository(connection)
     submission_repository = SubmissionRepository(connection)
+    utils = Utils(connection)
     return PermissionService(
-        user_repository, proposal_repository, block_repository, submission_repository
+        user_repository, proposal_repository, block_repository, submission_repository, utils
     )
 
 

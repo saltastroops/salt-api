@@ -8,7 +8,7 @@ from saltapi.repository.block_repository import BlockRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
-from saltapi.repository.util_repository import UtilRepository
+from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
 from saltapi.web.schema.proposal import (
@@ -24,13 +24,13 @@ class PermissionService:
         proposal_repository: ProposalRepository,
         block_repository: BlockRepository,
         submission_repository: SubmissionRepository,
-        util_repository: UtilRepository,
+        utils: Utils,
     ) -> None:
         self.user_repository = user_repository
         self.proposal_repository = proposal_repository
         self.block_repository = block_repository
         self.submission_repository = submission_repository
-        self.util_repository = util_repository
+        self.utils = utils
 
     def user_has_role(
         self,
@@ -602,7 +602,7 @@ class PermissionService:
                 return
             else:
                 for affiliation in user.affiliations:
-                    if affiliation.partner_code in self.util_repository.all_partners():
+                    if affiliation.partner_code in self.utils.all_partners():
                         return
                 raise AuthorizationError("You aren't allowed to subscribe as you aren't affiliated with a SALT partner.")
         raise AuthorizationError("You are not allowed to subscribe or unsubscribe another user.")

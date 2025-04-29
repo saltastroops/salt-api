@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 
-class UtilRepository:
+class Utils:
     def __init__(self, connection: Connection) -> None:
         self.connection = connection
 

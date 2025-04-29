@@ -374,7 +374,7 @@ FROM Proposal P
          JOIN Semester S ON P.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
   AND P.Current = 1
-ORDER BY S.Year DESC, S.Semester DESC
+ORDER BY S.Year DESC, S.Semester DESC, P.Submission DESC
 LIMIT 1
         """
         )
@@ -505,6 +505,7 @@ WHERE PC.Proposal_Code = :proposal_code
   AND P.Current = 1
   AND S.Year = :year
   AND S.Semester = :semester
+ORDER BY P.Submission DESC
         """
         )
         result = self.connection.execute(

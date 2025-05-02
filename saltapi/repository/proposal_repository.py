@@ -536,7 +536,7 @@ FROM Proposal P
 WHERE PC.Proposal_Code = :proposal_code
     AND P.Current = 1
     AND CONCAT(S.Year, '-', S.Semester) <= :semester
-    ORDER BY S.Year, S.Semester DESC, P.Submission DESC
+    ORDER BY S.Year DESC, S.Semester DESC, P.Submission DESC
     LIMIT 1
 
         """

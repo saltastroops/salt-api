@@ -28,8 +28,8 @@ class UserRepository:
 SELECT PU.PiptUser_Id           AS id,
        I1.Email                 AS preferred_email,
        I0.Email                 AS email,
-       I0.Surname               AS family_name,
-       I0.FirstName             AS given_name,
+       I1.Surname               AS family_name,
+       I1.FirstName             AS given_name,
        PU.Password              AS password_hash,
        PU.Username              AS username,
        P.Partner_Code           AS partner_code,
@@ -1237,9 +1237,13 @@ SET Investigator_Id = :investigator_id
 WHERE PiptUser_Id = :user_id            
             """
         )
-        self.connection.execute(stmt, {"user_id": user_id, "investigator_id": investigator_id})
+        self.connection.execute(
+            stmt, {"user_id": user_id, "investigator_id": investigator_id}
+        )
 
-    def add_contact_details(self, user_id: int, new_user_contact: Dict[str, Any]) -> int:
+    def add_contact_details(
+        self, user_id: int, new_user_contact: Dict[str, Any]
+    ) -> int:
         """
         Add contact details to a user.
 
@@ -1264,11 +1268,16 @@ VALUES (:institution_id, :given_name, :family_name, :email, :user_id)
                 },
             )
         except IntegrityError as e:
-            raise ValidationError(f"The email address {new_user_contact['email']} already exists for this institution.")
+            raise ValidationError(
+                f"The email address {new_user_contact['email']} already exists for this"
+                " institution."
+            )
 
         return cast(int, result.lastrowid)
 
-    def subscribe_to_gravitational_wave_notifications(self, user_id, subscribe: bool) -> None:
+    def subscribe_to_gravitational_wave_notifications(
+        self, user_id, subscribe: bool
+    ) -> None:
         stmt = text(
             """
 INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
@@ -1283,10 +1292,7 @@ ON DUPLICATE KEY UPDATE Value = VALUES(Value);
 
         self.connection.execute(
             stmt,
-            {
-                "user_id": user_id,
-                "value": subscribe
-            },
+            {"user_id": user_id, "value": subscribe},
         )
 
     def subscribe_to_salt_news(self, user_id, subscribe: bool) -> None:
@@ -1302,23 +1308,22 @@ WHERE PiptUser_Id = :user_id
 
         self.connection.execute(
             stmt,
-            {
-                "user_id": user_id,
-                "value": subscribe
-            },
+            {"user_id": user_id, "value": subscribe},
         )
 
-    def _is_user_subscribed_to_salt_news(self, user_id: int)-> bool:
+    def _is_user_subscribed_to_salt_news(self, user_id: int) -> bool:
         stmt = text(
             """
 SELECT 1 FROM PiptUser
 WHERE ReceiveNews > 0 AND PiptUser_Id = :user_id    
             """
         )
-        result =  self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
+        result = self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
         return result is not None
 
-    def _is_user_subscribed_to_gravitational_wave_notifications(self, user_id: int) -> Optional[Dict[str, Any]]:
+    def _is_user_subscribed_to_gravitational_wave_notifications(
+        self, user_id: int
+    ) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
 SELECT 1 FROM PiptUserSetting
@@ -1327,20 +1332,16 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
     AND Value > 0
             """
         )
-        result =  self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
+        result = self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
         return result is not None
 
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         subscriptions = []
         if self._is_user_subscribed_to_gravitational_wave_notifications(user_id):
-            subscriptions.append({
-                "to": "Gravitational Wave Notifications",
-                "is_subscribed": True
-            })
+            subscriptions.append(
+                {"to": "Gravitational Wave Notifications", "is_subscribed": True}
+            )
         if self._is_user_subscribed_to_salt_news(user_id):
-            subscriptions.append({
-                "to": "SALT News",
-                "is_subscribed": True
-            })
+            subscriptions.append({"to": "SALT News", "is_subscribed": True})
 
         return subscriptions

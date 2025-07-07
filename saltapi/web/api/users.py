@@ -22,7 +22,8 @@ from saltapi.web.schema.user import (
     UserUpdate,
     BaseUserDetails,
     UsernameEmail,
-    UserContact, Subscription,
+    UserContact,
+    Subscription,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -128,7 +129,6 @@ def send_verification_link(
     Send verification link.
     """
     with UnitOfWork() as unit_of_work:
-
         user_service = services.user_service(unit_of_work.connection)
 
         user = user_service.get_user_by_username(
@@ -314,7 +314,10 @@ def update_password(
     password_update: PasswordUpdate = Body(
         ...,
         title="Password and authentication token",
-        description="Password to replace the old one, and an authentication token to verify the user.",
+        description=(
+            "Password to replace the old one, and an authentication token to verify the"
+            " user."
+        ),
     ),
 ) -> _User:
     """
@@ -392,16 +395,18 @@ def update_user_roles(
 
 
 @router.post(
-    "/{user_id}/add-contact", summary="Add contact details to the user", response_model=User
+    "/{user_id}/add-contact",
+    summary="Add contact details to the user",
+    response_model=User,
 )
 def add_contact(
-        user_id: int = Path(
-            ..., title="User id", description="Id for user to add contact for."
-        ),
-        user: _User = Depends(get_current_user),
-        contact: UserContact = Body(
-            ..., title="Contact details", description="User contact to add."
-        ),
+    user_id: int = Path(
+        ..., title="User id", description="Id for user to add contact for."
+    ),
+    user: _User = Depends(get_current_user),
+    contact: UserContact = Body(
+        ..., title="Contact details", description="User contact to add."
+    ),
 ) -> User:
     """
     Add contact details to the user.
@@ -419,20 +424,21 @@ def add_contact(
         return user_service.get_user(user_id)
 
 
-
 @router.patch(
-        "/{user_id}/subscriptions/",
+    "/{user_id}/subscriptions/",
     summary="Update a user's subscriptions",
-    response_model=List[Subscription]
+    response_model=List[Subscription],
 )
 def update_subscriptions(
-        user_id: int = Path(
-            ..., title="User id", description="Id for the user whose subscriptions are updated."
-        ),
-        subscriptions: List[Subscription] = Body(
-            ..., title="Subscriptions", description="List of subscriptions."
-        ),
-        user: _User = Depends(get_current_user),
+    user_id: int = Path(
+        ...,
+        title="User id",
+        description="Id for the user whose subscriptions are updated.",
+    ),
+    subscriptions: List[Subscription] = Body(
+        ..., title="Subscriptions", description="List of subscriptions."
+    ),
+    user: _User = Depends(get_current_user),
 ) -> List[Dict[str, Any]]:
     """
     Update a user's subscriptions.
@@ -442,12 +448,12 @@ def update_subscriptions(
         for subscription in subscriptions:
             if subscription.to == "Gravitational Wave Notifications":
                 permission_service.check_permission_to_subscribe_to_gravitational_wave_notifications(
-                    user_id,
-                    user,
-                    subscription.is_subscribed
+                    user_id, user, subscription.is_subscribed
                 )
             if subscription.to == "SALT News":
-               permission_service.check_permission_to_subscribe_to_salt_news(user_id, user)
+                permission_service.check_permission_to_subscribe_to_salt_news(
+                    user_id, user
+                )
 
         user_service = services.user_service(unit_of_work.connection)
         user_service.update_subscriptions(user_id, subscriptions)
@@ -458,11 +464,13 @@ def update_subscriptions(
 @router.get(
     "/{user_id}/subscriptions/",
     summary="List a user's subscriptions",
-    response_model=List[Subscription]
+    response_model=List[Subscription],
 )
 def get_subscriptions(
     user_id: int = Path(
-        ..., title="User id", description="Id for the user whose subscriptions are listed."
+        ...,
+        title="User id",
+        description="Id for the user whose subscriptions are listed.",
     ),
     user: _User = Depends(get_current_user),
 ) -> List[Dict[str, Any]]:
@@ -473,4 +481,4 @@ def get_subscriptions(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_subscriptions(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
-        return  user_service.get_subscriptions(user_id)
+        return user_service.get_subscriptions(user_id)

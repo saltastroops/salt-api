@@ -459,7 +459,6 @@ LIMIT 1
         return db_proposal_type
 
     def _proposal_text(self, proposal_code, semester):
-
         """
         Return the proposal text for a semester.
 
@@ -506,7 +505,8 @@ LIMIT 1;
         No text may exist for the given semester as no phase 2 has been submitted for the proposal yet.
         In this case the latest text (preceding the semester) is used.
         """
-        stmt = text("""
+        stmt = text(
+            """
 SELECT
     PT.Title                            AS title,
     PT.Abstract                         AS abstract,
@@ -519,7 +519,8 @@ WHERE PC.Proposal_Code = :proposal_code
   AND CONCAT(S.Year, '-', S.Semester) <= :semester
 ORDER BY S.Year, S.Semester DESC
 LIMIT 1;
-        """)
+        """
+        )
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -533,8 +534,8 @@ LIMIT 1;
 
     def _proposal_general_info(self, proposal_code: str, semester: str):
         """
-       Return general proposal information for a semester.
-       """
+        Return general proposal information for a semester.
+        """
         year, sem = semester.split("-")
         stmt = text(
             """
@@ -621,7 +622,6 @@ WHERE PC.Proposal_Code = :proposal_code
             "first_submission": self._first_submission_date(proposal_code),
             "submission_number": self._latest_submission(proposal_code),
             "semesters": self._semesters(proposal_code),
-
         }
 
     def _investigators(self, proposal_code: str) -> List[Dict[str, Any]]:
@@ -1562,7 +1562,7 @@ WHERE PC.Proposal_Code = :proposal_code AND P.Phase IN :phases
         version = result.scalar_one()
         if version is None:
             raise NotFoundError(
-                f"There exists no proposal with proposal code  "
+                "There exists no proposal with proposal code  "
                 f"{proposal_code} and phase "
                 f"{' or '.join([str(p) for p in phases])}"
             )
@@ -2954,7 +2954,6 @@ WHERE BV.Block_Id = :block_id AND BVS.BlockVisitStatus = 'Accepted'
     def _get_pool_blocks(
         self, pool_id: int, semester: str, proposal_code: str
     ) -> List[Dict[str, Any]]:
-
         stmt = text(
             """
 SELECT
@@ -3004,7 +3003,6 @@ WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
     def get_pools(
         self, proposal_code: str, semester: Optional[str]
     ) -> List[Dict[str, any]]:
-
         if semester is None:
             semester = self._latest_submission_semester(proposal_code)
 

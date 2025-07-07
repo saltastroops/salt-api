@@ -150,7 +150,7 @@ class PermissionService:
                     Role.SALT_OPERATOR,
                     Role.PARTNER_AFFILIATED,
                     Role.ADMINISTRATOR,
-                    Role.LIBRARIAN
+                    Role.LIBRARIAN,
                 ]
 
                 self.check_role(username, roles, proposal_code)
@@ -594,7 +594,9 @@ class PermissionService:
 
         raise AuthorizationError("You are not allowed to add a contact to this user")
 
-    def check_permission_to_subscribe_to_gravitational_wave_notifications(self, user_id: int, user: User, subscribe: bool):
+    def check_permission_to_subscribe_to_gravitational_wave_notifications(
+        self, user_id: int, user: User, subscribe: bool
+    ):
         if self.check_user_has_role(user, Role.ADMINISTRATOR):
             return
         if user_id == user.id:
@@ -604,13 +606,20 @@ class PermissionService:
                 for affiliation in user.affiliations:
                     if affiliation.partner_code in self.utils.all_partners():
                         return
-                raise AuthorizationError("You aren't allowed to subscribe as you aren't affiliated with a SALT partner.")
-        raise AuthorizationError("You are not allowed to subscribe or unsubscribe another user.")
+                raise AuthorizationError(
+                    "You aren't allowed to subscribe as you aren't affiliated with a"
+                    " SALT partner."
+                )
+        raise AuthorizationError(
+            "You are not allowed to subscribe or unsubscribe another user."
+        )
 
     def check_permission_to_subscribe_to_salt_news(self, user_id: int, user: User):
         if self.check_user_has_role(user, Role.ADMINISTRATOR) or user_id == user.id:
             return
-        raise AuthorizationError("You are not allowed to subscribe or unsubscribe another user.")
+        raise AuthorizationError(
+            "You are not allowed to subscribe or unsubscribe another user."
+        )
 
     def check_permission_to_view_subscriptions(self, user_id, user):
         if self.check_user_has_role(user, Role.ADMINISTRATOR) or user_id == user.id:

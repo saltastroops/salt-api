@@ -142,7 +142,7 @@ WHERE SFPD.SalticamFilterPattern_Id = :pattern_id;
                 "filter": {
                     "name": row.filter_name,
                     "description": row.filter_description,
-                    "is_in_magazine": row.is_in_magazine
+                    "is_in_magazine": row.is_in_magazine,
                 },
                 "exposure_time": float(row.exposure_time),
             }

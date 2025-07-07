@@ -8,9 +8,8 @@ class Utils:
         self.connection = connection
 
     def all_partners(self) -> List[str]:
-
         stmt = text(
-        """
+            """
 SELECT Partner_Code AS partner_code 
 FROM Partner P
 WHERE P.Partner_Code != 'OTH' AND P.Virtual = 0

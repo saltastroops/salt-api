@@ -34,6 +34,8 @@ class InstrumentService:
         """The list of obsolete RSS masks."""
         return self.instrument_repository.get_obsolete_rss_masks_in_magazine(mask_types)
 
-    def get_rss_slit_masks(self, exclude_mask_types: List[RssMaskType]) -> List[Dict[str, Any]]:
+    def get_rss_slit_masks(
+        self, exclude_mask_types: List[RssMaskType]
+    ) -> List[Dict[str, Any]]:
         """The list of the RSS slit masks."""
         return self.instrument_repository.get_rss_slit_masks(exclude_mask_types)

@@ -337,6 +337,7 @@ def validate_user(user: User) -> None:
         )
     if not user.user_verified:
         raise AuthorizationError(
-            "Your account has not been verified. Please visit "
-            f"{get_settings().frontend_uri}/request-verification-link to verify your account."
+            "Your account has not been verified. Please visit"
+            f" {get_settings().frontend_uri}/request-verification-link to verify your"
+            " account."
         )

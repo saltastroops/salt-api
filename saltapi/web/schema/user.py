@@ -192,6 +192,7 @@ class UsernameEmail(BaseModel):
         ..., title="Username or Email", description="Username or Email."
     )
 
+
 class UserContact(BaseModel):
     email: str = Field(..., title="Email address", description="The email address.")
     institution_id: int = Field(
@@ -207,11 +208,15 @@ class SubscriptionType(str, Enum):
     """
     The type of subscriptions a user can subscribe to
     """
+
     SALT_NEWS = "SALT News"
     GRAVITATIONAL_WAVE_News = "Gravitational Wave Notifications"
 
 
 class Subscription(BaseModel):
-    to: SubscriptionType = Field(..., title="Subscription", description="The type of the subscription.")
-    is_subscribed: bool = Field(..., title="Is subscribed", description="Whether the user is subscribed")
-
+    to: SubscriptionType = Field(
+        ..., title="Subscription", description="The type of the subscription."
+    )
+    is_subscribed: bool = Field(
+        ..., title="Is subscribed", description="Whether the user is subscribed"
+    )

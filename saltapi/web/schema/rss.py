@@ -175,9 +175,7 @@ class RssConfiguration(BaseModel):
         ..., title="Polarimetry setup", description="Polarimetry setup"
     )
     filter: str = Field(..., title="Filter", description="Filter")
-    mask: Optional[RssMask] = Field(
-        ..., title="Slit mask", description="Slit mask"
-    )
+    mask: Optional[RssMask] = Field(..., title="Slit mask", description="Slit mask")
 
 
 class RssDetectorCalculation(str, Enum):
@@ -229,6 +227,7 @@ class RssGain(str, Enum):
 
 class RssReadoutSpeed(str, Enum):
     """RSS detector readout speed."""
+
     FAST = "Fast"
     NONE = "None"
     SLOW = "Slow"
@@ -236,6 +235,7 @@ class RssReadoutSpeed(str, Enum):
 
 class RssDetector(BaseModel):
     """Rss detector setup."""
+
     mode: RssDetectorMode = Field(
         ..., title="Detector mode", description="Detector mode"
     )
@@ -277,6 +277,7 @@ class RssDetector(BaseModel):
 
 class RssWaveplateAnglePair(BaseModel):
     """Half-wave plate and quarter-wave plate angle pair."""
+
     half_wave: Optional[float] = Field(
         ...,
         title="Half-wave plate angle",

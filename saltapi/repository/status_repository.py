@@ -149,7 +149,8 @@ LIMIT 1
             "status_changed_at"
         ):
             raise ValidationError(
-                "The time when the status has changed is required if the status has changed. "
+                "The time when the status has changed is required if the status has"
+                " changed. "
             )
 
         # status_changed_at must be timezone aware
@@ -165,7 +166,8 @@ LIMIT 1
         ]
         if status == "Available" and expected_available_again_at is not None:
             raise ValidationError(
-                "The expected time of availability again must be None if the subsystem is available."
+                "The expected time of availability again must be None if the subsystem"
+                " is available."
             )
 
         # expected_available_again_at must be timezone aware

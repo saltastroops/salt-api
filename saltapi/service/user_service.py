@@ -117,7 +117,6 @@ SALT Team
         return user
 
     def get_user_by_username(self, username: str) -> Optional[User]:
-
         user = self.repository.get_by_username(username)
         if user:
             # Just in case the password hash ends up somewhere
@@ -239,20 +238,25 @@ SALT Team
     def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
         self.repository.update_user_roles(user_id, new_roles)
 
-    def add_contact(self,user_id: int, contact: Dict[str, str]) -> None:
+    def add_contact(self, user_id: int, contact: Dict[str, str]) -> None:
         user_details = self.get_user_details(user_id)
         contact["given_name"] = user_details["given_name"]
         contact["family_name"] = user_details["family_name"]
         investigator_id = self.repository.add_contact_details(user_id, contact)
         self.repository.set_preferred_contact(user_id, investigator_id)
 
-    def update_subscriptions(self, user_id: int, subscriptions: List[Subscription]) -> None:
+    def update_subscriptions(
+        self, user_id: int, subscriptions: List[Subscription]
+    ) -> None:
         for subscription in subscriptions:
             if subscription.to == "Gravitational Wave Notifications":
-                self.repository.subscribe_to_gravitational_wave_notifications(user_id, subscription.is_subscribed)
+                self.repository.subscribe_to_gravitational_wave_notifications(
+                    user_id, subscription.is_subscribed
+                )
             if subscription.to == "SALT News":
-                self.repository.subscribe_to_salt_news(user_id, subscription.is_subscribed)
+                self.repository.subscribe_to_salt_news(
+                    user_id, subscription.is_subscribed
+                )
 
     def get_subscriptions(self, user_id) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
-

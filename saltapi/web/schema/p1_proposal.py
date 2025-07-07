@@ -34,15 +34,17 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
     target_of_opportunity_reason: Optional[str] = Field(
         ..., title="ToO reason", description="Reason for ToO flag"
     )
+
+
 class P1RssModeConfiguration(BaseModel):
-    grating: Optional[str] = Field(
-        ..., title="Grating", description=" The grating"
-    )
+    grating: Optional[str] = Field(..., title="Grating", description=" The grating")
     mask_type: Optional[str] = Field(
         ..., title="Mask type", description="The mask type"
     )
     polarimetry_pattern_name: Optional[str] = Field(
-        ..., title="Polarimetry pattern name", description="The polarimetry pattern name"
+        ...,
+        title="Polarimetry pattern name",
+        description="The polarimetry pattern name",
     )
     fabry_perot_mode: Optional[str] = Field(
         ..., title="Fabry-Pérot mode", description="The Fabry-Pérot mode"
@@ -51,25 +53,36 @@ class P1RssModeConfiguration(BaseModel):
 
 class Filter(BaseModel):
     name: str = Field(..., title="Filter name", description="The filter name")
-    description: str = Field(..., title="Filter description", description="The filter description")
+    description: str = Field(
+        ..., title="Filter description", description="The filter description"
+    )
 
 
 class P1Bvit(BaseModel):
-    instrument: Literal["BVIT"] = Field(..., title="Instrument name", description="The instrument name")
+    instrument: Literal["BVIT"] = Field(
+        ..., title="Instrument name", description="The instrument name"
+    )
     filter: Filter = Field(
         ..., title="List of Filters", description="The list of configured filters"
     )
 
+
 class P1Hrs(BaseModel):
-    instrument: Literal["HRS"] = Field(..., title="Instrument name", description="The instrument name")
-    detector_mode: str = Field(..., title="Detector mode", description="The detector mode")
+    instrument: Literal["HRS"] = Field(
+        ..., title="Instrument name", description="The instrument name"
+    )
+    detector_mode: str = Field(
+        ..., title="Detector mode", description="The detector mode"
+    )
     simulations: List[Simulation] = Field(
         ..., title="Simulations", description="The simulations for the proposal."
     )
 
 
 class P1Nir(BaseModel):
-    instrument: Literal["NIR"] = Field(..., title="Instrument name", description="The instrument name")
+    instrument: Literal["NIR"] = Field(
+        ..., title="Instrument name", description="The instrument name"
+    )
     grating: str = Field(..., title="Grating", description="The grating")
     simulations: List[Simulation] = Field(
         ..., title="Simulations", description="The simulations for the proposal."
@@ -77,9 +90,15 @@ class P1Nir(BaseModel):
 
 
 class P1Rss(BaseModel):
-    instrument: Literal["RSS"] = Field(..., title="Instrument name", description="The instrument name")
-    mode: str = Field(..., title="Configuration mode", description="The configuration mode")
-    detector_mode: str = Field(..., title="Detector mode", description="The detector mode")
+    instrument: Literal["RSS"] = Field(
+        ..., title="Instrument name", description="The instrument name"
+    )
+    mode: str = Field(
+        ..., title="Configuration mode", description="The configuration mode"
+    )
+    detector_mode: str = Field(
+        ..., title="Detector mode", description="The detector mode"
+    )
     rss_mode_configuration: P1RssModeConfiguration = Field(
         ..., title="RSS mode configuratio", description="The RSS mode configurations"
     )
@@ -89,8 +108,12 @@ class P1Rss(BaseModel):
 
 
 class P1Salticam(BaseModel):
-    instrument: Literal["SALTICAM"] = Field(..., title="Instrument name", description="The instrument name")
-    detector_mode: str = Field(..., title="Detector mode", description="The detector mode")
+    instrument: Literal["SALTICAM"] = Field(
+        ..., title="Instrument name", description="The instrument name"
+    )
+    detector_mode: str = Field(
+        ..., title="Detector mode", description="The detector mode"
+    )
     filters: List[Filter] = Field(
         ..., title="List of Filters", description="The list of configured filters"
     )
@@ -180,7 +203,9 @@ class P1Proposal(Proposal):
         title="Targets",
         description="Targets for which observations are requested.",
     )
-    science_configurations: List[Union[P1Bvit, P1Hrs, P1Nir, P1Rss, P1Salticam]] = Field(
+    science_configurations: List[
+        Union[P1Bvit, P1Hrs, P1Nir, P1Rss, P1Salticam]
+    ] = Field(
         title="Instruments configurations",
         description="The phase 1 instruments configurations.",
     )

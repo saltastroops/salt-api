@@ -34,7 +34,10 @@ class SubmissionLogEntry(BaseModel):
     entry_number: int = Field(
         ...,
         title="Log entry number",
-        description="The running number, starting at 1, for the log entries associated with the submission.",
+        description=(
+            "The running number, starting at 1, for the log entries associated with the"
+            " submission."
+        ),
     )
     logged_at: str = Field(
         ...,

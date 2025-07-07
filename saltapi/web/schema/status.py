@@ -15,7 +15,10 @@ class SubsystemStatus(BaseModel):
     expected_available_again_at: Optional[datetime] = Field(
         ...,
         title="Time when expected available again",
-        description="Date time when the subsystem is expected to be available again, as an ISO 8601 string",
+        description=(
+            "Date time when the subsystem is expected to be available again, as an ISO"
+            " 8601 string"
+        ),
     )
     reason: Optional[str] = Field(
         ...,
@@ -44,12 +47,17 @@ class SubsystemStatusUpdate(BaseModel):
     expected_available_again_at: Optional[datetime] = Field(
         ...,
         title="Time when expected available again",
-        description="Date time when the subsystem is expected to be available again, as an ISO 8601 string",
+        description=(
+            "Date time when the subsystem is expected to be available again, as an ISO"
+            " 8601 string"
+        ),
     )
     reason: Optional[str] = Field(
         ...,
         title="Reason for the status",
-        description="Reason for the status. This must be None if the subsystem is available.",
+        description=(
+            "Reason for the status. This must be None if the subsystem is available."
+        ),
     )
     reporting_user: str = Field(
         ...,
@@ -60,7 +68,10 @@ class SubsystemStatusUpdate(BaseModel):
     status_changed_at: Optional[datetime] = Field(
         ...,
         title="Time of status change",
-        description="Date and time when the status changed, as an ISO 8601 string. This may be None if the status has not changed.",
+        description=(
+            "Date and time when the status changed, as an ISO 8601 string. This may be"
+            " None if the status has not changed."
+        ),
     )
     subsystem: str = Field(
         ...,

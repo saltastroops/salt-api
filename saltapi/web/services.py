@@ -47,7 +47,11 @@ def permission_service(connection: Connection) -> PermissionService:
     submission_repository = SubmissionRepository(connection)
     utils = Utils(connection)
     return PermissionService(
-        user_repository, proposal_repository, block_repository, submission_repository, utils
+        user_repository,
+        proposal_repository,
+        block_repository,
+        submission_repository,
+        utils,
     )
 
 

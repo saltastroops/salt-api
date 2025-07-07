@@ -711,11 +711,10 @@ async def serve_attachment(
     filename: str = Path(
         ...,
         title="Filename",
-        description=("Name of the file to download."),
+        description="Name of the file to download.",
     ),
     user: User = Depends(get_current_user),
 ) -> FileResponse:
-
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)

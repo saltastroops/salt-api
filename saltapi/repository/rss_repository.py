@@ -151,16 +151,16 @@ ORDER BY Rss_Id DESC;
             return None
 
         return {
-                "mask_type": row.mask_type,
-                "barcode": row.mask_barcode,
-                "plot_filename": row.plot_path.split("/")[-1] if row.plot_path else None,
-                "xml_filename": row.xml_path.split("/")[-1] if row.xml_path else None,
-                "description": row.mask_description,
-                "cut_by": row.mos_cut_by,
-                "cut_date": row.mos_cut_date,
-                "comment": row.mos_comment,
-                "is_in_magazine": row.mask_in_magazine,
-            }
+            "mask_type": row.mask_type,
+            "barcode": row.mask_barcode,
+            "plot_filename": row.plot_path.split("/")[-1] if row.plot_path else None,
+            "xml_filename": row.xml_path.split("/")[-1] if row.xml_path else None,
+            "description": row.mask_description,
+            "cut_by": row.mos_cut_by,
+            "cut_date": row.mos_cut_date,
+            "comment": row.mos_comment,
+            "is_in_magazine": row.mask_in_magazine,
+        }
 
     def _configuration(self, row: Any) -> Dict[str, Any]:
         """Return an RSS configuration."""
@@ -171,7 +171,7 @@ ORDER BY Rss_Id DESC;
             "fabry_perot": self._fabry_perot(row),
             "polarimetry": self._polarimetry(row),
             "filter": row.filter,
-            "mask": self._mask(row)
+            "mask": self._mask(row),
         }
         return config
 
@@ -658,7 +658,9 @@ WHERE CONCAT(S.Year, '-', S.Semester) >= :semester
                 obsolete_masks.append(m)
         return obsolete_masks
 
-    def get_rss_slit_mask(self, exclude_mask_types: List[RssMaskType]) -> List[Dict[str, Any]]:
+    def get_rss_slit_mask(
+        self, exclude_mask_types: List[RssMaskType]
+    ) -> List[Dict[str, Any]]:
         """
         The list of RSS masks, optionally filtered by a mask type.
         """
@@ -691,7 +693,7 @@ FROM RssMask RM
                 "xml_filename": m.xml_path.split("/")[-1] if m.xml_path else None,
                 "cut_by": m.cut_by,
                 "cut_date": m.cut_date,
-                "comment": m.mask_comment
+                "comment": m.mask_comment,
             }
             for m in self.connection.execute(
                 text(stmt),

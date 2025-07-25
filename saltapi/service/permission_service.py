@@ -11,10 +11,8 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.proposal import (
-    ProposalStatusValue,
-    ProprietaryPeriodUpdateRequest,
-)
+from saltapi.web.schema.proposal import (ProposalStatusValue,
+                                         ProprietaryPeriodUpdateRequest)
 
 
 class PermissionService:

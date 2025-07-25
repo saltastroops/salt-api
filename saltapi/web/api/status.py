@@ -2,10 +2,8 @@ from typing import List
 
 from fastapi import APIRouter, Request
 
-from saltapi.repository.status_repository import (
-    StatusRepository,
-    SubsystemStatusDetails,
-)
+from saltapi.repository.status_repository import (StatusRepository,
+                                                  SubsystemStatusDetails)
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.status_service import StatusService
 from saltapi.web import services

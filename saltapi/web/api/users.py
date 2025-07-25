@@ -5,26 +5,20 @@ from starlette import status
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.authentication_service import get_current_user, get_user_to_verify
-from saltapi.service.user import NewUserDetails as _NewUserDetails, Role
+from saltapi.service.authentication_service import (get_current_user,
+                                                    get_user_to_verify)
+from saltapi.service.user import NewUserDetails as _NewUserDetails
+from saltapi.service.user import Role
 from saltapi.service.user import User as _User
 from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
 from saltapi.web import services
 from saltapi.web.schema.common import Message
-from saltapi.web.schema.user import (
-    NewUserDetails,
-    PasswordResetRequest,
-    PasswordUpdate,
-    ProposalPermission,
-    User,
-    UserListItem,
-    UserUpdate,
-    BaseUserDetails,
-    UsernameEmail,
-    UserContact,
-    Subscription,
-)
+from saltapi.web.schema.user import (BaseUserDetails, NewUserDetails,
+                                     PasswordResetRequest, PasswordUpdate,
+                                     ProposalPermission, Subscription, User,
+                                     UserContact, UserListItem, UsernameEmail,
+                                     UserUpdate)
 
 router = APIRouter(prefix="/users", tags=["User"])
 
@@ -160,6 +154,25 @@ def get_user(
         user = user_service.get_user(user_id)
         if user is None:
             raise NotFoundError("Unknown user.")
+        return user
+
+
+@router.get("/email/{email}", summary="Get user details by email", response_model=User)
+def get_user_by_email(
+    email: str = Path(
+        ..., title="Email", description="Email address of the user to fetch."
+    ),
+    user: _User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_users(user)
+        user_service = services.user_service(unit_of_work.connection)
+        user = user_service.get_user_by_email(email)
+
+        if user is None:
+            raise NotFoundError("Unknown user.")
+
         return user
 
 

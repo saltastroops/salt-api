@@ -1,5 +1,4 @@
 from typing import Any, Dict
-
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -22,13 +21,15 @@ class LunarPhaseRepository:
             """
         )
 
-        result = self.connection.execute(
-            stmt, {"proposal_code": proposal_code}
-        ).fetchall()
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code}).fetchall()
 
         phases = [
-            {"target": row.Target_Name, "phase": float(row.MaxLunarPhase)}
+            {
+                "target": row.Target_Name,
+                "phase": float(row.MaxLunarPhase)
+            }
             for row in result
         ]
 
         return {"phases": phases}
+

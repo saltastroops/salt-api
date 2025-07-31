@@ -5,7 +5,6 @@ from saltapi.repository.data_repository import DataRepository
 from saltapi.repository.finder_chart_repository import FinderChartRepository
 from saltapi.repository.institution_repository import InstitutionRepository
 from saltapi.repository.instrument_repository import InstrumentRepository
-from saltapi.repository.maximum_lunar_phase_repository import LunarPhaseRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
@@ -17,7 +16,6 @@ from saltapi.service.finder_chart_service import FinderChartService
 from saltapi.service.institution_service import InstitutionService
 from saltapi.service.instrument_service import InstrumentService
 from saltapi.service.mail_service import MailService
-from saltapi.service.maximum_lunar_phase_service import MaximumLunarPhaseService
 from saltapi.service.permission_service import PermissionService
 from saltapi.service.proposal_service import ProposalService
 from saltapi.service.submission_service import SubmissionService
@@ -100,12 +98,6 @@ def finder_chart_service(connection: Connection) -> FinderChartService:
     """Return a finding chart service instance."""
     finding_chart_repository = FinderChartRepository(connection)
     return FinderChartService(finding_chart_repository)
-
-
-def maximum_lunar_phase_service(connection: Connection) -> MaximumLunarPhaseService:
-    """Return a maximum lunar phase service instance."""
-    maximum_lunar_phase_repository = LunarPhaseRepository(connection)
-    return MaximumLunarPhaseService(maximum_lunar_phase_repository)
 
 
 def pipt_service(connection: Connection) -> PiptService:

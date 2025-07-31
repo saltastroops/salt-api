@@ -11,7 +11,6 @@ from saltapi.web.api.blocks import router as blocks_router
 from saltapi.web.api.finder_charts import router as finder_charts_router
 from saltapi.web.api.institutions import router as institution_router
 from saltapi.web.api.instruments import router as instruments_router
-from saltapi.web.api.maximum_lunar_phase import router as maximum_lunar_phase_router
 from saltapi.web.api.proposal_progress import router as progress_router
 from saltapi.web.api.proposals import router as proposals_router
 from saltapi.web.api.salt_astronomers import router as salt_astronomers_router
@@ -55,5 +54,4 @@ app.include_router(salt_astronomers_router)
 app.include_router(submissions_router)
 app.include_router(finder_charts_router)
 app.include_router(status_router)
-app.include_router(maximum_lunar_phase_router)
 app.include_router(pipt_router)

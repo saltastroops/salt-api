@@ -19,7 +19,7 @@ class PiptService:
 
     def get_flat_details(self, only_checksum: bool) -> Dict[str, Any]:
         """
-        Returns either the checksum or the full flat details with checksum.
+        Returns either the checksum or the full flat-field calibration details with checksum.
         """
         checksum = self.pipt_repository.get_flat_checksum()
 
@@ -31,7 +31,7 @@ class PiptService:
 
     def get_arc_details(self, only_checksum: bool) -> Dict[str, Any]:
         """
-        Returns either the checksum or the full arc details with checksum.
+        Returns either the checksum or the full arc calibration details with checksum.
         """
         checksum = self.pipt_repository.get_arc_checksum()
 

@@ -10,7 +10,6 @@ class PiptRepository:
     def get_pipt_news_for_days(self, days: int) -> List[Dict[str, Any]]:
         """
         Returns a list of PIPT news entries issued within the last `days` days.
-        The date field is returned as a datetime object.
         """
         stmt = text(
             """
@@ -224,7 +223,7 @@ HAVING SUM(pa.TimeAlloc) > 0
 
     def lamp_setup(self, orders: str, lamps: str) -> str:
         """
-        Given order and lamp strings like "3-1-2" and "Ne-Ar-Kr", return a formatted setup string
+        Given order and lamp strings like "3-1-2" and "Ne-Ar-Kr", return a formatted setup string.
         """
         orders_array = [int(order_str) for order_str in orders.split("-")]
         lamps_array = lamps.split("-")

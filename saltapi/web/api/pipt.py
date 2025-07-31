@@ -24,7 +24,7 @@ router = APIRouter(prefix="/pipt", tags=["PIPT"])
     response_model=List[PiptNewsItem],
 )
 def get_pipt_news(
-    days: int = Query(7, ge=1, description="Number of days to look back")
+    days: int = Query(30, ge=1, description="Number of days to look back")
 ) -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)

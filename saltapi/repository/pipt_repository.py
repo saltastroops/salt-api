@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Tuple
+
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -32,7 +33,7 @@ class PiptRepository:
         return news_items
 
     def get_proposal_constraints(
-        self, proposal_code: str, year: int = None, semester: int = None
+        self, proposal_code: str, year: int | None = None, semester: int | None = None
     ) -> List[Dict[str, Any]]:
         constraints: List[Dict[str, Any]] = []
 
@@ -44,12 +45,11 @@ SELECT s.Year AS year,
        m.Moon AS moon,
        SUM(pa.TimeAlloc) AS allocated_time
 FROM ProposalCode AS pc
-    JOIN ProposalGeneralInfo AS pgi ON (pc.ProposalCode_Id = pgi.ProposalCode_Id)
-    JOIN MultiPartner AS mp ON (pc.ProposalCode_Id = mp.ProposalCode_Id)
+    JOIN ProposalGeneralInfo AS pgi ON pc.ProposalCode_Id = pgi.ProposalCode_Id
+    JOIN MultiPartner AS mp ON pc.ProposalCode_Id = mp.ProposalCode_Id
     JOIN PriorityAlloc AS pa ON pa.MultiPartner_Id = mp.MultiPartner_Id
-    JOIN Semester AS s ON (mp.Semester_Id = s.Semester_Id)
+    JOIN Semester AS s ON mp.Semester_Id = s.Semester_Id
     JOIN Moon AS m ON pa.Moon_Id = m.Moon_Id
-    JOIN ProposalStatus AS ps ON (pgi.ProposalStatus_Id = ps.ProposalStatus_Id)
 WHERE pc.Proposal_Code = :proposal_code
   {year_filter}
   {semester_filter}
@@ -84,7 +84,7 @@ HAVING SUM(pa.TimeAlloc) > 0
             )
         return constraints
 
-    def get_flat_checksum(self) -> int:
+    def get_nir_flat_checksum(self) -> int:
         """
         Returns the checksum of the NirFlatBible table.
         """
@@ -92,7 +92,7 @@ HAVING SUM(pa.TimeAlloc) > 0
         result = self.connection.execute(stmt).first()
         return int(result.Checksum)
 
-    def get_flat_details(self) -> List[Dict[str, Any]]:
+    def get_nir_flat_details(self) -> List[Dict[str, Any]]:
         """
         Returns flat-field calibration entries from NirFlatBible joined with NirGrating and Lamp.
         """
@@ -119,7 +119,7 @@ HAVING SUM(pa.TimeAlloc) > 0
             for row in result
         ]
 
-    def get_arc_checksum(self) -> int:
+    def get_nir_arc_checksum(self) -> int:
         """
         Returns the combined checksum of NirArcBible, NirArcSetup, and NirArcExposure tables.
         """
@@ -128,8 +128,11 @@ HAVING SUM(pa.TimeAlloc) > 0
         for table in tables:
             stmt = text(f"CHECKSUM TABLE {table}")
             result = self.connection.execute(stmt).fetchone()
-            if result is not None:
-                total += int(result[1])
+            if result is None:
+                raise RuntimeError(
+                    f"Unexpected: CHECKSUM TABLE {table} returned no rows"
+                )
+            total += int(result[1])
         return total
 
     def get_exposures(self) -> List[Dict[str, Any]]:
@@ -160,7 +163,7 @@ HAVING SUM(pa.TimeAlloc) > 0
             for row in result
         ]
 
-    def get_arc_bible_lookup(
+    def _get_nir_arc_bible_lookup(
         self,
     ) -> Tuple[Dict[int, str], Dict[int, float], Dict[int, int]]:
         """
@@ -185,7 +188,7 @@ HAVING SUM(pa.TimeAlloc) > 0
             art_stations[arc_bible_id] = int(row.NirArtStation_Number)
         return gratings, grating_angles, art_stations
 
-    def get_allowed_lamp_setups_raw(self) -> List[Tuple[int, str, str]]:
+    def _get_allowed_nir_lamp_setups_raw(self) -> List[Tuple[int, str, str]]:
         """
         Returns raw allowed lamp setups from grouped query.
         """
@@ -202,7 +205,7 @@ HAVING SUM(pa.TimeAlloc) > 0
         )
         return list(self.connection.execute(stmt))
 
-    def get_preferred_lamp_setups_raw(self) -> List[Tuple[str, int, str, str]]:
+    def _get_preferred_nir_lamp_setups_raw(self) -> List[Tuple[str, int, str, str]]:
         """
         Returns raw preferred lamp setups.
         """
@@ -221,7 +224,7 @@ HAVING SUM(pa.TimeAlloc) > 0
         )
         return list(self.connection.execute(stmt))
 
-    def lamp_setup(self, orders: str, lamps: str) -> str:
+    def _nir_lamp_setup(self, orders: str, lamps: str) -> str:
         """
         Given order and lamp strings like "3-1-2" and "Ne-Ar-Kr", return a formatted setup string.
         """
@@ -239,12 +242,12 @@ HAVING SUM(pa.TimeAlloc) > 0
 
         return "; ".join(setup_parts)
 
-    def get_allowed_lamp_setups(self) -> List[Dict[str, Any]]:
+    def get_allowed_nir_lamp_setups(self) -> List[Dict[str, Any]]:
         """
         Returns allowed lamp setups, grouped by grating and art station.
         """
-        gratings, grating_angles, art_stations = self.get_arc_bible_lookup()
-        raw_data = self.get_allowed_lamp_setups_raw()
+        gratings, grating_angles, art_stations = self._get_nir_arc_bible_lookup()
+        raw_data = self._get_allowed_nir_lamp_setups_raw()
 
         allowed_map: Dict[str, Dict[str, Any]] = {}
         keys: List[str] = []
@@ -264,16 +267,16 @@ HAVING SUM(pa.TimeAlloc) > 0
                     "lamp_setups": [],
                 }
 
-            allowed_map[key]["lamp_setups"].append(self.lamp_setup(orders, lamps))
+            allowed_map[key]["lamp_setups"].append(self._nir_lamp_setup(orders, lamps))
 
         allowed = [allowed_map[key] for key in sorted(keys)]
         return allowed
 
-    def get_preferred_lamp_setups(self) -> List[Dict[str, Any]]:
+    def get_preferred_nir_lamp_setups(self) -> List[Dict[str, Any]]:
         """
         Returns preferred lamp setups per grating/art_station combination.
         """
-        raw_data = self.get_preferred_lamp_setups_raw()
+        raw_data = self._get_preferred_nir_lamp_setups_raw()
         preferred = []
 
         for grating, art_station, orders, lamps in raw_data:
@@ -281,7 +284,7 @@ HAVING SUM(pa.TimeAlloc) > 0
                 {
                     "grating": grating,
                     "art_station": int(art_station),
-                    "lamp_setup": self.lamp_setup(orders, lamps),
+                    "lamp_setup": self._nir_lamp_setup(orders, lamps),
                 }
             )
 

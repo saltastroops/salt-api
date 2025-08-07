@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Depends, Query
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
@@ -9,10 +9,15 @@ from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.pipt import (
+    NirwalsArcDetailsResponse,
+    NirwalsFlatDetailsResponse,
     PiptNewsItem,
     PiptProposalInfo,
     PiptUserInfo,
     ProposalConstraint,
+    RssArcDetailsResponse,
+    SmiArcDetailsResponse,
+    SmiFlatDetailsResponse,
 )
 
 router = APIRouter(prefix="/pipt", tags=["PIPT"])
@@ -38,7 +43,6 @@ def get_pipt_news(
 )
 def get_basic_user_info_by_email(
     email: str = Query(..., title="Email", description="User email address"),
-    user: User = Depends(get_current_user),
 ) -> PiptUserInfo:
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
@@ -58,6 +62,46 @@ def get_basic_user_info_by_email(
             family_name=pipt_user.family_name,
             email=pipt_user.email,
             affiliation=matching_affiliation[0],
+        )
+
+
+@router.get(
+    "/proposal-info",
+    summary="Get proposal info for PIPT",
+    response_model=PiptProposalInfo,
+)
+def get_pipt_proposal_info(
+    proposal_code: ProposalCode = Query(
+        ...,
+        title="Proposal code",
+        description="Proposal code of the returned proposal.",
+    ),
+    semester: Optional[Semester] = Query(
+        None,
+        description="Semester of the returned proposal.",
+        title="Semester",
+    ),
+    phase: Optional[int] = Query(
+        None,
+        description="Phase of the returned proposal.",
+        title="Phase",
+    ),
+    user: User = Depends(get_current_user),
+) -> PiptProposalInfo:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        proposal_service = services.proposal_service(unit_of_work.connection)
+        proposal = proposal_service.get_proposal(proposal_code, semester, phase)
+
+        return PiptProposalInfo(
+            proposal_code=proposal["proposal_code"],
+            title=proposal["general_info"]["title"],
+            phase=proposal["phase"],
+            status=proposal["general_info"]["status"],
+            proposal_file=proposal["proposal_file"],
+            time_allocations=proposal["time_allocations"],
         )
 
 
@@ -90,31 +134,76 @@ def get_constraints(
 
 @router.get(
     "/nirwals/flat_details",
-    summary="Get NIRWALS flat calibration details",
-    response_model=dict,
+    summary="Get NIRWALS flat field calibration details",
+    response_model=NirwalsFlatDetailsResponse,
 )
-def get_nirwals_flat_details(
-    only_checksum: bool = Query(False, description="If true, only return the checksum")
-) -> dict:
+def get_nirwals_flat_details() -> NirwalsFlatDetailsResponse:
     """
-    Returns NIRWALS flat calibration details or just the checksum.
+    Returns NIRWALS flat field calibration details.
     """
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)
-        return service.get_nir_flat_details(only_checksum=only_checksum)
+        return service.get_nir_flat_details()
 
 
 @router.get(
     "/nirwals/arc_details",
     summary="Get NIRWALS arc lamp calibration details",
-    response_model=dict,
+    response_model=NirwalsArcDetailsResponse,
 )
-def get_nirwals_arc_details(
-    only_checksum: bool = Query(False, description="If true, only return the checksum.")
-) -> dict:
+def get_nirwals_arc_details() -> NirwalsArcDetailsResponse:
     """
-    Returns NIRWALS arc lamp calibration details or just the checksum.
+    Returns NIRWALS arc lamp calibration details.
     """
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)
-        return service.get_nir_arc_details(only_checksum=only_checksum)
+        return service.get_nir_arc_details()
+
+
+@router.get(
+    "/rss/details",
+    summary="Get RSS arc calibration details",
+    response_model=RssArcDetailsResponse,
+)
+def get_rss_arc_details() -> RssArcDetailsResponse:
+    with UnitOfWork() as unit_of_work:
+        service = services.pipt_service(unit_of_work.connection)
+        return service.get_rss_arc_details()
+
+
+@router.get(
+    "/rss/ring-details",
+    summary="Get RSS ring calibration details",
+)
+def get_rss_ring_details(version: str = "1") -> Dict[str, list[dict]]:
+    with UnitOfWork() as unit_of_work:
+        service = services.pipt_service(unit_of_work.connection)
+        return service.get_rss_ring_details(version)
+
+
+@router.get(
+    "/smi-flat-details",
+    summary="Get SMI flat-field calibration details",
+    response_model=SmiFlatDetailsResponse,
+)
+def get_smi_flat_details() -> SmiFlatDetailsResponse:
+    """
+    Returns full flat-field calibration details for SMI.
+    """
+    with UnitOfWork() as unit_of_work:
+        service = services.pipt_service(unit_of_work.connection)
+        return service.get_smi_flat_details()
+
+
+@router.get(
+    "/smi-arc-details",
+    summary="Get SMI arc calibration details",
+    response_model=SmiArcDetailsResponse,
+)
+def get_smi_arc_details() -> SmiArcDetailsResponse:
+    """
+    Returns full arc calibration details for SMI.
+    """
+    with UnitOfWork() as unit_of_work:
+        service = services.pipt_service(unit_of_work.connection)
+        return service.get_smi_arc_details()

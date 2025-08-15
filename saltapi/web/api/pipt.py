@@ -9,15 +9,16 @@ from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.pipt import (
-    NirwalsArcDetailsResponse,
-    NirwalsFlatDetailsResponse,
+    NirwalsArcDetailsSetup,
+    NirwalsFlatDetailsSetup,
     PiptNewsItem,
     PiptProposalInfo,
+    PiptTimeAllocation,
     PiptUserInfo,
-    ProposalConstraint,
-    RssArcDetailsResponse,
-    SmiArcDetailsResponse,
-    SmiFlatDetailsResponse,
+    PreviousProposalListItem,
+    RssArcDetailsSetup,
+    SmiArcDetailsSetup,
+    SmiFlatDetailsSetup,
 )
 
 router = APIRouter(prefix="/pipt", tags=["PIPT"])
@@ -108,7 +109,7 @@ def get_pipt_proposal_info(
 @router.get(
     "/proposal-constraints",
     summary="Get proposal constraints",
-    response_model=List[ProposalConstraint],
+    response_model=List[PiptTimeAllocation],
 )
 def get_constraints(
     proposal_code: ProposalCode = Query(
@@ -119,7 +120,7 @@ def get_constraints(
     year: Optional[int] = Query(None, description="Optional year"),
     semester: Optional[int] = Query(None, description="Optional semester"),
     user: User = Depends(get_current_user),
-) -> List[ProposalConstraint]:
+) -> List[PiptTimeAllocation]:
     """
     Returns proposal constraints for a given proposal code.
     Optional filters include year and semester.
@@ -135,9 +136,9 @@ def get_constraints(
 @router.get(
     "/nirwals/flat_details",
     summary="Get NIRWALS flat field calibration details",
-    response_model=NirwalsFlatDetailsResponse,
+    response_model=NirwalsFlatDetailsSetup,
 )
-def get_nirwals_flat_details() -> NirwalsFlatDetailsResponse:
+def get_nirwals_flat_details() -> NirwalsFlatDetailsSetup:
     """
     Returns NIRWALS flat field calibration details.
     """
@@ -149,11 +150,11 @@ def get_nirwals_flat_details() -> NirwalsFlatDetailsResponse:
 @router.get(
     "/nirwals/arc_details",
     summary="Get NIRWALS arc lamp calibration details",
-    response_model=NirwalsArcDetailsResponse,
+    response_model=NirwalsArcDetailsSetup,
 )
-def get_nirwals_arc_details() -> NirwalsArcDetailsResponse:
+def get_nirwals_arc_details() -> NirwalsArcDetailsSetup:
     """
-    Returns NIRWALS arc lamp calibration details.
+    Return the arc calibration details for NIRWALS setups.
     """
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)
@@ -163,9 +164,12 @@ def get_nirwals_arc_details() -> NirwalsArcDetailsResponse:
 @router.get(
     "/rss/details",
     summary="Get RSS arc calibration details",
-    response_model=RssArcDetailsResponse,
+    response_model=RssArcDetailsSetup,
 )
-def get_rss_arc_details() -> RssArcDetailsResponse:
+def get_rss_arc_details() -> RssArcDetailsSetup:
+    """
+    Get the arc calibration details for non-SMI RSS setups.
+    """
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)
         return service.get_rss_arc_details()
@@ -177,18 +181,21 @@ def get_rss_arc_details() -> RssArcDetailsResponse:
 )
 def get_rss_ring_details(version: str = "1") -> Dict[str, list[dict]]:
     with UnitOfWork() as unit_of_work:
+        """Get calibration regions for version 1,
+        and regions plus lines for version 2 for non-SMI RSS setups.
+        """
         service = services.pipt_service(unit_of_work.connection)
         return service.get_rss_ring_details(version)
 
 
 @router.get(
     "/smi-flat-details",
-    summary="Get SMI flat-field calibration details",
-    response_model=SmiFlatDetailsResponse,
+    summary="Get SMI flat field calibration details",
+    response_model=SmiFlatDetailsSetup,
 )
-def get_smi_flat_details() -> SmiFlatDetailsResponse:
+def get_smi_flat_details() -> SmiFlatDetailsSetup:
     """
-    Returns full flat-field calibration details for SMI.
+    Get the flat-field calibration details for non-SMI RSS setups.
     """
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)
@@ -198,12 +205,41 @@ def get_smi_flat_details() -> SmiFlatDetailsResponse:
 @router.get(
     "/smi-arc-details",
     summary="Get SMI arc calibration details",
-    response_model=SmiArcDetailsResponse,
+    response_model=SmiArcDetailsSetup,
 )
-def get_smi_arc_details() -> SmiArcDetailsResponse:
+def get_smi_arc_details() -> SmiArcDetailsSetup:
     """
-    Returns full arc calibration details for SMI.
+    Get the arc calibration details for SMI RSS setups.
     """
     with UnitOfWork() as unit_of_work:
         service = services.pipt_service(unit_of_work.connection)
         return service.get_smi_arc_details()
+
+
+@router.get(
+    "/previous-proposals",
+    summary="Get previous proposals for a user",
+    response_model=List[PreviousProposalListItem],
+)
+def get_previous_proposals_info(
+    user_id: int = Query(..., title="User ID", description="PIPT user ID"),
+    from_year: Optional[int] = Query(
+        None, description="Year from which to include proposals"
+    ),
+    from_semester: Optional[int] = Query(
+        None, description="Semester from which to include proposals"
+    ),
+) -> List[PreviousProposalListItem]:
+    """
+    Returns previous proposals for the given user, starting from the specified year and semester.
+    If from_year and from_semester are not provided, defaults to 3 semesters ago.
+    """
+    with UnitOfWork() as unit_of_work:
+        service = services.pipt_service(unit_of_work.connection)
+        proposals = service.get_previous_proposals_info(
+            user_id=user_id,
+            from_year=from_year,
+            from_semester=from_semester,
+        )
+
+    return proposals

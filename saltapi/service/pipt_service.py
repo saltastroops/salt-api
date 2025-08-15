@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from saltapi.repository.pipt_repository import PiptRepository
 
@@ -19,7 +19,7 @@ class PiptService:
 
     def get_nir_flat_details(self) -> Dict[str, Any]:
         """
-        Returns full flat-field calibration details.
+        Returns full flat field calibration details.
         """
 
         entries = self.pipt_repository.get_nir_flat_details()
@@ -42,7 +42,7 @@ class PiptService:
 
     def get_rss_arc_details(self) -> Dict[str, list[dict]]:
         """
-        Returns the arc calibration details for RSS.
+        Return the arc calibration details for non-SMI RSS setups.
         """
         exposure_times = self.pipt_repository.get_rss_exposure_times()
         allowed_lamp_setups = self.pipt_repository.get_rss_allowed_lamps()
@@ -55,6 +55,9 @@ class PiptService:
         }
 
     def get_rss_ring_details(self, version: str = "1") -> Dict:
+        """Return calibration regions for version 1,
+        and regions plus lines for version 2 for non-SMI RSS setups.
+        """
         calibration_regions = self.pipt_repository.get_rss_calibration_regions(version)
 
         if version == "2":
@@ -68,14 +71,14 @@ class PiptService:
 
     def get_smi_flat_details(self) -> Dict[str, Any]:
         """
-        Returns full flat-field calibration details for SMI.
+        Return the flat field calibration details for non-SMI RSS setups.
         """
         entries = self.pipt_repository.get_smi_flat_details()
         return {"entries": entries}
 
     def get_smi_arc_details(self) -> Dict[str, Any]:
         """
-        Returns full arc calibration details for SMI.
+        Return the arc calibration details for non-SMI RSS setups.
         """
         allowed_lamp_setups = self.pipt_repository.get_smi_allowed_lamp_setups()
         preferred_lamp_setups = self.pipt_repository.get_smi_preferred_lamp_setups()
@@ -86,3 +89,17 @@ class PiptService:
             "preferred_lamp_setups": preferred_lamp_setups,
             "exposures": exposures,
         }
+
+    def get_previous_proposals_info(
+        self,
+        user_id: int,
+        from_year: Optional[int] = None,
+        from_semester: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Returns a list of previous proposals for the given user starting from
+        the specified year and semester (or defaults to 3 semesters ago).
+        """
+        return self.pipt_repository.get_previous_proposals_info(
+            user_id=user_id, from_year=from_year, from_semester=from_semester
+        )

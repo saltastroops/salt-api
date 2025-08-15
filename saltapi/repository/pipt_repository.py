@@ -1,7 +1,10 @@
-from typing import Any, Dict, List, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
+
+from saltapi.exceptions import NotFoundError
 
 
 class PiptRepository:
@@ -86,7 +89,7 @@ class PiptRepository:
 
     def get_nir_flat_details(self) -> List[Dict[str, Any]]:
         """
-        Returns flat-field calibration entries from NirFlatBible joined with NirGrating and Lamp.
+        Returns flat field calibration entries from NirFlatBible joined with NirGrating and Lamp.
         """
         stmt = text(
             """
@@ -274,12 +277,12 @@ class PiptRepository:
         return preferred
 
     @staticmethod
-    def w_obs(w_line: float) -> float:
+    def _w_obs(w_line: float) -> float:
         return w_line + 12
 
     def get_rss_calibration_regions(self, version: str) -> list[dict]:
         """
-        Returns Fabry-Perot calibration regions.
+        Return Fabry-Perot calibration regions.
         The returned structure depends on the version:
         - version '1': includes mode, w_min, w_max, filter, lamp, w_line, w_obs, exptime, valid
         - version '2': includes mode, w_min, w_max, filter, line_id, valid
@@ -318,7 +321,7 @@ class PiptRepository:
                         "filter": row.filter,
                         "lamp": row.lamp,
                         "w_line": row.line_wavelength,
-                        "w_obs": self.w_obs(row.line_wavelength),
+                        "w_obs": self._w_obs(row.line_wavelength),
                         "exptime": row.exp_time,
                         "valid": bool(row.valid),
                     }
@@ -341,7 +344,7 @@ class PiptRepository:
 
     def get_rss_calibration_lines(self) -> list[dict]:
         """
-        Returns Fabry-Perot calibration lines.
+        Return Fabry-Perot calibration lines.
         Includes line ID, lamp, line and observed wavelengths, relative intensity, and exposure time.
         """
 
@@ -364,7 +367,7 @@ class PiptRepository:
                 "line_id": row.line_id,
                 "lamp": row.lamp,
                 "w_line": row.line_wavelength,
-                "w_obs": self.w_obs(row.line_wavelength),
+                "w_obs": self._w_obs(row.line_wavelength),
                 "rel_intensity": row.rel_intensity,
                 "exptime": row.exp_time,
             }
@@ -463,7 +466,7 @@ class PiptRepository:
 
     def get_smi_flat_details(self) -> List[Dict[str, Any]]:
         """
-        Returns flat-field calibration entries, including smi_barcode, grating, lamp, etc.
+        Returns flat field calibration setup.
         """
         stmt = text(
             """
@@ -500,8 +503,7 @@ class PiptRepository:
 
     def get_smi_arc_details(self) -> List[Dict[str, Any]]:
         """
-        Returns arc exposure entries with full context.
-        Lamp_Order
+        Returns arc setup.
         """
         stmt = text(
             """
@@ -536,7 +538,7 @@ class PiptRepository:
             for row in result
         ]
 
-    def _get_smi_arc_bible_metadata(self) -> Dict[int, Dict[str, Any]]:
+    def _get_smi_arc_bible_setup(self) -> Dict[int, Dict[str, Any]]:
         """
         Lookup metadata for each arc bible ID (used for joining in other queries).
         """
@@ -606,7 +608,9 @@ class PiptRepository:
         return list(self.connection.execute(stmt))
 
     def get_smi_allowed_lamp_setups(self) -> List[Dict[str, Any]]:
-        meta_map = self._get_smi_arc_bible_metadata()
+        """Return allowed arc lamp setups grouped by grating, art station number, pre-bin rows, and pre-bin columns.
+        """
+        meta_map = self._get_smi_arc_bible_setup()
         raw_data = self._get_smi_allowed_lamp_setups_raw()
 
         grouped: Dict[str, Dict[str, Any]] = {}
@@ -616,7 +620,7 @@ class PiptRepository:
             arc_id = int(arc_id)
             meta = meta_map.get(arc_id)
             if not meta:
-                continue
+                raise NotFoundError(f"Arc ID {arc_id} not found in metadata map.")
             key = f"{meta['grating']}-{meta['art_station']}-{meta['pre_bin_rows']}-{meta['pre_bin_cols']}"
 
             if key not in grouped:
@@ -631,6 +635,7 @@ class PiptRepository:
         return [grouped[k] for k in sorted(keys)]
 
     def get_smi_preferred_lamp_setups(self) -> List[Dict[str, Any]]:
+        """Return the preferred arc lamp setups for each arc bible setup."""
         raw_data = self._get_smi_preferred_lamp_setups_raw()
         result = []
 
@@ -658,3 +663,157 @@ class PiptRepository:
             )
 
         return result
+
+    def current_semester(self) -> Dict[str, Any]:
+        now = datetime.utcnow()
+        year_sem = self.year_and_semester(now)
+        return self.get_by_year_and_semester(year_sem["year"], year_sem["semester"])
+
+    def year_and_semester(self, date: datetime) -> Dict[str, int]:
+        year = date.year
+        month = date.month
+        if month < 5:
+            year -= 1
+            semester = 2
+        elif 5 <= month < 11:
+            semester = 1
+        else:
+            semester = 2
+        return {"year": year, "semester": semester}
+
+    def get_by_year_and_semester(self, year: int, semester: int) -> Dict[str, Any]:
+        query = text(
+            """
+            SELECT Semester_Id, Year, Semester, UNIX_TIMESTAMP(StartSemester) AS start_unix,
+                   UNIX_TIMESTAMP(EndSemester) AS end_unix
+            FROM Semester
+            WHERE Year = :year AND Semester = :semester
+            LIMIT 1
+        """
+        )
+        result = self.connection.execute(query, {"year": year, "semester": semester})
+        row = result.fetchone()
+        if not row:
+            raise Exception(f"No semester found for {year} and {semester}.")
+        return {
+            "semester_id": row.Semester_Id,
+            "year": row.Year,
+            "semester": row.Semester,
+            "start_unix": row.start_unix,
+            "end_unix": row.end_unix,
+        }
+
+    def get_previous_proposals_info(
+        self,
+        user_id: int,
+        from_year: Optional[int] = None,
+        from_semester: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        current = self.current_semester()
+        if from_year is None:
+            from_year = (
+                current["year"] - 2 if current["semester"] == 1 else current["year"] - 1
+            )
+        if from_semester is None:
+            from_semester = 2 if current["semester"] == 1 else 1
+
+        if from_semester == 1:
+            semester_condition = f"s.Year >= {from_year}"
+        else:
+            semester_condition = (
+                f"((s.Year={from_year} AND s.Semester=2) OR s.Year >= {from_year + 1})"
+            )
+
+        # Allocated time & title
+        sql_allocated = text(
+            f"""
+            SELECT Proposal_Code AS proposal_code, Title AS title, SUM(TimeAlloc) AS allocated_time
+            FROM ProposalCode 
+            JOIN ProposalText AS pt ON ProposalCode.ProposalCode_Id = pt.ProposalCode_Id
+            JOIN MultiPartner ON ProposalCode.ProposalCode_Id=MultiPartner.ProposalCode_Id
+            JOIN PriorityAlloc USING (MultiPartner_Id)
+            WHERE MultiPartner.Semester_Id = pt.Semester_Id
+            AND Priority < 4
+            AND Proposal_Code IN (
+                SELECT DISTINCT pco.Proposal_Code FROM ProposalCode AS pco JOIN Proposal AS p USING (ProposalCode_Id)
+                JOIN ProposalContact AS pc ON pco.ProposalCode_Id = pc.ProposalCode_Id
+                JOIN Investigator AS i ON (pc.Leader_Id = i.Investigator_Id) JOIN PiptUser AS pu USING (PiptUser_Id)
+                JOIN Semester AS s ON p.Semester_id = s.Semester_Id
+                WHERE pu.PiptUser_Id = :user_id AND p.Current = 1 AND p.Phase = 2
+                AND {semester_condition}
+            )
+        GROUP BY Proposal_Code
+        """
+        )
+        result = self.connection.execute(sql_allocated, {"user_id": user_id})
+        allocated_times = {}
+        titles = {}
+        for row in result:
+            allocated_times[row.proposal_code] = row.allocated_time
+            titles[row.proposal_code] = row.title
+
+        # Observed time
+        sql_observed = text(
+            f"""
+            SELECT Proposal_Code AS proposal_code, SUM(Obstime) AS observed_time
+            FROM Proposal
+            JOIN ProposalCode USING (ProposalCode_Id)
+            JOIN Block USING (Proposal_Id)
+            JOIN BlockVisit USING (Block_Id)
+            JOIN BlockVisitStatus USING (BlockVisitStatus_Id)
+            WHERE BlockVisitStatus = 'Accepted'
+              AND Priority < 4
+              AND Proposal_Code IN (
+                    SELECT DISTINCT pco.Proposal_Code FROM ProposalCode AS pco JOIN Proposal AS p ON pco.ProposalCode_Id = p.ProposalCode_Id
+                    JOIN ProposalContact AS pc ON p.ProposalCode_Id = pc.ProposalCode_Id
+                    JOIN  Investigator AS i ON (pc.Leader_Id = i.Investigator_Id) JOIN PiptUser AS pu USING (PiptUser_Id)
+                    JOIN Semester AS s ON p.Semester_id = s.Semester_Id
+                    WHERE pu.PiptUser_Id = :user_id AND p.Current = 1 AND p.Phase = 2
+                    AND {semester_condition}
+              )
+            GROUP BY Proposal_Code
+        """
+        )
+        result = self.connection.execute(sql_observed, {"user_id": user_id})
+        observed_times = {row.proposal_code: row.observed_time for row in result}
+
+        # Publications
+        sql_publications = text(
+            f"""
+            SELECT DISTINCT Proposal_Code AS proposal_code, Bibcode AS bibcode
+            FROM Publication AS pp
+            JOIN ProposalCode ON pp.ProposalCode_Id = ProposalCode.ProposalCode_Id
+            JOIN Proposal ON ProposalCode.ProposalCode_Id = Proposal.ProposalCode_Id
+            WHERE Proposal_Code IN (
+                SELECT DISTINCT pco.Proposal_Code
+                FROM ProposalCode AS pco
+                JOIN Proposal AS p ON pco.ProposalCode_Id = p.ProposalCode_Id
+                JOIN ProposalContact AS pc ON p.ProposalCode_Id = pc.ProposalCode_Id
+                JOIN Investigator AS i ON pc.Leader_Id = i.Investigator_Id
+                JOIN PiptUser AS pu USING (PiptUser_Id)
+                JOIN Semester AS s ON p.Semester_id = s.Semester_Id
+                WHERE pu.PiptUser_Id = :user_id AND p.Current = 1 AND p.Phase = 2 AND pp.Valid = 1
+                  AND {semester_condition}
+            )
+        """
+        )
+        result = self.connection.execute(sql_publications, {"user_id": user_id})
+        bibcodes = {}
+        for row in result:
+            if row.proposal_code not in bibcodes:
+                bibcodes[row.proposal_code] = []
+            bibcodes[row.proposal_code].append(row.bibcode)
+
+        previous_proposals = []
+        for proposal_code in allocated_times.keys():
+            previous_proposals.append(
+                {
+                    "ProposalCode": proposal_code,
+                    "Title": titles.get(proposal_code, ""),
+                    "AllocatedTime": allocated_times[proposal_code],
+                    "ObservedTime": observed_times.get(proposal_code, 0),
+                    "Publications": ", ".join(bibcodes.get(proposal_code, [])),
+                }
+            )
+
+        return previous_proposals

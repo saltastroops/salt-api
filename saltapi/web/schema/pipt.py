@@ -59,7 +59,7 @@ class PiptProposalInfo(BaseModel):
     )
 
 
-class ProposalConstraint(BaseModel):
+class PiptTimeAllocation(BaseModel):
     """Represents constraints of a specified proposal."""
 
     year: int = Field(..., title="Year", description="Year of the semester")
@@ -73,8 +73,8 @@ class ProposalConstraint(BaseModel):
     )
 
 
-class NirwalsFlatEntry(BaseModel):
-    """Represents a single entry configuration for the NIRWALS instrument."""
+class NirwalsFlatListItem(BaseModel):
+    """Represents a single configuration item for the NIRWALS instrument list."""
 
     grating: Optional[str] = Field(..., title="Grating", description=" The grating")
     grating_angle: float = Field(
@@ -96,14 +96,14 @@ class NirwalsFlatEntry(BaseModel):
     )
 
 
-class NirwalsFlatDetailsResponse(BaseModel):
-    """Response model for NIRWALS flat details."""
+class NirwalsFlatDetailsSetup(BaseModel):
+    """List for NIRWALS flat field details."""
 
-    entries: List[NirwalsFlatEntry]
+    entries: List[NirwalsFlatListItem]
 
 
-class NirwalsArcEntry(BaseModel):
-    """Represents basic arc exposure configuration details for NIRWALS."""
+class BaseArcListItem(BaseModel):
+    """Represents basic arc configuration item for the NIRWALS instrument list."""
 
     grating: Optional[str] = Field(..., title="Grating", description=" The grating")
     art_station: int = Field(
@@ -111,8 +111,8 @@ class NirwalsArcEntry(BaseModel):
     )
 
 
-class ExposureEntry(NirwalsArcEntry):
-    """Represents single exposure entry for the NIRWALS arc exposures."""
+class NirwalsExposureListItem(BaseArcListItem):
+    """Represents exposure item for the NIRWALS arc exposures."""
 
     grating_angle: float = Field(
         ..., title="Grating angle", description="Grating angle, in degrees"
@@ -129,8 +129,8 @@ class ExposureEntry(NirwalsArcEntry):
     )
 
 
-class AllowedLampSetupEntry(NirwalsArcEntry):
-    """Represents single exposure entry for the NIRWALS arc allowed lamp setups."""
+class NirwalsAllowedLampSetup(BaseArcListItem):
+    """Represents item for the NIRWALS arc allowed lamp setups."""
 
     grating_angle: float = Field(
         ..., title="Grating angle", description="Grating angle, in degrees"
@@ -140,24 +140,24 @@ class AllowedLampSetupEntry(NirwalsArcEntry):
     )
 
 
-class PreferredLampSetupEntry(BaseModel):
-    """Represents single exposure entry for the NIRWALS arc preferred lamp setups."""
+class NirwalsPreferredLampSetup(BaseArcListItem):
+    """Represents item for the NIRWALS arc preferred lamp setups."""
 
     lamp_setup: str = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
 
 
-class NirwalsArcDetailsResponse(BaseModel):
-    """Response model for NIRWALS arc details."""
+class NirwalsArcDetailsSetup(BaseModel):
+    """List for NIRWALS arc details."""
 
-    exposures: List[ExposureEntry]
-    allowed_lamp_setups: List[AllowedLampSetupEntry]
-    preferred_lamp_setups: List[PreferredLampSetupEntry]
+    exposures: List[NirwalsExposureListItem]
+    allowed_lamp_setups: List[NirwalsAllowedLampSetup]
+    preferred_lamp_setups: List[NirwalsPreferredLampSetup]
 
 
-class SmiFlatDetails(BaseModel):
-    """Represents a single flat exposure configuration for the SMI."""
+class SmiFlatDetailsListItem(BaseModel):
+    """Represents a single flat exposure configuration item for the SMI."""
 
     smi_barcode: str = Field(..., description="RssMask barcode")
     grating: Optional[str] = Field(..., title="Grating", description=" The grating")
@@ -184,14 +184,14 @@ class SmiFlatDetails(BaseModel):
     )
 
 
-class SmiFlatDetailsResponse(BaseModel):
-    """Response model for SMI flat details."""
+class SmiFlatDetailsSetup(BaseModel):
+    """List for SMI flat details."""
 
-    entries: List[SmiFlatDetails]
+    entries: List[SmiFlatDetailsListItem]
 
 
-class ArcBaseSetup(BaseModel):
-    """Base configuration shared by all SMI arc-related setups."""
+class SmiArcListItem(BaseModel):
+    """Represents configuration item for SMI arc-related setups."""
 
     smi_barcode: str = Field(..., description="RssMask barcode")
     grating: Optional[str] = Field(..., title="Grating", description=" The grating")
@@ -209,24 +209,24 @@ class ArcBaseSetup(BaseModel):
     )
 
 
-class AllowedLampSetup(ArcBaseSetup):
-    """Represents allowed lamp setups for a given SMI arc configuration."""
+class SmiAllowedLampSetup(SmiArcListItem):
+    """Represents allowed lamp setup item for SMI arc configuration."""
 
     lamp_setups: List[str] = Field(
         ..., title="Calibration lamps", description="Calibration lamps"
     )
 
 
-class PreferredLampSetup(ArcBaseSetup):
-    """Represents the preferred lamp setup for a specific SMI arc configuration."""
+class SmiPreferredLampSetup(SmiArcListItem):
+    """Represents the preferred lamp setup for SMI arc configuration."""
 
     lamp_setup: str = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
 
 
-class ArcExposure(ArcBaseSetup):
-    """Represents an arc exposure configuration with lamp and exposure time for SMI."""
+class SmiArcExposure(SmiArcListItem):
+    """Represents exposure item for SMI arc exposures."""
 
     lamp: str = Field(..., title="Calibration lamps", description="Calibration lamps")
     exptime: float = Field(
@@ -234,16 +234,16 @@ class ArcExposure(ArcBaseSetup):
     )
 
 
-class SmiArcDetailsResponse(BaseModel):
+class SmiArcDetailsSetup(BaseModel):
     """Response model for SMI arc details."""
 
-    allowed_lamp_setups: List[AllowedLampSetup]
-    preferred_lamp_setups: List[PreferredLampSetup]
-    exposures: List[ArcExposure]
+    allowed_lamp_setups: List[SmiAllowedLampSetup]
+    preferred_lamp_setups: List[SmiPreferredLampSetup]
+    exposures: List[SmiArcExposure]
 
 
-class RssArcExposureEntry(NirwalsArcEntry):
-    """Represents an RSS arc exposure entry information."""
+class RssArcExposureListItem(BaseArcListItem):
+    """Represents exposure item for the RSS arc exposures."""
 
     lamp: Optional[str] = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
@@ -253,7 +253,48 @@ class RssArcExposureEntry(NirwalsArcEntry):
     )
 
 
-class RssArcDetailsResponse(BaseModel):
-    """Response model for RSS arc exposure details."""
+class RssArcAllowedLampSetup(BaseArcListItem):
+    """Represents item for the RSS arc allowed lamp setups."""
 
-    exposure_times: List[RssArcExposureEntry]
+    lamps: List[str] = Field(
+        ..., title="Calibration lamps", description="Calibration lamps"
+    )
+
+
+class RssArcPreferredLampSetup(BaseArcListItem):
+    """Represents item for the RSS arc preferred lamp setups."""
+
+    lamp: Optional[str] = Field(
+        ..., title="Calibration lamp", description="Calibration lamp"
+    )
+
+
+class RssArcDetailsSetup(BaseModel):
+    """Response model for RSS arc calibration details."""
+
+    exposure_times: List[RssArcExposureListItem]
+    allowed_lamps: List[RssArcAllowedLampSetup]
+    preferred_lamps: List[RssArcPreferredLampSetup]
+
+
+class PreviousProposalListItem(BaseModel):
+    """Represents an item for previous proposals."""
+
+    proposal_code: str = Field(
+        ..., title="Proposal code", alias="ProposalCode", description="Proposal code"
+    )
+    title: str = Field(
+        ..., title="Title", alias="Title", description="Title of the proposal"
+    )
+    allocated_time: int = Field(
+        ..., title="Allocated Time", alias="AllocatedTime", description="Time allocated"
+    )
+    observed_time: int = Field(
+        ..., title="Observed Time", alias="ObservedTime", description="Time observed"
+    )
+    publications: str = Field(
+        "",
+        title="Publications",
+        alias="Publications",
+        description="List of publications",
+    )

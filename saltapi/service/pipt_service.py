@@ -19,7 +19,7 @@ class PiptService:
 
     def get_nir_flat_details(self) -> Dict[str, Any]:
         """
-        Returns full flat field calibration details.
+        Return full flat field calibration details.
         """
 
         entries = self.pipt_repository.get_nir_flat_details()
@@ -54,20 +54,15 @@ class PiptService:
             "preferred_lamps": preferred_lamp_setups,
         }
 
-    def get_rss_ring_details(self, version: str = "1") -> Dict:
-        """Return calibration regions for version 1,
-        and regions plus lines for version 2 for non-SMI RSS setups.
-        """
-        calibration_regions = self.pipt_repository.get_rss_calibration_regions(version)
+    def get_rss_ring_details(self) -> Dict:
+        """Return calibration regions and lines for non-SMI RSS setups."""
+        calibration_regions = self.pipt_repository.get_rss_calibration_regions()
+        calibration_lines = self.pipt_repository.get_rss_calibration_lines()
 
-        if version == "2":
-            calibration_lines = self.pipt_repository.get_rss_calibration_lines()
-            return {
-                "fp_calibration_regions": calibration_regions,
-                "fp_calibration_lines": calibration_lines,
-            }
-        else:
-            return {"ring_details": calibration_regions}
+        return {
+            "fp_calibration_regions": calibration_regions,
+            "fp_calibration_lines": calibration_lines,
+        }
 
     def get_smi_flat_details(self) -> Dict[str, Any]:
         """
@@ -93,13 +88,20 @@ class PiptService:
     def get_previous_proposals_info(
         self,
         user_id: int,
-        from_year: Optional[int] = None,
-        from_semester: Optional[int] = None,
+        from_semester: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Returns a list of previous proposals for the given user starting from
-        the specified year and semester (or defaults to 3 semesters ago).
+        Return a list of previous proposals for the given user starting from
+        the specified semester (e.g. "2024-1"). If not provided, defaults to
+        3 semesters ago.
         """
         return self.pipt_repository.get_previous_proposals_info(
-            user_id=user_id, from_year=from_year, from_semester=from_semester
+            user_id=user_id,
+            from_semester=from_semester,
         )
+
+    def get_block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
+        """
+        Return a list of block visits for a given proposal code.
+        """
+        return self.pipt_repository.get_block_visits(proposal_code)

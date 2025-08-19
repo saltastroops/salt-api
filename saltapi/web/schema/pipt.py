@@ -3,7 +3,7 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from saltapi.web.schema.common import ProposalCode
+from saltapi.web.schema.common import BlockVisitStatusValue, ProposalCode, Semester
 from saltapi.web.schema.institution import UserInstitution
 from saltapi.web.schema.proposal import ProposalStatus, TimeAllocation
 
@@ -156,6 +156,49 @@ class NirwalsArcDetailsSetup(BaseModel):
     preferred_lamp_setups: List[NirwalsPreferredLampSetup]
 
 
+class RssFPCalibrationRegion(BaseModel):
+    mode: str = Field(..., title="FabryPerot mode", description="Instrument mode")
+    w_min: float = Field(
+        ...,
+        title="Minimum wavelength",
+        description="Minimum wavelength of calibration region (Å)",
+    )
+    w_max: float = Field(
+        ...,
+        title="Maximum wavelength",
+        description="Maximum wavelength of calibration region (Å)",
+    )
+    filter: Optional[str] = Field(None, title="RSS filter", description="RSS filter")
+    line_id: Optional[int] = Field(
+        None, title="Line Id", description="RssFabryPerotCalibration line Id"
+    )
+    valid: bool = Field(..., title="Valid", description="Valid")
+
+
+class RssFPCalibrationLine(BaseModel):
+    line_id: Optional[int] = Field(
+        None, title="Line Id", description="RssFabryPerotCalibration line Id"
+    )
+    lamp: str = Field(..., title="Calibration lamp", description="Calibration lamp")
+    w_line: float = Field(..., title="Wavelength", description="Wavelength")
+    w_obs: float = Field(..., title="Wavelength", description="Wavelength + 12")
+    rel_intensity: float = Field(
+        ..., title="Relative Intensity", description="Relative Intensity"
+    )
+    exposure_time: int = Field(
+        ..., title="Exposure time", alias="exptime", description="Exposure time"
+    )
+
+
+class RssRingDetailsSetup(BaseModel):
+    fp_calibration_regions: List[RssFPCalibrationRegion] = Field(
+        ..., description="Fabry-Perot calibration regions"
+    )
+    fp_calibration_lines: List[RssFPCalibrationLine] = Field(
+        ..., description="Fabry-Perot calibration lines"
+    )
+
+
 class SmiFlatDetailsListItem(BaseModel):
     """Represents a single flat exposure configuration item for the SMI."""
 
@@ -229,8 +272,11 @@ class SmiArcExposure(SmiArcListItem):
     """Represents exposure item for SMI arc exposures."""
 
     lamp: str = Field(..., title="Calibration lamps", description="Calibration lamps")
-    exptime: float = Field(
-        ..., title="Exposure time", description="Exposure time in seconds"
+    exposure_time: float = Field(
+        ...,
+        title="Exposure time",
+        alias="exptime",
+        description="Exposure time in seconds",
     )
 
 
@@ -292,9 +338,60 @@ class PreviousProposalListItem(BaseModel):
     observed_time: int = Field(
         ..., title="Observed Time", alias="ObservedTime", description="Time observed"
     )
-    publications: str = Field(
-        "",
+    publications: List[str] = Field(
+        ...,
         title="Publications",
         alias="Publications",
         description="List of publications",
+    )
+
+
+class PiptBlockVisit(BaseModel):
+    block_code: Optional[str] = Field(
+        None,
+        title="Block code",
+        alias="BlockCode",
+        description="Identifier for the block",
+    )
+    block_name: Optional[str] = Field(
+        None, title="Block name", alias="BlockName", description="Name for the block"
+    )
+    block_visit_status: Optional[str] = Field(
+        None,
+        title="Block visit status",
+        alias="BlockVisitStatus",
+        description="Status of the block",
+    )
+    priority: int = Field(
+        ...,
+        title="Block's priority",
+        alias="Priority",
+        description="The priority of the block",
+    )
+    moon: Optional[str] = Field(
+        None, title="Moon probability", alias="Moon", description="Moon probability"
+    )
+    total_time: Optional[float] = Field(
+        None,
+        title="Total observation time",
+        alias="TotalTime",
+        description="Total observation time",
+    )
+    overhead_time: Optional[float] = Field(
+        None, title="Overhead time", alias="OverheadTime", description="Overhead time"
+    )
+    pool_code: Optional[str] = Field(
+        None,
+        title="Pool code",
+        alias="PoolCode",
+        description="Code of the associated pool, if any",
+    )
+    year: Optional[int] = Field(
+        None, title="Year", alias="Year", description="Year of the observation"
+    )
+    semester: Optional[int] = Field(
+        None,
+        title="Semester",
+        alias="Semester",
+        description="Semester for which the time is requested",
     )

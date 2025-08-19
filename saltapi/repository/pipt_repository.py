@@ -1,19 +1,22 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import pytz
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
+from saltapi.util import semester_of_datetime
 
 
 class PiptRepository:
     def __init__(self, connection: Connection) -> None:
         self.connection = connection
+        self.clear_limitation()
 
     def get_pipt_news_for_days(self, days: int) -> List[Dict[str, Any]]:
         """
-        Returns a list of PIPT news entries issued within the last `days` days.
+        Return a list of PIPT news entries issued within the last `days` days.
         """
         stmt = text(
             """
@@ -89,7 +92,7 @@ class PiptRepository:
 
     def get_nir_flat_details(self) -> List[Dict[str, Any]]:
         """
-        Returns flat field calibration entries from NirFlatBible joined with NirGrating and Lamp.
+        Return flat field calibration entries from NirFlatBible joined with NirGrating and Lamp.
         """
         stmt = text(
             """
@@ -116,7 +119,7 @@ class PiptRepository:
 
     def get_exposures(self) -> List[Dict[str, Any]]:
         """
-        Returns exposures from arc calibration data.
+        Return exposures from arc calibration data.
         """
         stmt = text(
             """
@@ -146,7 +149,7 @@ class PiptRepository:
         self,
     ) -> Tuple[Dict[int, str], Dict[int, float], Dict[int, int]]:
         """
-        Returns lookup dictionaries for arc bible grating, grating angle, and art station.
+        Return lookup dictionaries for arc bible grating, grating angle, and art station.
         """
         stmt = text(
             """
@@ -169,7 +172,7 @@ class PiptRepository:
 
     def _get_allowed_nir_lamp_setups_raw(self) -> List[Tuple[int, str, str]]:
         """
-        Returns raw allowed lamp setups from grouped query.
+        Return raw allowed lamp setups from grouped query.
         """
         stmt = text(
             """
@@ -186,7 +189,7 @@ class PiptRepository:
 
     def _get_preferred_nir_lamp_setups_raw(self) -> List[Tuple[str, int, str, str]]:
         """
-        Returns raw preferred lamp setups.
+        Return raw preferred lamp setups.
         """
         stmt = text(
             """
@@ -228,7 +231,7 @@ class PiptRepository:
 
     def get_allowed_nir_lamp_setups(self) -> List[Dict[str, Any]]:
         """
-        Returns allowed lamp setups, grouped by grating and art station.
+        Return allowed lamp setups, grouped by grating and art station.
         """
         gratings, grating_angles, art_stations = self._get_nir_arc_bible_lookup()
         raw_data = self._get_allowed_nir_lamp_setups_raw()
@@ -260,7 +263,7 @@ class PiptRepository:
 
     def get_preferred_nir_lamp_setups(self) -> List[Dict[str, Any]]:
         """
-        Returns preferred lamp setups per grating/art_station combination.
+        Return preferred lamp setups per grating/art_station combination.
         """
         raw_data = self._get_preferred_nir_lamp_setups_raw()
         preferred = []
@@ -280,12 +283,9 @@ class PiptRepository:
     def _w_obs(w_line: float) -> float:
         return w_line + 12
 
-    def get_rss_calibration_regions(self, version: str) -> list[dict]:
+    def get_rss_calibration_regions(self) -> list[dict]:
         """
         Return Fabry-Perot calibration regions.
-        The returned structure depends on the version:
-        - version '1': includes mode, w_min, w_max, filter, lamp, w_line, w_obs, exptime, valid
-        - version '2': includes mode, w_min, w_max, filter, line_id, valid
         """
 
         stmt = text(
@@ -296,56 +296,30 @@ class PiptRepository:
             cal.Valid AS valid,
             mode.FabryPerot_Mode AS fp_mode,
             filter.Barcode AS filter,
-            line.RssFabryPerotCalibrationLine_Id AS line_id,
-            line.Wavelength AS line_wavelength,
-            line.Exptime AS exp_time,
-            lamp.Lamp AS lamp
+            line.RssFabryPerotCalibrationLine_Id AS line_id
             FROM RssFabryPerotCalibration AS cal
             JOIN RssFabryPerotCalibrationLine AS line ON (cal.RssFabryPerotCalibrationLine_Id=line.RssFabryPerotCalibrationLine_Id)
             JOIN RssFabryPerotMode AS mode ON (cal.RssFabryPerotMode_Id=mode.RssFabryPerotMode_Id) 
             JOIN RssFilter AS filter ON (cal.RssFilter_Id=filter.RssFilter_Id)
-            JOIN Lamp AS lamp ON (line.Lamp_Id=lamp.Lamp_Id)
             ORDER BY mode.FabryPerot_Mode, cal.MinWavelength
             """
         )
         rows = self.connection.execute(stmt).fetchall()
-
-        regions = []
-        for row in rows:
-            if version == "1":
-                regions.append(
-                    {
-                        "mode": row.fp_mode,
-                        "w_min": row.min_wavelength,
-                        "w_max": row.max_wavelength,
-                        "filter": row.filter,
-                        "lamp": row.lamp,
-                        "w_line": row.line_wavelength,
-                        "w_obs": self._w_obs(row.line_wavelength),
-                        "exptime": row.exp_time,
-                        "valid": bool(row.valid),
-                    }
-                )
-            elif version == "2":
-                regions.append(
-                    {
-                        "mode": row.fp_mode,
-                        "w_min": row.min_wavelength,
-                        "w_max": row.max_wavelength,
-                        "filter": row.filter,
-                        "line_id": row.line_id,
-                        "valid": bool(row.valid),
-                    }
-                )
-            else:
-                raise ValueError(f"Unsupported version: {version}")
-
-        return regions
+        return [
+            {
+                "mode": row.fp_mode,
+                "w_min": row.min_wavelength,
+                "w_max": row.max_wavelength,
+                "filter": row.filter,
+                "line_id": row.line_id,
+                "valid": bool(row.valid),
+            }
+            for row in rows
+        ]
 
     def get_rss_calibration_lines(self) -> list[dict]:
         """
         Return Fabry-Perot calibration lines.
-        Includes line ID, lamp, line and observed wavelengths, relative intensity, and exposure time.
         """
 
         stmt = text(
@@ -466,7 +440,7 @@ class PiptRepository:
 
     def get_smi_flat_details(self) -> List[Dict[str, Any]]:
         """
-        Returns flat field calibration setup.
+        Return flat field calibration setup.
         """
         stmt = text(
             """
@@ -503,7 +477,7 @@ class PiptRepository:
 
     def get_smi_arc_details(self) -> List[Dict[str, Any]]:
         """
-        Returns arc setup.
+        Return the arc details for Slit Mask IFU setups.
         """
         stmt = text(
             """
@@ -635,7 +609,7 @@ class PiptRepository:
         return [grouped[k] for k in sorted(keys)]
 
     def get_smi_preferred_lamp_setups(self) -> List[Dict[str, Any]]:
-        """Return the preferred arc lamp setups for each arc bible setup."""
+        """Return the preferred arc setups for the RSS Slit Mask IFU."""
         raw_data = self._get_smi_preferred_lamp_setups_raw()
         result = []
 
@@ -665,21 +639,9 @@ class PiptRepository:
         return result
 
     def current_semester(self) -> Dict[str, Any]:
-        now = datetime.utcnow()
-        year_sem = self.year_and_semester(now)
-        return self.get_by_year_and_semester(year_sem["year"], year_sem["semester"])
-
-    def year_and_semester(self, date: datetime) -> Dict[str, int]:
-        year = date.year
-        month = date.month
-        if month < 5:
-            year -= 1
-            semester = 2
-        elif 5 <= month < 11:
-            semester = 1
-        else:
-            semester = 2
-        return {"year": year, "semester": semester}
+        semester_str = semester_of_datetime(datetime.now(pytz.utc))
+        year, sem = map(int, semester_str.split("-"))
+        return self.get_by_year_and_semester(year, sem)
 
     def get_by_year_and_semester(self, year: int, semester: int) -> Dict[str, Any]:
         query = text(
@@ -694,7 +656,7 @@ class PiptRepository:
         result = self.connection.execute(query, {"year": year, "semester": semester})
         row = result.fetchone()
         if not row:
-            raise Exception(f"No semester found for {year} and {semester}.")
+            raise NotFoundError(f"No semester found for {year} and {semester}.")
         return {
             "semester_id": row.Semester_Id,
             "year": row.Year,
@@ -706,18 +668,20 @@ class PiptRepository:
     def get_previous_proposals_info(
         self,
         user_id: int,
-        from_year: Optional[int] = None,
-        from_semester: Optional[int] = None,
+        from_semester: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         current = self.current_semester()
-        if from_year is None:
-            from_year = (
-                current["year"] - 2 if current["semester"] == 1 else current["year"] - 1
-            )
-        if from_semester is None:
-            from_semester = 2 if current["semester"] == 1 else 1
 
-        if from_semester == 1:
+        # Default start semester: two semesters before the current one
+        if from_semester is None:
+            if current["semester"] == 1:
+                from_semester = f"{current['year']-2}-2"
+            else:
+                from_semester = f"{current['year']-1}-1"
+
+        # Handles whether the starting semester is 1 or 2
+        from_year, from_sem = map(int, from_semester.split("-"))
+        if from_sem == 1:
             semester_condition = f"s.Year >= {from_year}"
         else:
             semester_condition = (
@@ -725,7 +689,7 @@ class PiptRepository:
             )
 
         # Allocated time & title
-        sql_allocated = text(
+        stmt = text(
             f"""
             SELECT Proposal_Code AS proposal_code, Title AS title, SUM(TimeAlloc) AS allocated_time
             FROM ProposalCode 
@@ -745,7 +709,7 @@ class PiptRepository:
         GROUP BY Proposal_Code
         """
         )
-        result = self.connection.execute(sql_allocated, {"user_id": user_id})
+        result = self.connection.execute(stmt, {"user_id": user_id})
         allocated_times = {}
         titles = {}
         for row in result:
@@ -766,7 +730,7 @@ class PiptRepository:
               AND Proposal_Code IN (
                     SELECT DISTINCT pco.Proposal_Code FROM ProposalCode AS pco JOIN Proposal AS p ON pco.ProposalCode_Id = p.ProposalCode_Id
                     JOIN ProposalContact AS pc ON p.ProposalCode_Id = pc.ProposalCode_Id
-                    JOIN  Investigator AS i ON (pc.Leader_Id = i.Investigator_Id) JOIN PiptUser AS pu USING (PiptUser_Id)
+                    JOIN Investigator AS i ON (pc.Leader_Id = i.Investigator_Id) JOIN PiptUser AS pu USING (PiptUser_Id)
                     JOIN Semester AS s ON p.Semester_id = s.Semester_Id
                     WHERE pu.PiptUser_Id = :user_id AND p.Current = 1 AND p.Phase = 2
                     AND {semester_condition}
@@ -812,8 +776,196 @@ class PiptRepository:
                     "Title": titles.get(proposal_code, ""),
                     "AllocatedTime": allocated_times[proposal_code],
                     "ObservedTime": observed_times.get(proposal_code, 0),
-                    "Publications": ", ".join(bibcodes.get(proposal_code, [])),
+                    "Publications": bibcodes.get(proposal_code, []),
                 }
             )
 
         return previous_proposals
+
+    def clear_limitation(self):
+        """Reset WHERE, ORDER BY, LIMIT, and GROUP BY clauses to defaults."""
+        self.where_clauses: List[Union[str, Dict[str, Any]]] = []
+        self.sort_clauses: List[str] = []
+        self.limit_clause: str = ""
+        self.group_clause: str = ""
+
+    def _create_where(self, field: str, comparator: str, value: Any = None) -> str:
+        """Return a simple SQL condition like 'field = value' or 'field IS NULL'."""
+        if value is None:
+            return f"{field} {comparator}"
+        return f"{field} {comparator} {value}"
+
+    def _build_limitation_string(
+        self,
+        clauses: Optional[List[Union[str, Dict[str, Any]]]] = None,
+        delimiter: str = "AND",
+        toplevel: bool = True,
+        phase: Optional[int] = None,
+    ) -> str:
+        """Assemble WHERE, GROUP BY, ORDER BY, and LIMIT clauses into a SQL string."""
+        if clauses is None:
+            clauses = self.where_clauses
+
+        parts = []
+        for w in clauses:
+            if isinstance(w, str):
+                parts.append(f"({w})")
+            elif isinstance(w, dict):
+                nested_str = self._build_limitation_string(
+                    w.get("clauses", []), w.get("mode", "AND"), False
+                )
+                parts.append(f"({nested_str})")
+
+        ret = f" {delimiter} ".join(parts)
+
+        if toplevel:
+            if phase is not None:
+                ret = f"WHERE Proposal.Phase={phase}" + (f" AND ({ret})" if ret else "")
+            elif ret:
+                ret = f"WHERE {ret}"
+
+        if self.group_clause:
+            ret += f" {self.group_clause}"
+        if self.sort_clauses:
+            ret += " ORDER BY " + ", ".join(self.sort_clauses)
+        if self.limit_clause:
+            ret += f" {self.limit_clause}"
+
+        return ret
+
+    def add_where(self, where: str):
+        """Raw WHERE clause string."""
+        self.where_clauses.append(where)
+
+    def add_integer(self, field: str, value: Optional[Union[int, List[int], str]]):
+        """Condition supporting NULL, single value, list, or comma-separated string."""
+        if value is None:
+            self.where_clauses.append(self._create_where(field, "IS NULL"))
+        elif isinstance(value, list):
+            self.where_clauses.append(
+                self._create_where(field, "IN", f"({','.join(map(str, value))})")
+            )
+        else:
+            if isinstance(value, str):
+                value_list = [int(v) for v in value.replace(" ", "").split(",") if v]
+            else:
+                value_list = [value]
+            self.where_clauses.append(
+                self._create_where(field, "IN", f"({','.join(map(str, value_list))})")
+            )
+
+    def add_text(self, field: str, text: Optional[str]):
+        """Add a text filter to a field, handling None, multiple values, and wildcard conversion.
+        """
+        if text is None:
+            self.where_clauses.append(self._create_where(field, "IS NULL"))
+            return
+        if not text:
+            return
+        values = [v.strip() for v in text.split(",")]
+        self.where_clauses.append(
+            {
+                "mode": "OR",
+                "clauses": [
+                    self._create_where(field, "=", f"'{v.replace('*','%')}'")
+                    for v in values
+                ],
+            }
+        )
+
+    def add_sort(self, field: str, ascending: bool = True):
+        """Append a field to the ORDER BY clause."""
+        self.sort_clauses.append(f"{field} {'ASC' if ascending else 'DESC'}")
+
+    def sort_by(self, field: str, ascending: bool = True):
+        """Replace all sorting with a single ORDER BY field."""
+        self.sort_clauses.clear()
+        self.add_sort(field, ascending)
+
+    def limit(self, count: int = 0, start: int = 0):
+        """Set the query's LIMIT clause with optional offset for row selection."""
+        if count == 0:
+            self.limit_clause = ""
+        elif start == 0:
+            self.limit_clause = f"LIMIT {count}"
+        else:
+            self.limit_clause = f"LIMIT {start}, {count}"
+
+    def group_by(self, group: str):
+        """Set a GROUP BY clause."""
+        self.group_clause = f"GROUP BY {group}" if group else ""
+
+    def get_fields(
+        self, clauses: Optional[List[Union[str, Dict[str, Any]]]] = None
+    ) -> List[str]:
+        """Return a list of field names used in the query's where clauses, including nested ones.
+        """
+        if clauses is None:
+            clauses = self.where_clauses
+        fields = []
+        for w in clauses:
+            if isinstance(w, str):
+                continue
+            elif isinstance(w, dict):
+                fields.extend(self.get_fields(w.get("clauses", [])))
+        return fields
+
+    def get_sort(self) -> List[str]:
+        """Return the current ORDER BY fields."""
+        return self.sort_clauses
+
+    def get_block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
+        """Get block visit records for a given proposal code, applying filters and formatting results.
+        """
+        self.clear_limitation()
+        self.add_where(f"pc.Proposal_Code='{proposal_code}'")
+        limitation_str = self._build_limitation_string()
+
+        query = f"""
+            SELECT DISTINCT bv.BlockVisit_Id,
+                bc.BlockCode AS BlockCode,
+                b.Block_Name AS BlockName,
+                bvs.BlockVisitStatus AS BlockVisitStatus,
+                b.Priority AS Priority,
+                m.Moon AS Moon,
+                b.ObsTime AS ObservedTime,
+                b.OverheadTime AS OverheadTime,
+                pool.PoolCode AS PoolCode,
+                s.Year AS Year,
+                s.Semester AS Semester
+            FROM BlockVisit AS bv
+            JOIN BlockVisitStatus AS bvs ON (bv.BlockVisitStatus_Id=bvs.BlockVisitStatus_Id)
+            JOIN Block AS b ON (bv.Block_Id=b.Block_Id)
+            JOIN Moon AS m ON (b.Moon_Id=m.Moon_Id)
+            JOIN Proposal AS p ON (b.Proposal_Id=p.Proposal_Id)
+            JOIN ProposalCode AS pc ON (p.ProposalCode_Id=pc.ProposalCode_Id)
+            JOIN Semester AS s ON (p.Semester_Id=s.Semester_Id)
+            LEFT JOIN BlockCode AS bc ON (b.BlockCode_Id=bc.BlockCode_Id)
+            LEFT JOIN BlockPool AS bp ON (b.Block_Id=bp.Block_Id)
+            LEFT JOIN Pool AS pool ON (bp.Pool_Id=pool.Pool_Id)
+            {limitation_str}
+        """
+
+        result = self.connection.execute(text(query))
+        block_visits = []
+
+        for row in result:
+            moon = row.Moon
+            if moon in ["Dark-Gray", "Bright-Gray"]:
+                moon = "Gray"
+            block_visits.append(
+                {
+                    "BlockCode": row.BlockCode,
+                    "BlockName": row.BlockName,
+                    "BlockVisitStatus": row.BlockVisitStatus,
+                    "Priority": row.Priority,
+                    "Moon": moon,
+                    "TotalTime": row.ObservedTime,
+                    "OverheadTime": row.OverheadTime,
+                    "PoolCode": row.PoolCode,
+                    "Year": row.Year,
+                    "Semester": row.Semester,
+                }
+            )
+
+        return block_visits

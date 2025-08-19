@@ -11,12 +11,14 @@ from saltapi.web.schema.common import ProposalCode, Semester
 from saltapi.web.schema.pipt import (
     NirwalsArcDetailsSetup,
     NirwalsFlatDetailsSetup,
+    PiptBlockVisit,
     PiptNewsItem,
     PiptProposalInfo,
     PiptTimeAllocation,
     PiptUserInfo,
     PreviousProposalListItem,
     RssArcDetailsSetup,
+    RssRingDetailsSetup,
     SmiArcDetailsSetup,
     SmiFlatDetailsSetup,
 )
@@ -162,7 +164,7 @@ def get_nirwals_arc_details() -> NirwalsArcDetailsSetup:
 
 
 @router.get(
-    "/rss/details",
+    "/rss/arc_details",
     summary="Get RSS arc calibration details",
     response_model=RssArcDetailsSetup,
 )
@@ -178,14 +180,13 @@ def get_rss_arc_details() -> RssArcDetailsSetup:
 @router.get(
     "/rss/ring-details",
     summary="Get RSS ring calibration details",
+    response_model=RssRingDetailsSetup,
 )
-def get_rss_ring_details(version: str = "1") -> Dict[str, list[dict]]:
+def get_rss_ring_details() -> RssRingDetailsSetup:
     with UnitOfWork() as unit_of_work:
-        """Get calibration regions for version 1,
-        and regions plus lines for version 2 for non-SMI RSS setups.
-        """
+        """Get calibration regions and plus lines for non-SMI RSS setups."""
         service = services.pipt_service(unit_of_work.connection)
-        return service.get_rss_ring_details(version)
+        return service.get_rss_ring_details()
 
 
 @router.get(
@@ -223,23 +224,44 @@ def get_smi_arc_details() -> SmiArcDetailsSetup:
 )
 def get_previous_proposals_info(
     user_id: int = Query(..., title="User ID", description="PIPT user ID"),
-    from_year: Optional[int] = Query(
-        None, description="Year from which to include proposals"
-    ),
-    from_semester: Optional[int] = Query(
-        None, description="Semester from which to include proposals"
+    user: User = Depends(get_current_user),
+    from_semester: Optional[str] = Query(
+        None, description="Semester from which to include proposals, e.g., '2023-2'"
     ),
 ) -> List[PreviousProposalListItem]:
     """
-    Returns previous proposals for the given user, starting from the specified year and semester.
+    Return previous proposals for the given user, starting from the specified year and semester.
     If from_year and from_semester are not provided, defaults to 3 semesters ago.
     """
     with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_validate_user(user_id, user)
         service = services.pipt_service(unit_of_work.connection)
         proposals = service.get_previous_proposals_info(
             user_id=user_id,
-            from_year=from_year,
             from_semester=from_semester,
         )
 
     return proposals
+
+
+@router.get(
+    "/block-visits",
+    summary="Get block visits for a given proposal code",
+    response_model=List[PiptBlockVisit],
+)
+def get_block_visits(
+    proposal_code: ProposalCode = Query(
+        ...,
+        title="Proposal code",
+        description="Proposal code of the returned constraints.",
+    ),
+    user: User = Depends(get_current_user),
+) -> List[PiptBlockVisit]:
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_proposal(user, proposal_code)
+
+        service = services.pipt_service(unit_of_work.connection)
+        block_visits = service.get_block_visits(proposal_code)
+        return block_visits

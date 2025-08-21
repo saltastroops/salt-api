@@ -273,11 +273,22 @@ def get_pipt_proposals(
     phase: Optional[int] = Query(None, description="Phase filter"),
     limit: int = Query(250, description="Max number of proposals"),
     descending: bool = Query(False, description="Sort descending"),
+    user: User = Depends(get_current_user),
 ):
     with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
         pipt_service = services.pipt_service(unit_of_work.connection)
         proposals = pipt_service.get_proposals(
             phase=phase, limit=limit, descending=descending
         )
+
+        for proposal in proposals:
+            if permission_service.check_permission_to_view_proposal(
+                user, proposal["proposal_code"]
+            ):
+                if permission_service.check_permission_to_update_proposal_progress(
+                    user, proposal_code=proposal["proposal_code"]
+                ):
+                    proposal["editable"] = True
 
         return proposals

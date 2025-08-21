@@ -110,7 +110,7 @@ class PiptRepository:
                 "grating_angle": row.GratingAngle,
                 "art_station": row.NirArtStation_Number,
                 "lamp": row.Lamp,
-                "exptime": row.Exptime,
+                "exposure_time": row.Exptime,
                 "n_groups": row.Ngroups,
                 "n_ramps": row.Nramps,
                 "neutral_density": row.NeutralDensity,
@@ -139,7 +139,7 @@ class PiptRepository:
                 "grating_angle": row.GratingAngle,
                 "art_station": int(row.NirArtStation_Number),
                 "lamp": row.Lamp,
-                "exptime": float(row.Exptime),
+                "exposure_time": float(row.Exptime),
                 "n_groups": int(row.Ngroups),
                 "neutral_density": int(row.NeutralDensity),
             }
@@ -344,7 +344,7 @@ class PiptRepository:
                 "w_line": row.line_wavelength,
                 "w_obs": self._w_obs(row.line_wavelength),
                 "rel_intensity": row.rel_intensity,
-                "exptime": row.exp_time,
+                "exposure_time": row.exp_time,
             }
             for row in rows
         ]
@@ -365,7 +365,7 @@ class PiptRepository:
                 "grating": row.Grating,
                 "art_station": int(row.RssArtStation_Number),
                 "lamp": row.Lamp,
-                "exptime": float(row.Exptime),
+                "exposure_time": float(row.Exptime),
             }
             for row in result
         ]
@@ -470,7 +470,7 @@ class PiptRepository:
                 "pre_bin_rows": row.PreBinRows,
                 "pre_bin_cols": row.PreBinCols,
                 "lamp": row.Lamp,
-                "exptime": row.Exptime,
+                "exposure_time": row.Exptime,
                 "neutral_density": row.NeutralDensity,
             }
             for row in result
@@ -508,7 +508,7 @@ class PiptRepository:
                 "pre_bin_rows": row.PreBinRows,
                 "pre_bin_cols": row.PreBinCols,
                 "lamp": row.Lamp,
-                "exptime": float(row.Exptime),
+                "exposure_time": float(row.Exptime),
             }
             for row in result
         ]
@@ -642,9 +642,12 @@ class PiptRepository:
     def _current_semester(self) -> Dict[str, Any]:
         semester_str = semester_of_datetime(datetime.now(pytz.utc))
         year, sem = map(int, semester_str.split("-"))
-        return self.get_by_year_and_semester(year, sem)
+        return self._get_semester_by_year_and_semester(year, sem)
 
-    def get_by_year_and_semester(self, year: int, semester: int) -> Dict[str, Any]:
+    def _get_semester_by_year_and_semester(
+        self, year: int, semester: int
+    ) -> Dict[str, Any]:
+        """Fetch semester details by year and semester."""
         query = text(
             """
             SELECT Semester_Id, Year, Semester, UNIX_TIMESTAMP(StartSemester) AS start_unix,
@@ -773,147 +776,15 @@ class PiptRepository:
         for proposal_code in allocated_times.keys():
             previous_proposals.append(
                 {
-                    "ProposalCode": proposal_code,
-                    "Title": titles.get(proposal_code, ""),
-                    "AllocatedTime": allocated_times[proposal_code],
-                    "ObservedTime": observed_times.get(proposal_code, 0),
-                    "Publications": bibcodes.get(proposal_code, []),
+                    "proposal_code": proposal_code,
+                    "title": titles.get(proposal_code, ""),
+                    "allocated_time": allocated_times[proposal_code],
+                    "observed_time": observed_times.get(proposal_code, 0),
+                    "publications": bibcodes.get(proposal_code, []),
                 }
             )
 
         return previous_proposals
-
-    def clear_limitation(self):
-        """Reset WHERE, ORDER BY, LIMIT, and GROUP BY clauses to defaults."""
-        self.where_clauses: List[Union[str, Dict[str, Any]]] = []
-        self.sort_clauses: List[str] = []
-        self.limit_clause: str = ""
-        self.group_clause: str = ""
-
-    def _create_where(self, field: str, comparator: str, value: Any = None) -> str:
-        """Return a simple SQL condition like 'field = value' or 'field IS NULL'."""
-        if value is None:
-            return f"{field} {comparator}"
-        return f"{field} {comparator} {value}"
-
-    def _build_limitation_string(
-        self,
-        clauses: Optional[List[Union[str, Dict[str, Any]]]] = None,
-        delimiter: str = "AND",
-        toplevel: bool = True,
-        phase: Optional[int] = None,
-    ) -> str:
-        """Assemble WHERE, GROUP BY, ORDER BY, and LIMIT clauses into a SQL string."""
-        if clauses is None:
-            clauses = self.where_clauses
-
-        parts = []
-        for w in clauses:
-            if isinstance(w, str):
-                parts.append(f"({w})")
-            elif isinstance(w, dict):
-                nested_str = self._build_limitation_string(
-                    w.get("clauses", []), w.get("mode", "AND"), False
-                )
-                parts.append(f"({nested_str})")
-
-        ret = f" {delimiter} ".join(parts)
-
-        if toplevel:
-            if phase is not None:
-                ret = f"WHERE Proposal.Phase={phase}" + (f" AND ({ret})" if ret else "")
-            elif ret:
-                ret = f"WHERE {ret}"
-
-        if self.group_clause:
-            ret += f" {self.group_clause}"
-        if self.sort_clauses:
-            ret += " ORDER BY " + ", ".join(self.sort_clauses)
-        if self.limit_clause:
-            ret += f" {self.limit_clause}"
-
-        return ret
-
-    def add_where(self, where: str):
-        """Raw WHERE clause string."""
-        self.where_clauses.append(where)
-
-    def add_integer(self, field: str, value: Optional[Union[int, List[int], str]]):
-        """Condition supporting NULL, single value, list, or comma-separated string."""
-        if value is None:
-            self.where_clauses.append(self._create_where(field, "IS NULL"))
-        elif isinstance(value, list):
-            self.where_clauses.append(
-                self._create_where(field, "IN", f"({','.join(map(str, value))})")
-            )
-        else:
-            if isinstance(value, str):
-                value_list = [int(v) for v in value.replace(" ", "").split(",") if v]
-            else:
-                value_list = [value]
-            self.where_clauses.append(
-                self._create_where(field, "IN", f"({','.join(map(str, value_list))})")
-            )
-
-    def add_text(self, field: str, text: Optional[str]):
-        """Add a text filter to a field, handling None, multiple values, and wildcard conversion.
-        """
-        if text is None:
-            self.where_clauses.append(self._create_where(field, "IS NULL"))
-            return
-        if not text:
-            return
-        values = [v.strip() for v in text.split(",")]
-        self.where_clauses.append(
-            {
-                "mode": "OR",
-                "clauses": [
-                    self._create_where(field, "=", f"'{v.replace('*','%')}'")
-                    for v in values
-                ],
-            }
-        )
-
-    def add_sort(self, field: str, ascending: bool = True):
-        """Append a field to the ORDER BY clause."""
-        self.sort_clauses.append(f"{field} {'ASC' if ascending else 'DESC'}")
-
-    def sort_by(self, field: str, ascending: bool = True):
-        """Replace all sorting with a single ORDER BY field."""
-        self.sort_clauses.clear()
-        self.add_sort(field, ascending)
-
-    def limit(self, count: int = 0, start: int = 0):
-        """Set the query's LIMIT clause with optional offset for row selection."""
-        if count == 0:
-            self.limit_clause = ""
-        elif start == 0:
-            self.limit_clause = f"LIMIT {count}"
-        else:
-            self.limit_clause = f"LIMIT {start}, {count}"
-
-    def group_by(self, group: str):
-        """Set a GROUP BY clause."""
-        self.group_clause = f"GROUP BY {group}" if group else ""
-
-    def get_fields(
-        self, clauses: Optional[List[Union[str, Dict[str, Any]]]] = None
-    ) -> List[str]:
-        """Return a list of field names used in the query's where clauses, including nested ones.
-        """
-        if clauses is None:
-            clauses = self.where_clauses
-        fields = []
-        for w in clauses:
-            if isinstance(w, str):
-                continue
-            elif isinstance(w, dict):
-                fields.extend(self.get_fields(w.get("clauses", [])))
-        return fields
-
-    def get_sort(self) -> List[str]:
-        """Return the current ORDER BY fields."""
-        return self.sort_clauses
 
     def get_block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
         """Get block visit records for a given proposal code."""
@@ -952,16 +823,15 @@ class PiptRepository:
                 moon = "Gray"
             block_visits.append(
                 {
-                    "BlockCode": row.BlockCode,
-                    "BlockName": row.BlockName,
-                    "BlockVisitStatus": row.BlockVisitStatus,
-                    "Priority": row.Priority,
-                    "Moon": moon,
-                    "TotalTime": row.ObservedTime,
-                    "OverheadTime": row.OverheadTime,
-                    "PoolCode": row.PoolCode,
-                    "Year": row.Year,
-                    "Semester": row.Semester,
+                    "block_code": row.BlockCode,
+                    "block_name": row.BlockName,
+                    "block_visit_status": row.BlockVisitStatus,
+                    "priority": row.Priority,
+                    "moon": moon,
+                    "total_time": row.ObservedTime,
+                    "overhead_time": row.OverheadTime,
+                    "pool_code": row.PoolCode,
+                    "semester": f"{row.Year}-{row.Semester}",
                 }
             )
 
@@ -1042,9 +912,7 @@ class PiptRepository:
             row.proposal_id: row.surname for row in pi_result.mappings()
         }
 
-        # --------------------
         # Build final proposal list, remove duplicates by Proposal_Code
-        # --------------------
         proposals_list = []
         seen_codes: set = set()
 
@@ -1058,13 +926,15 @@ class PiptRepository:
 
             proposals_list.append(
                 {
-                    "Proposal_Id": proposal["Proposal_Id"],
-                    "Code": code,
-                    "Title": full_proposal["general_info"]["title"],
-                    "PI": principal_investigator.get(proposal["Proposal_Id"]),
-                    "Semester": full_proposal["semester"],
-                    "Editable": False,
-                    "Url": full_proposal["proposal_file"],
+                    "proposal_id": proposal["Proposal_Id"],
+                    "proposal_code": code,
+                    "title": full_proposal["general_info"]["title"],
+                    "principal_investigator": principal_investigator.get(
+                        proposal["Proposal_Id"]
+                    ),
+                    "semester": full_proposal["semester"],
+                    "editable": False,
+                    "url": full_proposal["proposal_file"],
                 }
             )
 

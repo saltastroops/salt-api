@@ -66,7 +66,7 @@ class PiptTimeAllocation(BaseModel):
     semester: int = Field(..., title="Semester", description="Semester number")
     priority: int = Field(..., title="Priority", description="Proposal priority")
     moon: Optional[str] = Field(
-        None, title="Moon Phase", description="Moon phase or name (optional)"
+        None, title="Moon Phase", description="Moon phase or name"
     )
     allocated_time: float = Field(
         ..., title="Allocated Time", description="Time allocated"
@@ -86,7 +86,7 @@ class NirwalsFlatListItem(BaseModel):
     lamp: Optional[str] = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
-    exptime: float = Field(
+    exposure_time: float = Field(
         ..., title="Exposure time", description="Exposure time in seconds"
     )
     n_groups: int = Field(..., title="Groups", description="Number of groups")
@@ -120,7 +120,7 @@ class NirwalsExposureListItem(BaseArcListItem):
     lamp: Optional[str] = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
-    exptime: float = Field(
+    exposure_time: float = Field(
         ..., title="Exposure time", description="Exposure time in seconds"
     )
     n_groups: int = Field(..., title="Groups", description="Number of groups")
@@ -161,12 +161,12 @@ class RssFPCalibrationRegion(BaseModel):
     w_min: float = Field(
         ...,
         title="Minimum wavelength",
-        description="Minimum wavelength of calibration region (Å)",
+        description="Minimum wavelength of calibration region",
     )
     w_max: float = Field(
         ...,
         title="Maximum wavelength",
-        description="Maximum wavelength of calibration region (Å)",
+        description="Maximum wavelength of calibration region",
     )
     filter: Optional[str] = Field(None, title="RSS filter", description="RSS filter")
     line_id: Optional[int] = Field(
@@ -185,9 +185,7 @@ class RssFPCalibrationLine(BaseModel):
     rel_intensity: float = Field(
         ..., title="Relative Intensity", description="Relative Intensity"
     )
-    exposure_time: int = Field(
-        ..., title="Exposure time", alias="exptime", description="Exposure time"
-    )
+    exposure_time: int = Field(..., title="Exposure time", description="Exposure time")
 
 
 class RssRingDetailsSetup(BaseModel):
@@ -219,7 +217,7 @@ class SmiFlatDetailsListItem(BaseModel):
     lamp: Optional[str] = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
-    exptime: float = Field(
+    exposure_time: float = Field(
         ..., title="Exposure time", description="Exposure time in seconds"
     )
     neutral_density: int = Field(
@@ -275,7 +273,6 @@ class SmiArcExposure(SmiArcListItem):
     exposure_time: float = Field(
         ...,
         title="Exposure time",
-        alias="exptime",
         description="Exposure time in seconds",
     )
 
@@ -294,7 +291,7 @@ class RssArcExposureListItem(BaseArcListItem):
     lamp: Optional[str] = Field(
         ..., title="Calibration lamp", description="Calibration lamp"
     )
-    exptime: float = Field(
+    exposure_time: float = Field(
         ..., title="Exposure time", description="Exposure time in seconds"
     )
 
@@ -326,22 +323,15 @@ class RssArcDetailsSetup(BaseModel):
 class PreviousProposalListItem(BaseModel):
     """Represents an item for previous proposals."""
 
-    proposal_code: str = Field(
-        ..., title="Proposal code", alias="ProposalCode", description="Proposal code"
-    )
-    title: str = Field(
-        ..., title="Title", alias="Title", description="Title of the proposal"
-    )
+    proposal_code: str = Field(..., title="Proposal code", description="Proposal code")
+    title: str = Field(..., title="Title", description="Title of the proposal")
     allocated_time: int = Field(
-        ..., title="Allocated Time", alias="AllocatedTime", description="Time allocated"
+        ..., title="Allocated Time", description="Time allocated"
     )
-    observed_time: int = Field(
-        ..., title="Observed Time", alias="ObservedTime", description="Time observed"
-    )
+    observed_time: int = Field(..., title="Observed Time", description="Time observed")
     publications: List[str] = Field(
         ...,
         title="Publications",
-        alias="Publications",
         description="List of publications",
     )
 
@@ -350,48 +340,37 @@ class PiptBlockVisit(BaseModel):
     block_code: Optional[str] = Field(
         None,
         title="Block code",
-        alias="BlockCode",
         description="Identifier for the block",
     )
     block_name: Optional[str] = Field(
-        None, title="Block name", alias="BlockName", description="Name for the block"
+        None, title="Block name", description="Name for the block"
     )
     block_visit_status: Optional[str] = Field(
         None,
         title="Block visit status",
-        alias="BlockVisitStatus",
         description="Status of the block",
     )
     priority: int = Field(
         ...,
-        title="Block's priority",
-        alias="Priority",
+        title="Block priority",
         description="The priority of the block",
     )
-    moon: Optional[str] = Field(
-        None, title="Moon probability", alias="Moon", description="Moon probability"
-    )
+    moon: Optional[str] = Field(None, title="Moon phase", description="Moon phase")
     total_time: Optional[float] = Field(
         None,
         title="Total observation time",
-        alias="TotalTime",
         description="Total observation time",
     )
     overhead_time: Optional[float] = Field(
-        None, title="Overhead time", alias="OverheadTime", description="Overhead time"
+        None, title="Overhead time", description="Overhead time"
     )
     pool_code: Optional[str] = Field(
         None,
         title="Pool code",
-        alias="PoolCode",
         description="Code of the associated pool, if any",
     )
-    year: Optional[int] = Field(
-        None, title="Year", alias="Year", description="Year of the observation"
-    )
-    semester: Optional[int] = Field(
-        None,
+    semester: Semester = Field(
+        ...,
         title="Semester",
-        alias="Semester",
-        description="Semester for which the time is requested",
+        description="Semester of the observation",
     )

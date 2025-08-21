@@ -226,7 +226,8 @@ def get_previous_proposals_info(
     user_id: int = Query(..., title="User ID", description="PIPT user ID"),
     user: User = Depends(get_current_user),
     from_semester: Optional[str] = Query(
-        None, description="Semester from which to include proposals, e.g., '2023-2'"
+        None,
+        description="Semester from which onwards to include proposals, e.g., '2023-2'",
     ),
 ) -> List[PreviousProposalListItem]:
     """
@@ -265,3 +266,18 @@ def get_block_visits(
         service = services.pipt_service(unit_of_work.connection)
         block_visits = service.get_block_visits(proposal_code)
         return block_visits
+
+
+@router.get("/proposals", response_model=List[Dict[str, Any]])
+def get_pipt_proposals(
+    phase: Optional[int] = Query(None, description="Phase filter"),
+    limit: int = Query(250, description="Max number of proposals"),
+    descending: bool = Query(False, description="Sort descending"),
+):
+    with UnitOfWork() as unit_of_work:
+        pipt_service = services.pipt_service(unit_of_work.connection)
+        proposals = pipt_service.get_proposals(
+            phase=phase, limit=limit, descending=descending
+        )
+
+        return proposals

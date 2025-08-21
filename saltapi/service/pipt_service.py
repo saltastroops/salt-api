@@ -105,3 +105,13 @@ class PiptService:
         Return a list of block visits for a given proposal code.
         """
         return self.pipt_repository.get_block_visits(proposal_code)
+
+    def get_proposals(
+        self, phase: Optional[int] = None, limit: int = 250, descending: bool = False
+    ) -> List[Dict[str, Any]]:
+        """
+        Fetch proposals, optionally filtered by phase.
+        """
+        return self.pipt_repository.get_proposals(
+            phase=phase, limit=limit, descending=descending
+        )

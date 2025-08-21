@@ -6,13 +6,14 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
+from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.util import semester_of_datetime
 
 
 class PiptRepository:
     def __init__(self, connection: Connection) -> None:
         self.connection = connection
-        self.clear_limitation()
+        self.proposal_repository = ProposalRepository(connection)
 
     def get_pipt_news_for_days(self, days: int) -> List[Dict[str, Any]]:
         """
@@ -638,7 +639,7 @@ class PiptRepository:
 
         return result
 
-    def current_semester(self) -> Dict[str, Any]:
+    def _current_semester(self) -> Dict[str, Any]:
         semester_str = semester_of_datetime(datetime.now(pytz.utc))
         year, sem = map(int, semester_str.split("-"))
         return self.get_by_year_and_semester(year, sem)
@@ -670,9 +671,9 @@ class PiptRepository:
         user_id: int,
         from_semester: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        current = self.current_semester()
+        current = self._current_semester()
 
-        # Default start semester: two semesters before the current one
+        # Default is 3 semesters ago
         if from_semester is None:
             if current["semester"] == 1:
                 from_semester = f"{current['year']-2}-2"
@@ -915,13 +916,9 @@ class PiptRepository:
         return self.sort_clauses
 
     def get_block_visits(self, proposal_code: str) -> List[Dict[str, Any]]:
-        """Get block visit records for a given proposal code, applying filters and formatting results.
-        """
-        self.clear_limitation()
-        self.add_where(f"pc.Proposal_Code='{proposal_code}'")
-        limitation_str = self._build_limitation_string()
+        """Get block visit records for a given proposal code."""
 
-        query = f"""
+        query = """
             SELECT DISTINCT bv.BlockVisit_Id,
                 bc.BlockCode AS BlockCode,
                 b.Block_Name AS BlockName,
@@ -943,10 +940,10 @@ class PiptRepository:
             LEFT JOIN BlockCode AS bc ON (b.BlockCode_Id=bc.BlockCode_Id)
             LEFT JOIN BlockPool AS bp ON (b.Block_Id=bp.Block_Id)
             LEFT JOIN Pool AS pool ON (bp.Pool_Id=pool.Pool_Id)
-            {limitation_str}
+            WHERE pc.Proposal_Code = :proposal_code
         """
 
-        result = self.connection.execute(text(query))
+        result = self.connection.execute(text(query), {"proposal_code": proposal_code})
         block_visits = []
 
         for row in result:
@@ -969,3 +966,106 @@ class PiptRepository:
             )
 
         return block_visits
+
+    def get_query_sql(self) -> str:
+        return """
+            SELECT Proposal.Proposal_Id,
+                Proposal.ProposalCode_Id,
+                ProposalCode.Proposal_Code,
+                Proposal.Current,
+                Proposal.Semester_Id,
+                Proposal.TotalReqTime,
+                Proposal.Phase,
+                Proposal.Submission,
+                UNIX_TIMESTAMP(Proposal.SubmissionDate),
+                Proposal.OverheadTime
+  			FROM Proposal JOIN ProposalInvestigator ON (Proposal.ProposalCode_Id=ProposalInvestigator.ProposalCode_Id)
+            JOIN ProposalContact ON (Proposal.ProposalCode_Id=ProposalContact.ProposalCode_Id)
+            JOIN ProposalCode ON (Proposal.ProposalCode_Id=ProposalCode.ProposalCode_Id)
+            JOIN ProposalGeneralInfo ON (Proposal.ProposalCode_Id=ProposalGeneralInfo.ProposalCode_Id)
+            JOIN SemesterPhase ON (Proposal.Semester_Id=SemesterPhase.Semester_Id)
+            JOIN Semester ON (SemesterPhase.Semester_Id=Semester.Semester_Id)
+            JOIN MultiPartner ON MultiPartner.ProposalCode_Id=Proposal.ProposalCode_Id
+        """
+
+    def get_proposals(
+        self,
+        phase: Optional[int] = None,
+        limit: int = 250,
+        descending: bool = False,
+        proposal_code: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Fetch proposals with optional filters for phase and proposal_code.
+        """
+
+        where_clauses = []
+        params: Dict[str, Any] = {}
+
+        if phase == 1:
+            where_clauses.append(
+                "ProposalGeneralInfo.ProposalStatus_Id != :deleted AND"
+                " Proposal.Phase = 1"
+            )
+            params["deleted"] = 2
+        elif phase == 2:
+            where_clauses.append(
+                "(ProposalGeneralInfo.ProposalStatus_Id = :accepted AND Proposal.Phase"
+                " = 1) OR (Proposal.Current = 1 AND Proposal.Phase = 2)"
+            )
+            params["accepted"] = 1
+
+        if proposal_code:
+            where_clauses.append("ProposalCode.Proposal_Code = :proposal_code")
+            params["proposal_code"] = proposal_code
+
+        where_clause = (
+            " AND ".join(f"({wc})" for wc in where_clauses) if where_clauses else ""
+        )
+        order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
+        sql = self.get_query_sql()
+        if where_clause:
+            sql += f" WHERE {where_clause}"
+        sql += f" ORDER BY {order_by} LIMIT {limit}"
+
+        result = self.connection.execute(text(sql), params)
+        proposals = [dict(row) for row in result.mappings()]
+
+        pi_sql = """
+            SELECT DISTINCT p.Proposal_Id AS proposal_id, i.Surname AS surname
+            FROM Investigator AS i
+            JOIN ProposalContact AS pc ON (i.Investigator_Id = pc.Leader_Id)
+            JOIN Proposal AS p ON (pc.ProposalCode_Id = p.ProposalCode_Id)
+        """
+        pi_result = self.connection.execute(text(pi_sql))
+        principal_investigator = {
+            row.proposal_id: row.surname for row in pi_result.mappings()
+        }
+
+        # --------------------
+        # Build final proposal list, remove duplicates by Proposal_Code
+        # --------------------
+        proposals_list = []
+        seen_codes: set = set()
+
+        for proposal in proposals:
+            code = proposal["Proposal_Code"]
+            if code in seen_codes:
+                continue
+            seen_codes.add(code)
+
+            full_proposal = self.proposal_repository.get(proposal_code=code)
+
+            proposals_list.append(
+                {
+                    "Proposal_Id": proposal["Proposal_Id"],
+                    "Code": code,
+                    "Title": full_proposal["general_info"]["title"],
+                    "PI": principal_investigator.get(proposal["Proposal_Id"]),
+                    "Semester": full_proposal["semester"],
+                    "Editable": False,
+                    "Url": full_proposal["proposal_file"],
+                }
+            )
+
+        return proposals_list

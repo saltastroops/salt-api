@@ -209,12 +209,12 @@ class PiptRepository:
 
     def format_lamp_setup(self, orders: str, lamps: str) -> str:
         """
-        Given order and lamp strings like "3-1-2" and "Ne-Ar-Kr", returns a formatted setup string.
+        Given order and lamp strings like "3-2-1-2" and "Ne-Ar-Xe-Kr", returns a formatted setup string.
 
         Example:
-        orders = "3-1-2"
-        lamps = "Ne-Ar-Kr"
-        Output: "Ar; Kr; Ne"
+        orders = "3-2-1-2"
+        lamps = "Ne-Ar-Xe-Kr"
+        Output: "Xe; Ar and Kr; Ne"
         """
         orders_array = [int(order_str) for order_str in orders.split("-")]
         lamps_array = lamps.split("-")

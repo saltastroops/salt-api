@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from saltapi.repository.pipt_repository import PiptRepository
+from saltapi.service.user import User
 
 
 class PiptService:
@@ -107,11 +108,20 @@ class PiptService:
         return self.pipt_repository.get_block_visits(proposal_code)
 
     def get_proposals(
-        self, phase: Optional[int] = None, limit: int = 250, descending: bool = False
+        self,
+        user: User,
+        phase: Optional[int] = None,
+        limit: int = 250,
+        descending: bool = False,
+        proposal_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals, optionally filtered by phase.
         """
         return self.pipt_repository.get_proposals(
-            phase=phase, limit=limit, descending=descending
+            user=user,
+            phase=phase,
+            limit=limit,
+            descending=descending,
+            proposal_code=proposal_code,
         )

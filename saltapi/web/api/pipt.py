@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.user import User
@@ -13,6 +13,7 @@ from saltapi.web.schema.pipt import (
     NirwalsFlatDetailsSetup,
     PiptBlockVisit,
     PiptNewsItem,
+    PiptProposal,
     PiptProposalInfo,
     PiptTimeAllocation,
     PiptUserInfo,
@@ -268,7 +269,11 @@ def get_block_visits(
         return block_visits
 
 
-@router.get("/proposals", response_model=List[Dict[str, Any]])
+@router.get(
+    "/proposals",
+    summary="Get block visits for a given proposal code",
+    response_model=List[PiptProposal],
+)
 def get_pipt_proposals(
     phase: Optional[int] = Query(None, description="Phase filter"),
     limit: int = Query(250, description="Max number of proposals"),
@@ -279,16 +284,19 @@ def get_pipt_proposals(
         permission_service = services.permission_service(unit_of_work.connection)
         pipt_service = services.pipt_service(unit_of_work.connection)
         proposals = pipt_service.get_proposals(
-            phase=phase, limit=limit, descending=descending
+            phase=phase, limit=limit, descending=descending, user=user
         )
 
+        accessible_proposals = []
         for proposal in proposals:
-            if permission_service.check_permission_to_view_proposal(
-                user, proposal["proposal_code"]
-            ):
-                if permission_service.check_permission_to_update_proposal_progress(
-                    user, proposal_code=proposal["proposal_code"]
-                ):
-                    proposal["editable"] = True
+            try:
+                permission_service.check_permission_to_view_proposal(
+                    user, proposal["proposal_code"]
+                )
+                can_view = True
+            except Exception:
+                raise AuthorizationError()
+            if can_view:
+                accessible_proposals.append(proposal)
 
-        return proposals
+        return accessible_proposals

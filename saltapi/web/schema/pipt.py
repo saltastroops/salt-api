@@ -161,12 +161,12 @@ class RssFPCalibrationRegion(BaseModel):
     w_min: float = Field(
         ...,
         title="Minimum wavelength",
-        description="Minimum wavelength of calibration region",
+        description="Minimum wavelength of calibration region (Å)",
     )
     w_max: float = Field(
         ...,
         title="Maximum wavelength",
-        description="Maximum wavelength of calibration region",
+        description="Maximum wavelength of calibration region (Å)",
     )
     filter: Optional[str] = Field(None, title="RSS filter", description="RSS filter")
     line_id: Optional[int] = Field(
@@ -373,4 +373,40 @@ class PiptBlockVisit(BaseModel):
         ...,
         title="Semester",
         description="Semester of the observation",
+    )
+
+
+class PiptProposal(BaseModel):
+    """A PIPT proposal."""
+
+    proposal_id: int = Field(
+        ..., title="Proposal ID", description="Unique identifier for the proposal"
+    )
+    proposal_code: ProposalCode = Field(
+        ..., title="Proposal code", description="Proposal code"
+    )
+    title: str = Field(..., title="Title", description="Proposal title")
+    semester: Semester = Field(
+        ...,
+        title="Semester",
+        description="Semester for which the proposal details are given",
+    )
+    principal_investigator: str = Field(
+        ..., title="Principal Investigator", description="Principal Investigator"
+    )
+    semester: Semester = Field(
+        ..., title="Semester", description="Semester for which the time is requested"
+    )
+    editable: bool = Field(
+        ...,
+        title="Editable",
+        description="Indicates whether the current user can edit this proposal",
+    )
+    proposal_file: str = Field(
+        ...,
+        title="Proposal file",
+        description=(
+            "URL of the proposal file that can be imported into the Principal "
+            "Investigator Proposal Tool"
+        ),
     )

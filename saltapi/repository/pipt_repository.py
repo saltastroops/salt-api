@@ -7,6 +7,7 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
+from saltapi.service.user import User
 from saltapi.util import semester_of_datetime
 
 
@@ -837,7 +838,7 @@ class PiptRepository:
 
         return block_visits
 
-    def get_query_sql(self) -> str:
+    def get_proposal_query(self) -> str:
         return """
             SELECT Proposal.Proposal_Id,
                 Proposal.ProposalCode_Id,
@@ -847,19 +848,26 @@ class PiptRepository:
                 Proposal.TotalReqTime,
                 Proposal.Phase,
                 Proposal.Submission,
-                UNIX_TIMESTAMP(Proposal.SubmissionDate),
-                Proposal.OverheadTime
-  			FROM Proposal JOIN ProposalInvestigator ON (Proposal.ProposalCode_Id=ProposalInvestigator.ProposalCode_Id)
-            JOIN ProposalContact ON (Proposal.ProposalCode_Id=ProposalContact.ProposalCode_Id)
-            JOIN ProposalCode ON (Proposal.ProposalCode_Id=ProposalCode.ProposalCode_Id)
-            JOIN ProposalGeneralInfo ON (Proposal.ProposalCode_Id=ProposalGeneralInfo.ProposalCode_Id)
-            JOIN SemesterPhase ON (Proposal.Semester_Id=SemesterPhase.Semester_Id)
-            JOIN Semester ON (SemesterPhase.Semester_Id=Semester.Semester_Id)
-            JOIN MultiPartner ON MultiPartner.ProposalCode_Id=Proposal.ProposalCode_Id
+                UNIX_TIMESTAMP(Proposal.SubmissionDate) AS submission_timestamp,
+                Proposal.OverheadTime,
+                PULead.Username AS leader_username,
+                PUCont.Username AS contact_username
+            FROM Proposal
+            JOIN ProposalInvestigator ON Proposal.ProposalCode_Id = ProposalInvestigator.ProposalCode_Id
+            JOIN ProposalContact ON Proposal.ProposalCode_Id = ProposalContact.ProposalCode_Id
+            JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
+            JOIN ProposalGeneralInfo ON Proposal.ProposalCode_Id = ProposalGeneralInfo.ProposalCode_Id
+            JOIN ProposalStatus ON ProposalGeneralInfo.ProposalStatus_Id = ProposalStatus.ProposalStatus_Id
+            JOIN Semester ON Proposal.Semester_Id = Semester.Semester_Id
+            JOIN Investigator ILead ON ILead.Investigator_Id = ProposalContact.Leader_Id
+            JOIN Investigator ICont ON ICont.Investigator_Id = ProposalContact.Contact_Id
+            JOIN PiptUser PULead ON PULead.PiptUser_Id = ILead.PiptUser_Id
+            JOIN PiptUser PUCont ON PUCont.PiptUser_Id = ICont.PiptUser_Id
         """
 
     def get_proposals(
         self,
+        user: User,
         phase: Optional[int] = None,
         limit: int = 250,
         descending: bool = False,
@@ -872,18 +880,20 @@ class PiptRepository:
         where_clauses = []
         params: Dict[str, Any] = {}
 
+        username = user.username
+        can_edit = True if "Administrator" in user.roles else False
+
         if phase == 1:
             where_clauses.append(
-                "ProposalGeneralInfo.ProposalStatus_Id != :deleted AND"
-                " Proposal.Phase = 1"
+                "ProposalStatus.Status != :deleted AND Proposal.Phase = 1"
             )
-            params["deleted"] = 2
+            params["deleted"] = "Deleted"
         elif phase == 2:
             where_clauses.append(
-                "(ProposalGeneralInfo.ProposalStatus_Id = :accepted AND Proposal.Phase"
-                " = 1) OR (Proposal.Current = 1 AND Proposal.Phase = 2)"
+                "(ProposalStatus.Status = :accepted AND Proposal.Phase= 1) OR"
+                " (Proposal.Current = 1 AND Proposal.Phase = 2)"
             )
-            params["accepted"] = 1
+            params["accepted"] = "Accepted"
 
         if proposal_code:
             where_clauses.append("ProposalCode.Proposal_Code = :proposal_code")
@@ -893,7 +903,7 @@ class PiptRepository:
             " AND ".join(f"({wc})" for wc in where_clauses) if where_clauses else ""
         )
         order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
-        sql = self.get_query_sql()
+        sql = self.get_proposal_query()
         if where_clause:
             sql += f" WHERE {where_clause}"
         sql += f" ORDER BY {order_by} LIMIT {limit}"
@@ -914,7 +924,7 @@ class PiptRepository:
 
         # Build final proposal list, remove duplicates by Proposal_Code
         proposals_list = []
-        seen_codes: set = set()
+        seen_codes = set()
 
         for proposal in proposals:
             code = proposal["Proposal_Code"]
@@ -923,7 +933,10 @@ class PiptRepository:
             seen_codes.add(code)
 
             full_proposal = self.proposal_repository.get(proposal_code=code)
-
+            editable = can_edit or username in [
+                proposal["leader_username"],
+                proposal["contact_username"],
+            ]
             proposals_list.append(
                 {
                     "proposal_id": proposal["Proposal_Id"],
@@ -933,9 +946,8 @@ class PiptRepository:
                         proposal["Proposal_Id"]
                     ),
                     "semester": full_proposal["semester"],
-                    "editable": False,
+                    "editable": True if can_edit else editable,
                     "url": full_proposal["proposal_file"],
                 }
             )
-
         return proposals_list

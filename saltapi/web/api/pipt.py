@@ -268,7 +268,7 @@ def get_block_visits(
 
 @router.get(
     "/proposals",
-    summary="Get block visits for a given proposal code",
+    summary="Get proposals",
     response_model=List[PiptProposal],
 )
 def get_pipt_proposals(
@@ -278,22 +278,9 @@ def get_pipt_proposals(
     user: User = Depends(get_current_user),
 ):
     with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
         pipt_service = services.pipt_service(unit_of_work.connection)
         proposals = pipt_service.get_proposals(
             phase=phase, limit=limit, descending=descending, user=user
         )
 
-        accessible_proposals = []
-        for proposal in proposals:
-            try:
-                permission_service.check_permission_to_view_proposal(
-                    user, proposal["proposal_code"]
-                )
-                can_view = True
-            except Exception:
-                raise AuthorizationError()
-            if can_view:
-                accessible_proposals.append(proposal)
-
-        return accessible_proposals
+        return proposals

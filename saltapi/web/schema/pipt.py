@@ -382,9 +382,7 @@ class PiptProposal(BaseModel):
     proposal_id: int = Field(
         ..., title="Proposal ID", description="Unique identifier for the proposal"
     )
-    proposal_code: ProposalCode = Field(
-        ..., title="Proposal code", description="Proposal code"
-    )
+    proposal_code: str = Field(..., title="Proposal code", description="Proposal code")
     title: str = Field(..., title="Title", description="Proposal title")
     semester: Semester = Field(
         ...,

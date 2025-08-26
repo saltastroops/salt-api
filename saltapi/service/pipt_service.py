@@ -113,7 +113,6 @@ class PiptService:
         phase: Optional[int] = None,
         limit: int = 250,
         descending: bool = False,
-        proposal_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals, optionally filtered by phase.
@@ -123,5 +122,4 @@ class PiptService:
             phase=phase,
             limit=limit,
             descending=descending,
-            proposal_code=proposal_code,
         )

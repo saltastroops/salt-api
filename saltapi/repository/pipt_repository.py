@@ -854,6 +854,8 @@ class PiptRepository:
                 PUCont.Username AS contact_username
             FROM Proposal
             JOIN ProposalInvestigator ON Proposal.ProposalCode_Id = ProposalInvestigator.ProposalCode_Id
+            JOIN Investigator I ON ProposalInvestigator.Investigator_Id = I.Investigator_Id
+            JOIN PiptUser PU ON I.Investigator_Id = PU.Investigator_Id
             JOIN ProposalContact ON Proposal.ProposalCode_Id = ProposalContact.ProposalCode_Id
             JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
             JOIN ProposalGeneralInfo ON Proposal.ProposalCode_Id = ProposalGeneralInfo.ProposalCode_Id
@@ -871,7 +873,6 @@ class PiptRepository:
         phase: Optional[int] = None,
         limit: int = 250,
         descending: bool = False,
-        proposal_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals with optional filters for phase and proposal_code.
@@ -881,7 +882,8 @@ class PiptRepository:
         params: Dict[str, Any] = {}
 
         username = user.username
-        can_edit = True if "Administrator" in user.roles else False
+        can_edit = "Administrator" in user.roles
+        can_see_all = can_edit or "Astronomer" in user.roles
 
         if phase == 1:
             where_clauses.append(
@@ -895,9 +897,12 @@ class PiptRepository:
             )
             params["accepted"] = "Accepted"
 
-        if proposal_code:
-            where_clauses.append("ProposalCode.Proposal_Code = :proposal_code")
-            params["proposal_code"] = proposal_code
+        if not can_see_all:
+            where_clauses.append(
+                "((PULead.Username = :username) OR (PUCont.Username = :username) OR"
+                " (PU.Username = :username))"
+            )
+            params["username"] = username
 
         where_clause = (
             " AND ".join(f"({wc})" for wc in where_clauses) if where_clauses else ""
@@ -932,7 +937,7 @@ class PiptRepository:
                 continue
             seen_codes.add(code)
 
-            full_proposal = self.proposal_repository.get(proposal_code=code)
+            full_proposal = self.proposal_repository.get(code)
             editable = can_edit or username in [
                 proposal["leader_username"],
                 proposal["contact_username"],
@@ -946,8 +951,8 @@ class PiptRepository:
                         proposal["Proposal_Id"]
                     ),
                     "semester": full_proposal["semester"],
-                    "editable": True if can_edit else editable,
-                    "url": full_proposal["proposal_file"],
+                    "editable": editable,
+                    "proposal_file": full_proposal["proposal_file"],
                 }
             )
         return proposals_list

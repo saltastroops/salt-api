@@ -224,7 +224,6 @@ def get_smi_arc_details() -> SmiArcDetailsSetup:
     response_model=List[PreviousProposalListItem],
 )
 def get_previous_proposals_info(
-    user_id: int = Query(..., title="User ID", description="PIPT user ID"),
     user: User = Depends(get_current_user),
     from_semester: Optional[str] = Query(
         None,
@@ -236,11 +235,9 @@ def get_previous_proposals_info(
     If from_year and from_semester are not provided, defaults to 3 semesters ago.
     """
     with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_validate_user(user_id, user)
         service = services.pipt_service(unit_of_work.connection)
         proposals = service.get_previous_proposals_info(
-            user_id=user_id,
+            user_id=user.id,
             from_semester=from_semester,
         )
 

@@ -838,7 +838,7 @@ class PiptRepository:
 
         return block_visits
 
-    def get_proposal_query(self) -> str:
+    def _get_proposal_query(self) -> str:
         return """
             SELECT Proposal.Proposal_Id,
                 Proposal.ProposalCode_Id,
@@ -853,9 +853,6 @@ class PiptRepository:
                 PULead.Username AS leader_username,
                 PUCont.Username AS contact_username
             FROM Proposal
-            JOIN ProposalInvestigator ON Proposal.ProposalCode_Id = ProposalInvestigator.ProposalCode_Id
-            JOIN Investigator I ON ProposalInvestigator.Investigator_Id = I.Investigator_Id
-            JOIN PiptUser PU ON I.Investigator_Id = PU.Investigator_Id
             JOIN ProposalContact ON Proposal.ProposalCode_Id = ProposalContact.ProposalCode_Id
             JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
             JOIN ProposalGeneralInfo ON Proposal.ProposalCode_Id = ProposalGeneralInfo.ProposalCode_Id
@@ -882,8 +879,8 @@ class PiptRepository:
         params: Dict[str, Any] = {}
 
         username = user.username
-        can_edit = "Administrator" in user.roles
-        can_see_all = can_edit or "Astronomer" in user.roles
+        can_edit_all = "Administrator" in user.roles
+        can_see_all = can_edit_all or "Astronomer" in user.roles
 
         if phase == 1:
             where_clauses.append(
@@ -897,20 +894,24 @@ class PiptRepository:
             )
             params["accepted"] = "Accepted"
 
+        sql = self._get_proposal_query()
+
         if not can_see_all:
-            where_clauses.append(
-                "((PULead.Username = :username) OR (PUCont.Username = :username) OR"
-                " (PU.Username = :username))"
-            )
+            sql += """
+            JOIN ProposalInvestigator ON Proposal.ProposalCode_Id = ProposalInvestigator.ProposalCode_Id
+            JOIN Investigator I ON ProposalInvestigator.Investigator_Id = I.Investigator_Id
+            JOIN PiptUser PU ON I.Investigator_Id = PU.Investigator_Id
+            """
+            where_clauses.append("PU.Username = :username")
             params["username"] = username
 
         where_clause = (
             " AND ".join(f"({wc})" for wc in where_clauses) if where_clauses else ""
         )
-        order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
-        sql = self.get_proposal_query()
         if where_clause:
             sql += f" WHERE {where_clause}"
+
+        order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
         sql += f" ORDER BY {order_by} LIMIT {limit}"
 
         result = self.connection.execute(text(sql), params)
@@ -919,8 +920,8 @@ class PiptRepository:
         pi_sql = """
             SELECT DISTINCT p.Proposal_Id AS proposal_id, i.Surname AS surname
             FROM Investigator AS i
-            JOIN ProposalContact AS pc ON (i.Investigator_Id = pc.Leader_Id)
-            JOIN Proposal AS p ON (pc.ProposalCode_Id = p.ProposalCode_Id)
+            JOIN ProposalContact AS pc ON i.Investigator_Id = pc.Leader_Id
+            JOIN Proposal AS p ON pc.ProposalCode_Id = p.ProposalCode_Id
         """
         pi_result = self.connection.execute(text(pi_sql))
         principal_investigator = {
@@ -938,7 +939,7 @@ class PiptRepository:
             seen_codes.add(code)
 
             full_proposal = self.proposal_repository.get(code)
-            editable = can_edit or username in [
+            editable = can_edit_all or username in [
                 proposal["leader_username"],
                 proposal["contact_username"],
             ]

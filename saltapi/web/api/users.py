@@ -164,7 +164,6 @@ def get_user(
         return user
 
 
-
 @router.patch(
     "/{user_id}", summary="Update user details", response_model=BaseUserDetails
 )

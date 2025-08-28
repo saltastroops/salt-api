@@ -24,7 +24,7 @@ RUN sed -i "s@<policy domain=\"coder\" rights=\"none\" pattern=\"PDF\" />@<polic
 
 RUN pip install wheel
 
-RUN pip install poetry
+RUN pip install poetry==1.8.3
 
 COPY ./pyproject.toml ./poetry.lock* ./
 

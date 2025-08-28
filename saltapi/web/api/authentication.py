@@ -5,15 +5,13 @@ from fastapi import APIRouter, Body, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from saltapi.exceptions import ValidationError, AuthenticationError
+from saltapi.exceptions import AuthenticationError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication import AccessToken
-from saltapi.service.authentication_service import (
-    SECONDARY_AUTH_TOKEN_KEY,
-    USER_ID_KEY,
-    AuthenticationService,
-    get_current_user,
-)
+from saltapi.service.authentication_service import (SECONDARY_AUTH_TOKEN_KEY,
+                                                    USER_ID_KEY,
+                                                    AuthenticationService,
+                                                    get_current_user)
 from saltapi.service.user import User
 from saltapi.settings import get_settings
 from saltapi.util import validate_user

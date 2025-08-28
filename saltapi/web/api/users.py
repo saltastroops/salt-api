@@ -6,24 +6,25 @@ from starlette import status
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user, get_user_to_verify
-from saltapi.service.user import NewUserDetails as _NewUserDetails, Role
+from saltapi.service.user import NewUserDetails as _NewUserDetails
+from saltapi.service.user import Role
 from saltapi.service.user import User as _User
 from saltapi.service.user import UserDetails as _UserDetails
 from saltapi.service.user import UserUpdate as _UserUpdate
 from saltapi.web import services
 from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
+    BaseUserDetails,
     NewUserDetails,
     PasswordResetRequest,
     PasswordUpdate,
     ProposalPermission,
-    User,
-    UserListItem,
-    UserUpdate,
-    BaseUserDetails,
-    UsernameEmail,
-    UserContact,
     Subscription,
+    User,
+    UserContact,
+    UserListItem,
+    UsernameEmail,
+    UserUpdate,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])

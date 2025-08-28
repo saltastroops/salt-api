@@ -2,27 +2,17 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    Form,
-    Path,
-    Query,
-    UploadFile,
-    WebSocket,
-)
+from fastapi import (APIRouter, Depends, File, Form, Path, Query, UploadFile,
+                     WebSocket)
 from starlette import status
 
-from saltapi.exceptions import NotFoundError, AuthorizationError
+from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.database import engine
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.authentication_service import (
-    find_user_from_token,
-    get_current_user,
-)
-from saltapi.service.submission import SubmissionStatus, SubmissionLogEntry
+from saltapi.service.authentication_service import (find_user_from_token,
+                                                    get_current_user)
+from saltapi.service.submission import SubmissionLogEntry, SubmissionStatus
 from saltapi.service.user import User
 from saltapi.web import services
 from saltapi.web.schema.submissions import Submission, SubmissionProgress

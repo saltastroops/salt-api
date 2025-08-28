@@ -5,6 +5,7 @@ from saltapi.repository.data_repository import DataRepository
 from saltapi.repository.finder_chart_repository import FinderChartRepository
 from saltapi.repository.institution_repository import InstitutionRepository
 from saltapi.repository.instrument_repository import InstrumentRepository
+from saltapi.repository.pipt_repository import PiptRepository
 from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
@@ -17,6 +18,7 @@ from saltapi.service.institution_service import InstitutionService
 from saltapi.service.instrument_service import InstrumentService
 from saltapi.service.mail_service import MailService
 from saltapi.service.permission_service import PermissionService
+from saltapi.service.pipt_service import PiptService
 from saltapi.service.proposal_service import ProposalService
 from saltapi.service.submission_service import SubmissionService
 from saltapi.service.user_service import UserService
@@ -96,3 +98,9 @@ def finder_chart_service(connection: Connection) -> FinderChartService:
     """Return a finding chart service instance."""
     finding_chart_repository = FinderChartRepository(connection)
     return FinderChartService(finding_chart_repository)
+
+
+def pipt_service(connection: Connection) -> PiptService:
+    """Return a PIPT service instance."""
+    pipt_repository = PiptRepository(connection)
+    return PiptService(pipt_repository)

@@ -344,6 +344,23 @@ ORDER BY S.Year, S.Semester;
         semesters = sorted(result, reverse=True)
 
         return semesters
+    
+    def _phases(self, proposal_code: str) -> List[int]:
+        """
+        Return a list of phases (1 or 2) for a given proposal.
+        """
+        stmt = text(
+        """
+        SELECT DISTINCT P.Phase
+        FROM ProposalCode PC
+        JOIN Proposal P ON PC.ProposalCode_Id = P.ProposalCode_Id
+        WHERE PC.Proposal_Code = :proposal_code
+        ORDER BY P.Phase
+        """
+    )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        phases = sorted(result.scalars(), reverse=True)
+        return phases
 
     def get_proposal_type(self, proposal_code: str) -> str:
         stmt = text(
@@ -622,6 +639,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "first_submission": self._first_submission_date(proposal_code),
             "submission_number": self._latest_submission(proposal_code),
             "semesters": self._semesters(proposal_code),
+            "phases": self._phases(proposal_code)
         }
 
     def _investigators(self, proposal_code: str) -> List[Dict[str, Any]]:

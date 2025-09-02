@@ -133,7 +133,7 @@ class GeneralProposalInfo(BaseModel):
     )
     phases: List[int] = Field(
         ...,
-        title="Proposal Phases",
+        title="Proposal phases",
         description="List of phases for which the proposal has been submitted",
     )
     submission_number: int = Field(

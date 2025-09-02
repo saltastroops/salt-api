@@ -359,7 +359,7 @@ ORDER BY S.Year, S.Semester;
         """
     )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        phases = sorted(result.scalars(), reverse=True)
+        phases = list(result.scalars())
         return phases
 
     def get_proposal_type(self, proposal_code: str) -> str:

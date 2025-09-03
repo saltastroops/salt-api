@@ -693,12 +693,13 @@ WHERE PiptUser_Id = :user_id
     def _update_user_details(self, user_id: int, user_update: Dict[str, str]) -> None:
         stmt = text(
             """
-UPDATE Investigator 
-SET FirstName = :given_name, 
-    Surname = :family_name, 
-    Email = :email
-WHERE PiptUser_Id = :user_id
-            """
+UPDATE Investigator
+SET FirstName = :given_name,
+    Surname   = :family_name,
+    Email     = :email
+WHERE Investigator_Id =
+      (SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id)
+             """
         )
 
         try:

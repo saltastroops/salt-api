@@ -711,9 +711,10 @@ WHERE PiptUser_Id = :user_id
                     "email": user_update["email"],
                 },
             )
-
-        except IntegrityError:
+        except NoResultFound:
             raise NotFoundError(f"No such user id: {user_id}")
+        except IntegrityError:
+            raise ValidationError(f"The combination of contact details exists already.")
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:

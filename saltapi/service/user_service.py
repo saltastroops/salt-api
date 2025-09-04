@@ -258,5 +258,5 @@ SALT Team
                     user_id, subscription.is_subscribed
                 )
 
-    def get_subscriptions(self, user_id) -> List[Dict[str, Any]]:
+    def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)

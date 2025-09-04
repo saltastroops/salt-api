@@ -1314,34 +1314,35 @@ WHERE PiptUser_Id = :user_id
     def _is_user_subscribed_to_salt_news(self, user_id: int) -> bool:
         stmt = text(
             """
-SELECT 1 FROM PiptUser
+SELECT COUNT(*) FROM PiptUser
 WHERE ReceiveNews > 0 AND PiptUser_Id = :user_id    
             """
         )
-        result = self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
-        return result is not None
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return cast(int, result.scalar_one()) > 0
 
     def _is_user_subscribed_to_gravitational_wave_notifications(
         self, user_id: int
-    ) -> Optional[Dict[str, Any]]:
+    ) -> bool:
         stmt = text(
             """
-SELECT 1 FROM PiptUserSetting
+SELECT COUNT(*) FROM PiptUserSetting
 WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProposals'
     AND PiptUser_Id = :user_id    
     AND Value > 0
             """
         )
-        result = self.connection.execute(stmt, {"user_id": user_id}).one_or_none()
-        return result is not None
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return cast(int, result.scalar_one()) > 0
 
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
-        subscriptions = []
-        if self._is_user_subscribed_to_gravitational_wave_notifications(user_id):
-            subscriptions.append(
-                {"to": "Gravitational Wave Notifications", "is_subscribed": True}
-            )
-        if self._is_user_subscribed_to_salt_news(user_id):
-            subscriptions.append({"to": "SALT News", "is_subscribed": True})
-
-        return subscriptions
+        return [
+            {
+                "to": "Gravitational Wave Notifications",
+                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(user_id)
+            },
+            {
+                "to": "SALT News",
+                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id)
+            }
+        ]

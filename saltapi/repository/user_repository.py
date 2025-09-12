@@ -716,7 +716,7 @@ WHERE Investigator_Id =
             raise NotFoundError(f"No such user id: {user_id}")
         except IntegrityError:
             raise ValidationError(
-                f"The combination of email address and institute exists already."
+                f"There are contact details with this email address and institute already."
             )
 
     @staticmethod

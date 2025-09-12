@@ -693,12 +693,13 @@ WHERE PiptUser_Id = :user_id
     def _update_user_details(self, user_id: int, user_update: Dict[str, str]) -> None:
         stmt = text(
             """
-UPDATE Investigator 
-SET FirstName = :given_name, 
-    Surname = :family_name, 
-    Email = :email
-WHERE PiptUser_Id = :user_id
-            """
+UPDATE Investigator
+SET FirstName = :given_name,
+    Surname   = :family_name,
+    Email     = :email
+WHERE Investigator_Id =
+      (SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id)
+             """
         )
 
         try:
@@ -711,9 +712,12 @@ WHERE PiptUser_Id = :user_id
                     "email": user_update["email"],
                 },
             )
-
-        except IntegrityError:
+        except NoResultFound:
             raise NotFoundError(f"No such user id: {user_id}")
+        except IntegrityError:
+            raise ValidationError(
+                f"There are contact details with this email address and institute already."
+            )
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:

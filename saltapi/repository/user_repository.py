@@ -715,7 +715,9 @@ WHERE Investigator_Id =
         except NoResultFound:
             raise NotFoundError(f"No such user id: {user_id}")
         except IntegrityError:
-            raise ValidationError(f"The combination of contact details exists already.")
+            raise ValidationError(
+                f"The combination of email address and institute exists already."
+            )
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:

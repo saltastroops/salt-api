@@ -121,6 +121,9 @@ class Settings(BaseSettings):
     # Java command
     mapping_tool_java_command: str
 
+    # Path to the xml_to_gcode.jar file
+    jar_path: str
+
     # Python interpreter
     mapping_tool_python_interpreter: str
 

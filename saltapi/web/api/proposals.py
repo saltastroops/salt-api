@@ -1,32 +1,32 @@
 import mimetypes
 import os
-from datetime import date
 import subprocess
 import tempfile
+from datetime import date
 from typing import Any, Dict, List, Optional, Union
-from saltapi.settings import get_settings
 
 from fastapi import (
     APIRouter,
     Body,
     Depends,
+    Form,
     HTTPException,
     Path,
     Query,
     Response,
     status,
-    Form,
 )
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
-from saltapi.exceptions import ValidationError, NotFoundError, SSDAError
+from saltapi.exceptions import NotFoundError, SSDAError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import LiaisonAstronomer, User
+from saltapi.settings import get_settings
 from saltapi.util import semester_start
 from saltapi.web import services
 from saltapi.web.schema.common import Message, ProposalCode, Semester
@@ -739,9 +739,10 @@ async def serve_attachment(
         # Serve the file
         return FileResponse(file_path, media_type=media_type)
 
+
 @router.post(
     "/{proposal_code}/slitmask/{barcode}/gcode",
-    summary="Generate GCode for a slit mask"
+    summary="Generate GCode for a slit mask",
 )
 async def generate_slitmask_gcode(
     proposal_code: str = Path(
@@ -758,17 +759,15 @@ async def generate_slitmask_gcode(
     using_boxes_for_refstars: bool = Form(
         True,
         title="Cut boxes for reference stars",
-        description="Whether to cut boxes for reference stars"
+        description="Whether to cut boxes for reference stars",
     ),
     refstar_boxsize: int = Form(
-        5,
-        title="Reference star box size",
-        description="Size of reference star boxes"
+        5, title="Reference star box size", description="Size of reference star boxes"
     ),
     slow_cutting_power: float = Form(
         19.1,
         title="Slow cutting power",
-        description="Cutting power for laser cutter in slow mode"
+        description="Cutting power for laser cutter in slow mode",
     ),
     user: User = Depends(get_current_user),
 ):
@@ -777,31 +776,34 @@ async def generate_slitmask_gcode(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)
         proposal_service = services.ProposalService(unit_of_work.connection)
-        xml_file = proposal_service.get_proposal_attachments_dir(proposal_code) / filename
+        xml_file = (
+            proposal_service.get_proposal_attachments_dir(proposal_code) / filename
+        )
 
         if not xml_file.exists():
-            raise HTTPException(status_code=404, detail=f"Slit mask XML not found: {filename}")
+            raise HTTPException(
+                status_code=404, detail=f"Slit mask XML not found: {filename}"
+            )
 
         tmp_file = tempfile.mktemp(suffix=".nc")
 
         cmd = [
-            settings.mapping_tool_java_command, "-jar", settings.jar_path,
+            settings.mapping_tool_java_command,
+            "-jar",
+            settings.jar_path,
             f"--slow-cutting-power={slow_cutting_power}",
             f"--xml={xml_file}",
             f"--gcode={tmp_file}",
-            f"--barcode={barcode}"
+            f"--barcode={barcode}",
         ]
         if using_boxes_for_refstars:
-            cmd.extend(["--boxes-for-refstars", "--refstar-boxsize", str(refstar_boxsize)])
+            cmd.extend(
+                ["--boxes-for-refstars", "--refstar-boxsize", str(refstar_boxsize)]
+            )
 
         try:
             subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             raise HTTPException(status_code=500, detail=f"GCode generation failed: {e}")
 
-        return FileResponse(
-            tmp_file,
-            filename=f"{barcode}.nc",
-            media_type="text/plain"
-        )
-
+        return FileResponse(tmp_file, filename=f"{barcode}.nc", media_type="text/plain")

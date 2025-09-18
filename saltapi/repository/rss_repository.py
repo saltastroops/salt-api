@@ -702,3 +702,25 @@ FROM RssMask RM
                 },
             )
         ]
+
+    def get_xml_filename_by_barcode(self, barcode: str) -> str:
+        """
+        Return the XML filename for an RSS MOS mask given its barcode.
+        """
+        stmt = text(
+            """
+            SELECT RMMD.XmlPath AS xml_path
+            FROM RssMask RM
+                     JOIN RssMosMaskDetails RMMD
+                          ON RM.RssMask_Id = RMMD.RssMask_Id
+            WHERE RM.Barcode = :barcode
+            """
+        )
+
+        result = (
+            self.connection.execute(stmt, {"barcode": barcode}).mappings().fetchone()
+        )
+        if not result or not result["xml_path"]:
+            raise NotFoundError(f"No XML path found for barcode {barcode}")
+
+        return result["xml_path"].split("/")[-1]

@@ -1,6 +1,5 @@
 import mimetypes
 import os
-import subprocess
 import tempfile
 from datetime import date
 from typing import Any, Dict, List, Optional, Union
@@ -17,6 +16,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse
 
 from saltapi.exceptions import NotFoundError, SSDAError, ValidationError
@@ -26,8 +26,7 @@ from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import LiaisonAstronomer, User
-from saltapi.settings import get_settings
-from saltapi.util import semester_start
+from saltapi.util import semester_start, remove_file
 from saltapi.web import services
 from saltapi.web.schema.common import Message, ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
@@ -741,7 +740,7 @@ async def serve_attachment(
 
 
 @router.post(
-    "/{proposal_code}/slitmask/{barcode}/gcode",
+    "/{proposal_code}/slitmasks/{barcode}/gcode",
     summary="Generate GCode for a slit mask",
 )
 async def generate_slitmask_gcode(
@@ -751,11 +750,6 @@ async def generate_slitmask_gcode(
         description="The proposal code",
     ),
     barcode: str = Path(..., title="Barcode", description="Slitmask barcode"),
-    filename: str = Form(
-        ...,
-        title="Filename",
-        description="The XML filename to use.",
-    ),
     using_boxes_for_refstars: bool = Form(
         True,
         title="Cut boxes for reference stars",
@@ -771,11 +765,12 @@ async def generate_slitmask_gcode(
     ),
     user: User = Depends(get_current_user),
 ):
-    settings = get_settings()
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)
         proposal_service = services.ProposalService(unit_of_work.connection)
+        instrument_service = services.instrument_service(unit_of_work.connection)
+        filename = instrument_service.get_rss_mask_filename(barcode)
         xml_file = (
             proposal_service.get_proposal_attachments_dir(proposal_code) / filename
         )
@@ -787,23 +782,18 @@ async def generate_slitmask_gcode(
 
         tmp_file = tempfile.mktemp(suffix=".nc")
 
-        cmd = [
-            settings.mapping_tool_java_command,
-            "-jar",
-            settings.jar_path,
-            f"--slow-cutting-power={slow_cutting_power}",
-            f"--xml={xml_file}",
-            f"--gcode={tmp_file}",
-            f"--barcode={barcode}",
-        ]
-        if using_boxes_for_refstars:
-            cmd.extend(
-                ["--boxes-for-refstars", "--refstar-boxsize", str(refstar_boxsize)]
-            )
+        instrument_service.generate_slitmask_gcode(
+            barcode=barcode,
+            xml_file=xml_file,
+            tmp_file=tmp_file,
+            using_boxes_for_refstars=using_boxes_for_refstars,
+            refstar_boxsize=refstar_boxsize,
+            slow_cutting_power=slow_cutting_power,
+        )
 
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError as e:
-            raise HTTPException(status_code=500, detail=f"GCode generation failed: {e}")
-
-        return FileResponse(tmp_file, filename=f"{barcode}.nc", media_type="text/plain")
+        return FileResponse(
+            tmp_file,
+            filename=f"{barcode}.nc",
+            media_type="text/plain",
+            background=BackgroundTask(remove_file, tmp_file),
+        )

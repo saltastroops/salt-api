@@ -119,10 +119,10 @@ class Settings(BaseSettings):
     mapping_tool_ephemeris_url: HttpUrl
 
     # Java command
-    mapping_tool_java_command: str
+    java_command: str
 
     # Path to the xml_to_gcode.jar file
-    jar_path: str
+    xml_to_gcode_jar_path: str
 
     # Python interpreter
     mapping_tool_python_interpreter: str

@@ -1,7 +1,12 @@
 from typing import Any, Dict, List
+from pathlib import Path
+from fastapi import HTTPException
+import subprocess
+
 
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.web.schema.rss import RssMaskType
+from saltapi.settings import get_settings
 
 
 class InstrumentService:
@@ -39,3 +44,41 @@ class InstrumentService:
     ) -> List[Dict[str, Any]]:
         """The list of the RSS slit masks."""
         return self.instrument_repository.get_rss_slit_masks(exclude_mask_types)
+
+    def get_rss_mask_filename(self, barcode: str) -> str:
+        """Get the filename for a given MOS mask barcode."""
+        return self.instrument_repository.get_xml_filename_by_barcode(barcode)
+
+    def generate_slitmask_gcode(
+        self,
+        barcode: str,
+        xml_file: Path,
+        tmp_file: Path,
+        using_boxes_for_refstars: bool,
+        refstar_boxsize: int,
+        slow_cutting_power: float,
+    ) -> Path:
+        """Generate GCode for a slit mask and return the output file path."""
+
+        settings = get_settings()
+
+        cmd = [
+            settings.java_command,
+            "-jar",
+            settings.xml_to_gcode_jar_path,
+            f"--slow-cutting-power={slow_cutting_power}",
+            f"--xml={xml_file}",
+            f"--gcode={tmp_file}",
+            f"--barcode={barcode}",
+        ]
+        if using_boxes_for_refstars:
+            cmd.extend(
+                ["--boxes-for-refstars", "--refstar-boxsize", str(refstar_boxsize)]
+            )
+
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError:
+            raise HTTPException(status_code=500, detail="GCode generation failed")
+
+        return tmp_file

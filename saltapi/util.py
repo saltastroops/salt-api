@@ -1,5 +1,7 @@
 """Utility functions."""
 import inspect
+from pathlib import Path
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, NamedTuple, Optional, Type, cast
 
@@ -341,3 +343,11 @@ def validate_user(user: User) -> None:
             f" {get_settings().frontend_uri}/request-verification-link to verify your"
             " account."
         )
+
+
+def remove_file(path: Path) -> None:
+    """Deletes a file."""
+    try:
+        path.unlink(missing_ok=True)
+    except Exception as e:
+        logging.error(f"Failed to remove file {path}: {e}")

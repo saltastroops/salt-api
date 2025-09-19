@@ -769,13 +769,12 @@ async def generate_slitmask_gcode(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)
         instrument_service = services.instrument_service(unit_of_work.connection)
-        xml_file = instrument_service.get_rss_mask_xml_file(barcode, proposal_code)
 
         tmp_file = tempfile.mktemp(suffix=".nc")
 
         instrument_service.generate_slitmask_gcode(
             barcode=barcode,
-            xml_file=xml_file,
+            proposal_code=proposal_code,
             tmp_file=tmp_file,
             using_boxes_for_refstars=using_boxes_for_refstars,
             refstar_boxsize=refstar_boxsize,

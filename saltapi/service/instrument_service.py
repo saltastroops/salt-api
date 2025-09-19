@@ -60,7 +60,7 @@ class InstrumentService:
     def generate_slitmask_gcode(
         self,
         barcode: str,
-        xml_file: Path,
+        proposal_code,
         tmp_file: Path,
         using_boxes_for_refstars: bool,
         refstar_boxsize: int,
@@ -68,6 +68,7 @@ class InstrumentService:
     ) -> Path:
         """Generate GCode for a slit mask and return the output file path."""
 
+        xml_file = self.get_rss_mask_xml_file(barcode, proposal_code)
         settings = get_settings()
 
         cmd = [

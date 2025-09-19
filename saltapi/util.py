@@ -345,7 +345,7 @@ def validate_user(user: User) -> None:
         )
 
 
-def remove_file(path, missing_ok: bool = True) -> None:
+def remove_file(path: Path | str, missing_ok: bool = True) -> None:
     """Delete a file."""
     path = Path(path)
     try:

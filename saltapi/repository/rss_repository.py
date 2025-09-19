@@ -702,3 +702,92 @@ FROM RssMask RM
                 },
             )
         ]
+
+    def _get_needed_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        stmt = text("""
+SELECT
+    COUNT(*) AS number_of_blocks,
+    Barcode AS barcode,
+    RssFilterSlot AS filter_slot,
+    GROUP_CONCAT(DISTINCT(Proposal_Code)) AS proposal_code
+FROM Proposal P
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S         ON S.Semester_Id = P.Semester_Id
+    JOIN Block B            ON B.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Pointing Po        ON Po.Block_Id = B.Block_Id
+    JOIN Observation O      ON O.Pointing_Id = Po.Pointing_Id
+    JOIN TelescopeConfigObsConfig TCO ON TCO.Pointing_Id = Po.Pointing_Id
+    JOIN ObsConfig OC       ON TCO.PlannedObsConfig_Id = OC.ObsConfig_Id
+    JOIN RssPatternDetail RPD ON RPD.RssPattern_Id = OC.RssPattern_Id
+    JOIN Rss R              ON R.Rss_Id = RPD.Rss_Id
+    JOIN RssConfig RC       ON R.RssConfig_Id = RC.RssConfig_Id
+    JOIN RssFilter RF       ON RC.RssFilter_Id = RF.RssFilter_Id
+    LEFT JOIN RssCurrentFilters RCF ON RF.RssFilter_Id = RCF.RssFilter_Id
+WHERE BlockStatus_Id IN (1, 2)
+    AND NDone < NVisits
+    AND CONCAT(S.`Year`, '-', S.Semester) IN :semesters
+    AND Barcode like 'pi%%'
+GROUP BY RF.RssFilter_Id
+ORDER BY RF.RssFilter_Id;
+                    """)
+        result = self.connection.execute(stmt, {"semesters": semesters})
+        needed_filters = []
+        for row in result:
+            needed_filters.append(
+                {
+                    "is_needed": True,
+                    "barcode": row.barcode,
+                    "in_magazine": True if row.filter_slot else False,
+                    "number_of_blocks": row.number_of_blocks,
+                    "proposals": row.proposal_code.split(",")
+                }
+            )
+        return needed_filters
+
+    def _get_unneeded_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        excluded_barcodes = [ row["barcode"] for row in self._get_needed_filters(semesters)]
+        stmt = text("""
+SELECT
+    COUNT(DISTINCT(B.Block_Id))   AS number_of_blocks,
+    Barcode                     AS barcode,
+    RssFilterSlot               AS filter_slot,
+    GROUP_CONCAT(DISTINCT(Proposal_Code)) AS proposal_code
+FROM Block B
+    JOIN Proposal P         ON B.ProposalCode_Id = P.ProposalCode_Id
+    JOIN Semester S         ON S.Semester_Id = P.Semester_Id
+    JOIN ProposalCode PC    ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Pointing Po        ON B.Block_Id = Po.Block_Id
+    JOIN Observation O      ON Po.Pointing_Id = O.Pointing_Id
+    JOIN TelescopeConfigObsConfig TCO ON TCO.Pointing_Id =  Po.Pointing_Id
+    JOIN ObsConfig  OC      ON TCO.PlannedObsConfig_Id = OC.ObsConfig_Id
+    JOIN RssPatternDetail RPD ON RPD.RssPattern_Id = OC.RssPattern_Id
+    JOIN Rss R              ON RPD.Rss_Id = R.Rss_Id
+    JOIN RssConfig RC       ON R.RssConfig_Id = RC.RssConfig_Id
+    JOIN RssFilter RF       ON RC.RssFilter_Id = RF.RssFilter_Id
+    JOIN RssCurrentFilters RCF ON RF.RssFilter_Id = RCF.RssFilter_Id
+WHERE Barcode NOT like 'pc%%'
+    AND Barcode NOT IN :excluded_barcodes
+    AND CONCAT(S.`Year`, '-', S.Semester) IN :semesters
+GROUP BY RF.RssFilter_Id;
+                    """)
+        result = self.connection.execute(stmt, {
+            "semesters": semesters,
+            "excluded_barcodes": excluded_barcodes
+        })
+        unneeded_filters = []
+        for row in result:
+            unneeded_filters.append(
+                {
+                    "is_needed": False,
+                    "barcode": row.barcode,
+                    "in_magazine": True if row.filter_slot else False,
+                    "number_of_blocks": row.number_of_blocks,
+                    "proposals": row.proposal_code.split(",")
+                }
+            )
+        return unneeded_filters
+
+    def get_filters_details(self, semesters: List[str]) -> list[Dict[str, Any]]:
+        needed_filters = self._get_needed_filters(semesters)
+        unneeded_filters = self._get_unneeded_filters(semesters)
+        return  needed_filters + unneeded_filters

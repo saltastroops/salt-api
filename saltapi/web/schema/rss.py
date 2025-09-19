@@ -469,3 +469,25 @@ class UpdateMosMaskMetadata(BaseModel):
 
 class MosMaskMetadata(UpdateMosMaskMetadata):
     barcode: str = Field(..., title="Barcode", description="The slit mask barcode")
+
+
+class Filter(BaseModel):
+    """Filter item."""
+
+    barcode: str = Field(..., title="Filter name", description="The filter name.")
+    is_needed: bool = Field(
+        ..., title="Is filter needed",
+        description="Is there any block that still need to use this filter."
+    )
+    in_magazine: bool = Field(
+        ..., title="Is filter in the magazine",
+        description="Is filter currently installed in the magazine."
+    )
+    number_of_blocks: int = Field(
+        ..., title="Number blocks using this filter.",
+        description="The number blocks using this filter."
+    )
+    proposals: List[str] = Field(
+        ..., title="Proposal using this filter",
+        description="The Proposal codes using this filter."
+    )

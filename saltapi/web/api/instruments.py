@@ -13,6 +13,7 @@ from saltapi.web.schema.rss import (
     RssMaskType,
     UpdateMosMaskMetadata,
     RssMask,
+    Filter,
 )
 
 router = APIRouter(tags=["Instrument"])
@@ -164,3 +165,17 @@ def get_rss_slit_masks(
 
         instrument_service = services.instrument_service(unit_of_work.connection)
         return instrument_service.get_rss_slit_masks(exclude_mask_types)
+
+
+@router.get("/rss-filters-detatils", summary="Get the RSS filters details.", response_model=List[Filter])
+def get_rss_filters_details(
+        semesters: List[Semester] = Query(
+            ...,
+            alias="semester",
+            title="Semesters.",
+            description="The semesters of which you are checking for filters",
+        ),
+) -> List[Dict[str, Any]]:
+    with UnitOfWork() as unit_of_work:
+        filter_service = services.instrument_service(unit_of_work.connection)
+        return filter_service.get_filters_details(semesters)

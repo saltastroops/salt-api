@@ -703,7 +703,7 @@ FROM RssMask RM
             )
         ]
 
-    def _get_needed_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
+    def _get_required_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
         stmt = text("""
 SELECT
     COUNT(*) AS number_of_blocks,
@@ -731,9 +731,9 @@ GROUP BY RF.RssFilter_Id
 ORDER BY RF.RssFilter_Id;
                     """)
         result = self.connection.execute(stmt, {"semesters": semesters})
-        needed_filters = []
+        required_filters = []
         for row in result:
-            needed_filters.append(
+            required_filters.append(
                 {
                     "is_needed": True,
                     "barcode": row.barcode,
@@ -742,10 +742,10 @@ ORDER BY RF.RssFilter_Id;
                     "proposals": row.proposal_code.split(",")
                 }
             )
-        return needed_filters
+        return required_filters
 
-    def _get_unneeded_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
-        excluded_barcodes = [ row["barcode"] for row in self._get_needed_filters(semesters)]
+    def _get_non_required_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        excluded_barcodes = [row["barcode"] for row in self._get_required_filters(semesters)]
         stmt = text("""
 SELECT
     COUNT(DISTINCT(B.Block_Id))   AS number_of_blocks,
@@ -774,9 +774,9 @@ GROUP BY RF.RssFilter_Id;
             "semesters": semesters,
             "excluded_barcodes": excluded_barcodes
         })
-        unneeded_filters = []
+        none_required_filters = []
         for row in result:
-            unneeded_filters.append(
+            none_required_filters.append(
                 {
                     "is_needed": False,
                     "barcode": row.barcode,
@@ -785,9 +785,9 @@ GROUP BY RF.RssFilter_Id;
                     "proposals": row.proposal_code.split(",")
                 }
             )
-        return unneeded_filters
+        return none_required_filters
 
-    def get_filters_details(self, semesters: List[str]) -> list[Dict[str, Any]]:
-        needed_filters = self._get_needed_filters(semesters)
-        unneeded_filters = self._get_unneeded_filters(semesters)
-        return  needed_filters + unneeded_filters
+    def get_filter_details(self, semesters: List[str]) -> list[Dict[str, Any]]:
+        required_filters = self._get_required_filters(semesters)
+        non_required_filters = self._get_non_required_filters(semesters)
+        return  required_filters + non_required_filters

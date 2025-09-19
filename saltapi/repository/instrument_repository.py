@@ -67,5 +67,5 @@ class InstrumentRepository:
     ) -> List[Dict[str, Any]]:
         return self.rss_repository.get_rss_slit_mask(exclude_mask_types)
 
-    def get_filters_details(self, semesters: List[str]) -> List[Dict[str, Any]]:
-        return self.rss_repository.get_filters_details(semesters)
+    def get_filter_details(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        return self.rss_repository.get_filter_details(semesters)

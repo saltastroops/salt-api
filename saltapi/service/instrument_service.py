@@ -40,5 +40,5 @@ class InstrumentService:
         """The list of the RSS slit masks."""
         return self.instrument_repository.get_rss_slit_masks(exclude_mask_types)
 
-    def get_filters_details(self, semesters: List[str]) -> List[Dict[str, Any]]:
-        return self.instrument_repository.get_filters_details(semesters)
+    def get_filter_details(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        return self.instrument_repository.get_filter_details(semesters)

@@ -476,12 +476,12 @@ class Filter(BaseModel):
 
     barcode: str = Field(..., title="Filter name", description="The filter name.")
     is_needed: bool = Field(
-        ..., title="Is filter needed",
-        description="Is there any block that still need to use this filter."
+        ..., title="Is filter needed?",
+        description="Is there any block that still needs to use this filter?"
     )
     is_in_magazine: bool = Field(
-        ..., title="Is filter in the magazine",
-        description="Is filter currently installed in the magazine."
+        ..., title="Is filter in the magazine?",
+        description="Is filter currently installed in the magazine?"
     )
     number_of_blocks: int = Field(
         ..., title="Number blocks using this filter.",

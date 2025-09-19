@@ -167,15 +167,15 @@ def get_rss_slit_masks(
         return instrument_service.get_rss_slit_masks(exclude_mask_types)
 
 
-@router.get("/rss-filters-details", summary="Get the RSS filters details.", response_model=List[Filter])
-def get_rss_filters_details(
+@router.get("/rss/filters-details", summary="Get the RSS filters details.", response_model=List[Filter])
+def get_rss_filter_details(
         semesters: List[Semester] = Query(
             ...,
             alias="semester",
             title="Semesters.",
-            description="The semesters of which you are checking for filters",
+            description="The semesters for which you are checking for filters",
         ),
 ) -> List[Dict[str, Any]]:
     with UnitOfWork() as unit_of_work:
         filter_service = services.instrument_service(unit_of_work.connection)
-        return filter_service.get_filters_details(semesters)
+        return filter_service.get_filter_details(semesters)

@@ -1,8 +1,8 @@
 """Utility functions."""
 import inspect
-from pathlib import Path
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Type, cast
 
 import pytz
@@ -345,9 +345,10 @@ def validate_user(user: User) -> None:
         )
 
 
-def remove_file(path: Path) -> None:
-    """Deletes a file."""
+def remove_file(path, missing_ok: bool = True) -> None:
+    """Delete a file."""
+    path = Path(path)
     try:
-        path.unlink(missing_ok=True)
+        path.unlink(missing_ok=missing_ok)
     except Exception as e:
         logging.error(f"Failed to remove file {path}: {e}")

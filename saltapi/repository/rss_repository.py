@@ -723,4 +723,4 @@ FROM RssMask RM
         if not result or not result["xml_path"]:
             raise NotFoundError(f"No XML path found for barcode {barcode}")
 
-        return result["xml_path"].split("/")[-1]
+        return result["xml_path"]

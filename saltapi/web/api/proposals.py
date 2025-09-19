@@ -26,7 +26,7 @@ from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
 from saltapi.service.proposal import ProposalStatus as _ProposalStatus
 from saltapi.service.user import LiaisonAstronomer, User
-from saltapi.util import semester_start, remove_file
+from saltapi.util import remove_file, semester_start
 from saltapi.web import services
 from saltapi.web.schema.common import Message, ProposalCode, Semester
 from saltapi.web.schema.p1_proposal import P1Proposal
@@ -768,17 +768,8 @@ async def generate_slitmask_gcode(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_view_proposal(user, proposal_code)
-        proposal_service = services.ProposalService(unit_of_work.connection)
         instrument_service = services.instrument_service(unit_of_work.connection)
-        filename = instrument_service.get_rss_mask_filename(barcode)
-        xml_file = (
-            proposal_service.get_proposal_attachments_dir(proposal_code) / filename
-        )
-
-        if not xml_file.exists():
-            raise HTTPException(
-                status_code=404, detail=f"Slit mask XML not found: {filename}"
-            )
+        xml_file = instrument_service.get_rss_mask_xml_file(barcode, proposal_code)
 
         tmp_file = tempfile.mktemp(suffix=".nc")
 

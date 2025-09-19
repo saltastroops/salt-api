@@ -479,7 +479,7 @@ class Filter(BaseModel):
         ..., title="Is filter needed",
         description="Is there any block that still need to use this filter."
     )
-    in_magazine: bool = Field(
+    is_in_magazine: bool = Field(
         ..., title="Is filter in the magazine",
         description="Is filter currently installed in the magazine."
     )

@@ -1,12 +1,12 @@
-from typing import Any, Dict, List
-from pathlib import Path
-from fastapi import HTTPException
 import subprocess
+from pathlib import Path
+from typing import Any, Dict, List
 
+from fastapi import HTTPException
 
 from saltapi.repository.instrument_repository import InstrumentRepository
-from saltapi.web.schema.rss import RssMaskType
 from saltapi.settings import get_settings
+from saltapi.web.schema.rss import RssMaskType
 
 
 class InstrumentService:
@@ -45,9 +45,17 @@ class InstrumentService:
         """The list of the RSS slit masks."""
         return self.instrument_repository.get_rss_slit_masks(exclude_mask_types)
 
-    def get_rss_mask_filename(self, barcode: str) -> str:
-        """Get the filename for a given MOS mask barcode."""
-        return self.instrument_repository.get_xml_filename_by_barcode(barcode)
+    def get_rss_mask_xml_file(self, barcode: str, proposal_code) -> str:
+        """Get the full path of an xml for a given MOS mask barcode."""
+        xml_path_str = self.instrument_repository.get_xml_filename_by_barcode(barcode)
+        xml_file = get_settings().proposals_dir / proposal_code / xml_path_str
+
+        if not xml_file.exists():
+            raise HTTPException(
+                status_code=404, detail=f"Slit mask XML not found: {xml_file}"
+            )
+
+        return xml_file
 
     def generate_slitmask_gcode(
         self,

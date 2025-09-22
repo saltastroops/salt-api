@@ -45,7 +45,7 @@ class InstrumentService:
         """The list of the RSS slit masks."""
         return self.instrument_repository.get_rss_slit_masks(exclude_mask_types)
 
-    def get_rss_mask_xml_file(self, barcode: str, proposal_code) -> str:
+    def get_rss_mask_xml_file(self, barcode: str, proposal_code: str) -> Path:
         """Get the full path of an xml for a given MOS mask barcode."""
         xml_path_str = self.instrument_repository.get_xml_filename_by_barcode(barcode)
         xml_file = get_settings().proposals_dir / proposal_code / xml_path_str
@@ -60,7 +60,7 @@ class InstrumentService:
     def generate_slitmask_gcode(
         self,
         barcode: str,
-        proposal_code,
+        proposal_code: str,
         tmp_file: Path,
         using_boxes_for_refstars: bool,
         refstar_boxsize: int,

@@ -713,7 +713,7 @@ SELECT
 FROM Proposal P
     JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S         ON S.Semester_Id = P.Semester_Id
-    JOIN Block B            ON B.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Block B            ON B.Proposal_Id = P.Proposal_Id
     JOIN Pointing Po        ON Po.Block_Id = B.Block_Id
     JOIN Observation O      ON O.Pointing_Id = Po.Pointing_Id
     JOIN TelescopeConfigObsConfig TCO ON TCO.Pointing_Id = Po.Pointing_Id
@@ -753,7 +753,7 @@ SELECT
     RssFilterSlot               AS filter_slot,
     GROUP_CONCAT(DISTINCT(Proposal_Code)) AS proposal_code
 FROM Block B
-    JOIN Proposal P         ON B.ProposalCode_Id = P.ProposalCode_Id
+    JOIN Proposal P         ON B.Proposal_Id = P.Proposal_Id
     JOIN Semester S         ON S.Semester_Id = P.Semester_Id
     JOIN ProposalCode PC    ON P.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Pointing Po        ON B.Block_Id = Po.Block_Id

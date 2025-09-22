@@ -6,7 +6,7 @@ import tempfile
 import threading
 import zipfile
 from datetime import datetime
-from typing import Any, Optional, cast, Dict
+from typing import Any, Dict, Optional, cast
 
 from defusedxml.ElementTree import fromstring
 from fastapi import UploadFile
@@ -230,7 +230,7 @@ class SubmissionService:
         log_name = SubmissionService._mapping_log_name(proposal_code)
         sentry_dsn = f"-sentryDSN {settings.sentry_dsn}" if settings.sentry_dsn else ""
         command = f"""
-        {settings.mapping_tool_java_command} -Xms85m -Xmx1024m
+        {settings.java_command} -Xms85m -Xmx1024m
              -jar {settings.mapping_tool_dir}/MappingService.jar
              -submissionIdentifier {submission_identifier}
              -log {settings.mapping_tool_log_dir}/{log_name}

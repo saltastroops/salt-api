@@ -746,6 +746,8 @@ ORDER BY RF.RssFilter_Id;
 
     def _get_non_required_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
         excluded_barcodes = [row["barcode"] for row in self._get_required_filters(semesters)]
+        if not excluded_barcodes:
+            excluded_barcodes = ['__NO_BARCODE_TO_EXCLUDE__']
         stmt = text("""
 SELECT
     COUNT(DISTINCT(B.Block_Id))   AS number_of_blocks,

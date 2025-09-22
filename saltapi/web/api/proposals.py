@@ -742,6 +742,7 @@ async def serve_attachment(
 @router.post(
     "/{proposal_code}/slitmasks/{barcode}/gcode",
     summary="Generate GCode for a slit mask",
+    response_class=FileResponse,
 )
 async def generate_slitmask_gcode(
     proposal_code: str = Path(

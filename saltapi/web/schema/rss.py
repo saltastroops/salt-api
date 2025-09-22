@@ -483,9 +483,9 @@ class Filter(BaseModel):
         ..., title="Is filter in the magazine?",
         description="Is filter currently installed in the magazine?"
     )
-    number_of_blocks: int = Field(
-        ..., title="Number blocks using this filter.",
-        description="The number blocks using this filter."
+    number_of_incomplete_blocks: int = Field(
+        ..., title="Number of incomplete blocks.",
+        description="The number of incomplete blocks that are still using this filter."
     )
     proposals: List[str] = Field(
         ..., title="Proposal using this filter",

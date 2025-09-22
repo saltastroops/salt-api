@@ -738,7 +738,7 @@ ORDER BY RF.RssFilter_Id;
                     "is_needed": True,
                     "barcode": row.barcode,
                     "is_in_magazine": True if row.filter_slot else False,
-                    "number_of_blocks": row.number_of_blocks,
+                    "number_of_incomplete_blocks": row.number_of_blocks,
                     "proposals": row.proposal_code.split(",")
                 }
             )
@@ -783,7 +783,7 @@ GROUP BY RF.RssFilter_Id;
                     "is_needed": False,
                     "barcode": row.barcode,
                     "is_in_magazine": True if row.filter_slot else False,
-                    "number_of_blocks": row.number_of_blocks,
+                    "number_of_incomplete_blocks": 0,
                     "proposals": row.proposal_code.split(",")
                 }
             )

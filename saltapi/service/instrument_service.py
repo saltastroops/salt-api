@@ -1,6 +1,11 @@
+import subprocess
+from pathlib import Path
 from typing import Any, Dict, List
 
+from fastapi import HTTPException
+
 from saltapi.repository.instrument_repository import InstrumentRepository
+from saltapi.settings import get_settings
 from saltapi.web.schema.rss import RssMaskType
 
 
@@ -42,3 +47,50 @@ class InstrumentService:
 
     def get_filter_details(self, semesters: List[str]) -> List[Dict[str, Any]]:
         return self.instrument_repository.get_filter_details(semesters)
+
+    def get_rss_mask_xml_file(self, barcode: str, proposal_code: str) -> Path:
+        """Get the full path of an xml for a given MOS mask barcode."""
+        xml_path_str = self.instrument_repository.get_xml_filename_by_barcode(barcode)
+        xml_file = get_settings().proposals_dir / proposal_code / xml_path_str
+
+        if not xml_file.exists():
+            raise HTTPException(
+                status_code=404, detail=f"Slit mask XML not found: {xml_file}"
+            )
+
+        return xml_file
+
+    def generate_slitmask_gcode(
+        self,
+        barcode: str,
+        proposal_code: str,
+        tmp_file: Path,
+        using_boxes_for_refstars: bool,
+        refstar_boxsize: int,
+        slow_cutting_power: float,
+    ) -> Path:
+        """Generate GCode for a slit mask and return the output file path."""
+
+        xml_file = self.get_rss_mask_xml_file(barcode, proposal_code)
+        settings = get_settings()
+
+        cmd = [
+            settings.java_command,
+            "-jar",
+            settings.xml_to_gcode_jar_path,
+            f"--slow-cutting-power={slow_cutting_power}",
+            f"--xml={xml_file}",
+            f"--gcode={tmp_file}",
+            f"--barcode={barcode}",
+        ]
+        if using_boxes_for_refstars:
+            cmd.extend(
+                ["--boxes-for-refstars", "--refstar-boxsize", str(refstar_boxsize)]
+            )
+
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError:
+            raise HTTPException(status_code=500, detail="GCode generation failed")
+
+        return tmp_file

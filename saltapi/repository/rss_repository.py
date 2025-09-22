@@ -776,9 +776,9 @@ GROUP BY RF.RssFilter_Id;
             "semesters": semesters,
             "excluded_barcodes": excluded_barcodes
         })
-        none_required_filters = []
+        non_required_filters = []
         for row in result:
-            none_required_filters.append(
+            non_required_filters.append(
                 {
                     "is_needed": False,
                     "barcode": row.barcode,
@@ -787,7 +787,7 @@ GROUP BY RF.RssFilter_Id;
                     "proposals": row.proposal_code.split(",")
                 }
             )
-        return none_required_filters
+        return non_required_filters
 
     def get_filter_details(self, semesters: List[str]) -> list[Dict[str, Any]]:
         required_filters = self._get_required_filters(semesters)

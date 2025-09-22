@@ -167,7 +167,7 @@ def get_rss_slit_masks(
         return instrument_service.get_rss_slit_masks(exclude_mask_types)
 
 
-@router.get("/rss/filters-details", summary="Get the RSS filters details.", response_model=List[Filter])
+@router.get("/rss/filter-details", summary="Get the RSS filter details.", response_model=List[Filter])
 def get_rss_filter_details(
         semesters: List[Semester] = Query(
             ...,

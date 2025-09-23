@@ -412,7 +412,7 @@ class MosBlock(BaseModel):
     )
     block_status: str = Field(..., title="Block status", description="The block status")
     block_name: str = Field(..., title="Block name", description="The block name")
-    block_id: int = Field(..., title="Block Id", description="The block Id")
+    block_id: int = Field(..., title="Block id", description="The block id")
     priority: int = Field(..., title="Block priority", description="The block priority")
     n_visits: int = Field(
         ..., title="Number of visits", description="The number of visits"

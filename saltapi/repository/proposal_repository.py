@@ -608,7 +608,7 @@ WHERE PC.Proposal_Code = :proposal_code
             "total_requested_time": row.total_requested_time,
             "proprietary_period": row.proprietary_period,
             "is_time_restricted": row.is_time_restricted != 0,
-            "is_priority4": row.is_p4 != 0,
+            "is_priority_4": row.is_p4 != 0,
             "is_self_activatable": row.self_activatable != 0,
             "target_of_opportunity_reason": row.too_reason,
         }

@@ -26,7 +26,7 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
         title="Are there restrictions for the observing times?",
         description="Are there restrictions for the observing times?",
     )
-    is_priority4: bool = Field(
+    is_priority_4: bool = Field(
         ...,
         title="Is the proposal a priority 4 proposal?",
         description="Is the proposal only requesting priority 4 time?",

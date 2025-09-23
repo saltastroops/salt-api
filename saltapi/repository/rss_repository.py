@@ -703,6 +703,97 @@ FROM RssMask RM
             )
         ]
 
+    def _get_required_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        stmt = text("""
+SELECT
+    COUNT(*) AS number_of_blocks,
+    Barcode AS barcode,
+    RssFilterSlot AS filter_slot,
+    GROUP_CONCAT(DISTINCT(Proposal_Code)) AS proposal_code
+FROM Proposal P
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S         ON S.Semester_Id = P.Semester_Id
+    JOIN Block B            ON B.Proposal_Id = P.Proposal_Id
+    JOIN Pointing Po        ON Po.Block_Id = B.Block_Id
+    JOIN Observation O      ON O.Pointing_Id = Po.Pointing_Id
+    JOIN TelescopeConfigObsConfig TCO ON TCO.Pointing_Id = Po.Pointing_Id
+    JOIN ObsConfig OC       ON TCO.PlannedObsConfig_Id = OC.ObsConfig_Id
+    JOIN RssPatternDetail RPD ON RPD.RssPattern_Id = OC.RssPattern_Id
+    JOIN Rss R              ON R.Rss_Id = RPD.Rss_Id
+    JOIN RssConfig RC       ON R.RssConfig_Id = RC.RssConfig_Id
+    JOIN RssFilter RF       ON RC.RssFilter_Id = RF.RssFilter_Id
+    LEFT JOIN RssCurrentFilters RCF ON RF.RssFilter_Id = RCF.RssFilter_Id
+WHERE BlockStatus_Id IN (1, 2)
+    AND NDone < NVisits
+    AND CONCAT(S.`Year`, '-', S.Semester) IN :semesters
+    AND Barcode like 'pi%%'
+GROUP BY RF.RssFilter_Id
+ORDER BY RF.RssFilter_Id;
+                    """)
+        result = self.connection.execute(stmt, {"semesters": semesters})
+        required_filters = []
+        for row in result:
+            required_filters.append(
+                {
+                    "is_needed": True,
+                    "barcode": row.barcode,
+                    "is_in_magazine": True if row.filter_slot else False,
+                    "number_of_incomplete_blocks": row.number_of_blocks,
+                    "proposals": row.proposal_code.split(",")
+                }
+            )
+        return required_filters
+
+    def _get_non_required_filters(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        excluded_barcodes = [row["barcode"] for row in self._get_required_filters(semesters)]
+        if not excluded_barcodes:
+            excluded_barcodes = ['__NO_BARCODE_TO_EXCLUDE__']
+        stmt = text("""
+SELECT
+    COUNT(DISTINCT(B.Block_Id))   AS number_of_blocks,
+    Barcode                     AS barcode,
+    RssFilterSlot               AS filter_slot,
+    GROUP_CONCAT(DISTINCT(Proposal_Code)) AS proposal_code
+FROM Block B
+    JOIN Proposal P         ON B.Proposal_Id = P.Proposal_Id
+    JOIN Semester S         ON S.Semester_Id = P.Semester_Id
+    JOIN ProposalCode PC    ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Pointing Po        ON B.Block_Id = Po.Block_Id
+    JOIN Observation O      ON Po.Pointing_Id = O.Pointing_Id
+    JOIN TelescopeConfigObsConfig TCO ON TCO.Pointing_Id =  Po.Pointing_Id
+    JOIN ObsConfig  OC      ON TCO.PlannedObsConfig_Id = OC.ObsConfig_Id
+    JOIN RssPatternDetail RPD ON RPD.RssPattern_Id = OC.RssPattern_Id
+    JOIN Rss R              ON RPD.Rss_Id = R.Rss_Id
+    JOIN RssConfig RC       ON R.RssConfig_Id = RC.RssConfig_Id
+    JOIN RssFilter RF       ON RC.RssFilter_Id = RF.RssFilter_Id
+    JOIN RssCurrentFilters RCF ON RF.RssFilter_Id = RCF.RssFilter_Id
+WHERE Barcode NOT like 'pc%%'
+    AND Barcode NOT IN :excluded_barcodes
+    AND CONCAT(S.`Year`, '-', S.Semester) IN :semesters
+GROUP BY RF.RssFilter_Id;
+                    """)
+        result = self.connection.execute(stmt, {
+            "semesters": semesters,
+            "excluded_barcodes": excluded_barcodes
+        })
+        non_required_filters = []
+        for row in result:
+            non_required_filters.append(
+                {
+                    "is_needed": False,
+                    "barcode": row.barcode,
+                    "is_in_magazine": True if row.filter_slot else False,
+                    "number_of_incomplete_blocks": 0,
+                    "proposals": row.proposal_code.split(",")
+                }
+            )
+        return non_required_filters
+
+    def get_filter_details(self, semesters: List[str]) -> list[Dict[str, Any]]:
+        required_filters = self._get_required_filters(semesters)
+        non_required_filters = self._get_non_required_filters(semesters)
+        return  required_filters + non_required_filters
+      
     def get_xml_filename_by_barcode(self, barcode: str) -> str:
         """
         Return the XML filename for an RSS MOS mask given its barcode.

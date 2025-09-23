@@ -45,6 +45,9 @@ class InstrumentService:
         """The list of the RSS slit masks."""
         return self.instrument_repository.get_rss_slit_masks(exclude_mask_types)
 
+    def get_filter_details(self, semesters: List[str]) -> List[Dict[str, Any]]:
+        return self.instrument_repository.get_filter_details(semesters)
+
     def get_rss_mask_xml_file(self, barcode: str, proposal_code: str) -> Path:
         """Get the full path of an xml for a given MOS mask barcode."""
         xml_path_str = self.instrument_repository.get_xml_filename_by_barcode(barcode)

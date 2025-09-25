@@ -92,19 +92,19 @@ class UpdateStatus(str, Enum):
 class ProprietaryPeriod(BaseModel):
     """Proprietary period."""
 
-    period: Optional[int] = Field(
+    period: int = Field(
         ...,
         title="Current proprietary period",
         description="Proprietary period in months.",
     )
-    maximum_period: Optional[int] = Field(
+    maximum_period:int = Field(
         ...,
         title="Maximum proprietary period, in months",
         description=(
             "Maximum proprietary period, in months for partner partners that have it."
         ),
     )
-    start_date: Optional[date] = Field(
+    start_date: date = Field(
         ...,
         title="Start date",
         description="Start date from which the proprietary period is counted.",

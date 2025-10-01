@@ -73,7 +73,7 @@ FROM PiptUser AS PU
                 }
             )
         if user:
-            return User(**user, roles=self.get_user_roles(user["username"]))
+            return User(**user, roles=self.get_user_roles(user["username"]), demographics=None)
         return None
 
     def get_by_username(self, username: str) -> Optional[User]:
@@ -290,7 +290,7 @@ WHERE Investigator_Id = :investigator_id
     def get_user_details(
         self,
         user_id: int,
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         """
         Returns the details of a user.
         """
@@ -331,16 +331,7 @@ WHERE US.PiptUser_Id = :user_id
                 "year_of_phd_completion": row["year_of_phd"],
             }
         except NoResultFound:
-            new_user_details = {
-                "email": user.email,
-                "given_name": user.given_name,
-                "family_name": user.family_name,
-                "legal_status": "Other",
-                "gender": None,
-                "race": None,
-                "has_phd": None,
-                "year_of_phd_completion": None,
-            }
+            new_user_details = None
 
         return new_user_details
 

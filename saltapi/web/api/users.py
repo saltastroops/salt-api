@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, Query
 from starlette import status
 
 from saltapi.exceptions import NotFoundError
@@ -25,6 +25,7 @@ from saltapi.web.schema.user import (
     UserListItem,
     UsernameEmail,
     UserUpdate,
+    UserStatistics,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -152,6 +153,7 @@ def get_user(
         title="User id",
         description="User id of the user making the request.",
     ),
+    include_demographics: bool = Query(False, description="Include user's demographics"),
     user: _User = Depends(get_current_user),
 ) -> _User:
     with UnitOfWork() as unit_of_work:
@@ -161,6 +163,11 @@ def get_user(
         user = user_service.get_user(user_id)
         if user is None:
             raise NotFoundError("Unknown user.")
+        if include_demographics:
+            user_details = user_service.get_user_details(user_id)
+            user.demographics = UserStatistics(**user_details)
+        else:
+            user.demographics = None
         return user
 
 

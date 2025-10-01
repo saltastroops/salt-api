@@ -588,16 +588,60 @@ WHERE PC.Proposal_Code = :proposal_code
             info["liaison_salt_astronomer"] = None
         return info
 
+    def _get_deadlines_and_submissions(self, proposal_code: str, semester: str) -> Dict[str, Any]:
+        # Adding 6 months to first submission date since all the proposal for a given semester needs to be submitted
+        # before the start of the next semester
+        stmt = text("""
+SELECT
+    P.SubmissionDate        AS submission_date,
+    P.Submission            AS submission_number,
+    SP.Deadline             AS deadline,
+    P.Current               AS current
+FROM Proposal P
+    JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN Semester S ON S.Semester_Id=P.Semester_Id
+    JOIN SemesterPhase SP ON SP.Semester_Id = S.Semester_Id
+WHERE P.Phase = 1
+    AND SP.Phase = 1
+    AND CONCAT(S.Year, '-', S.Semester) = :semester
+    AND PC.Proposal_Code = :proposal_code
+        """)
+        results = self.connection.execute(
+            stmt, {"proposal_code": proposal_code, "semester": semester}
+        )
+        submissions = [{
+            "submission_date": "2025-11-11",
+            "submission_number": 15,
+            "is_current": True
+        }]
+        deadline = None
+        for row in results:
+            deadline = row.deadline
+            submissions.append(
+                {
+                    "submission_date": row.submission_date,
+                    "submission_number": row.submission_number,
+                    "is_current": row.current
+                }
+            )
+        return {
+            "submission_deadline": deadline,
+            "submissions": submissions
+
+        }
+
     def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
         """
         Return general proposal information for a semester.
         """
         proposal_text = self._proposal_text(proposal_code, semester)
         general_info = self._proposal_general_info(proposal_code, semester)
+        submissions_deadline = self._get_deadlines_and_submissions(proposal_code, semester)
 
         return {
             **proposal_text,
             **general_info,
+            **submissions_deadline,
             "first_submission": self._first_submission_date(proposal_code),
             "submission_number": self._latest_submission(proposal_code),
             "semesters": self._semesters(proposal_code),

@@ -589,14 +589,11 @@ WHERE PC.Proposal_Code = :proposal_code
         return info
 
     def _get_deadlines_and_submissions(self, proposal_code: str, semester: str) -> Dict[str, Any]:
-        # Adding 6 months to first submission date since all the proposal for a given semester needs to be submitted
-        # before the start of the next semester
         stmt = text("""
 SELECT
     P.SubmissionDate        AS submission_date,
     P.Submission            AS submission_number,
-    SP.Deadline             AS deadline,
-    P.Current               AS current
+    SP.Deadline             AS deadline
 FROM Proposal P
     JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
     JOIN Semester S ON S.Semester_Id=P.Semester_Id
@@ -616,13 +613,12 @@ WHERE P.Phase = 1
             submissions.append(
                 {
                     "submission_date": row.submission_date,
-                    "submission_number": row.submission_number,
-                    "is_current": row.current
+                    "submission_number": row.submission_number
                 }
             )
         return {
-            "submission_deadline": deadline,
-            "submissions": submissions
+            "phase_1_submission_deadline": deadline,
+            "phase_1_submissions": submissions
 
         }
 

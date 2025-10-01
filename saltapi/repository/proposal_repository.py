@@ -609,11 +609,7 @@ WHERE P.Phase = 1
         results = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
-        submissions = [{
-            "submission_date": "2025-11-11",
-            "submission_number": 15,
-            "is_current": True
-        }]
+        submissions = []
         deadline = None
         for row in results:
             deadline = row.deadline

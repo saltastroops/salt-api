@@ -2,8 +2,6 @@
 
 # WARNING: This Dockerfile is not suitable for production use.
 
-version: "3"
-
 services:
   saltapi:
     build: .

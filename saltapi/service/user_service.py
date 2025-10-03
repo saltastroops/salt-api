@@ -101,7 +101,7 @@ SALT Team
             user.password_hash = "***"  # nosec
         return user
 
-    def get_user_details(self, user_id: int) -> Optional[Dict[str, Any]]:
+    def get_user_details(self, user_id: int) -> Dict[str, Any]:
         user = self.repository.get_user_details(user_id)
         return user
 

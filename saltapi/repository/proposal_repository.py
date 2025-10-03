@@ -2,7 +2,7 @@ import hashlib
 import pathlib
 import re
 from collections import defaultdict
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 from typing import Any, DefaultDict, Dict, List, Optional, cast
 
 import pytz
@@ -617,7 +617,10 @@ WHERE P.Phase = 1
                 }
             )
         return {
-            "phase_1_submission_deadline": deadline,
+            "phase_1_submission_deadline": datetime.combine(
+                    deadline,
+                    time(16, 0, 0, tzinfo=timezone.utc)
+                ),
             "phase_1_submissions": submissions
 
         }

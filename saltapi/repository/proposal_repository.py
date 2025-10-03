@@ -609,7 +609,10 @@ WHERE P.Phase = 1
         submissions = []
         deadline = None
         for row in results:
-            deadline = row.deadline
+            deadline = datetime.combine(
+                row.deadline,
+                time(16, 0, 0, tzinfo=timezone.utc)
+            ),
             submissions.append(
                 {
                     "submission_date": row.submission_date,
@@ -617,10 +620,7 @@ WHERE P.Phase = 1
                 }
             )
         return {
-            "phase_1_submission_deadline": datetime.combine(
-                    deadline,
-                    time(16, 0, 0, tzinfo=timezone.utc)
-                ),
+            "phase_1_submission_deadline": deadline,
             "phase_1_submissions": submissions
 
         }

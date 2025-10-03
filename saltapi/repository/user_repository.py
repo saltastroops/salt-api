@@ -644,7 +644,7 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         )
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
-    
+
     def get_all_roles(self, username: str) -> set[str]:
         stmt = text(
             """
@@ -730,7 +730,8 @@ WHERE Investigator_Id =
             raise NotFoundError(f"No such user id: {user_id}")
         except IntegrityError:
             raise ValidationError(
-                f"There are contact details with this email address and institute already."
+                f"There are contact details with this email address and institute"
+                f" already."
             )
 
     @staticmethod
@@ -1374,10 +1375,12 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         return [
             {
                 "to": "Gravitational Wave Notifications",
-                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(user_id)
+                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(
+                    user_id
+                ),
             },
             {
                 "to": "SALT News",
-                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id)
-            }
+                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id),
+            },
         ]

@@ -24,7 +24,6 @@ class Role(str, Enum):
     FABRY_PEROT_SCIENTIST = "Fabry-Perot Scientist"
 
 
-
 @dataclass()
 class ContactDetails:
     given_name: str

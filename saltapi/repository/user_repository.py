@@ -645,6 +645,20 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
 
+    def get_all_roles(self, username: str) -> set[str]:
+        stmt = text(
+            """
+            SELECT PS.PiptSetting_Name
+            FROM PiptUser PU
+                JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+                JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PU.Username = :username
+            AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return {row[0] for row in result.fetchall()}
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
@@ -716,7 +730,8 @@ WHERE Investigator_Id =
             raise NotFoundError(f"No such user id: {user_id}")
         except IntegrityError:
             raise ValidationError(
-                f"There are contact details with this email address and institute already."
+                f"There are contact details with this email address and institute"
+                f" already."
             )
 
     @staticmethod
@@ -780,6 +795,17 @@ WHERE Investigator_Id =
 
         if self.is_librarian(username):
             roles.append(Role.LIBRARIAN)
+
+        user_rights = self.get_all_roles(username)
+
+        if "RightEditNightLog" in user_rights:
+            roles.append(Role.EDIT_NIGHT_LOG)
+
+        if "RightViewNightLog" in user_rights:
+            roles.append(Role.VIEW_NIGHT_LOG)
+
+        if "RightFabryPerotScientist" in user_rights:
+            roles.append(Role.FABRY_PEROT_SCIENTIST)
 
         return roles
 
@@ -1207,6 +1233,12 @@ WHERE Email = :email
             return "RightMaskCutting"
         if role == Role.LIBRARIAN:
             return "RightLibrarian"
+        if role == Role.EDIT_NIGHT_LOG:
+            return "RightEditNightLog"
+        if role == Role.VIEW_NIGHT_LOG:
+            return "RightViewNightLog"
+        if role == Role.FABRY_PEROT_SCIENTIST:
+            return "RightFabryPerotScientist"
 
         raise ValidationError("Unknown user role: " + role)
 
@@ -1343,10 +1375,12 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         return [
             {
                 "to": "Gravitational Wave Notifications",
-                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(user_id)
+                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(
+                    user_id
+                ),
             },
             {
                 "to": "SALT News",
-                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id)
-            }
+                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id),
+            },
         ]

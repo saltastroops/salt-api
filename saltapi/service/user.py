@@ -50,6 +50,14 @@ class Institution:
     department: Optional[str]
     partner_code: str
 
+@dataclass()
+class UserStatistics:
+    legal_status: str
+    gender: Optional[str]
+    race: Optional[str]
+    has_phd: Optional[bool]
+    year_of_phd_completion: int
+
 
 @dataclass()
 class User:
@@ -63,6 +71,7 @@ class User:
     roles: List[Role]
     user_verified: bool
     active: bool
+    demographics: Optional[UserStatistics]
 
 
 @dataclass(frozen=True)

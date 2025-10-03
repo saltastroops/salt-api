@@ -19,6 +19,10 @@ class Role(str, Enum):
     PARTNER_AFFILIATED = "Partner Affiliated"
     LIBRARIAN = "Librarian"
     MASK_CUTTER = "Mask Cutter"
+    EDIT_NIGHT_LOG = "Edit Night Log"
+    VIEW_NIGHT_LOG = "View Night Log"
+    FABRY_PEROT_SCIENTIST = "Fabry-Perot Scientist"
+
 
 
 @dataclass()

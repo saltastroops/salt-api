@@ -25,7 +25,7 @@ from saltapi.web.schema.user import (
     UserListItem,
     UsernameEmail,
     UserUpdate,
-    UserStatistics,
+    UserDemographics,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -156,7 +156,7 @@ def get_user(
     include_demographics: bool = Query(
         default=False,
         title="User demographical details",
-        description="Include the users demographical details"
+        description="Include the user's demographical details"
     ),
     user: _User = Depends(get_current_user),
 ) -> _User:
@@ -170,7 +170,7 @@ def get_user(
         if include_demographics:
             user_details = user_service.get_user_details(user_id)
             if user_details["legal_status"]:
-                user.demographics = UserStatistics(**user_details)
+                user.demographics = UserDemographics(**user_details)
             else:
                 user.demographics = None
         return user

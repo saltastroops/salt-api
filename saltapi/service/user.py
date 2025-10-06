@@ -51,7 +51,7 @@ class Institution:
     partner_code: str
 
 @dataclass()
-class UserStatistics:
+class UserDemographics:
     legal_status: str
     gender: Optional[str]
     race: Optional[str]
@@ -71,11 +71,11 @@ class User:
     roles: List[Role]
     user_verified: bool
     active: bool
-    demographics: Optional[UserStatistics]
+    demographics: Optional[UserDemographics]
 
 
 @dataclass(frozen=True)
-class UserStatistics:
+class UserDemographics:
     legal_status: str
     gender: Optional[str]
     race: Optional[str]
@@ -84,7 +84,7 @@ class UserStatistics:
 
 
 @dataclass(frozen=True)
-class NewUserDetails(UserStatistics):
+class NewUserDetails(UserDemographics):
     given_name: str
     family_name: str
     email: str
@@ -94,7 +94,7 @@ class NewUserDetails(UserStatistics):
 
 
 @dataclass(frozen=True)
-class UserDetails(UserStatistics):
+class UserDetails(UserDemographics):
     given_name: str
     family_name: str
     email: str

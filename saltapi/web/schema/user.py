@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from saltapi.service.user import UserStatistics
+from saltapi.service.user import UserDemographics
 from saltapi.web.schema.common import ProposalCode
 from saltapi.web.schema.institution import UserInstitution
 
@@ -55,7 +55,7 @@ class User(FullName):
     affiliations: List[UserInstitution] = Field(
         ..., title="Affiliation", description="Affiliation of the user"
     )
-    demographics: Optional[UserStatistics] = Field(
+    demographics: Optional[UserDemographics] = Field(
         None,
         title="User Demographics",
         description="Information about user's legal status in South Africa"

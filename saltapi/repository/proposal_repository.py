@@ -612,7 +612,7 @@ WHERE P.Phase = 1
             deadline = datetime.combine(
                 row.deadline,
                 time(16, 0, 0, tzinfo=timezone.utc)
-            ),
+            )
             submissions.append(
                 {
                     "submission_date": row.submission_date,

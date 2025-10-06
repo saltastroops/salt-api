@@ -21,7 +21,7 @@ class Simulation(BaseModel):
 
 class Submission(BaseModel):
     submission_date: datetime = Field(
-        ..., title="Submission date and time", description="The date of proposal submission."
+        ..., title="Submission date and time", description="The date abd time of proposal submission."
     )
     submission_number: int = Field(
         ..., title="Submission number", description="The number of proposal submission."

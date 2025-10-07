@@ -260,3 +260,24 @@ SALT Team
 
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
+
+    def update_rights(self, user_id: int, rights: List[Dict[str, Any]]) -> None:
+        """
+        Update a user's rights.
+
+        rights: list of dicts like {"right": "Edit Night Log", "is_granted": True/False}
+        """
+        for right in rights:
+            right_name = right.get("right")
+            is_granted = right.get("is_granted")
+
+            if right_name is None or is_granted is None:
+                raise ValueError("Each right must have 'right' and 'is_granted' keys.")
+
+            self.repository.set_user_right(user_id, right_name, is_granted)
+
+    def get_rights(self, user_id: int) -> List[Dict[str, Any]]:
+        """
+        Get a user's current rights.
+        """
+        return self.repository.get_user_rights(user_id)

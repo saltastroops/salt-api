@@ -645,7 +645,7 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
 
-    def get_all_roles(self, username: str) -> set[str]:
+    def get_all_rights(self, username: str) -> set[str]:
         stmt = text(
             """
             SELECT PS.PiptSetting_Name
@@ -795,17 +795,6 @@ WHERE Investigator_Id =
 
         if self.is_librarian(username):
             roles.append(Role.LIBRARIAN)
-
-        user_rights = self.get_all_roles(username)
-
-        if "RightEditNightLog" in user_rights:
-            roles.append(Role.EDIT_NIGHT_LOG)
-
-        if "RightViewNightLog" in user_rights:
-            roles.append(Role.VIEW_NIGHT_LOG)
-
-        if "RightFabryPerotScientist" in user_rights:
-            roles.append(Role.FABRY_PEROT_SCIENTIST)
 
         return roles
 
@@ -1233,12 +1222,6 @@ WHERE Email = :email
             return "RightMaskCutting"
         if role == Role.LIBRARIAN:
             return "RightLibrarian"
-        if role == Role.EDIT_NIGHT_LOG:
-            return "RightEditNightLog"
-        if role == Role.VIEW_NIGHT_LOG:
-            return "RightViewNightLog"
-        if role == Role.FABRY_PEROT_SCIENTIST:
-            return "RightFabryPerotScientist"
 
         raise ValidationError("Unknown user role: " + role)
 
@@ -1384,3 +1367,45 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
                 "is_subscribed": self._is_user_subscribed_to_salt_news(user_id),
             },
         ]
+
+    def get_user_rights(self, user_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT PS.PiptSetting_Name
+            FROM PiptUserSetting PUS
+            JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PUS.PiptUser_Id = :user_id AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        current_rights = {row[0] for row in result.fetchall()}
+
+        rights_map = {
+            "RightEditNightLog": "Edit Night Log",
+            "Fabry-Perot Scientist": "Fabry-Perot Scientist",
+            "HomeWeatherInformation": "Home Weather Information",
+            "HomeNews": "Home News",
+            "RightMaskCutting": "Mask Cutting",
+            "HomeProposals": "Home Proposals",
+            "HomeNewsEntries": "Home News Entries",
+            "HomeProposalStatistics": "Proposal Statistics",
+        }
+
+        return [
+            {"right": display_name, "is_granted": db_name in current_rights}
+            for db_name, display_name in rights_map.items()
+        ]
+
+    def set_user_right(self, user_id: int, right_name: str, grant: bool) -> None:
+        stmt = text(
+            """
+            INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
+            SELECT :user_id,
+                (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_name),
+                1
+            ON DUPLICATE KEY UPDATE Value = :value;
+            """
+        )
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_name": right_name, "value": int(grant)}
+        )

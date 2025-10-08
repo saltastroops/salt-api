@@ -2,15 +2,15 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, cast, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
-from saltapi.service.user import Role, User
+from saltapi.service.user import Role, User, UserRight
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
@@ -1379,21 +1379,9 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         )
         result = self.connection.execute(stmt, {"user_id": user_id})
         current_rights = {row[0] for row in result.fetchall()}
-
-        rights_map = {
-            "RightEditNightLog": "Edit Night Log",
-            "Fabry-Perot Scientist": "Fabry-Perot Scientist",
-            "HomeWeatherInformation": "Home Weather Information",
-            "HomeNews": "Home News",
-            "RightMaskCutting": "Mask Cutting",
-            "HomeProposals": "Home Proposals",
-            "HomeNewsEntries": "Home News Entries",
-            "HomeProposalStatistics": "Proposal Statistics",
-        }
-
         return [
-            {"right": display_name, "is_granted": db_name in current_rights}
-            for db_name, display_name in rights_map.items()
+            {"right": right.display_name, "is_granted": right.value in current_rights}
+            for right in UserRight
         ]
 
     def set_user_right(self, user_id: int, right_name: str, grant: bool) -> None:

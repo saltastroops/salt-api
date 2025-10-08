@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from fastapi import APIRouter, Body, Depends, Path
 from starlette import status
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user, get_user_to_verify
 from saltapi.service.user import NewUserDetails as _NewUserDetails
@@ -24,6 +24,8 @@ from saltapi.web.schema.user import (
     UserContact,
     UserListItem,
     UsernameEmail,
+    UserRightResponse,
+    UserRightUpdateRequest,
     UserUpdate,
 )
 
@@ -488,12 +490,12 @@ def get_subscriptions(
 @router.get(
     "/{user_id}/rights/",
     summary="List a user's rights",
-    response_model=List[Dict[str, Any]],
+    response_model=List[UserRightUpdateRequest],
 )
 def get_rights(
     user_id: int = Path(..., title="User id", description="Id of the user."),
     user: _User = Depends(get_current_user),
-) -> List[Dict[str, Any]]:
+) -> List[UserRightUpdateRequest]:
     """
     List all rights for a given user.
     """
@@ -505,10 +507,14 @@ def get_rights(
         return user_service.get_rights(user_id)
 
 
-@router.patch("/{user_id}/rights/", summary="Update a user's rights")
+@router.patch(
+    "/{user_id}/rights/",
+    summary="Update a user's rights",
+    response_model=List[UserRightResponse],
+)
 def update_rights(
     user_id: int,
-    rights: List[Dict[str, Any]],
+    rights: List[UserRightUpdateRequest],
     user: _User = Depends(get_current_user),
 ):
     """
@@ -525,16 +531,7 @@ def update_rights(
         permission_service.check_permission_to_validate_user(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
 
-        for right in rights:
-            right_name = right.get("right")
-            is_granted = right.get("is_granted")
-
-            if right_name is None or is_granted is None:
-                raise ValidationError(
-                    "Each right must have 'right' and 'is_granted' keys."
-                )
-
-            user_service.repository.set_user_right(user_id, right_name, is_granted)
+        user_service.update_rights(user_id, [right.dict() for right in rights])
 
         unit_of_work.commit()
         return user_service.get_rights(user_id)

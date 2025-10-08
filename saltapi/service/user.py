@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 class Role(str, Enum):
@@ -94,3 +94,32 @@ class UserDetails(UserStatistics):
 @dataclass(frozen=True)
 class UserUpdate(UserDetails):
     password: Optional[str]
+
+
+class UserRight(str, Enum):
+    HOME_NEWS = "HomeNews"
+    HOME_PROPOSALS = "HomeProposals"
+    MASK_CUTTING = "RightMaskCutting"
+    HOME_NEWS_ENTRIES = "HomeNewsEntries"
+    EDIT_NIGHT_LOG = "RightEditNightLog"
+    VIEW_NIGHT_LOG = "RightViewNightLog"
+    HOME_WEATHER_INFORMATION = "HomeWeatherInformation"
+    HOME_PROPOSAL_STATS = "HomeProposalStatistics"
+    FABRY_PEROT_SCIENTIST = "RightFabryPerotScientist"
+
+    @property
+    def display_name(self) -> str:
+        return DISPLAY_NAMES[self]
+
+
+DISPLAY_NAMES: Dict[UserRight, str] = {
+    UserRight.HOME_NEWS: "Home News",
+    UserRight.HOME_PROPOSALS: "Home Proposals",
+    UserRight.MASK_CUTTING: "Mask Cutting",
+    UserRight.HOME_NEWS_ENTRIES: "Home News Entries",
+    UserRight.EDIT_NIGHT_LOG: "Edit Night Log",
+    UserRight.VIEW_NIGHT_LOG: "View Night Log",
+    UserRight.HOME_WEATHER_INFORMATION: "Home Weather Information",
+    UserRight.HOME_PROPOSAL_STATS: "Home Proposal Statistics",
+    UserRight.FABRY_PEROT_SCIENTIST: "Fabry-Perot Scientist",
+}

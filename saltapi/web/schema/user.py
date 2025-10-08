@@ -221,3 +221,29 @@ class Subscription(BaseModel):
         ..., title="Is subscribed", description="Whether the user is subscribed"
     )
 
+
+class UserRightUpdateRequest(BaseModel):
+    right: str = Field(
+        ...,
+        title="Right name",
+        description="The name of the user right to update (e.g. 'RightEditNightLog' or 'Edit Night Log')."
+    )
+    is_granted: bool = Field(
+        ...,
+        title="Grant or revoke",
+        description="Whether to grant (true) or revoke (false) the right."
+    )
+
+
+class UserRightResponse(BaseModel):
+    right: str = Field(
+        ...,
+        title="Right name (display)",
+        description="The display name of the user right (e.g. 'Edit Night Log')."
+    )
+    is_granted: bool = Field(
+        ...,
+        title="Granted",
+        description="Whether the user currently has this right (true) or not (false)."
+    )
+

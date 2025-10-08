@@ -518,12 +518,12 @@ def update_rights(
     user: _User = Depends(get_current_user),
 ):
     """
-    Update a user's rights. true rights will be granted; false revoked.
+    Update a user's rights. true rights will be granted, false revoked.
 
     Example request body:
     [
-        {"right": "RightEditNightLog", "is_granted": true},
-        {"right": "RightViewNightLog", "is_granted": false}
+        {"right": "Edit Night Log", "is_granted": true},
+        {"right": "View Night Log", "is_granted": false}
     ]
     """
     with UnitOfWork() as unit_of_work:

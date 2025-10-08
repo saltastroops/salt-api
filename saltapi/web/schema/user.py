@@ -222,28 +222,43 @@ class Subscription(BaseModel):
     )
 
 
+class UserRight(str, Enum):
+    HOME_NEWS = "Home News"
+    HOME_PROPOSALS = "Home Proposals"
+    MASK_CUTTING = "Mask Cutting"
+    HOME_NEWS_ENTRIES = "Home News Entries"
+    EDIT_NIGHT_LOG = "Edit Night Log"
+    VIEW_NIGHT_LOG = "View Night Log"
+    HOME_WEATHER_INFORMATION = "Home Weather Information"
+    HOME_PROPOSAL_STATS = "Home Proposal Statistics"
+    FABRY_PEROT_SCIENTIST = "Fabry-Perot Scientist"
+
+
 class UserRightUpdateRequest(BaseModel):
-    right: str = Field(
+    """Updating a specific user right."""
+
+    right: UserRight = Field(
         ...,
         title="Right name",
-        description="The name of the user right to update (e.g. 'RightEditNightLog' or 'Edit Night Log')."
+        description="The name of the user right to update (e.g. 'RightEditNightLog' or 'Edit Night Log').",
     )
     is_granted: bool = Field(
         ...,
         title="Grant or revoke",
-        description="Whether to grant (true) or revoke (false) the right."
+        description="Whether to grant (true) or revoke (false) the right.",
     )
 
 
 class UserRightResponse(BaseModel):
-    right: str = Field(
+    """Represents a user right and its current status."""
+
+    right: UserRight = Field(
         ...,
         title="Right name (display)",
-        description="The display name of the user right (e.g. 'Edit Night Log')."
+        description="The display name of the user right (e.g. 'Edit Night Log').",
     )
     is_granted: bool = Field(
         ...,
         title="Granted",
-        description="Whether the user currently has this right (true) or not (false)."
+        description="Whether the user currently has this right (true) or not (false).",
     )
-

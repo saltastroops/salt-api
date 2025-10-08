@@ -97,29 +97,25 @@ class UserUpdate(UserDetails):
 
 
 class UserRight(str, Enum):
-    HOME_NEWS = "HomeNews"
-    HOME_PROPOSALS = "HomeProposals"
-    MASK_CUTTING = "RightMaskCutting"
-    HOME_NEWS_ENTRIES = "HomeNewsEntries"
-    EDIT_NIGHT_LOG = "RightEditNightLog"
-    VIEW_NIGHT_LOG = "RightViewNightLog"
-    HOME_WEATHER_INFORMATION = "HomeWeatherInformation"
-    HOME_PROPOSAL_STATS = "HomeProposalStatistics"
-    FABRY_PEROT_SCIENTIST = "RightFabryPerotScientist"
-
-    @property
-    def display_name(self) -> str:
-        return DISPLAY_NAMES[self]
+    HOME_NEWS = "Home News"
+    HOME_PROPOSALS = "Home Proposals"
+    MASK_CUTTING = "Mask Cutting"
+    HOME_NEWS_ENTRIES = "Home News Entries"
+    EDIT_NIGHT_LOG = "Edit Night Log"
+    VIEW_NIGHT_LOG = "View Night Log"
+    HOME_WEATHER_INFORMATION = "Home Weather Information"
+    HOME_PROPOSAL_STATS = "Home Proposal Statistics"
+    FABRY_PEROT_SCIENTIST = "Fabry-Perot Scientist"
 
 
-DISPLAY_NAMES: Dict[UserRight, str] = {
-    UserRight.HOME_NEWS: "Home News",
-    UserRight.HOME_PROPOSALS: "Home Proposals",
-    UserRight.MASK_CUTTING: "Mask Cutting",
-    UserRight.HOME_NEWS_ENTRIES: "Home News Entries",
-    UserRight.EDIT_NIGHT_LOG: "Edit Night Log",
-    UserRight.VIEW_NIGHT_LOG: "View Night Log",
-    UserRight.HOME_WEATHER_INFORMATION: "Home Weather Information",
-    UserRight.HOME_PROPOSAL_STATS: "Home Proposal Statistics",
-    UserRight.FABRY_PEROT_SCIENTIST: "Fabry-Perot Scientist",
+RIGHT_DB_NAMES: Dict[UserRight, str] = {
+    UserRight.HOME_NEWS: "HomeNews",
+    UserRight.HOME_PROPOSALS: "HomeProposals",
+    UserRight.MASK_CUTTING: "RightMaskCutting",
+    UserRight.HOME_NEWS_ENTRIES: "HomeNewsEntries",
+    UserRight.EDIT_NIGHT_LOG: "RightEditNightLog",
+    UserRight.VIEW_NIGHT_LOG: "RightViewNightLog",
+    UserRight.HOME_WEATHER_INFORMATION: "HomeWeatherInformation",
+    UserRight.HOME_PROPOSAL_STATS: "HomeProposalStatistics",
+    UserRight.FABRY_PEROT_SCIENTIST: "RightFabryPerotScientist",
 }

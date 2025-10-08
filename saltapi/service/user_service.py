@@ -265,25 +265,17 @@ SALT Team
         """
         Update a user's rights.
 
-        rights: list of dicts like {"key": "RightEditNightLog", "is_granted": true/false}
         """
         for right in rights:
-            key_or_display = right.get("right")
+            right_name = right.get("right")
             is_granted = right.get("is_granted")
 
-            if key_or_display is None or is_granted is None:
+            if right_name is None or is_granted is None:
                 raise ValueError("Each right must have 'right' and 'is_granted' keys.")
 
-            matched = next(
-                (
-                    r
-                    for r in UserRight
-                    if r.value == key_or_display or r.display_name == key_or_display
-                ),
-                None,
-            )
+            matched = next((r for r in UserRight if r.value == right_name))
             if not matched:
-                raise ValueError(f"Unknown user right: {key_or_display}")
+                raise ValueError(f"Unknown user right: {right_name}")
 
             self.repository.set_user_right(user_id, matched.value, is_granted)
 

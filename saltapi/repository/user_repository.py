@@ -10,7 +10,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
-from saltapi.service.user import Role, User, UserRight
+from saltapi.service.user import Role, User, UserRight, RIGHT_DB_NAMES
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
@@ -1380,11 +1380,16 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         result = self.connection.execute(stmt, {"user_id": user_id})
         current_rights = {row[0] for row in result.fetchall()}
         return [
-            {"right": right.display_name, "is_granted": right.value in current_rights}
+            {
+                "right": right.value,
+                "is_granted": RIGHT_DB_NAMES[right] in current_rights,
+            }
             for right in UserRight
         ]
 
     def set_user_right(self, user_id: int, right_name: str, grant: bool) -> None:
+        right_label = next((r for r in UserRight if r.value == right_name))
+        right = RIGHT_DB_NAMES[right_label]
         stmt = text(
             """
             INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
@@ -1395,5 +1400,5 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             """
         )
         self.connection.execute(
-            stmt, {"user_id": user_id, "right_name": right_name, "value": int(grant)}
+            stmt, {"user_id": user_id, "right_name": right, "value": int(grant)}
         )

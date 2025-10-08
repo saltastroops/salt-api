@@ -240,7 +240,7 @@ class UserRightUpdateRequest(BaseModel):
     right: UserRight = Field(
         ...,
         title="Right name",
-        description="The name of the user right to update (e.g. 'RightEditNightLog' or 'Edit Night Log').",
+        description="The name of the user right to update (e.g. 'Edit Night Log').",
     )
     is_granted: bool = Field(
         ...,

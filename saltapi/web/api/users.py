@@ -24,6 +24,8 @@ from saltapi.web.schema.user import (
     UserContact,
     UserListItem,
     UsernameEmail,
+    UserRightResponse,
+    UserRightUpdateRequest,
     UserUpdate,
     UserDemographics,
 )
@@ -495,3 +497,53 @@ def get_subscriptions(
         permission_service.check_permission_to_view_subscriptions(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
         return user_service.get_subscriptions(user_id)
+
+
+@router.get(
+    "/{user_id}/rights/",
+    summary="List a user's rights",
+    response_model=List[UserRightUpdateRequest],
+)
+def get_rights(
+    user_id: int = Path(..., title="User id", description="Id of the user."),
+    user: _User = Depends(get_current_user),
+) -> List[UserRightUpdateRequest]:
+    """
+    List all rights for a given user.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_view_subscriptions(user_id, user)
+
+        user_service = services.user_service(unit_of_work.connection)
+        return user_service.get_rights(user_id)
+
+
+@router.patch(
+    "/{user_id}/rights/",
+    summary="Update a user's rights",
+    response_model=List[UserRightResponse],
+)
+def update_rights(
+    user_id: int,
+    rights: List[UserRightUpdateRequest],
+    user: _User = Depends(get_current_user),
+):
+    """
+    Update a user's rights. true rights will be granted, false revoked.
+
+    Example request body:
+    [
+        {"right": "Edit Night Log", "is_granted": true},
+        {"right": "View Night Log", "is_granted": false}
+    ]
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_validate_user(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+
+        user_service.update_rights(user_id, [right.dict() for right in rights])
+
+        unit_of_work.commit()
+        return user_service.get_rights(user_id)

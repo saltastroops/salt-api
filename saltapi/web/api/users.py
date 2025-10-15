@@ -1,9 +1,9 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 from starlette import status
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user, get_user_to_verify
 from saltapi.service.user import NewUserDetails as _NewUserDetails
@@ -22,10 +22,10 @@ from saltapi.web.schema.user import (
     Subscription,
     User,
     UserContact,
+    UserDemographics,
     UserListItem,
     UsernameEmail,
     UserUpdate,
-    UserDemographics,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -156,7 +156,7 @@ def get_user(
     include_demographics: bool = Query(
         default=False,
         title="User demographical details",
-        description="Include the user's demographical details"
+        description="Include the user's demographical details",
     ),
     user: _User = Depends(get_current_user),
 ) -> _User:
@@ -432,7 +432,17 @@ def add_contact(
         new_contact = dict(contact)
         new_contact["family_name"] = affected_user.family_name
         new_contact["given_name"] = affected_user.given_name
-        user_service.add_contact(user_id, new_contact)
+        investigator_id = user_service.add_contact(user_id, new_contact)
+        validation_code = user_service.get_email_validation_code(investigator_id)
+        try:
+            user_service.send_contact_verification_email(
+                affected_user, new_contact, validation_code
+            )
+        except Exception as e:
+            unit_of_work.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to send verification email: {str(e)}"
+            )
         unit_of_work.commit()
         return user_service.get_user(user_id)
 
@@ -495,3 +505,43 @@ def get_subscriptions(
         permission_service.check_permission_to_view_subscriptions(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
         return user_service.get_subscriptions(user_id)
+
+
+@router.get(
+    "/emails/{user_id}",
+    response_model=List[Dict[str, Any]],
+    summary="Get all emails for a user",
+)
+def get_user_emails(
+    user_id: int = Path(..., title="PiptUser ID"),
+    user=Depends(get_current_user),
+):
+    """
+    Returns all email addresses for a user along with their verification status (pending or not).
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_validate_user(user_id, user)
+        user_service = services.user_service(unit_of_work.connection)
+        try:
+            emails = user_service.get_emails(user_id)
+        except Exception as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        return emails
+
+
+@router.post("/validate-email", summary="Validate email using validation code")
+def validate_email(
+    validation_code: str = Query(..., description="Validation code from email")
+):
+    """
+    Validate an email address for a newly added contact/investigator.
+    """
+    with UnitOfWork() as unit_of_work:
+        user_service = services.user_service(unit_of_work.connection)
+        try:
+            message = user_service.validate_email(validation_code)
+            unit_of_work.commit()
+            return {"detail": message}
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=str(e))

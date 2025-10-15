@@ -243,7 +243,10 @@ SALT Team
         contact["given_name"] = user_details["given_name"]
         contact["family_name"] = user_details["family_name"]
         investigator_id = self.repository.add_contact_details(user_id, contact)
-        self.repository.set_preferred_contact(user_id, investigator_id)
+
+        # Generate and store validation code for the new contact
+        validation_code = self.repository.generate_validation_code()
+        self.repository.add_email_validation(investigator_id, validation_code)
 
     def update_subscriptions(
         self, user_id: int, subscriptions: List[Subscription]
@@ -260,3 +263,84 @@ SALT Team
 
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
+
+    def get_emails(self, user_id: int) -> List[Dict[str, Any]]:
+        """
+        Get all emails for a given PiptUser, along with pending status.
+        """
+        return self.repository.get_user_emails(user_id)
+
+    def get_email_validation_code(self, investigator_id: int) -> str:
+        """Get validation code for a certain investigator id"""
+
+        return self.repository.get_validation_code(investigator_id)
+
+    def validate_email(self, validation_code: str) -> str:
+        """
+        Validate an email by its validation code.
+        """
+        validation = self.repository.get_validation_code(validation_code)
+        if not validation:
+            raise ValidationError("Invalid validation code.")
+
+        if validation["ValidationCode"] is None:
+            raise ValidationError("This email has already been validated.")
+
+        self.repository.clear_validation_code(validation["Investigator_Id"])
+        return f"Email for Investigator {validation['Investigator_Id']} successfully validated."
+
+    def send_contact_verification_email(
+        self,
+        affected_user: Dict[str, Any],
+        new_contact: Dict[str, str],
+        validation_code: str,
+    ) -> None:
+        """
+        Sends the verification email to a new contact.
+        """
+        mail_service = MailService()
+        confirm_url = f"{get_settings().frontend_uri}/ValidateEmail/{validation_code}"
+
+        plain_body = f"""Dear {new_contact['given_name']} {new_contact['family_name']},
+
+Thank you for using the SALT Web Manager!
+
+A new investigator has been created for you.
+  Username: {affected_user['username']}
+  Name: {new_contact['given_name']} {new_contact['family_name']}
+  Email: {new_contact['email']}
+
+Please confirm your email address by pointing your browser to the following URL:
+{confirm_url}
+
+If you have any questions, please feel free to reply to this email.
+
+Sincerely,
+Your Our Team
+"""
+        html_body = f"""
+<html>
+  <body>
+    <p>Dear {new_contact['given_name']} {new_contact['family_name']},</p>
+    <p>Thank you for using the SALT Web Manager!</p>
+    <p>A new investigator has been created for you.</p>
+    <ul>
+      <li>Username: {affected_user['username']}</li>
+      <li>Name: {new_contact['given_name']} {new_contact['family_name']}</li>
+      <li>Email: {new_contact['email']}</li>
+    </ul>
+    <p>Please confirm your email address by pointing your browser to the following URL:</p>
+    <p><a href="{confirm_url}">{confirm_url}</a></p>
+    <p>If you have any questions, please feel free to reply to this email.</p>
+    <p>Sincerely,</p>
+    <p>Your Our Team</p>
+  </body>
+</html>
+"""
+        message = mail_service.generate_email(
+            to=f"{new_contact['given_name']} {new_contact['family_name']} <{new_contact['email']}>",
+            html_body=html_body,
+            plain_body=plain_body,
+            subject="SALT Web Manager Email Confirmation",
+        )
+        mail_service.send_email(to=[new_contact["email"]], message=message)

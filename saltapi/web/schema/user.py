@@ -58,7 +58,7 @@ class User(FullName):
     demographics: Optional[UserDemographics] = Field(
         None,
         title="User Demographics",
-        description="Information about user's legal status in South Africa"
+        description="Information about user's legal status in South Africa",
     )
 
 

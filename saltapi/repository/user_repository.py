@@ -1,13 +1,14 @@
 import enum
 import hashlib
+import random
 import secrets
 import uuid
-from typing import Any, Dict, List, cast, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
 from saltapi.service.user import Role, User
@@ -73,7 +74,9 @@ FROM PiptUser AS PU
                 }
             )
         if user:
-            return User(**user, roles=self.get_user_roles(user["username"]), demographics=None)
+            return User(
+                **user, roles=self.get_user_roles(user["username"]), demographics=None
+            )
         return None
 
     def get_by_username(self, username: str) -> Optional[User]:
@@ -213,6 +216,8 @@ VALUES (:institution_id, :given_name, :family_name, :email)
         # self._update_password_hash(username, password)
         password_hash = self.get_password_hash(password)
 
+        validation_code = self.generate_validation_code()
+
         stmt = text(
             """
 INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active, UserVerified)
@@ -225,7 +230,7 @@ VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
                 "username": new_user_details["username"],
                 "password_hash": password_hash,
                 "investigator_id": investigator_id,
-                "email_validation": str(uuid.uuid4())[:8],
+                "email_validation": validation_code[:8],
             },
         )
 
@@ -330,7 +335,7 @@ WHERE US.PiptUser_Id = :user_id
                 "year_of_phd_completion": row["year_of_phd"],
             }
         except NoResultFound:
-            new_user_details =  {
+            new_user_details = {
                 "email": user.email,
                 "given_name": user.given_name,
                 "family_name": user.family_name,
@@ -340,7 +345,6 @@ WHERE US.PiptUser_Id = :user_id
                 "has_phd": None,
                 "year_of_phd_completion": None,
             }
-
 
         return new_user_details
 
@@ -1343,10 +1347,75 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         return [
             {
                 "to": "Gravitational Wave Notifications",
-                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(user_id)
+                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(
+                    user_id
+                ),
             },
             {
                 "to": "SALT News",
-                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id)
-            }
+                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id),
+            },
         ]
+
+    def get_user_emails(self, user_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT 
+                I.*,
+                P.*,
+                CASE 
+                    WHEN P.ValidationCode IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END AS pending
+            FROM Investigator I
+            LEFT JOIN PiptEmailValidation P
+                ON P.Investigator_Id = I.Investigator_Id
+            WHERE I.PiptUser_Id = :user_id
+            """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return [dict(row) for row in result.fetchall()]
+
+    def generate_validation_code(self, length: int = 20) -> str:
+        """Generate a random validation code containing letters and digits."""
+        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+        return "".join(random.choices(chars, k=length))
+
+    def add_email_validation(self, investigator_id: int, validation_code: str) -> None:
+        """Insert validation code for an Investigator."""
+        stmt = text(
+            """
+            INSERT INTO PiptEmailValidation (Investigator_Id, ValidationCode)
+            VALUES (:investigator_id, :validation_code)
+            """
+        )
+        self.connection.execute(
+            stmt,
+            {"investigator_id": investigator_id, "validation_code": validation_code},
+        )
+
+    def get_validation_code(self, investigator_id: int) -> str:
+        """Return the latest validation code for an investigator."""
+        stmt = text(
+            """
+            SELECT ValidationCode
+            FROM PiptEmailValidation
+            WHERE Investigator_Id = :investigator_id
+            """
+        )
+        result = self.connection.execute(
+            stmt, {"investigator_id": investigator_id}
+        ).fetchone()
+        if result:
+            return result["ValidationCode"]
+        raise ValueError(f"No validation code found for Investigator {investigator_id}")
+
+    def clear_validation_code(self, investigator_id: int) -> None:
+        stmt = text(
+            """
+            UPDATE PiptEmailValidation
+            SET ValidationCode = NULL
+            WHERE Investigator_Id = :investigator_id
+        """
+        )
+        self.connection.execute(stmt, {"investigator_id": investigator_id})

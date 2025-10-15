@@ -24,8 +24,7 @@ from saltapi.web.schema.user import (
     UserContact,
     UserListItem,
     UsernameEmail,
-    UserRightResponse,
-    UserRightUpdateRequest,
+    UserRightStatus,
     UserUpdate,
 )
 
@@ -490,12 +489,12 @@ def get_subscriptions(
 @router.get(
     "/{user_id}/rights/",
     summary="List a user's rights",
-    response_model=List[UserRightUpdateRequest],
+    response_model=List[UserRightStatus],
 )
 def get_rights(
     user_id: int = Path(..., title="User id", description="Id of the user."),
     user: _User = Depends(get_current_user),
-) -> List[UserRightUpdateRequest]:
+) -> List[UserRightStatus]:
     """
     List all rights for a given user.
     """
@@ -510,11 +509,11 @@ def get_rights(
 @router.patch(
     "/{user_id}/rights/",
     summary="Update a user's rights",
-    response_model=List[UserRightResponse],
+    response_model=List[UserRightStatus],
 )
 def update_rights(
     user_id: int,
-    rights: List[UserRightUpdateRequest],
+    rights: List[UserRightStatus],
     user: _User = Depends(get_current_user),
 ):
     """

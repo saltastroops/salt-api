@@ -234,27 +234,12 @@ class UserRight(str, Enum):
     FABRY_PEROT_SCIENTIST = "Fabry-Perot Scientist"
 
 
-class UserRightUpdateRequest(BaseModel):
-    """Updating a specific user right."""
-
-    right: UserRight = Field(
-        ...,
-        title="Right name",
-        description="The name of the user right to update (e.g. 'Edit Night Log').",
-    )
-    is_granted: bool = Field(
-        ...,
-        title="Grant or revoke",
-        description="Whether to grant (true) or revoke (false) the right.",
-    )
-
-
-class UserRightResponse(BaseModel):
+class UserRightStatus(BaseModel):
     """Represents a user right and its current status."""
 
     right: UserRight = Field(
         ...,
-        title="Right name (display)",
+        title="Right name",
         description="The display name of the user right (e.g. 'Edit Night Log').",
     )
     is_granted: bool = Field(

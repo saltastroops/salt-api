@@ -1394,8 +1394,7 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             """
             INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
             SELECT :user_id,
-                (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_name),
-                1
+                (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_name),:value
             ON DUPLICATE KEY UPDATE Value = :value;
             """
         )

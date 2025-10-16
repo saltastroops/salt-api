@@ -2,15 +2,15 @@ import enum
 import hashlib
 import secrets
 import uuid
-from typing import Any, Dict, List, cast, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from passlib.context import CryptContext
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
-from saltapi.service.user import Role, User
+from saltapi.service.user import Role, User, UserRight, RIGHT_DB_NAMES
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
@@ -645,6 +645,20 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
 
+    def get_all_rights(self, username: str) -> set[str]:
+        stmt = text(
+            """
+            SELECT PS.PiptSetting_Name
+            FROM PiptUser PU
+                JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+                JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PU.Username = :username
+            AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return {row[0] for row in result.fetchall()}
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""
@@ -716,7 +730,8 @@ WHERE Investigator_Id =
             raise NotFoundError(f"No such user id: {user_id}")
         except IntegrityError:
             raise ValidationError(
-                f"There are contact details with this email address and institute already."
+                f"There are contact details with this email address and institute"
+                f" already."
             )
 
     @staticmethod
@@ -1343,10 +1358,46 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         return [
             {
                 "to": "Gravitational Wave Notifications",
-                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(user_id)
+                "is_subscribed": self._is_user_subscribed_to_gravitational_wave_notifications(
+                    user_id
+                ),
             },
             {
                 "to": "SALT News",
-                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id)
-            }
+                "is_subscribed": self._is_user_subscribed_to_salt_news(user_id),
+            },
         ]
+
+    def get_user_rights(self, user_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT PS.PiptSetting_Name
+            FROM PiptUserSetting PUS
+            JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PUS.PiptUser_Id = :user_id AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        current_rights = {row[0] for row in result.fetchall()}
+        return [
+            {
+                "right": right.value,
+                "is_granted": RIGHT_DB_NAMES[right] in current_rights,
+            }
+            for right in UserRight
+        ]
+
+    def set_user_right(self, user_id: int, right_name: str, grant: bool) -> None:
+        right_label = next((r for r in UserRight if r.value == right_name))
+        right = RIGHT_DB_NAMES[right_label]
+        stmt = text(
+            """
+            INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
+            SELECT :user_id,
+                (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_name),:value
+            ON DUPLICATE KEY UPDATE Value = :value;
+            """
+        )
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_name": right, "value": int(grant)}
+        )

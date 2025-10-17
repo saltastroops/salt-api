@@ -1413,9 +1413,24 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
     def clear_validation_code(self, investigator_id: int) -> None:
         stmt = text(
             """
-            UPDATE PiptEmailValidation
-            SET ValidationCode = NULL
+            DELETE FROM PiptEmailValidation
             WHERE Investigator_Id = :investigator_id
         """
         )
         self.connection.execute(stmt, {"investigator_id": investigator_id})
+
+    def get_investigator_by_validation_code(
+        self, validation_code: str
+    ) -> Optional[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT I.Investigator_Id, I.PiptUser_Id, P.ValidationCode
+            FROM Investigator I
+            LEFT JOIN PiptEmailValidation P ON P.Investigator_Id = I.Investigator_Id
+            WHERE P.ValidationCode = :validation_code
+        """
+        )
+        result = self.connection.execute(
+            stmt, {"validation_code": validation_code}
+        ).fetchone()
+        return dict(result) if result else None

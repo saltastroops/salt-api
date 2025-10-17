@@ -25,6 +25,7 @@ from saltapi.web.schema.user import (
     UserDemographics,
     UserListItem,
     UsernameEmail,
+    EmailValidationResponse,
     UserUpdate,
 )
 
@@ -532,16 +533,25 @@ def get_user_emails(
 
 @router.post("/validate-email", summary="Validate email using validation code")
 def validate_email(
-    validation_code: str = Query(..., description="Validation code from email")
+    validation_code: str = Query(..., description="Validation code from email"),
+    user: _User = Depends(get_current_user),
 ):
     """
-    Validate an email address for a newly added contact/investigator.
+    Validate an email address for an added contact.
     """
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
         try:
+            validation = user_service.repository.get_investigator_by_validation_code(
+                validation_code
+            )
+            if validation["PiptUser_Id"] != user.id:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"You are not allowed to validate the email.",
+                )
             message = user_service.validate_email(validation_code)
             unit_of_work.commit()
-            return {"detail": message}
+            return EmailValidationResponse(message=message)
         except ValidationError as e:
             raise HTTPException(status_code=400, detail=str(e))

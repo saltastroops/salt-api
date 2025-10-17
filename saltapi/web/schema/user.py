@@ -226,3 +226,14 @@ class Subscription(BaseModel):
     is_subscribed: bool = Field(
         ..., title="Is subscribed", description="Whether the user is subscribed"
     )
+
+
+class EmailValidationResponse(BaseModel):
+    """Response after validating a user's email."""
+    message: str = Field(
+        ...,
+        title="Email Validation Message",
+        description=
+            "Confirmation message indicating the result of the email validation. "
+        )
+

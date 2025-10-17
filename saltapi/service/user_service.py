@@ -247,6 +247,7 @@ SALT Team
         # Generate and store validation code for the new contact
         validation_code = self.repository.generate_validation_code()
         self.repository.add_email_validation(investigator_id, validation_code)
+        return investigator_id
 
     def update_subscriptions(
         self, user_id: int, subscriptions: List[Subscription]
@@ -273,21 +274,22 @@ SALT Team
     def get_email_validation_code(self, investigator_id: int) -> str:
         """Get validation code for a certain investigator id"""
 
-        return self.repository.get_validation_code(investigator_id)
+        validation_code = self.repository.get_validation_code(investigator_id)
+        if not validation_code:
+            raise ValidationError("No validation code found for this investigator.")
+        return validation_code
 
     def validate_email(self, validation_code: str) -> str:
-        """
-        Validate an email by its validation code.
-        """
-        validation = self.repository.get_validation_code(validation_code)
+        """Validate an email using its validation code."""
+        validation = self.repository.get_investigator_by_validation_code(
+            validation_code
+        )
         if not validation:
             raise ValidationError("Invalid validation code.")
 
-        if validation["ValidationCode"] is None:
-            raise ValidationError("This email has already been validated.")
-
-        self.repository.clear_validation_code(validation["Investigator_Id"])
-        return f"Email for Investigator {validation['Investigator_Id']} successfully validated."
+        investigator_id = validation["Investigator_Id"]
+        self.repository.clear_validation_code(investigator_id)
+        return f"Email for Investigator {investigator_id} successfully validated."
 
     def send_contact_verification_email(
         self,
@@ -299,14 +301,14 @@ SALT Team
         Sends the verification email to a new contact.
         """
         mail_service = MailService()
-        confirm_url = f"{get_settings().frontend_uri}/ValidateEmail/{validation_code}"
+        confirm_url = f"{get_settings().frontend_uri}/verify-user-email?validation_code={validation_code}"
 
         plain_body = f"""Dear {new_contact['given_name']} {new_contact['family_name']},
 
 Thank you for using the SALT Web Manager!
 
 A new investigator has been created for you.
-  Username: {affected_user['username']}
+  Username: {affected_user.username}
   Name: {new_contact['given_name']} {new_contact['family_name']}
   Email: {new_contact['email']}
 
@@ -325,7 +327,7 @@ Your Our Team
     <p>Thank you for using the SALT Web Manager!</p>
     <p>A new investigator has been created for you.</p>
     <ul>
-      <li>Username: {affected_user['username']}</li>
+      <li>Username: {affected_user.username}</li>
       <li>Name: {new_contact['given_name']} {new_contact['family_name']}</li>
       <li>Email: {new_contact['email']}</li>
     </ul>
@@ -333,7 +335,7 @@ Your Our Team
     <p><a href="{confirm_url}">{confirm_url}</a></p>
     <p>If you have any questions, please feel free to reply to this email.</p>
     <p>Sincerely,</p>
-    <p>Your Our Team</p>
+    <p>SALT Our Team</p>
   </body>
 </html>
 """

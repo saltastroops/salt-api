@@ -512,8 +512,14 @@ def get_rights(
     response_model=List[UserRightStatus],
 )
 def update_rights(
-    user_id: int,
-    rights: List[UserRightStatus],
+    user_id: int = Path(
+        ..., title="User ID", description="ID of the user whose rights will be updated."
+    ),
+    rights: List[UserRightStatus] = Body(
+        ...,
+        title="User Rights",
+        description="List of rights to grant or revoke for the user.",
+    ),
     user: _User = Depends(get_current_user),
 ):
     """

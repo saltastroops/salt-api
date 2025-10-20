@@ -1,5 +1,6 @@
 from typing import List, Optional, Union, Literal
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 from saltapi.web.schema.common import ObservationProbabilities, Ranking
 from saltapi.web.schema.proposal import GeneralProposalInfo, Proposal
@@ -15,6 +16,15 @@ class Simulation(BaseModel):
     )
     description: Optional[str] = Field(
         ..., title="Description", description="A Description of the simulation."
+    )
+
+
+class Submission(BaseModel):
+    submission_date: datetime = Field(
+        ..., title="Submission date and time", description="The date and time of proposal submission."
+    )
+    submission_number: int = Field(
+        ..., title="Submission number", description="The number of proposal submission."
     )
 
 
@@ -34,6 +44,15 @@ class P1GeneralProposalInfo(GeneralProposalInfo):
     target_of_opportunity_reason: Optional[str] = Field(
         ..., title="ToO reason", description="Reason for ToO flag"
     )
+    phase_1_submissions: List[Submission] = Field(
+        ..., title="Phase 1 submissions", description="The submissions of the phase 1 proposals"
+    )
+    phase_1_submission_deadline: Optional[datetime] = Field(
+        ...,
+        title="Phase 1 submission deadline",
+        description="The deadline by when the Phase 1 submission for the proposal was due"
+    )
+
 
 
 class P1RssModeConfiguration(BaseModel):

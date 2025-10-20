@@ -292,6 +292,34 @@ SALT Team
         """
         return self.repository.get_user_emails(user_id)
 
+    def set_preferred_email(self, user_id: int, email: str, institution_id: int) -> str:
+        """
+        Sets a user's preferred email.
+        """
+        emails = self.get_emails(user_id)
+
+        matching_email = next(
+            (
+                e
+                for e in emails
+                if e["email"] == email and e["institution_id"] == institution_id
+            ),
+            None,
+        )
+        if not matching_email:
+            raise NotFoundError(
+                f"No email '{email}' found for institution {institution_id}."
+            )
+        if matching_email["pending"] != 0:
+            raise ValidationError(
+                "You cannot set this email as preferred until it's validated."
+            )
+
+        investigator_id = matching_email["investigator_id"]
+        self.repository.set_preferred_contact(user_id, investigator_id)
+
+        return f"Preferred email successfully set to {email}"
+
     def get_email_validation_code(self, investigator_id: int) -> str:
         """Get validation code for a certain investigator id"""
 

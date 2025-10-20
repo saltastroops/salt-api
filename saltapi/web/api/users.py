@@ -15,7 +15,7 @@ from saltapi.web import services
 from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     BaseUserDetails,
-    EmailValidationResponse,
+    MessageResponse,
     NewUserDetails,
     PasswordResetRequest,
     PasswordUpdate,
@@ -554,7 +554,7 @@ def validate_email(
                 )
             message = user_service.validate_email(validation_code)
             unit_of_work.commit()
-            return EmailValidationResponse(message=message)
+            return MessageResponse(message=message)
         except ValidationError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -597,3 +597,38 @@ def resend_verification_email_for_contact(
 
         unit_of_work.commit()
         return {"message": f"Verification email resent successfully to {email}"}
+
+
+@router.patch(
+    "/{user_id}/set-preferred-email",
+    summary="Set preferred email for a validated contact",
+)
+def set_preferred_email(
+    user_id: int = Path(
+        ..., title="User id", description="User ID of the current user"
+    ),
+    email: str = Query(
+        ..., title="Email", description="Email address to set as preferred"
+    ),
+    institution_id: int = Query(
+        ..., title="Institution id", description="Institution ID of the email contact"
+    ),
+    user: _User = Depends(get_current_user),
+):
+    """
+    Set the preferred email for the logged-in user.
+    """
+    if user_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not allowed to set another user's preferred email.",
+        )
+
+    with UnitOfWork() as unit_of_work:
+        user_service = services.user_service(unit_of_work.connection)
+        try:
+            message = user_service.set_preferred_email(user_id, email, institution_id)
+            unit_of_work.commit()
+            return MessageResponse(message=message)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

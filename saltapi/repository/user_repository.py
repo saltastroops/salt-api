@@ -720,7 +720,8 @@ WHERE Investigator_Id =
             raise NotFoundError(f"No such user id: {user_id}")
         except IntegrityError:
             raise ValidationError(
-                f"There are contact details with this email address and institute already."
+                f"There are contact details with this email address and institute"
+                f" already."
             )
 
     @staticmethod
@@ -1361,8 +1362,11 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         stmt = text(
             """
             SELECT 
-                I.*,
-                P.*,
+                I.Investigator_Id AS investigator_id,
+                I.FirstName AS given_name,
+                I.Surname AS family_name,
+                I.Email AS email,
+                I.Institute_Id AS institution_id,
                 CASE 
                     WHEN P.ValidationCode IS NOT NULL THEN TRUE
                     ELSE FALSE
@@ -1434,3 +1438,15 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             stmt, {"validation_code": validation_code}
         ).fetchone()
         return dict(result) if result else None
+
+    def get_investigators_with_validation(self, user_id: int) -> list[dict]:
+        """Return all investigators linked to a user with their validation info."""
+        stmt = text(
+            """
+            SELECT * FROM Investigator I
+            LEFT JOIN PiptEmailValidation P ON P.Investigator_Id=I.Investigator_Id
+            WHERE I.PiptUser_Id = :user_id
+        """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id}).mappings().all()
+        return [dict(row) for row in result]

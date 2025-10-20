@@ -228,7 +228,7 @@ class Subscription(BaseModel):
     )
 
 
-class EmailValidationResponse(BaseModel):
+class MessageResponse(BaseModel):
     """Response after validating a user's email."""
 
     message: str = Field(

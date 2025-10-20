@@ -1395,7 +1395,7 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         )
 
     def get_validation_code(self, investigator_id: int) -> str:
-        """Return the latest validation code for an investigator."""
+        """Return validation code for an investigator."""
         stmt = text(
             """
             SELECT ValidationCode

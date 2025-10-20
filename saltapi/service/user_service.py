@@ -238,16 +238,37 @@ SALT Team
     def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
         self.repository.update_user_roles(user_id, new_roles)
 
-    def add_contact(self, user_id: int, contact: Dict[str, str]) -> None:
+    def add_contact(self, user_id: int, contact: Dict[str, str]) -> int:
         user_details = self.get_user_details(user_id)
         contact["given_name"] = user_details["given_name"]
         contact["family_name"] = user_details["family_name"]
+
+        new_email = contact["email"]
+        existing_investigators = self.repository.get_investigators_with_validation(
+            user_id
+        )
+        email_already_exists = False
+        for investigator in existing_investigators:
+            if investigator["Email"] == new_email:
+                email_already_exists = True
+                break
+
         investigator_id = self.repository.add_contact_details(user_id, contact)
 
-        # Generate and store validation code for the new contact
-        validation_code = self.repository.generate_validation_code()
-        self.repository.add_email_validation(investigator_id, validation_code)
+        if not email_already_exists:
+            validation_code = self.repository.generate_validation_code()
+            self.repository.add_email_validation(investigator_id, validation_code)
+
         return investigator_id
+
+    def get_validation_code_if_exists(self, investigator_id: int) -> Optional[str]:
+        """
+        Return the validation code if it exists, otherwise return None.
+        """
+        try:
+            return self.get_email_validation_code(investigator_id)
+        except ValueError:
+            return None
 
     def update_subscriptions(
         self, user_id: int, subscriptions: List[Subscription]
@@ -290,6 +311,36 @@ SALT Team
         investigator_id = validation["Investigator_Id"]
         self.repository.clear_validation_code(investigator_id)
         return f"Email for Investigator {investigator_id} successfully validated."
+
+    def resend_verification_email_for_contact(self, user_id: int, email: str) -> None:
+        """
+        Resend the verification email for an unvalidated contact.
+        """
+        contacts = self.repository.get_user_emails(user_id)
+
+        contact = next((c for c in contacts if c["email"] == email), None)
+        if not contact:
+            raise ValueError(f"No contact found with email {email}")
+
+        if contact.get("pending") != 1:
+            raise ValueError(f"The email {email} has already been validated.")
+
+        investigator_id = contact["investigator_id"]
+
+        validation_code = self.get_email_validation_code(investigator_id)
+
+        affected_user = self.get_user(user_id)
+
+        contact_info = {
+            "given_name": contact["given_name"],
+            "family_name": contact["family_name"],
+            "email": contact["email"],
+            "institution_id": contact["institution_id"],
+        }
+
+        self.send_contact_verification_email(
+            affected_user, contact_info, validation_code
+        )
 
     def send_contact_verification_email(
         self,
@@ -340,7 +391,9 @@ Your Our Team
 </html>
 """
         message = mail_service.generate_email(
-            to=f"{new_contact['given_name']} {new_contact['family_name']} <{new_contact['email']}>",
+            to=(
+                f"{new_contact['given_name']} {new_contact['family_name']} <{new_contact['email']}>"
+            ),
             html_body=html_body,
             plain_body=plain_body,
             subject="SALT Web Manager Email Confirmation",

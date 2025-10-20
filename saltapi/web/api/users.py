@@ -15,6 +15,7 @@ from saltapi.web import services
 from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     BaseUserDetails,
+    EmailValidationResponse,
     NewUserDetails,
     PasswordResetRequest,
     PasswordUpdate,
@@ -25,7 +26,6 @@ from saltapi.web.schema.user import (
     UserDemographics,
     UserListItem,
     UsernameEmail,
-    EmailValidationResponse,
     UserUpdate,
 )
 
@@ -434,16 +434,18 @@ def add_contact(
         new_contact["family_name"] = affected_user.family_name
         new_contact["given_name"] = affected_user.given_name
         investigator_id = user_service.add_contact(user_id, new_contact)
-        validation_code = user_service.get_email_validation_code(investigator_id)
-        try:
-            user_service.send_contact_verification_email(
-                affected_user, new_contact, validation_code
-            )
-        except Exception as e:
-            unit_of_work.rollback()
-            raise HTTPException(
-                status_code=500, detail=f"Failed to send verification email: {str(e)}"
-            )
+        validation_code = user_service.get_validation_code_if_exists(investigator_id)
+        if validation_code:
+            try:
+                user_service.send_contact_verification_email(
+                    affected_user, new_contact, validation_code
+                )
+            except Exception as e:
+                unit_of_work.rollback()
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to send verification email: {str(e)}",
+                )
         unit_of_work.commit()
         return user_service.get_user(user_id)
 
@@ -555,3 +557,43 @@ def validate_email(
             return EmailValidationResponse(message=message)
         except ValidationError as e:
             raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/{user_id}/resend-verification",
+    summary="Resend a verification email for a specific contact email",
+)
+def resend_verification_email_for_contact(
+    user_id: int = Path(
+        ...,
+        title="User ID",
+        description="User ID whose contact email to resend verification for.",
+    ),
+    email: str = Body(
+        ...,
+        embed=True,
+        title="Email",
+        description="Email address to resend the verification for.",
+    ),
+    user: _User = Depends(get_current_user),
+):
+    """
+    Resend the verification email for a specific contact belonging to a user.
+    Only resends if the contact is pending validation (pending = 1).
+    """
+    with UnitOfWork() as unit_of_work:
+        user_service = services.user_service(unit_of_work.connection)
+        if user_id != user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not allowed to resend verification for another user.",
+            )
+        try:
+            user_service.resend_verification_email_for_contact(user_id, email)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Failed to resend verification email: {str(e)}"
+            )
+
+        unit_of_work.commit()
+        return {"message": f"Verification email resent successfully to {email}"}

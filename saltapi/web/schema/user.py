@@ -230,10 +230,11 @@ class Subscription(BaseModel):
 
 class EmailValidationResponse(BaseModel):
     """Response after validating a user's email."""
+
     message: str = Field(
         ...,
         title="Email Validation Message",
-        description=
+        description=(
             "Confirmation message indicating the result of the email validation. "
-        )
-
+        ),
+    )

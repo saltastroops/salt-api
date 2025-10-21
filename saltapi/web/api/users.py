@@ -510,29 +510,6 @@ def get_subscriptions(
         return user_service.get_subscriptions(user_id)
 
 
-@router.get(
-    "/emails/{user_id}",
-    response_model=List[Dict[str, Any]],
-    summary="Get all emails for a user",
-)
-def get_user_emails(
-    user_id: int = Path(..., title="PiptUser ID"),
-    user=Depends(get_current_user),
-):
-    """
-    Returns all email addresses for a user along with their verification status (pending or not).
-    """
-    with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_validate_user(user_id, user)
-        user_service = services.user_service(unit_of_work.connection)
-        try:
-            emails = user_service.get_emails(user_id)
-        except Exception as e:
-            raise HTTPException(status_code=404, detail=str(e))
-        return emails
-
-
 @router.post("/validate-email", summary="Validate email using validation code")
 def validate_email(
     validation_code: str = Query(..., description="Validation code from email"),

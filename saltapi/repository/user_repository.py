@@ -39,13 +39,18 @@ SELECT PU.PiptUser_Id           AS id,
        I2.Institute_Id          AS institution_id,
        I2.Department            AS department,
        PU.Active                AS active,
-       PU.UserVerified          AS user_verified
+       PU.UserVerified          AS user_verified,
+       CASE 
+            WHEN PEV.ValidationCode IS NULL THEN TRUE
+            ELSE FALSE
+        END AS contact_validated
 FROM PiptUser AS PU
          JOIN Investigator I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
+         LEFT JOIN PiptEmailValidation PEV ON I0.Investigator_Id = PEV.Investigator_Id
 """
 
     def _get(self, rows: Any) -> Optional[User]:
@@ -71,6 +76,7 @@ FROM PiptUser AS PU
                     "department": row.department,
                     "partner_code": row.partner_code,
                     "partner_name": row.partner_name,
+                    "contact_validated": row.contact_validated,
                 }
             )
         if user:
@@ -1363,8 +1369,6 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             """
             SELECT 
                 I.Investigator_Id AS investigator_id,
-                I.FirstName AS given_name,
-                I.Surname AS family_name,
                 I.Email AS email,
                 I.Institute_Id AS institution_id,
                 CASE 

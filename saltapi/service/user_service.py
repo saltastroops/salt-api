@@ -286,12 +286,6 @@ SALT Team
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
 
-    def get_emails(self, user_id: int) -> List[Dict[str, Any]]:
-        """
-        Get all emails for a given PiptUser, along with pending status.
-        """
-        return self.repository.get_user_emails(user_id)
-
     def set_preferred_email(self, user_id: int, email: str, institution_id: int) -> str:
         """
         Sets a user's preferred email.
@@ -360,8 +354,8 @@ SALT Team
         affected_user = self.get_user(user_id)
 
         contact_info = {
-            "given_name": contact["given_name"],
-            "family_name": contact["family_name"],
+            "given_name": affected_user.given_name,
+            "family_name": affected_user.family_name,
             "email": contact["email"],
             "institution_id": contact["institution_id"],
         }

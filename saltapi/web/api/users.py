@@ -15,11 +15,11 @@ from saltapi.web import services
 from saltapi.web.schema.common import Message
 from saltapi.web.schema.user import (
     BaseUserDetails,
-    MessageResponse,
     NewUserDetails,
     PasswordResetRequest,
     PasswordUpdate,
     ProposalPermission,
+    PreferredEmailRequest,
     Subscription,
     User,
     UserContact,
@@ -438,7 +438,7 @@ def add_contact(
         if validation_code:
             try:
                 user_service.send_contact_verification_email(
-                    affected_user, new_contact, validation_code
+                    new_contact, validation_code
                 )
             except Exception as e:
                 unit_of_work.rollback()
@@ -510,28 +510,33 @@ def get_subscriptions(
         return user_service.get_subscriptions(user_id)
 
 
-@router.post("/validate-email", summary="Validate email using validation code")
+@router.post(
+    "/validate-email/{validation_code}",
+    summary="Validate email using validation code",
+    response_model=Message,
+)
 def validate_email(
-    validation_code: str = Query(..., description="Validation code from email"),
+    validation_code: str = Path(
+        ..., title="Validation Code", description="Validation code from email"
+    ),
     user: _User = Depends(get_current_user),
-):
+) -> Message:
     """
     Validate an email address for an added contact.
     """
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
+        permission_service = services.permission_service(unit_of_work.connection)
         try:
             validation = user_service.repository.get_investigator_by_validation_code(
                 validation_code
             )
-            if validation["PiptUser_Id"] != user.id:
-                raise HTTPException(
-                    status_code=403,
-                    detail=f"You are not allowed to validate the email.",
-                )
+            if not validation:
+                raise ValidationError("Invalid validation code.")
+            permission_service.check_user_access(validation["PiptUser_Id"], user)
             message = user_service.validate_email(validation_code)
             unit_of_work.commit()
-            return MessageResponse(message=message)
+            return Message(message=message)
         except ValidationError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -539,6 +544,7 @@ def validate_email(
 @router.post(
     "/{user_id}/resend-verification",
     summary="Resend a verification email for a specific contact email",
+    response_model=Message,
 )
 def resend_verification_email_for_contact(
     user_id: int = Path(
@@ -553,59 +559,51 @@ def resend_verification_email_for_contact(
         description="Email address to resend the verification for.",
     ),
     user: _User = Depends(get_current_user),
-):
+) -> Message:
     """
     Resend the verification email for a specific contact belonging to a user.
     Only resends if the contact is pending validation (pending = 1).
     """
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
-        if user_id != user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="You are not allowed to resend verification for another user.",
-            )
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_user_access(user_id, user)
         try:
             user_service.resend_verification_email_for_contact(user_id, email)
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Failed to resend verification email: {str(e)}"
-            )
-
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
         unit_of_work.commit()
-        return {"message": f"Verification email resent successfully to {email}"}
+        return Message(message=f"Verification email resent successfully to {email}")
 
 
 @router.patch(
     "/{user_id}/set-preferred-email",
     summary="Set preferred email for a validated contact",
+    response_model=Message,
 )
 def set_preferred_email(
     user_id: int = Path(
         ..., title="User id", description="User ID of the current user"
     ),
-    email: str = Query(
-        ..., title="Email", description="Email address to set as preferred"
-    ),
-    institution_id: int = Query(
-        ..., title="Institution id", description="Institution ID of the email contact"
+    preferred_email: PreferredEmailRequest = Body(
+        ..., description="Preferred email data"
     ),
     user: _User = Depends(get_current_user),
-):
+) -> Message:
     """
     Set the preferred email for the logged-in user.
     """
-    if user_id != user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="You are not allowed to set another user's preferred email.",
-        )
-
     with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
         user_service = services.user_service(unit_of_work.connection)
+        permission_service.check_user_access(user_id, user)
         try:
-            message = user_service.set_preferred_email(user_id, email, institution_id)
+            message = user_service.set_preferred_email(
+                user_id=user_id,
+                email=preferred_email.email,
+                investigator_id=preferred_email.investigator_id,
+            )
             unit_of_work.commit()
-            return MessageResponse(message=message)
+            return Message(message=message)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

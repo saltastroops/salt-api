@@ -11,8 +11,10 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.proposal import (ProposalStatusValue,
-                                         ProprietaryPeriodUpdateRequest)
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:
@@ -623,3 +625,13 @@ class PermissionService:
         if self.check_user_has_role(user, Role.ADMINISTRATOR) or user_id == user.id:
             return
         raise AuthorizationError("You are not allowed view the subscriptions.")
+
+    def check_user_access(self, user_id, user):
+        """
+        Ensure that the logged-in user is performing an action only on their account.
+        """
+        if user_id == user.id:
+            return
+        raise AuthorizationError(
+            "You are not allowed to perform this action on another user's account."
+        )

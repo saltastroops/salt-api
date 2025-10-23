@@ -1,7 +1,7 @@
 import enum
 import hashlib
-import random
 import secrets
+import string
 import uuid
 from typing import Any, Dict, List, Optional, cast
 
@@ -29,6 +29,7 @@ class UserRepository:
 SELECT PU.PiptUser_Id           AS id,
        I1.Email                 AS preferred_email,
        I0.Email                 AS email,
+       I0.Investigator_Id       AS investigator_id,
        I1.Surname               AS family_name,
        I1.FirstName             AS given_name,
        PU.Password              AS password_hash,
@@ -43,7 +44,7 @@ SELECT PU.PiptUser_Id           AS id,
        CASE 
             WHEN PEV.ValidationCode IS NULL THEN TRUE
             ELSE FALSE
-        END AS contact_validated
+        END AS is_contact_validated
 FROM PiptUser AS PU
          JOIN Investigator I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
@@ -76,7 +77,8 @@ FROM PiptUser AS PU
                     "department": row.department,
                     "partner_code": row.partner_code,
                     "partner_name": row.partner_name,
-                    "contact_validated": row.contact_validated,
+                    "investigator_id": row.investigator_id,
+                    "is_contact_validated": row.is_contact_validated,
                 }
             )
         if user:
@@ -222,8 +224,6 @@ VALUES (:institution_id, :given_name, :family_name, :email)
         # self._update_password_hash(username, password)
         password_hash = self.get_password_hash(password)
 
-        validation_code = self.generate_validation_code()
-
         stmt = text(
             """
 INSERT INTO PiptUser (Username, Password, Investigator_Id, EmailValidation, Active, UserVerified)
@@ -236,7 +236,7 @@ VALUES (:username, :password_hash, :investigator_id, :email_validation, 1, 0)
                 "username": new_user_details["username"],
                 "password_hash": password_hash,
                 "investigator_id": investigator_id,
-                "email_validation": validation_code[:8],
+                "email_validation": str(uuid.uuid4())[:8],
             },
         )
 
@@ -1386,8 +1386,8 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
 
     def generate_validation_code(self, length: int = 20) -> str:
         """Generate a random validation code containing letters and digits."""
-        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-        return "".join(random.choices(chars, k=length))
+        chars = string.ascii_letters + string.digits
+        return "".join(secrets.choice(chars) for _ in range(length))
 
     def add_email_validation(self, investigator_id: int, validation_code: str) -> None:
         """Insert validation code for an Investigator."""
@@ -1432,7 +1432,7 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
     ) -> Optional[Dict[str, Any]]:
         stmt = text(
             """
-            SELECT I.Investigator_Id, I.PiptUser_Id, P.ValidationCode
+            SELECT I.Investigator_Id, I.PiptUser_Id, P.ValidationCode, I.Email
             FROM Investigator I
             LEFT JOIN PiptEmailValidation P ON P.Investigator_Id = I.Investigator_Id
             WHERE P.ValidationCode = :validation_code
@@ -1442,15 +1442,3 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             stmt, {"validation_code": validation_code}
         ).fetchone()
         return dict(result) if result else None
-
-    def get_investigators_with_validation(self, user_id: int) -> list[dict]:
-        """Return all investigators linked to a user with their validation info."""
-        stmt = text(
-            """
-            SELECT * FROM Investigator I
-            LEFT JOIN PiptEmailValidation P ON P.Investigator_Id=I.Investigator_Id
-            WHERE I.PiptUser_Id = :user_id
-        """
-        )
-        result = self.connection.execute(stmt, {"user_id": user_id}).mappings().all()
-        return [dict(row) for row in result]

@@ -228,13 +228,8 @@ class Subscription(BaseModel):
     )
 
 
-class MessageResponse(BaseModel):
-    """Response after validating a user's email."""
-
-    message: str = Field(
-        ...,
-        title="Email Validation Message",
-        description=(
-            "Confirmation message indicating the result of the email validation. "
-        ),
+class PreferredEmailRequest(BaseModel):
+    email: str = Field(..., title="Email address", description="The email address.")
+    investigator_id: int = Field(
+        ..., title="Investigator ID", description="The email address."
     )

@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     smtp_password: Optional[str]
 
     # SMTP port for sending emails
-    smtp_port: int = 0
+    smtp_port: int
 
     # Directory containing the jar file MappingService.jar for mapping proposals to the
     # database

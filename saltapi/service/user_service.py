@@ -239,23 +239,18 @@ SALT Team
         self.repository.update_user_roles(user_id, new_roles)
 
     def add_contact(self, user_id: int, contact: Dict[str, str]) -> int:
-        user_details = self.get_user_details(user_id)
-        contact["given_name"] = user_details["given_name"]
-        contact["family_name"] = user_details["family_name"]
-
         new_email = contact["email"]
-        existing_investigators = self.repository.get_investigators_with_validation(
-            user_id
+        existing_investigators = self.repository.get_user_emails(user_id)
+
+        existing_contact = next(
+            (email for email in existing_investigators if email["email"] == new_email),
+            None,
         )
-        email_already_exists = False
-        for investigator in existing_investigators:
-            if investigator["Email"] == new_email:
-                email_already_exists = True
-                break
 
         investigator_id = self.repository.add_contact_details(user_id, contact)
 
-        if not email_already_exists:
+        # Send validation only if email is new or existing but not yet validated
+        if not existing_contact or existing_contact["pending"] != 0:
             validation_code = self.repository.generate_validation_code()
             self.repository.add_email_validation(investigator_id, validation_code)
 
@@ -286,32 +281,33 @@ SALT Team
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
 
-    def set_preferred_email(self, user_id: int, email: str, institution_id: int) -> str:
+    def set_preferred_email(
+        self, user_id: int, email: str, investigator_id: int
+    ) -> str:
         """
         Sets a user's preferred email.
         """
-        emails = self.get_emails(user_id)
-
+        emails = self.repository.get_user_emails(user_id)
         matching_email = next(
             (
                 e
                 for e in emails
-                if e["email"] == email and e["institution_id"] == institution_id
+                if e["email"] == email and e["investigator_id"] == investigator_id
             ),
             None,
         )
+
         if not matching_email:
             raise NotFoundError(
-                f"No email '{email}' found for institution {institution_id}."
+                f"No email '{email}' found for investigator {investigator_id}."
             )
+
         if matching_email["pending"] != 0:
             raise ValidationError(
                 "You cannot set this email as preferred until it's validated."
             )
 
-        investigator_id = matching_email["investigator_id"]
         self.repository.set_preferred_contact(user_id, investigator_id)
-
         return f"Preferred email successfully set to {email}"
 
     def get_email_validation_code(self, investigator_id: int) -> str:
@@ -324,15 +320,24 @@ SALT Team
 
     def validate_email(self, validation_code: str) -> str:
         """Validate an email using its validation code."""
-        validation = self.repository.get_investigator_by_validation_code(
+        investigator = self.repository.get_investigator_by_validation_code(
             validation_code
         )
-        if not validation:
+        if not investigator:
             raise ValidationError("Invalid validation code.")
 
-        investigator_id = validation["Investigator_Id"]
+        investigator_id = investigator["Investigator_Id"]
         self.repository.clear_validation_code(investigator_id)
-        return f"Email for Investigator {investigator_id} successfully validated."
+
+        email = investigator["Email"]
+        user_id = investigator["PiptUser_Id"]
+        user_emails = self.repository.get_user_emails(user_id)
+
+        for other in user_emails:
+            if other["email"] == email and other["pending"] != 0:
+                self.repository.clear_validation_code(other["investigator_id"])
+
+        return f"Email '{email}' successfully validated for all matching investigators."
 
     def resend_verification_email_for_contact(self, user_id: int, email: str) -> None:
         """
@@ -357,16 +362,12 @@ SALT Team
             "given_name": affected_user.given_name,
             "family_name": affected_user.family_name,
             "email": contact["email"],
-            "institution_id": contact["institution_id"],
         }
 
-        self.send_contact_verification_email(
-            affected_user, contact_info, validation_code
-        )
+        self.send_contact_verification_email(contact_info, validation_code)
 
     def send_contact_verification_email(
         self,
-        affected_user: Dict[str, Any],
         new_contact: Dict[str, str],
         validation_code: str,
     ) -> None:
@@ -374,14 +375,15 @@ SALT Team
         Sends the verification email to a new contact.
         """
         mail_service = MailService()
-        confirm_url = f"{get_settings().frontend_uri}/verify-user-email?validation_code={validation_code}"
+        confirm_url = (
+            f"{get_settings().frontend_uri}/verify-user-email/{validation_code}"
+        )
 
         plain_body = f"""Dear {new_contact['given_name']} {new_contact['family_name']},
 
 Thank you for using the SALT Web Manager!
 
 A new investigator has been created for you.
-  Username: {affected_user.username}
   Name: {new_contact['given_name']} {new_contact['family_name']}
   Email: {new_contact['email']}
 
@@ -391,7 +393,7 @@ Please confirm your email address by pointing your browser to the following URL:
 If you have any questions, please feel free to reply to this email.
 
 Sincerely,
-Your Our Team
+SALT Team
 """
         html_body = f"""
 <html>
@@ -400,7 +402,6 @@ Your Our Team
     <p>Thank you for using the SALT Web Manager!</p>
     <p>A new investigator has been created for you.</p>
     <ul>
-      <li>Username: {affected_user.username}</li>
       <li>Name: {new_contact['given_name']} {new_contact['family_name']}</li>
       <li>Email: {new_contact['email']}</li>
     </ul>
@@ -408,7 +409,7 @@ Your Our Team
     <p><a href="{confirm_url}">{confirm_url}</a></p>
     <p>If you have any questions, please feel free to reply to this email.</p>
     <p>Sincerely,</p>
-    <p>SALT Our Team</p>
+    <p>SALT Team</p>
   </body>
 </html>
 """

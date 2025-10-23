@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from saltapi.service.user import UserDemographics
 from saltapi.web.schema.common import ProposalCode
 from saltapi.web.schema.institution import UserInstitution
 
@@ -45,23 +44,6 @@ class UserListItem(FullName):
     username: str = Field(..., title="Username", description="The username.")
 
 
-class User(FullName):
-    """User details."""
-
-    id: int = Field(..., title="User id", description="User id.")
-    email: EmailStr = Field(..., title="Email address", description="Email address")
-    username: str = Field(..., title="Username", description="Username.")
-    roles: List[UserRole] = Field(..., title="User roles", description="User roles.")
-    affiliations: List[UserInstitution] = Field(
-        ..., title="Affiliation", description="Affiliation of the user"
-    )
-    demographics: Optional[UserDemographics] = Field(
-        None,
-        title="User Demographics",
-        description="Information about user's legal status in South Africa"
-    )
-
-
 class LegalStatus(str, Enum):
     """
     South African legal status.
@@ -72,7 +54,7 @@ class LegalStatus(str, Enum):
     OTHER = "Other"
 
 
-class UserStatistics(BaseModel):
+class UserDemographics(BaseModel):
     """The User statistics."""
 
     legal_status: LegalStatus = Field(
@@ -87,6 +69,23 @@ class UserStatistics(BaseModel):
         None,
         title="Year of PhD degree completion",
         description="The year the PhD degree was completed",
+    )
+
+
+class User(FullName):
+    """User details."""
+
+    id: int = Field(..., title="User id", description="User id.")
+    email: EmailStr = Field(..., title="Email address", description="Email address")
+    username: str = Field(..., title="Username", description="Username.")
+    roles: List[UserRole] = Field(..., title="User roles", description="User roles.")
+    affiliations: List[UserInstitution] = Field(
+        ..., title="Affiliation", description="Affiliation of the user"
+    )
+    demographics: Optional[UserDemographics] = Field(
+        None,
+        title="User Demographics",
+        description="Information about user's legal status in South Africa"
     )
 
 

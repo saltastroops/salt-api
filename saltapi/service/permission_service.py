@@ -626,7 +626,7 @@ class PermissionService:
             return
         raise AuthorizationError("You are not allowed view the subscriptions.")
 
-    def check_user_access(self, user_id, user):
+    def check_user_is_self(self, user_id, user):
         """
         Ensure that the logged-in user is performing an action only on their account.
         """

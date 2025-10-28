@@ -1370,7 +1370,6 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             SELECT 
                 I.Investigator_Id AS investigator_id,
                 I.Email AS email,
-                I.Institute_Id AS institution_id,
                 CASE 
                     WHEN P.ValidationCode IS NOT NULL THEN TRUE
                     ELSE FALSE

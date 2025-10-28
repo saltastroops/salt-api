@@ -533,7 +533,7 @@ def validate_email(
             )
             if not validation:
                 raise ValidationError("Invalid validation code.")
-            permission_service.check_user_access(validation["PiptUser_Id"], user)
+            permission_service.check_user_is_self(validation["PiptUser_Id"], user)
             message = user_service.validate_email(validation_code)
             unit_of_work.commit()
             return Message(message=message)
@@ -567,10 +567,10 @@ def resend_verification_email_for_contact(
     with UnitOfWork() as unit_of_work:
         user_service = services.user_service(unit_of_work.connection)
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_user_access(user_id, user)
+        permission_service.check_user_is_self(user_id, user)
         try:
             user_service.resend_verification_email_for_contact(user_id, email)
-        except ValueError as e:
+        except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
         unit_of_work.commit()
         return Message(message=f"Verification email resent successfully to {email}")
@@ -596,7 +596,7 @@ def set_preferred_email(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         user_service = services.user_service(unit_of_work.connection)
-        permission_service.check_user_access(user_id, user)
+        permission_service.check_user_is_self(user_id, user)
         try:
             message = user_service.set_preferred_email(
                 user_id=user_id,

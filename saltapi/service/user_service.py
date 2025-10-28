@@ -347,10 +347,10 @@ SALT Team
 
         contact = next((c for c in contacts if c["email"] == email), None)
         if not contact:
-            raise ValueError(f"No contact found with email {email}")
+            raise NotFoundError(f"No contact found with email {email}")
 
         if contact.get("pending") != 1:
-            raise ValueError(f"The email {email} has already been validated.")
+            raise ValidationError(f"The email {email} has already been validated.")
 
         investigator_id = contact["investigator_id"]
 

@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from saltapi.service.user import UserDemographics
 from saltapi.web.schema.common import ProposalCode
 from saltapi.web.schema.institution import UserInstitution
 
@@ -44,6 +43,33 @@ class UserListItem(FullName):
     id: int = Field(..., title="User id", description="User id.")
     username: str = Field(..., title="Username", description="The username.")
 
+class LegalStatus(str, Enum):
+    """
+    South African legal status.
+    """
+
+    SOUTH_AFRICAN_CITIZEN = "South African citizen"
+    PERMANENT_RESIDENT_OF_SOUTH_AFRICA = "Permanent resident of South Africa"
+    OTHER = "Other"
+
+
+class UserDemographics(BaseModel):
+    """The User statistics."""
+
+    legal_status: LegalStatus = Field(
+        ..., title="Legal status", description="The legal status in South Africa"
+    )
+    gender: Optional[str] = Field(..., title="Gender", description="Gender.")
+    race: Optional[str] = Field(..., title="Race", description="Race.")
+    has_phd: Optional[bool] = Field(
+        ..., title="PhD", description="Does the user has a PhD?"
+    )
+    year_of_phd_completion: Optional[int] = Field(
+        None,
+        title="Year of PhD degree completion",
+        description="The year the PhD degree was completed",
+    )
+
 
 class User(FullName):
     """User details."""
@@ -59,34 +85,6 @@ class User(FullName):
         None,
         title="User Demographics",
         description="Information about user's legal status in South Africa"
-    )
-
-
-class LegalStatus(str, Enum):
-    """
-    South African legal status.
-    """
-
-    SOUTH_AFRICAN_CITIZEN = "South African citizen"
-    PERMANENT_RESIDENT_OF_SOUTH_AFRICA = "Permanent resident of South Africa"
-    OTHER = "Other"
-
-
-class UserStatistics(BaseModel):
-    """The User statistics."""
-
-    legal_status: LegalStatus = Field(
-        ..., title="Legal status", description="The legal status in South Africa"
-    )
-    gender: Optional[str] = Field(..., title="Gender", description="Gender.")
-    race: Optional[str] = Field(..., title="Race", description="Race.")
-    has_phd: Optional[bool] = Field(
-        ..., title="PhD", description="Does the user has a PhD?"
-    )
-    year_of_phd_completion: Optional[int] = Field(
-        None,
-        title="Year of PhD degree completion",
-        description="The year the PhD degree was completed",
     )
 
 

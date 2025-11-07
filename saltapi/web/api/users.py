@@ -568,10 +568,7 @@ def resend_verification_email_for_contact(
         user_service = services.user_service(unit_of_work.connection)
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_user_is_self(user_id, user)
-        try:
-            user_service.resend_verification_email_for_contact(user_id, email)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=str(e))
+        user_service.resend_verification_email_for_contact(user_id, email)
         unit_of_work.commit()
         return Message(message=f"Verification email resent successfully to {email}")
 
@@ -597,13 +594,10 @@ def set_preferred_email(
         permission_service = services.permission_service(unit_of_work.connection)
         user_service = services.user_service(unit_of_work.connection)
         permission_service.check_user_is_self(user_id, user)
-        try:
-            message = user_service.set_preferred_email(
-                user_id=user_id,
-                email=preferred_email.email,
-                investigator_id=preferred_email.investigator_id,
-            )
-            unit_of_work.commit()
-            return Message(message=message)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        message = user_service.set_preferred_email(
+            user_id=user_id,
+            email=preferred_email.email,
+            investigator_id=preferred_email.investigator_id,
+        )
+        unit_of_work.commit()
+        return Message(message=message)

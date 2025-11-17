@@ -2,16 +2,17 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from fastapi import (APIRouter, Depends, File, Form, Path, Query, UploadFile,
-                     WebSocket)
+from fastapi import APIRouter, Depends, File, Form, Path, Query, UploadFile, WebSocket
 from starlette import status
 
 from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.database import engine
 from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.unit_of_work import UnitOfWork
-from saltapi.service.authentication_service import (find_user_from_token,
-                                                    get_current_user)
+from saltapi.service.authentication_service import (
+    find_user_from_token,
+    get_current_user,
+)
 from saltapi.service.submission import SubmissionLogEntry, SubmissionStatus
 from saltapi.service.user import User
 from saltapi.web import services
@@ -58,11 +59,22 @@ async def create_submission(
     submission_repository = SubmissionRepository(connection)
     submission_service = services.submission_service(submission_repository)
     xml = await submission_service.extract_xml(proposal)
+
+    # If a proposal code exists in the XML, the user must explicitly make a submission
+    # for that proposal code.
     xml_proposal_code = submission_service.extract_proposal_code(xml)
+    if xml_proposal_code and xml_proposal_code != proposal_code:
+        raise ValueError(
+            f"The proposal code specified by the query ({proposal_code} differs from "
+            f"the proposal code in the submitted XML ({xml_proposal_code})."
+        )
+
+    if xml_proposal_code:
+        proposal_code = xml_proposal_code
 
     # Check that the user is allowed to make the submission
     permission_service = services.permission_service(connection)
-    permission_service.check_permission_to_submit_proposal(user, xml_proposal_code)
+    permission_service.check_permission_to_submit_proposal(user, proposal_code)
 
     submission_identifier = await submission_service.submit_proposal(
         user, proposal, proposal_code

@@ -51,14 +51,13 @@ class SubmissionService:
         # Get and check the proposal code for consistency
         xml = await self.extract_xml(proposal)
         xml_proposal_code = SubmissionService.extract_proposal_code(xml)
-        if proposal_code:
-            if proposal_code != xml_proposal_code:
-                raise ValidationError(
-                    "The proposal code passed as query parameter "
-                    f"({proposal_code}) is not the same as that "
-                    "given in the proposal file "
-                    f"({xml_proposal_code})."
-                )
+        if xml_proposal_code and xml_proposal_code != proposal_code:
+            raise ValidationError(
+                "The proposal code passed as query parameter "
+                f"({proposal_code}) is not the same as that "
+                "given in the proposal file "
+                f"({xml_proposal_code})."
+            )
 
         # Record the submission in the database
         submission_identifier = self.submission_repository.create(

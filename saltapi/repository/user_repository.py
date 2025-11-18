@@ -303,8 +303,8 @@ SELECT  SL.SouthAfricanLegalStatus  AS legal_status,
         US.YearOfPhD                      AS year_of_phd
 FROM UserStatistics US
     JOIN SouthAfricanLegalStatus SL ON US.SouthAfricanLegalStatus_Id = SL.SouthAfricanLegalStatus_Id
-    JOIN Race R ON US.Race_Id = R.Race_Id
-    JOIN Gender G ON US.Gender_Id = G.Gender_Id
+    LEFT JOIN Race R ON US.Race_Id = R.Race_Id
+    LEFT JOIN Gender G ON US.Gender_Id = G.Gender_Id
 WHERE US.PiptUser_Id = :user_id
                 """
         )

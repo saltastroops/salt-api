@@ -33,6 +33,8 @@ services:
       - MAPPING_TOOL_PYTHON_INTERPRETER=python
       - MAPPING_TOOL_FINDER_CHART_TOOL
       - MAPPING_TOOL_IMAGE_CONVERSION_COMMAND=/usr/bin/convert
+      - GCODE_DIR=/gcode
+      - XML_TO_GCODE_JAR=xml_to_gcode.jar
     ports:
       - ${PORT}:80
     restart: always
@@ -40,3 +42,4 @@ services:
       - ${PROPOSALS_DIR}:/proposals
       - ${MAPPING_TOOL_LOG_DIR}:/mapping-logs
       - ${MAPPING_TOOL_DIR}:/mapping-tool
+      - ${GCODE_DIR}:/gcode

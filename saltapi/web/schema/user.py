@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from saltapi.service.user import UserDemographics
 from saltapi.web.schema.common import ProposalCode
 from saltapi.web.schema.institution import UserInstitution
 
@@ -72,7 +71,7 @@ class LegalStatus(str, Enum):
     OTHER = "Other"
 
 
-class UserStatistics(BaseModel):
+class UserDemographics(BaseModel):
     """The User statistics."""
 
     legal_status: LegalStatus = Field(
@@ -87,6 +86,23 @@ class UserStatistics(BaseModel):
         None,
         title="Year of PhD degree completion",
         description="The year the PhD degree was completed",
+    )
+
+
+class User(FullName):
+    """User details."""
+
+    id: int = Field(..., title="User id", description="User id.")
+    email: EmailStr = Field(..., title="Email address", description="Email address")
+    username: str = Field(..., title="Username", description="Username.")
+    roles: List[UserRole] = Field(..., title="User roles", description="User roles.")
+    affiliations: List[UserInstitution] = Field(
+        ..., title="Affiliation", description="Affiliation of the user"
+    )
+    demographics: Optional[UserDemographics] = Field(
+        None,
+        title="User Demographics",
+        description="Information about user's legal status in South Africa"
     )
 
 
@@ -232,4 +248,31 @@ class PreferredEmailRequest(BaseModel):
     email: str = Field(..., title="Email address", description="The email address.")
     investigator_id: int = Field(
         ..., title="Investigator ID", description="The email address."
+    )
+
+
+class UserRight(str, Enum):
+    HOME_NEWS = "Home News"
+    HOME_PROPOSALS = "Home Proposals"
+    MASK_CUTTING = "Mask Cutting"
+    HOME_NEWS_ENTRIES = "Home News Entries"
+    EDIT_NIGHT_LOG = "Edit Night Log"
+    VIEW_NIGHT_LOG = "View Night Log"
+    HOME_WEATHER_INFORMATION = "Home Weather Information"
+    HOME_PROPOSAL_STATS = "Home Proposal Statistics"
+    FABRY_PEROT_SCIENTIST = "Fabry-Perot Scientist"
+
+
+class UserRightStatus(BaseModel):
+    """Represents a user right and its current status."""
+
+    right: UserRight = Field(
+        ...,
+        title="Right name",
+        description="The display name of the user right (e.g. 'Edit Night Log').",
+    )
+    is_granted: bool = Field(
+        ...,
+        title="Granted",
+        description="Whether the user currently has this right (true) or not (false).",
     )

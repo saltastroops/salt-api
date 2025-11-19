@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
+from saltapi.web.schema.user import UserRight
 
 
 class Role(str, Enum):
@@ -104,3 +105,16 @@ class UserDetails(UserDemographics):
 @dataclass(frozen=True)
 class UserUpdate(UserDetails):
     password: Optional[str]
+
+
+RIGHT_DB_NAMES: Dict[UserRight, str] = {
+    UserRight.HOME_NEWS: "HomeNews",
+    UserRight.HOME_PROPOSALS: "HomeProposals",
+    UserRight.MASK_CUTTING: "RightMaskCutting",
+    UserRight.HOME_NEWS_ENTRIES: "HomeNewsEntries",
+    UserRight.EDIT_NIGHT_LOG: "RightEditNightLog",
+    UserRight.VIEW_NIGHT_LOG: "RightViewNightLog",
+    UserRight.HOME_WEATHER_INFORMATION: "HomeWeatherInformation",
+    UserRight.HOME_PROPOSAL_STATS: "HomeProposalStatistics",
+    UserRight.FABRY_PEROT_SCIENTIST: "RightFabryPerotScientist",
+}

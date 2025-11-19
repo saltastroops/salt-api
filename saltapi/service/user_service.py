@@ -10,7 +10,7 @@ from saltapi.exceptions import (
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
-from saltapi.service.user import NewUserDetails, Role, User
+from saltapi.service.user import NewUserDetails, Role, User, UserRight
 from saltapi.settings import get_settings
 from saltapi.web.schema.user import ProposalPermissionType, Subscription, UserContact
 
@@ -449,3 +449,27 @@ SALT Team
             subject="SALT Web Manager Email Confirmation",
         )
         mail_service.send_email(to=[new_contact["email"]], message=message)
+
+    def update_rights(self, user_id: int, rights: List[Dict[str, Any]]) -> None:
+        """
+        Update a user's rights.
+
+        """
+        for right in rights:
+            right_name = right.get("right")
+            is_granted = right.get("is_granted")
+
+            if right_name is None or is_granted is None:
+                raise ValueError("Each right must have 'right' and 'is_granted' keys.")
+
+            matched = next((r for r in UserRight if r.value == right_name))
+            if not matched:
+                raise ValueError(f"Unknown user right: {right_name}")
+
+            self.repository.set_user_right(user_id, matched.value, is_granted)
+
+    def get_rights(self, user_id: int) -> List[Dict[str, Any]]:
+        """
+        Get a user's current rights.
+        """
+        return self.repository.get_user_rights(user_id)

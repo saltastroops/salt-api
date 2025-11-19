@@ -11,7 +11,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
-from saltapi.service.user import Role, User
+from saltapi.service.user import Role, User, UserRight, RIGHT_DB_NAMES
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
@@ -314,8 +314,8 @@ SELECT  SL.SouthAfricanLegalStatus  AS legal_status,
         US.YearOfPhD                      AS year_of_phd
 FROM UserStatistics US
     JOIN SouthAfricanLegalStatus SL ON US.SouthAfricanLegalStatus_Id = SL.SouthAfricanLegalStatus_Id
-    JOIN Race R ON US.Race_Id = R.Race_Id
-    JOIN Gender G ON US.Gender_Id = G.Gender_Id
+    LEFT JOIN Race R ON US.Race_Id = R.Race_Id
+    LEFT JOIN Gender G ON US.Gender_Id = G.Gender_Id
 WHERE US.PiptUser_Id = :user_id
                 """
         )
@@ -654,6 +654,20 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         )
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
+
+    def get_all_rights(self, username: str) -> set[str]:
+        stmt = text(
+            """
+            SELECT PS.PiptSetting_Name
+            FROM PiptUser PU
+                JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+                JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PU.Username = :username
+            AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return {row[0] for row in result.fetchall()}
 
     @staticmethod
     def get_password_hash(password: str) -> str:
@@ -1441,3 +1455,37 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             stmt, {"validation_code": validation_code}
         ).fetchone()
         return dict(result) if result else None
+
+    def get_user_rights(self, user_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT PS.PiptSetting_Name
+            FROM PiptUserSetting PUS
+            JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PUS.PiptUser_Id = :user_id AND PUS.Value > 0
+        """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        current_rights = {row[0] for row in result.fetchall()}
+        return [
+            {
+                "right": right.value,
+                "is_granted": RIGHT_DB_NAMES[right] in current_rights,
+            }
+            for right in UserRight
+        ]
+
+    def set_user_right(self, user_id: int, right_name: str, grant: bool) -> None:
+        right_label = next((r for r in UserRight if r.value == right_name))
+        right = RIGHT_DB_NAMES[right_label]
+        stmt = text(
+            """
+            INSERT INTO PiptUserSetting (PiptUser_Id, PiptSetting_Id, Value)
+            SELECT :user_id,
+                (SELECT PiptSetting_Id FROM PiptSetting WHERE PiptSetting_Name = :right_name),:value
+            ON DUPLICATE KEY UPDATE Value = :value;
+            """
+        )
+        self.connection.execute(
+            stmt, {"user_id": user_id, "right_name": right, "value": int(grant)}
+        )

@@ -51,6 +51,7 @@ class Institution:
     department: Optional[str]
     partner_code: str
 
+
 @dataclass()
 class UserDemographics:
     legal_status: str

@@ -69,6 +69,9 @@ class Settings(BaseSettings):
     # Password for the SMTP server
     smtp_password: Optional[str]
 
+    # SMTP port for sending emails
+    smtp_port: int
+
     # Directory containing the jar file MappingService.jar for mapping proposals to the
     # database
     mapping_tool_dir: DirectoryPath

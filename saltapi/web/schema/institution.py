@@ -35,6 +35,18 @@ class UserInstitution(Institution):
         title="Contact",
         description="The user's email address for this institution",
     )
+    is_contact_validated: bool = Field(
+        ...,
+        title="Contact Validated",
+        description="Indicates whether this email has been validated",
+    )
+    investigator_id: int = Field(
+        ...,
+        title="Investigator ID",
+        description=(
+            "ID for the investigator record associated with this email and institution"
+        ),
+    )
 
 
 class NewInstitutionDetails(BaseModel):

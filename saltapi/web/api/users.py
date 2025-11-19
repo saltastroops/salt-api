@@ -18,8 +18,8 @@ from saltapi.web.schema.user import (
     NewUserDetails,
     PasswordResetRequest,
     PasswordUpdate,
-    ProposalPermission,
     PreferredEmailRequest,
+    ProposalPermission,
     Subscription,
     User,
     UserContact,
@@ -429,25 +429,9 @@ def add_contact(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_add_user_contact(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
-        affected_user = user_service.get_user(user_id)
-        new_contact = dict(contact)
-        new_contact["family_name"] = affected_user.family_name
-        new_contact["given_name"] = affected_user.given_name
-        investigator_id = user_service.add_contact(user_id, new_contact)
-        validation_code = user_service.get_validation_code_if_exists(investigator_id)
-        if validation_code:
-            try:
-                user_service.send_contact_verification_email(
-                    new_contact, validation_code
-                )
-            except Exception as e:
-                unit_of_work.rollback()
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to send verification email: {str(e)}",
-                )
+        updated_user = user_service.create_contact(user_id, contact)
         unit_of_work.commit()
-        return user_service.get_user(user_id)
+        return updated_user
 
 
 @router.patch(

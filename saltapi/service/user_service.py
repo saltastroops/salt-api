@@ -1,13 +1,18 @@
 from datetime import timedelta
 from typing import Any, Dict, List, Optional
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import (
+    AuthorizationError,
+    NotFoundError,
+    SSDAError,
+    ValidationError,
+)
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType, Subscription
+from saltapi.web.schema.user import ProposalPermissionType, Subscription, UserContact
 
 
 class UserService:
@@ -365,6 +370,28 @@ SALT Team
         }
 
         self.send_contact_verification_email(contact_info, validation_code)
+
+    def create_contact(self, user_id: int, contact: UserContact) -> User:
+        """Adding contact details and sending a verification email."""
+        affected_user = self.get_user(user_id)
+        if not affected_user:
+            raise NotFoundError(f"User with ID {user_id} not found.")
+
+        new_contact = dict(contact)
+        new_contact["family_name"] = affected_user.family_name
+        new_contact["given_name"] = affected_user.given_name
+        try:
+            investigator_id = self.add_contact(user_id, new_contact)
+
+            validation_code = self.get_validation_code_if_exists(investigator_id)
+            if validation_code:
+                self.send_contact_verification_email(new_contact, validation_code)
+
+        except (ValidationError, AuthorizationError, NotFoundError):
+            raise
+        except Exception as e:
+            raise SSDAError(f"Failed to send verification email: {str(e)}")
+        return self.get_user(user_id)
 
     def send_contact_verification_email(
         self,

@@ -91,6 +91,10 @@ SALT Team
                 raise ValidationError("Race is missing.")
             if user_details["has_phd"] and not user_details["year_of_phd_completion"]:
                 raise ValidationError("Year of completing PhD is missing.")
+            if not user_details["has_phd"] and user_details["year_of_phd_completion"]:
+                raise ValidationError(
+                    "A PhD year cannot be provided if the user does not have a PhD."
+                )
 
     def create_user(self, user: NewUserDetails) -> int:
         if self._does_user_exist(user.username):

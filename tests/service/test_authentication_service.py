@@ -21,7 +21,6 @@ USER = User(
     given_name="John",
     id=1,
     email=EmailStr("jdoe@email.com"),
-    alternative_emails=[EmailStr("")],
     password_hash="PasswordHash",
     affiliations=[
         Institution(
@@ -34,6 +33,7 @@ USER = User(
     roles=[],
     user_verified=True,
     active=True,
+    demographics=None,
 )
 
 
@@ -47,7 +47,6 @@ class FakeUserRepository:
                 family_name="Doe",
                 email=EmailStr("johndoe@email.com"),
                 password_hash="hashedpassword",
-                alternative_emails=[EmailStr("alt@gmail.com")],
                 affiliations=[
                     Institution(
                         institution_id=1332,
@@ -59,6 +58,7 @@ class FakeUserRepository:
                 roles=[],
                 user_verified=True,
                 active=True,
+                demographics=None,
             )
         return None
 
@@ -73,7 +73,6 @@ class FakeUserRepository:
                 family_name="Doe",
                 email=EmailStr("johndoe@email.com"),
                 password_hash="hashedpassword",
-                alternative_emails=[EmailStr("")],
                 affiliations=[
                     Institution(
                         institution_id=1332,
@@ -85,9 +84,32 @@ class FakeUserRepository:
                 roles=[],
                 user_verified=True,
                 active=True,
+                demographics=None,
             )
 
         raise NotFoundError("User not found or password doesn't match.")
+
+    def get_by_username(self, username: str) -> User:
+        return User(
+            id=1,
+            username=username,
+            given_name="John",
+            family_name="Doe",
+            email=EmailStr("johndoe@email.com"),
+            password_hash="hashedpassword",
+            affiliations=[
+                Institution(
+                    institution_id=1332,
+                    institution="Other",
+                    department="Other",
+                    partner_code="Code",
+                )
+            ],
+            roles=[],
+            user_verified=True,
+            active=True,
+            demographics=None,
+        )
 
 
 user_repository = cast(UserRepository, FakeUserRepository())

@@ -11,8 +11,10 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.proposal import (ProposalStatusValue,
-                                         ProprietaryPeriodUpdateRequest)
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:
@@ -541,13 +543,27 @@ class PermissionService:
     def check_permission_to_request_data(
         self, user: User, proposal_code: str, block_visit_ids: List[int]
     ) -> None:
-        roles = [
-            Role.ADMINISTRATOR,
-            Role.SALT_ASTRONOMER,
-            Role.PRINCIPAL_INVESTIGATOR,
-            Role.PRINCIPAL_CONTACT,
-            Role.INVESTIGATOR,
-        ]
+        proposal_type = self.proposal_repository.get_proposal_type(proposal_code)
+
+        if proposal_type != "Gravitational Wave Event":
+            roles = [
+                Role.ADMINISTRATOR,
+                Role.SALT_ASTRONOMER,
+                Role.PRINCIPAL_INVESTIGATOR,
+                Role.PRINCIPAL_CONTACT,
+                Role.INVESTIGATOR,
+            ]
+            self.check_role(user.username, roles, proposal_code)
+        else:
+            # Gravitational wave event proposals are a special case; they can be
+            # viewed by anyone who belongs to a SALT partner.
+            roles = [
+                Role.SALT_ASTRONOMER,
+                Role.SALT_OPERATOR,
+                Role.PARTNER_AFFILIATED,
+                Role.ADMINISTRATOR,
+                Role.LIBRARIAN,
+            ]
         self.check_role(user.username, roles, proposal_code)
         proposal_block_visit_ids = [
             bv["id"] for bv in self.proposal_repository.block_visits(proposal_code)

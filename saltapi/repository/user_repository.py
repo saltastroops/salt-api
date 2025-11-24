@@ -655,20 +655,6 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
 
-    def get_all_rights(self, username: str) -> set[str]:
-        stmt = text(
-            """
-            SELECT PS.PiptSetting_Name
-            FROM PiptUser PU
-                JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
-                JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
-            WHERE PU.Username = :username
-            AND PUS.Value > 0
-        """
-        )
-        result = self.connection.execute(stmt, {"username": username})
-        return {row[0] for row in result.fetchall()}
-
     @staticmethod
     def get_password_hash(password: str) -> str:
         """Hash a plain text password."""

@@ -68,7 +68,7 @@ def setup_exception_handler(app: FastAPI) -> None:
 
         log_message(request.method, request.url, exc)
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": str(exc)}
+            status_code=status.HTTP_404_NOT_FOUND, content={"message": "Not found"}
         )
 
     @app.exception_handler(ValueError)

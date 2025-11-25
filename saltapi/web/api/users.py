@@ -18,7 +18,6 @@ from saltapi.web.schema.user import (
     NewUserDetails,
     PasswordResetRequest,
     PasswordUpdate,
-    PreferredEmailRequest,
     ProposalPermission,
     Subscription,
     User,
@@ -559,30 +558,29 @@ def resend_verification_email_for_contact(
 
 
 @router.patch(
-    "/{user_id}/set-preferred-email",
-    summary="Set preferred email for a validated contact",
+    "/{user_id}/set-preferred-contact/{investigator_id}",
+    summary="Set preferred contact for a validated email",
     response_model=Message,
 )
-def set_preferred_email(
+def set_preferred_contact(
     user_id: int = Path(
         ..., title="User id", description="User ID of the current user"
     ),
-    preferred_email: PreferredEmailRequest = Body(
-        ..., description="Preferred email data"
+    investigator_id: int = Path(
+        ..., title="Investigator ID", description="The email address investigator id."
     ),
     user: _User = Depends(get_current_user),
 ) -> Message:
     """
-    Set the preferred email for the logged-in user.
+    Set the preferred contact for the logged-in user.
     """
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         user_service = services.user_service(unit_of_work.connection)
         permission_service.check_user_is_self(user_id, user)
-        message = user_service.set_preferred_email(
+        message = user_service.set_preferred_contact(
             user_id=user_id,
-            email=preferred_email.email,
-            investigator_id=preferred_email.investigator_id,
+            investigator_id=investigator_id,
         )
         unit_of_work.commit()
         return Message(message=message)

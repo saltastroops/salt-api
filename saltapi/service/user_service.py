@@ -290,26 +290,18 @@ SALT Team
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
 
-    def set_preferred_email(
-        self, user_id: int, email: str, investigator_id: int
-    ) -> str:
+    def set_preferred_contact(self, user_id: int, investigator_id: int) -> str:
         """
-        Sets a user's preferred email.
+        Sets a user's preferred contact.
         """
         emails = self.repository.get_user_emails(user_id)
         matching_email = next(
-            (
-                e
-                for e in emails
-                if e["email"] == email and e["investigator_id"] == investigator_id
-            ),
+            (e for e in emails if e["investigator_id"] == investigator_id),
             None,
         )
 
         if not matching_email:
-            raise NotFoundError(
-                f"No email '{email}' found for investigator {investigator_id}."
-            )
+            raise ValidationError(f"No email found for investigator {investigator_id}.")
 
         if matching_email["pending"] != 0:
             raise ValidationError(
@@ -317,7 +309,7 @@ SALT Team
             )
 
         self.repository.set_preferred_contact(user_id, investigator_id)
-        return f"Preferred email successfully set to {email}"
+        return f"Preferred contact is successfully set to {matching_email['email']}"
 
     def get_email_validation_code(self, investigator_id: int) -> str:
         """Get validation code for a certain investigator id"""

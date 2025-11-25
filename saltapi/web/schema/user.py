@@ -43,6 +43,7 @@ class UserListItem(FullName):
     id: int = Field(..., title="User id", description="User id.")
     username: str = Field(..., title="Username", description="The username.")
 
+
 class LegalStatus(str, Enum):
     """
     South African legal status.
@@ -84,7 +85,7 @@ class User(FullName):
     demographics: Optional[UserDemographics] = Field(
         None,
         title="User Demographics",
-        description="Information about user's legal status in South Africa"
+        description="Information about user's legal status in South Africa",
     )
 
 
@@ -223,12 +224,6 @@ class Subscription(BaseModel):
     )
     is_subscribed: bool = Field(
         ..., title="Is subscribed", description="Whether the user is subscribed"
-    )
-
-class PreferredEmailRequest(BaseModel):
-    email: str = Field(..., title="Email address", description="The email address.")
-    investigator_id: int = Field(
-        ..., title="Investigator ID", description="The email address."
     )
 
 

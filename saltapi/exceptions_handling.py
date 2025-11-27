@@ -11,11 +11,11 @@ from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from starlette.datastructures import URL
 
 from saltapi.exceptions import (
+    AuthenticationError,
     AuthorizationError,
     NotFoundError,
-    ValidationError,
-    AuthenticationError,
     SSDAError,
+    ValidationError,
 )
 
 

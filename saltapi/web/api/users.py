@@ -578,6 +578,9 @@ def set_preferred_contact(
         permission_service = services.permission_service(unit_of_work.connection)
         user_service = services.user_service(unit_of_work.connection)
         permission_service.check_user_is_self(user_id, user)
+        permission_service.check_permission_to_set_preferred_contact(
+            user_id, investigator_id
+        )
         message = user_service.set_preferred_contact(
             user_id=user_id,
             investigator_id=investigator_id,

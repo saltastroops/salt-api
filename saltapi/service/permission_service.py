@@ -635,3 +635,24 @@ class PermissionService:
         raise AuthorizationError(
             "You are not allowed to perform this action on another user's account."
         )
+
+    def check_permission_to_set_preferred_contact(
+        self, user_id: int, investigator_id: int
+    ) -> None:
+        """
+        Check that the investigator email exists and has been validated
+        before allowing it to be set as the preferred contact.
+        """
+        contact = self.user_repository.get_user_email_for_investigator(
+            user_id, investigator_id
+        )
+
+        if not contact:
+            raise ValidationError(
+                f"No email found for investigator {investigator_id}."
+            )
+
+        if not contact["is_validated"]:
+            raise ValidationError(
+                "You cannot set this email as preferred until it's validated."
+            )

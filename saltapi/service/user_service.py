@@ -294,22 +294,13 @@ SALT Team
         """
         Sets a user's preferred contact.
         """
-        emails = self.repository.get_user_emails(user_id)
-        matching_email = next(
-            (e for e in emails if e["investigator_id"] == investigator_id),
-            None,
-        )
-
-        if not matching_email:
-            raise ValidationError(f"No email found for investigator {investigator_id}.")
-
-        if matching_email["pending"] != 0:
+        preferred = self.repository.get_preferred_contact(user_id)
+        if preferred and preferred["investigator_id"] == investigator_id:
             raise ValidationError(
-                "You cannot set this email as preferred until it's validated."
+                "This email is already set as your preferred contact."
             )
-
         self.repository.set_preferred_contact(user_id, investigator_id)
-        return f"Preferred contact is successfully set to {matching_email['email']}"
+        return f"Preferred contact is successfully set"
 
     def get_email_validation_code(self, investigator_id: int) -> str:
         """Get validation code for a certain investigator id"""

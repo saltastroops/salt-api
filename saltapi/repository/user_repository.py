@@ -1475,3 +1475,31 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         self.connection.execute(
             stmt, {"user_id": user_id, "right_name": right, "value": int(grant)}
         )
+
+    def get_user_email_for_investigator(
+        self, user_id: int, investigator_id: int
+    ) -> Optional[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT 
+                I.Investigator_Id AS investigator_id,
+                I.Email AS email,
+                CASE 
+                    WHEN P.ValidationCode IS NULL THEN TRUE
+                    ELSE FALSE
+                END AS is_validated
+            FROM Investigator I
+            LEFT JOIN PiptEmailValidation P
+                ON P.Investigator_Id = I.Investigator_Id
+            WHERE
+                I.PiptUser_Id = :user_id
+                AND I.Investigator_Id = :investigator_id
+            """
+        )
+
+        result = self.connection.execute(
+            stmt,
+            {"user_id": user_id, "investigator_id": investigator_id},
+        ).fetchone()
+
+        return dict(result) if result else None

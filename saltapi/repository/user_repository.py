@@ -1503,3 +1503,21 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         ).fetchone()
 
         return dict(result) if result else None
+
+    def get_preferred_contact(self, user_id: int) -> dict | None:
+        stmt = text(
+            """
+            SELECT 
+                PU.PiptUser_Id      AS user_id,
+                I.Email             AS preferred_email,
+                I.Investigator_Id   AS investigator_id
+            FROM PiptUser AS PU
+            JOIN Investigator I
+                ON PU.Investigator_Id = I.Investigator_Id
+            WHERE PU.PiptUser_Id = :user_id
+            """
+        )
+
+        result = self.connection.execute(stmt, {"user_id": user_id}).fetchone()
+
+        return dict(result) if result else None

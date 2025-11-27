@@ -1476,7 +1476,7 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             stmt, {"user_id": user_id, "right_name": right, "value": int(grant)}
         )
 
-    def get_user_email_for_investigator(
+    def get_users_contact(
         self, user_id: int, investigator_id: int
     ) -> Optional[Dict[str, Any]]:
         stmt = text(

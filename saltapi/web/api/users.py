@@ -1,9 +1,9 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 from starlette import status
 
-from saltapi.exceptions import NotFoundError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
 from saltapi.service.authentication_service import get_current_user, get_user_to_verify
 from saltapi.service.user import NewUserDetails as _NewUserDetails
@@ -22,11 +22,11 @@ from saltapi.web.schema.user import (
     Subscription,
     User,
     UserContact,
+    UserDemographics,
     UserListItem,
     UsernameEmail,
     UserRightStatus,
     UserUpdate,
-    UserDemographics,
 )
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -157,7 +157,7 @@ def get_user(
     include_demographics: bool = Query(
         default=False,
         title="User demographical details",
-        description="Include the user's demographical details"
+        description="Include the user's demographical details",
     ),
     user: _User = Depends(get_current_user),
 ) -> _User:
@@ -429,13 +429,9 @@ def add_contact(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_add_user_contact(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
-        affected_user = user_service.get_user(user_id)
-        new_contact = dict(contact)
-        new_contact["family_name"] = affected_user.family_name
-        new_contact["given_name"] = affected_user.given_name
-        user_service.add_contact(user_id, new_contact)
+        updated_user = user_service.create_contact(user_id, contact)
         unit_of_work.commit()
-        return user_service.get_user(user_id)
+        return updated_user
 
 
 @router.patch(
@@ -496,6 +492,101 @@ def get_subscriptions(
         permission_service.check_permission_to_view_subscriptions(user_id, user)
         user_service = services.user_service(unit_of_work.connection)
         return user_service.get_subscriptions(user_id)
+
+
+@router.post(
+    "/validate-email/{validation_code}",
+    summary="Validate email using validation code",
+    response_model=Message,
+)
+def validate_email(
+    validation_code: str = Path(
+        ..., title="Validation Code", description="Validation code from email"
+    ),
+    user: _User = Depends(get_current_user),
+) -> Message:
+    """
+    Validate an email address for an added contact.
+    """
+    with UnitOfWork() as unit_of_work:
+        user_service = services.user_service(unit_of_work.connection)
+        permission_service = services.permission_service(unit_of_work.connection)
+        try:
+            validation = user_service.repository.get_investigator_by_validation_code(
+                validation_code
+            )
+            if not validation:
+                raise ValidationError("Invalid validation code.")
+            permission_service.check_user_is_self(validation["PiptUser_Id"], user)
+            message = user_service.validate_email(validation_code)
+            unit_of_work.commit()
+            return Message(message=message)
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/{user_id}/resend-verification",
+    summary="Resend a verification email for a specific contact email",
+    response_model=Message,
+)
+def resend_verification_email_for_contact(
+    user_id: int = Path(
+        ...,
+        title="User ID",
+        description="User ID whose contact email to resend verification for.",
+    ),
+    email: str = Body(
+        ...,
+        embed=True,
+        title="Email",
+        description="Email address to resend the verification for.",
+    ),
+    user: _User = Depends(get_current_user),
+) -> Message:
+    """
+    Resend the verification email for a specific contact belonging to a user.
+    Only resends if the contact is pending validation (pending = 1).
+    """
+    with UnitOfWork() as unit_of_work:
+        user_service = services.user_service(unit_of_work.connection)
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_user_is_self(user_id, user)
+        user_service.resend_verification_email_for_contact(user_id, email)
+        unit_of_work.commit()
+        return Message(message=f"Verification email resent successfully to {email}")
+
+
+@router.patch(
+    "/{user_id}/set-preferred-contact/{investigator_id}",
+    summary="Set preferred contact for a validated email",
+    response_model=Message,
+)
+def set_preferred_contact(
+    user_id: int = Path(
+        ..., title="User id", description="User ID of the current user"
+    ),
+    investigator_id: int = Path(
+        ..., title="Investigator ID", description="The email address investigator id."
+    ),
+    user: _User = Depends(get_current_user),
+) -> Message:
+    """
+    Set the preferred contact for the logged-in user.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(unit_of_work.connection)
+        user_service = services.user_service(unit_of_work.connection)
+        permission_service.check_user_is_self(user_id, user)
+        permission_service.check_permission_to_set_preferred_contact(
+            user_id, investigator_id
+        )
+        message = user_service.set_preferred_contact(
+            user_id=user_id,
+            investigator_id=investigator_id,
+        )
+        unit_of_work.commit()
+        return Message(message=message)
 
 
 @router.get(

@@ -11,8 +11,10 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.proposal import (ProposalStatusValue,
-                                         ProprietaryPeriodUpdateRequest)
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:
@@ -623,3 +625,34 @@ class PermissionService:
         if self.check_user_has_role(user, Role.ADMINISTRATOR) or user_id == user.id:
             return
         raise AuthorizationError("You are not allowed view the subscriptions.")
+
+    def check_user_is_self(self, user_id, user):
+        """
+        Ensure that the logged-in user is performing an action only on their account.
+        """
+        if user_id == user.id:
+            return
+        raise AuthorizationError(
+            "You are not allowed to perform this action on another user's account."
+        )
+
+    def check_permission_to_set_preferred_contact(
+        self, user_id: int, investigator_id: int
+    ) -> None:
+        """
+        Check that the investigator email exists and has been validated
+        before allowing it to be set as the preferred contact.
+        """
+        contact = self.user_repository.get_users_contact(
+            user_id, investigator_id
+        )
+
+        if not contact:
+            raise ValidationError(
+                f"No contact details found for investigator {investigator_id}."
+            )
+
+        if not contact["is_validated"]:
+            raise ValidationError(
+                "You cannot set this contact as preferred until it has been validated."
+            )

@@ -1,13 +1,18 @@
 from datetime import timedelta
 from typing import Any, Dict, List, Optional
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import (
+    AuthorizationError,
+    NotFoundError,
+    SSDAError,
+    ValidationError,
+)
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.authentication_service import AuthenticationService
 from saltapi.service.mail_service import MailService
 from saltapi.service.user import NewUserDetails, Role, User, UserRight
 from saltapi.settings import get_settings
-from saltapi.web.schema.user import ProposalPermissionType, Subscription
+from saltapi.web.schema.user import ProposalPermissionType, Subscription, UserContact
 
 
 class UserService:
@@ -86,6 +91,10 @@ SALT Team
                 raise ValidationError("Race is missing.")
             if user_details["has_phd"] and not user_details["year_of_phd_completion"]:
                 raise ValidationError("Year of completing PhD is missing.")
+            if not user_details["has_phd"] and user_details["year_of_phd_completion"]:
+                raise ValidationError(
+                    "A PhD year cannot be provided if the user does not have a PhD."
+                )
 
     def create_user(self, user: NewUserDetails) -> int:
         if self._does_user_exist(user.username):
@@ -238,12 +247,32 @@ SALT Team
     def update_user_roles(self, user_id: int, new_roles: List[Role]) -> None:
         self.repository.update_user_roles(user_id, new_roles)
 
-    def add_contact(self, user_id: int, contact: Dict[str, str]) -> None:
-        user_details = self.get_user_details(user_id)
-        contact["given_name"] = user_details["given_name"]
-        contact["family_name"] = user_details["family_name"]
+    def add_contact(self, user_id: int, contact: Dict[str, str]) -> int:
+        new_email = contact["email"]
+        existing_investigators = self.repository.get_user_emails(user_id)
+
+        existing_contact = next(
+            (email for email in existing_investigators if email["email"] == new_email),
+            None,
+        )
+
         investigator_id = self.repository.add_contact_details(user_id, contact)
-        self.repository.set_preferred_contact(user_id, investigator_id)
+
+        # Send validation only if email is new or existing but not yet validated
+        if not existing_contact or existing_contact["pending"] != 0:
+            validation_code = self.repository.generate_validation_code()
+            self.repository.add_email_validation(investigator_id, validation_code)
+
+        return investigator_id
+
+    def get_validation_code_if_exists(self, investigator_id: int) -> Optional[str]:
+        """
+        Return the validation code if it exists, otherwise return None.
+        """
+        try:
+            return self.get_email_validation_code(investigator_id)
+        except ValueError:
+            return None
 
     def update_subscriptions(
         self, user_id: int, subscriptions: List[Subscription]
@@ -260,6 +289,153 @@ SALT Team
 
     def get_subscriptions(self, user_id: int) -> List[Dict[str, Any]]:
         return self.repository.get_subscriptions(user_id)
+
+    def set_preferred_contact(self, user_id: int, investigator_id: int) -> str:
+        """
+        Sets a user's preferred contact.
+        """
+        preferred = self.repository.get_preferred_contact(user_id)
+        if preferred and preferred["investigator_id"] == investigator_id:
+            raise ValidationError(
+                "This email is already set as your preferred contact."
+            )
+        self.repository.set_preferred_contact(user_id, investigator_id)
+        return f"Preferred contact is successfully set"
+
+    def get_email_validation_code(self, investigator_id: int) -> str:
+        """Get validation code for a certain investigator id"""
+
+        validation_code = self.repository.get_validation_code(investigator_id)
+        if not validation_code:
+            raise ValidationError("No validation code found for this investigator.")
+        return validation_code
+
+    def validate_email(self, validation_code: str) -> str:
+        """Validate an email using its validation code."""
+        investigator = self.repository.get_investigator_by_validation_code(
+            validation_code
+        )
+        if not investigator:
+            raise ValidationError("Invalid validation code.")
+
+        investigator_id = investigator["Investigator_Id"]
+        self.repository.clear_validation_code(investigator_id)
+
+        email = investigator["Email"]
+        user_id = investigator["PiptUser_Id"]
+        user_emails = self.repository.get_user_emails(user_id)
+
+        for other in user_emails:
+            if other["email"] == email and other["pending"] != 0:
+                self.repository.clear_validation_code(other["investigator_id"])
+
+        return f"Email '{email}' successfully validated for all matching investigators."
+
+    def resend_verification_email_for_contact(self, user_id: int, email: str) -> None:
+        """
+        Resend the verification email for an unvalidated contact.
+        """
+        contacts = self.repository.get_user_emails(user_id)
+
+        contact = next((c for c in contacts if c["email"] == email), None)
+        if not contact:
+            raise NotFoundError(f"No contact found with email {email}")
+
+        if contact.get("pending") != 1:
+            raise ValidationError(f"The email {email} has already been validated.")
+
+        investigator_id = contact["investigator_id"]
+
+        validation_code = self.get_email_validation_code(investigator_id)
+
+        affected_user = self.get_user(user_id)
+
+        contact_info = {
+            "given_name": affected_user.given_name,
+            "family_name": affected_user.family_name,
+            "email": contact["email"],
+        }
+
+        self.send_contact_verification_email(contact_info, validation_code)
+
+    def create_contact(self, user_id: int, contact: UserContact) -> User:
+        """Adding contact details and sending a verification email."""
+        affected_user = self.get_user(user_id)
+        if not affected_user:
+            raise NotFoundError(f"User with ID {user_id} not found.")
+
+        new_contact = dict(contact)
+        new_contact["family_name"] = affected_user.family_name
+        new_contact["given_name"] = affected_user.given_name
+        try:
+            investigator_id = self.add_contact(user_id, new_contact)
+
+            validation_code = self.get_validation_code_if_exists(investigator_id)
+            if validation_code:
+                self.send_contact_verification_email(new_contact, validation_code)
+
+        except (ValidationError, AuthorizationError, NotFoundError):
+            raise
+        except Exception as e:
+            raise SSDAError(f"Failed to send verification email: {str(e)}")
+        return self.get_user(user_id)
+
+    def send_contact_verification_email(
+        self,
+        new_contact: Dict[str, str],
+        validation_code: str,
+    ) -> None:
+        """
+        Sends the verification email to a new contact.
+        """
+        mail_service = MailService()
+        confirm_url = (
+            f"{get_settings().frontend_uri}/verify-user-email/{validation_code}"
+        )
+
+        plain_body = f"""Dear {new_contact['given_name']} {new_contact['family_name']},
+
+Thank you for using the SALT Web Manager!
+
+A new investigator has been created for you.
+  Name: {new_contact['given_name']} {new_contact['family_name']}
+  Email: {new_contact['email']}
+
+Please confirm your email address by pointing your browser to the following URL:
+{confirm_url}
+
+If you have any questions, please feel free to reply to this email.
+
+Sincerely,
+SALT Team
+"""
+        html_body = f"""
+<html>
+  <body>
+    <p>Dear {new_contact['given_name']} {new_contact['family_name']},</p>
+    <p>Thank you for using the SALT Web Manager!</p>
+    <p>A new investigator has been created for you.</p>
+    <ul>
+      <li>Name: {new_contact['given_name']} {new_contact['family_name']}</li>
+      <li>Email: {new_contact['email']}</li>
+    </ul>
+    <p>Please confirm your email address by pointing your browser to the following URL:</p>
+    <p><a href="{confirm_url}">{confirm_url}</a></p>
+    <p>If you have any questions, please feel free to reply to this email.</p>
+    <p>Sincerely,</p>
+    <p>SALT Team</p>
+  </body>
+</html>
+"""
+        message = mail_service.generate_email(
+            to=(
+                f"{new_contact['given_name']} {new_contact['family_name']} <{new_contact['email']}>"
+            ),
+            html_body=html_body,
+            plain_body=plain_body,
+            subject="SALT Web Manager Email Confirmation",
+        )
+        mail_service.send_email(to=[new_contact["email"]], message=message)
 
     def update_rights(self, user_id: int, rights: List[Dict[str, Any]]) -> None:
         """

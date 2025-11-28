@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional
+
 from saltapi.web.schema.user import UserRight
 
 
@@ -50,6 +51,7 @@ class Institution:
     institution: str
     department: Optional[str]
     partner_code: str
+
 
 @dataclass()
 class UserDemographics:

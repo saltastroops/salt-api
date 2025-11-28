@@ -1,6 +1,7 @@
 import enum
 import hashlib
 import secrets
+import string
 import uuid
 from typing import Any, Dict, List, Optional, cast
 
@@ -10,7 +11,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
-from saltapi.service.user import Role, User, UserRight, RIGHT_DB_NAMES
+from saltapi.service.user import RIGHT_DB_NAMES, Role, User, UserRight
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "md5_crypt"], default="bcrypt", deprecated="auto"
@@ -28,6 +29,7 @@ class UserRepository:
 SELECT PU.PiptUser_Id           AS id,
        I1.Email                 AS preferred_email,
        I0.Email                 AS email,
+       I0.Investigator_Id       AS investigator_id,
        I1.Surname               AS family_name,
        I1.FirstName             AS given_name,
        PU.Password              AS password_hash,
@@ -38,13 +40,18 @@ SELECT PU.PiptUser_Id           AS id,
        I2.Institute_Id          AS institution_id,
        I2.Department            AS department,
        PU.Active                AS active,
-       PU.UserVerified          AS user_verified
+       PU.UserVerified          AS user_verified,
+       CASE 
+            WHEN PEV.ValidationCode IS NULL THEN TRUE
+            ELSE FALSE
+        END AS is_contact_validated
 FROM PiptUser AS PU
          JOIN Investigator I0 ON PU.PiptUser_Id = I0.PiptUser_Id
          JOIN Investigator I1 ON PU.Investigator_Id = I1.Investigator_Id
          JOIN Institute I2 ON I0.Institute_Id = I2.Institute_Id
          JOIN Partner P ON I2.Partner_Id = P.Partner_Id
          JOIN InstituteName I ON I2.InstituteName_Id = I.InstituteName_Id
+         LEFT JOIN PiptEmailValidation PEV ON I0.Investigator_Id = PEV.Investigator_Id
 """
 
     def _get(self, rows: Any) -> Optional[User]:
@@ -70,10 +77,14 @@ FROM PiptUser AS PU
                     "department": row.department,
                     "partner_code": row.partner_code,
                     "partner_name": row.partner_name,
+                    "investigator_id": row.investigator_id,
+                    "is_contact_validated": row.is_contact_validated,
                 }
             )
         if user:
-            return User(**user, roles=self.get_user_roles(user["username"]), demographics=None)
+            return User(
+                **user, roles=self.get_user_roles(user["username"]), demographics=None
+            )
         return None
 
     def get_by_username(self, username: str) -> Optional[User]:
@@ -330,7 +341,7 @@ WHERE US.PiptUser_Id = :user_id
                 "year_of_phd_completion": row["year_of_phd"],
             }
         except NoResultFound:
-            new_user_details =  {
+            new_user_details = {
                 "email": user.email,
                 "given_name": user.given_name,
                 "family_name": user.family_name,
@@ -340,7 +351,6 @@ WHERE US.PiptUser_Id = :user_id
                 "has_phd": None,
                 "year_of_phd_completion": None,
             }
-
 
         return new_user_details
 
@@ -644,20 +654,6 @@ WHERE PS.PiptSetting_Name = 'RightLibrarian'
         )
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
-
-    def get_all_rights(self, username: str) -> set[str]:
-        stmt = text(
-            """
-            SELECT PS.PiptSetting_Name
-            FROM PiptUser PU
-                JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
-                JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
-            WHERE PU.Username = :username
-            AND PUS.Value > 0
-        """
-        )
-        result = self.connection.execute(stmt, {"username": username})
-        return {row[0] for row in result.fetchall()}
 
     @staticmethod
     def get_password_hash(password: str) -> str:
@@ -1368,6 +1364,84 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
             },
         ]
 
+    def get_user_emails(self, user_id: int) -> List[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT 
+                I.Investigator_Id AS investigator_id,
+                I.Email AS email,
+                CASE 
+                    WHEN P.ValidationCode IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END AS pending
+            FROM Investigator I
+            LEFT JOIN PiptEmailValidation P
+                ON P.Investigator_Id = I.Investigator_Id
+            WHERE I.PiptUser_Id = :user_id
+            """
+        )
+        result = self.connection.execute(stmt, {"user_id": user_id})
+        return [dict(row) for row in result.fetchall()]
+
+    def generate_validation_code(self, length: int = 20) -> str:
+        """Generate a random validation code containing letters and digits."""
+        chars = string.ascii_letters + string.digits
+        return "".join(secrets.choice(chars) for _ in range(length))
+
+    def add_email_validation(self, investigator_id: int, validation_code: str) -> None:
+        """Insert validation code for an Investigator."""
+        stmt = text(
+            """
+            INSERT INTO PiptEmailValidation (Investigator_Id, ValidationCode)
+            VALUES (:investigator_id, :validation_code)
+            """
+        )
+        self.connection.execute(
+            stmt,
+            {"investigator_id": investigator_id, "validation_code": validation_code},
+        )
+
+    def get_validation_code(self, investigator_id: int) -> str:
+        """Return validation code for an investigator."""
+        stmt = text(
+            """
+            SELECT ValidationCode
+            FROM PiptEmailValidation
+            WHERE Investigator_Id = :investigator_id
+            """
+        )
+        result = self.connection.execute(
+            stmt, {"investigator_id": investigator_id}
+        ).fetchone()
+        if result:
+            return result["ValidationCode"]
+        raise ValueError(f"No validation code found for Investigator {investigator_id}")
+
+    def clear_validation_code(self, investigator_id: int) -> None:
+        stmt = text(
+            """
+            DELETE FROM PiptEmailValidation
+            WHERE Investigator_Id = :investigator_id
+        """
+        )
+        self.connection.execute(stmt, {"investigator_id": investigator_id})
+
+    def get_investigator_by_validation_code(
+        self, validation_code: str
+    ) -> Optional[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT I.Investigator_Id, I.PiptUser_Id, P.ValidationCode, I.Email
+            FROM Investigator I
+            LEFT JOIN PiptEmailValidation P ON P.Investigator_Id = I.Investigator_Id
+            WHERE P.ValidationCode = :validation_code
+        """
+        )
+        result = self.connection.execute(
+            stmt, {"validation_code": validation_code}
+        ).fetchone()
+        return dict(result) if result else None
+
     def get_user_rights(self, user_id: int) -> List[Dict[str, Any]]:
         stmt = text(
             """
@@ -1401,3 +1475,49 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         self.connection.execute(
             stmt, {"user_id": user_id, "right_name": right, "value": int(grant)}
         )
+
+    def get_users_contact(
+        self, user_id: int, investigator_id: int
+    ) -> Optional[Dict[str, Any]]:
+        stmt = text(
+            """
+            SELECT 
+                I.Investigator_Id AS investigator_id,
+                I.Email AS email,
+                CASE 
+                    WHEN P.ValidationCode IS NULL THEN TRUE
+                    ELSE FALSE
+                END AS is_validated
+            FROM Investigator I
+            LEFT JOIN PiptEmailValidation P
+                ON P.Investigator_Id = I.Investigator_Id
+            WHERE
+                I.PiptUser_Id = :user_id
+                AND I.Investigator_Id = :investigator_id
+            """
+        )
+
+        result = self.connection.execute(
+            stmt,
+            {"user_id": user_id, "investigator_id": investigator_id},
+        ).fetchone()
+
+        return dict(result) if result else None
+
+    def get_preferred_contact(self, user_id: int) -> dict | None:
+        stmt = text(
+            """
+            SELECT 
+                PU.PiptUser_Id      AS user_id,
+                I.Email             AS preferred_email,
+                I.Investigator_Id   AS investigator_id
+            FROM PiptUser AS PU
+            JOIN Investigator I
+                ON PU.Investigator_Id = I.Investigator_Id
+            WHERE PU.PiptUser_Id = :user_id
+            """
+        )
+
+        result = self.connection.execute(stmt, {"user_id": user_id}).fetchone()
+
+        return dict(result) if result else None

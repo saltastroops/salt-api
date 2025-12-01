@@ -66,7 +66,9 @@ def proposal_service(connection: Connection) -> ProposalService:
 def data_service(connection: Connection) -> DataService:
     """Return a data service instance."""
     data_repository = DataRepository(connection)
-    return DataService(data_repository)
+    proposal_repository = ProposalRepository(connection)
+    user_repository = UserRepository(connection)
+    return DataService(data_repository, proposal_repository, user_repository)
 
 
 def user_service(connection: Connection) -> UserService:

@@ -543,13 +543,24 @@ class PermissionService:
     def check_permission_to_request_data(
         self, user: User, proposal_code: str, block_visit_ids: List[int]
     ) -> None:
-        roles = [
-            Role.ADMINISTRATOR,
-            Role.SALT_ASTRONOMER,
-            Role.PRINCIPAL_INVESTIGATOR,
-            Role.PRINCIPAL_CONTACT,
-            Role.INVESTIGATOR,
-        ]
+        proposal_type = self.proposal_repository.get_proposal_type(proposal_code)
+
+        if proposal_type != "Gravitational Wave Event":
+            roles = [
+                Role.ADMINISTRATOR,
+                Role.SALT_ASTRONOMER,
+                Role.PRINCIPAL_INVESTIGATOR,
+                Role.PRINCIPAL_CONTACT,
+                Role.INVESTIGATOR,
+            ]
+        else:
+            # Gravitational wave event proposals are a special case; they can be
+            # viewed by anyone who belongs to a SALT partner.
+            roles = [
+                Role.ADMINISTRATOR,
+                Role.SALT_ASTRONOMER,
+                Role.PARTNER_AFFILIATED,
+            ]
         self.check_role(user.username, roles, proposal_code)
         proposal_block_visit_ids = [
             bv["id"] for bv in self.proposal_repository.block_visits(proposal_code)

@@ -32,7 +32,7 @@ def get_user_authentication_function() -> Callable[[str, str], User]:
                 unit_of_work.connection
             )
             if username == "gw":
-                raise AuthenticationError("User cannot be Authenticated.")
+                raise AuthenticationError("User cannot be authenticated.")
             user = authentication_service.authenticate_user(username, password)
             return user
 
@@ -152,6 +152,8 @@ def switch_user(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_switch_user(user)
 
+        if user_switch.username == "gw":
+            raise AuthenticationError("You’re not allowed to switch to this user.")
         user_service = services.user_service(unit_of_work.connection)
         user = user_service.get_user_by_username(user_switch.username)
         if user is not None:

@@ -433,7 +433,7 @@ WHERE PC.Proposal_Code = :proposal_code
         dt = result.scalar_one()
         if type(dt) == date:
             dt = datetime.combine(dt, time.min)
-        return cast(datetime, dt)
+        return cast(datetime, dt).astimezone(timezone.utc)
 
     def _latest_submission_date(self, proposal_code: str) -> datetime:
         """Return the date and time when the latest submission was made."""
@@ -448,7 +448,7 @@ LIMIT 1
         """
         )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        return cast(datetime, result.scalar_one())
+        return cast(datetime, result.scalar_one()).astimezone(timezone.utc)
 
     def _latest_submission(self, proposal_code: str) -> int:
         """

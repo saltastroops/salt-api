@@ -557,11 +557,9 @@ class PermissionService:
             # Gravitational wave event proposals are a special case; they can be
             # viewed by anyone who belongs to a SALT partner.
             roles = [
-                Role.SALT_ASTRONOMER,
-                Role.SALT_OPERATOR,
-                Role.PARTNER_AFFILIATED,
                 Role.ADMINISTRATOR,
-                Role.LIBRARIAN,
+                Role.SALT_ASTRONOMER,
+                Role.PARTNER_AFFILIATED,
             ]
         self.check_role(user.username, roles, proposal_code)
         proposal_block_visit_ids = [

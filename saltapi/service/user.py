@@ -104,7 +104,9 @@ class UserDetails(UserDemographics):
 
 
 @dataclass(frozen=True)
-class UserUpdate(UserDetails):
+class UserUpdate(UserDemographics):
+    given_name: str
+    family_name: str
     password: Optional[str]
 
 

@@ -1157,7 +1157,7 @@ SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id
     def _add_salt_astronomer(self, user: User):
         stmt = text(
             """
-INSERT INTO SaltAstronomer (Investigator_Id)
+INSERT INTO SaltAstronomers (Investigator_Id)
 VALUES (:investigator_id)
        """
         )
@@ -1168,7 +1168,7 @@ VALUES (:investigator_id)
     def _remove_salt_astronomer(self, user: User):
         stmt = text(
             """
-DELETE FROM SaltAstronomer
+DELETE FROM SaltAstronomers
 WHERE Investigator_id = :investigator_id
        """
         )

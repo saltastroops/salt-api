@@ -31,6 +31,8 @@ def get_user_authentication_function() -> Callable[[str, str], User]:
             authentication_service = services.authentication_service(
                 unit_of_work.connection
             )
+            if username == "gw":
+                raise AuthenticationError("User cannot be Authenticated.")
             user = authentication_service.authenticate_user(username, password)
             return user
 

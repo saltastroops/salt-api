@@ -553,7 +553,6 @@ class PermissionService:
                 Role.PRINCIPAL_CONTACT,
                 Role.INVESTIGATOR,
             ]
-            self.check_role(user.username, roles, proposal_code)
         else:
             # Gravitational wave event proposals are a special case; they can be
             # viewed by anyone who belongs to a SALT partner.

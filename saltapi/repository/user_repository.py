@@ -269,18 +269,10 @@ WHERE Investigator_Id = :investigator_id
         Updates a user's details.
 
         If the user id does not exist, a NotFoundError is raised.
-        If the email exists already and belongs to another user, a ValueError is raised.
 
         """
         if not self.is_existing_user_id(user_id):
             raise NotFoundError(f"Unknown user id: {user_id}")
-
-        user = self.get_by_email(user_update["email"])
-        if user is not None:
-            if user.id != user_id:
-                raise ResourceExistsError(
-                    f"The email {user_update['email']} exists already."
-                )
 
         if user_update["password"]:
             self.update_password(user_id, user_update["password"])
@@ -705,8 +697,7 @@ WHERE PiptUser_Id = :user_id
             """
 UPDATE Investigator
 SET FirstName = :given_name,
-    Surname   = :family_name,
-    Email     = :email
+    Surname   = :family_name
 WHERE Investigator_Id =
       (SELECT Investigator_Id FROM PiptUser WHERE PiptUser_Id = :user_id)
              """
@@ -719,16 +710,10 @@ WHERE Investigator_Id =
                     "user_id": user_id,
                     "given_name": user_update["given_name"],
                     "family_name": user_update["family_name"],
-                    "email": user_update["email"],
                 },
             )
         except NoResultFound:
             raise NotFoundError(f"No such user id: {user_id}")
-        except IntegrityError:
-            raise ValidationError(
-                f"There are contact details with this email address and institute"
-                f" already."
-            )
 
     @staticmethod
     def get_new_password_hash(password: str) -> str:

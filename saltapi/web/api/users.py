@@ -195,7 +195,6 @@ def update_user(
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_user(user, user_id)
         _user_update = _UserUpdate(
-            email=user_update.email,
             family_name=user_update.family_name,
             given_name=user_update.given_name,
             password=user_update.password,

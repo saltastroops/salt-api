@@ -73,7 +73,9 @@ FROM PiptUser AS PU
                 }
             )
         if user:
-            return User(**user, roles=self.get_user_roles(user["username"]), demographics=None)
+            return User(
+                **user, roles=self.get_user_roles(user["username"]), demographics=None
+            )
         return None
 
     def get_by_username(self, username: str) -> Optional[User]:
@@ -330,7 +332,7 @@ WHERE US.PiptUser_Id = :user_id
                 "year_of_phd_completion": row["year_of_phd"],
             }
         except NoResultFound:
-            new_user_details =  {
+            new_user_details = {
                 "email": user.email,
                 "given_name": user.given_name,
                 "family_name": user.family_name,
@@ -340,7 +342,6 @@ WHERE US.PiptUser_Id = :user_id
                 "has_phd": None,
                 "year_of_phd_completion": None,
             }
-
 
         return new_user_details
 
@@ -608,14 +609,34 @@ WHERE PU.Username = :username
         """
         stmt = text(
             """
-SELECT COUNT(*)
-FROM PiptUser PU
-    JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
-    JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
-WHERE PS.PiptSetting_Name = 'RightAdmin'
-    AND PUS.Value > 1
-    AND PU.Username = :username
+            SELECT COUNT(*)
+            FROM PiptUser PU
+                     JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+                     JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PS.PiptSetting_Name = 'RightAdmin'
+              AND PUS.Value > 1
+              AND PU.Username = :username
+            """
+        )
+        result = self.connection.execute(stmt, {"username": username})
+        return cast(int, result.scalar()) > 0
+
+    def is_mask_cutter(self, username: str) -> bool:
         """
+        Check whether the user is a mask cutter.
+
+        If the user does not exist, it is assumed they are no mask cutter.
+        """
+        stmt = text(
+            """
+            SELECT COUNT(*)
+            FROM PiptUser PU
+                     JOIN PiptUserSetting PUS ON PU.PiptUser_Id = PUS.PiptUser_Id
+                     JOIN PiptSetting PS ON PUS.PiptSetting_Id = PS.PiptSetting_Id
+            WHERE PS.PiptSetting_Name = 'RightMaskCutting'
+              AND PUS.Value > 1
+              AND PU.Username = :username
+            """
         )
         result = self.connection.execute(stmt, {"username": username})
         return cast(int, result.scalar()) > 0
@@ -780,6 +801,9 @@ WHERE Investigator_Id =
 
         if self.is_salt_operator(username):
             roles.append(Role.SALT_OPERATOR)
+
+        if self.is_mask_cutter(username):
+            roles.append(Role.MASK_CUTTER)
 
         if self.is_engineer():
             roles.append(Role.ENGINEER)

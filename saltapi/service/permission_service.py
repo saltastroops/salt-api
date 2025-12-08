@@ -11,8 +11,10 @@ from saltapi.repository.user_repository import UserRepository
 from saltapi.repository.utils import Utils
 from saltapi.service.user import Role, User
 from saltapi.settings import get_settings
-from saltapi.web.schema.proposal import (ProposalStatusValue,
-                                         ProprietaryPeriodUpdateRequest)
+from saltapi.web.schema.proposal import (
+    ProposalStatusValue,
+    ProprietaryPeriodUpdateRequest,
+)
 
 
 class PermissionService:
@@ -378,12 +380,18 @@ class PermissionService:
 
         * a SALT Astronomer
         * an administrator
+        * a mask cutter
         * an engineer
         """
 
         username = user.username
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.MASK_CUTTER,
+            Role.ENGINEER,
+        ]
 
         self.check_role(username, roles)
 
@@ -393,7 +401,12 @@ class PermissionService:
         """
         username = user.username
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.MASK_CUTTER,
+            Role.ENGINEER,
+        ]
 
         self.check_role(username, roles)
 
@@ -402,7 +415,12 @@ class PermissionService:
         Check that the user can view the obsolete masks in the magazine.
         """
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.MASK_CUTTER,
+            Role.ENGINEER,
+        ]
 
         self.check_role(user.username, roles)
 

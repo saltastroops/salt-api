@@ -20,6 +20,7 @@ class UserRole(str, Enum):
     SALT_ASTRONOMER = "SALT Astronomer"
     SALT_OPERATOR = "SALT Operator"
     ADMINISTRATOR = "Administrator"
+    MASK_CUTTER = "Mask Cutter"
     ENGINEER = "Engineer"
     TAC_MEMBER = "TAC Member"
     TAC_CHAIR = "TAC Chair"
@@ -42,6 +43,7 @@ class UserListItem(FullName):
 
     id: int = Field(..., title="User id", description="User id.")
     username: str = Field(..., title="Username", description="The username.")
+
 
 class LegalStatus(str, Enum):
     """
@@ -84,7 +86,7 @@ class User(FullName):
     demographics: Optional[UserDemographics] = Field(
         None,
         title="User Demographics",
-        description="Information about user's legal status in South Africa"
+        description="Information about user's legal status in South Africa",
     )
 
 

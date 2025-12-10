@@ -77,7 +77,7 @@ class InstrumentService:
         cmd = [
             settings.java_command,
             "-jar",
-            f"{settings.gcode_dir}/{settings.xml_to_gcode_jar}",
+            f"{settings.xml_to_gcode_jar_path}",
             f"--slow-cutting-power={slow_cutting_power}",
             f"--xml={xml_file}",
             f"--gcode={tmp_file}",

@@ -126,11 +126,26 @@ class NewUserDetails(BaseUserDetails):
     )
 
 
-class UserUpdate(BaseUserDetails):
+class UserUpdate(BaseModel):
     """
     Details for updating a user.
     """
 
+    given_name: str = Field(..., title="Given name", description="Given name.")
+    family_name: str = Field(..., title="Family name", description="Family name.")
+    legal_status: LegalStatus = Field(
+        ..., title="Legal status", description="The legal status in South Africa"
+    )
+    gender: Optional[str] = Field(..., title="Gender", description="Gender.")
+    race: Optional[str] = Field(..., title="Race", description="Race.")
+    has_phd: Optional[bool] = Field(
+        ..., title="PhD", description="Does the user has a PhD?"
+    )
+    year_of_phd_completion: Optional[int] = Field(
+        None,
+        title="Year of PhD degree completion",
+        description="The year the PhD degree was completed",
+    )
     password: Optional[str] = Field(None, title="Password", description="Password.")
 
 

@@ -48,6 +48,9 @@ class PermissionService:
         elif role == Role.BOARD_MEMBER:
             return self.user_repository.is_board_member(username)
 
+        elif role == Role.MASK_CUTTER:
+            return self.user_repository.is_mask_cutter(username)
+
         elif role == Role.ENGINEER:
             return self.user_repository.is_engineer()
 

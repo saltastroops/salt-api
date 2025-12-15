@@ -137,7 +137,7 @@ def get_constraints(
 
 
 @router.get(
-    "/nirwals/flat_details",
+    "/nirwals/flat-details",
     summary="Get NIRWALS flat field calibration details",
     response_model=NirwalsFlatDetailsSetup,
 )
@@ -151,7 +151,7 @@ def get_nirwals_flat_details() -> NirwalsFlatDetailsSetup:
 
 
 @router.get(
-    "/nirwals/arc_details",
+    "/nirwals/arc-details",
     summary="Get NIRWALS arc lamp calibration details",
     response_model=NirwalsArcDetailsSetup,
 )
@@ -165,7 +165,7 @@ def get_nirwals_arc_details() -> NirwalsArcDetailsSetup:
 
 
 @router.get(
-    "/rss/arc_details",
+    "/rss/arc-details",
     summary="Get RSS arc calibration details",
     response_model=RssArcDetailsSetup,
 )

@@ -191,7 +191,7 @@ def get_rss_ring_details() -> RssRingDetailsSetup:
 
 
 @router.get(
-    "/smi-flat-details",
+    "/rss/smi-flat-details",
     summary="Get SMI flat field calibration details",
     response_model=SmiFlatDetailsSetup,
 )
@@ -205,7 +205,7 @@ def get_smi_flat_details() -> SmiFlatDetailsSetup:
 
 
 @router.get(
-    "/smi-arc-details",
+    "/rss/smi-arc-details",
     summary="Get SMI arc calibration details",
     response_model=SmiArcDetailsSetup,
 )

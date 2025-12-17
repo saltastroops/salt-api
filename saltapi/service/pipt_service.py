@@ -123,3 +123,7 @@ class PiptService:
             limit=limit,
             descending=descending,
         )
+
+    def get_partners(self):
+        """Fetch the partner information."""
+        return self.pipt_repository.get_partners()

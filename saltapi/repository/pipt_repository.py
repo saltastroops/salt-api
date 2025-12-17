@@ -584,8 +584,7 @@ class PiptRepository:
         return list(self.connection.execute(stmt))
 
     def get_smi_allowed_lamp_setups(self) -> List[Dict[str, Any]]:
-        """Return allowed arc lamp setups grouped by grating, art station number, pre-bin rows, and pre-bin columns.
-        """
+        """Return allowed arc lamp setups grouped by grating, art station number, pre-bin rows, and pre-bin columns."""
         meta_map = self._get_smi_arc_bible_setup()
         raw_data = self._get_smi_allowed_lamp_setups_raw()
 
@@ -957,3 +956,45 @@ class PiptRepository:
                 }
             )
         return proposals_list
+
+    def get_partners(self):
+        """
+        Return the partner details.
+
+        For every partner the name and the list of institutes are included. The list is
+        sorted by partner name, and for each partner the institutes are sorted by
+        institute name and department.
+
+        Returns
+        -------
+        The partner details.
+        """
+        sql = """
+SELECT P.Partner_Code           AS partner_code,
+       P.Partner_Name           AS partner_name,
+       IName.InstituteName_Name AS institute_name,
+       I.Department             AS department
+FROM Partner P
+         JOIN Institute I ON P.Partner_Id = I.Partner_Id
+         JOIN InstituteName IName ON I.InstituteName_Id = IName.InstituteName_Id
+ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
+        """
+        result = self.connection.execute(text(sql))
+
+        # Collect the results by partner in a dictionary
+        partners_dict = {}
+        for row in result:
+            partner_code = row.partner_code
+            if partner_code not in partners_dict:
+                partners_dict[partner_code] = {
+                    "name": row.partner_name,
+                    "institutes": [],
+                }
+            partners_dict[partner_code]["institutes"].append(
+                {"name": row.institute_name, "department": row.department}
+            )
+
+        # Turn the dictionary into a list and sort the result. The instruments are
+        # sorted already as they were returned sorted by the SQL query.
+        partners = sorted(partners_dict.values(), key=lambda v: v["name"])
+        return partners

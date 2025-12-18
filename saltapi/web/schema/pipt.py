@@ -408,3 +408,25 @@ class PiptProposal(BaseModel):
             "Investigator Proposal Tool"
         ),
     )
+
+
+class PiptInstitute(BaseModel):
+    """Institute details, as needed by the PIPT."""
+
+    name: str = Field(..., title="Name", description="The name of the institute.")
+    department: Optional[str] = Field(
+        None, title="Department", description="The name of the department."
+    )
+
+
+class PiptPartner(BaseModel):
+    """Partner details, as needed by the PIPT."""
+
+    name: str = Field(
+        ...,
+        title="Name",
+        description='The full name of the partner, such as "University of Wisconsin-Madison".',
+    )
+    institutes: List[PiptInstitute] = Field(
+        ..., title="Institutes", description="The institutes belonging to the partner."
+    )

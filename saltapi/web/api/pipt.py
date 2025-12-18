@@ -13,6 +13,7 @@ from saltapi.web.schema.pipt import (
     NirwalsFlatDetailsSetup,
     PiptBlockVisit,
     PiptNewsItem,
+    PiptPartner,
     PiptProposal,
     PiptProposalInfo,
     PiptTimeAllocation,
@@ -284,3 +285,19 @@ def get_pipt_proposals(
         )
 
         return proposals
+
+
+@router.get("/partners", summary="Get partners", response_model=List[PiptPartner])
+def get_partners(
+    user: User = Depends(get_current_user),
+):
+    """
+        Get the partner details.
+
+        For every partner the name and the list of institutes are included. The list is
+        sorted by partner name, and for each partner the institutes are sorted by
+        institute name and department.
+    ="""
+    with UnitOfWork() as unit_of_work:
+        pipt_service = services.pipt_service(unit_of_work.connection)
+        return pipt_service.get_partners()

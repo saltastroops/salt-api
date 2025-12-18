@@ -994,7 +994,7 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
                 {"name": row.institute_name, "department": row.department}
             )
 
-        # Turn the dictionary into a list and sort the result. The instruments are
+        # Turn the dictionary into a list and sort the result. The institutes are
         # sorted already as they were returned sorted by the SQL query.
         partners = sorted(partners_dict.values(), key=lambda v: v["name"])
         return partners

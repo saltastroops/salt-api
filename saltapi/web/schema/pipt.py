@@ -415,7 +415,7 @@ class PiptInstitute(BaseModel):
 
     name: str = Field(..., title="Name", description="The name of the institute.")
     department: Optional[str] = Field(
-        ..., title="Department", description="The name of the department."
+        None, title="Department", description="The name of the department."
     )
 
 

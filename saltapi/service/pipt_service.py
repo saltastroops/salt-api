@@ -111,7 +111,7 @@ class PiptService:
         self,
         user: User,
         phase: Optional[int] = None,
-        limit: int = 250,
+        limit: Optional[int] = None,
         descending: bool = False,
     ) -> List[Dict[str, Any]]:
         """

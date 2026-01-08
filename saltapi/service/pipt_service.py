@@ -112,7 +112,7 @@ class PiptService:
         user: User,
         phase: Optional[int] = None,
         limit: Optional[int] = None,
-        descending: bool = False,
+        descending: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals, optionally filtered by phase.

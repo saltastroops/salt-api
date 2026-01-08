@@ -842,7 +842,7 @@ class PiptRepository:
         user: User,
         phase: Optional[int] = None,
         limit: Optional[int] = None,
-        descending: bool = False,
+        descending: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals with optional filters for phase and proposal_code.

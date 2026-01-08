@@ -990,8 +990,13 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
                     "name": row.partner_name,
                     "institutes": [],
                 }
+            department = row.department
+            if department is not None:
+                department = department.strip()
+            if department == "":
+                department = None
             partners_dict[partner_code]["institutes"].append(
-                {"name": row.institute_name, "department": row.department}
+                {"name": row.institute_name, "department": department}
             )
 
         # Turn the dictionary into a list and sort the result. The institutes are

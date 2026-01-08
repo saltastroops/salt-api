@@ -303,7 +303,7 @@ LIMIT :limit;
             "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
             "phase1_proposal_summary": summary_url,
-            "proposal_file": f"/proposals/{proposal_code}.zip",
+            "proposal_file": ProposalRepository.proposal_file_url(proposal_code),
         }
         return proposal
 
@@ -319,6 +319,10 @@ LIMIT :limit;
             )
         except NoResultFound:
             raise NotFoundError()
+
+    @staticmethod
+    def proposal_file_url(proposal_code: str) -> str:
+        return f"/proposals/{proposal_code}.zip"
 
     def _semesters(self, proposal_code: str) -> List[str]:
         """
@@ -344,20 +348,20 @@ ORDER BY S.Year, S.Semester;
         semesters = sorted(result, reverse=True)
 
         return semesters
-    
+
     def _phases(self, proposal_code: str) -> List[int]:
         """
         Return a list of phases (1 or 2) for a given proposal.
         """
         stmt = text(
-        """
+            """
         SELECT DISTINCT P.Phase
         FROM ProposalCode PC
         JOIN Proposal P ON PC.ProposalCode_Id = P.ProposalCode_Id
         WHERE PC.Proposal_Code = :proposal_code
         ORDER BY P.Phase
         """
-    )
+        )
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         phases = list(result.scalars())
         return phases
@@ -588,8 +592,11 @@ WHERE PC.Proposal_Code = :proposal_code
             info["liaison_salt_astronomer"] = None
         return info
 
-    def _get_deadlines_and_submissions(self, proposal_code: str, semester: str) -> Dict[str, Any]:
-        stmt = text("""
+    def _get_deadlines_and_submissions(
+        self, proposal_code: str, semester: str
+    ) -> Dict[str, Any]:
+        stmt = text(
+            """
 SELECT
     P.SubmissionDate        AS submission_date,
     P.Submission            AS submission_number,
@@ -602,7 +609,8 @@ WHERE P.Phase = 1
     AND SP.Phase = 1
     AND CONCAT(S.Year, '-', S.Semester) = :semester
     AND PC.Proposal_Code = :proposal_code
-        """)
+        """
+        )
         results = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -610,19 +618,17 @@ WHERE P.Phase = 1
         deadline = None
         for row in results:
             deadline = datetime.combine(
-                row.deadline,
-                time(16, 0, 0, tzinfo=timezone.utc)
+                row.deadline, time(16, 0, 0, tzinfo=timezone.utc)
             )
             submissions.append(
                 {
                     "submission_date": row.submission_date,
-                    "submission_number": row.submission_number
+                    "submission_number": row.submission_number,
                 }
             )
         return {
             "phase_1_submission_deadline": deadline,
-            "phase_1_submissions": submissions
-
+            "phase_1_submissions": submissions,
         }
 
     def _general_info(self, proposal_code: str, semester: str) -> Dict[str, Any]:
@@ -631,7 +637,9 @@ WHERE P.Phase = 1
         """
         proposal_text = self._proposal_text(proposal_code, semester)
         general_info = self._proposal_general_info(proposal_code, semester)
-        submissions_deadline = self._get_deadlines_and_submissions(proposal_code, semester)
+        submissions_deadline = self._get_deadlines_and_submissions(
+            proposal_code, semester
+        )
 
         return {
             **proposal_text,
@@ -640,7 +648,7 @@ WHERE P.Phase = 1
             "first_submission": self._first_submission_date(proposal_code),
             "submission_number": self._latest_submission(proposal_code),
             "semesters": self._semesters(proposal_code),
-            "phases": self._phases(proposal_code)
+            "phases": self._phases(proposal_code),
         }
 
     def _investigators(self, proposal_code: str) -> List[Dict[str, Any]]:

@@ -32,7 +32,7 @@ class PiptRepository:
         result = self.connection.execute(stmt, {"days": days})
         news_items = [
             {
-                "date": row.time,
+                "date": pytz.utc.localize(row.time),
                 "title": row.title,
                 "text": row.text,
             }

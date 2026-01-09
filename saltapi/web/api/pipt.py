@@ -18,6 +18,7 @@ from saltapi.web.schema.pipt import (
     PiptProposalInfo,
     PiptTimeAllocation,
     PiptUserInfo,
+    PiptVersion,
     PreviousProposalListItem,
     RssArcDetailsSetup,
     RssRingDetailsSetup,
@@ -301,3 +302,17 @@ def get_partners(
     with UnitOfWork() as unit_of_work:
         pipt_service = services.pipt_service(unit_of_work.connection)
         return pipt_service.get_partners()
+
+
+@router.get(
+    "/current-version",
+    summary="Get the current PIPT version",
+    response_model=PiptVersion,
+)
+def get_current_version():
+    """
+    Get the current PIPT version.
+    """
+    with UnitOfWork() as unit_of_work:
+        pipt_service = services.pipt_service(unit_of_work.connection)
+        return pipt_service.get_current_version()

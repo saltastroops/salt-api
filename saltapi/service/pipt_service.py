@@ -127,3 +127,7 @@ class PiptService:
     def get_partners(self):
         """Fetch the partner information."""
         return self.pipt_repository.get_partners()
+
+    def get_current_version(self):
+        """Fetch the current PIPT version."""
+        return self.pipt_repository.get_current_version()

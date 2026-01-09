@@ -430,3 +430,11 @@ class PiptPartner(BaseModel):
     institutes: List[PiptInstitute] = Field(
         ..., title="Institutes", description="The institutes belonging to the partner."
     )
+
+
+class PiptVersion(BaseModel):
+    """PIPT version."""
+
+    version: str = Field(
+        ..., title="PIPT version", description="A version number for the PIPT."
+    )

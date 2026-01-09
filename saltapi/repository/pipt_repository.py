@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytz
 from sqlalchemy import text
@@ -998,3 +998,21 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
         # sorted already as they were returned sorted by the SQL query.
         partners = sorted(partners_dict.values(), key=lambda v: v["name"])
         return partners
+
+    def get_current_version(self) -> dict:
+        """
+        Return the current PIPT version.
+
+        Returns
+        -------
+        """
+
+        sql = """
+    SELECT Pipt
+    FROM PiptVersions
+    ORDER BY DateActive DESC
+    LIMIT 1
+        """
+        result = self.connection.execute(text(sql))
+        version = float(result.scalar_one())
+        return {"version": str(round(version, 7))}

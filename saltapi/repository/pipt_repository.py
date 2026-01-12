@@ -83,8 +83,7 @@ class PiptRepository:
         for row in rows:
             constraints.append(
                 {
-                    "year": row.year,
-                    "semester": row.semester,
+                    "semester": f"{row.year}-{row.semester}",
                     "priority": row.priority,
                     "moon": row.moon,
                     "allocated_time": row.allocated_time,

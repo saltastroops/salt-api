@@ -121,8 +121,7 @@ def get_constraints(
         title="Proposal code",
         description="Proposal code of the returned constraints.",
     ),
-    year: Optional[int] = Query(None, description="Optional year"),
-    semester: Optional[int] = Query(None, description="Optional semester"),
+    semester: Optional[Semester] = Query(None, description="Optional semester"),
     user: User = Depends(get_current_user),
 ) -> List[PiptTimeAllocation]:
     """
@@ -134,7 +133,7 @@ def get_constraints(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
         pipt_service = services.pipt_service(unit_of_work.connection)
 
-        return pipt_service.get_proposal_constraints(proposal_code, year, semester)
+        return pipt_service.get_proposal_constraints(proposal_code, semester)
 
 
 @router.get(

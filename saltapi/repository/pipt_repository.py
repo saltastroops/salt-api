@@ -840,7 +840,7 @@ class PiptRepository:
     def get_proposals(
         self,
         user: User,
-        phase: Optional[int] = None,
+        phase: int,
         limit: Optional[int] = None,
         descending: bool = True,
     ) -> List[Dict[str, Any]]:

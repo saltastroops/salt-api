@@ -303,7 +303,7 @@ LIMIT :limit;
             "requested_times": requested_times,
             "science_configurations": self._get_science_configurations(proposal_code),
             "phase1_proposal_summary": summary_url,
-            "proposal_file": ProposalRepository.proposal_file_url(proposal_code),
+            "proposal_file": ProposalRepository.proposal_file_url(proposal_code, phase),
         }
         return proposal
 
@@ -321,8 +321,8 @@ LIMIT :limit;
             raise NotFoundError()
 
     @staticmethod
-    def proposal_file_url(proposal_code: str) -> str:
-        return f"/proposals/{proposal_code}.zip"
+    def proposal_file_url(proposal_code: str, phase: int) -> str:
+        return f"/proposals/{proposal_code}.zip?phase={phase}"
 
     def _semesters(self, proposal_code: str) -> List[str]:
         """

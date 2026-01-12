@@ -932,7 +932,7 @@ class PiptRepository:
                     "title": proposal["Title"],
                     "principal_investigator": proposal["PI_Surname"],
                     "editable": editable,
-                    "proposal_file": ProposalRepository.proposal_file_url(code),
+                    "proposal_file": ProposalRepository.proposal_file_url(code, phase),
                 }
             )
         return proposals_list

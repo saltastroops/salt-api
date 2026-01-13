@@ -273,7 +273,7 @@ def get_block_visits(
     response_model=List[PiptProposal],
 )
 def get_pipt_proposals(
-    phase: Literal[1, 2] = Query(..., description="Proposal phase"),
+    phase: int = Query(..., description="Proposal phase"),
     limit: Optional[int] = Query(None, description="Max number of proposals"),
     descending: bool = Query(True, description="Sort in descending order"),
     user: User = Depends(get_current_user),

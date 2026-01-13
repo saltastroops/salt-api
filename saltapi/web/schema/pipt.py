@@ -392,9 +392,6 @@ class PiptProposal(BaseModel):
     principal_investigator: str = Field(
         ..., title="Principal Investigator", description="Principal Investigator"
     )
-    semester: Semester = Field(
-        ..., title="Semester", description="Semester for which the time is requested"
-    )
     editable: bool = Field(
         ...,
         title="Editable",

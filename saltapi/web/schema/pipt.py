@@ -4,8 +4,8 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.web.schema.common import BlockVisitStatusValue, ProposalCode, Semester
-from saltapi.web.schema.institution import UserInstitution
-from saltapi.web.schema.proposal import ProposalStatus, TimeAllocation
+from saltapi.web.schema.institution import UserInstitution, Institution
+from saltapi.web.schema.proposal import ProposalStatus, TimeAllocation, ProposalUser
 
 
 class PiptNewsItem(BaseModel):
@@ -427,3 +427,14 @@ class PiptPartner(BaseModel):
     institutes: List[PiptInstitute] = Field(
         ..., title="Institutes", description="The institutes belonging to the partner."
     )
+
+
+class PiptInvestigator(ProposalUser):
+    """Investigator details, as needed by the PIPT."""
+
+    partner: str = Field(
+        ..., description="Name of the partner to which the user's institute belongs."
+    )
+    institute: str = Field(..., description="Name of the user's institute.")
+    department: Optional[str] = Field(..., description="Institute department.")
+    phone: Optional[str] = Field(None, description="Phone number.")

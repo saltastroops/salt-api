@@ -127,3 +127,9 @@ class PiptService:
     def get_partners(self):
         """Fetch the partner information."""
         return self.pipt_repository.get_partners()
+
+    def get_investigator(
+        self, email: str, preferred_institute: Optional[str]
+    ) -> dict[str, Any]:
+        """Fetch the investigator."""
+        return self.pipt_repository.get_investigator(email, preferred_institute)

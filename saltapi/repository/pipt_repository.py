@@ -848,7 +848,7 @@ class PiptRepository:
         Fetch proposals with optional filters for phase and proposal_code.
         """
 
-        where_clauses = ["Proposal.Current = 1"]
+        where_clauses = []
         params: Dict[str, Any] = {}
 
         username = user.username
@@ -863,11 +863,19 @@ class PiptRepository:
         elif phase == 2:
             where_clauses.append(
                 "(ProposalStatus.Status = :accepted AND Proposal.Phase= 1) OR"
-                " (Proposal.Current = 1 AND Proposal.Phase = 2)"
+                " (Proposal.Phase = 2)"
             )
             params["accepted"] = "Accepted"
 
-        sql = """
+        latest_proposal_select = """
+            SELECT MAX(Proposal_Id) AS latest_proposal_id
+            FROM Proposal
+            WHERE Phase = :phase
+            GROUP BY ProposalCode_Id
+        """
+        params["phase"] = phase
+
+        sql = f"""
             SELECT Proposal.Proposal_Id AS Proposal_Id,
                 ProposalCode.Proposal_Code AS Proposal_Code,
                 ProposalText.Title AS Title,
@@ -875,6 +883,7 @@ class PiptRepository:
                 PULead.Username AS Leader_Username,
                 PUCont.Username AS Contact_Username
             FROM Proposal
+            JOIN ({latest_proposal_select}) AS latest_proposal ON Proposal.Proposal_Id = latest_proposal.latest_proposal_id
             JOIN ProposalContact ON Proposal.ProposalCode_Id = ProposalContact.ProposalCode_Id
             JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
             JOIN ProposalGeneralInfo ON Proposal.ProposalCode_Id = ProposalGeneralInfo.ProposalCode_Id

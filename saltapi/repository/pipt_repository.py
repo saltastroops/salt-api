@@ -1017,9 +1017,6 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
         -------
         The investigator.
         """
-        sql = """
-        
-        """
         if preferred_institute is None:
             preferred_institute = ""
         # There may be multiple entries with the same email address. If so, we prefer

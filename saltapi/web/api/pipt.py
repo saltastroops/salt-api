@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
+from pydantic.networks import EmailStr
 
 from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
@@ -23,6 +24,7 @@ from saltapi.web.schema.pipt import (
     RssRingDetailsSetup,
     SmiArcDetailsSetup,
     SmiFlatDetailsSetup,
+    PiptInvestigator,
 )
 
 router = APIRouter(prefix="/pipt", tags=["PIPT"])
@@ -301,3 +303,27 @@ def get_partners(
     with UnitOfWork() as unit_of_work:
         pipt_service = services.pipt_service(unit_of_work.connection)
         return pipt_service.get_partners()
+
+
+@router.get(
+    "/investigator", summary="Get an investigator", response_model=PiptInvestigator
+)
+def get_investigator(
+    email: EmailStr = Query(..., description="Email address of the investigator"),
+    preferred_institute: Optional[str] = Query(
+        None,
+        description="Preferred institute name (in case the email address is not unique).",
+    ),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """
+    Get the investigator for an email address.
+
+    If there are multiple investigator entries with the given email address, only one of
+    these is returned. If in this case you specify a preferred institute name, an entry
+    with that institute name is returned. If there are still multiple options, the one
+    last added to the database is used.
+    """
+    with UnitOfWork() as unit_of_work:
+        pipt_service = services.pipt_service(unit_of_work.connection)
+        return pipt_service.get_investigator(email, preferred_institute)

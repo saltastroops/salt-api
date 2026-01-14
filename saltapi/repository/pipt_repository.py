@@ -998,3 +998,69 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
         # sorted already as they were returned sorted by the SQL query.
         partners = sorted(partners_dict.values(), key=lambda v: v["name"])
         return partners
+
+    def get_investigator(
+        self, email: str, preferred_institute: Optional[str]
+    ) -> dict[str, Any]:
+        """
+        Return the investigator with a given email address/
+
+        Parameters
+        ----------
+        email
+            Email address.
+        preferred_institute
+            Preferred institute name. This is relevant only if there are multiple
+            entries for the email address.
+
+        Returns
+        -------
+        The investigator.
+        """
+        if preferred_institute is None:
+            preferred_institute = ""
+        # There may be multiple entries with the same email address. If so, we prefer
+        # one who has the given institute name.
+        sql = """
+SELECT PU.PiptUser_Id                                     AS id,
+       I.FirstName                                        AS given_name,
+       I.Surname                                          AS family_name,
+       I.email                                            AS email,
+       I.phone                                            AS phone,
+       InstName.InstituteName_Name                        AS institute,
+       Inst.Department                                    AS department,
+       P.Partner_Name                                     AS partner,
+       IF(InstName.InstituteName_Name = :institute, 1, 0) AS has_preferred_institute
+FROM Investigator I
+         JOIN Institute Inst ON I.Institute_Id = Inst.Institute_Id
+         JOIN InstituteName InstName
+              ON Inst.InstituteName_Id = InstName.InstituteName_Id
+         JOIN Partner P ON Inst.Partner_Id = P.Partner_Id
+         JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+WHERE I.Email = :email
+ORDER BY has_preferred_institute DESC, I.Investigator_Id DESC;
+        """
+        result = self.connection.execute(
+            text(sql), {"email": email, "institute": preferred_institute}
+        )
+        investigator = result.fetchone()
+
+        if investigator is None:
+            raise NotFoundError(f"No investigator found for email: {email}")
+
+        department = investigator["department"]
+        if department is not None and department.strip() == "":
+            department = None
+        phone = investigator["phone"]
+        if phone is not None and phone.strip() == "":
+            phone = None
+        return {
+            "id": investigator["id"],
+            "given_name": investigator["given_name"],
+            "family_name": investigator["family_name"],
+            "email": investigator["email"],
+            "phone": phone,
+            "institute": investigator["institute"],
+            "department": department,
+            "partner": investigator["partner"],
+        }

@@ -124,10 +124,10 @@ class PiptService:
             descending=descending,
         )
 
-    def get_partners(self):
+    def get_partners(self) -> List[Dict[str, Any]]:
         """Fetch the partner information."""
         return self.pipt_repository.get_partners()
 
-    def get_current_version(self):
+    def get_current_version(self) -> Dict[str, Any]:
         """Fetch the current PIPT version."""
         return self.pipt_repository.get_current_version()

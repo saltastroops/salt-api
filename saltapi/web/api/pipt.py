@@ -291,7 +291,7 @@ def get_pipt_proposals(
 @router.get("/partners", summary="Get partners", response_model=List[PiptPartner])
 def get_partners(
     user: User = Depends(get_current_user),
-):
+) -> List[Dict[str, Any]]:
     """
         Get the partner details.
 
@@ -309,7 +309,7 @@ def get_partners(
     summary="Get the current PIPT version",
     response_model=PiptVersion,
 )
-def get_current_version():
+def get_current_version() -> Dict[str, Any]:
     """
     Get the current PIPT version.
     """

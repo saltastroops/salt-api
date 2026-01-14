@@ -957,7 +957,7 @@ class PiptRepository:
             )
         return proposals_list
 
-    def get_partners(self):
+    def get_partners(self) -> List[Dict[str, Any]]:
         """
         Return the partner details.
 
@@ -999,7 +999,7 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
         partners = sorted(partners_dict.values(), key=lambda v: v["name"])
         return partners
 
-    def get_current_version(self) -> dict:
+    def get_current_version(self) -> Dict[str, Any]:
         """
         Return the current PIPT version.
 

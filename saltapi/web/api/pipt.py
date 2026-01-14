@@ -314,6 +314,8 @@ def get_investigator(
         None,
         description="Preferred institute name (in case the email address is not unique).",
     ),
+    # As this endpoint is for contact details, as a soft form of protection we require
+    # the user to be logged in.
     user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """

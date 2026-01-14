@@ -262,6 +262,8 @@ class ProposalCode(str):
     dash, the semester ("1" or "2"), another dash, a combination of uppercase letters
     and underscores (which must start and end with a letter), another dash and three
     digits.
+
+    For the year 2011, the semester may also be 3.
     """
 
     # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types

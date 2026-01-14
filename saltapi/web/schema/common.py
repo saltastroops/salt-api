@@ -265,7 +265,7 @@ class ProposalCode(str):
     """
 
     # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-    proposal_code_regex = r"20\d{2}-[12]-[A-Z][A-Z_]*[A-Z]-\d{3}"
+    proposal_code_regex = r"(20\d{2}-[12]|2011-3)-[A-Z][A-Z_]*[A-Z]-\d{3}"
 
     @classmethod
     def __get_validators__(cls) -> Generator[Callable[[str], str], None, None]:

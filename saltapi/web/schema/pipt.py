@@ -436,5 +436,5 @@ class PiptInvestigator(ProposalUser):
         ..., description="Name of the partner to which the user's institute belongs."
     )
     institute: str = Field(..., description="Name of the user's institute.")
-    department: Optional[str] = Field(..., description="Institute department.")
+    department: Optional[str] = Field(None, description="Institute department.")
     phone: Optional[str] = Field(None, description="Phone number.")

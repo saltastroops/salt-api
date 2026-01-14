@@ -41,7 +41,7 @@ class PiptRepository:
         return news_items
 
     def get_proposal_constraints(
-        self, proposal_code: str, year: int | None = None, semester: int | None = None
+        self, proposal_code: str, semester: str | None = None
     ) -> List[Dict[str, Any]]:
         constraints: List[Dict[str, Any]] = []
 
@@ -59,23 +59,21 @@ class PiptRepository:
                 JOIN Semester AS s ON mp.Semester_Id = s.Semester_Id
                 JOIN Moon AS m ON pa.Moon_Id = m.Moon_Id
             WHERE pc.Proposal_Code = :proposal_code
-            {year_filter}
-            {semester_filter}
+             {semester_filter}
             GROUP BY s.Semester_Id, pa.Moon_Id, pa.Priority
             HAVING SUM(pa.TimeAlloc) > 0
             """.format(
-                year_filter="AND s.Year = :year" if year is not None else "",
-                semester_filter="AND s.Semester = :semester"
+                semester_filter="AND s.Year = :year AND s.Semester = :semester"
                 if semester is not None
                 else "",
             )
         )
 
         params = {"proposal_code": proposal_code}
-        if year is not None:
-            params["year"] = year
         if semester is not None:
-            params["semester"] = semester
+            semester_parts = semester.split("-")
+            params["year"] = semester_parts[0]
+            params["semester"] = semester_parts[1]
 
         result = self.connection.execute(stmt, params)
         rows = result.fetchall()
@@ -83,8 +81,7 @@ class PiptRepository:
         for row in rows:
             constraints.append(
                 {
-                    "year": row.year,
-                    "semester": row.semester,
+                    "semester": f"{row.year}-{row.semester}",
                     "priority": row.priority,
                     "moon": row.moon,
                     "allocated_time": row.allocated_time,

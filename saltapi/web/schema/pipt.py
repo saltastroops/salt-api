@@ -62,8 +62,11 @@ class PiptProposalInfo(BaseModel):
 class PiptTimeAllocation(BaseModel):
     """Represents constraints of a specified proposal."""
 
-    year: int = Field(..., title="Year", description="Year of the semester")
-    semester: int = Field(..., title="Semester", description="Semester number")
+    semester: Semester = Field(
+        ...,
+        title="Semester",
+        description="Semester of the time allocation",
+    )
     priority: int = Field(..., title="Priority", description="Proposal priority")
     moon: Optional[str] = Field(
         None, title="Moon Phase", description="Moon phase or name"

@@ -12,11 +12,9 @@ class PiptService:
         return self.pipt_repository.get_pipt_news_for_days(days)
 
     def get_proposal_constraints(
-        self, proposal_code: str, year: int = None, semester: int = None
+        self, proposal_code: str, semester: str = None
     ) -> List[Dict[str, Any]]:
-        return self.pipt_repository.get_proposal_constraints(
-            proposal_code, year, semester
-        )
+        return self.pipt_repository.get_proposal_constraints(proposal_code, semester)
 
     def get_nir_flat_details(self) -> Dict[str, Any]:
         """

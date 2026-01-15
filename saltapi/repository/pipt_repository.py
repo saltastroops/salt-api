@@ -914,7 +914,8 @@ class PiptRepository:
         order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
         sql += f" ORDER BY {order_by}"
         if limit is not None:
-            sql += " LIMIT {limit}"
+            sql += " LIMIT :limit"
+            params["limit"] = limit
 
         result = self.connection.execute(text(sql), params)
         proposals = [dict(row) for row in result.mappings()]

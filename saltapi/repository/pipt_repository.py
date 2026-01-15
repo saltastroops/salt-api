@@ -934,7 +934,6 @@ class PiptRepository:
                 proposal["Leader_Username"],
                 proposal["Contact_Username"],
             ]
-            editable = False
             proposals_list.append(
                 {
                     "proposal_id": proposal["Proposal_Id"],

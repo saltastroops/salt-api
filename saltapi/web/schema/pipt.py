@@ -387,11 +387,6 @@ class PiptProposal(BaseModel):
     )
     proposal_code: str = Field(..., title="Proposal code", description="Proposal code")
     title: str = Field(..., title="Title", description="Proposal title")
-    semester: Semester = Field(
-        ...,
-        title="Semester",
-        description="Semester for which the proposal details are given",
-    )
     principal_investigator: str = Field(
         ..., title="Principal Investigator", description="Principal Investigator"
     )

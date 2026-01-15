@@ -108,9 +108,9 @@ class PiptService:
     def get_proposals(
         self,
         user: User,
-        phase: Optional[int] = None,
-        limit: int = 250,
-        descending: bool = False,
+        phase: int,
+        limit: Optional[int] = None,
+        descending: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals, optionally filtered by phase.

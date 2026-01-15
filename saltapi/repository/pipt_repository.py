@@ -834,38 +834,12 @@ class PiptRepository:
 
         return block_visits
 
-    def _get_proposal_query(self) -> str:
-        return """
-            SELECT Proposal.Proposal_Id,
-                Proposal.ProposalCode_Id,
-                ProposalCode.Proposal_Code,
-                Proposal.Current,
-                Proposal.Semester_Id,
-                Proposal.TotalReqTime,
-                Proposal.Phase,
-                Proposal.Submission,
-                UNIX_TIMESTAMP(Proposal.SubmissionDate) AS submission_timestamp,
-                Proposal.OverheadTime,
-                PULead.Username AS leader_username,
-                PUCont.Username AS contact_username
-            FROM Proposal
-            JOIN ProposalContact ON Proposal.ProposalCode_Id = ProposalContact.ProposalCode_Id
-            JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
-            JOIN ProposalGeneralInfo ON Proposal.ProposalCode_Id = ProposalGeneralInfo.ProposalCode_Id
-            JOIN ProposalStatus ON ProposalGeneralInfo.ProposalStatus_Id = ProposalStatus.ProposalStatus_Id
-            JOIN Semester ON Proposal.Semester_Id = Semester.Semester_Id
-            JOIN Investigator ILead ON ILead.Investigator_Id = ProposalContact.Leader_Id
-            JOIN Investigator ICont ON ICont.Investigator_Id = ProposalContact.Contact_Id
-            JOIN PiptUser PULead ON PULead.PiptUser_Id = ILead.PiptUser_Id
-            JOIN PiptUser PUCont ON PUCont.PiptUser_Id = ICont.PiptUser_Id
-        """
-
     def get_proposals(
         self,
         user: User,
-        phase: Optional[int] = None,
-        limit: int = 250,
-        descending: bool = False,
+        phase: int,
+        limit: Optional[int] = None,
+        descending: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Fetch proposals with optional filters for phase and proposal_code.
@@ -886,11 +860,38 @@ class PiptRepository:
         elif phase == 2:
             where_clauses.append(
                 "(ProposalStatus.Status = :accepted AND Proposal.Phase= 1) OR"
-                " (Proposal.Current = 1 AND Proposal.Phase = 2)"
+                " (Proposal.Phase = 2)"
             )
             params["accepted"] = "Accepted"
 
-        sql = self._get_proposal_query()
+        latest_proposal_select = """
+            SELECT MAX(Proposal_Id) AS latest_proposal_id
+            FROM Proposal
+            WHERE Phase = :phase
+            GROUP BY ProposalCode_Id
+        """
+        params["phase"] = phase
+
+        sql = f"""
+            SELECT Proposal.Proposal_Id AS Proposal_Id,
+                ProposalCode.Proposal_Code AS Proposal_Code,
+                ProposalText.Title AS Title,
+                ILead.Surname AS PI_Surname,
+                PULead.Username AS Leader_Username,
+                PUCont.Username AS Contact_Username
+            FROM Proposal
+            JOIN ({latest_proposal_select}) AS latest_proposal ON Proposal.Proposal_Id = latest_proposal.latest_proposal_id
+            JOIN ProposalContact ON Proposal.ProposalCode_Id = ProposalContact.ProposalCode_Id
+            JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
+            JOIN ProposalGeneralInfo ON Proposal.ProposalCode_Id = ProposalGeneralInfo.ProposalCode_Id
+            JOIN ProposalStatus ON ProposalGeneralInfo.ProposalStatus_Id = ProposalStatus.ProposalStatus_Id
+            JOIN ProposalText ON Proposal.ProposalCode_Id = ProposalText.ProposalCode_Id
+            JOIN Semester ON Proposal.Semester_Id = Semester.Semester_Id
+            JOIN Investigator ILead ON ILead.Investigator_Id = ProposalContact.Leader_Id
+            JOIN Investigator ICont ON ICont.Investigator_Id = ProposalContact.Contact_Id
+            JOIN PiptUser PULead ON PULead.PiptUser_Id = ILead.PiptUser_Id
+            JOIN PiptUser PUCont ON PUCont.PiptUser_Id = ICont.PiptUser_Id
+        """
 
         if not can_see_all:
             sql += """
@@ -907,22 +908,14 @@ class PiptRepository:
         if where_clause:
             sql += f" WHERE {where_clause}"
 
-        order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
-        sql += f" ORDER BY {order_by} LIMIT {limit}"
+        order_by = f"ProposalCode.Proposal_Code {'DESC' if descending else 'ASC'}"
+        sql += f" ORDER BY {order_by}"
+        if limit is not None:
+            sql += " LIMIT :limit"
+            params["limit"] = limit
 
         result = self.connection.execute(text(sql), params)
         proposals = [dict(row) for row in result.mappings()]
-
-        pi_sql = """
-            SELECT DISTINCT p.Proposal_Id AS proposal_id, i.Surname AS surname
-            FROM Investigator AS i
-            JOIN ProposalContact AS pc ON i.Investigator_Id = pc.Leader_Id
-            JOIN Proposal AS p ON pc.ProposalCode_Id = p.ProposalCode_Id
-        """
-        pi_result = self.connection.execute(text(pi_sql))
-        principal_investigator = {
-            row.proposal_id: row.surname for row in pi_result.mappings()
-        }
 
         # Build final proposal list, remove duplicates by Proposal_Code
         proposals_list = []
@@ -934,22 +927,18 @@ class PiptRepository:
                 continue
             seen_codes.add(code)
 
-            full_proposal = self.proposal_repository.get(code)
             editable = can_edit_all or username in [
-                proposal["leader_username"],
-                proposal["contact_username"],
+                proposal["Leader_Username"],
+                proposal["Contact_Username"],
             ]
             proposals_list.append(
                 {
                     "proposal_id": proposal["Proposal_Id"],
                     "proposal_code": code,
-                    "title": full_proposal["general_info"]["title"],
-                    "principal_investigator": principal_investigator.get(
-                        proposal["Proposal_Id"]
-                    ),
-                    "semester": full_proposal["semester"],
+                    "title": proposal["Title"],
+                    "principal_investigator": proposal["PI_Surname"],
                     "editable": editable,
-                    "proposal_file": full_proposal["proposal_file"],
+                    "proposal_file": ProposalRepository.proposal_file_url(code, phase),
                 }
             )
         return proposals_list

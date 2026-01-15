@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic.networks import EmailStr
@@ -275,9 +275,9 @@ def get_block_visits(
     response_model=List[PiptProposal],
 )
 def get_pipt_proposals(
-    phase: Optional[int] = Query(None, description="Phase filter"),
-    limit: int = Query(250, description="Max number of proposals"),
-    descending: bool = Query(False, description="Sort in descending order"),
+    phase: int = Query(..., description="Proposal phase"),
+    limit: Optional[int] = Query(None, description="Max number of proposals"),
+    descending: bool = Query(True, description="Sort in descending order"),
     user: User = Depends(get_current_user),
 ):
     with UnitOfWork() as unit_of_work:

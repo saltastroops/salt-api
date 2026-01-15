@@ -262,10 +262,12 @@ class ProposalCode(str):
     dash, the semester ("1" or "2"), another dash, a combination of uppercase letters
     and underscores (which must start and end with a letter), another dash and three
     digits.
+
+    For the year 2011, the semester may also be 3.
     """
 
     # Based on https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-    proposal_code_regex = r"20\d{2}-[12]-[A-Z][A-Z_]*[A-Z]-\d{3}"
+    proposal_code_regex = r"(20\d{2}-[12]|2011-3)-[A-Z][A-Z_]*[A-Z]-\d{3}"
 
     @classmethod
     def __get_validators__(cls) -> Generator[Callable[[str], str], None, None]:

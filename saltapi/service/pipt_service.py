@@ -12,11 +12,9 @@ class PiptService:
         return self.pipt_repository.get_pipt_news_for_days(days)
 
     def get_proposal_constraints(
-        self, proposal_code: str, year: int = None, semester: int = None
+        self, proposal_code: str, semester: str = None
     ) -> List[Dict[str, Any]]:
-        return self.pipt_repository.get_proposal_constraints(
-            proposal_code, year, semester
-        )
+        return self.pipt_repository.get_proposal_constraints(proposal_code, semester)
 
     def get_nir_flat_details(self) -> Dict[str, Any]:
         """
@@ -127,6 +125,12 @@ class PiptService:
     def get_partners(self) -> List[Dict[str, Any]]:
         """Fetch the partner information."""
         return self.pipt_repository.get_partners()
+
+    def get_investigator(
+        self, email: str, preferred_institute: Optional[str]
+    ) -> dict[str, Any]:
+        """Fetch the investigator."""
+        return self.pipt_repository.get_investigator(email, preferred_institute)
 
     def get_current_version(self) -> Dict[str, Any]:
         """Fetch the current PIPT version."""

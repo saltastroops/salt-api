@@ -4,8 +4,8 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from saltapi.web.schema.common import BlockVisitStatusValue, ProposalCode, Semester
-from saltapi.web.schema.institution import UserInstitution
-from saltapi.web.schema.proposal import ProposalStatus, TimeAllocation
+from saltapi.web.schema.institution import UserInstitution, Institution
+from saltapi.web.schema.proposal import ProposalStatus, TimeAllocation, ProposalUser
 
 
 class PiptNewsItem(BaseModel):
@@ -62,8 +62,11 @@ class PiptProposalInfo(BaseModel):
 class PiptTimeAllocation(BaseModel):
     """Represents constraints of a specified proposal."""
 
-    year: int = Field(..., title="Year", description="Year of the semester")
-    semester: int = Field(..., title="Semester", description="Semester number")
+    semester: Semester = Field(
+        ...,
+        title="Semester",
+        description="Semester of the time allocation",
+    )
     priority: int = Field(..., title="Priority", description="Proposal priority")
     moon: Optional[str] = Field(
         None, title="Moon Phase", description="Moon phase or name"
@@ -392,9 +395,6 @@ class PiptProposal(BaseModel):
     principal_investigator: str = Field(
         ..., title="Principal Investigator", description="Principal Investigator"
     )
-    semester: Semester = Field(
-        ..., title="Semester", description="Semester for which the time is requested"
-    )
     editable: bool = Field(
         ...,
         title="Editable",
@@ -430,6 +430,17 @@ class PiptPartner(BaseModel):
     institutes: List[PiptInstitute] = Field(
         ..., title="Institutes", description="The institutes belonging to the partner."
     )
+
+      
+class PiptInvestigator(ProposalUser):
+    """Investigator details, as needed by the PIPT."""
+
+    partner: str = Field(
+        ..., description="Name of the partner to which the user's institute belongs."
+    )
+    institute: str = Field(..., description="Name of the user's institute.")
+    department: Optional[str] = Field(None, description="Institute department.")
+    phone: Optional[str] = Field(None, description="Phone number.")
 
 
 class PiptVersion(BaseModel):

@@ -32,7 +32,7 @@ class PiptRepository:
         result = self.connection.execute(stmt, {"days": days})
         news_items = [
             {
-                "date": row.time,
+                "date": pytz.utc.localize(row.time),
                 "title": row.title,
                 "text": row.text,
             }
@@ -41,7 +41,7 @@ class PiptRepository:
         return news_items
 
     def get_proposal_constraints(
-        self, proposal_code: str, year: int | None = None, semester: int | None = None
+        self, proposal_code: str, semester: str | None = None
     ) -> List[Dict[str, Any]]:
         constraints: List[Dict[str, Any]] = []
 
@@ -59,23 +59,21 @@ class PiptRepository:
                 JOIN Semester AS s ON mp.Semester_Id = s.Semester_Id
                 JOIN Moon AS m ON pa.Moon_Id = m.Moon_Id
             WHERE pc.Proposal_Code = :proposal_code
-            {year_filter}
-            {semester_filter}
+             {semester_filter}
             GROUP BY s.Semester_Id, pa.Moon_Id, pa.Priority
             HAVING SUM(pa.TimeAlloc) > 0
             """.format(
-                year_filter="AND s.Year = :year" if year is not None else "",
-                semester_filter="AND s.Semester = :semester"
+                semester_filter="AND s.Year = :year AND s.Semester = :semester"
                 if semester is not None
                 else "",
             )
         )
 
         params = {"proposal_code": proposal_code}
-        if year is not None:
-            params["year"] = year
         if semester is not None:
-            params["semester"] = semester
+            semester_parts = semester.split("-")
+            params["year"] = semester_parts[0]
+            params["semester"] = semester_parts[1]
 
         result = self.connection.execute(stmt, params)
         rows = result.fetchall()
@@ -83,8 +81,7 @@ class PiptRepository:
         for row in rows:
             constraints.append(
                 {
-                    "year": row.year,
-                    "semester": row.semester,
+                    "semester": f"{row.year}-{row.semester}",
                     "priority": row.priority,
                     "moon": row.moon,
                     "allocated_time": row.allocated_time,
@@ -990,14 +987,85 @@ ORDER BY P.Partner_Code, IName.InstituteName_Name, I.Department
                     "name": row.partner_name,
                     "institutes": [],
                 }
+            department = row.department
+            if department is not None:
+                department = department.strip()
+            if department == "":
+                department = None
             partners_dict[partner_code]["institutes"].append(
-                {"name": row.institute_name, "department": row.department}
+                {"name": row.institute_name, "department": department}
             )
 
         # Turn the dictionary into a list and sort the result. The institutes are
         # sorted already as they were returned sorted by the SQL query.
         partners = sorted(partners_dict.values(), key=lambda v: v["name"])
         return partners
+
+    def get_investigator(
+        self, email: str, preferred_institute: Optional[str]
+    ) -> dict[str, Any]:
+        """
+        Return the investigator with a given email address/
+
+        Parameters
+        ----------
+        email
+            Email address.
+        preferred_institute
+            Preferred institute name. This is relevant only if there are multiple
+            entries for the email address.
+
+        Returns
+        -------
+        The investigator.
+        """
+        if preferred_institute is None:
+            preferred_institute = ""
+        # There may be multiple entries with the same email address. If so, we prefer
+        # one who has the given institute name.
+        sql = """
+SELECT PU.PiptUser_Id                                     AS id,
+       I.FirstName                                        AS given_name,
+       I.Surname                                          AS family_name,
+       I.email                                            AS email,
+       I.phone                                            AS phone,
+       InstName.InstituteName_Name                        AS institute,
+       Inst.Department                                    AS department,
+       P.Partner_Name                                     AS partner,
+       IF(InstName.InstituteName_Name = :institute, 1, 0) AS has_preferred_institute
+FROM Investigator I
+         JOIN Institute Inst ON I.Institute_Id = Inst.Institute_Id
+         JOIN InstituteName InstName
+              ON Inst.InstituteName_Id = InstName.InstituteName_Id
+         JOIN Partner P ON Inst.Partner_Id = P.Partner_Id
+         JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+WHERE I.Email = :email
+ORDER BY has_preferred_institute DESC, I.Investigator_Id DESC;
+        """
+        result = self.connection.execute(
+            text(sql), {"email": email, "institute": preferred_institute}
+        )
+        investigator = result.fetchone()
+
+        if investigator is None:
+            raise NotFoundError(f"No investigator found for email: {email}")
+
+        department = investigator["department"]
+        if department is not None and department.strip() == "":
+            department = None
+        phone = investigator["phone"]
+        if phone is not None and phone.strip() == "":
+            phone = None
+        return {
+            "id": investigator["id"],
+            "given_name": investigator["given_name"],
+            "family_name": investigator["family_name"],
+            "email": investigator["email"],
+            "phone": phone,
+            "institute": investigator["institute"],
+            "department": department,
+            "partner": investigator["partner"],
+        }
 
     def get_current_version(self) -> Dict[str, Any]:
         """

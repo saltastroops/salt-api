@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
+from pydantic.networks import EmailStr
 
 from saltapi.exceptions import AuthorizationError, NotFoundError
 from saltapi.repository.unit_of_work import UnitOfWork
@@ -24,6 +25,7 @@ from saltapi.web.schema.pipt import (
     RssRingDetailsSetup,
     SmiArcDetailsSetup,
     SmiFlatDetailsSetup,
+    PiptInvestigator,
 )
 
 router = APIRouter(prefix="/pipt", tags=["PIPT"])
@@ -122,8 +124,7 @@ def get_constraints(
         title="Proposal code",
         description="Proposal code of the returned constraints.",
     ),
-    year: Optional[int] = Query(None, description="Optional year"),
-    semester: Optional[int] = Query(None, description="Optional semester"),
+    semester: Optional[Semester] = Query(None, description="Optional semester"),
     user: User = Depends(get_current_user),
 ) -> List[PiptTimeAllocation]:
     """
@@ -135,7 +136,7 @@ def get_constraints(
         permission_service.check_permission_to_view_proposal(user, proposal_code)
         pipt_service = services.pipt_service(unit_of_work.connection)
 
-        return pipt_service.get_proposal_constraints(proposal_code, year, semester)
+        return pipt_service.get_proposal_constraints(proposal_code, semester)
 
 
 @router.get(
@@ -303,7 +304,33 @@ def get_partners(
         pipt_service = services.pipt_service(unit_of_work.connection)
         return pipt_service.get_partners()
 
+      
+@router.get(
+    "/investigator", summary="Get an investigator", response_model=PiptInvestigator
+)
+def get_investigator(
+    email: EmailStr = Query(..., description="Email address of the investigator"),
+    preferred_institute: Optional[str] = Query(
+        None,
+        description="Preferred institute name (in case the email address is not unique).",
+    ),
+    # As this endpoint is for contact details, as a soft form of protection we require
+    # the user to be logged in.
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """
+    Get the investigator for an email address.
 
+    If there are multiple investigator entries with the given email address, only one of
+    these is returned. If in this case you specify a preferred institute name, an entry
+    with that institute name is returned. If there are still multiple options, the one
+    last added to the database is used.
+    """
+    with UnitOfWork() as unit_of_work:
+        pipt_service = services.pipt_service(unit_of_work.connection)
+        return pipt_service.get_investigator(email, preferred_institute)
+
+      
 @router.get(
     "/current-version",
     summary="Get the current PIPT version",

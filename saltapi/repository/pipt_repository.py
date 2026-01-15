@@ -911,7 +911,7 @@ class PiptRepository:
         if where_clause:
             sql += f" WHERE {where_clause}"
 
-        order_by = f"Proposal.Proposal_Id {'DESC' if descending else 'ASC'}"
+        order_by = f"ProposalCode.Proposal_Code {'DESC' if descending else 'ASC'}"
         sql += f" ORDER BY {order_by}"
         if limit is not None:
             sql += " LIMIT :limit"

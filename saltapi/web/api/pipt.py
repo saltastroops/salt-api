@@ -19,6 +19,7 @@ from saltapi.web.schema.pipt import (
     PiptProposalInfo,
     PiptTimeAllocation,
     PiptUserInfo,
+    PiptVersion,
     PreviousProposalListItem,
     RssArcDetailsSetup,
     RssRingDetailsSetup,
@@ -291,7 +292,7 @@ def get_pipt_proposals(
 @router.get("/partners", summary="Get partners", response_model=List[PiptPartner])
 def get_partners(
     user: User = Depends(get_current_user),
-):
+) -> List[Dict[str, Any]]:
     """
         Get the partner details.
 
@@ -303,7 +304,7 @@ def get_partners(
         pipt_service = services.pipt_service(unit_of_work.connection)
         return pipt_service.get_partners()
 
-
+      
 @router.get(
     "/investigator", summary="Get an investigator", response_model=PiptInvestigator
 )
@@ -328,3 +329,17 @@ def get_investigator(
     with UnitOfWork() as unit_of_work:
         pipt_service = services.pipt_service(unit_of_work.connection)
         return pipt_service.get_investigator(email, preferred_institute)
+
+      
+@router.get(
+    "/current-version",
+    summary="Get the current PIPT version",
+    response_model=PiptVersion,
+)
+def get_current_version() -> Dict[str, Any]:
+    """
+    Get the current PIPT version.
+    """
+    with UnitOfWork() as unit_of_work:
+        pipt_service = services.pipt_service(unit_of_work.connection)
+        return pipt_service.get_current_version()

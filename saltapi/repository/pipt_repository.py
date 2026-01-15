@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytz
 from sqlalchemy import text
@@ -954,7 +954,7 @@ class PiptRepository:
             )
         return proposals_list
 
-    def get_partners(self):
+    def get_partners(self) -> List[Dict[str, Any]]:
         """
         Return the partner details.
 
@@ -1066,3 +1066,21 @@ ORDER BY has_preferred_institute DESC, I.Investigator_Id DESC;
             "department": department,
             "partner": investigator["partner"],
         }
+
+    def get_current_version(self) -> Dict[str, Any]:
+        """
+        Return the current PIPT version.
+
+        Returns
+        -------
+        """
+
+        sql = """
+    SELECT Pipt
+    FROM PiptVersions
+    ORDER BY DateActive DESC
+    LIMIT 1
+        """
+        result = self.connection.execute(text(sql))
+        version = float(result.scalar_one())
+        return {"version": str(round(version, 7))}

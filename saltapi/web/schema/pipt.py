@@ -431,7 +431,7 @@ class PiptPartner(BaseModel):
         ..., title="Institutes", description="The institutes belonging to the partner."
     )
 
-
+      
 class PiptInvestigator(ProposalUser):
     """Investigator details, as needed by the PIPT."""
 
@@ -441,3 +441,11 @@ class PiptInvestigator(ProposalUser):
     institute: str = Field(..., description="Name of the user's institute.")
     department: Optional[str] = Field(None, description="Institute department.")
     phone: Optional[str] = Field(None, description="Phone number.")
+
+
+class PiptVersion(BaseModel):
+    """PIPT version."""
+
+    version: str = Field(
+        ..., title="PIPT version", description="A version number for the PIPT."
+    )

@@ -742,33 +742,6 @@ class PiptRepository:
         result = self.connection.execute(sql_observed, {"user_id": user_id})
         observed_times = {row.proposal_code: row.observed_time for row in result}
 
-        # Publications
-        sql_publications = text(
-            f"""
-            SELECT DISTINCT Proposal_Code AS proposal_code, Bibcode AS bibcode
-            FROM Publication AS pp
-            JOIN ProposalCode ON pp.ProposalCode_Id = ProposalCode.ProposalCode_Id
-            JOIN Proposal ON ProposalCode.ProposalCode_Id = Proposal.ProposalCode_Id
-            WHERE Proposal_Code IN (
-                SELECT DISTINCT pco.Proposal_Code
-                FROM ProposalCode AS pco
-                JOIN Proposal AS p ON pco.ProposalCode_Id = p.ProposalCode_Id
-                JOIN ProposalContact AS pc ON p.ProposalCode_Id = pc.ProposalCode_Id
-                JOIN Investigator AS i ON pc.Leader_Id = i.Investigator_Id
-                JOIN PiptUser AS pu USING (PiptUser_Id)
-                JOIN Semester AS s ON p.Semester_id = s.Semester_Id
-                WHERE pu.PiptUser_Id = :user_id AND p.Current = 1 AND p.Phase = 2 AND pp.Valid = 1
-                  AND {semester_condition}
-            )
-        """
-        )
-        result = self.connection.execute(sql_publications, {"user_id": user_id})
-        bibcodes = {}
-        for row in result:
-            if row.proposal_code not in bibcodes:
-                bibcodes[row.proposal_code] = []
-            bibcodes[row.proposal_code].append(row.bibcode)
-
         previous_proposals = []
         for proposal_code in allocated_times.keys():
             previous_proposals.append(
@@ -777,7 +750,6 @@ class PiptRepository:
                     "title": titles.get(proposal_code, ""),
                     "allocated_time": allocated_times[proposal_code],
                     "observed_time": observed_times.get(proposal_code, 0),
-                    "publications": bibcodes.get(proposal_code, []),
                 }
             )
 

@@ -332,11 +332,6 @@ class PreviousProposalListItem(BaseModel):
         ..., title="Allocated Time", description="Time allocated"
     )
     observed_time: int = Field(..., title="Observed Time", description="Time observed")
-    publications: List[str] = Field(
-        ...,
-        title="Publications",
-        description="List of publications",
-    )
 
 
 class PiptBlockVisit(BaseModel):
@@ -426,7 +421,7 @@ class PiptPartner(BaseModel):
         ..., title="Institutes", description="The institutes belonging to the partner."
     )
 
-      
+
 class PiptInvestigator(ProposalUser):
     """Investigator details, as needed by the PIPT."""
 

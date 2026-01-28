@@ -1083,7 +1083,7 @@ WHERE PiptUser_Id = :user_id
         self.connection.execute(stmt, {"user_id": user_id, "verify": verify})
         # User only can only use this verify if they only have one contact
         count = self.contact_count(user_id)
-        if count > 1:
+        if count == 1:
             raise ValidationError("Only one contact is allowed.")
         contact = self.get_preferred_contact(user_id)
         self.clear_validation_code(contact["investigator_id"])

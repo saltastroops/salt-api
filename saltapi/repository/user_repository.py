@@ -1517,6 +1517,23 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         return dict(result) if result else None
 
     def contact_count(self, user_id) -> int:
+        """
+        Return the number of contact records registered for a given user.
+
+        This method queries the `Investigator` table and counts how many
+        contact entries exist for the specified `user_id`.
+
+        Parameters
+        ----------
+        user_id : int
+            The ID of the user whose associated contact records are being counted.
+
+        Returns
+        -------
+        int
+            The total number of contact records linked to the given user.
+            Returns 0 if the user has no contacts.
+        """
         stmt = text("""
 SELECT COUNT(*) AS contact_count
 FROM Investigator

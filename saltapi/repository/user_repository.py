@@ -10,7 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.service.user import RIGHT_DB_NAMES, Role, User, UserRight
 
 pwd_context = CryptContext(

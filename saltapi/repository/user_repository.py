@@ -213,8 +213,11 @@ VALUES (:institution_id, :given_name, :family_name, :email)
                 "email": new_user_details["email"],
             },
         )
+        investigator_id = result.lastrowid
+        validation_code = self.generate_validation_code()
+        self.add_email_validation(investigator_id, validation_code)
 
-        return cast(int, result.lastrowid)
+        return cast(int, investigator_id)
 
     def _create_pipt_user(
         self, new_user_details: Dict[str, Any], investigator_id: int
@@ -1078,6 +1081,8 @@ WHERE PiptUser_Id = :user_id
             raise NotFoundError(f"Unknown user id: {user_id}")
 
         self.connection.execute(stmt, {"user_id": user_id, "verify": verify})
+        contact = self.get_preferred_contact(user_id)
+        self.clear_validation_code(contact["investigator_id"])
 
     def activate_user(self, user_id: int, active: bool = True) -> None:
         """

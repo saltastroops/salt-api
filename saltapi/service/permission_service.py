@@ -181,7 +181,7 @@ class PermissionService:
         * an administrator
         * a Principal Investigator or Principal Contact of the proposal
         """
-        if proposal_code.startswith("Unsubmitted"):
+        if not proposal_code or proposal_code.startswith("Unsubmitted"):
             return
         username = user.username
         if self.user_has_role(
@@ -654,9 +654,7 @@ class PermissionService:
         Check that the investigator email exists and has been validated
         before allowing it to be set as the preferred contact.
         """
-        contact = self.user_repository.get_users_contact(
-            user_id, investigator_id
-        )
+        contact = self.user_repository.get_users_contact(user_id, investigator_id)
 
         if not contact:
             raise ValidationError(

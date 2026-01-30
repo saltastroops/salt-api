@@ -10,7 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from saltapi.exceptions import NotFoundError, ResourceExistsError, ValidationError
+from saltapi.exceptions import NotFoundError, ValidationError
 from saltapi.service.user import RIGHT_DB_NAMES, Role, User, UserRight
 
 pwd_context = CryptContext(
@@ -213,8 +213,11 @@ VALUES (:institution_id, :given_name, :family_name, :email)
                 "email": new_user_details["email"],
             },
         )
+        investigator_id = result.lastrowid
+        validation_code = self.generate_validation_code()
+        self.add_email_validation(investigator_id, validation_code)
 
-        return cast(int, result.lastrowid)
+        return cast(int, investigator_id)
 
     def _create_pipt_user(
         self, new_user_details: Dict[str, Any], investigator_id: int
@@ -1078,6 +1081,12 @@ WHERE PiptUser_Id = :user_id
             raise NotFoundError(f"Unknown user id: {user_id}")
 
         self.connection.execute(stmt, {"user_id": user_id, "verify": verify})
+        # User only can only use this verify if they only have one contact
+        count = self.contact_count(user_id)
+        if count > 1:
+            raise ValidationError("Only one contact is allowed.")
+        contact = self.get_preferred_contact(user_id)
+        self.clear_validation_code(contact["investigator_id"])
 
     def activate_user(self, user_id: int, active: bool = True) -> None:
         """
@@ -1506,3 +1515,31 @@ WHERE PiptSetting_Id = 32     # ID for PiptSetting_Name = 'GravitationalWaveProp
         result = self.connection.execute(stmt, {"user_id": user_id}).fetchone()
 
         return dict(result) if result else None
+
+    def contact_count(self, user_id) -> int:
+        """
+        Return the number of contact records registered for a given user.
+
+        This method queries the `Investigator` table and counts how many
+        contact entries exist for the specified `user_id`.
+
+        Parameters
+        ----------
+        user_id : int
+            The ID of the user whose associated contact records are being counted.
+
+        Returns
+        -------
+        int
+            The total number of contact records linked to the given user.
+            Returns 0 if the user has no contacts.
+        """
+        stmt = text("""
+SELECT COUNT(*) AS contact_count
+FROM Investigator
+WHERE PiptUser_Id = :user_id
+       """)
+
+        count = self.connection.execute(stmt, {"user_id": user_id}).scalar_one()
+
+        return count

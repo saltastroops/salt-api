@@ -48,6 +48,9 @@ class PermissionService:
         elif role == Role.BOARD_MEMBER:
             return self.user_repository.is_board_member(username)
 
+        elif role == Role.MASK_CUTTER:
+            return self.user_repository.is_mask_cutter(username)
+
         elif role == Role.ENGINEER:
             return self.user_repository.is_engineer()
 
@@ -380,12 +383,18 @@ class PermissionService:
 
         * a SALT Astronomer
         * an administrator
+        * a mask cutter
         * an engineer
         """
 
         username = user.username
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.MASK_CUTTER,
+            Role.ENGINEER,
+        ]
 
         self.check_role(username, roles)
 
@@ -395,7 +404,12 @@ class PermissionService:
         """
         username = user.username
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.MASK_CUTTER,
+            Role.ENGINEER,
+        ]
 
         self.check_role(username, roles)
 
@@ -404,7 +418,12 @@ class PermissionService:
         Check that the user can view the obsolete masks in the magazine.
         """
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.MASK_CUTTER,
+            Role.ENGINEER,
+        ]
 
         self.check_role(user.username, roles)
 
@@ -413,7 +432,12 @@ class PermissionService:
         Check that the user can view the RSS slit masks.
         """
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.ENGINEER,
+            Role.MASK_CUTTER,
+        ]
 
         self.check_role(user.username, roles)
 

@@ -768,7 +768,7 @@ async def generate_slitmask_gcode(
 ):
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_view_proposal(user, proposal_code)
+        permission_service.check_permission_to_view_mos_mask_metadata(user)
         instrument_service = services.instrument_service(unit_of_work.connection)
 
         tmp_file = tempfile.mktemp(suffix=".nc")

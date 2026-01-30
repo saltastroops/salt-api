@@ -432,7 +432,12 @@ class PermissionService:
         Check that the user can view the RSS slit masks.
         """
 
-        roles = [Role.SALT_ASTRONOMER, Role.ADMINISTRATOR, Role.ENGINEER]
+        roles = [
+            Role.SALT_ASTRONOMER,
+            Role.ADMINISTRATOR,
+            Role.ENGINEER,
+            Role.MASK_CUTTER,
+        ]
 
         self.check_role(user.username, roles)
 

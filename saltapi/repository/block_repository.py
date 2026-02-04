@@ -450,7 +450,7 @@ ORDER BY ValidFrom, FindingChart_Id
         proposal_code: str,
         size: Literal["original", "thumbnail"],
     ) -> List[str]:
-        included_dir = get_settings().proposals_dir / proposal_code / "Included"
+        included_dir = get_settings().proposals_dir / proposal_code/ Path(path_from_db).parent
         prefix = ""
         size_identifier = ""
         if size == "original":

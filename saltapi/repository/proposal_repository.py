@@ -2318,7 +2318,7 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
             return 6
         if proposal_type == "Engineering":
             return 0
-        if proposal_type == "Gravitational Wave Event":
+        if proposal_type in ["Gravitational Wave Event", "NOIRLab"]:
             return 1200
         if proposal_type == "Science Verification":
             return 12

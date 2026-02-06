@@ -29,6 +29,7 @@ _partners = dict(
     GU="Georg-August-Universität Göttingen",
     HET="Hobby Eberly Telescope Board",
     IUCAA="Inter-University Centre for Astronomy & Astrophysics",
+    NOIR="NOIRLab",
     ORP="OPTICON-Radionet Pilot",
     OTH="Other",
     POL="Poland",

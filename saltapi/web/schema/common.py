@@ -242,6 +242,7 @@ class PartnerName(str, Enum):
     HET = "Hobby Eberly Telescope Board"
     IUCAA = "Inter-University Centre for Astronomy & Astrophysics"
     KEY = "Partnership Proposals for Key Science"
+    NOIR = "NOIRLab"
     ORP = "OPTICON-Radionet Pilot"
     OTH = "Other"
     POL = "Poland"

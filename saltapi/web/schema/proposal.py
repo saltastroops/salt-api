@@ -77,6 +77,7 @@ class ProposalType(str, Enum):
     GRAVITATIONAL_WAVE_EVENT = "Gravitational Wave Event"
     KEY_SCIENCE_PROGRAM = "Key Science Program"
     LARGE_SCIENCE_PROPOSAL = "Large Science Proposal"
+    NOIRLAB = "NOIRLab"
     OPTICON_RADIO_PILOT = "OPTICON-Radionet Pilot"
     SCIENCE = "Science"
     SCIENCE_LONG_TERM = "Science - Long Term"
@@ -97,7 +98,7 @@ class ProprietaryPeriod(BaseModel):
         title="Current proprietary period",
         description="Proprietary period in months.",
     )
-    maximum_period:int = Field(
+    maximum_period: int = Field(
         ...,
         title="Maximum proprietary period, in months",
         description=(

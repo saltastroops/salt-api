@@ -215,6 +215,7 @@ class PartnerCode(str, Enum):
     HET = "HET"
     IUCAA = "IUCAA"
     KEY = "KEY"
+    NOIR = "NOIR"
     ORP = "ORP"
     OTH = "OTH"
     POL = "POL"

@@ -13,6 +13,14 @@ from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
 from saltapi.settings import get_settings
+from saltapi.web.schema.block import BlockStatusValue
+from saltapi.web.schema.common import BlockRejectionReason
+
+
+TECH_PROBLEMS = {
+    BlockRejectionReason.INSTRUMENT_TECHNICAL_PROBLEMS,
+    BlockRejectionReason.TELESCOPE_TECHNICAL_PROBLEMS,
+}
 
 
 class BlockRepository:
@@ -238,11 +246,329 @@ WHERE BV.BlockVisit_Id = :block_visit_id
         except NoResultFound:
             raise NotFoundError("Unknown block visit id")
 
+    def get_observation_time(self, block_visit_id: int) -> float:
+        """
+        Retrieve the scheduled observation time for a given block visit.
+
+        Parameters
+        ----------
+        block_visit_id : int
+           The unique identifier of the block visit.
+
+        Returns
+        -------
+        float
+           Observation time in seconds (or database time unit).
+
+        Raises
+        ------
+        NotFoundError
+           If no block visit is found for the given ID.
+        """
+
+        stmt  = text("""
+SELECT B.ObsTime  AS obs_time 
+FROM Block B 
+    JOIN BlockVisit BV ON B.Block_Id=BV.Block_Id 
+WHERE BlockVisit_Id=:block_visit_id
+                     """)
+        try:
+            return self.connection.execute(stmt, {"block_visit_id": block_visit_id}).scalar_one()
+        except NoResultFound:
+            raise NotFoundError(f"No observation time for block_visit_id: {block_visit_id}")
+
+    def get_night_info_id_for_block_visit(self, block_visit_id: int) -> int:
+        """
+        Retrieve the NightInfo ID associated with a block visit.
+
+        Parameters
+        ----------
+        block_visit_id : int
+            The block visit identifier.
+
+        Returns
+        -------
+        int
+            NightInfo primary key ID.
+
+        Raises
+        ------
+        NotFoundError
+            If the block visit does not exist.
+        """
+
+        stmt  = text("""
+SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_visit_id      
+        """)
+        try:
+            result = self.connection.execute(stmt, {"block_visit_id": block_visit_id})
+            row = result.one()
+            return row.night_info_id
+        except NoResultFound:
+            raise NotFoundError(f"No NightInfo for block_visit_id: {block_visit_id}")
+
+    def get_night_info_times(self, night_info_id: int) -> dict[str, Any]:
+        """
+        Fetch time accounting values for a given night.
+
+        Parameters
+        ----------
+        night_info_id : int
+            NightInfo table primary key.
+
+        Returns
+        -------
+        dict[str, float]
+            Dictionary containing:
+            - science_time
+            - lost_time_to_weather
+            - lost_time_to_problems
+
+        Raises
+        ------
+        NotFoundError
+            If NightInfo record does not exist.
+        """
+
+        stmt  = text("""
+SELECT 
+    ScienceTime         AS science_time, 
+    TimeLostToWeather   AS lost_time_to_weather, 
+    TimeLostToProblems  AS lost_time_to_problems
+FROM NightInfo
+WHERE NightInfo_Id=:night_info_id
+                     """)
+        try:
+            result = self.connection.execute(stmt, {"night_info_id": night_info_id})
+            row = result.one()
+            return {
+                "science_time": row.science_time,
+                "lost_time_to_weather": row.lost_time_to_weather,
+                "lost_time_to_problems": row.lost_time_to_problems,
+            }
+        except NoResultFound:
+            raise NotFoundError(f"NightInfo not found: {night_info_id}")
+
+    def update_used_times(self, block_visit_id: int, new_status: str, new_rejection_reason: str):
+        """
+        Update nightly time accounting when a block visit status changes.
+
+        This adjusts:
+        - ScienceTime
+        - TimeLostToWeather
+        - TimeLostToProblems
+
+        Parameters
+        ----------
+        block_visit_id : int
+            Block visit identifier.
+        new_status : str
+            New block visit status ("Accepted" or "Rejected").
+        new_rejection_reason : str
+            Rejection reason code (if rejected).
+
+        Notes
+        -----
+        This method handles transitions between:
+        - Accepted → Rejected
+        - Rejected → Accepted
+        - Rejected → Rejected (reason change)
+        """
+        block_visit = self.get_block_visit(block_visit_id)
+        observation_time = self.get_observation_time(block_visit_id)
+        night_info_id = self.get_night_info_id_for_block_visit(block_visit_id)
+        current_times = self.get_night_info_times(night_info_id)
+
+        science_time = current_times["science_time"]
+        lost_time_to_weather = current_times["lost_time_to_weather"]
+        lost_time_to_problems = current_times["lost_time_to_problems"]
+
+        current_rejection_reason = block_visit["rejection_reason"]
+        current_status = block_visit["status"]
+
+        technical_problems = new_rejection_reason in TECH_PROBLEMS
+
+        # Rejected → Rejected (change reason)
+        if new_status == "Rejected" and current_status == "Rejected":
+            if technical_problems and current_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET:
+                lost_time_to_weather -= observation_time
+                lost_time_to_problems += observation_time
+            if (current_rejection_reason in TECH_PROBLEMS
+                    and new_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET):
+                lost_time_to_weather += observation_time
+                lost_time_to_problems -= observation_time
+
+        # Accepted → Rejected
+        if new_status == "Rejected" and current_status == "Accepted":
+            science_time -= observation_time
+            if technical_problems:
+                lost_time_to_problems += observation_time
+            if current_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET:
+                lost_time_to_weather += observation_time
+
+        # Rejected → Accepted
+        if new_status == "Accepted" and current_status == "Rejected":
+            science_time += observation_time
+            if technical_problems:
+                lost_time_to_problems -= observation_time
+            if current_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET:
+                lost_time_to_weather -= observation_time
+
+        stmt = text("""
+UPDATE NightInfo 
+SET 
+    ScienceTime=:science_time, 
+    TimeLostToWeather=:lost_time_to_weather, 
+    TimeLostToProblems=:lost_time_to_problems
+WHERE NightInfo_Id=:night_info_id       
+        """)
+        self.connection.execute(
+            stmt, {
+                "night_info_id": night_info_id,
+                "science_time": science_time,
+                "lost_time_to_weather": lost_time_to_weather,
+                "lost_time_to_problems": lost_time_to_problems
+            }
+        )
+
+    def update_block_attempts_and_status(self, block_visit_id: int, status: str):
+        """
+         Update block-level attempt counters and block completion status.
+
+        This function updates the latest Block record for the same semester and
+        block code as the given block visit. It adjusts:
+
+        - NDone       : Number of successful visits
+        - NAttempted  : Number of attempted visits
+        - BlockStatus : ACTIVE or COMPLETED
+
+        The logic depends on the transition of the block visit status:
+
+        - Accepted → Rejected: decrement NDone, increment NAttempted
+        - Rejected → Accepted: increment NDone, decrement NAttempted
+        - Rejected → Rejected: no change
+
+        If all required visits are completed (NDone == NVisits), the block is marked
+        as COMPLETED. If a completed block is later rejected, it is set back to ACTIVE.
+
+        Parameters
+        ----------
+        block_visit_id : int
+            The BlockVisit identifier used to locate the latest Block instance.
+        status : str
+            New block visit status ("Accepted" or "Rejected").
+
+        Notes
+        -----
+        This function does NOT update BlockVisit records. It only updates Block-level
+        accounting fields and block lifecycle status.
+        """
+
+        # Get latest block for the same semester + block code
+        stmt_get = text("""
+SELECT
+    B.Block_Id AS block_id,
+    B.NDone AS n_done,
+    B.NVisits AS n_visits,
+    B.NAttempted AS n_attempted,
+    BS.BlockStatus AS block_status
+FROM Block AS B
+         JOIN Proposal AS P ON B.Proposal_Id = P.Proposal_Id
+    JOIN BlockStatus AS BS ON BS.BlockStatus_Id = B.BlockStatus_Id
+WHERE P.Semester_Id = (
+    SELECT P1.Semester_Id
+    FROM Proposal AS P1
+             JOIN Block AS B1 ON P1.Proposal_Id = B1.Proposal_Id
+             JOIN BlockVisit AS BV1 ON B1.Block_Id = BV1.Block_Id
+    WHERE BV1.BlockVisit_Id = :block_visit_id
+)
+  AND B.BlockCode_Id = (
+    SELECT B2.BlockCode_Id
+    FROM Block AS B2
+             JOIN BlockVisit AS BV2 USING (Block_Id)
+    WHERE BV2.BlockVisit_Id = :block_visit_id
+)
+ORDER BY B.Block_Id DESC 
+    LIMIT 1
+        """)
+        result = self.connection.execute(stmt_get, {"block_visit_id": block_visit_id})
+        row = result.one()
+        latest_block_id = row["block_id"]
+        n_done = row.n_done
+        n_attempted = row.n_attempted
+        current_visit = self.get_block_visit(block_visit_id)
+
+        # Update counters
+        if current_visit["status"] == "Rejected" and status == "Rejected":
+            pass
+        else:
+            if status == "Rejected":
+                n_done -= 1
+                n_attempted += 1
+            else:
+                n_done += 1
+                n_attempted -= 1
+
+        # Update block status
+        block_status = row["block_status"]
+
+        if block_status == BlockStatusValue.COMPLETED and status == "Rejected":
+            block_status = BlockStatusValue.ACTIVE
+        if status == "Accepted" and n_done == row["n_visits"]:
+            block_status = BlockStatusValue.COMPLETED
+
+        # Update SDB table Block
+        stmt_update = text("""
+UPDATE Block B
+SET B.NDone = :n_done, 
+    B.NAttempted = :n_attempted,
+    B.BlockStatus_Id = (SELECT BS.BlockStatus_Id
+                        FROM BlockStatus BS
+                        WHERE BS.BlockStatus = :status)
+WHERE B.Block_Id = :block_id 
+        """)
+        self.connection.execute(
+            stmt_update, {
+                "n_done": n_done,
+                "n_attempted": n_attempted,
+                "status": block_status,
+                "block_id": latest_block_id
+            }
+        )
+
     def update_block_visit_status(
         self, block_visit_id: int, status: str, rejection_reason: Optional[str]
     ) -> None:
         """
-        Update the status of a block visit.
+         Update the status and rejection reason of a BlockVisit.
+
+        This method performs three operations:
+
+        1. Updates nightly time accounting (science time, weather loss, technical loss).
+        2. Updates block-level counters and block status via
+           `update_block_attempts_and_status`.
+        3. Updates the BlockVisit status and rejection reason in the database.
+
+        Parameters
+        ----------
+        block_visit_id : int
+            Unique identifier of the block visit.
+        status : str
+            New visit status (e.g. "Accepted", "Rejected").
+        rejection_reason : Optional[str]
+            Reason for rejection, if the status is "Rejected".
+
+        Raises
+        ------
+        NotFoundError
+            If the block visit does not exist.
+        ValueError
+            If the status or rejection reason is invalid.
+
+        Notes
+        -----
+        This function is the main entry point for changing a visit state.
+        It coordinates visit-level, block-level, and night-level accounting updates.
         """
 
         if not self._block_visit_exists(block_visit_id):
@@ -256,6 +582,12 @@ WHERE BV.BlockVisit_Id = :block_visit_id
             )
         except NoResultFound:
             raise ValueError(f"Unknown block visit status: {status}")
+
+        # update used time for the night
+        self.update_used_times(block_visit_id, status, rejection_reason)
+
+        # update the visit attempts and block Status
+        self.update_block_attempts_and_status(block_visit_id, status)
         stmt = text(
             """
 UPDATE BlockVisit BV

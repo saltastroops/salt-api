@@ -2324,6 +2324,8 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
             return 12
         if proposal_type == "OPTICON-Radionet Pilot":
             return 24
+        if proposal_type == "NOIRLab":
+            return 24
         if proposal_type in [
             "Key Science Program",
             "Large Science Proposal",

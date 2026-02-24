@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from saltapi.exceptions import NotFoundError, ValidationError
+from saltapi.exceptions import NotFoundError
 from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
@@ -221,7 +221,6 @@ WHERE B.Block_Id = :block_id;
         stmt = text(
             """
 SELECT BV.BlockVisit_Id     AS id,
-       BV.Block_Id          AS block_id,
        NI.Date              AS night,
        BVS.BlockVisitStatus AS status,
        BRR.RejectedReason   AS rejection_reason
@@ -237,14 +236,12 @@ WHERE BV.BlockVisit_Id = :block_visit_id
         try:
             result = self.connection.execute(stmt, {"block_visit_id": block_visit_id})
             row = result.one()
-            block_visit = {
+            return {
                 "id": row.id,
-                "block_id": row.block_id,
                 "night": row.night,
                 "status": row.status,
                 "rejection_reason": row.rejection_reason,
             }
-            return block_visit
         except NoResultFound:
             raise NotFoundError("Unknown block visit id")
 
@@ -291,7 +288,7 @@ WHERE BlockVisit_Id=:block_visit_id
         Returns
         -------
         int
-            Night Info ID.
+            Night info ID.
 
         Raises
         ------
@@ -315,7 +312,7 @@ SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_
         Parameters
         ----------
         night_info_id : int
-            NightInfo table ID.
+            NightInfo ID.
 
         Returns
         -------
@@ -351,25 +348,24 @@ WHERE NightInfo_Id=:night_info_id
             raise NotFoundError(f"No NightInfo found for ID: {night_info_id}")
 
     @staticmethod
-    def _compute_block_deltas(old_status, new_status):
+    def _block_visit_deltas(old_status, new_status):
         """
-        Compute delta changes for Block counters (NDone and NAttempted)
-        based on a BlockVisit status transition.
+        Compute the changes (-1, 0 or +1) of the number of attempted and successful block visits for a block status change.
 
         Parameters
         ----------
         old_status : str
-            Previous BlockVisit status ("Accepted" or "Rejected").
+            Previous Block visit status ("Accepted" or "Rejected").
         new_status : str
-            New BlockVisit status.
+            New Block visit status.
 
         Returns
         -------
         Dict[str, int]
             Dictionary with integer deltas:
             {
-                "done": int,        # change to Block.NDone
-                "attempted": int    # change to Block.NAttempted
+                "done": int,        # change in successful visits (Block.NDone())
+                "attempted": int    # change in attempted visits (Block.NAttempted())
             }
         """
         delta = {"done": 0, "attempted": 0}
@@ -379,12 +375,10 @@ WHERE NightInfo_Id=:night_info_id
             return delta
 
         elif old_status == "Accepted" and new_status == "Rejected":
-            delta["done"] -= 1
-            delta["attempted"] += 1
+            return { "done": -1, "attempted": 1 }
 
         elif old_status == "Rejected" and new_status == "Accepted":
-            delta["done"] += 1
-            delta["attempted"] -= 1
+            return { "done": -1, "attempted": -1 }
 
         return delta
 
@@ -396,9 +390,9 @@ WHERE NightInfo_Id=:night_info_id
         Parameters
         ----------
         old_status : str
-            Previous BlockVisit status.
+            Previous BlockVisit status("Accepted or Rejected").
         new_status : str
-            New BlockVisit status.
+            New BlockVisit status("Accepted or Rejected").
         old_rejection_reason : Optional[str]
             Previous rejection reason (if rejected).
         new_rejection_reason : Optional[str]
@@ -413,7 +407,7 @@ WHERE NightInfo_Id=:night_info_id
             {
                 "science": int,
                 "weather": int,
-                "problems": int
+                "technical": int
             }
 
         Raises
@@ -424,43 +418,46 @@ WHERE NightInfo_Id=:night_info_id
             If rejection reason cannot be classified.
         """
         if new_status == "Accepted" and new_rejection_reason:
-            raise ValidationError("Accepted block visits must not have a rejection reason")
+            raise ValueError("Accepted block visits must not have a rejection reason")
 
-        new_is_technical_problems = new_rejection_reason in TECHNICAL_PROBLEMS
-        new_is_weather_problems = new_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
-        old_is_technical_problems = old_rejection_reason in TECHNICAL_PROBLEMS
-        old_is_weather_problems = old_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
+        is_new_technical_problems = new_rejection_reason in TECHNICAL_PROBLEMS
+        is_new_weather_problems = new_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
+        is_old_technical_problems = old_rejection_reason in TECHNICAL_PROBLEMS
+        is_old_weather_problems = old_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
 
-        delta = {"science": 0, "weather": 0, "problems": 0}
+        delta = {"science": 0, "weather": 0, "technical": 0}
+        obs_time = abs(obs_time)
 
         # Accepted → Rejected
         if old_status == "Accepted" and new_status == "Rejected":
-            delta["science"] -= obs_time
-            if new_is_technical_problems:
-                delta["problems"] += obs_time
-            elif new_is_weather_problems:
-                delta["weather"] += obs_time
+            delta["science"] = -obs_time
+            if is_new_technical_problems:
+                delta["technical"] = obs_time
+            elif is_new_weather_problems:
+                delta["weather"] = obs_time
             else:
                 raise ValueError(f"Failed to account time for reason: {new_rejection_reason}")
 
         # Rejected → Accepted
         elif old_status == "Rejected" and new_status == "Accepted":
-            delta["science"] += obs_time
-            if old_is_technical_problems:
-                delta["problems"] -= obs_time
-            elif old_is_weather_problems:
-                delta["weather"] -= obs_time
+            delta["science"] = obs_time
+            if is_old_technical_problems:
+                delta["technical"] = -obs_time
+            elif is_old_weather_problems:
+                delta["weather"] = -obs_time
             else:
-                raise ValueError(f"Failed to account time for reason the current set reason: {old_rejection_reason}")
+                raise ValueError(f"Failed to account time for reason: {old_rejection_reason}")
 
         # Rejected → Rejected (reason change)
         elif old_status == "Rejected" and new_status == "Rejected":
-            if old_is_technical_problems and new_is_weather_problems:
-                delta["problems"] -= obs_time
-                delta["weather"] += obs_time
-            elif old_is_weather_problems and new_is_technical_problems:
-                delta["weather"] -= obs_time
-                delta["problems"] += obs_time
+            if is_old_technical_problems and is_new_weather_problems:
+                delta["technical"] = -obs_time
+                delta["weather"] = obs_time
+            elif is_old_weather_problems and is_new_technical_problems:
+                delta["weather"] = -obs_time
+                delta["technical"] = obs_time
+            elif is_old_technical_problems and is_new_technical_problems:
+                pass
             else:
                 raise ValueError(f"Failed to account time for reason the current set reason: {old_rejection_reason}")
 
@@ -504,7 +501,7 @@ WHERE NightInfo_Id=:night_info_id
             }
         )
 
-    def update_block_attempts_and_status(self, block_id: int,  n_done: int, n_attempted: int, block_status: str):
+    def update_block_visits_and_status(self, block_id: int, n_done: int, n_attempted: int, block_status: str):
         """
         Update Block counters and BlockStatus.
 
@@ -513,7 +510,7 @@ WHERE NightInfo_Id=:night_info_id
         block_id : int
             Block primary key.
         n_done : int
-            Updated number of completed visits.
+            Updated number of successful visits.
         n_attempted : int
             Updated number of attempted visits.
         block_status : str
@@ -621,7 +618,7 @@ ORDER BY B.Block_Id DESC
                 else None
             )
         except NoResultFound:
-            raise ValueError(f"Unknown block visit status: {status}")
+            raise ValueError(f"Unknown block visit status: {status} or rejection reason: {rejection_reason}")
 
         block = self.get_latest_block(block_visit_id)
         block_visit = self.get_block_visit(block_visit_id)
@@ -642,14 +639,13 @@ ORDER BY B.Block_Id DESC
             night_info_id,
             science_time=night_info_times["science_time"] + night_info_time_delta["science"] ,
             time_lost_to_weather=night_info_times["time_lost_to_weather"] + night_info_time_delta["weather"],
-            time_lost_to_problems=night_info_times["time_lost_to_problems"] + night_info_time_delta["problems"]
+            time_lost_to_problems=night_info_times["time_lost_to_problems"] + night_info_time_delta["technical"]
         )
 
-        # update the visit attempts and block Status
+        # update the visit counts and block Status
 
-        # Update block status
         block_status = block["block_status"]
-        block_delta = self._compute_block_deltas(
+        block_delta = self._block_visit_deltas(
             old_status=block_visit["status"],
             new_status=status,
         )
@@ -659,7 +655,7 @@ ORDER BY B.Block_Id DESC
             block_status = BlockStatusValue.ACTIVE
         if status == "Accepted" and n_done >= block["n_visits"]:
             block_status = BlockStatusValue.COMPLETED
-        self.update_block_attempts_and_status(block["block_id"], n_done=n_done, n_attempted=n_attempted, block_status=block_status)
+        self.update_block_visits_and_status(block["block_id"], n_done=n_done, n_attempted=n_attempted, block_status=block_status)
 
         stmt = text(
             """

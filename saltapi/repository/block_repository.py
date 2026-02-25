@@ -256,7 +256,7 @@ WHERE BV.BlockVisit_Id = :block_visit_id
 
         Returns
         -------
-        float
+        int
            Observation time in seconds.
 
         Raises
@@ -305,7 +305,7 @@ SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_
         except NoResultFound:
             raise NotFoundError(f"No block visit found for block_visit_id: {block_visit_id}")
 
-    def _get_night_info_times(self, night_info_id: int) -> dict[str, Any]:
+    def _get_night_info_times(self, night_info_id: int) -> dict[str, int]:
         """
         Fetch time accounting values for a given night.
 
@@ -316,7 +316,7 @@ SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_
 
         Returns
         -------
-        dict[str, float]
+        dict[str, int]
             Dictionary containing:
             - science_time
             - time_lost_to_weather

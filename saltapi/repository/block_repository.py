@@ -378,7 +378,7 @@ WHERE NightInfo_Id=:night_info_id
             return { "done": -1, "attempted": 1 }
 
         elif old_status == "Rejected" and new_status == "Accepted":
-            return { "done": -1, "attempted": -1 }
+            return { "done": 1, "attempted": -1 }
 
         return delta
 
@@ -504,7 +504,7 @@ WHERE NightInfo_Id=:night_info_id
 
     def update_block_visits_and_status(self, block_id: int, n_done: int, n_attempted: int, block_status: str):
         """
-        Update number of successful and attempted visits and BlockStatus.
+        Update number of successful and attempted visits and Block status.
 
         Parameters
         ----------

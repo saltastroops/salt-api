@@ -13,6 +13,14 @@ from saltapi.repository.instrument_repository import InstrumentRepository
 from saltapi.repository.target_repository import TargetRepository
 from saltapi.service.block import Block
 from saltapi.settings import get_settings
+from saltapi.web.schema.block import BlockStatusValue
+from saltapi.web.schema.common import BlockRejectionReason
+
+
+TECHNICAL_PROBLEMS = {
+    BlockRejectionReason.INSTRUMENT_TECHNICAL_PROBLEMS,
+    BlockRejectionReason.TELESCOPE_TECHNICAL_PROBLEMS,
+}
 
 
 class BlockRepository:
@@ -228,34 +236,441 @@ WHERE BV.BlockVisit_Id = :block_visit_id
         try:
             result = self.connection.execute(stmt, {"block_visit_id": block_visit_id})
             row = result.one()
-            block_visit = {
+            return {
                 "id": row.id,
                 "night": row.night,
                 "status": row.status,
                 "rejection_reason": row.rejection_reason,
             }
-            return block_visit
         except NoResultFound:
             raise NotFoundError("Unknown block visit id")
+
+    def get_observation_time(self, block_visit_id: int) -> int:
+        """
+        Retrieve the observation time for a given block visit.
+
+        Parameters
+        ----------
+        block_visit_id : int
+           The unique identifier of the block visit.
+
+        Returns
+        -------
+        int
+           Observation time in seconds.
+
+        Raises
+        ------
+        NotFoundError
+           If no block visit is found for the given ID.
+        """
+
+        stmt  = text("""
+SELECT B.ObsTime  AS obs_time 
+FROM Block B 
+    JOIN BlockVisit BV ON B.Block_Id=BV.Block_Id 
+WHERE BlockVisit_Id=:block_visit_id
+                     """)
+        try:
+            return cast(int, self.connection.execute(stmt, {"block_visit_id": block_visit_id}).scalar_one())
+        except NoResultFound:
+            raise NotFoundError(f"No block visit found for block_visit_id: {block_visit_id}")
+
+    def _get_night_info_id_for_block_visit(self, block_visit_id: int) -> int:
+        """
+        Retrieve the night info ID of the night when the block visit was done.
+
+        Parameters
+        ----------
+        block_visit_id : int
+            The block visit ID.
+
+        Returns
+        -------
+        int
+            Night info ID.
+
+        Raises
+        ------
+        NotFoundError
+            If the block visit does not exist.
+        """
+
+        stmt  = text("""
+SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_visit_id      
+        """)
+        try:
+            result = self.connection.execute(stmt, {"block_visit_id": block_visit_id})
+            return cast(int, result.scalar_one())
+        except NoResultFound:
+            raise NotFoundError(f"No block visit found for block_visit_id: {block_visit_id}")
+
+    def _get_night_info_times(self, night_info_id: int) -> dict[str, int]:
+        """
+        Fetch time accounting values for a given night.
+
+        Parameters
+        ----------
+        night_info_id : int
+            NightInfo ID.
+
+        Returns
+        -------
+        dict[str, int]
+            Dictionary containing:
+            - science_time
+            - time_lost_to_weather
+            - time_lost_to_problems
+
+        Raises
+        ------
+        NotFoundError
+            If NightInfo record does not exist.
+        """
+
+        stmt  = text("""
+SELECT 
+    ScienceTime         AS science_time, 
+    TimeLostToWeather   AS time_lost_to_weather, 
+    TimeLostToProblems  AS time_lost_to_problems
+FROM NightInfo
+WHERE NightInfo_Id=:night_info_id
+                     """)
+        try:
+            result = self.connection.execute(stmt, {"night_info_id": night_info_id})
+            row = result.one()
+            return {
+                "science_time": cast(int, row.science_time),
+                "time_lost_to_weather": cast(int, row.time_lost_to_weather),
+                "time_lost_to_problems": cast(int,row.time_lost_to_problems)
+            }
+        except NoResultFound:
+            raise NotFoundError(f"No NightInfo found for ID: {night_info_id}")
+
+    @staticmethod
+    def _block_visit_deltas(old_status: str, new_status: str) -> Dict[str, int]:
+        """
+        Compute the changes (-1, 0 or +1) of the number of attempted and successful block visits for a block status change.
+
+        Parameters
+        ----------
+        old_status : str
+            Previous Block visit status ("Accepted" or "Rejected").
+        new_status : str
+            New block visit status.
+
+        Returns
+        -------
+        Dict[str, int]
+            Dictionary with integer deltas:
+            {
+                "done": int,        # change in successful visits (Block.NDone)
+                "attempted": int    # change in attempted visits (Block.NAttempted)
+            }
+        """
+        delta = {"done": 0, "attempted": 0}
+
+        if ((old_status == "Accepted" and new_status == "Accepted")
+                or (old_status == "Rejected" and new_status == "Rejected")):
+            return delta
+
+        elif old_status == "Accepted" and new_status == "Rejected":
+            return { "done": -1, "attempted": 1 }
+
+        elif old_status == "Rejected" and new_status == "Accepted":
+            return { "done": 1, "attempted": -1 }
+
+        return delta
+
+    @staticmethod
+    def _compute_night_info_time_deltas(
+            old_status: str,
+            new_status: str,
+            old_rejection_reason: Optional[str],
+            new_rejection_reason: Optional[str],
+
+            obs_time: int
+    ) -> Dict[str, int]:
+        """
+        Compute time accounting deltas for NightInfo based on visit status transitions.
+
+        Parameters
+        ----------
+        old_status : str
+            Previous BlockVisit status("Accepted" or "Rejected").
+        new_status : str
+            New BlockVisit status("Accepted or Rejected").
+        old_rejection_reason : Optional[str]
+            Previous rejection reason (if rejected).
+        new_rejection_reason : Optional[str]
+            New rejection reason (if rejected).
+        obs_time : int
+            Observation time in seconds.
+
+        Returns
+        -------
+        Dict[str, int]
+            Dictionary with deltas:
+            {
+                "science": int,
+                "weather": int,
+                "technical": int
+            }
+
+        Raises
+        ------
+        ValidationError
+            If Accepted visit has a rejection reason.
+        ValueError
+            If rejection reason cannot be classified.
+        """
+        if new_status == "Accepted" and new_rejection_reason:
+            raise ValueError("Accepted block visits must not have a rejection reason")
+
+        is_new_technical_problem = new_rejection_reason in TECHNICAL_PROBLEMS
+        is_new_weather_problem = new_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
+        is_old_technical_problem = old_rejection_reason in TECHNICAL_PROBLEMS
+        is_old_weather_problem = old_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
+
+        delta = {"science": 0, "weather": 0, "technical": 0}
+        obs_time = abs(obs_time)
+
+        # Accepted → Rejected
+        if old_status == "Accepted" and new_status == "Rejected":
+            delta["science"] = -obs_time
+            if is_new_technical_problem:
+                delta["technical"] = obs_time
+            elif is_new_weather_problem:
+                delta["weather"] = obs_time
+            else:
+                raise ValueError(f"Failed to account time for reason: {new_rejection_reason}")
+
+        # Rejected → Accepted
+        elif old_status == "Rejected" and new_status == "Accepted":
+            delta["science"] = obs_time
+            if is_old_technical_problem:
+                delta["technical"] = -obs_time
+            elif is_old_weather_problem:
+                delta["weather"] = -obs_time
+            else:
+                raise ValueError(f"Failed to account time for reason: {old_rejection_reason}")
+
+        # Rejected → Rejected (reason change)
+        elif old_status == "Rejected" and new_status == "Rejected":
+            if is_old_technical_problem and is_new_weather_problem:
+                delta["technical"] = -obs_time
+                delta["weather"] = obs_time
+            elif is_old_weather_problem and is_new_technical_problem:
+                delta["weather"] = -obs_time
+                delta["technical"] = obs_time
+            elif ((is_old_technical_problem and is_new_technical_problem) or
+                  (is_old_weather_problem and is_new_weather_problem)):
+                pass
+            else:
+                raise ValueError(f"Failed to account time for reason the current set reason: {old_rejection_reason}")
+
+        return delta
+
+    def _update_night_info_times(
+            self,
+            night_info_id: int,
+            science_time: int,
+            time_lost_to_weather: int,
+            time_lost_to_problems: int
+    ) -> None:
+        """
+        Persist updated NightInfo time accounting values.
+
+        Parameters
+        ----------
+        night_info_id : int
+            NightInfo Id.
+        science_time : int
+            Total science time.
+        time_lost_to_weather : int
+            Time lost due to weather.
+        time_lost_to_problems : int
+            Time lost due to technical problems.
+        """
+        stmt = text("""
+                    UPDATE NightInfo
+                    SET
+                        ScienceTime=:science_time,
+                        TimeLostToWeather=:time_lost_to_weather,
+                        TimeLostToProblems=:time_lost_to_problems
+                    WHERE NightInfo_Id=:night_info_id
+                    """)
+        self.connection.execute(
+            stmt, {
+                "night_info_id": night_info_id,
+                "science_time": science_time,
+                "time_lost_to_weather": time_lost_to_weather,
+                "time_lost_to_problems": time_lost_to_problems
+            }
+        )
+
+    def update_block_visits_and_status(self, block_id: int, n_done: int, n_attempted: int, block_status: str) -> None:
+        """
+        Update number of successful and attempted visits and Block status.
+
+        Parameters
+        ----------
+        block_id : int
+            Block primary key.
+        n_done : int
+            Updated number of successful visits.
+        n_attempted : int
+            Updated number of attempted visits.
+        block_status : str
+            Block status (Active / Complete).
+        """
+        # Update SDB table Block
+        stmt_update = text("""
+UPDATE Block B
+SET B.NDone = :n_done, 
+    B.NAttempted = :n_attempted,
+    B.BlockStatus_Id = (SELECT BS.BlockStatus_Id
+                        FROM BlockStatus BS
+                        WHERE BS.BlockStatus = :status)
+WHERE B.Block_Id = :block_id 
+        """)
+        self.connection.execute(
+            stmt_update, {
+                "n_done": n_done,
+                "n_attempted": n_attempted,
+                "status": block_status,
+                "block_id": block_id
+            }
+        )
+
+    def get_latest_block(self, block_visit_id: int) -> Dict[str, Any]:
+        # Get latest block for the same semester + block code
+        stmt_get = text("""
+SELECT
+    B.Block_Id AS block_id,
+    B.NDone AS n_done,
+    B.NVisits AS n_visits,
+    B.NAttempted AS n_attempted,
+    BS.BlockStatus AS block_status
+FROM Block AS B
+         JOIN Proposal AS P ON B.Proposal_Id = P.Proposal_Id
+    JOIN BlockStatus AS BS ON BS.BlockStatus_Id = B.BlockStatus_Id
+WHERE P.Semester_Id = (
+    SELECT P1.Semester_Id
+    FROM Proposal AS P1
+             JOIN Block AS B1 ON P1.Proposal_Id = B1.Proposal_Id
+             JOIN BlockVisit AS BV1 ON B1.Block_Id = BV1.Block_Id
+    WHERE BV1.BlockVisit_Id = :block_visit_id
+)
+  AND B.BlockCode_Id = (
+    SELECT B2.BlockCode_Id
+    FROM Block AS B2
+             JOIN BlockVisit AS BV2 USING (Block_Id)
+    WHERE BV2.BlockVisit_Id = :block_visit_id
+)
+ORDER BY B.Block_Id DESC
+    LIMIT 1
+        """)
+        result = self.connection.execute(stmt_get, {"block_visit_id": block_visit_id})
+        row = result.one()
+        return {
+            "block_id": row.block_id,
+            "n_done": row.n_done,
+            "n_visits": row.n_visits,
+            "n_attempted": row.n_attempted,
+            "block_status": row.block_status
+        }
 
     def update_block_visit_status(
         self, block_visit_id: int, status: str, rejection_reason: Optional[str]
     ) -> None:
         """
-        Update the status of a block visit.
+         Update BlockVisit status and synchronize Block and NightInfo accounting.
+
+        This method performs the following steps atomically:
+
+        1. Compute time deltas for NightInfo (science/weather/technical).
+        2. Compute block counter deltas (NDone, NAttempted).
+        3. Update NightInfo totals.
+        4. Update Block counters and BlockStatus.
+        5. Update BlockVisit status and rejection reason.
+
+        Parameters
+        ----------
+        block_visit_id : int
+            Unique identifier of the block visit.
+        status : str
+            New visit status (e.g. "Accepted", "Rejected").
+        rejection_reason : Optional[str]
+            Reason for rejection, if the status is "Rejected".
+
+        Raises
+        ------
+        NotFoundError
+            If the block visit does not exist.
+        ValueError
+            If the status or rejection reason is invalid.
+
+        Notes
+        -----
+        All deltas are computed before database updates to avoid order-dependent bugs.
         """
 
         if not self._block_visit_exists(block_visit_id):
             raise NotFoundError(f"Unknown block visit id: {block_visit_id}")
         try:
             block_visit_status_id = self._block_visit_status_id(status)
+
+        except NoResultFound:
+            raise ValueError(f"Unknown block visit status: {status}")
+
+        try:
             block_rejected_reason_id = (
                 self._block_rejection_reason_id(rejection_reason)
                 if rejection_reason
                 else None
             )
         except NoResultFound:
-            raise ValueError(f"Unknown block visit status: {status}")
+            raise ValueError(f"Unknown rejection reason: {rejection_reason}")
+
+        block = self.get_latest_block(block_visit_id)
+        block_visit = self.get_block_visit(block_visit_id)
+
+        # Night info time delta
+        observation_time = self.get_observation_time(block_visit_id)
+        night_info_time_delta = self._compute_night_info_time_deltas(
+            old_status=block_visit["status"],
+            new_status=status,
+            old_rejection_reason=block_visit["rejection_reason"],
+            new_rejection_reason=rejection_reason,
+            obs_time=observation_time
+        )
+        # update used time for the night
+        night_info_id =  self._get_night_info_id_for_block_visit(block_visit_id)
+        night_info_times = self._get_night_info_times(night_info_id)
+        self._update_night_info_times(
+            night_info_id,
+            science_time=night_info_times["science_time"] + night_info_time_delta["science"] ,
+            time_lost_to_weather=night_info_times["time_lost_to_weather"] + night_info_time_delta["weather"],
+            time_lost_to_problems=night_info_times["time_lost_to_problems"] + night_info_time_delta["technical"]
+        )
+
+        # update the visit counts and block status
+
+        block_status = block["block_status"]
+        block_delta = self._block_visit_deltas(
+            old_status=block_visit["status"],
+            new_status=status,
+        )
+        n_done = block["n_done"] + block_delta["done"]
+        n_attempted = block["n_attempted"] + block_delta["attempted"]
+
+        if n_done >= block["n_visits"]:
+            block_status = BlockStatusValue.COMPLETED
+        else:
+            block_status = BlockStatusValue.ACTIVE
+        self.update_block_visits_and_status(block["block_id"], n_done=n_done, n_attempted=n_attempted, block_status=block_status)
+
         stmt = text(
             """
 UPDATE BlockVisit BV

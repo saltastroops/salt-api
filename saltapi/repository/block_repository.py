@@ -664,10 +664,11 @@ ORDER BY B.Block_Id DESC
         )
         n_done = block["n_done"] + block_delta["done"]
         n_attempted = block["n_attempted"] + block_delta["attempted"]
-        if block_status == BlockStatusValue.COMPLETED and status == "Rejected":
-            block_status = BlockStatusValue.ACTIVE
-        if status == "Accepted" and n_done >= block["n_visits"]:
+
+        if n_done >= block["n_visits"]:
             block_status = BlockStatusValue.COMPLETED
+        else:
+            block_status = BlockStatusValue.ACTIVE
         self.update_block_visits_and_status(block["block_id"], n_done=n_done, n_attempted=n_attempted, block_status=block_status)
 
         stmt = text(

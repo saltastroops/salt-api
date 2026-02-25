@@ -305,7 +305,7 @@ SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_
         except NoResultFound:
             raise NotFoundError(f"No block visit found for block_visit_id: {block_visit_id}")
 
-    def _get_night_info_times(self, night_info_id: int) -> dict[str, int]:
+    def _get_night_info_times(self, night_info_id: int) -> dict[str, Any]:
         """
         Fetch time accounting values for a given night.
 

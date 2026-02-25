@@ -272,7 +272,7 @@ FROM Block B
 WHERE BlockVisit_Id=:block_visit_id
                      """)
         try:
-            return self.connection.execute(stmt, {"block_visit_id": block_visit_id}).scalar_one()
+            return cast(int, self.connection.execute(stmt, {"block_visit_id": block_visit_id}).scalar_one())
         except NoResultFound:
             raise NotFoundError(f"No block visit found for block_visit_id: {block_visit_id}")
 
@@ -305,7 +305,7 @@ SELECT NightInfo_Id AS night_info_id FROM BlockVisit WHERE BlockVisit_Id=:block_
         except NoResultFound:
             raise NotFoundError(f"No block visit found for block_visit_id: {block_visit_id}")
 
-    def _get_night_info_times(self, night_info_id: int) -> dict[str, Any]:
+    def _get_night_info_times(self, night_info_id: int) -> dict[str, int]:
         """
         Fetch time accounting values for a given night.
 
@@ -340,9 +340,9 @@ WHERE NightInfo_Id=:night_info_id
             result = self.connection.execute(stmt, {"night_info_id": night_info_id})
             row = result.one()
             return {
-                "science_time": row.science_time,
-                "time_lost_to_weather": row.time_lost_to_weather,
-                "time_lost_to_problems": row.time_lost_to_problems,
+                "science_time": cast(int, row.science_time),
+                "time_lost_to_weather": cast(int, row.time_lost_to_weather),
+                "time_lost_to_problems": cast(int,row.time_lost_to_problems)
             }
         except NoResultFound:
             raise NotFoundError(f"No NightInfo found for ID: {night_info_id}")

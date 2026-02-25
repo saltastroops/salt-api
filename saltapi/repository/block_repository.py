@@ -348,7 +348,7 @@ WHERE NightInfo_Id=:night_info_id
             raise NotFoundError(f"No NightInfo found for ID: {night_info_id}")
 
     @staticmethod
-    def _block_visit_deltas(old_status, new_status):
+    def _block_visit_deltas(old_status: str, new_status: str) -> Dict[str, int]:
         """
         Compute the changes (-1, 0 or +1) of the number of attempted and successful block visits for a block status change.
 
@@ -383,7 +383,14 @@ WHERE NightInfo_Id=:night_info_id
         return delta
 
     @staticmethod
-    def _compute_night_info_time_deltas(old_status: str, new_status: str, old_rejection_reason: str, new_rejection_reason: str, obs_time: int) -> Dict[str, int]:
+    def _compute_night_info_time_deltas(
+            old_status: str,
+            new_status: str,
+            old_rejection_reason: Optional[str],
+            new_rejection_reason: Optional[str],
+
+            obs_time: int
+    ) -> Dict[str, int]:
         """
         Compute time accounting deltas for NightInfo based on visit status transitions.
 
@@ -502,7 +509,7 @@ WHERE NightInfo_Id=:night_info_id
             }
         )
 
-    def update_block_visits_and_status(self, block_id: int, n_done: int, n_attempted: int, block_status: str):
+    def update_block_visits_and_status(self, block_id: int, n_done: int, n_attempted: int, block_status: str) -> None:
         """
         Update number of successful and attempted visits and Block status.
 

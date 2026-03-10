@@ -83,8 +83,8 @@ WHERE S.Identifier = :identifier
         """
         identifier = str(uuid.uuid4())
         proposal_code_id = (
-            (self._proposal_code_id(proposal_code) if proposal_code else None)
-            if not proposal_code.startswith("Unsubmitted")
+            self._proposal_code_id(proposal_code)
+            if proposal_code and not proposal_code.startswith("Unsubmitted")
             else None
         )
         stmt = text(

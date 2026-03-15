@@ -198,6 +198,7 @@ class SubmissionService:
             "MAPPING_TOOL_FROM_EMAIL": settings.from_email,
             "MAPPING_TOOL_SUBMIT_EMAIL": settings.mapping_tool_submit_email,
             "MAPPING_TOOL_NO_REPLY_EMAIL": settings.mapping_tool_no_reply_email,
+            "MAPPING_TOOL_WEB_MANAGER_URL": settings.mapping_tool_web_manager_url,
             "MAPPING_TOOL_MAILCHIMP_API_KEY": settings.mapping_tool_mailchimp_api_key,
             "MAPPING_TOOL_MAILCHIMP_LIST_ID": settings.mapping_tool_mailchimp_list_id,
         }
@@ -240,7 +241,7 @@ class SubmissionService:
              -file {saved_file.absolute()}
              {('-proposalCode ' + proposal_code) if proposal_code else ""}
              -piptDir {settings.mapping_tool_pipt_dir}
-             -server {settings.mapping_tool_web_manager_url}
+             -server {settings.mapping_tool_salt_api_url}
              -ephemerisUrl {settings.mapping_tool_ephemeris_url}
              -findingChartGenerationScript {settings.mapping_tool_finder_chart_tool}
              -python {settings.mapping_tool_python_interpreter}

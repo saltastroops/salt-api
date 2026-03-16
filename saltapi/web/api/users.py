@@ -97,7 +97,7 @@ def create_user(
         # address.
         # Validate email
         user_service.send_registration_confirmation_email(
-            pipt_user_id, f"{user.family_name} {user.given_name}", user.email
+            pipt_user_id, f"{user.given_name} {user.family_name}", user.email
         )
         unit_of_work.commit()
 
@@ -141,7 +141,7 @@ def send_verification_link(
             raise NotFoundError()
 
         user_service.send_registration_confirmation_email(
-            user.id, f"{user.family_name} {user.given_name}", user.email
+            user.id, f"{user.given_name} {user.family_name}", user.email
         )
 
         return Message(message="Email with an activation link has been sent.")

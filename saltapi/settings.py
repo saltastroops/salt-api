@@ -115,8 +115,11 @@ class Settings(BaseSettings):
     # Email address for submission notifications by the mapping tool
     mapping_tool_submit_email: str
 
-    # URL for accessing Web Manager services
+    # URL for accessing Web Manager
     mapping_tool_web_manager_url: HttpUrl
+
+    # URL for accessing the SALT API
+    mapping_tool_salt_api_url: HttpUrl
 
     # URL for requesting ephemerides
     mapping_tool_ephemeris_url: HttpUrl

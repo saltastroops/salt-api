@@ -669,11 +669,11 @@ SELECT
     `IN`.InstituteName_Name AS institution_name,
     I2.Institute_Id         AS institution_id,
     I2.Department           AS department,
-    PI.InvestigatorOkay     AS approved,
+    PI.InvestigatorOkay     AS investigator_okay,
     PI.ApprovalCode         AS approval_code,
-    ThesisType		       AS thesis_type,
-    ThesisDescr		       AS relevance_of_proposal,
-    CompletionYear	       AS year_of_completion
+    ThesisType		        AS thesis_type,
+    ThesisDescr		        AS relevance_of_proposal,
+    CompletionYear	        AS year_of_completion
 FROM ProposalInvestigator PI
     JOIN Investigator I ON PI.Investigator_Id = I.Investigator_Id
     JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
@@ -723,14 +723,14 @@ ORDER BY I.Surname, I.FirstName
             del investigator["relevance_of_proposal"]
             del investigator["year_of_completion"]
 
-            if investigator["approved"] == 1:
-                investigator["has_approved_proposal"] = True
-            elif investigator["approval_code"]:
+            if investigator["approval_code"]:
                 investigator["has_approved_proposal"] = None
+            elif investigator["investigator_okay"] == 1:
+                investigator["has_approved_proposal"] = True
             else:
                 investigator["has_approved_proposal"] = False
 
-            del investigator["approved"]
+            del investigator["investigator_okay"]
             del investigator["approval_code"]
         return investigators
 
@@ -2884,14 +2884,16 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
         Update the investigator's approval status of the proposal with the given
         proposal code.
         """
-        # The temporary table tmp is necessary as the ProposalInvestigator table
-        # cannot be included in the FROM statement.
+        # The temporary tables tmp1 and tmp2 are necessary as the ProposalInvestigator
+        # table cannot be included in the FROM statement. Note that if a user is present
+        # as multiple investigators, the approval status is updated for all of these
+        # investigators.
         stmt = text(
             """
 UPDATE ProposalInvestigator
 SET InvestigatorOkay=:approved,
     ApprovalCode=NULL
-WHERE Investigator_Id = (SELECT *
+WHERE Investigator_Id IN (SELECT tmp1.Investigator_Id
                          FROM (SELECT I.Investigator_Id
                                FROM Investigator I
                                         JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
@@ -2899,8 +2901,14 @@ WHERE Investigator_Id = (SELECT *
                                              ON I.Investigator_Id = PI.Investigator_Id
                                         JOIN ProposalCode PC
                                              ON PI.ProposalCode_Id = PC.ProposalCode_Id
-                               WHERE PC.Proposal_Code = :proposal_code
-                                 AND PU.PiptUser_Id = :user_id) tmp)
+                               WHERE PU.PiptUser_Id = :user_id
+                                 AND PC.ProposalCode_Id = (SELECT ProposalCode_Id
+                                                           FROM ProposalCode
+                                                           WHERE Proposal_Code = :proposal_code)) AS tmp1)
+  AND ProposalCode_Id = (SELECT tmp2.ProposalCode_Id
+                         FROM (SELECT PC.ProposalCode_Id
+                               FROM ProposalCode PC
+                               WHERE PC.Proposal_Code = :proposal_code) AS tmp2);
         """
         )
         result = self.connection.execute(

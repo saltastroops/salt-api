@@ -195,6 +195,9 @@ class SubmissionService:
             "MAPPING_TOOL_SMTP_SERVER": settings.smtp_server
             if settings.smtp_server
             else "",
+            "MAPPING_TOOL_SMTP_PORT": str(settings.smtp_port)
+            if settings.smtp_port
+            else "25",
             "MAPPING_TOOL_FROM_EMAIL": settings.from_email,
             "MAPPING_TOOL_SUBMIT_EMAIL": settings.mapping_tool_submit_email,
             "MAPPING_TOOL_NO_REPLY_EMAIL": settings.mapping_tool_no_reply_email,

@@ -17,10 +17,14 @@ RUN apt-get update -y
 RUN apt-get install -y default-jre
 RUN apt-get install -y ghostscript
 RUN apt-get install -y imagemagick
-RUN apt-get install -y wkhtmltopdf
+
+# wkhtmltopdf is unavailable via apt-get
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb -O /tmp/wkhtmltopdf.deb && \
+    dpkg -i /tmp/wkhtmltopdf.deb || apt-get install -f -y && \
+    rm /tmp/wkhtmltopdf.deb
 
 # Give ImageMagick access to pdf files
-RUN sed -i "s@<policy domain=\"coder\" rights=\"none\" pattern=\"PDF\" />@<policy domain=\"coder\" rights=\"read|write\" pattern=\"PDF\" />@g" /etc/ImageMagick-6/policy.xml
+RUN sed -i "s@<policy domain=\"coder\" rights=\"none\" pattern=\"PDF\" />@<policy domain=\"coder\" rights=\"read|write\" pattern=\"PDF\" />@g" /etc/ImageMagick-7/policy.xml
 
 RUN pip install wheel
 

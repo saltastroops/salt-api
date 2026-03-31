@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Literal
 
 import pytz
 from sqlalchemy import text
@@ -809,7 +809,7 @@ class PiptRepository:
     def get_proposals(
         self,
         user: User,
-        phase: int,
+        phase: Literal[1, 2],
         limit: Optional[int] = None,
         descending: bool = True,
     ) -> List[Dict[str, Any]]:
@@ -836,12 +836,24 @@ class PiptRepository:
             )
             params["accepted"] = "Accepted"
 
-        latest_proposal_select = """
-            SELECT MAX(Proposal_Id) AS latest_proposal_id
-            FROM Proposal
-            WHERE Phase = :phase
-            GROUP BY ProposalCode_Id
-        """
+        # For Phase 1 proposals we need the proposal id for the latest submission of
+        # Phase 1. For Phase 2 proposals we need the latest submission of any phase, as
+        # the phase might still be 1. (If the proposal has not been accepted, the where
+        # condition above will fail for the latest proposal id, anyway, so even though
+        # we don't limit the phase, such proposals will end up being excluded.)
+        if phase == 1:
+            latest_proposal_select = """
+                SELECT MAX(Proposal_Id) AS latest_proposal_id
+                FROM Proposal
+                WHERE Phase=1
+                GROUP BY ProposalCode_Id
+            """
+        else:
+            latest_proposal_select = """
+                SELECT MAX(Proposal_Id) AS latest_proposal_id
+                FROM Proposal
+                GROUP BY ProposalCode_Id
+            """
         params["phase"] = phase
 
         sql = f"""

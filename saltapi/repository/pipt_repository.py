@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Literal
 
 import pytz
 from sqlalchemy import text
@@ -809,7 +809,7 @@ class PiptRepository:
     def get_proposals(
         self,
         user: User,
-        phase: int,
+        phase: Literal[1, 2],
         limit: Optional[int] = None,
         descending: bool = True,
     ) -> List[Dict[str, Any]]:

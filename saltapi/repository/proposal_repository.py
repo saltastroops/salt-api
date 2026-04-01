@@ -3,7 +3,7 @@ import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time, timezone
-from typing import Any, DefaultDict, Dict, List, Optional, cast
+from typing import Any, DefaultDict, Dict, List, Optional, cast, Literal
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -2009,7 +2009,7 @@ WHERE PC.Proposal_Code = :proposal_code
         return path
 
     def get_proposal_file(
-        self, proposal_code: str, phase: Optional[int] = None
+        self, proposal_code: str, phase: Optional[Literal[1, 2]] = None
     ) -> pathlib.Path:
         """
         Return the path of the latest proposal zip file with an (optional) phase.
@@ -2033,8 +2033,41 @@ WHERE PC.Proposal_Code = :proposal_code
 
         """
         proposals_dir = get_settings().proposals_dir
-        version = self.get_current_version(proposal_code, phase)
-        path = proposals_dir / proposal_code / str(version) / f"{proposal_code}.zip"
+        if phase == 1:
+            current_version = self.get_current_version(proposal_code, 1)
+            path = (
+                proposals_dir
+                / proposal_code
+                / str(current_version)
+                / f"{proposal_code}.zip"
+            )
+        else:
+            # If a proposal has been accepted but has no Phase 2 submission yet, the
+            # latest version is Phase 1, but during the Phase 1-Phase 2 conversion a
+            # special Phase 2 zipfile should have been created.
+            try:
+                current_version_phase_1 = self.get_current_version(proposal_code, 1)
+            except Exception:
+                current_version_phase_1 = None
+            current_version_any_phase = self.get_current_version(proposal_code, None)
+            if current_version_phase_1 != current_version_any_phase:
+                # The latest version is Phase 2, and hence there should be a "normal"
+                # zip file.
+                path = (
+                    proposals_dir
+                    / proposal_code
+                    / str(current_version_any_phase)
+                    / f"{proposal_code}.zip"
+                )
+            else:
+                # The latest version is Phase 1, and hence there must be the zip file
+                # created during the Phase1-Phase 2 conversion.
+                path = (
+                    proposals_dir
+                    / proposal_code
+                    / str(current_version_any_phase)
+                    / f"{proposal_code}-Phase2.zip"
+                )
         if not path.exists():
             raise NotFoundError(f"No proposal file found for proposal {proposal_code}")
 

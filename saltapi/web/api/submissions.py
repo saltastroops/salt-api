@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Literal
 
 from fastapi import APIRouter, Depends, File, Form, Path, Query, UploadFile, WebSocket
 from starlette import status
@@ -37,6 +37,12 @@ async def create_submission(
     ),
     proposal_code: Optional[str] = Form(
         None, title="Proposal code", description="Proposal code"
+    ),
+    validation_only: Optional[Literal["validation-only"]] = Form(
+        None,
+        title="Validation only",
+        description="Whether to validate the proposal only, without an actual "
+        "submission. Validation-only is performed if the value is 'validation-only'.",
     ),
     user: User = Depends(get_current_user),
 ) -> Dict[str, str]:
@@ -77,7 +83,7 @@ async def create_submission(
     permission_service.check_permission_to_submit_proposal(user, proposal_code)
 
     submission_identifier = await submission_service.submit_proposal(
-        user, proposal, proposal_code
+        user, proposal, proposal_code, validation_only is not None
     )
     return {"submission_identifier": submission_identifier}
 

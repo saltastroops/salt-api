@@ -26,7 +26,11 @@ class SubmissionService:
         self.connection = submission_repository.connection
 
     async def submit_proposal(
-        self, submitter: User, proposal: UploadFile, proposal_code: Optional[str]
+        self,
+        submitter: User,
+        proposal: UploadFile,
+        proposal_code: Optional[str],
+        validation_only: bool,
     ) -> str:
         """
         Submit a proposal.
@@ -39,6 +43,8 @@ class SubmissionService:
             The uploaded proposal file.
         proposal_code: str, optional
             The proposal code of the submitted proposal.
+        validation_only: bool
+            Whether to perform a validation only, with no actual submission.
 
         Returns
         -------
@@ -71,11 +77,18 @@ class SubmissionService:
         self.submission_repository.create_log_entry(
             submission_identifier=submission_identifier,
             message_type=SubmissionMessageType.INFO,
-            message="Calling the submission script.",
+            message=f"Calling the submission script"
+            f"{' (for validation only)' if validation_only else ''}.",
         )
         t = threading.Thread(
             target=SubmissionService._perform_submission,
-            args=[saved_file, proposal_code, submission_identifier, submitter],
+            args=[
+                saved_file,
+                proposal_code,
+                submission_identifier,
+                submitter,
+                validation_only,
+            ],
         )
         t.start()
         return submission_identifier
@@ -123,6 +136,7 @@ class SubmissionService:
         proposal_code: Optional[str],
         submission_identifier: str,
         submitter: User,
+        validation_only: bool,
     ) -> int:
         """Execute the submission."""
         return_code = SubmissionService._call_submission_tool(
@@ -130,6 +144,7 @@ class SubmissionService:
             proposal_code=proposal_code,
             submission_identifier=submission_identifier,
             submitter=submitter,
+            validation_only=validation_only,
         )
 
         # As this command is running in a separate thread, it needs its own database
@@ -170,6 +185,7 @@ class SubmissionService:
         proposal_code: Optional[str],
         submission_identifier: str,
         submitter: User,
+        validation_only: bool,
     ) -> int:
         # Create the command
         command_string = SubmissionService._submission_command(
@@ -177,6 +193,7 @@ class SubmissionService:
             submission_identifier=submission_identifier,
             submitter=submitter,
             proposal_code=proposal_code,
+            validation_only=validation_only,
         )
         command = command_string.split(" ")
         if proposal_code:
@@ -217,6 +234,7 @@ class SubmissionService:
         submitter: User,
         proposal_code: Optional[str],
         submission_identifier: str,
+        validation_only: bool,
     ) -> str:
         """Generate the command for submitting the proposal."""
         # Ensure the proposal code and username are safe.
@@ -248,6 +266,7 @@ class SubmissionService:
              -ephemerisUrl {settings.mapping_tool_ephemeris_url}
              -findingChartGenerationScript {settings.mapping_tool_finder_chart_tool}
              -python {settings.mapping_tool_python_interpreter}
+             {'-checkonly' if validation_only else ''}
              {sentry_dsn}
              {settings.mapping_tool_api_key}
         """

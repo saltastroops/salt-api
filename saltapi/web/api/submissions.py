@@ -69,11 +69,16 @@ async def create_submission(
     # If a proposal code exists in the XML, the user must explicitly make a submission
     # for that proposal code.
     xml_proposal_code = submission_service.extract_proposal_code(xml)
-    if xml_proposal_code and xml_proposal_code != proposal_code:
-        raise ValueError(
-            f"The proposal code specified by the query ({proposal_code} differs from "
-            f"the proposal code in the submitted XML ({xml_proposal_code})."
-        )
+    message = (
+        f"The proposal code specified by the query ({proposal_code}) differs from "
+        f"the proposal code in the submitted XML ({xml_proposal_code})."
+    )
+    if proposal_code is not None:
+        if xml_proposal_code != proposal_code:
+            raise ValueError(message)
+    else:
+        if xml_proposal_code and not xml_proposal_code.startswith("Unsubmitted"):
+            raise ValueError(message)
 
     if xml_proposal_code:
         proposal_code = xml_proposal_code

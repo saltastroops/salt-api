@@ -162,8 +162,14 @@ WHERE H.Hrs_Id = :hrs_id
             )
         orders = list(orders_set)
         orders.sort()
-        blue_exposure_times = [float(blue_pattern[order]) for order in orders]
-        red_exposure_times = [float(red_pattern[order]) for order in orders]
+        blue_exposure_times = [
+            float(blue_pattern[order]) if order in blue_pattern else None
+            for order in orders
+        ]
+        red_exposure_times = [
+            float(red_pattern[order]) if order in red_pattern else None
+            for order in orders
+        ]
 
         procedure = {
             "cycles": row.cycles,

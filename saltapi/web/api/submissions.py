@@ -74,7 +74,7 @@ async def create_submission(
         f"the proposal code in the submitted XML ({xml_proposal_code})."
     )
     if proposal_code is not None:
-        if xml_proposal_code != proposal_code:
+        if xml_proposal_code and xml_proposal_code != proposal_code:
             raise ValueError(message)
     else:
         if xml_proposal_code and not xml_proposal_code.startswith("Unsubmitted"):

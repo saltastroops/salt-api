@@ -28,6 +28,7 @@ class StatusRepository:
         "RSS",
         "RSS MOS",
         "RSS Polarimetry",
+        "RSS Slit Mask IFU",
         "RSS Spectroscopy",
         "Salticam",
         "Telescope",

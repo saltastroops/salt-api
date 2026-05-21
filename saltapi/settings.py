@@ -139,6 +139,9 @@ class Settings(BaseSettings):
     # Command for converting images
     mapping_tool_image_conversion_command: str
 
+    # Additional mapping tool options
+    mapping_tool_additional_options: str = ""
+
     # URL for getting the TCS ICD file
     tcs_icd_url: str
 

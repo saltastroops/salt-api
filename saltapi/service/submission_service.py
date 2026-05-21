@@ -266,7 +266,9 @@ class SubmissionService:
              -ephemerisUrl {settings.mapping_tool_ephemeris_url}
              -findingChartGenerationScript {settings.mapping_tool_finder_chart_tool}
              -python {settings.mapping_tool_python_interpreter}
+             {settings.mapping_tool_additional_options}
              {'-checkonly' if validation_only else ''}
+             
              {sentry_dsn}
              {settings.mapping_tool_api_key}
         """

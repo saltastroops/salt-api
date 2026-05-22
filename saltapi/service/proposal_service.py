@@ -4,11 +4,11 @@ import urllib.parse
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, cast
 
-import pdfkit
 import requests
 from fastapi import APIRouter, Request, UploadFile
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
+from weasyprint import HTML
 
 from saltapi.exceptions import NotFoundError, SSDAError
 from saltapi.repository.proposal_repository import ProposalRepository
@@ -332,7 +332,7 @@ class ProposalService:
             "encoding": "UTF-8",
             "no-outline": None,
         }
-        return cast(bytes, pdfkit.from_string(html_content, options=options))
+        return HTML(string=html_content).write_pdf()
 
     def generate_proposal_progress_pdf(
         self,

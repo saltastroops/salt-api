@@ -5,13 +5,13 @@ description = "SALT API"
 authors = ["SALT Astronomy Operations <salt-software@saao.ac.za>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.14"
 uvicorn = {extras = ["standard"], version = "^0.17.6"}
 python-jose = {extras = ["cryptography"], version = "^3.2.0"}
 python-multipart = "^0.0.5"
 aiofiles = "^0.6.0"
 dsnparse = "^0.1.15"
-astropy = "^5.1"
+astropy = "^7.2"
 passlib = "^1.7.4"
 pydantic = {extras = ["email"], version = "^1.8.2"}
 PyMySQL = "^1.0.2"

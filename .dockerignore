@@ -142,3 +142,6 @@ node_modules/
 
 # Test data
 testdata
+
+# Deployment
+deployment/

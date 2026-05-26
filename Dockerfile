@@ -4,7 +4,7 @@
 
 # Based on https://fastapi.tiangolo.com/deployment/docker/
 
-FROM python:3.14
+FROM python:3.13
 
 # LABEL specifies the File Author / Organization
 LABEL author="SALT Software Team <saltsoftware@saao.ac.za>"

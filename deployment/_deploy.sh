@@ -9,6 +9,10 @@ handle_error() {
 
 cd "$1" || handle_error "Directory not found: $1"
 
+if ! [[ -d ".git" ]]; then
+  handle_error "No .git directory found in project directory: $1"
+fi
+
 if [[ "$(git branch --show-current)" != "main" ]]; then
   handle_error "The main branch is not checked out."
 fi

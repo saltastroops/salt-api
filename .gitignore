@@ -140,3 +140,5 @@ node_modules/
 testdata
 
 /.env.deployment
+
+/deploy.sh

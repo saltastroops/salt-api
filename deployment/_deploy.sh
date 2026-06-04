@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Usage: ssh user@remote bash -s < _deploy.sh
+# Usage: ssh user@remote bash -s -- remote_project_dir < _deploy.sh
 
-cd salt-api-main || { echo "Directory not found." >&2; exit 1; }
+cd "$1" || { echo "Directory not found: $1" >&2; exit 1; }
 
 if [[ "$(git branch --show-current)" != "main" ]]; then
   echo "The main branch is not checked out." >&2
@@ -28,5 +28,3 @@ if ! docker compose up --build -d; then
   echo "The Docker container(s) could not be started." >&2
   exit 1
 fi
-
-

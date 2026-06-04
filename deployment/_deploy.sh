@@ -7,6 +7,10 @@ handle_error() {
   exit 1
 }
 
+if [[ -z "$1" ]]; then
+  handle_error "No remote project directory specified."
+fi
+
 cd "$1" || handle_error "Directory not found: $1"
 
 if ! [[ -d ".git" ]]; then

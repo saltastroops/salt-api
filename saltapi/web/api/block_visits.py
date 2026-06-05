@@ -57,6 +57,12 @@ def update_block_visit_status(
         title="Block visit rejection reason",
         description="New block visit rejection reason.",
     ),
+    time_account: Optional[int] = Body(
+        None,
+        alias="time",
+        title="The time to update with",
+        description="The time to update with if you don't want to use the "
+    ),
     user: User = Depends(get_current_user),
 ) -> None:
     """
@@ -84,6 +90,6 @@ def update_block_visit_status(
 
         block_service = services.block_service(unit_of_work.connection)
         block_service.update_block_visit_status(
-            block_visit_id, block_visit_status, rejection_reason
+            block_visit_id, block_visit_status, rejection_reason, time_account
         )
         unit_of_work.commit()

@@ -388,8 +388,7 @@ WHERE NightInfo_Id=:night_info_id
             new_status: str,
             old_rejection_reason: Optional[str],
             new_rejection_reason: Optional[str],
-
-            obs_time: int
+            time_account: int
     ) -> Dict[str, int]:
         """
         Compute time accounting deltas for NightInfo based on visit status transitions.
@@ -404,7 +403,7 @@ WHERE NightInfo_Id=:night_info_id
             Previous rejection reason (if rejected).
         new_rejection_reason : Optional[str]
             New rejection reason (if rejected).
-        obs_time : int
+        time_account : int
             Observation time in seconds.
 
         Returns
@@ -429,42 +428,56 @@ WHERE NightInfo_Id=:night_info_id
 
         is_new_technical_problem = new_rejection_reason in TECHNICAL_PROBLEMS
         is_new_weather_problem = new_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
+        is_new_other_problem = new_rejection_reason == BlockRejectionReason.OTHER
+        is_new_phase_2_problem = new_rejection_reason == BlockRejectionReason.PHASE_2_PROBLEMS
         is_old_technical_problem = old_rejection_reason in TECHNICAL_PROBLEMS
         is_old_weather_problem = old_rejection_reason == BlockRejectionReason.OBSERVING_CONDITIONS_NOT_MET
+        is_old_other_problem = old_rejection_reason == BlockRejectionReason.OTHER
+        is_old_phase_2_problem = old_rejection_reason == BlockRejectionReason.PHASE_2_PROBLEMS
 
         delta = {"science": 0, "weather": 0, "technical": 0}
-        obs_time = abs(obs_time)
+        time_account = abs(time_account)
 
         # Accepted → Rejected
         if old_status == "Accepted" and new_status == "Rejected":
-            delta["science"] = -obs_time
             if is_new_technical_problem:
-                delta["technical"] = obs_time
+                delta["science"] = -time_account
+                delta["technical"] = time_account
             elif is_new_weather_problem:
-                delta["weather"] = obs_time
+                delta["science"] = -time_account
+                delta["weather"] = time_account
+            elif (is_new_other_problem or is_old_other_problem or
+                  is_new_phase_2_problem or is_old_phase_2_problem):
+                pass
             else:
                 raise ValueError(f"Failed to account time for reason: {new_rejection_reason}")
 
         # Rejected → Accepted
         elif old_status == "Rejected" and new_status == "Accepted":
-            delta["science"] = obs_time
             if is_old_technical_problem:
-                delta["technical"] = -obs_time
+                delta["science"] = time_account
+                delta["technical"] = -time_account
             elif is_old_weather_problem:
-                delta["weather"] = -obs_time
+                delta["science"] = time_account
+                delta["weather"] = -time_account
+            elif (is_new_other_problem or is_old_other_problem or
+                  is_new_phase_2_problem or is_old_phase_2_problem):
+                pass
             else:
                 raise ValueError(f"Failed to account time for reason: {old_rejection_reason}")
 
         # Rejected → Rejected (reason change)
         elif old_status == "Rejected" and new_status == "Rejected":
             if is_old_technical_problem and is_new_weather_problem:
-                delta["technical"] = -obs_time
-                delta["weather"] = obs_time
+                delta["technical"] = -time_account
+                delta["weather"] = time_account
             elif is_old_weather_problem and is_new_technical_problem:
-                delta["weather"] = -obs_time
-                delta["technical"] = obs_time
+                delta["weather"] = -time_account
+                delta["technical"] = time_account
             elif ((is_old_technical_problem and is_new_technical_problem) or
-                  (is_old_weather_problem and is_new_weather_problem)):
+                  (is_old_weather_problem and is_new_weather_problem) or
+                  is_old_phase_2_problem or is_new_phase_2_problem or
+                  is_old_other_problem or is_new_other_problem):
                 pass
             else:
                 raise ValueError(f"Failed to account time for reason the current set reason: {old_rejection_reason}")
@@ -582,7 +595,7 @@ ORDER BY B.Block_Id DESC
         }
 
     def update_block_visit_status(
-        self, block_visit_id: int, status: str, rejection_reason: Optional[str]
+        self, block_visit_id: int, status: str, rejection_reason: Optional[str], time_account: Optional[int]
     ) -> None:
         """
          Update BlockVisit status and synchronize Block and NightInfo accounting.
@@ -637,13 +650,14 @@ ORDER BY B.Block_Id DESC
         block_visit = self.get_block_visit(block_visit_id)
 
         # Night info time delta
-        observation_time = self.get_observation_time(block_visit_id)
+        if not time_account:
+            time_account = self.get_observation_time(block_visit_id)
         night_info_time_delta = self._compute_night_info_time_deltas(
             old_status=block_visit["status"],
             new_status=status,
             old_rejection_reason=block_visit["rejection_reason"],
             new_rejection_reason=rejection_reason,
-            obs_time=observation_time
+            time_account=time_account
         )
         # update used time for the night
         night_info_id =  self._get_night_info_id_for_block_visit(block_visit_id)

@@ -436,7 +436,8 @@ WHERE NightInfo_Id=:night_info_id
         is_old_phase_2_problem = old_rejection_reason == BlockRejectionReason.PHASE_2_PROBLEMS
 
         delta = {"science": 0, "weather": 0, "technical": 0}
-        time_spent = abs(time_spent)
+        if time_spent < 0:
+            raise ValueError("Time spent must be a non-negative number")
 
         # Accepted → Rejected
         if old_status == "Accepted" and new_status == "Rejected":

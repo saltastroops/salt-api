@@ -446,8 +446,7 @@ WHERE NightInfo_Id=:night_info_id
             elif is_new_weather_problem:
                 delta["science"] = -time_account
                 delta["weather"] = time_account
-            elif (is_new_other_problem or is_old_other_problem or
-                  is_new_phase_2_problem or is_old_phase_2_problem):
+            elif is_new_other_problem or is_new_phase_2_problem:
                 pass
             else:
                 raise ValueError(f"Failed to account time for reason: {new_rejection_reason}")
@@ -460,8 +459,7 @@ WHERE NightInfo_Id=:night_info_id
             elif is_old_weather_problem:
                 delta["science"] = time_account
                 delta["weather"] = -time_account
-            elif (is_new_other_problem or is_old_other_problem or
-                  is_new_phase_2_problem or is_old_phase_2_problem):
+            elif is_old_other_problem or is_old_phase_2_problem:
                 pass
             else:
                 raise ValueError(f"Failed to account time for reason: {old_rejection_reason}")
@@ -595,7 +593,7 @@ ORDER BY B.Block_Id DESC
         }
 
     def update_block_visit_status(
-        self, block_visit_id: int, status: str, rejection_reason: Optional[str], time_account: Optional[int]
+        self, block_visit_id: int, status: str, rejection_reason: Optional[str], time_spent: Optional[int]
     ) -> None:
         """
          Update BlockVisit status and synchronize Block and NightInfo accounting.
@@ -616,6 +614,8 @@ ORDER BY B.Block_Id DESC
             New visit status (e.g. "Accepted", "Rejected").
         rejection_reason : Optional[str]
             Reason for rejection, if the status is "Rejected".
+        time_spent: Optional[int]
+            The time spent on a block if any or not
 
         Raises
         ------
@@ -650,14 +650,14 @@ ORDER BY B.Block_Id DESC
         block_visit = self.get_block_visit(block_visit_id)
 
         # Night info time delta
-        if not time_account:
-            time_account = self.get_observation_time(block_visit_id)
+        if not time_spent:
+            time_spent = self.get_observation_time(block_visit_id)
         night_info_time_delta = self._compute_night_info_time_deltas(
             old_status=block_visit["status"],
             new_status=status,
             old_rejection_reason=block_visit["rejection_reason"],
             new_rejection_reason=rejection_reason,
-            time_account=time_account
+            time_account=time_spent
         )
         # update used time for the night
         night_info_id =  self._get_night_info_id_for_block_visit(block_visit_id)

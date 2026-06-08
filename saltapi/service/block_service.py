@@ -51,13 +51,14 @@ class BlockService:
         block_visit_id: int,
         status: str,
         reason: Optional[str],
+        time_spent: Optional[int]
     ) -> None:
         """
         Set the block visit status for a block visit id.
         """
 
-        return self.block_repository.update_block_visit_status(
-            block_visit_id, status, reason
+        self.block_repository.update_block_visit_status(
+            block_visit_id, status, reason, time_spent
         )
 
     def get_next_scheduled_block(self) -> Block:

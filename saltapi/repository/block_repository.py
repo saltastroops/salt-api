@@ -388,7 +388,7 @@ WHERE NightInfo_Id=:night_info_id
             new_status: str,
             old_rejection_reason: Optional[str],
             new_rejection_reason: Optional[str],
-            time_account: int
+            time_spent: int
     ) -> Dict[str, int]:
         """
         Compute time accounting deltas for NightInfo based on visit status transitions.
@@ -403,7 +403,7 @@ WHERE NightInfo_Id=:night_info_id
             Previous rejection reason (if rejected).
         new_rejection_reason : Optional[str]
             New rejection reason (if rejected).
-        time_account : int
+        time_spent : int
             Observation time in seconds.
 
         Returns
@@ -436,16 +436,16 @@ WHERE NightInfo_Id=:night_info_id
         is_old_phase_2_problem = old_rejection_reason == BlockRejectionReason.PHASE_2_PROBLEMS
 
         delta = {"science": 0, "weather": 0, "technical": 0}
-        time_account = abs(time_account)
+        time_spent = abs(time_spent)
 
         # Accepted → Rejected
         if old_status == "Accepted" and new_status == "Rejected":
             if is_new_technical_problem:
-                delta["science"] = -time_account
-                delta["technical"] = time_account
+                delta["science"] = -time_spent
+                delta["technical"] = time_spent
             elif is_new_weather_problem:
-                delta["science"] = -time_account
-                delta["weather"] = time_account
+                delta["science"] = -time_spent
+                delta["weather"] = time_spent
             elif is_new_other_problem or is_new_phase_2_problem:
                 pass
             else:
@@ -454,11 +454,11 @@ WHERE NightInfo_Id=:night_info_id
         # Rejected → Accepted
         elif old_status == "Rejected" and new_status == "Accepted":
             if is_old_technical_problem:
-                delta["science"] = time_account
-                delta["technical"] = -time_account
+                delta["science"] = time_spent
+                delta["technical"] = -time_spent
             elif is_old_weather_problem:
-                delta["science"] = time_account
-                delta["weather"] = -time_account
+                delta["science"] = time_spent
+                delta["weather"] = -time_spent
             elif is_old_other_problem or is_old_phase_2_problem:
                 pass
             else:
@@ -467,11 +467,11 @@ WHERE NightInfo_Id=:night_info_id
         # Rejected → Rejected (reason change)
         elif old_status == "Rejected" and new_status == "Rejected":
             if is_old_technical_problem and is_new_weather_problem:
-                delta["technical"] = -time_account
-                delta["weather"] = time_account
+                delta["technical"] = -time_spent
+                delta["weather"] = time_spent
             elif is_old_weather_problem and is_new_technical_problem:
-                delta["weather"] = -time_account
-                delta["technical"] = time_account
+                delta["weather"] = -time_spent
+                delta["technical"] = time_spent
             elif ((is_old_technical_problem and is_new_technical_problem) or
                   (is_old_weather_problem and is_new_weather_problem) or
                   is_old_phase_2_problem or is_new_phase_2_problem or
@@ -657,7 +657,7 @@ ORDER BY B.Block_Id DESC
             new_status=status,
             old_rejection_reason=block_visit["rejection_reason"],
             new_rejection_reason=rejection_reason,
-            time_account=time_spent
+            time_spent=time_spent
         )
         # update used time for the night
         night_info_id =  self._get_night_info_id_for_block_visit(block_visit_id)

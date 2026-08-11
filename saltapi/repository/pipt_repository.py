@@ -7,7 +7,7 @@ from sqlalchemy.engine import Connection
 
 from saltapi.exceptions import NotFoundError
 from saltapi.repository.proposal_repository import ProposalRepository
-from saltapi.service.user import User
+from saltapi.service.user import User, Role
 from saltapi.util import semester_of_datetime
 
 
@@ -821,8 +821,8 @@ class PiptRepository:
         params: Dict[str, Any] = {}
 
         username = user.username
-        can_edit_all = "Administrator" in user.roles
-        can_see_all = can_edit_all or "Astronomer" in user.roles
+        can_edit_all = Role.ADMINISTRATOR in user.roles
+        can_see_all = can_edit_all or Role.SALT_ASTRONOMER in user.roles
 
         if phase == 1:
             where_clauses.append(

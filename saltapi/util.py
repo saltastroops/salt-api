@@ -26,6 +26,7 @@ _partners = dict(
     CMU="Carnegie Mellon University",
     DC="Dartmouth College",
     DUR="Durham University",
+    DDT="Director Discretionary Time Proposals",
     GU="Georg-August-Universität Göttingen",
     HET="Hobby Eberly Telescope Board",
     IUCAA="Inter-University Centre for Astronomy & Astrophysics",

@@ -25,6 +25,7 @@ _partners = dict(
     AMNH="American Museum of Natural History",
     CMU="Carnegie Mellon University",
     DC="Dartmouth College",
+    DDT="Director Discretionary Time Proposals",
     DUR="Durham University",
     GU="Georg-August-Universität Göttingen",
     HET="Hobby Eberly Telescope Board",

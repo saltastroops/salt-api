@@ -404,7 +404,7 @@ class ProposalService:
         except Exception as error:
             raise SSDAError() from error
 
-        if ssda_response["errors"]:
+        if ssda_response.get("errors"):
             for err in ssda_response["errors"]:
                 error_message = (
                     f'SSDA Error start\n{err["message"]}\n{err["path"]}\nSSDA error end'

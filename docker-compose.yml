@@ -35,6 +35,7 @@ services:
       - MAPPING_TOOL_IMAGE_CONVERSION_COMMAND=/usr/bin/convert
       - GCODE_DIR=/gcode
       - XML_TO_GCODE_JAR=xml_to_gcode.jar
+      - SSDA_API_URL=${SSDA_API_URL}
     ports:
       - ${PORT}:80
     restart: always
@@ -43,3 +44,5 @@ services:
       - ${MAPPING_TOOL_LOG_DIR}:/mapping-logs
       - ${MAPPING_TOOL_DIR}:/mapping-tool
       - ${GCODE_DIR}:/gcode
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

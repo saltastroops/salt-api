@@ -389,6 +389,12 @@ class ProposalService:
         release_date = self.repository.get_release_date(
             proprietary_period, proposal_code
         )
+        print("Release date: ", release_date)
+        if get_settings().ssda_api_key is not None:
+            print("Value is set")
+        else:
+            print("Value is not set")
+
         body = {
             "query": "mutation($proposalCode:String!,$institution:Institution!,$apiKey:String!,$releaseDate:String!){updateReleaseDates(proposalCode:$proposalCode,institution:$institution,apiKey:$apiKey,metadataReleaseDate:$releaseDate,dataReleaseDate:$releaseDate){status}}",
             "variables": {
@@ -398,11 +404,13 @@ class ProposalService:
                 "apiKey": get_settings().ssda_api_key,
             },
         }
+        print("Body: \n", body)
 
-        try:
-            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-        except Exception as error:
-            raise SSDAError() from error
+        # try:
+        ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+        print("SSDA Response: \n", ssda_response)
+        # except Exception as error:
+        #     raise SSDAError() from error
 
         if ssda_response.get("errors"):
             for err in ssda_response["errors"]:

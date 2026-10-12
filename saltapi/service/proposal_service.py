@@ -406,11 +406,12 @@ class ProposalService:
         }
         print("Body: \n", body)
 
-        # try:
-        ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-        print("SSDA Response: \n", ssda_response)
-        # except Exception as error:
-        #     raise SSDAError() from error
+        try:
+            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+            print("SSDA Response: \n", ssda_response)
+        except Exception as error:
+            print("Error:\n", error)
+            raise SSDAError() from error
 
         if ssda_response.get("errors"):
             for err in ssda_response["errors"]:

@@ -411,13 +411,15 @@ class ProposalService:
                 get_settings().ssda_api_url,
                 json=body,
                 timeout=30,
+                allow_redirects=False,
             )
 
-            print("SSDA URL:", response.url)
-            print("HTTP Status:", response.status_code)
-            print("Content-Type:", response.headers.get("Content-Type"))
-            print("Response Body:", repr(response.text))
-
+            print("Requested URL:", get_settings().ssda_api_url)
+            print("Status:", response.status_code)
+            print("Location:", response.headers.get("Location"))
+            print("History:", response.history)
+            print("Response:", repr(response.text))
+            print("SSDA API URL:", repr(get_settings().ssda_api_url))
             response.raise_for_status()
 
             if not response.content:

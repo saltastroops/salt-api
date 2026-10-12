@@ -407,10 +407,27 @@ class ProposalService:
         print("Body: \n", body)
 
         try:
-            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-            print("SSDA Response: \n", ssda_response)
+            response = requests.post(
+                get_settings().ssda_api_url,
+                json=body,
+                timeout=30,
+            )
+
+            print("SSDA URL:", response.url)
+            print("HTTP Status:", response.status_code)
+            print("Content-Type:", response.headers.get("Content-Type"))
+            print("Response Body:", repr(response.text))
+
+            response.raise_for_status()
+
+            if not response.content:
+                raise SSDAError("SSDA returned an empty response")
+
+            ssda_response = response.json()
+            print("SSDA Response:\n", ssda_response)
+
         except Exception as error:
-            print("Error:\n", error)
+            print("SSDA Error:", repr(error))
             raise SSDAError() from error
 
         if ssda_response.get("errors"):

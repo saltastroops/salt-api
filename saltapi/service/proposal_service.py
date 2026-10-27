@@ -15,6 +15,7 @@ from saltapi.repository.proposal_repository import ProposalRepository
 from saltapi.service.create_proposal_progress_html import (
     create_proposal_progress_html,
 )
+from saltapi.service.mail_service import MailService
 from saltapi.service.proposal import ProposalListItem
 from saltapi.service.user import User
 from saltapi.settings import get_settings
@@ -377,11 +378,114 @@ class ProposalService:
         proposal_code: str,
         proprietary_period: int,
         motivation: str,
-        username: str,
+        user: User,
     ) -> None:
         self.repository.insert_proprietary_period_extension_request(
-            proposal_code, proprietary_period, motivation, username
+            proposal_code, proprietary_period, motivation, user.username
         )
+        self.send_proprietary_period_extension_notification(
+            proposal_code=proposal_code,
+            proprietary_period=proprietary_period,
+            motivation=motivation,
+            user=user,
+        )
+
+    def send_proprietary_period_extension_notification(
+        self,
+        proposal_code: str,
+        user: User,
+        proprietary_period: int,
+        motivation: Optional[str] = None,
+    ) -> None:
+        salt_help_email = get_settings().salt_help_email
+        pc = self.repository.get_principal_contact(proposal_code)
+        pc_name = f"{pc['given_name']} {pc['family_name']}".strip()
+        # pc_email = pc["email"]
+        pc_email = "nhlavutelo@saao.ac.za"
+        user_name = f"{user.given_name} {user.family_name}".strip()
+
+        # Notification to salt_help
+        salt_help_plain = f"""Dear SALT Help,
+
+{ user_name } is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n
+"""
+        if motivation:
+            salt_help_plain += (f"----------"
+                                f"\nMotivation:\n{motivation}\n"
+                                f"----------")
+        salt_help_plain += f"""
+The URL for the proposal is: https://www.salt.ac.za/wm/proposal/{proposal_code}\n
+Kind regards,\n
+Your Friendly Web Manager
+"""
+
+        salt_help_html = f"""
+<html>
+  <head></head>
+  <div>
+    <p>Dear SALT Help,</p>
+    <p>{ user_name } is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n</p>
+"""
+        if motivation:
+            salt_help_html += (f"----------"
+                               f"<p><b>Motivation:</b><br>{motivation}</p>"
+                               f"----------")
+
+        salt_help_html += f"""
+    <p>The URL for the proposal is: https://www.salt.ac.za/wm/proposal/{proposal_code}</p>    
+    <p>Kind regards,</p>
+    <p>Your Friendly Web Manager</p>
+  </div>
+</html>
+"""
+        salt_help_message = MailService.generate_email(
+            to=salt_help_email,
+            subject=f"Proprietary period extension request for {proposal_code}",
+            html_body=salt_help_html,
+            plain_body=salt_help_plain,
+        )
+        MailService.send_email(to=[salt_help_email], message=salt_help_message)
+
+        # Notification to requester (Principal Contact)
+        pc_plain = f"""Dear {pc_name},
+
+{ user_name }'s request to extend the proprietary period for proposal {proposal_code} has been received and is waiting for approval.
+"""
+        if proprietary_period is not None:
+            pc_plain += f"\nRequested proprietary period: {proprietary_period} months\n"
+        if motivation:
+            pc_plain += f"\nMotivation:\n{motivation}\n"
+
+        pc_plain += """
+Kind regards,
+
+SALT Team
+"""
+
+        pc_html = f"""
+<html>
+  <head></head>
+  <div>
+    <p>Dear {pc_name},</p>
+    <p>{ user_name }'s request to extend the proprietary period for proposal {proposal_code} has been received and is waiting for approval.</p>
+"""
+        if proprietary_period is not None:
+            pc_html += f"    <p><b>Requested proprietary period:</b> {proprietary_period} months</p>\n"
+        if motivation:
+            pc_html += f"    <p><b>Motivation:</b><br>{motivation}</p>\n"
+
+        pc_html += """    <p>Kind regards,</p>
+    <p>SALT Team</p>
+  </div>
+</html>
+"""
+        pc_message = MailService.generate_email(
+            to=f"{pc_name} <{pc_email}>",
+            subject=f"Proprietary period extension request for {proposal_code}",
+            html_body=pc_html,
+            plain_body=pc_plain,
+        )
+        MailService.send_email(to=[pc_email], message=pc_message)
 
     def update_proprietary_period_in_ssda(
         self, proposal_code: str, proprietary_period: int
@@ -400,8 +504,11 @@ class ProposalService:
         }
 
         try:
+            print(get_settings().ssda_api_url, body)
             ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
+
         except Exception as error:
+            print(f"Error updating release date in SSDA: {error}")
             raise SSDAError() from error
 
         if ssda_response.get("errors"):

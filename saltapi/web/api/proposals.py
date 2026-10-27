@@ -354,7 +354,7 @@ def update_proprietary_period(
                 proposal_code=proposal_code,
                 proprietary_period=proprietary_period_update_request.proprietary_period,
                 motivation=proprietary_period_update_request.motivation,
-                username=user.username,
+                user=user,
             )
             status_code = status.HTTP_202_ACCEPTED
             update_status = UpdateStatus.PENDING
@@ -373,7 +373,8 @@ def update_proprietary_period(
                     proprietary_period=proprietary_period_update_request.proprietary_period,
                 )
                 unit_of_work.commit()
-            except SSDAError:
+            except SSDAError as err:
+                print(f"Error updating proprietary period in SSDA: {err}")
                 status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return JSONResponse(
             status_code=status_code,

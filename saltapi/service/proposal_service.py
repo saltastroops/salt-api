@@ -383,7 +383,13 @@ class ProposalService:
         self.repository.insert_proprietary_period_extension_request(
             proposal_code, proprietary_period, motivation, user.username
         )
-        self.send_proprietary_period_extension_notification(
+        self.send_proprietary_period_extension_notification_to_salt_help(
+            proposal_code=proposal_code,
+            proprietary_period=proprietary_period,
+            motivation=motivation,
+            user=user,
+        )
+        self.send_proprietary_period_extension_notification_to_pc_and_pi(
             proposal_code=proposal_code,
             proprietary_period=proprietary_period,
             motivation=motivation,
@@ -395,19 +401,36 @@ class ProposalService:
         proposal_code: str,
         user: User,
         proprietary_period: int,
-        motivation: Optional[str] = None,
+        motivation: str,
+    ) -> None:
+        self.send_proprietary_period_extension_notification_to_salt_help(
+            proposal_code=proposal_code,
+            proprietary_period=proprietary_period,
+            motivation=motivation,
+            user=user,
+        )
+        self.send_proprietary_period_extension_notification_to_pc_and_pi(
+            proposal_code=proposal_code,
+            proprietary_period=proprietary_period,
+            motivation=motivation,
+            user=user,
+        )
+
+    def send_proprietary_period_extension_notification_to_salt_help(
+        self,
+        proposal_code: str,
+        user: User,
+        proprietary_period: int,
+        motivation: str,
     ) -> None:
         salt_help_email = get_settings().salt_help_email
-        pc = self.repository.get_principal_contact(proposal_code)
-        pc_name = f"{pc['given_name']} {pc['family_name']}".strip()
-        # pc_email = pc["email"]
-        pc_email = "nhlavutelo@saao.ac.za"
         user_name = f"{user.given_name} {user.family_name}".strip()
+        user_email = f"{user.email}".strip()
 
         # Notification to salt_help
         salt_help_plain = f"""Dear SALT Help,
 
-{ user_name } is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n
+{ user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n
 """
         if motivation:
             salt_help_plain += (f"----------"
@@ -446,46 +469,65 @@ Your Friendly Web Manager
         )
         MailService.send_email(to=[salt_help_email], message=salt_help_message)
 
-        # Notification to requester (Principal Contact)
-        pc_plain = f"""Dear {pc_name},
+    def send_proprietary_period_extension_notification_to_pc_and_pi(
+        self,
+        proposal_code: str,
+        user: User,
+        proprietary_period: int,
+        motivation: str,
+    ) -> None:
+        pc = self.repository.get_principal_contact(proposal_code)
+        pi = self.repository.get_principal_investigator(proposal_code)
+        pc_name = f"{pc['given_name']} {pc['family_name']}".strip()
+        pi_name = f"{pi['given_name']} {pi['family_name']}".strip()
+        pc_email = pc["email"].strip()
+        pi_email = pi["email"].strip()
+        user_name = f"{user.given_name} {user.family_name}".strip()
+
+        is_same_person = pc_email.lower() == pi_email.lower()
+
+        if is_same_person:
+            salutation = f"Dear {pc_name},"
+            to_header = f"{pc_name} <{pc_email}>"
+            to_recipients = [pc_email]
+        else:
+            salutation = f"Dear {pi_name} and {pc_name},"
+            to_header = f"{pi_name} <{pi_email}>, {pc_name} <{pc_email}>"
+            to_recipients = [pc_email, pi_email]
+
+        # Notification to requester (Principal Contact / Principal Investigator)
+        notification_plain = f"""{salutation}
 
 { user_name }'s request to extend the proprietary period for proposal {proposal_code} has been received and is waiting for approval.
-"""
-        if proprietary_period is not None:
-            pc_plain += f"\nRequested proprietary period: {proprietary_period} months\n"
-        if motivation:
-            pc_plain += f"\nMotivation:\n{motivation}\n"
+Requested proprietary period: {proprietary_period} months
 
-        pc_plain += """
+Motivation:\n{motivation}\n
+
 Kind regards,
 
 SALT Team
 """
 
-        pc_html = f"""
+        notification_html = f"""
 <html>
   <head></head>
   <div>
-    <p>Dear {pc_name},</p>
+    <p>{salutation}</p>
     <p>{ user_name }'s request to extend the proprietary period for proposal {proposal_code} has been received and is waiting for approval.</p>
-"""
-        if proprietary_period is not None:
-            pc_html += f"    <p><b>Requested proprietary period:</b> {proprietary_period} months</p>\n"
-        if motivation:
-            pc_html += f"    <p><b>Motivation:</b><br>{motivation}</p>\n"
-
-        pc_html += """    <p>Kind regards,</p>
+    <p><b>Requested proprietary period:</b> {proprietary_period} months</p>
+    <p><b>Motivation:</b><br>{motivation}</p>
+    <p>Kind regards,</p>
     <p>SALT Team</p>
   </div>
 </html>
 """
-        pc_message = MailService.generate_email(
-            to=f"{pc_name} <{pc_email}>",
+        notification_message = MailService.generate_email(
+            to=to_header,
             subject=f"Proprietary period extension request for {proposal_code}",
-            html_body=pc_html,
-            plain_body=pc_plain,
+            html_body=notification_html,
+            plain_body=notification_plain,
         )
-        MailService.send_email(to=[pc_email], message=pc_message)
+        MailService.send_email(to=to_recipients, message=notification_message)
 
     def update_proprietary_period_in_ssda(
         self, proposal_code: str, proprietary_period: int
@@ -504,11 +546,9 @@ SALT Team
         }
 
         try:
-            print(get_settings().ssda_api_url, body)
             ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
 
         except Exception as error:
-            print(f"Error updating release date in SSDA: {error}")
             raise SSDAError() from error
 
         if ssda_response.get("errors"):

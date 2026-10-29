@@ -374,7 +374,6 @@ def update_proprietary_period(
                 )
                 unit_of_work.commit()
             except SSDAError as err:
-                print(f"Error updating proprietary period in SSDA: {err}")
                 status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return JSONResponse(
             status_code=status_code,

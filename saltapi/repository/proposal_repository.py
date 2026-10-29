@@ -792,6 +792,32 @@ WHERE P.Proposal_Code = :proposal_code
             "email": contact.email,
         }
 
+    def get_principal_investigator(self, proposal_code: str) -> Dict[str, Any]:
+        """
+        Return the Principal Investigator for a proposal.
+        """
+        stmt = text(
+            """
+SELECT
+    I.FirstName             AS given_name,
+    I.Surname               AS family_name,
+    I.Email                 AS email
+FROM ProposalContact PC
+    JOIN Investigator I ON PC.Leader_Id = I.Investigator_Id
+    JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+WHERE P.Proposal_Code = :proposal_code
+            """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        investigator = result.one_or_none()
+        if not investigator:
+            raise NotFoundError(f"Principal investigator for {proposal_code} not found")
+        return {
+            "given_name": investigator.given_name,
+            "family_name": investigator.family_name,
+            "email": investigator.email,
+        }
+
     def _blocks(self, proposal_code: str, semester: str) -> List[Dict[str, Any]]:
         """
         Return the blocks for a semester.

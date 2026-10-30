@@ -742,12 +742,14 @@ WHERE P.Proposal_Code = :proposal_code
         """
         stmt = text("""
 SELECT
-    I.FirstName             AS given_name,
-    I.Surname               AS family_name,
-    I.Email                 AS email
+    I2.FirstName             AS given_name,
+    I2.Surname               AS family_name,
+    I2.Email                 AS email
 FROM ProposalContact PC
     JOIN Investigator I ON PC.Contact_Id = I.Investigator_Id
     JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+    JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+    JOIN Investigator I2 ON I2.Investigator_Id = PU.Investigator_Id
 WHERE P.Proposal_Code = :proposal_code
             """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
@@ -766,12 +768,14 @@ WHERE P.Proposal_Code = :proposal_code
         """
         stmt = text("""
 SELECT
-    I.FirstName             AS given_name,
-    I.Surname               AS family_name,
-    I.Email                 AS email
+    I2.FirstName             AS given_name,
+    I2.Surname               AS family_name,
+    I2.Email                 AS email
 FROM ProposalContact PC
     JOIN Investigator I ON PC.Leader_Id = I.Investigator_Id
     JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+    JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+    JOIN Investigator I2 ON I2.Investigator_Id = PU.Investigator_Id
 WHERE P.Proposal_Code = :proposal_code
             """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})

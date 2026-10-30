@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 import pathlib
 import urllib.parse
 from io import BytesIO
@@ -243,9 +243,13 @@ class ProposalService:
             "requested_time": proposal_progress_report.requested_time,
             "maximum_seeing": proposal_progress_report.maximum_seeing,
             "transparency": proposal_progress_report.transparency,
-            "description_of_observing_constraints": proposal_progress_report.description_of_observing_constraints,
+            "description_of_observing_constraints": (
+                proposal_progress_report.description_of_observing_constraints
+            ),
             "change_reason": proposal_progress_report.change_reason,
-            "summary_of_proposal_status": proposal_progress_report.summary_of_proposal_status,
+            "summary_of_proposal_status": (
+                proposal_progress_report.summary_of_proposal_status
+            ),
             "strategy_changes": proposal_progress_report.strategy_changes,
             "partner_requested_percentages": partner_requested_percentages,
         }
@@ -433,9 +437,9 @@ class ProposalService:
 { user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n
 """
         if motivation:
-            salt_help_plain += (f"----------"
-                                f"\nMotivation:\n{motivation}\n"
-                                f"----------")
+            salt_help_plain += (
+                f"----------" f"\nMotivation:\n{motivation}\n" f"----------"
+            )
         salt_help_plain += f"""
 The URL for the proposal is: https://www.salt.ac.za/wm/proposal/{proposal_code}\n
 Kind regards,\n
@@ -447,12 +451,12 @@ Your Friendly Web Manager
   <head></head>
   <div>
     <p>Dear SALT Help,</p>
-    <p>{ user_name } is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n</p>
+    <p>{ user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n</p>
 """
         if motivation:
-            salt_help_html += (f"----------"
-                               f"<p><b>Motivation:</b><br>{motivation}</p>"
-                               f"----------")
+            salt_help_html += (
+                f"----------" f"<p><b>Motivation:</b><br>{motivation}</p>" f"----------"
+            )
 
         salt_help_html += f"""
     <p>The URL for the proposal is: https://www.salt.ac.za/wm/proposal/{proposal_code}</p>    
@@ -470,64 +474,85 @@ Your Friendly Web Manager
         MailService.send_email(to=[salt_help_email], message=salt_help_message)
 
     def send_proprietary_period_extension_notification_to_pc_and_pi(
-        self,
-        proposal_code: str,
-        user: User,
-        proprietary_period: int,
-        motivation: str,
+            self,
+            proposal_code: str,
+            user: User,
+            proprietary_period: int,
+            motivation: str,
     ) -> None:
         pc = self.repository.get_principal_contact(proposal_code)
         pi = self.repository.get_principal_investigator(proposal_code)
+
         pc_name = f"{pc['given_name']} {pc['family_name']}".strip()
         pi_name = f"{pi['given_name']} {pi['family_name']}".strip()
+
         pc_email = pc["email"].strip()
         pi_email = pi["email"].strip()
+
         user_name = f"{user.given_name} {user.family_name}".strip()
+        user_email = user.email.strip().lower()
 
-        is_same_person = pc_email.lower() == pi_email.lower()
+        recipients = {
+            pc_email.lower(): {"name": pc_name, "email": pc_email},
+            pi_email.lower(): {"name": pi_name, "email": pi_email},
+        }
 
-        if is_same_person:
-            salutation = f"Dear {pc_name},"
-            to_header = f"{pc_name} <{pc_email}>"
-            to_recipients = [pc_email]
-        else:
-            salutation = f"Dear {pi_name} and {pc_name},"
-            to_header = f"{pi_name} <{pi_email}>, {pc_name} <{pc_email}>"
-            to_recipients = [pc_email, pi_email]
+        for recipient in recipients.values():
+            is_requester = recipient["email"].lower() == user_email
 
-        # Notification to requester (Principal Contact / Principal Investigator)
-        notification_plain = f"""{salutation}
+            salutation = f"Dear {recipient['name']},"
 
-{ user_name }'s request to extend the proprietary period for proposal {proposal_code} has been received and is waiting for approval.
+            if is_requester:
+                message_intro = (
+                    f"Your request to extend the proprietary period for "
+                    f"proposal {proposal_code} has been received and is "
+                    "awaiting approval."
+                )
+            else:
+                message_intro = (
+                    f"{user_name} has submitted a request to extend the "
+                    f"proprietary period for proposal {proposal_code}. "
+                    "The request is awaiting approval."
+                )
+
+            notification_plain = f"""{salutation}
+
+{message_intro}
+
 Requested proprietary period: {proprietary_period} months
 
-Motivation:\n{motivation}\n
+Motivation:
+{motivation}
 
 Kind regards,
 
 SALT Team
 """
 
-        notification_html = f"""
+            notification_html = f"""
 <html>
-  <head></head>
-  <div>
+  <body>
     <p>{salutation}</p>
-    <p>{ user_name }'s request to extend the proprietary period for proposal {proposal_code} has been received and is waiting for approval.</p>
+    <p>{message_intro}</p>
     <p><b>Requested proprietary period:</b> {proprietary_period} months</p>
     <p><b>Motivation:</b><br>{motivation}</p>
     <p>Kind regards,</p>
     <p>SALT Team</p>
-  </div>
+  </body>
 </html>
 """
-        notification_message = MailService.generate_email(
-            to=to_header,
-            subject=f"Proprietary period extension request for {proposal_code}",
-            html_body=notification_html,
-            plain_body=notification_plain,
-        )
-        MailService.send_email(to=to_recipients, message=notification_message)
+
+            notification_message = MailService.generate_email(
+                to=f"{recipient['name']} <{recipient['email']}>",
+                subject=f"Proprietary period extension request for {proposal_code}",
+                html_body=notification_html,
+                plain_body=notification_plain,
+            )
+
+            MailService.send_email(
+                to=[recipient["email"]],
+                message=notification_message,
+            )
 
     def update_proprietary_period_in_ssda(
         self, proposal_code: str, proprietary_period: int
@@ -536,7 +561,9 @@ SALT Team
             proprietary_period, proposal_code
         )
         body = {
-            "query": "mutation($proposalCode:String!,$institution:Institution!,$apiKey:String!,$releaseDate:String!){updateReleaseDates(proposalCode:$proposalCode,institution:$institution,apiKey:$apiKey,metadataReleaseDate:$releaseDate,dataReleaseDate:$releaseDate){status}}",
+            "query": (
+                "mutation($proposalCode:String!,$institution:Institution!,$apiKey:String!,$releaseDate:String!){updateReleaseDates(proposalCode:$proposalCode,institution:$institution,apiKey:$apiKey,metadataReleaseDate:$releaseDate,dataReleaseDate:$releaseDate){status}}"
+            ),
             "variables": {
                 "proposalCode": proposal_code,
                 "institution": "SALT",
@@ -546,18 +573,18 @@ SALT Team
         }
 
         try:
-            ssda_response = requests.post(get_settings().ssda_api_url, json=body).json()
-
+            response = requests.post(get_settings().ssda_api_url, json=body)
+            response.raise_for_status()
+            ssda_response = response.json()
         except Exception as error:
-            raise SSDAError() from error
+            logger.error(f"SSDA Error start\n{error}\nSSDA error end")
+            raise SSDAError(f"Failed to update SAAO SALT Data Archive: {error}") from error
 
         if ssda_response.get("errors"):
             for err in ssda_response["errors"]:
-                error_message = (
-                    f'SSDA Error start\n{err["message"]}\n{err["path"]}\nSSDA error end'
-                )
-                logging.error(error_message)
-            raise SSDAError()
+                error_message = f"SSDA Error start\n{err}\nSSDA error end"
+                logger.error(error_message)
+            raise SSDAError(f"SSDA errors: {ssda_response['errors']}")
 
     def update_proprietary_period(
         self, proposal_code: str, proprietary_period: int

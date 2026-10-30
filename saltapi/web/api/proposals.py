@@ -379,7 +379,9 @@ def update_proprietary_period(
             status_code=status_code,
             content={
                 **proposal["general_info"]["proprietary_period"],
-                "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
+                "start_date": (
+                    f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}"
+                ),
                 "status": update_status,
                 "status_code": status_code,
             },

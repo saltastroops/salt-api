@@ -328,7 +328,7 @@ def update_proprietary_period(
             " than the maximum proprietary period for the proposal."
         ),
     ),
-    user: User = Depends(get_current_user),
+    requester: User = Depends(get_current_user),
 ) -> JSONResponse:
     """
     Request an update of the propriety period after which the observation data can become public. It depends on the
@@ -341,12 +341,12 @@ def update_proprietary_period(
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proprietary_period(
-            user, proposal_code
+            requester, proposal_code
         )
         proposal_service = services.proposal_service(unit_of_work.connection)
         proposal = proposal_service.get_proposal(proposal_code)
         if permission_service.is_motivation_needed_to_update_proprietary_period(
-            proposal, proprietary_period_update_request, user.username
+            proposal, proprietary_period_update_request, requester.username
         ):
             if not proprietary_period_update_request.motivation:
                 raise ValidationError("A motivation is required.")
@@ -354,7 +354,7 @@ def update_proprietary_period(
                 proposal_code=proposal_code,
                 proprietary_period=proprietary_period_update_request.proprietary_period,
                 motivation=proprietary_period_update_request.motivation,
-                username=user.username,
+                requester=requester,
             )
             status_code = status.HTTP_202_ACCEPTED
             update_status = UpdateStatus.PENDING
@@ -373,13 +373,15 @@ def update_proprietary_period(
                     proprietary_period=proprietary_period_update_request.proprietary_period,
                 )
                 unit_of_work.commit()
-            except SSDAError:
+            except SSDAError as err:
                 status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return JSONResponse(
             status_code=status_code,
             content={
                 **proposal["general_info"]["proprietary_period"],
-                "start_date": f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}",
+                "start_date": (
+                    f"{proposal['general_info']['proprietary_period']['start_date']:%Y-%m-%d}"
+                ),
                 "status": update_status,
                 "status_code": status_code,
             },

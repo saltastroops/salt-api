@@ -47,8 +47,7 @@ class ProposalRepository:
         """
         Return a list of proposal summaries.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT DISTINCT P.Proposal_Id                   AS id,
                 PC.Proposal_Code                AS proposal_code,
                 CONCAT(S.Year, '-', S.Semester) AS semester,
@@ -149,8 +148,7 @@ WHERE P.Current = 1
     )
 ORDER BY P.Proposal_Id DESC
 LIMIT :limit;
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -329,16 +327,14 @@ LIMIT :limit;
         Return an ordered list of the semesters for which this a proposal has been
         submitted.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT DISTINCT CONCAT(S.Year, '-', S.Semester) AS semester 
 FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN ProposalCode PC ON MP.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
 ORDER BY S.Year, S.Semester;
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return list(result.scalars())
 
@@ -353,29 +349,25 @@ ORDER BY S.Year, S.Semester;
         """
         Return a list of phases (1 or 2) for a given proposal.
         """
-        stmt = text(
-            """
+        stmt = text("""
         SELECT DISTINCT P.Phase
         FROM ProposalCode PC
         JOIN Proposal P ON PC.ProposalCode_Id = P.ProposalCode_Id
         WHERE PC.Proposal_Code = :proposal_code
         ORDER BY P.Phase
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         phases = list(result.scalars())
         return phases
 
     def get_proposal_type(self, proposal_code: str) -> str:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT PT.ProposalType AS proposal_type
 FROM ProposalType PT
          JOIN ProposalGeneralInfo PGI ON PT.ProposalType_Id = PGI.ProposalType_Id
          JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
-            """
-        )
+            """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_type = result.scalar_one_or_none()
         if not proposal_type:
@@ -387,8 +379,7 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Return the semester for which the latest submission was made.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT CONCAT(S.Year, '-', S.Semester) AS semester
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
@@ -397,23 +388,20 @@ WHERE PC.Proposal_Code = :proposal_code
   AND P.Current = 1
 ORDER BY S.Year DESC, S.Semester DESC
 LIMIT 1
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(str, result.scalar_one())
 
     def latest_submission_phase(self, proposal_code: str) -> int:
         """Return the proposal phase of the latest submission."""
-        stmt = text(
-            """
+        stmt = text("""
 SELECT P.Phase
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
 ORDER BY P.Submission DESC
 LIMIT 1
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         try:
             return cast(int, result.scalar_one())
@@ -424,15 +412,13 @@ LIMIT 1
         """
         Return the date and time when the first submission was made.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT P.SubmissionDate AS submission_date
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
   AND P.Submission = 1;
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         dt = result.scalar_one()
         if type(dt) == date:
@@ -441,16 +427,14 @@ WHERE PC.Proposal_Code = :proposal_code
 
     def _latest_submission_date(self, proposal_code: str) -> datetime:
         """Return the date and time when the latest submission was made."""
-        stmt = text(
-            """
+        stmt = text("""
 SELECT P.SubmissionDate
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
 ORDER BY P.Submission DESC
 LIMIT 1
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(datetime, result.scalar_one()).astimezone(timezone.utc)
 
@@ -458,8 +442,7 @@ LIMIT 1
         """
         Return the submission number of the latest submission for any semester.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT Submission
 FROM Proposal P
          JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
@@ -467,8 +450,7 @@ WHERE P.Current = 1
   AND PC.Proposal_Code = :proposal_code
 ORDER BY Submission DESC
 LIMIT 1
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(int, result.scalar())
 
@@ -489,8 +471,7 @@ LIMIT 1
         No text may exist for the given semester as no phase 2 has been submitted for
         the proposal yet. In this case the latest text (preceding the semester) is used.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     PT.Title                            AS title,
     PT.Abstract                         AS abstract,
@@ -503,8 +484,7 @@ WHERE PC.Proposal_Code = :proposal_code
   AND CONCAT(S.Year, '-', S.Semester) <= :semester
 ORDER BY S.Year, S.Semester DESC
 LIMIT 1;
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -520,8 +500,7 @@ LIMIT 1;
         """
         Return general proposal information for a semester.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT 
     P.Submission                        AS submission_number,
     T.ProposalType                      AS proposal_type,
@@ -559,8 +538,7 @@ WHERE PC.Proposal_Code = :proposal_code
     ORDER BY S.Year DESC, S.Semester DESC, P.Submission DESC
     LIMIT 1
 
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -595,8 +573,7 @@ WHERE PC.Proposal_Code = :proposal_code
     def _get_deadlines_and_submissions(
         self, proposal_code: str, semester: str
     ) -> Dict[str, Any]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P.SubmissionDate        AS submission_date,
     P.Submission            AS submission_number,
@@ -609,8 +586,7 @@ WHERE P.Phase = 1
     AND SP.Phase = 1
     AND CONCAT(S.Year, '-', S.Semester) = :semester
     AND PC.Proposal_Code = :proposal_code
-        """
-        )
+        """)
         results = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -657,8 +633,7 @@ WHERE P.Phase = 1
 
         The list is ordered by family nme and given name.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     PU.PiptUser_Id          AS id,
     I.FirstName             AS given_name,
@@ -686,8 +661,7 @@ FROM ProposalInvestigator PI
     LEFT JOIN ThesisType TT ON PT.ThesisType_Id = TT.ThesisType_Id
 WHERE PC.Proposal_Code = :proposal_code
 ORDER BY I.Surname, I.FirstName
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         investigators = [dict(row) for row in result]
 
@@ -738,15 +712,13 @@ ORDER BY I.Surname, I.FirstName
         """
         Return the user id of the Principal Investigator.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT I.PiptUser_Id
 FROM ProposalContact PC
          JOIN Investigator I ON PC.Leader_Id = I.Investigator_Id
          JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
 WHERE P.Proposal_Code = :proposal_code
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(int, result.scalar_one())
 
@@ -754,25 +726,74 @@ WHERE P.Proposal_Code = :proposal_code
         """
         Return the user id of the Principal Contact.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT I.PiptUser_Id
 FROM ProposalContact PC
          JOIN Investigator I ON PC.Contact_Id = I.Investigator_Id
          JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
 WHERE P.Proposal_Code = :proposal_code
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return cast(int, result.scalar_one())
+
+    def get_principal_contact(self, proposal_code: str) -> Dict[str, Any]:
+        """
+        Return the Principal Contact for a proposal.
+        """
+        stmt = text("""
+SELECT
+    I2.FirstName             AS given_name,
+    I2.Surname               AS family_name,
+    I2.Email                 AS email
+FROM ProposalContact PC
+    JOIN Investigator I ON PC.Contact_Id = I.Investigator_Id
+    JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+    JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+    JOIN Investigator I2 ON I2.Investigator_Id = PU.Investigator_Id
+WHERE P.Proposal_Code = :proposal_code
+            """)
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        contact = result.one_or_none()
+        if not contact:
+            raise NotFoundError(f"Principal contact for {proposal_code} not found")
+        return {
+            "given_name": contact.given_name,
+            "family_name": contact.family_name,
+            "email": contact.email,
+        }
+
+    def get_principal_investigator(self, proposal_code: str) -> Dict[str, Any]:
+        """
+        Return the Principal Investigator for a proposal.
+        """
+        stmt = text("""
+SELECT
+    I2.FirstName             AS given_name,
+    I2.Surname               AS family_name,
+    I2.Email                 AS email
+FROM ProposalContact PC
+    JOIN Investigator I ON PC.Leader_Id = I.Investigator_Id
+    JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+    JOIN PiptUser PU ON I.PiptUser_Id = PU.PiptUser_Id
+    JOIN Investigator I2 ON I2.Investigator_Id = PU.Investigator_Id
+WHERE P.Proposal_Code = :proposal_code
+            """)
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        investigator = result.one_or_none()
+        if not investigator:
+            raise NotFoundError(f"Principal investigator for {proposal_code} not found")
+        return {
+            "given_name": investigator.given_name,
+            "family_name": investigator.family_name,
+            "email": investigator.email,
+        }
 
     def _blocks(self, proposal_code: str, semester: str) -> List[Dict[str, Any]]:
         """
         Return the blocks for a semester.
         """
         year, sem = semester.split("-")
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id                      AS id,
        CONCAT(S.Year, '-', S.Semester) AS semester,
        B.Block_Name                    AS name,
@@ -798,8 +819,7 @@ WHERE BS.BlockStatus NOT IN :excluded_status_values
   AND PC.Proposal_Code = :proposal_code
   AND S.Year = :year
   AND S.Semester = :semester
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -863,8 +883,7 @@ WHERE BS.BlockStatus NOT IN :excluded_status_values
 
         The observations are ordered by block name and observation night.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     BV.BlockVisit_Id                            AS id,
     BV.Block_Id                                 AS block_id,
@@ -888,8 +907,7 @@ FROM BlockVisit BV
 WHERE PC.Proposal_Code = :proposal_code
     AND BVS.BlockVisitStatus != 'Deleted'
 ORDER BY B.Block_Name, NI.Date
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         block_visits = [
             {
@@ -919,8 +937,7 @@ ORDER BY B.Block_Name, NI.Date
         for all semesters.
         """
         separator = "::::"
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id       AS block_id,
        GROUP_CONCAT(
             DISTINCT T.Target_Name ORDER BY T.Target_Name SEPARATOR :separator
@@ -933,8 +950,7 @@ FROM Target T
          JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY B.Block_Id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -954,8 +970,7 @@ GROUP BY B.Block_Id
         A block is only included in the dictionary if it is using Salticam. There is
         only one mode, which is an empty string.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id AS block_id
 FROM ObsConfig OC
          JOIN PayloadConfig PC ON OC.PayloadConfig_Id = PC.PayloadConfig_Id
@@ -969,8 +984,7 @@ FROM ObsConfig OC
 WHERE C.Proposal_Code = :proposal_code
   AND OC.SalticamPattern_Id IS NOT NULL
   AND PCT.Type != 'Acquisition'
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -990,8 +1004,7 @@ WHERE C.Proposal_Code = :proposal_code
         ordered alphabetically for every block.
         """
         separator = "::::"
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id AS block_id,
        GROUP_CONCAT(DISTINCT RM.Mode ORDER BY RM.Mode SEPARATOR :separator) AS modes,
        GROUP_CONCAT(DISTINCT RG.Grating ORDER BY RG.Grating SEPARATOR :separator) AS gratings,
@@ -1012,8 +1025,7 @@ FROM RssMode RM
          LEFT JOIN RssGrating RG ON RS.RssGrating_Id = RG.RssGrating_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY B.Block_Id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1041,8 +1053,7 @@ GROUP BY B.Block_Id
         ordered alphabetically for every block.
         """
         separator = "::::"
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id AS block_id,
        GROUP_CONCAT(
             DISTINCT HM.ExposureMode ORDER BY HM.ExposureMode SEPARATOR :separator
@@ -1060,8 +1071,7 @@ FROM HrsMode HM
          JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY B.Block_Id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1087,8 +1097,7 @@ GROUP BY B.Block_Id
         A block is only included in the dictionary if it is using BVIT. There is only
         one mode, which is an empty string.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id AS block_id
 FROM ObsConfig OC
          JOIN TelescopeConfigObsConfig TCOC
@@ -1098,8 +1107,7 @@ FROM ObsConfig OC
          JOIN ProposalCode C ON B.ProposalCode_Id = C.ProposalCode_Id
 WHERE C.Proposal_Code = :proposal_code
   AND OC.BvitPattern_Id IS NOT NULL
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1113,8 +1121,7 @@ WHERE C.Proposal_Code = :proposal_code
         self, proposal_code: str
     ) -> Dict[int, Dict[str, List[str]]]:
         separator = "::::"
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id                                                                                   AS block_id,
        GROUP_CONCAT(DISTINCT NG.Grating ORDER BY NG.Grating SEPARATOR :separator) AS gratings,
        GROUP_CONCAT(DISTINCT NF.NirFilter  ORDER BY NF.NirFilter  SEPARATOR :separator) AS filters
@@ -1135,8 +1142,7 @@ FROM Nir N
          JOIN ProposalCode PC ON B.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY B.Block_Id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1227,8 +1233,7 @@ GROUP BY B.Block_Id
         Return the time allocations for a semester.
         """
         year, sem = semester.split("-")
-        stmt = text(
-            """
+        stmt = text("""
 SELECT P.Partner_Code    AS partner_code,
        PA.Priority       AS priority,
        SUM(PA.TimeAlloc) AS time_allocation
@@ -1241,8 +1246,7 @@ WHERE PC.Proposal_Code = :proposal_code
   AND S.Year = :year
   AND S.Semester = :semester
 GROUP BY PA.MultiPartner_Id, PA.Priority
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
@@ -1260,8 +1264,7 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
         Return the TAC comments for a semester.
         """
         year, sem = semester.split("-")
-        stmt = text(
-            """
+        stmt = text("""
 SELECT P.Partner_Code AS partner_code,
        TPC.TacComment AS tac_comment
 FROM TacProposalComment TPC
@@ -1272,8 +1275,7 @@ FROM TacProposalComment TPC
 WHERE PC.Proposal_Code = :proposal_code
   AND S.Year = :year
   AND S.Semester = :semester
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
@@ -1284,8 +1286,7 @@ WHERE PC.Proposal_Code = :proposal_code
 
     def _charged_time(self, proposal_code: str, semester: str) -> Dict[str, int]:
         year, sem = semester.split("-")
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Priority AS priority, SUM(B.ObsTime) AS charged_time
 FROM BlockVisit BV
     JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
@@ -1298,8 +1299,7 @@ WHERE PC.Proposal_Code = :proposal_code
     AND S.Semester = :semester
     AND BVS.BlockVisitStatus = 'Accepted'
 GROUP BY B.Priority
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "year": year, "semester": sem}
         )
@@ -1333,8 +1333,7 @@ GROUP BY B.Priority
         # There may be multiple observing windows for a block in a night. But if we
         # shift all times by 12 hours, all windows in the same night end up with the
         # same date. The number of nights is then the number of distinct dates.
-        stmt = text(
-            """
+        stmt = text("""
 SELECT B.Block_Id                                                           AS block_id,
        COUNT(DISTINCT DATE(DATE_SUB(BVW.VisibilityStart, INTERVAL 12 HOUR))) AS nights
 FROM BlockVisibilityWindow BVW
@@ -1350,8 +1349,7 @@ WHERE PC.Proposal_Code = :proposal_code
   AND BVW.VisibilityStart BETWEEN :start AND :end
   AND BVWT.BlockVisibilityWindowType='Strict'
 GROUP BY B.Block_Id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1368,8 +1366,7 @@ GROUP BY B.Block_Id
         """
         Return the proposal comments ordered by the time when they were made.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT PC.ProposalComment_Id               AS id,
        PC.CommentDate                      AS comment_date,
        CONCAT(I.FirstName, ' ', I.Surname) AS author,
@@ -1379,16 +1376,14 @@ FROM ProposalComment PC
          JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
 WHERE P.Proposal_Code = :proposal_code
 ORDER BY PC.CommentDate, PC.ProposalComment_Id
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return [dict(row) for row in result]
 
     def add_observation_comment(
         self, proposal_code: str, comment: str, user: User
     ) -> Dict[str, Any]:
-        istmt = text(
-            """
+        istmt = text("""
 INSERT INTO ProposalComment(
     ProposalCode_Id,
     CommentDate,
@@ -1401,8 +1396,7 @@ VALUES (
     (SELECT Investigator_Id FROM PiptUser WHERE Username = :username),
     :comment
 )
-    """
-        )
+    """)
         comment_date = date.today()
         insert_results = self.connection.execute(
             istmt,
@@ -1413,8 +1407,7 @@ VALUES (
                 "date": comment_date,
             },
         )
-        sstmt = text(
-            """
+        sstmt = text("""
 SELECT PC.ProposalComment_Id               AS id,
        PC.CommentDate                      AS comment_date,
        CONCAT(I.FirstName, ' ', I.Surname) AS author,
@@ -1423,8 +1416,7 @@ FROM ProposalComment PC
          JOIN Investigator I ON PC.Investigator_Id = I.Investigator_Id
          JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
 WHERE PC.ProposalComment_Id = :proposal_comment_id
-    """
-        )
+    """)
         select_results = self.connection.execute(
             sstmt, {"proposal_comment_id": insert_results.lastrowid}
         )
@@ -1435,8 +1427,7 @@ WHERE PC.ProposalComment_Id = :proposal_comment_id
         """
         Return the proposal status for a proposal.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     PS.Status 			AS `status`,
     PGI.StatusComment 	AS `comment`
@@ -1444,8 +1435,7 @@ FROM ProposalGeneralInfo PGI
          JOIN ProposalStatus PS ON PS.ProposalStatus_Id = PGI.ProposalStatus_Id
          JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         try:
             row = result.one()
@@ -1498,15 +1488,13 @@ WHERE PC.Proposal_Code = :proposal_code
 
         self._validate_status_update(proposal_code, status)
 
-        stmt = text(
-            """
+        stmt = text("""
 UPDATE ProposalGeneralInfo  PGI
 SET
     PGI.ProposalStatus_Id = :status_id,
     PGI.StatusComment = :status_comment
 WHERE ProposalCode_Id = :proposal_code_id;
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1522,13 +1510,11 @@ WHERE ProposalCode_Id = :proposal_code_id;
         """
         Return the id of a proposal status value.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT PS.ProposalStatus_Id
 FROM ProposalStatus PS
 WHERE PS.Status = :status
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"status": status})
         return cast(int, result.scalar_one())
 
@@ -1537,14 +1523,12 @@ WHERE PS.Status = :status
         Check whether the proposal may be activated by the Principal Investigator and
         Principal Contact.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT PSA.PiPcMayActivate
 FROM ProposalSelfActivation PSA
          JOIN ProposalCode PC ON PSA.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code;
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         try:
             one = result.scalar_one_or_none()
@@ -1575,14 +1559,12 @@ WHERE PC.Proposal_Code = :proposal_code;
             phases = [1, 2]
         else:
             phases = [phase]
-        stmt = text(
-            """
+        stmt = text("""
 SELECT MAX(Submission) AS version
 FROM Proposal P
 JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code AND P.Phase IN :phases
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "phases": phases}
         )
@@ -1610,14 +1592,12 @@ WHERE PC.Proposal_Code = :proposal_code AND P.Phase IN :phases
         int
             The proposal version.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT COUNT(Submission) AS version
 FROM Proposal P
 JOIN ProposalCode PC ON P.ProposalCode_Id = PC.ProposalCode_Id
 WHERE PC.Proposal_Code = :proposal_code AND P.Phase = 1
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         current_version = result.scalar_one()
         if current_version == 0:
@@ -1645,8 +1625,7 @@ WHERE PC.Proposal_Code = :proposal_code AND P.Phase = 1
         """
         Insert or update the proposal progress information.
         """
-        stmt = text(
-            """
+        stmt = text("""
 INSERT INTO ProposalProgress (
     ProposalCode_Id,
     Semester_Id,
@@ -1674,8 +1653,7 @@ VALUES(
     SupplementaryPath = :supplementary_path,
     SubmissionDate = NOW()
 ;
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1696,8 +1674,7 @@ VALUES(
     def _reset_partner_requested_time_and_percentages(
         self, proposal_code: str, semester: str, requested_time: int
     ) -> None:
-        stmt = text(
-            """
+        stmt = text("""
 UPDATE MultiPartner
 SET ReqTimeAmount=:requested_time,
     ReqTimePercent=0
@@ -1705,8 +1682,7 @@ WHERE ProposalCode_Id =
       (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code)
   AND Semester_Id =
       (SELECT Semester_Id FROM Semester WHERE CONCAT(Year, '-', semester) = :semester);
-              """
-        )
+              """)
         self.connection.execute(
             stmt,
             {
@@ -1727,8 +1703,7 @@ WHERE ProposalCode_Id =
         """
         Insert or update proposal progress requested time.
         """
-        stmt = text(
-            """
+        stmt = text("""
 INSERT INTO MultiPartner(
     ProposalCode_Id,
     Partner_Id,
@@ -1745,8 +1720,7 @@ VALUES (
 ) ON DUPLICATE KEY UPDATE
     ReqTimePercent = :requested_time_percent,
     ReqTimeAmount = :requested_time_amount
-        """
-        )
+        """)
         self.connection.execute(
             stmt,
             {
@@ -1769,8 +1743,7 @@ VALUES (
         """
         Insert or update the observing conditions
         """
-        stmt = text(
-            """
+        stmt = text("""
 INSERT INTO P1ObservingConditions (
     ProposalCode_Id,
     Semester_Id,
@@ -1790,8 +1763,7 @@ VALUES
     Transparency_Id = (SELECT Transparency_Id FROM Transparency WHERE Transparency = :transparency),
     ObservingConditionsDescription = :observing_conditions_description
 
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -1821,8 +1793,7 @@ VALUES
         # However, the alias "semester" is not known to the WHERE clause, and hence
         # "semester" would be interpreted as the Semester column of the Semester table,
         # leading to incorrect results.
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     CONCAT(S.`Year`, '-', S.Semester)   AS semester,
     MaxSeeing						    AS seeing,
@@ -1835,8 +1806,7 @@ FROM P1ObservingConditions AS OC
 WHERE PC.Proposal_Code = :proposal_code
     AND (S.`Year` < :year OR (S.`Year` = :year AND S.Semester <= :sem))
 ORDER BY semester DESC;
-    """
-        )
+    """)
         year, sem = semester.split("-")
         results = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "year": year, "sem": sem}
@@ -1858,8 +1828,7 @@ ORDER BY semester DESC;
         Priority 4 observations are not included. Rejected observations are not included
         either.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     CONCAT(S.`Year`, '-', S.Semester) AS semester,
     SUM(Obstime)                AS observed_time
@@ -1873,8 +1842,7 @@ WHERE BlockVisitStatus = 'Accepted'
     AND B.Priority < 4
     AND Proposal_Code = :proposal_code
     GROUP BY S.Semester_Id
-    """
-        )
+    """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         try:
             return [
@@ -1889,8 +1857,7 @@ WHERE BlockVisitStatus = 'Accepted'
     ) -> List[Dict[str, Any]]:
         # ReqTimeAmount is the total amount of time requested by a proposal per semester
         # for all partners combined; hence there is no need to sum its value.
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     CONCAT(S.`Year`, '-', S.Semester) AS semester,
     ReqTimeAmount 	AS requested_time,
@@ -1901,8 +1868,7 @@ FROM MultiPartner 	AS MP
     JOIN Semester 		AS S ON (MP.Semester_Id = S.Semester_Id)
 WHERE Proposal_Code=:proposal_code
     GROUP BY S.Semester_Id
-    """
-        )
+    """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         try:
             return [
@@ -1936,8 +1902,7 @@ WHERE Proposal_Code=:proposal_code
     def _get_partner_requested_percentages(
         self, proposal_code: str, semester: str
     ) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     Partner_Code 						AS partner_code,
     Partner_Name 						AS partner_name,
@@ -1948,8 +1913,7 @@ FROM MultiPartner MP
     JOIN Semester S ON MP.Semester_Id = S.Semester_Id
     JOIN Partner AS P ON (MP.Partner_Id = P.Partner_Id)
 WHERE PC.Proposal_Code = :proposal_code
-    """
-        )
+    """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         tmp = dict()
         # Some partners may have a time request (which may be 0) for other semesters,
@@ -2089,16 +2053,14 @@ WHERE PC.Proposal_Code = :proposal_code
         list of str
             The sorted list of semesters.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT CONCAT(S.Year, '-', S.Semester) AS semester
 FROM ProposalProgress PP
          JOIN ProposalCode PC ON PP.ProposalCode_Id = PC.ProposalCode_Id
          JOIN Semester S ON PP.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code;
 
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         return sorted(row.semester for row in result)
 
@@ -2112,8 +2074,7 @@ WHERE PC.Proposal_Code = :proposal_code;
                 requested_time = t["requested_time"]
 
         # Get the progress details
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     TimeRequestChangeReasons			AS change_reason,
     StatusSummary						AS summary_of_proposal_status,
@@ -2126,8 +2087,7 @@ FROM ProposalProgress PP
     JOIN Semester S ON PP.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
     AND CONCAT(S.`Year`, '-', S.Semester) = :semester
-    """
-        )
+    """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "semester": semester}
         )
@@ -2139,13 +2099,13 @@ WHERE PC.Proposal_Code = :proposal_code
             progress_report["requested_time"] = requested_time
             progress_report["semester"] = report_from_db.semester
             progress_report["additional_pdf"] = report_from_db.additional_pdf
-            progress_report[
-                "proposal_progress_pdf"
-            ] = report_from_db.proposal_progress_pdf
+            progress_report["proposal_progress_pdf"] = (
+                report_from_db.proposal_progress_pdf
+            )
             progress_report["change_reason"] = report_from_db.change_reason
-            progress_report[
-                "summary_of_proposal_status"
-            ] = report_from_db.summary_of_proposal_status
+            progress_report["summary_of_proposal_status"] = (
+                report_from_db.summary_of_proposal_status
+            )
             progress_report["strategy_changes"] = report_from_db.strategy_changes
             progress_report["previous_time_requests"] = time_statistics
 
@@ -2184,9 +2144,9 @@ WHERE PC.Proposal_Code = :proposal_code
             )
 
             # self.get_latest_observing_conditions(proposal_code, _next_semester)
-            progress_report[
-                "partner_requested_percentages"
-            ] = self._get_partner_requested_percentages(proposal_code, _next_semester)
+            progress_report["partner_requested_percentages"] = (
+                self._get_partner_requested_percentages(proposal_code, _next_semester)
+            )
             return progress_report
         else:
             return {
@@ -2200,8 +2160,10 @@ WHERE PC.Proposal_Code = :proposal_code
                 "change_reason": None,
                 "summary_of_proposal_status": None,
                 "strategy_changes": None,
-                "partner_requested_percentages": self._get_partner_requested_percentages(
-                    proposal_code, _next_semester
+                "partner_requested_percentages": (
+                    self._get_partner_requested_percentages(
+                        proposal_code, _next_semester
+                    )
                 ),
                 "previous_time_requests": time_statistics,
                 "last_observing_constraints": self.get_latest_observing_conditions(
@@ -2254,8 +2216,7 @@ WHERE PC.Proposal_Code = :proposal_code
         motivation: str,
         username: str,
     ) -> None:
-        stmt = text(
-            """
+        stmt = text("""
 INSERT INTO ProprietaryPeriodExtensionRequest(
     ProposalCode_Id,
     Reason,
@@ -2268,8 +2229,7 @@ VALUES (
     (SELECT PiptUser_Id FROM PiptUser WHERE Username = :username),
     :requested_period
 )
-    """
-        )
+    """)
         self.connection.execute(
             stmt,
             {
@@ -2323,8 +2283,7 @@ VALUES (
         return self._data_release_date(proprietary_period, block_visits)
 
     def _is_partner_allocated(self, proposal_code: str, partner_code: str) -> bool:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT P.Partner_Code    AS partner_code,
        SUM(PA.TimeAlloc) AS time_allocation
 FROM PriorityAlloc PA
@@ -2334,8 +2293,7 @@ FROM PriorityAlloc PA
          JOIN Partner P ON MP.Partner_Id = P.Partner_Id
 WHERE PC.Proposal_Code = :proposal_code
 GROUP BY PA.MultiPartner_Id, PA.Priority
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
 
         for row in result:
@@ -2373,15 +2331,13 @@ GROUP BY PA.MultiPartner_Id, PA.Priority
     def update_proprietary_period(
         self, proposal_code: str, proprietary_period: int
     ) -> None:
-        stmt = text(
-            """
+        stmt = text("""
 UPDATE ProposalGeneralInfo
 SET ProprietaryPeriod = :proprietary_period, ReleaseDate = :release_date
 WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
                          FROM ProposalCode PC
                          WHERE PC.Proposal_Code = :proposal_code)
-    """
-        )
+    """)
         block_visits = self.block_visits(proposal_code)
         self.connection.execute(
             stmt,
@@ -2396,8 +2352,7 @@ WHERE ProposalCode_Id = (SELECT PC.ProposalCode_Id
 
     def _get_phase_one_observations(self, proposal_code: str) -> List[Dict[str, Any]]:
         # The phase 1 targets.
-        stmt = text(
-            """
+        stmt = text("""
 SELECT DISTINCT RequestedTime                                   AS observing_time,
                 T.Target_Id                                     AS id,
                 T.Target_Name                                   AS name,
@@ -2457,8 +2412,7 @@ FROM P1ProposalTarget PPT
          LEFT JOIN Moon M ON POC.Moon_Id = M.Moon_Id
          LEFT JOIN P1TargetProbabilities PTP ON PC.ProposalCode_Id = PTP.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code
-    """
-        )
+    """)
         return [
             {
                 "target": {
@@ -2491,8 +2445,7 @@ WHERE Proposal_Code = :proposal_code
         ]
 
     def _get_requested_times(self, proposal_code: str) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     MP.ReqTimePercent					AS percentage,
     PMT.P1MinimumUsefulTime				AS minimum_useful_time,
@@ -2506,8 +2459,7 @@ FROM MultiPartner MP
     JOIN Partner P ON MP.Partner_Id = P.Partner_Id
     JOIN P1MinTime PMT ON MP.ProposalCode_Id = PMT.ProposalCode_Id AND MP.Semester_Id = PMT.Semester_Id
 WHERE Proposal_Code = :proposal_code
-        """
-        )
+        """)
 
         req_time: DefaultDict[str, Dict[str, Any]] = defaultdict(lambda: dict())
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
@@ -2529,8 +2481,7 @@ WHERE Proposal_Code = :proposal_code
     def _get_nir_simulations(
         self, proposal_code: str, configuration_id: int
     ) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P1NirSimulation_Id          AS id,
     P1NirSimulation_Name		AS `name`,
@@ -2538,8 +2489,7 @@ SELECT
 FROM P1NirSimulation P1NS
     JOIN ProposalCode PC ON	P1NS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code AND P1Nir_Id = :configuration_id
-        """
-        )
+        """)
         simulations = []
         for row in self.connection.execute(
             stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
@@ -2556,8 +2506,7 @@ WHERE Proposal_Code = :proposal_code AND P1Nir_Id = :configuration_id
     def _get_hrs_simulations(
         self, proposal_code: str, configuration_id: int
     ) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P1HrsSimulation_Id          AS id,
     P1HrsSimulation_Name		AS `name`,
@@ -2565,8 +2514,7 @@ SELECT
 FROM P1HrsSimulation P1HS
     JOIN ProposalCode PC ON	P1HS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code AND P1Hrs_Id = :configuration_id
-        """
-        )
+        """)
         simulations = []
         for row in self.connection.execute(
             stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
@@ -2583,8 +2531,7 @@ WHERE Proposal_Code = :proposal_code AND P1Hrs_Id = :configuration_id
     def _get_rss_simulations(
         self, proposal_code: str, configuration_id: int
     ) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P1RssSimulation_Id          AS id,
     P1RssSimulation_Name		AS `name`,
@@ -2592,8 +2539,7 @@ SELECT
 FROM P1RssSimulation P1RS
     JOIN ProposalCode PC ON	P1RS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code AND P1Rss_Id = :configuration_id
-        """
-        )
+        """)
         simulations = []
         for row in self.connection.execute(
             stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
@@ -2610,8 +2556,7 @@ WHERE Proposal_Code = :proposal_code AND P1Rss_Id = :configuration_id
     def _get_salticam_simulations(
         self, proposal_code: str, configuration_id: int
     ) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P1SalticamSimulation_Id         AS id,
     P1SalticamSimulation_Name		AS `name`,
@@ -2619,8 +2564,7 @@ SELECT
 FROM P1SalticamSimulation P1SS
     JOIN ProposalCode PC ON	P1SS.ProposalCode_Id = PC.ProposalCode_Id
 WHERE Proposal_Code = :proposal_code AND P1Salticam_Id = :configuration_id
-        """
-        )
+        """)
         simulations = []
         for row in self.connection.execute(
             stmt, {"proposal_code": proposal_code, "configuration_id": configuration_id}
@@ -2635,8 +2579,7 @@ WHERE Proposal_Code = :proposal_code AND P1Salticam_Id = :configuration_id
         return simulations
 
     def _get_p1_rss_config(self, proposal_code, config_id):
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     RG.Grating              AS grating,
     RFPM.FabryPerot_Mode    AS fabry_perot_mode,
@@ -2656,8 +2599,7 @@ FROM P1Config P1C
     LEFT JOIN RssPolarimetryPattern RPP ON P1RP.RssPolarimetryPattern_Id = RPP.RssPolarimetryPattern_Id
     LEFT JOIN RssMaskType RMT ON P1RM.RssMaskType_Id = RMT.RssMaskType_Id
 WHERE Proposal_Code = :proposal_code AND P1C.P1Rss_Id = :config_id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"proposal_code": proposal_code, "config_id": config_id}
         )
@@ -2671,8 +2613,7 @@ WHERE Proposal_Code = :proposal_code AND P1C.P1Rss_Id = :config_id
         }
 
     def _get_p1_scam_filters(self, scam_id: int):
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     SF.SalticamFilter_Name          AS `name`,
     SF.DescriptiveName              AS description
@@ -2681,14 +2622,12 @@ FROM P1Salticam  P1S
     JOIN P1SalticamFilterPatternDetail P1SFD ON P1SFP.P1SalticamFilterPattern_Id = P1SFD.P1SalticamFilterPattern_Id
     JOIN SalticamFilter SF ON P1SFD.SalticamFilter_Id = SF.SalticamFilter_Id
 WHERE P1S.P1Salticam_Id = :scam_id
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"scam_id": scam_id})
         return [{"name": row.name, "description": row.description} for row in result]
 
     def _get_science_configurations(self, proposal_code: str) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P1C.P1Bvit_Id				        AS bvit,
     P1C.P1Hrs_Id				        AS hrs,
@@ -2715,8 +2654,7 @@ FROM P1Config P1C
     LEFT JOIN P1Salticam PS ON P1C.P1Salticam_Id = PS.P1Salticam_Id
     LEFT JOIN SalticamDetectorMode SM ON PS.SalticamDetectorMode_Id = SM.SalticamDetectorMode_Id
 WHERE PC.Proposal_Code = :proposal_code
-        """
-        )
+        """)
         configurations = []
 
         for row in self.connection.execute(stmt, {"proposal_code": proposal_code}):
@@ -2788,12 +2726,10 @@ WHERE PC.Proposal_Code = :proposal_code
         """
         Return the proposal code id of a proposal code.
         """
-        stmt = text(
-            """
+        stmt = text("""
 SELECT ProposalCode_Id FROM ProposalCode
 WHERE Proposal_Code = :proposal_code
-        """
-        )
+        """)
         result = self.connection.execute(stmt, {"proposal_code": proposal_code})
         proposal_code_id = result.one_or_none()
         if not proposal_code_id:
@@ -2807,16 +2743,14 @@ WHERE Proposal_Code = :proposal_code
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self.get_proposal_code_id(proposal_code)
-        stmt = text(
-            """
+        stmt = text("""
         INSERT INTO ProposalSelfActivation (ProposalCode_Id, PiPcMayActivate)
         VALUE(
             :proposal_code_id,
             :is_self_activatable
         )
         ON DUPLICATE KEY UPDATE PiPcMayActivate = :is_self_activatable;
-        """
-        )
+        """)
         self.connection.execute(
             stmt,
             {
@@ -2829,8 +2763,7 @@ WHERE Proposal_Code = :proposal_code
         # The id could be evaluated in the INSERT query, but this would lead to more
         # cryptic errors for a non-existing proposal code.
         proposal_code_id = self.get_proposal_code_id(proposal_code)
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     I2.PiptUser_Id           AS id,
     I2.FirstName             AS given_name,
@@ -2842,8 +2775,7 @@ FROM ProposalContact PCon
     JOIN Investigator I2 ON I2.Investigator_Id = PU.Investigator_Id
     JOIN ProposalCode PC ON PC.ProposalCode_Id = PCon.ProposalCode_Id
 WHERE PCon.ProposalCode_Id = :proposal_code_id
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -2874,13 +2806,11 @@ WHERE PCon.ProposalCode_Id = :proposal_code_id
         )
         proposal_code_id = self.get_proposal_code_id(proposal_code)
 
-        stmt = text(
-            """
+        stmt = text("""
 UPDATE ProposalContact
 SET Astronomer_Id = :liaison_astronomer_id
 WHERE ProposalCode_Id = :proposal_code_id
-        """
-        )
+        """)
         self.connection.execute(
             stmt,
             {
@@ -2891,14 +2821,12 @@ WHERE ProposalCode_Id = :proposal_code_id
 
     def _salt_astronomer_investigator_id(self, salt_astronomer_user_id: int) -> int:
         """Return the id of the preferred investigator entry for a SALT Astronomer."""
-        stmt = text(
-            """
+        stmt = text("""
 SELECT PU.Investigator_Id FROM PiptUser PU
     JOIN SaltAstronomers SA ON PU.Investigator_Id = SA.Investigator_Id
 WHERE PU.PiptUser_Id = :salt_astronomer_user_id
 
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt, {"salt_astronomer_user_id": salt_astronomer_user_id}
         )
@@ -2921,8 +2849,7 @@ WHERE PU.PiptUser_Id = :salt_astronomer_user_id
         # table cannot be included in the FROM statement. Note that if a user is present
         # as multiple investigators, the approval status is updated for all of these
         # investigators.
-        stmt = text(
-            """
+        stmt = text("""
 UPDATE ProposalInvestigator
 SET InvestigatorOkay=:approved,
     ApprovalCode=NULL
@@ -2942,8 +2869,7 @@ WHERE Investigator_Id IN (SELECT tmp1.Investigator_Id
                          FROM (SELECT PC.ProposalCode_Id
                                FROM ProposalCode PC
                                WHERE PC.Proposal_Code = :proposal_code) AS tmp2);
-        """
-        )
+        """)
         result = self.connection.execute(
             stmt,
             {
@@ -2957,15 +2883,13 @@ WHERE Investigator_Id IN (SELECT tmp1.Investigator_Id
             raise NotFoundError()
 
     def _get_pool_times(self, pool_id: int, total_times_per_priority: Dict[int, int]):
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     PAT.Priority        AS priority,
     PAT.AssignedTime    AS assigned_time
 FROM PoolAssignedTime PAT
 WHERE PAT.Pool_Id = :pool_id
-            """
-        )
+            """)
 
         pool_times = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
@@ -2980,16 +2904,14 @@ WHERE PAT.Pool_Id = :pool_id
         return pool_times
 
     def _get_pool_rules(self, pool_id: int) -> List[Dict[str, int]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     PRS.X1              AS rule_parameter,
     PR.Pool_Rule_short  AS rule
 FROM PoolRuleSet    PRS
     JOIN PoolRule   PR ON PRS.PoolRule_Id = PR.PoolRule_Id
 WHERE PRS.Pool_Id = :pool_id
-            """
-        )
+            """)
 
         pool_rules = []
         for row in self.connection.execute(stmt, {"pool_id": pool_id}):
@@ -3002,14 +2924,12 @@ WHERE PRS.Pool_Id = :pool_id
         return pool_rules
 
     def _get_block_total_observed_time(self, block_id: int) -> int:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT SUM(B.ObsTime) AS total_observed_time FROM BlockVisit BV 
     JOIN Block B ON BV.Block_Id = B.Block_Id
     JOIN BlockVisitStatus BVS ON BV.BlockVisitStatus_Id = BVS.BlockVisitStatus_Id
 WHERE BV.Block_Id = :block_id AND BVS.BlockVisitStatus = 'Accepted'      
-            """
-        )
+            """)
         result = self.connection.execute(
             stmt,
             {
@@ -3024,8 +2944,7 @@ WHERE BV.Block_Id = :block_id AND BVS.BlockVisitStatus = 'Accepted'
     def _get_pool_blocks(
         self, pool_id: int, semester: str, proposal_code: str
     ) -> List[Dict[str, Any]]:
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     B.Block_Id          AS id,
     B.Block_Name        AS name,
@@ -3041,8 +2960,7 @@ FROM BlockPool  BP
     JOIN BlockStatus BS ON B.BlockStatus_Id = BS.BlockStatus_Id
 WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
     AND BP.Pool_Id = :pool_id
-            """
-        )
+            """)
         block_observable_tonight = self._block_observable_nights(
             proposal_code, semester, tonight()
         )
@@ -3076,8 +2994,7 @@ WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
         if semester is None:
             semester = self._latest_submission_semester(proposal_code)
 
-        stmt = text(
-            """
+        stmt = text("""
 SELECT
     P.Pool_Id           AS id,
     P.Pool_Name         AS name
@@ -3086,8 +3003,7 @@ FROM Pool P
     JOIN Semester S ON P.Semester_Id = S.Semester_Id
 WHERE PC.Proposal_Code = :proposal_code
     AND CONCAT(S.Year, '-', S.Semester) = :semester
-            """
-        )
+            """)
         pools = []
         for row in self.connection.execute(
             stmt,

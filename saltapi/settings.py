@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     # Email sender
     from_email: str
 
+    # Email address for SALT help
+    salt_help_email: str
+
     # SMTP server for sending emails
     smtp_server: Optional[str]
 

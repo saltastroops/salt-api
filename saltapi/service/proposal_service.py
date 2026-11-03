@@ -437,7 +437,7 @@ class ProposalService:
 { user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n
 """
         if motivation:
-            salt_help_plain += ("""
+            salt_help_plain += (f"""
                 \n----------\nMotivation:\n{motivation}\n----------\n
             """)
         salt_help_plain += f"""
@@ -454,7 +454,7 @@ Your Friendly Web Manager
     <p>{ user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n</p>
 """
         if motivation:
-            salt_help_html += ("""
+            salt_help_html += (f"""
                 <p>----------</p>
                 <p><b>Motivation:</b><br>{motivation}</p>
                 <p>----------</p>

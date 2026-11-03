@@ -382,28 +382,28 @@ class ProposalService:
         proposal_code: str,
         proprietary_period: int,
         motivation: str,
-        user: User,
+        requester: User,
     ) -> None:
         self.repository.insert_proprietary_period_extension_request(
-            proposal_code, proprietary_period, motivation, user.username
+            proposal_code, proprietary_period, motivation, requester.username
         )
         self.send_proprietary_period_extension_notification_to_salt_help(
             proposal_code=proposal_code,
             proprietary_period=proprietary_period,
             motivation=motivation,
-            user=user,
+            requester=requester,
         )
         self.send_proprietary_period_extension_notification_to_pc_and_pi(
             proposal_code=proposal_code,
             proprietary_period=proprietary_period,
             motivation=motivation,
-            user=user,
+            requester=requester,
         )
 
     def send_proprietary_period_extension_notification(
         self,
         proposal_code: str,
-        user: User,
+        requester: User,
         proprietary_period: int,
         motivation: str,
     ) -> None:
@@ -411,25 +411,25 @@ class ProposalService:
             proposal_code=proposal_code,
             proprietary_period=proprietary_period,
             motivation=motivation,
-            user=user,
+            requester=requester,
         )
         self.send_proprietary_period_extension_notification_to_pc_and_pi(
             proposal_code=proposal_code,
             proprietary_period=proprietary_period,
             motivation=motivation,
-            user=user,
+            requester=requester,
         )
 
     def send_proprietary_period_extension_notification_to_salt_help(
         self,
         proposal_code: str,
-        user: User,
+        requester: User,
         proprietary_period: int,
         motivation: str,
     ) -> None:
         salt_help_email = get_settings().salt_help_email
-        user_name = f"{user.given_name} {user.family_name}".strip()
-        user_email = f"{user.email}".strip()
+        user_name = f"{requester.given_name} {requester.family_name}".strip()
+        user_email = f"{requester.email}".strip()
 
         # Notification to salt_help
         salt_help_plain = f"""Dear SALT Help,
@@ -437,9 +437,9 @@ class ProposalService:
 { user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n
 """
         if motivation:
-            salt_help_plain += (
-                f"----------" f"\nMotivation:\n{motivation}\n" f"----------"
-            )
+            salt_help_plain += ("""
+                \n----------\nMotivation:\n{motivation}\n----------\n
+            """)
         salt_help_plain += f"""
 The URL for the proposal is: https://www.salt.ac.za/wm/proposal/{proposal_code}\n
 Kind regards,\n
@@ -454,9 +454,11 @@ Your Friendly Web Manager
     <p>{ user_name } <{user_email}> is requesting to change the proprietary period of proposal {proposal_code} to {proprietary_period} months.\n</p>
 """
         if motivation:
-            salt_help_html += (
-                f"----------" f"<p><b>Motivation:</b><br>{motivation}</p>" f"----------"
-            )
+            salt_help_html += ("""
+                <p>----------</p>
+                <p><b>Motivation:</b><br>{motivation}</p>
+                <p>----------</p>
+            """)
 
         salt_help_html += f"""
     <p>The URL for the proposal is: https://www.salt.ac.za/wm/proposal/{proposal_code}</p>    
@@ -476,7 +478,7 @@ Your Friendly Web Manager
     def send_proprietary_period_extension_notification_to_pc_and_pi(
             self,
             proposal_code: str,
-            user: User,
+            requester: User,
             proprietary_period: int,
             motivation: str,
     ) -> None:
@@ -489,16 +491,16 @@ Your Friendly Web Manager
         pc_email = pc["email"].strip()
         pi_email = pi["email"].strip()
 
-        user_name = f"{user.given_name} {user.family_name}".strip()
-        user_email = user.email.strip().lower()
+        requester_name = f"{requester.given_name} {requester.family_name}".strip()
+        requester_email = requester.email.strip()
 
         recipients = {
-            pc_email.lower(): {"name": pc_name, "email": pc_email},
-            pi_email.lower(): {"name": pi_name, "email": pi_email},
+            pc_email: {"name": pc_name, "email": pc_email},
+            pi_email: {"name": pi_name, "email": pi_email},
         }
 
         for recipient in recipients.values():
-            is_requester = recipient["email"].lower() == user_email
+            is_requester = recipient["email"] == requester_email
 
             salutation = f"Dear {recipient['name']},"
 
@@ -510,7 +512,7 @@ Your Friendly Web Manager
                 )
             else:
                 message_intro = (
-                    f"{user_name} has submitted a request to extend the "
+                    f"{requester_name} has submitted a request to extend the "
                     f"proprietary period for proposal {proposal_code}. "
                     "The request is awaiting approval."
                 )

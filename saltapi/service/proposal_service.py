@@ -556,9 +556,76 @@ SALT Team
                 message=notification_message,
             )
 
+    def notify_pc_and_pi_of_proprietary_period_update(
+            self,
+            proposal_code: str,
+            proprietary_period: int,
+    ) -> None:
+        try:
+            pc = self.repository.get_principal_contact(proposal_code)
+            pi = self.repository.get_principal_investigator(proposal_code)
+
+            pc_name = f"{pc['given_name']} {pc['family_name']}".strip()
+            pi_name = f"{pi['given_name']} {pi['family_name']}".strip()
+
+            pc_email = pc["email"].strip()
+            pi_email = pi["email"].strip()
+
+            recipients = {
+                pc_email: pc_name,
+                pi_email: pi_name,
+            }
+
+            for recipient_email, recipient_name in recipients.items():
+                salutation = f"Dear {recipient_name},"
+
+                message = (
+                    f"The proprietary period for proposal {proposal_code} "
+                    f"has been updated to {proprietary_period} months."
+                )
+
+                notification_plain = f"""{salutation}
+
+{message}
+
+Kind regards,
+
+SALT Team
+"""
+
+                notification_html = f"""
+<html>
+  <body>
+    <p>{salutation}</p>
+    <p>{message}</p>
+    <p>Kind regards,</p>
+    <p>SALT Team</p>
+  </body>
+</html>
+"""
+
+                notification_message = MailService.generate_email(
+                    to=f"{recipient_name} <{recipient_email}>",
+                    subject=f"Proprietary period updated for {proposal_code}",
+                    html_body=notification_html,
+                    plain_body=notification_plain,
+                )
+
+                MailService.send_email(
+                    to=[recipient_email],
+                    message=notification_message,
+                )
+        except Exception as e:
+            error_message = (
+                f"Failed to send email to PC/PI for proposal {proposal_code}: \n{str(e)}"
+            )
+            logger.exception(error_message)
+            raise RuntimeError(error_message) from e
+
+
     def update_proprietary_period_in_ssda(
         self, proposal_code: str, proprietary_period: int
-    ):
+    ) -> None:
         release_date = self.repository.get_release_date(
             proprietary_period, proposal_code
         )
@@ -651,9 +718,26 @@ SALT Team
 
     def get_pools(
         self, proposal_code: str, semester: Optional[Semester] = None
-    ) -> List[Dict[str, any]]:
+    ) -> List[Dict[str, Any]]:
         return self.repository.get_pools(proposal_code, semester)
 
     @staticmethod
     def get_proposal_attachments_dir(proposal_code: str) -> pathlib.Path:
         return get_settings().proposals_dir / proposal_code / "Included"
+
+    def proposals_requesting_proprietary_request_extension(
+        self, semester: Optional[Semester] = None
+    ) -> List[Dict[str, Any]]:
+        return self.repository.proposals_requesting_proprietary_period_extension()
+
+    def update_proprietary_period_extension_request(
+        self,
+        request_id: int,
+        granted_proprietary_period: int,
+        reason: Optional[str] = None,
+    ) -> str:
+        return self.repository.update_proprietary_period_extension_request(
+            request_id=request_id,
+            granted_proprietary_period=granted_proprietary_period,
+            reason=reason,
+        )

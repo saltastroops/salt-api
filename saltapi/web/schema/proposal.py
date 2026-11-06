@@ -698,7 +698,7 @@ class DataRequest(BaseModel):
     )
 
 
-class ProposalRequestingMoreTime(BaseModel):
+class ProposalRequestingMoreTimeHistory(BaseModel):
     id: int = Field(
         title="Request ID",
         description="The proprietary period extension request ID",
@@ -752,6 +752,14 @@ class ProposalRequestingMoreTime(BaseModel):
         ...,
         title="Release Date",
         description="The date when the proprietary period will be released",
+    )
+
+
+class ProposalRequestingMoreTime(ProposalRequestingMoreTimeHistory):
+    previous_requests: List[ProposalRequestingMoreTimeHistory] = Field(
+        default_factory=list,
+        title="Previous Requests",
+        description="Earlier proprietary period extension requests for this proposal",
     )
 
 

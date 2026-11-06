@@ -3101,31 +3101,50 @@ FROM ProprietaryPeriodExtensionRequest PPER
     JOIN PiptUser PU ON PPER.RequestedBy = PU.PiptUser_Id
     JOIN Investigator I ON PU.Investigator_Id = I.Investigator_Id
     JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
-WHERE PPER.MadeAt >= :semester_start_date
-ORDER BY PPER.MadeAt DESC
+WHERE PPER.ProposalCode_Id IN (
+    SELECT RecentPPER.ProposalCode_Id
+    FROM ProprietaryPeriodExtensionRequest RecentPPER
+    WHERE RecentPPER.MadeAt >= :semester_start_date
+)
+ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC
         """
         )
 
-        requests = []
+        requests_by_proposal: Dict[str, List[Any]] = {}
         for row in self.connection.execute(
             stmt, {"semester_start_date": semester_start_date}
         ):
+            requests_by_proposal.setdefault(row.proposal_code, []).append(row)
+
+        def request_to_dict(
+            request_row: Any, release_date: date
+        ) -> Dict[str, Any]:
+            return {
+                "id": request_row.id,
+                "proposal_code": request_row.proposal_code,
+                "request_reason": request_row.request_reason,
+                "grant_reason": request_row.grant_reason,
+                "granted_period": request_row.granted_period,
+                "made_at": request_row.made_at,
+                "requester": request_row.requester_name,
+                "requester_email": request_row.requester_email,
+                "requested_period": request_row.requested_period,
+                "current_period": request_row.current_period,
+                "release_date": release_date,
+            }
+
+        requests = []
+        for proposal_requests in requests_by_proposal.values():
+            row = proposal_requests[0]
             release_date = self.get_release_date(row.current_period, row.proposal_code)
-            requests.append(
-                {
-                    "id": row.id,
-                    "proposal_code": row.proposal_code,
-                    "request_reason": row.request_reason,
-                    "grant_reason": row.grant_reason,
-                    "granted_period": row.granted_period,
-                    "made_at": row.made_at,
-                    "requester": row.requester_name,
-                    "requester_email": row.requester_email,
-                    "requested_period": row.requested_period,
-                    "current_period": row.current_period,
-                    "release_date": release_date or date.today(),
-                }
-            )
+            proposal_release_date = release_date or date.today()
+
+            latest_request = request_to_dict(row, proposal_release_date)
+            latest_request["previous_requests"] = [
+                request_to_dict(previous_request, proposal_release_date)
+                for previous_request in proposal_requests[1:]
+            ]
+            requests.append(latest_request)
         return requests
 
     def update_proprietary_period_extension_request(

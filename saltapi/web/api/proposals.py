@@ -433,16 +433,21 @@ def add_proprietary_period_extension_decision(
         permission_service.check_permission_to_grant_more_time(user)
 
         proposal_service = services.proposal_service(unit_of_work.connection)
+        request_proposal_code = proposal_service.update_proprietary_period_extension_request(
+            request_id=decision.request_id,
+            granted_proprietary_period=decision.granted_period,
+            reason=decision.reason,
+        )
+        if request_proposal_code != proposal_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Extension request {decision.request_id} belongs to proposal "
+                    f"{request_proposal_code}, not {proposal_code}."
+                ),
+            )
+
         if decision.granted_period > 0:
-            proposal_service.update_proprietary_period(
-                proposal_code=proposal_code,
-                proprietary_period=decision.granted_period,
-            )
-            proposal_service.update_proprietary_period_extension_request(
-                request_id=decision.request_id,
-                granted_proprietary_period=decision.granted_period,
-                reason=decision.reason,
-            )
             try:
                 proposal_service.update_proprietary_period_in_ssda(
                     proposal_code=proposal_code,
@@ -460,17 +465,21 @@ def add_proprietary_period_extension_decision(
                     },
                 )
 
-            try:
-                proposal_service.notify_pc_and_pi_of_proprietary_period_update(proposal_code, decision.granted_period)
-            except Exception:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail={
-                        "message": (
-                            f"Failed to send email to PC/PI for proposal {proposal_code}."
-                        )
-                    },
-                )
+        try:
+            proposal_service.notify_pc_and_pi_of_proprietary_period_extension_decision(
+                proposal_code=proposal_code,
+                granted_period=decision.granted_period,
+                reason=decision.reason,
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "message": (
+                        f"Failed to send email to PC/PI for proposal {proposal_code}."
+                    )
+                },
+            )
 
         unit_of_work.commit()
 

@@ -1,11 +1,12 @@
-from loguru import logger
 import pathlib
 import urllib.parse
+from html import escape as html_escape
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import requests
 from fastapi import APIRouter, Request, UploadFile
+from loguru import logger
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 from weasyprint import HTML
@@ -556,10 +557,11 @@ SALT Team
                 message=notification_message,
             )
 
-    def notify_pc_and_pi_of_proprietary_period_update(
-            self,
-            proposal_code: str,
-            proprietary_period: int,
+    def notify_pc_and_pi_of_proprietary_period_extension_decision(
+        self,
+        proposal_code: str,
+        granted_period: int,
+        reason: Optional[str] = None,
     ) -> None:
         try:
             pc = self.repository.get_principal_contact(proposal_code)
@@ -575,29 +577,47 @@ SALT Team
                 pc_email: pc_name,
                 pi_email: pi_name,
             }
+            granted = granted_period > 0
+            decision = "Granted" if granted else "Declined"
+            decision_message = (
+                f"The proprietary period extension request for proposal "
+                f"{proposal_code} has been {decision.lower()}."
+            )
+            period_message = (
+                f"Granted proprietary period: {granted_period} months"
+                if granted
+                else "No additional proprietary period was granted."
+            )
 
             for recipient_email, recipient_name in recipients.items():
                 salutation = f"Dear {recipient_name},"
 
-                message = (
-                    f"The proprietary period for proposal {proposal_code} "
-                    f"has been updated to {proprietary_period} months."
-                )
-
                 notification_plain = f"""{salutation}
 
-{message}
+{decision_message}
+{period_message}
+"""
+                notification_html = f"""
+<html>
+  <body>
+    <p>{salutation}</p>
+    <p>{decision_message}</p>
+    <p>{period_message}</p>
+"""
+                if reason:
+                    notification_plain += f"\nDecision reason:\n{reason}\n"
+                    notification_html += (
+                        f"    <p><b>Decision reason:</b><br>"
+                        f"{html_escape(reason)}</p>\n"
+                    )
+
+                notification_plain += """
 
 Kind regards,
 
 SALT Team
 """
-
-                notification_html = f"""
-<html>
-  <body>
-    <p>{salutation}</p>
-    <p>{message}</p>
+                notification_html += """
     <p>Kind regards,</p>
     <p>SALT Team</p>
   </body>
@@ -606,7 +626,7 @@ SALT Team
 
                 notification_message = MailService.generate_email(
                     to=f"{recipient_name} <{recipient_email}>",
-                    subject=f"Proprietary period updated for {proposal_code}",
+                    subject=f"Proprietary period extension decision for {proposal_code}",
                     html_body=notification_html,
                     plain_body=notification_plain,
                 )

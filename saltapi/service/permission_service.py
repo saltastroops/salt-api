@@ -689,3 +689,11 @@ class PermissionService:
             raise ValidationError(
                 "You cannot set this contact as preferred until it has been validated."
             )
+
+    def check_permission_to_grant_more_time(self, user: User) -> None:
+        """
+        Check that the user may switch the user, i.e. login as someone else.
+
+        This is the case if the user is an administrator.
+        """
+        self._check_user_is_admin(user)

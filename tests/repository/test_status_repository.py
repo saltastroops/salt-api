@@ -81,7 +81,7 @@ def test_add_status_update(db_connection: Connection) -> None:
     rss_status_update: SubsystemStatusDetails = SubsystemStatusDetails(
         subsystem="RSS",
         status="Available with restrictions",
-        status_changed_at=original_rss_status_update["status_changed_at"]  # type:ignore
+        status_changed_at=original_rss_status_update["status_changed_at"]  # type: ignore
         + timeshift,
         reason="down for testing",
         expected_available_again_at=original_rss_status_update[  # type: ignore

@@ -2,7 +2,7 @@ import hashlib
 import pathlib
 import re
 from collections import defaultdict
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any, DefaultDict, Dict, List, Optional, cast, Literal
 
 import pytz
@@ -2990,7 +2990,7 @@ WHERE BS.BlockStatus NOT IN ('Deleted', 'Superseded')
 
     def get_pools(
         self, proposal_code: str, semester: Optional[str]
-    ) -> List[Dict[str, any]]:
+    ) -> List[Dict[str, Any]]:
         if semester is None:
             semester = self._latest_submission_semester(proposal_code)
 
@@ -3033,3 +3033,168 @@ WHERE PC.Proposal_Code = :proposal_code
                 }
             )
         return pools
+
+    def get_principal_investigator(self, proposal_code: str) -> Dict[str, Any]:
+        stmt = text(
+            """
+SELECT I.FirstName AS given_name,
+       I.Surname   AS family_name,
+       I.Email     AS email
+FROM ProposalContact PC
+         JOIN Investigator I ON PC.Leader_Id = I.Investigator_Id
+         JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+WHERE P.Proposal_Code = :proposal_code
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        row = result.one()
+        return {
+            "given_name": row.given_name,
+            "family_name": row.family_name,
+            "email": row.email,
+        }
+
+    def get_principal_contact(self, proposal_code: str) -> Dict[str, Any]:
+        stmt = text(
+            """
+SELECT I.FirstName AS given_name,
+       I.Surname   AS family_name,
+       I.Email     AS email
+FROM ProposalContact PC
+         JOIN Investigator I ON PC.Contact_Id = I.Investigator_Id
+         JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
+WHERE P.Proposal_Code = :proposal_code
+        """
+        )
+        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
+        row = result.one()
+        return {
+            "given_name": row.given_name,
+            "family_name": row.family_name,
+            "email": row.email,
+        }
+
+    def proposals_requesting_proprietary_period_extension(
+        self, semester_start_date: Optional[datetime] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Returns a list of proposals that are requesting more time.
+        """
+        if semester_start_date is None:
+            semester_start_date = datetime.now() - timedelta(days=200)
+        stmt = text(
+            """
+SELECT 
+    PPER.ProprietaryPeriodExtensionRequest_Id AS id,
+    PC.Proposal_Code        AS proposal_code,
+    PPER.Reason             AS request_reason,
+    PPER.MadeAt             AS made_at,
+    PPED.Reason             AS grant_reason,
+    PPED.GrantedPeriod      AS granted_period,
+    CONCAT(I.FirstName, ' ', I.Surname) AS requester_name,
+    I.Email                 AS requester_email,
+    PGI.ProprietaryPeriod   AS current_period,
+    PPER.RequestedPeriod    AS requested_period
+FROM ProprietaryPeriodExtensionRequest PPER
+    LEFT JOIN ProprietaryPeriodExtensionDecision PPED ON PPER.ProprietaryPeriodExtensionRequest_Id = PPED.ProprietaryPeriodExtensionRequest_Id
+    JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
+    JOIN PiptUser PU ON PPER.RequestedBy = PU.PiptUser_Id
+    JOIN Investigator I ON PU.Investigator_Id = I.Investigator_Id
+    JOIN ProposalGeneralInfo PGI ON PC.ProposalCode_Id = PGI.ProposalCode_Id
+WHERE PPER.ProposalCode_Id IN (
+    SELECT RecentPPER.ProposalCode_Id
+    FROM ProprietaryPeriodExtensionRequest RecentPPER
+    WHERE RecentPPER.MadeAt >= :semester_start_date
+)
+ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC
+        """
+        )
+
+        requests_by_proposal: Dict[str, List[Any]] = {}
+        for row in self.connection.execute(
+            stmt, {"semester_start_date": semester_start_date}
+        ):
+            requests_by_proposal.setdefault(row.proposal_code, []).append(row)
+
+        def request_to_dict(
+            request_row: Any, release_date: date
+        ) -> Dict[str, Any]:
+            return {
+                "id": request_row.id,
+                "proposal_code": request_row.proposal_code,
+                "request_reason": request_row.request_reason,
+                "grant_reason": request_row.grant_reason,
+                "granted_period": request_row.granted_period,
+                "made_at": request_row.made_at,
+                "requester": request_row.requester_name,
+                "requester_email": request_row.requester_email,
+                "requested_period": request_row.requested_period,
+                "current_period": request_row.current_period,
+                "release_date": release_date,
+            }
+
+        requests = []
+        for proposal_requests in requests_by_proposal.values():
+            row = proposal_requests[0]
+            release_date = self.get_release_date(row.current_period, row.proposal_code)
+            proposal_release_date = release_date or date.today()
+
+            latest_request = request_to_dict(row, proposal_release_date)
+            latest_request["previous_requests"] = [
+                request_to_dict(previous_request, proposal_release_date)
+                for previous_request in proposal_requests[1:]
+            ]
+            requests.append(latest_request)
+        return requests
+
+    def update_proprietary_period_extension_request(
+        self,
+        request_id: int,
+        granted_proprietary_period: int,
+        reason: Optional[str] = None,
+    ) -> str:
+        stmt_proposal = text(
+            """
+SELECT PC.Proposal_Code AS proposal_code
+FROM ProprietaryPeriodExtensionRequest PPER
+    JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PPER.ProprietaryPeriodExtensionRequest_Id = :request_id
+        """
+        )
+        result = self.connection.execute(stmt_proposal, {"request_id": request_id})
+        row = result.one_or_none()
+        if not row:
+            raise NotFoundError(
+                f"There is no proprietary period extension request with id: {request_id}"
+            )
+        proposal_code = row.proposal_code
+
+        stmt_decision = text(
+            """
+INSERT INTO ProprietaryPeriodExtensionDecision (
+    ProprietaryPeriodExtensionRequest_Id, 
+    GrantedPeriod,
+    Reason, 
+    MadeAt
+)
+VALUES (:request_id, :granted_proprietary_period, :reason, :made_at)
+ON DUPLICATE KEY UPDATE
+    GrantedPeriod = :granted_proprietary_period,
+    Reason = :reason,
+    MadeAt = :made_at
+        """
+        )
+        self.connection.execute(
+            stmt_decision,
+            {
+                "request_id": request_id,
+                "granted_proprietary_period": granted_proprietary_period,
+                "reason": reason,
+                "made_at": datetime.now(),
+            },
+        )
+
+        if granted_proprietary_period > 0:
+            self.update_proprietary_period(proposal_code, granted_proprietary_period)
+
+        return proposal_code

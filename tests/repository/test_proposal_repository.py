@@ -795,7 +795,7 @@ def test_put_progress_report_handles_missing_partners(
     db_connection: Connection,
 ) -> None:
     def dict_to_requested_percentages(
-        percentages_dict: Dict[str, Any]
+        percentages_dict: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         return [
             {
@@ -806,7 +806,7 @@ def test_put_progress_report_handles_missing_partners(
         ]
 
     def requested_percentages_to_dict(
-        percentages: List[Dict[str, Any]]
+        percentages: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
         return {p["partner_code"]: p["requested_percentage"] for p in percentages}
 
@@ -894,3 +894,62 @@ def test_get_proposal_code_id_raises_error_for_none_existing_proposal_code(
     proposal_repository = ProposalRepository(db_connection)
     with pytest.raises(NotFoundError):
         proposal_repository.get_proposal_code_id("2023-1-NOT-CODE-001")
+
+
+def test_proposals_requesting_more_time(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    proposal_code = "2020-2-SCI-043"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=36,
+        motivation="Requesting extra time for data analysis",
+        username=username,
+    )
+    semester_start_date = datetime(2000, 1, 1)
+    results = proposal_repository.proposals_requesting_proprietary_period_extension(semester_start_date)
+    matching = [r for r in results if r["proposal_code"] == proposal_code]
+    assert len(matching) > 0
+    request = matching[-1]
+    assert request["proposal_code"] == proposal_code
+    assert request["request_reason"] == "Requesting extra time for data analysis"
+    assert request["grant_reason"] is None
+    assert request["granted_period"] is None
+    assert request["requested_period"] == 36
+    assert isinstance(request["current_period"], int)
+    assert request["made_at"] is not None
+
+
+def test_update_proprietary_period_extension_request(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    proposal_code = "2020-2-SCI-043"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=36,
+        motivation="Need more time for testing",
+        username=username,
+    )
+    results = proposal_repository.proposals_requesting_proprietary_period_extension(datetime(2000, 1, 1))
+    request = [r for r in results if r["proposal_code"] == proposal_code][-1]
+    request_id = request["id"]
+
+    proposal_code_returned = proposal_repository.update_proprietary_period_extension_request(
+        request_id=request_id,
+        granted_proprietary_period=36,
+        reason="Granted for good reasons",
+    )
+    assert proposal_code_returned == proposal_code
+
+    updated_results = proposal_repository.proposals_requesting_proprietary_period_extension(datetime(2000, 1, 1))
+    updated_request = [r for r in updated_results if r["id"] == request_id][0]
+    assert updated_request["granted_period"] == 36
+    assert updated_request["grant_reason"] == "Granted for good reasons"
+
+    # Also verify non-existent request raises NotFoundError
+    with pytest.raises(NotFoundError):
+        proposal_repository.update_proprietary_period_extension_request(
+            request_id=99999999,
+            granted_proprietary_period=12,
+            reason="Non-existent",
+        )

@@ -696,3 +696,89 @@ class DataRequest(BaseModel):
         title="Data formats",
         description="The requested data formats.",
     )
+
+
+class ProposalRequestingMoreTimeHistory(BaseModel):
+    id: int = Field(
+        title="Request ID",
+        description="The proprietary period extension request ID",
+    )
+    proposal_code: str = Field(
+        ...,
+        title="Proposal Code",
+        description="The proposal code for which the user is requesting more time for",
+    )
+    request_reason: str = Field(
+        ...,
+        title="Request Reason",
+        description="The reason for requesting more time",
+    )
+    grant_reason: Optional[str] = Field(
+        None,
+        title="Grant Reason",
+        description="The reason for granting more time",
+    )
+    granted_period: Optional[int] = Field(
+        None,
+        title="Granted Period",
+        description="The proprietary period granted to the proposal",
+    )
+    made_at: datetime = Field(
+        ...,
+        title="Made At",
+        description="The date and time when the request was made",
+    )
+    requester_email: str = Field(
+        ...,
+        title="Requester Email",
+        description="The email of the user who is requesting for proprietary period extension",
+    )
+    requester: str = Field(
+        ...,
+        title="Requester",
+        description="The user who is requesting for proprietary period extension",
+    )
+    requested_period: int = Field(
+        ...,
+        title="Requested Period",
+        description="The period for which the user is requesting more time",
+    )
+    current_period: int = Field(
+        ...,
+        title="Current Period",
+        description="The current period for the proposal",
+    )
+    release_date: date = Field(
+        ...,
+        title="Release Date",
+        description="The date when the proprietary period will be released",
+    )
+
+
+class ProposalRequestingMoreTime(ProposalRequestingMoreTimeHistory):
+    previous_requests: List[ProposalRequestingMoreTimeHistory] = Field(
+        default_factory=list,
+        title="Previous Requests",
+        description="Earlier proprietary period extension requests for this proposal",
+    )
+
+
+class ProprietaryPeriodExtensionDecision(BaseModel):
+    """A decision on a proprietary period extension request."""
+
+    request_id: int = Field(
+        ...,
+        title="Request ID",
+        description="The proprietary period extension request ID.",
+    )
+    granted_period: int = Field(
+        ...,
+        ge=0,
+        title="Granted Period",
+        description="The proprietary period granted to the proposal, in months.",
+    )
+    reason: Optional[str] = Field(
+        None,
+        title="Reason",
+        description="The reason for the decision.",
+    )

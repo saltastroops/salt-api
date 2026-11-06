@@ -1,11 +1,12 @@
-from loguru import logger
 import pathlib
 import urllib.parse
+from html import escape as html_escape
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import requests
 from fastapi import APIRouter, Request, UploadFile
+from loguru import logger
 from PyPDF2 import PdfMerger
 from starlette.datastructures import URLPath
 from weasyprint import HTML
@@ -556,9 +557,95 @@ SALT Team
                 message=notification_message,
             )
 
+    def notify_pc_and_pi_of_proprietary_period_extension_decision(
+        self,
+        proposal_code: str,
+        granted_period: int,
+        reason: Optional[str] = None,
+    ) -> None:
+        try:
+            pc = self.repository.get_principal_contact(proposal_code)
+            pi = self.repository.get_principal_investigator(proposal_code)
+
+            pc_name = f"{pc['given_name']} {pc['family_name']}".strip()
+            pi_name = f"{pi['given_name']} {pi['family_name']}".strip()
+
+            pc_email = pc["email"].strip()
+            pi_email = pi["email"].strip()
+
+            recipients = {
+                pc_email: pc_name,
+                pi_email: pi_name,
+            }
+            granted = granted_period > 0
+            decision = "Granted" if granted else "Declined"
+            decision_message = (
+                f"The proprietary period extension request for proposal "
+                f"{proposal_code} has been {decision.lower()}."
+            )
+            period_message = (
+                f"Granted proprietary period: {granted_period} months"
+                if granted
+                else "No additional proprietary period was granted."
+            )
+
+            for recipient_email, recipient_name in recipients.items():
+                salutation = f"Dear {recipient_name},"
+
+                notification_plain = f"""{salutation}
+
+{decision_message}
+{period_message}
+"""
+                notification_html = f"""
+<html>
+  <body>
+    <p>{salutation}</p>
+    <p>{decision_message}</p>
+    <p>{period_message}</p>
+"""
+                if reason:
+                    notification_plain += f"\nDecision reason:\n{reason}\n"
+                    notification_html += (
+                        f"    <p><b>Decision reason:</b><br>"
+                        f"{html_escape(reason)}</p>\n"
+                    )
+
+                notification_plain += """
+
+Kind regards,
+
+SALT Team
+"""
+                notification_html += """
+    <p>Kind regards,</p>
+    <p>SALT Team</p>
+  </body>
+</html>
+"""
+
+                notification_message = MailService.generate_email(
+                    to=f"{recipient_name} <{recipient_email}>",
+                    subject=f"Proprietary period extension decision for {proposal_code}",
+                    html_body=notification_html,
+                    plain_body=notification_plain,
+                )
+
+                MailService.send_email(
+                    to=[recipient_email],
+                    message=notification_message,
+                )
+        except Exception as e:
+            error_message = (
+                f"Failed to send email to PC/PI for proposal {proposal_code}: \n{str(e)}"
+            )
+            logger.exception(error_message)
+            raise RuntimeError(error_message) from e
+
+
     def update_proprietary_period_in_ssda(
         self, proposal_code: str, proprietary_period: int
-    ):
+    ) -> None:
         release_date = self.repository.get_release_date(
             proprietary_period, proposal_code
         )
@@ -651,9 +738,26 @@ SALT Team
 
     def get_pools(
         self, proposal_code: str, semester: Optional[Semester] = None
-    ) -> List[Dict[str, any]]:
+    ) -> List[Dict[str, Any]]:
         return self.repository.get_pools(proposal_code, semester)
 
     @staticmethod
     def get_proposal_attachments_dir(proposal_code: str) -> pathlib.Path:
         return get_settings().proposals_dir / proposal_code / "Included"
+
+    def proposals_requesting_proprietary_request_extension(
+        self, semester: Optional[Semester] = None
+    ) -> List[Dict[str, Any]]:
+        return self.repository.proposals_requesting_proprietary_period_extension()
+
+    def update_proprietary_period_extension_request(
+        self,
+        request_id: int,
+        granted_proprietary_period: int,
+        reason: Optional[str] = None,
+    ) -> str:
+        return self.repository.update_proprietary_period_extension_request(
+            request_id=request_id,
+            granted_proprietary_period=granted_proprietary_period,
+            reason=reason,
+        )

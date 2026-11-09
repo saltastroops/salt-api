@@ -3034,46 +3034,6 @@ WHERE PC.Proposal_Code = :proposal_code
             )
         return pools
 
-    def get_principal_investigator(self, proposal_code: str) -> Dict[str, Any]:
-        stmt = text(
-            """
-SELECT I.FirstName AS given_name,
-       I.Surname   AS family_name,
-       I.Email     AS email
-FROM ProposalContact PC
-         JOIN Investigator I ON PC.Leader_Id = I.Investigator_Id
-         JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
-WHERE P.Proposal_Code = :proposal_code
-        """
-        )
-        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        row = result.one()
-        return {
-            "given_name": row.given_name,
-            "family_name": row.family_name,
-            "email": row.email,
-        }
-
-    def get_principal_contact(self, proposal_code: str) -> Dict[str, Any]:
-        stmt = text(
-            """
-SELECT I.FirstName AS given_name,
-       I.Surname   AS family_name,
-       I.Email     AS email
-FROM ProposalContact PC
-         JOIN Investigator I ON PC.Contact_Id = I.Investigator_Id
-         JOIN ProposalCode P ON PC.ProposalCode_Id = P.ProposalCode_Id
-WHERE P.Proposal_Code = :proposal_code
-        """
-        )
-        result = self.connection.execute(stmt, {"proposal_code": proposal_code})
-        row = result.one()
-        return {
-            "given_name": row.given_name,
-            "family_name": row.family_name,
-            "email": row.email,
-        }
-
     def proposals_requesting_proprietary_period_extension(
         self, semester_start_date: Optional[datetime] = None
     ) -> List[Dict[str, Any]]:

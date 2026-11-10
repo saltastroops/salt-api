@@ -3069,7 +3069,7 @@ ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC
 
         requests_by_proposal: Dict[str, List[Dict[str, Any]]] = {}
         for row in self.connection.execute(
-            stmt, {"start_date": start_date}
+            stmt, {"start_date": start_date.date()}
         ):
             requests_by_proposal.setdefault(row.proposal_code, []).append(row)
 
@@ -3136,14 +3136,12 @@ LIMIT 1
 INSERT INTO ProprietaryPeriodExtensionDecision (
     ProprietaryPeriodExtensionRequest_Id, 
     GrantedPeriod,
-    Reason, 
-    MadeAt
+    Reason
 )
-VALUES (:request_id, :granted_proprietary_period, :reason, :made_at)
+VALUES (:request_id, :granted_proprietary_period, :reason)
 ON DUPLICATE KEY UPDATE
     GrantedPeriod = :granted_proprietary_period,
-    Reason = :reason,
-    MadeAt = :made_at
+    Reason = :reason
         """
         )
         self.connection.execute(
@@ -3151,10 +3149,8 @@ ON DUPLICATE KEY UPDATE
             {
                 "request_id": request_id,
                 "granted_proprietary_period": granted_proprietary_period,
-                "reason": reason,
-                "made_at": datetime.now(),
+                "reason": reason
             },
         )
 
-        if granted_proprietary_period > 0:
-            self.update_proprietary_period(proposal_code, granted_proprietary_period)
+        self.update_proprietary_period(proposal_code, granted_proprietary_period)

@@ -168,7 +168,7 @@ def get_proposal_zip(
     summary="Returns a list of proposals that are requesting proprietary period extension",
     response_model=List[ProprietaryPeriodRequest],
 )
-async def proposals_requesting_more_time(
+async def proprietary_period_extension_requests(
     user: User = Depends(get_current_user),
 ) -> List[ProprietaryPeriodRequest]:
     with UnitOfWork() as unit_of_work:
@@ -359,6 +359,15 @@ def update_proprietary_period(
     depending on whether the request needs prior approval.
     """
     with UnitOfWork() as unit_of_work:
+        if proprietary_period_update_request.proprietary_period <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "message": (
+                        "The granted period must be greater than zero."
+                    )
+                },
+            )
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proprietary_period(
             requester, proposal_code
@@ -440,27 +449,34 @@ def add_proprietary_period_extension_decision(
             unit_of_work.connection
         )
 
+        if decision.granted_period <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "message": (
+                        "The granted period must be greater than zero."
+                    )
+                },
+            )
         proposal_service.update_proprietary_period_extension_request(
             proposal_code=proposal_code,
             granted_proprietary_period=decision.granted_period,
             reason=decision.reason,
         )
-
-        if decision.granted_period > 0:
-            try:
-                proposal_service.update_proprietary_period_in_ssda(
-                    proposal_code=proposal_code,
-                    proprietary_period=decision.granted_period,
-                )
-            except SSDAError:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail={
-                        "message": (
-                            "Could not update the proprietary period in SSDA. "
-                        )
-                    },
-                )
+        try:
+            proposal_service.update_proprietary_period_in_ssda(
+                proposal_code=proposal_code,
+                proprietary_period=decision.granted_period,
+            )
+        except SSDAError:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "message": (
+                        "Could not update the proprietary period in SSDA. "
+                    )
+                },
+            )
         unit_of_work.commit()
 
         email_sent = True

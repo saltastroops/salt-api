@@ -358,7 +358,7 @@ def test_proposals_requesting_more_time(
     ]
 
     with patch.object(
-        repo, "proposals_requesting_proprietary_period_extension", return_value=expected
+        repo, "proprietary_period_extension_requests", return_value=expected
     ) as mock_repo_method:
         result = service.proposals_requesting_proprietary_request_extension(semester)
         from saltapi.util import semester_start

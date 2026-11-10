@@ -1,11 +1,12 @@
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, Generator, List
 from unittest.mock import patch
 
 import freezegun
 import pytest
 from pytest_mock import MockerFixture
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Connection
 
 import saltapi.repository.proposal_repository
@@ -907,49 +908,341 @@ def test_proposals_requesting_more_time(db_connection: Connection) -> None:
         username=username,
     )
     semester_start_date = datetime(2000, 1, 1)
-    results = proposal_repository.proposals_requesting_proprietary_period_extension(semester_start_date)
+    results = proposal_repository.proprietary_period_extension_requests(semester_start_date)
     matching = [r for r in results if r["proposal_code"] == proposal_code]
     assert len(matching) > 0
     request = matching[-1]
     assert request["proposal_code"] == proposal_code
-    assert request["request_reason"] == "Requesting extra time for data analysis"
+    assert request["current_request"]["request_motivation"] == (
+        "Requesting extra time for data analysis"
+    )
     assert request["grant_reason"] is None
     assert request["granted_period"] is None
-    assert request["requested_period"] == 36
-    assert isinstance(request["current_period"], int)
-    assert request["made_at"] is not None
+    assert request["current_request"]["requested_period"] == 36
+    assert request["current_request"]["made_at"] is not None
 
 
-def test_update_proprietary_period_extension_request(db_connection: Connection) -> None:
-    proposal_repository = ProposalRepository(db_connection)
+@pytest.fixture
+def sqlite_proprietary_period_connection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Generator[Connection, None, None]:
+    engine = create_engine("sqlite://")
+    with engine.connect() as connection:
+        connection.exec_driver_sql(
+            """
+CREATE TABLE ProposalCode (
+    ProposalCode_Id INTEGER PRIMARY KEY,
+    Proposal_Code TEXT NOT NULL UNIQUE
+)
+            """
+        )
+        connection.exec_driver_sql(
+            """
+CREATE TABLE ProposalGeneralInfo (
+    ProposalCode_Id INTEGER PRIMARY KEY,
+    ProprietaryPeriod INTEGER NOT NULL,
+    ReleaseDate DATE
+)
+            """
+        )
+        connection.exec_driver_sql(
+            """
+CREATE TABLE Investigator (
+    Investigator_Id INTEGER PRIMARY KEY,
+    FirstName TEXT NOT NULL,
+    Surname TEXT NOT NULL,
+    Email TEXT NOT NULL
+)
+            """
+        )
+        connection.exec_driver_sql(
+            """
+CREATE TABLE PiptUser (
+    PiptUser_Id INTEGER PRIMARY KEY,
+    Username TEXT NOT NULL UNIQUE,
+    Investigator_Id INTEGER NOT NULL
+)
+            """
+        )
+        connection.exec_driver_sql(
+            """
+CREATE TABLE ProprietaryPeriodExtensionRequest (
+    ProprietaryPeriodExtensionRequest_Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ProposalCode_Id INTEGER NOT NULL,
+    Reason TEXT NOT NULL,
+    RequestedBy INTEGER NOT NULL,
+    RequestedPeriod INTEGER NOT NULL,
+    MadeAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+            """
+        )
+        connection.exec_driver_sql(
+            """
+CREATE TABLE ProprietaryPeriodExtensionDecision (
+    ProprietaryPeriodExtensionRequest_Id INTEGER PRIMARY KEY,
+    GrantedPeriod INTEGER NOT NULL,
+    Reason TEXT,
+    MadeAt DATETIME NOT NULL
+)
+            """
+        )
+        connection.execute(
+            text(
+                """
+INSERT INTO ProposalCode (ProposalCode_Id, Proposal_Code)
+VALUES (1, '2020-2-SCI-043'), (2, '2020-2-SCI-044')
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+INSERT INTO ProposalGeneralInfo (ProposalCode_Id, ProprietaryPeriod)
+VALUES (1, 12), (2, 12)
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+INSERT INTO Investigator (Investigator_Id, FirstName, Surname, Email)
+VALUES (1, 'Test', 'User', 'test@example.com')
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+INSERT INTO PiptUser (PiptUser_Id, Username, Investigator_Id)
+VALUES (1, 'test-user', 1)
+                """
+            )
+        )
+
+        def translate_mysql_upsert(
+            conn: Connection,
+            cursor: Any,
+            statement: str,
+            parameters: Any,
+            context: Any,
+            executemany: bool,
+        ) -> tuple[str, Any]:
+            statement = statement.replace(
+                "ON DUPLICATE KEY UPDATE",
+                "ON CONFLICT (ProprietaryPeriodExtensionRequest_Id) DO UPDATE SET",
+            )
+            return statement, parameters
+
+        event.listen(
+            connection, "before_cursor_execute", translate_mysql_upsert, retval=True
+        )
+
+        def no_block_visits(
+            repository: ProposalRepository, proposal_code: str
+        ) -> List[Dict[str, Any]]:
+            return []
+
+        monkeypatch.setattr(ProposalRepository, "block_visits", no_block_visits)
+        yield connection
+    engine.dispose()
+
+
+def test_update_proprietary_period_extension_request_updates_latest_request(
+    sqlite_proprietary_period_connection: Connection,
+) -> None:
+    connection = sqlite_proprietary_period_connection
+    proposal_repository = ProposalRepository(connection)
     proposal_code = "2020-2-SCI-043"
-    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    username = "test-user"
     proposal_repository.insert_proprietary_period_extension_request(
         proposal_code=proposal_code,
         proprietary_period=36,
         motivation="Need more time for testing",
         username=username,
     )
-    results = proposal_repository.proposals_requesting_proprietary_period_extension(datetime(2000, 1, 1))
-    request = [r for r in results if r["proposal_code"] == proposal_code][-1]
-    request_id = request["id"]
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=48,
+        motivation="Latest request",
+        username=username,
+    )
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code="2020-2-SCI-044",
+        proprietary_period=24,
+        motivation="Another proposal's newer request",
+        username=username,
+    )
+    connection.execute(
+        text(
+            """
+UPDATE ProprietaryPeriodExtensionRequest
+SET MadeAt = :made_at
+WHERE ProposalCode_Id = (
+    SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code
+)
+            """
+        ),
+        {"made_at": datetime(2026, 1, 1), "proposal_code": proposal_code},
+    )
+    connection.execute(
+        text(
+            """
+UPDATE ProprietaryPeriodExtensionRequest
+SET MadeAt = :made_at
+WHERE ProposalCode_Id = (
+    SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code
+)
+            """
+        ),
+        {"made_at": datetime(2027, 1, 1), "proposal_code": "2020-2-SCI-044"},
+    )
+    request_ids = connection.execute(
+        text(
+            """
+SELECT PPER.ProprietaryPeriodExtensionRequest_Id
+FROM ProprietaryPeriodExtensionRequest PPER
+JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+ORDER BY PPER.ProprietaryPeriodExtensionRequest_Id
+            """
+        ),
+        {"proposal_code": proposal_code},
+    ).scalars().all()
 
-    proposal_code_returned = proposal_repository.update_proprietary_period_extension_request(
-        request_id=request_id,
+    proposal_repository.update_proprietary_period_extension_request(
+        proposal_code=proposal_code,
         granted_proprietary_period=36,
         reason="Granted for good reasons",
     )
-    assert proposal_code_returned == proposal_code
 
-    updated_results = proposal_repository.proposals_requesting_proprietary_period_extension(datetime(2000, 1, 1))
-    updated_request = [r for r in updated_results if r["id"] == request_id][0]
-    assert updated_request["granted_period"] == 36
-    assert updated_request["grant_reason"] == "Granted for good reasons"
+    decisions = connection.execute(
+        text(
+            """
+SELECT PPED.ProprietaryPeriodExtensionRequest_Id AS request_id,
+       PPED.GrantedPeriod AS granted_period,
+       PPED.Reason AS reason
+FROM ProprietaryPeriodExtensionDecision PPED
+WHERE PPED.ProprietaryPeriodExtensionRequest_Id = :request_id
+            """
+        ),
+        {"request_id": request_ids[-1]},
+    ).mappings().one()
+    assert decisions["request_id"] == request_ids[-1]
+    assert decisions["granted_period"] == 36
+    assert decisions["reason"] == "Granted for good reasons"
 
-    # Also verify non-existent request raises NotFoundError
+    other_proposal_decisions = connection.execute(
+        text(
+            """
+SELECT COUNT(*)
+FROM ProprietaryPeriodExtensionDecision PPED
+JOIN ProprietaryPeriodExtensionRequest PPER
+    ON PPED.ProprietaryPeriodExtensionRequest_Id = PPER.ProprietaryPeriodExtensionRequest_Id
+JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+            """
+        ),
+        {"proposal_code": "2020-2-SCI-044"},
+    ).scalar_one()
+    assert other_proposal_decisions == 0
+
+    current_period = connection.execute(
+        text(
+            """
+SELECT PGI.ProprietaryPeriod
+FROM ProposalGeneralInfo PGI
+JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+            """
+        ),
+        {"proposal_code": proposal_code},
+    ).scalar_one()
+    assert current_period == 36
+    other_proposal_period = connection.execute(
+        text(
+            """
+SELECT ProprietaryPeriod
+FROM ProposalGeneralInfo
+WHERE ProposalCode_Id = 2
+            """
+        )
+    ).scalar_one()
+    assert other_proposal_period == 12
+
+
+def test_update_proprietary_period_extension_request_can_update_decision(
+    sqlite_proprietary_period_connection: Connection,
+) -> None:
+    connection = sqlite_proprietary_period_connection
+    proposal_repository = ProposalRepository(connection)
+    proposal_code = "2020-2-SCI-043"
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=36,
+        motivation="Need more time for testing",
+        username="test-user",
+    )
+    request_id = connection.execute(
+        text(
+            """
+SELECT MAX(PPER.ProprietaryPeriodExtensionRequest_Id)
+FROM ProprietaryPeriodExtensionRequest PPER
+JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+            """
+        ),
+        {"proposal_code": proposal_code},
+    ).scalar_one()
+
+    proposal_repository.update_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        granted_proprietary_period=12,
+        reason="Initial decision",
+    )
+    proposal_repository.update_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        granted_proprietary_period=24,
+        reason="Revised decision",
+    )
+
+    decisions = connection.execute(
+        text(
+            """
+SELECT PPED.GrantedPeriod AS granted_period, PPED.Reason AS reason
+FROM ProprietaryPeriodExtensionDecision PPED
+WHERE PPED.ProprietaryPeriodExtensionRequest_Id = :request_id
+            """
+        ),
+        {"request_id": request_id},
+    ).mappings().one()
+    assert decisions["granted_period"] == 24
+    assert decisions["reason"] == "Revised decision"
+
+    current_period = connection.execute(
+        text(
+            """
+SELECT PGI.ProprietaryPeriod
+FROM ProposalGeneralInfo PGI
+JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
+WHERE PC.Proposal_Code = :proposal_code
+            """
+        ),
+        {"proposal_code": proposal_code},
+    ).scalar_one()
+    assert current_period == 24
+
+
+@pytest.mark.parametrize(
+    "proposal_code", ["2020-2-SCI-044", "2099-1-NOT-EXIST-001"]
+)
+def test_update_proprietary_period_extension_request_raises_without_request(
+    proposal_code: str,
+    sqlite_proprietary_period_connection: Connection,
+) -> None:
+    proposal_repository = ProposalRepository(sqlite_proprietary_period_connection)
     with pytest.raises(NotFoundError):
         proposal_repository.update_proprietary_period_extension_request(
-            request_id=99999999,
+            proposal_code=proposal_code,
             granted_proprietary_period=12,
             reason="Non-existent",
         )

@@ -577,17 +577,17 @@ SALT Team
                 pc_email: pc_name,
                 pi_email: pi_name,
             }
-            granted = granted_period > 0
-            decision = "Granted" if granted else "Declined"
             decision_message = (
                 f"The proprietary period extension request for proposal "
-                f"{proposal_code} has been {decision.lower()}."
+                f"{proposal_code} has been considered."
             )
             period_message = (
                 f"Granted proprietary period: {granted_period} months"
-                if granted
-                else "No additional proprietary period was granted."
             )
+            if reason:
+                period_message += (
+                    f"\nReason:\n{reason}"
+                )
 
             for recipient_email, recipient_name in recipients.items():
                 salutation = f"Dear {recipient_name},"
@@ -748,16 +748,16 @@ SALT Team
     def proposals_requesting_proprietary_request_extension(
         self, semester: Optional[Semester] = None
     ) -> List[Dict[str, Any]]:
-        return self.repository.proposals_requesting_proprietary_period_extension()
+        return self.repository.proprietary_period_extension_requests()
 
     def update_proprietary_period_extension_request(
         self,
-        request_id: int,
+        proposal_code: str,
         granted_proprietary_period: int,
         reason: Optional[str] = None,
-    ) -> str:
-        return self.repository.update_proprietary_period_extension_request(
-            request_id=request_id,
+    ) -> None:
+        self.repository.update_proprietary_period_extension_request(
+            proposal_code=proposal_code,
             granted_proprietary_period=granted_proprietary_period,
             reason=reason,
         )

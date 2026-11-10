@@ -16,6 +16,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from loguru import logger
 from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse
 
@@ -42,10 +43,10 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodExtensionDecision,
+    ProprietaryPeriodRequest,
     ProprietaryPeriodUpdateRequest,
-    ProposalRequestingMoreTime,
     SelfActivation,
-    UpdateStatus,
+    UpdateStatus, ProprietaryPeriodExtensionDecisionResponse,
 )
 from saltapi.web.schema.user import UserId
 
@@ -163,13 +164,13 @@ def get_proposal_zip(
 
 
 @router.get(
-    "/proprietory-period-extention-requets",
+    "/proprietary-period-extension-requests",
     summary="Returns a list of proposals that are requesting proprietary period extension",
-    response_model=List[ProposalRequestingMoreTime],
+    response_model=List[ProprietaryPeriodRequest],
 )
 async def proposals_requesting_more_time(
     user: User = Depends(get_current_user),
-) -> List[Dict[str, Any]]:
+) -> List[ProprietaryPeriodRequest]:
     with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_grant_more_time(user)
@@ -410,6 +411,7 @@ def update_proprietary_period(
 @router.patch(
     "/{proposal_code}/proprietary-period-extension-decision",
     summary="Add a proprietary period extension decision",
+    response_model=ProprietaryPeriodExtensionDecisionResponse,
     status_code=status.HTTP_200_OK,
 )
 def add_proprietary_period_extension_decision(
@@ -424,28 +426,25 @@ def add_proprietary_period_extension_decision(
             description="The proprietary period extension decision.",
         ),
         user: User = Depends(get_current_user),
-) -> None:
+) -> dict:
     """
     Adds a decision on a proprietary period extension request.
     """
     with UnitOfWork() as unit_of_work:
-        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service = services.permission_service(
+            unit_of_work.connection
+        )
         permission_service.check_permission_to_grant_more_time(user)
 
-        proposal_service = services.proposal_service(unit_of_work.connection)
-        request_proposal_code = proposal_service.update_proprietary_period_extension_request(
-            request_id=decision.request_id,
+        proposal_service = services.proposal_service(
+            unit_of_work.connection
+        )
+
+        proposal_service.update_proprietary_period_extension_request(
+            proposal_code=proposal_code,
             granted_proprietary_period=decision.granted_period,
             reason=decision.reason,
         )
-        if request_proposal_code != proposal_code:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Extension request {decision.request_id} belongs to proposal "
-                    f"{request_proposal_code}, not {proposal_code}."
-                ),
-            )
 
         if decision.granted_period > 0:
             try:
@@ -458,12 +457,13 @@ def add_proprietary_period_extension_decision(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail={
                         "message": (
-                            "The proprietary period has been updated in the Web"
-                            " Manager database, but could not be updated in the SSDA"
-                            " database."
+                            "Could not update the proprietary period in SSDA. "
                         )
                     },
                 )
+        unit_of_work.commit()
+
+        email_sent = True
 
         try:
             proposal_service.notify_pc_and_pi_of_proprietary_period_extension_decision(
@@ -472,17 +472,24 @@ def add_proprietary_period_extension_decision(
                 reason=decision.reason,
             )
         except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "message": (
-                        f"Failed to send email to PC/PI for proposal {proposal_code}."
-                    )
-                },
-            )
+            email_sent = False
 
-        unit_of_work.commit()
+    if not email_sent:
+        return {
+            "success": True,
+            "email_sent": False,
+            "message": (
+                f"The proprietary period extension decision for proposal "
+                f"{proposal_code} was successfully saved, but the notification "
+                "email could not be sent. Please send the email manually."
+            ),
+        }
 
+    return {
+        "success": True,
+        "email_sent": True,
+        "message": "The decision was successfully saved and the notification email was sent.",
+    }
 
 @router.put(
     "/{proposal_code}/status",

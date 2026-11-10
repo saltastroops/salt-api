@@ -692,8 +692,6 @@ class PermissionService:
 
     def check_permission_to_grant_more_time(self, user: User) -> None:
         """
-        Check that the user may switch the user, i.e. login as someone else.
-
-        This is the case if the user is an administrator.
+        Check that the user may grant more time.
         """
         self._check_user_is_admin(user)

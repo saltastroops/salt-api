@@ -3,7 +3,7 @@ import pathlib
 import re
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta, timezone
-from typing import Any, DefaultDict, Dict, List, Optional, cast, Literal
+from typing import Any, DefaultDict, Dict, List, Literal, Optional, cast
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -2270,11 +2270,8 @@ VALUES (
 
     def _data_release_date(
         self, proprietary_period: int, block_visits: List[dict[str, Any]]
-    ) -> Optional[date]:
+    ) -> date:
         proprietary_period_start = self.proprietary_period_start_date(block_visits)
-
-        if proprietary_period is None:
-            return None
         # add the proprietary period to get the data release date
         return proprietary_period_start + relativedelta(months=proprietary_period)
 
@@ -3034,14 +3031,14 @@ WHERE PC.Proposal_Code = :proposal_code
             )
         return pools
 
-    def proposals_requesting_proprietary_period_extension(
-        self, semester_start_date: Optional[datetime] = None
+    def proprietary_period_extension_requests(
+        self, start_date: Optional[datetime] = None
     ) -> List[Dict[str, Any]]:
         """
         Returns a list of proposals that are requesting more time.
         """
-        if semester_start_date is None:
-            semester_start_date = datetime.now() - timedelta(days=200)
+        if start_date is None:
+            start_date = datetime.now() - timedelta(days=200)
         stmt = text(
             """
 SELECT 
@@ -3064,70 +3061,75 @@ FROM ProprietaryPeriodExtensionRequest PPER
 WHERE PPER.ProposalCode_Id IN (
     SELECT RecentPPER.ProposalCode_Id
     FROM ProprietaryPeriodExtensionRequest RecentPPER
-    WHERE RecentPPER.MadeAt >= :semester_start_date
+    WHERE RecentPPER.MadeAt >= :start_date
 )
 ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC
         """
         )
 
-        requests_by_proposal: Dict[str, List[Any]] = {}
+        requests_by_proposal: Dict[str, List[Dict[str, Any]]] = {}
         for row in self.connection.execute(
-            stmt, {"semester_start_date": semester_start_date}
+            stmt, {"start_date": start_date}
         ):
             requests_by_proposal.setdefault(row.proposal_code, []).append(row)
 
-        def request_to_dict(
-            request_row: Any, release_date: date
-        ) -> Dict[str, Any]:
+        def request_to_dict(request_row: Any) -> Dict[str, Any]:
             return {
                 "id": request_row.id,
-                "proposal_code": request_row.proposal_code,
-                "request_reason": request_row.request_reason,
-                "grant_reason": request_row.grant_reason,
-                "granted_period": request_row.granted_period,
                 "made_at": request_row.made_at,
                 "requester": request_row.requester_name,
                 "requester_email": request_row.requester_email,
                 "requested_period": request_row.requested_period,
-                "current_period": request_row.current_period,
-                "release_date": release_date,
+                "request_motivation": request_row.request_reason,
             }
 
         requests = []
         for proposal_requests in requests_by_proposal.values():
             row = proposal_requests[0]
             release_date = self.get_release_date(row.current_period, row.proposal_code)
-            proposal_release_date = release_date or date.today()
-
-            latest_request = request_to_dict(row, proposal_release_date)
-            latest_request["previous_requests"] = [
-                request_to_dict(previous_request, proposal_release_date)
-                for previous_request in proposal_requests[1:]
-            ]
-            requests.append(latest_request)
+            requests.append(
+                {
+                    "id": row.id,
+                    "proposal_code": row.proposal_code,
+                    "grant_reason": row.grant_reason,
+                    "granted_period": row.granted_period,
+                    "release_date": release_date,
+                    "current_period": row.current_period,
+                    "current_request": request_to_dict(row),
+                    "previous_requests": [
+                        request_to_dict(previous_request)
+                        for previous_request in proposal_requests[1:]
+                    ],
+                }
+            )
         return requests
 
     def update_proprietary_period_extension_request(
         self,
-        request_id: int,
+        proposal_code: str,
         granted_proprietary_period: int,
         reason: Optional[str] = None,
-    ) -> str:
+    ) -> None:
         stmt_proposal = text(
             """
-SELECT PC.Proposal_Code AS proposal_code
+SELECT PPER.ProprietaryPeriodExtensionRequest_Id AS request_id
 FROM ProprietaryPeriodExtensionRequest PPER
     JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PPER.ProprietaryPeriodExtensionRequest_Id = :request_id
+WHERE PC.Proposal_Code = :proposal_code
+ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC
+LIMIT 1
         """
         )
-        result = self.connection.execute(stmt_proposal, {"request_id": request_id})
+        result = self.connection.execute(
+            stmt_proposal, {"proposal_code": proposal_code}
+        )
         row = result.one_or_none()
         if not row:
             raise NotFoundError(
-                f"There is no proprietary period extension request with id: {request_id}"
+                "There is no proprietary period extension request for this proposal "
+                f"code: {proposal_code}"
             )
-        proposal_code = row.proposal_code
+        request_id = row.request_id
 
         stmt_decision = text(
             """
@@ -3156,5 +3158,3 @@ ON DUPLICATE KEY UPDATE
 
         if granted_proprietary_period > 0:
             self.update_proprietary_period(proposal_code, granted_proprietary_period)
-
-        return proposal_code

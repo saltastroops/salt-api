@@ -697,8 +697,39 @@ class DataRequest(BaseModel):
         description="The requested data formats.",
     )
 
+class RequestedProprietaryPeriod(BaseModel):
+    id: int = Field(
+        ...,
+        title="Id",
+        description="The id of the request",
+    )
+    requester: str = Field(
+        ...,
+        title="Requester",
+        description="The user who is requesting for proprietary period extension",
+    )
+    requester_email: str = Field(
+        ...,
+        title="Requester Email",
+        description="The email of the user who is requesting for proprietary period extension",
+    )
+    made_at: datetime = Field(
+        ...,
+        title="Made At",
+        description="The date and time when the request was made",
+    )
+    requested_period: int = Field(
+        ...,
+        title="Requested Period",
+        description="The period for which the user is requesting more time",
+    )
+    request_motivation: str = Field(
+        ...,
+        title="Request Motivation",
+        description="The motivation for requesting more time",
+    )
 
-class ProposalRequestingMoreTimeHistory(BaseModel):
+class ProprietaryPeriodRequest(BaseModel):
     id: int = Field(
         title="Request ID",
         description="The proprietary period extension request ID",
@@ -707,11 +738,6 @@ class ProposalRequestingMoreTimeHistory(BaseModel):
         ...,
         title="Proposal Code",
         description="The proposal code for which the user is requesting more time for",
-    )
-    request_reason: str = Field(
-        ...,
-        title="Request Reason",
-        description="The reason for requesting more time",
     )
     grant_reason: Optional[str] = Field(
         None,
@@ -723,43 +749,25 @@ class ProposalRequestingMoreTimeHistory(BaseModel):
         title="Granted Period",
         description="The proprietary period granted to the proposal",
     )
-    made_at: datetime = Field(
-        ...,
-        title="Made At",
-        description="The date and time when the request was made",
-    )
-    requester_email: str = Field(
-        ...,
-        title="Requester Email",
-        description="The email of the user who is requesting for proprietary period extension",
-    )
-    requester: str = Field(
-        ...,
-        title="Requester",
-        description="The user who is requesting for proprietary period extension",
-    )
-    requested_period: int = Field(
-        ...,
-        title="Requested Period",
-        description="The period for which the user is requesting more time",
-    )
-    current_period: int = Field(
-        ...,
-        title="Current Period",
-        description="The current period for the proposal",
-    )
     release_date: date = Field(
         ...,
         title="Release Date",
         description="The date when the proprietary period will be released",
     )
-
-
-class ProposalRequestingMoreTime(ProposalRequestingMoreTimeHistory):
-    previous_requests: List[ProposalRequestingMoreTimeHistory] = Field(
-        default_factory=list,
+    current_period: int = Field(
+        ...,
+        title="Current Period",
+        description="The current proprietary period",
+    )
+    current_request: RequestedProprietaryPeriod = Field(
+        ...,
+        title="Current Request",
+        description="The current proprietary period extension request",
+    )
+    previous_requests: List[RequestedProprietaryPeriod] = Field(
+        ...,
         title="Previous Requests",
-        description="Earlier proprietary period extension requests for this proposal",
+        description="The previous requests for proprietary period extension",
     )
 
 
@@ -782,3 +790,11 @@ class ProprietaryPeriodExtensionDecision(BaseModel):
         title="Reason",
         description="The reason for the decision.",
     )
+
+
+class ProprietaryPeriodExtensionDecisionResponse(BaseModel):
+    """A response to a proprietary period extension decision."""
+
+    success: bool = Field(..., title="Success", description="Whether the request was successful.")
+    email_sent: bool = Field(..., title="Email Sent", description="Whether an email was sent.")
+    message: str = Field(..., title="Message", description="A message about the request.")

@@ -16,11 +16,13 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from loguru import logger
 from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse
 
 from saltapi.exceptions import NotFoundError, SSDAError, ValidationError
 from saltapi.repository.unit_of_work import UnitOfWork
+from saltapi.service import permission_service
 from saltapi.service.authentication_service import get_current_user
 from saltapi.service.proposal import Proposal as _Proposal
 from saltapi.service.proposal import ProposalListItem as _ProposalListItem
@@ -40,9 +42,11 @@ from saltapi.web.schema.proposal import (
     ProposalApprovalStatus,
     ProposalListItem,
     ProposalStatus,
+    ProprietaryPeriodExtensionDecision,
+    ProprietaryPeriodRequestHistory,
     ProprietaryPeriodUpdateRequest,
     SelfActivation,
-    UpdateStatus,
+    UpdateStatus, ProprietaryPeriodExtensionDecisionResponse,
 )
 from saltapi.web.schema.user import UserId
 
@@ -156,6 +160,25 @@ def get_proposal_zip(
         return FileResponse(
             path, media_type="application/zip", filename=f"{proposal_code}.zip"
         )
+
+
+
+@router.get(
+    "/proprietary-period-extension-requests",
+    summary="Returns a list of proposals that are requesting proprietary period extension",
+    response_model=List[ProprietaryPeriodRequestHistory],
+)
+async def proprietary_period_extension_requests(
+    user: User = Depends(get_current_user),
+) -> List[ProprietaryPeriodRequestHistory]:
+    with (UnitOfWork() as unit_of_work):
+        permission_service = services.permission_service(unit_of_work.connection)
+        permission_service.check_permission_to_make_proprietary_period_decision(user)
+        proposals_service = services.proposal_service(unit_of_work.connection)
+        return [
+            ProprietaryPeriodRequestHistory(**res)
+            for res in proposals_service.proposals_requesting_proprietary_request_extension()
+        ]
 
 
 @router.get(
@@ -339,6 +362,15 @@ def update_proprietary_period(
     depending on whether the request needs prior approval.
     """
     with UnitOfWork() as unit_of_work:
+        if proprietary_period_update_request.proprietary_period < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "message": (
+                        "The granted period must be non-negative."
+                    )
+                },
+            )
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_update_proprietary_period(
             requester, proposal_code
@@ -387,6 +419,88 @@ def update_proprietary_period(
             },
         )
 
+
+@router.patch(
+    "/{proposal_code}/proprietary-period-extension-decision",
+    summary="Add a proprietary period extension decision",
+    response_model=ProprietaryPeriodExtensionDecisionResponse,
+    status_code=status.HTTP_200_OK,
+)
+def add_proprietary_period_extension_decision(
+        proposal_code: ProposalCode = Path(
+            ProposalCode,
+            title="Proposal code",
+            description="Proposal code of the returned proposal.",
+        ),
+        decision: ProprietaryPeriodExtensionDecision = Body(
+            ...,
+            title="Proprietary period extension decision",
+            description="The proprietary period extension decision.",
+        ),
+        user: User = Depends(get_current_user),
+) -> dict:
+    """
+    Adds a decision on a proprietary period extension request.
+    """
+    with UnitOfWork() as unit_of_work:
+        permission_service = services.permission_service(
+            unit_of_work.connection
+        )
+        permission_service.check_permission_to_make_proprietary_period_decision(user)
+
+        proposal_service = services.proposal_service(
+            unit_of_work.connection
+        )
+
+        if decision.granted_period < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "message": (
+                        "The granted period must be non-negative."
+                    )
+                },
+            )
+        proposal_service.update_proprietary_period_extension_request(
+            proposal_code=proposal_code,
+            granted_proprietary_period=decision.granted_period,
+            reason=decision.reason,
+        )
+        try:
+            proposal_service.update_proprietary_period_in_ssda(
+                proposal_code=proposal_code,
+                proprietary_period=decision.granted_period,
+            )
+        except SSDAError:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "message": (
+                        "Could not update the proprietary period in SSDA. "
+                    )
+                },
+            )
+        unit_of_work.commit()
+
+        email_sent = True
+
+        try:
+            proposal_service.notify_pc_and_pi_of_proprietary_period_extension_decision(
+                proposal_code=proposal_code,
+                granted_period=decision.granted_period,
+                reason=decision.reason,
+            )
+        except Exception:
+            email_sent = False
+
+    if not email_sent:
+        return {
+            "email_sent": False,
+        }
+
+    return {
+        "email_sent": True,
+    }
 
 @router.put(
     "/{proposal_code}/status",

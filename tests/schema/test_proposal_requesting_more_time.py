@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 
 from saltapi.main import app
 from saltapi.web.api import proposals as proposals_api
-from saltapi.web.schema.proposal import ProprietaryPeriodRequest
+from saltapi.web.schema.proposal import ProprietaryPeriodRequestHistory
 
 
 def test_proprietary_period_request_schema() -> None:
@@ -27,7 +27,7 @@ def test_proprietary_period_request_schema() -> None:
         "previous_requests": [],
     }
 
-    proposal_req = ProprietaryPeriodRequest(**data)
+    proposal_req = ProprietaryPeriodRequestHistory(**data)
     assert proposal_req.proposal_code == "2020-2-MLT-007"
     assert proposal_req.grant_reason is None
     assert proposal_req.granted_period is None
@@ -63,7 +63,7 @@ def test_proprietary_period_request_serializes_history() -> None:
         ],
     }
 
-    request = ProprietaryPeriodRequest(**data)
+    request = ProprietaryPeriodRequestHistory(**data)
     response = jsonable_encoder(request)
 
     assert response["id"] == 1

@@ -43,7 +43,7 @@ from saltapi.web.schema.proposal import (
     ProposalListItem,
     ProposalStatus,
     ProprietaryPeriodExtensionDecision,
-    ProprietaryPeriodRequest,
+    ProprietaryPeriodRequestHistory,
     ProprietaryPeriodUpdateRequest,
     SelfActivation,
     UpdateStatus, ProprietaryPeriodExtensionDecisionResponse,
@@ -166,16 +166,19 @@ def get_proposal_zip(
 @router.get(
     "/proprietary-period-extension-requests",
     summary="Returns a list of proposals that are requesting proprietary period extension",
-    response_model=List[ProprietaryPeriodRequest],
+    response_model=List[ProprietaryPeriodRequestHistory],
 )
 async def proprietary_period_extension_requests(
     user: User = Depends(get_current_user),
-) -> List[ProprietaryPeriodRequest]:
-    with UnitOfWork() as unit_of_work:
+) -> List[ProprietaryPeriodRequestHistory]:
+    with (UnitOfWork() as unit_of_work):
         permission_service = services.permission_service(unit_of_work.connection)
-        permission_service.check_permission_to_grant_more_time(user)
+        permission_service.check_permission_to_make_proprietary_period_decision(user)
         proposals_service = services.proposal_service(unit_of_work.connection)
-        return proposals_service.proposals_requesting_proprietary_request_extension()
+        return [
+            ProprietaryPeriodRequestHistory(**res)
+            for res in proposals_service.proposals_requesting_proprietary_request_extension()
+        ]
 
 
 @router.get(
@@ -359,12 +362,12 @@ def update_proprietary_period(
     depending on whether the request needs prior approval.
     """
     with UnitOfWork() as unit_of_work:
-        if proprietary_period_update_request.proprietary_period <= 0:
+        if proprietary_period_update_request.proprietary_period < 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "message": (
-                        "The granted period must be greater than zero."
+                        "The granted period must be non-negative."
                     )
                 },
             )
@@ -443,18 +446,18 @@ def add_proprietary_period_extension_decision(
         permission_service = services.permission_service(
             unit_of_work.connection
         )
-        permission_service.check_permission_to_grant_more_time(user)
+        permission_service.check_permission_to_make_proprietary_period_decision(user)
 
         proposal_service = services.proposal_service(
             unit_of_work.connection
         )
 
-        if decision.granted_period <= 0:
+        if decision.granted_period < 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "message": (
-                        "The granted period must be greater than zero."
+                        "The granted period must be non-negative."
                     )
                 },
             )
@@ -492,19 +495,11 @@ def add_proprietary_period_extension_decision(
 
     if not email_sent:
         return {
-            "success": True,
             "email_sent": False,
-            "message": (
-                f"The proprietary period extension decision for proposal "
-                f"{proposal_code} was successfully saved, but the notification "
-                "email could not be sent. Please send the email manually."
-            ),
         }
 
     return {
-        "success": True,
         "email_sent": True,
-        "message": "The decision was successfully saved and the notification email was sent.",
     }
 
 @router.put(

@@ -697,7 +697,7 @@ class DataRequest(BaseModel):
         description="The requested data formats.",
     )
 
-class RequestedProprietaryPeriod(BaseModel):
+class ProprietaryPeriodRequest(BaseModel):
     id: int = Field(
         ...,
         title="Id",
@@ -729,7 +729,7 @@ class RequestedProprietaryPeriod(BaseModel):
         description="The motivation for requesting more time",
     )
 
-class ProprietaryPeriodRequest(BaseModel):
+class ProprietaryPeriodRequestHistory(BaseModel):
     id: int = Field(
         title="Request ID",
         description="The proprietary period extension request ID",
@@ -759,12 +759,12 @@ class ProprietaryPeriodRequest(BaseModel):
         title="Current Period",
         description="The current proprietary period",
     )
-    current_request: RequestedProprietaryPeriod = Field(
+    current_request: ProprietaryPeriodRequest = Field(
         ...,
         title="Current Request",
         description="The current proprietary period extension request",
     )
-    previous_requests: List[RequestedProprietaryPeriod] = Field(
+    previous_requests: List[ProprietaryPeriodRequest] = Field(
         ...,
         title="Previous Requests",
         description="The previous requests for proprietary period extension",
@@ -774,11 +774,6 @@ class ProprietaryPeriodRequest(BaseModel):
 class ProprietaryPeriodExtensionDecision(BaseModel):
     """A decision on a proprietary period extension request."""
 
-    request_id: int = Field(
-        ...,
-        title="Request ID",
-        description="The proprietary period extension request ID.",
-    )
     granted_period: int = Field(
         ...,
         ge=0,

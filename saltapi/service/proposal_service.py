@@ -745,9 +745,7 @@ SALT Team
     def get_proposal_attachments_dir(proposal_code: str) -> pathlib.Path:
         return get_settings().proposals_dir / proposal_code / "Included"
 
-    def proposals_requesting_proprietary_request_extension(
-        self, semester: Optional[Semester] = None
-    ) -> List[Dict[str, Any]]:
+    def proposals_requesting_proprietary_request_extension(self) -> List[Dict[str, Any]]:
         return self.repository.proprietary_period_extension_requests()
 
     def update_proprietary_period_extension_request(

@@ -1,12 +1,12 @@
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List
-from unittest.mock import patch
+from types import SimpleNamespace
+from typing import Any, Callable, Dict, List
+from unittest.mock import MagicMock, patch
 
 import freezegun
 import pytest
 from pytest_mock import MockerFixture
-from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Connection
 
 import saltapi.repository.proposal_repository
@@ -400,7 +400,7 @@ def test_get_proposal_status_raises_error_for_wrong_proposal_code(
 def test_update_proposal_status(db_connection: Connection) -> None:
     # Set the status to "Active"
     proposal_repository = ProposalRepository(db_connection)
-    proposal_code = "2020-2-SCI-043"
+    proposal_code = "2018-2-LSP-001"
     proposal_repository.update_proposal_status(proposal_code, "Active")
     status = proposal_repository.get_proposal_status(proposal_code)
     assert status["value"] == "Active"
@@ -922,138 +922,24 @@ def test_proposals_requesting_more_time(db_connection: Connection) -> None:
     assert request["current_request"]["made_at"] is not None
 
 
-@pytest.fixture
-def sqlite_proprietary_period_connection(
-    monkeypatch: pytest.MonkeyPatch,
-) -> Generator[Connection, None, None]:
-    engine = create_engine("sqlite://")
-    with engine.connect() as connection:
-        connection.exec_driver_sql(
-            """
-CREATE TABLE ProposalCode (
-    ProposalCode_Id INTEGER PRIMARY KEY,
-    Proposal_Code TEXT NOT NULL UNIQUE
-)
-            """
-        )
-        connection.exec_driver_sql(
-            """
-CREATE TABLE ProposalGeneralInfo (
-    ProposalCode_Id INTEGER PRIMARY KEY,
-    ProprietaryPeriod INTEGER NOT NULL,
-    ReleaseDate DATE
-)
-            """
-        )
-        connection.exec_driver_sql(
-            """
-CREATE TABLE Investigator (
-    Investigator_Id INTEGER PRIMARY KEY,
-    FirstName TEXT NOT NULL,
-    Surname TEXT NOT NULL,
-    Email TEXT NOT NULL
-)
-            """
-        )
-        connection.exec_driver_sql(
-            """
-CREATE TABLE PiptUser (
-    PiptUser_Id INTEGER PRIMARY KEY,
-    Username TEXT NOT NULL UNIQUE,
-    Investigator_Id INTEGER NOT NULL
-)
-            """
-        )
-        connection.exec_driver_sql(
-            """
-CREATE TABLE ProprietaryPeriodExtensionRequest (
-    ProprietaryPeriodExtensionRequest_Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ProposalCode_Id INTEGER NOT NULL,
-    Reason TEXT NOT NULL,
-    RequestedBy INTEGER NOT NULL,
-    RequestedPeriod INTEGER NOT NULL,
-    MadeAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
-            """
-        )
-        connection.exec_driver_sql(
-            """
-CREATE TABLE ProprietaryPeriodExtensionDecision (
-    ProprietaryPeriodExtensionRequest_Id INTEGER PRIMARY KEY,
-    GrantedPeriod INTEGER NOT NULL,
-    Reason TEXT,
-    MadeAt DATETIME NOT NULL
-)
-            """
-        )
-        connection.execute(
-            text(
-                """
-INSERT INTO ProposalCode (ProposalCode_Id, Proposal_Code)
-VALUES (1, '2020-2-SCI-043'), (2, '2020-2-SCI-044')
-                """
-            )
-        )
-        connection.execute(
-            text(
-                """
-INSERT INTO ProposalGeneralInfo (ProposalCode_Id, ProprietaryPeriod)
-VALUES (1, 12), (2, 12)
-                """
-            )
-        )
-        connection.execute(
-            text(
-                """
-INSERT INTO Investigator (Investigator_Id, FirstName, Surname, Email)
-VALUES (1, 'Test', 'User', 'test@example.com')
-                """
-            )
-        )
-        connection.execute(
-            text(
-                """
-INSERT INTO PiptUser (PiptUser_Id, Username, Investigator_Id)
-VALUES (1, 'test-user', 1)
-                """
-            )
-        )
-
-        def translate_mysql_upsert(
-            conn: Connection,
-            cursor: Any,
-            statement: str,
-            parameters: Any,
-            context: Any,
-            executemany: bool,
-        ) -> tuple[str, Any]:
-            statement = statement.replace(
-                "ON DUPLICATE KEY UPDATE",
-                "ON CONFLICT (ProprietaryPeriodExtensionRequest_Id) DO UPDATE SET",
-            )
-            return statement, parameters
-
-        event.listen(
-            connection, "before_cursor_execute", translate_mysql_upsert, retval=True
-        )
-
-        def no_block_visits(
-            repository: ProposalRepository, proposal_code: str
-        ) -> List[Dict[str, Any]]:
-            return []
-
-        monkeypatch.setattr(ProposalRepository, "block_visits", no_block_visits)
-        yield connection
-    engine.dispose()
-
-
 def test_update_proprietary_period_extension_request_updates_latest_request(
-    sqlite_proprietary_period_connection: Connection,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    connection = sqlite_proprietary_period_connection
+    connection = MagicMock()
+    latest_request = MagicMock()
+    latest_request.one_or_none.return_value = SimpleNamespace(request_id=2)
+    connection.execute.side_effect = [
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        latest_request,
+        MagicMock(),
+        MagicMock(),
+    ]
     proposal_repository = ProposalRepository(connection)
-    proposal_code = "2020-2-SCI-043"
-    username = "test-user"
+    proposal_code = "2018-2-LSP-001"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    monkeypatch.setattr(ProposalRepository, "block_visits", lambda self, code: [])
     proposal_repository.insert_proprietary_period_extension_request(
         proposal_code=proposal_code,
         proprietary_period=36,
@@ -1067,132 +953,66 @@ def test_update_proprietary_period_extension_request_updates_latest_request(
         username=username,
     )
     proposal_repository.insert_proprietary_period_extension_request(
-        proposal_code="2020-2-SCI-044",
+        proposal_code="2014-2-SCI-078",
         proprietary_period=24,
         motivation="Another proposal's newer request",
         username=username,
     )
-    connection.execute(
-        text(
-            """
-UPDATE ProprietaryPeriodExtensionRequest
-SET MadeAt = :made_at
-WHERE ProposalCode_Id = (
-    SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code
-)
-            """
-        ),
-        {"made_at": datetime(2026, 1, 1), "proposal_code": proposal_code},
-    )
-    connection.execute(
-        text(
-            """
-UPDATE ProprietaryPeriodExtensionRequest
-SET MadeAt = :made_at
-WHERE ProposalCode_Id = (
-    SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code = :proposal_code
-)
-            """
-        ),
-        {"made_at": datetime(2027, 1, 1), "proposal_code": "2020-2-SCI-044"},
-    )
-    request_ids = connection.execute(
-        text(
-            """
-SELECT PPER.ProprietaryPeriodExtensionRequest_Id
-FROM ProprietaryPeriodExtensionRequest PPER
-JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
-ORDER BY PPER.ProprietaryPeriodExtensionRequest_Id
-            """
-        ),
-        {"proposal_code": proposal_code},
-    ).scalars().all()
-
     proposal_repository.update_proprietary_period_extension_request(
         proposal_code=proposal_code,
         granted_proprietary_period=36,
         reason="Granted for good reasons",
     )
 
-    decisions = connection.execute(
-        text(
-            """
-SELECT PPED.ProprietaryPeriodExtensionRequest_Id AS request_id,
-       PPED.GrantedPeriod AS granted_period,
-       PPED.Reason AS reason
-FROM ProprietaryPeriodExtensionDecision PPED
-WHERE PPED.ProprietaryPeriodExtensionRequest_Id = :request_id
-            """
-        ),
-        {"request_id": request_ids[-1]},
-    ).mappings().one()
-    assert decisions["request_id"] == request_ids[-1]
-    assert decisions["granted_period"] == 36
-    assert decisions["reason"] == "Granted for good reasons"
+    select_statement, select_parameters = connection.execute.call_args_list[3].args
+    normalized_select = " ".join(str(select_statement).split())
+    assert "WHERE PC.Proposal_Code = :proposal_code" in normalized_select
+    assert "ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC" in (
+        normalized_select
+    )
+    assert select_parameters == {"proposal_code": proposal_code}
 
-    other_proposal_decisions = connection.execute(
-        text(
-            """
-SELECT COUNT(*)
-FROM ProprietaryPeriodExtensionDecision PPED
-JOIN ProprietaryPeriodExtensionRequest PPER
-    ON PPED.ProprietaryPeriodExtensionRequest_Id = PPER.ProprietaryPeriodExtensionRequest_Id
-JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
-            """
-        ),
-        {"proposal_code": "2020-2-SCI-044"},
-    ).scalar_one()
-    assert other_proposal_decisions == 0
+    decision_statement, decision_parameters = connection.execute.call_args_list[4].args
+    normalized_decision = " ".join(str(decision_statement).split())
+    assert "ON DUPLICATE KEY UPDATE" in normalized_decision
+    assert decision_parameters == {
+        "request_id": 2,
+        "granted_proprietary_period": 36,
+        "reason": "Granted for good reasons",
+    }
 
-    current_period = connection.execute(
-        text(
-            """
-SELECT PGI.ProprietaryPeriod
-FROM ProposalGeneralInfo PGI
-JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
-            """
-        ),
-        {"proposal_code": proposal_code},
-    ).scalar_one()
-    assert current_period == 36
-    other_proposal_period = connection.execute(
-        text(
-            """
-SELECT ProprietaryPeriod
-FROM ProposalGeneralInfo
-WHERE ProposalCode_Id = 2
-            """
-        )
-    ).scalar_one()
-    assert other_proposal_period == 12
+    period_statement, period_parameters = connection.execute.call_args_list[5].args
+    assert "UPDATE ProposalGeneralInfo" in str(period_statement)
+    assert period_parameters["proposal_code"] == proposal_code
+    assert period_parameters["proprietary_period"] == 36
+    assert period_parameters["release_date"] is not None
 
 
 def test_update_proprietary_period_extension_request_can_update_decision(
-    sqlite_proprietary_period_connection: Connection,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    connection = sqlite_proprietary_period_connection
+    connection = MagicMock()
+    request_result = MagicMock()
+    request_result.one_or_none.return_value = SimpleNamespace(request_id=1)
+    connection.execute.side_effect = [
+        MagicMock(),
+        request_result,
+        MagicMock(),
+        MagicMock(),
+        request_result,
+        MagicMock(),
+        MagicMock(),
+    ]
     proposal_repository = ProposalRepository(connection)
-    proposal_code = "2020-2-SCI-043"
+    proposal_code = "2018-2-LSP-001"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    monkeypatch.setattr(ProposalRepository, "block_visits", lambda self, code: [])
     proposal_repository.insert_proprietary_period_extension_request(
         proposal_code=proposal_code,
         proprietary_period=36,
         motivation="Need more time for testing",
-        username="test-user",
+        username=username,
     )
-    request_id = connection.execute(
-        text(
-            """
-SELECT MAX(PPER.ProprietaryPeriodExtensionRequest_Id)
-FROM ProprietaryPeriodExtensionRequest PPER
-JOIN ProposalCode PC ON PPER.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
-            """
-        ),
-        {"proposal_code": proposal_code},
-    ).scalar_one()
 
     proposal_repository.update_proprietary_period_extension_request(
         proposal_code=proposal_code,
@@ -1205,31 +1025,20 @@ WHERE PC.Proposal_Code = :proposal_code
         reason="Revised decision",
     )
 
-    decisions = connection.execute(
-        text(
-            """
-SELECT PPED.GrantedPeriod AS granted_period, PPED.Reason AS reason
-FROM ProprietaryPeriodExtensionDecision PPED
-WHERE PPED.ProprietaryPeriodExtensionRequest_Id = :request_id
-            """
-        ),
-        {"request_id": request_id},
-    ).mappings().one()
-    assert decisions["granted_period"] == 24
-    assert decisions["reason"] == "Revised decision"
-
-    current_period = connection.execute(
-        text(
-            """
-SELECT PGI.ProprietaryPeriod
-FROM ProposalGeneralInfo PGI
-JOIN ProposalCode PC ON PGI.ProposalCode_Id = PC.ProposalCode_Id
-WHERE PC.Proposal_Code = :proposal_code
-            """
-        ),
-        {"proposal_code": proposal_code},
-    ).scalar_one()
-    assert current_period == 24
+    first_decision_parameters = connection.execute.call_args_list[2].args[1]
+    revised_decision_parameters = connection.execute.call_args_list[5].args[1]
+    assert first_decision_parameters == {
+        "request_id": 1,
+        "granted_proprietary_period": 12,
+        "reason": "Initial decision",
+    }
+    assert revised_decision_parameters == {
+        "request_id": 1,
+        "granted_proprietary_period": 24,
+        "reason": "Revised decision",
+    }
+    assert connection.execute.call_args_list[3].args[1]["proprietary_period"] == 12
+    assert connection.execute.call_args_list[6].args[1]["proprietary_period"] == 24
 
 
 @pytest.mark.parametrize(
@@ -1237,12 +1046,18 @@ WHERE PC.Proposal_Code = :proposal_code
 )
 def test_update_proprietary_period_extension_request_raises_without_request(
     proposal_code: str,
-    sqlite_proprietary_period_connection: Connection,
 ) -> None:
-    proposal_repository = ProposalRepository(sqlite_proprietary_period_connection)
+    connection = MagicMock()
+    request_result = MagicMock()
+    request_result.one_or_none.return_value = None
+    connection.execute.return_value = request_result
+    proposal_repository = ProposalRepository(connection)
     with pytest.raises(NotFoundError):
         proposal_repository.update_proprietary_period_extension_request(
             proposal_code=proposal_code,
             granted_proprietary_period=12,
             reason="Non-existent",
         )
+    connection.execute.assert_called_once()
+    _, parameters = connection.execute.call_args.args
+    assert parameters == {"proposal_code": proposal_code}

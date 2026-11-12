@@ -690,8 +690,8 @@ class PermissionService:
                 "You cannot set this contact as preferred until it has been validated."
             )
 
-    def check_permission_to_grant_more_time(self, user: User) -> None:
+    def check_permission_to_make_proprietary_period_decision(self, user: User) -> None:
         """
-        Check that the user may grant more time.
+        Check that the user may make a proprietary period decision.
         """
         self._check_user_is_admin(user)

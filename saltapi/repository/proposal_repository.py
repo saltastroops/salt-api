@@ -3032,13 +3032,13 @@ WHERE PC.Proposal_Code = :proposal_code
         return pools
 
     def proprietary_period_extension_requests(
-        self, start_date: Optional[datetime] = None
+        self, start_date: Optional[date] = None
     ) -> List[Dict[str, Any]]:
         """
         Returns a list of proposals that are requesting more time.
         """
         if start_date is None:
-            start_date = datetime.now() - timedelta(days=200)
+            start_date = date.today() - timedelta(days=200)
         stmt = text(
             """
 SELECT 
@@ -3069,7 +3069,7 @@ ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC
 
         requests_by_proposal: Dict[str, List[Dict[str, Any]]] = {}
         for row in self.connection.execute(
-            stmt, {"start_date": start_date.date()}
+            stmt, {"start_date": start_date}
         ):
             requests_by_proposal.setdefault(row.proposal_code, []).append(row)
 

@@ -10,7 +10,7 @@ from saltapi.repository.submission_repository import SubmissionRepository
 from saltapi.repository.user_repository import UserRepository
 from saltapi.service.permission_service import PermissionService
 from saltapi.service.proposal import ProposalCode
-from saltapi.service.user import Institution, User
+from saltapi.service.user import Institution, User, UserDemographics
 
 
 class FakeUserRepository:
@@ -154,6 +154,7 @@ USER = User(
     roles=[],
     user_verified=True,
     active=True,
+    demographics=UserDemographics(legal_status="Other", gender="Female", race="Black", has_phd=False, year_of_phd_completion=None),
 )
 
 PROPOSAL_CODE = ProposalCode("some_code")

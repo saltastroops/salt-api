@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional
 
@@ -75,6 +75,10 @@ class User:
     user_verified: bool
     active: bool
     demographics: Optional[UserDemographics]
+    alternative_emails: List[str] = field(default_factory=list)
+
+
+UserStatistics = UserDemographics
 
 
 @dataclass(frozen=True)

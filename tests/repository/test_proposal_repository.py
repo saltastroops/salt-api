@@ -1,7 +1,8 @@
 from datetime import date, datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Callable, Dict, List
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import freezegun
 import pytest
@@ -399,7 +400,7 @@ def test_get_proposal_status_raises_error_for_wrong_proposal_code(
 def test_update_proposal_status(db_connection: Connection) -> None:
     # Set the status to "Active"
     proposal_repository = ProposalRepository(db_connection)
-    proposal_code = "2020-2-SCI-043"
+    proposal_code = "2018-2-LSP-001"
     proposal_repository.update_proposal_status(proposal_code, "Active")
     status = proposal_repository.get_proposal_status(proposal_code)
     assert status["value"] == "Active"
@@ -795,7 +796,7 @@ def test_put_progress_report_handles_missing_partners(
     db_connection: Connection,
 ) -> None:
     def dict_to_requested_percentages(
-        percentages_dict: Dict[str, Any]
+        percentages_dict: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         return [
             {
@@ -806,7 +807,7 @@ def test_put_progress_report_handles_missing_partners(
         ]
 
     def requested_percentages_to_dict(
-        percentages: List[Dict[str, Any]]
+        percentages: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
         return {p["partner_code"]: p["requested_percentage"] for p in percentages}
 
@@ -894,3 +895,169 @@ def test_get_proposal_code_id_raises_error_for_none_existing_proposal_code(
     proposal_repository = ProposalRepository(db_connection)
     with pytest.raises(NotFoundError):
         proposal_repository.get_proposal_code_id("2023-1-NOT-CODE-001")
+
+
+def test_proposals_requesting_more_time(db_connection: Connection) -> None:
+    proposal_repository = ProposalRepository(db_connection)
+    proposal_code = "2020-2-SCI-043"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=36,
+        motivation="Requesting extra time for data analysis",
+        username=username,
+    )
+    semester_start_date = datetime(2000, 1, 1)
+    results = proposal_repository.proprietary_period_extension_requests(semester_start_date)
+    matching = [r for r in results if r["proposal_code"] == proposal_code]
+    assert len(matching) > 0
+    request = matching[-1]
+    assert request["proposal_code"] == proposal_code
+    assert request["current_request"]["request_motivation"] == (
+        "Requesting extra time for data analysis"
+    )
+    assert request["grant_reason"] is None
+    assert request["granted_period"] is None
+    assert request["current_request"]["requested_period"] == 36
+    assert request["current_request"]["made_at"] is not None
+
+
+def test_update_proprietary_period_extension_request_updates_latest_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    connection = MagicMock()
+    latest_request = MagicMock()
+    latest_request.one_or_none.return_value = SimpleNamespace(request_id=2)
+    connection.execute.side_effect = [
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        latest_request,
+        MagicMock(),
+        MagicMock(),
+    ]
+    proposal_repository = ProposalRepository(connection)
+    proposal_code = "2018-2-LSP-001"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    monkeypatch.setattr(ProposalRepository, "block_visits", lambda self, code: [])
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=36,
+        motivation="Need more time for testing",
+        username=username,
+    )
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=48,
+        motivation="Latest request",
+        username=username,
+    )
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code="2014-2-SCI-078",
+        proprietary_period=24,
+        motivation="Another proposal's newer request",
+        username=username,
+    )
+    proposal_repository.update_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        granted_proprietary_period=36,
+        reason="Granted for good reasons",
+    )
+
+    select_statement, select_parameters = connection.execute.call_args_list[3].args
+    normalized_select = " ".join(str(select_statement).split())
+    assert "WHERE PC.Proposal_Code = :proposal_code" in normalized_select
+    assert "ORDER BY PPER.MadeAt DESC, PPER.ProprietaryPeriodExtensionRequest_Id DESC" in (
+        normalized_select
+    )
+    assert select_parameters == {"proposal_code": proposal_code}
+
+    decision_statement, decision_parameters = connection.execute.call_args_list[4].args
+    normalized_decision = " ".join(str(decision_statement).split())
+    assert "ON DUPLICATE KEY UPDATE" in normalized_decision
+    assert decision_parameters == {
+        "request_id": 2,
+        "granted_proprietary_period": 36,
+        "reason": "Granted for good reasons",
+    }
+
+    period_statement, period_parameters = connection.execute.call_args_list[5].args
+    assert "UPDATE ProposalGeneralInfo" in str(period_statement)
+    assert period_parameters["proposal_code"] == proposal_code
+    assert period_parameters["proprietary_period"] == 36
+    assert period_parameters["release_date"] is not None
+
+
+def test_update_proprietary_period_extension_request_can_update_decision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    connection = MagicMock()
+    request_result = MagicMock()
+    request_result.one_or_none.return_value = SimpleNamespace(request_id=1)
+    connection.execute.side_effect = [
+        MagicMock(),
+        request_result,
+        MagicMock(),
+        MagicMock(),
+        request_result,
+        MagicMock(),
+        MagicMock(),
+    ]
+    proposal_repository = ProposalRepository(connection)
+    proposal_code = "2018-2-LSP-001"
+    username = find_username("Principal Investigator", proposal_code=proposal_code)
+    monkeypatch.setattr(ProposalRepository, "block_visits", lambda self, code: [])
+    proposal_repository.insert_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        proprietary_period=36,
+        motivation="Need more time for testing",
+        username=username,
+    )
+
+    proposal_repository.update_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        granted_proprietary_period=12,
+        reason="Initial decision",
+    )
+    proposal_repository.update_proprietary_period_extension_request(
+        proposal_code=proposal_code,
+        granted_proprietary_period=24,
+        reason="Revised decision",
+    )
+
+    first_decision_parameters = connection.execute.call_args_list[2].args[1]
+    revised_decision_parameters = connection.execute.call_args_list[5].args[1]
+    assert first_decision_parameters == {
+        "request_id": 1,
+        "granted_proprietary_period": 12,
+        "reason": "Initial decision",
+    }
+    assert revised_decision_parameters == {
+        "request_id": 1,
+        "granted_proprietary_period": 24,
+        "reason": "Revised decision",
+    }
+    assert connection.execute.call_args_list[3].args[1]["proprietary_period"] == 12
+    assert connection.execute.call_args_list[6].args[1]["proprietary_period"] == 24
+
+
+@pytest.mark.parametrize(
+    "proposal_code", ["2020-2-SCI-044", "2099-1-NOT-EXIST-001"]
+)
+def test_update_proprietary_period_extension_request_raises_without_request(
+    proposal_code: str,
+) -> None:
+    connection = MagicMock()
+    request_result = MagicMock()
+    request_result.one_or_none.return_value = None
+    connection.execute.return_value = request_result
+    proposal_repository = ProposalRepository(connection)
+    with pytest.raises(NotFoundError):
+        proposal_repository.update_proprietary_period_extension_request(
+            proposal_code=proposal_code,
+            granted_proprietary_period=12,
+            reason="Non-existent",
+        )
+    connection.execute.assert_called_once()
+    _, parameters = connection.execute.call_args.args
+    assert parameters == {"proposal_code": proposal_code}

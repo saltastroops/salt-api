@@ -100,13 +100,14 @@ def test_send_proprietary_period_extension_notification_to_pc_and_pi_same_person
 
             pc_call = mock_generate.call_args_list[0].kwargs
             assert pc_email in pc_call["to"]
-            assert f"Dear {pc_name}," in pc_call["plain_body"]
-            assert f"{pc_name}'s request to extend" in pc_call["plain_body"]
             assert proposal_code in pc_call["subject"]
-            assert proposal_code in pc_call["plain_body"]
-            assert "waiting for approval" in pc_call["plain_body"]
-            assert "24 months" in pc_call["plain_body"]
-            assert "Need more time for analysis" in pc_call["plain_body"]
+            for html_body in ["plain_body", "html_body"]:
+                assert f"Dear {pc_name}," in pc_call[html_body]
+                assert f"{pc_name}'s request to extend" in pc_call[html_body]
+                assert proposal_code in pc_call[html_body]
+                assert "waiting for approval" in pc_call[html_body]
+                assert "24 months" in pc_call[html_body]
+                assert "Need more time for analysis" in pc_call[html_body]
             mock_send.assert_called_once_with(
                 to=[pc_email], message=mock_generate.return_value
             )

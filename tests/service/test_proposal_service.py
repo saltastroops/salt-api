@@ -58,12 +58,12 @@ def test_send_proprietary_period_extension_notification_to_salt_help(
         salt_help_call = mock_generate.call_args_list[0].kwargs
         assert "salthelp@salt.ac.za" in salt_help_call["to"]
         assert proposal_code in salt_help_call["subject"]
-        assert proposal_code in salt_help_call["plain_body"]
-        assert "John Doe" in salt_help_call["plain_body"]
-        assert "john@example.com" in salt_help_call["plain_body"]
-        assert "24 months" in salt_help_call["plain_body"]
-        assert "Need more time for analysis" in salt_help_call["plain_body"]
-
+        for body_type in ["plain_body", "html_body"]:
+            assert proposal_code in salt_help_call[body_type]
+            assert "John Doe" in salt_help_call[body_type]
+            assert "john@example.com" in salt_help_call[body_type]
+            assert "24 months" in salt_help_call[body_type]
+            assert "Need more time for analysis" in salt_help_call[body_type]
 
 def test_send_proprietary_period_extension_notification_to_pc_and_pi_same_person(
     db_connection: Connection,

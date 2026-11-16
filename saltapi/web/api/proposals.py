@@ -171,7 +171,7 @@ def get_proposal_zip(
 async def proprietary_period_extension_requests(
     user: User = Depends(get_current_user),
 ) -> List[ProprietaryPeriodRequestHistory]:
-    with (UnitOfWork() as unit_of_work):
+    with UnitOfWork() as unit_of_work:
         permission_service = services.permission_service(unit_of_work.connection)
         permission_service.check_permission_to_make_proprietary_period_decision(user)
         proposals_service = services.proposal_service(unit_of_work.connection)
@@ -493,13 +493,8 @@ def add_proprietary_period_extension_decision(
         except Exception:
             email_sent = False
 
-    if not email_sent:
-        return {
-            "email_sent": False,
-        }
-
     return {
-        "email_sent": True,
+        "email_sent": email_sent,
     }
 
 @router.put(

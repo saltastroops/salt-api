@@ -790,6 +790,4 @@ class ProprietaryPeriodExtensionDecision(BaseModel):
 class ProprietaryPeriodExtensionDecisionResponse(BaseModel):
     """A response to a proprietary period extension decision."""
 
-    success: bool = Field(..., title="Success", description="Whether the request was successful.")
     email_sent: bool = Field(..., title="Email Sent", description="Whether an email was sent.")
-    message: str = Field(..., title="Message", description="A message about the request.")
